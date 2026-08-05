@@ -442,6 +442,18 @@ export class WebSocketTransport implements Transport {
           'WebSocketTransport: 4003 received but headers refreshed, scheduling reconnect',
         )
         logForDiagnosticsNoPII('info', 'cli_websocket_4003_token_refreshed')
+      } else if (freshHeaders.Authorization) {
+        // API key / permanent token: the value didn't change but the
+        // caller explicitly provided a refresh mechanism — trust it and
+        // re-apply so the reconnect attempt uses the same (valid) key.
+        Object.assign(this.headers, freshHeaders)
+        headersRefreshed = true
+        logForDebugging(
+          'WebSocketTransport: 4003 received, refreshHeaders returned same Authorization (permanent key), scheduling reconnect anyway',
+        )
+        logForDiagnosticsNoPII('info', 'cli_websocket_4003_token_stable_retry', {
+          hasAuth: true,
+        })
       }
     }
 

@@ -12,6 +12,7 @@ import { getKairosActive, setKairosActive } from '../../bootstrap/state.js';
 import type { LocalJSXCommandContext } from '../../commands.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import type { AppState } from '../../state/AppState.js';
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * Compute the default directory for assistant daemon installation.
@@ -92,14 +93,14 @@ export function NewInstallWizard({ defaultDir, onInstalled, onCancel, onError }:
 
   if (starting) {
     return (
-      <Dialog title="Assistant Setup" onCancel={onCancel} hideInputGuide>
+      <Dialog title={t("cmdSystemUI.assistantTitle")} onCancel={onCancel} hideInputGuide>
         <Text>Starting daemon in {defaultDir}...</Text>
       </Dialog>
     );
   }
 
   return (
-    <Dialog title="Assistant Setup" onCancel={onCancel} hideInputGuide>
+    <Dialog title={t("cmdSystemUI.assistantTitle")} onCancel={onCancel} hideInputGuide>
       <Box flexDirection="column" gap={1}>
         <Text>No active assistant sessions found.</Text>
         <Text>

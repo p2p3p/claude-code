@@ -20,6 +20,7 @@
  */
 import * as React from 'react';
 import { Box, Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import type { AuthStatus } from './getAuthStatus.js';
 
 // ---------------------------------------------------------------------------
@@ -29,7 +30,7 @@ import type { AuthStatus } from './getAuthStatus.js';
 function SubscriptionRow({ subscription }: { subscription: AuthStatus['subscription'] }): React.ReactNode {
   const icon = subscription.active ? '☑' : '☐';
   const planLabel = subscription.active && subscription.plan ? ` ${subscription.plan} plan` : '';
-  const statusText = subscription.active ? `logged in${planLabel}` : 'not logged in';
+  const statusText = subscription.active ? `logged in${planLabel}` : t('authPlane.notLoggedIn');
 
   return (
     <Box>
@@ -89,12 +90,12 @@ function WorkspaceKeyInstructions({
   if (!workspaceKey.set && subscription.active) {
     return (
       <Box flexDirection="column" marginLeft={5} marginTop={0}>
-        <Text dimColor>To enable /vault /agents-platform /memory-stores:</Text>
-        <Text dimColor>{'Press W to set now (saves to settings.json, no restart needed)'}</Text>
+        <Text dimColor>{t('authPlane.enableVault')}</Text>
+        <Text dimColor>{t('authPlane.pressW')}</Text>
         <Text dimColor>{'  — or —'}</Text>
-        <Text dimColor>{'1. Open https://console.anthropic.com/settings/keys'}</Text>
-        <Text dimColor>{'2. Create a key (sk-ant-api03-*)'}</Text>
-        <Text dimColor>{'3. Set ANTHROPIC_API_KEY=<key> and restart'}</Text>
+        <Text dimColor>{t('authPlane.step1')}</Text>
+        <Text dimColor>{t('authPlane.step2')}</Text>
+        <Text dimColor>{t('authPlane.step3')}</Text>
       </Box>
     );
   }

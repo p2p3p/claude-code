@@ -1,6 +1,7 @@
 import figures from 'figures';
 import * as React from 'react';
 import { Suspense, use } from 'react';
+import { t } from '../../utils/i18n/index.js';
 import { getSessionId } from '../../bootstrap/state.js';
 import type { LocalJSXCommandContext } from '../../commands.js';
 import { useIsInsideModal } from '../../context/modalContext.js';
@@ -36,9 +37,9 @@ function buildPrimarySection(): Property[] {
   const nameValue = customTitle ?? <Text dimColor>/rename to add a name</Text>;
 
   return [
-    { label: 'Version', value: MACRO.VERSION },
-    { label: 'Session name', value: nameValue },
-    { label: 'Session ID', value: sessionId },
+    { label: t('settingsStatus.version'), value: MACRO.VERSION },
+    { label: t('settingsStatus.sessionName'), value: nameValue },
+    { label: t('settingsStatus.sessionId'), value: sessionId },
     { label: 'cwd', value: getCwd() },
     ...buildAccountProperties(),
     ...buildAPIProviderProperties(),

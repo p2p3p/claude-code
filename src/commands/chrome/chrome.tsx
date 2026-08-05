@@ -10,6 +10,7 @@ import { isChromeExtensionInstalled } from '../../utils/claudeInChrome/setup.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js';
 import { env } from '../../utils/env.js';
 import { isRunningOnHomespace } from '../../utils/envUtils.js';
+import { t } from '../../utils/i18n/index.js'
 
 const CHROME_EXTENSION_URL = 'https://claude.ai/chrome';
 const CHROME_PERMISSIONS_URL = 'https://clau.de/chrome/permissions';
@@ -89,7 +90,7 @@ function ClaudeInChromeMenu({
 
   if (!isExtensionInstalled && !isHomespace) {
     options.push({
-      label: 'Install Chrome extension',
+      label: t('chrome.installExtension'),
       value: 'install-extension',
     });
   }
@@ -98,7 +99,7 @@ function ClaudeInChromeMenu({
     {
       label: (
         <>
-          <Text>Manage permissions</Text>
+          <Text>{t('chrome.managePermissions')}</Text>
           <Text dimColor>{requiresExtensionSuffix}</Text>
         </>
       ),
@@ -107,7 +108,7 @@ function ClaudeInChromeMenu({
     {
       label: (
         <>
-          <Text>Reconnect extension</Text>
+          <Text>{t('chrome.reconnectExtension')}</Text>
           <Text dimColor>{requiresExtensionSuffix}</Text>
         </>
       ),
@@ -122,7 +123,7 @@ function ClaudeInChromeMenu({
   const isDisabled = isWSL || ((process.env.USER_TYPE as string) !== 'ant' && !isClaudeAISubscriber);
 
   return (
-    <Dialog title="Claude in Chrome (Beta)" onCancel={() => onDone()} color="chromeYellow">
+    <Dialog title={t("cmdSystemUI.chromeTitle")} onCancel={() => onDone()} color="chromeYellow">
       <Box flexDirection="column" gap={1}>
         <Text>
           Claude in Chrome works with the Chrome extension to let you control your browser directly from Claude Code.
@@ -130,10 +131,10 @@ function ClaudeInChromeMenu({
           requests.
         </Text>
 
-        {isWSL && <Text color="error">Claude in Chrome is not supported in WSL at this time.</Text>}
+        {isWSL && <Text color="error">{t('chrome.notSupportedWSL')}</Text>}
 
         {(process.env.USER_TYPE as string) !== 'ant' && !isClaudeAISubscriber && (
-          <Text color="error">Claude in Chrome requires a claude.ai subscription.</Text>
+          <Text color="error">{t('chrome.requiresSubscription')}</Text>
         )}
 
         {!isDisabled && (
@@ -141,14 +142,14 @@ function ClaudeInChromeMenu({
             {!isHomespace && (
               <Box flexDirection="column">
                 <Text>
-                  Status: {isConnected ? <Text color="success">Enabled</Text> : <Text color="inactive">Disabled</Text>}
+                  {t('chrome.status')}: {isConnected ? <Text color="success">{t('chrome.enabled')}</Text> : <Text color="inactive">{t('chrome.disabled')}</Text>}
                 </Text>
                 <Text>
-                  Extension:{' '}
+                  {t('chrome.extension')}:{' '}
                   {isExtensionInstalled ? (
-                    <Text color="success">Installed</Text>
+                    <Text color="success">{t('chrome.installed')}</Text>
                   ) : (
-                    <Text color="warning">Not detected</Text>
+                    <Text color="warning">{t('chrome.notDetected')}</Text>
                   )}
                 </Text>
               </Box>
@@ -160,7 +161,7 @@ function ClaudeInChromeMenu({
             )}
 
             <Text>
-              <Text dimColor>Usage: </Text>
+              <Text dimColor>{t('chrome.usage')}: </Text>
               <Text>claude --chrome</Text>
               <Text dimColor> or </Text>
               <Text>claude --no-chrome</Text>

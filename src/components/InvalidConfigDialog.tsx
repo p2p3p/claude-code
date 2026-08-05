@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Dialog, wrappedRender as render, Text } from '@anthropic/ink';
 import { KeybindingSetup } from '../keybindings/KeybindingProviderSetup.js';
+import { t } from '../utils/i18n/index.js';
 import { AppStateProvider } from '../state/AppState.js';
 import type { ConfigParseError } from '../utils/errors.js';
 import { getBaseRenderOptions } from '../utils/renderOptions.js';
@@ -49,8 +50,8 @@ function InvalidConfigDialog({
         <Text bold>Choose an option:</Text>
         <Select
           options={[
-            { label: 'Exit and fix manually', value: 'exit' },
-            { label: 'Reset with default configuration', value: 'reset' },
+            { label: t('invalidConfig.exitAndFix'), value: 'exit' },
+            { label: t('invalidConfig.resetDefault'), value: 'reset' },
           ]}
           onChange={handleSelect}
           onCancel={onExit}

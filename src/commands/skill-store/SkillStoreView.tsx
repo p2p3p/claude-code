@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import type { Theme } from '@anthropic/ink';
 import type { Skill, SkillVersion } from './skillsApi.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props =
   | { mode: 'list'; skills: Skill[] }
@@ -139,7 +140,7 @@ export function SkillStoreView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'success' as keyof Theme}>
-            Skill created
+            {t("cmdSystemUI.skillStoreTitle")} created
           </Text>
         </Box>
         <Text>ID: {skill.skill_id}</Text>
@@ -161,7 +162,7 @@ export function SkillStoreView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'success' as keyof Theme}>
-            Skill installed
+            {t("cmdSystemUI.skillStoreTitle")} installed
           </Text>
         </Box>
         <Text>Name: {props.skillName}</Text>

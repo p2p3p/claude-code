@@ -57,6 +57,7 @@ import { initSentry } from '../utils/sentry.js'
 import { initUser } from '../utils/user.js'
 import { initLangfuse, shutdownLangfuse } from '../services/langfuse/index.js'
 import { setThemeConfigCallbacks } from '@anthropic/ink'
+import { setLocale } from '../utils/i18n/index.js'
 
 // initialize1PEventLogging is dynamically imported to defer OpenTelemetry sdk-logs/resources
 
@@ -77,6 +78,9 @@ export const init = memoize(async (): Promise<void> => {
       saveTheme: setting =>
         saveGlobalConfig(current => ({ ...current, theme: setting })),
     })
+    // Initialize UI language from config
+    const uiLang = getGlobalConfig().uiLanguage
+    setLocale(uiLang || 'zh_CN')
     logForDiagnosticsNoPII('info', 'init_configs_enabled', {
       duration_ms: Date.now() - configsStart,
     })

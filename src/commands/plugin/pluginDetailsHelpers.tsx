@@ -8,6 +8,7 @@ import * as React from 'react';
 import { ConfigurableShortcutHint } from '../../components/ConfigurableShortcutHint.js';
 import { Box, Byline, Text } from '@anthropic/ink';
 import type { PluginMarketplaceEntry } from '../../utils/plugins/schemas.js';
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * Represents a plugin available for installation from a marketplace
@@ -52,23 +53,23 @@ export function buildPluginDetailsMenuOptions(
   githubRepo: string | null,
 ): PluginDetailsMenuOption[] {
   const options: PluginDetailsMenuOption[] = [
-    { label: 'Install for you (user scope)', action: 'install-user' },
+    { label: t('pluginUI.installUser'), action: 'install-user' },
     {
-      label: 'Install for all collaborators on this repository (project scope)',
+      label: t('pluginUI.installProject'),
       action: 'install-project',
     },
     {
-      label: 'Install for you, in this repo only (local scope)',
+      label: t('pluginUI.installLocal'),
       action: 'install-local',
     },
   ];
   if (hasHomepage) {
-    options.push({ label: 'Open homepage', action: 'homepage' });
+    options.push({ label: t('pluginUI.openHomepage'), action: 'homepage' });
   }
   if (githubRepo) {
-    options.push({ label: 'View on GitHub', action: 'github' });
+    options.push({ label: t('pluginUI.viewOnGitHub'), action: 'github' });
   }
-  options.push({ label: 'Back to plugin list', action: 'back' });
+  options.push({ label: t('pluginUI.back'), action: 'back' });
   return options;
 }
 

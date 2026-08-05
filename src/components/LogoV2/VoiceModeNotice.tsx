@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Box, Text } from '@anthropic/ink';
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js';
 import { getInitialSettings } from '../../utils/settings/settings.js';
+import { t } from '../../utils/i18n/index.js';
 import { isVoiceModeEnabled } from '../../voice/voiceModeEnabled.js';
 import { AnimatedAsterisk } from './AnimatedAsterisk.js';
 import { shouldShowOpus1mMergeNotice } from './Opus1mMergeNotice.js';
@@ -45,7 +46,7 @@ function VoiceModeNoticeInner(): React.ReactNode {
   return (
     <Box paddingLeft={2}>
       <AnimatedAsterisk />
-      <Text dimColor> Voice mode is now available · /voice to enable</Text>
+      <Text dimColor>{t('misc.voiceMode')}</Text>
     </Box>
   );
 }

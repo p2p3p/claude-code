@@ -24,6 +24,7 @@ import {
 import { formatDuration } from '../../utils/format.js';
 import { formatModelPricing, getOpus46CostTier } from '../../utils/modelCost.js';
 import { updateSettingsForSource } from '../../utils/settings/settings.js';
+import { t } from '../../utils/i18n/index.js'
 
 function applyFastMode(enable: boolean, setAppState: (f: (prev: AppState) => AppState) => void): void {
   clearFastModeCooldown();
@@ -110,7 +111,7 @@ export function FastModePicker({
 
   const title = (
     <Text>
-      <FastIcon cooldown={isCooldown} /> Fast mode (research preview)
+      <FastIcon cooldown={isCooldown} /> {t("cmdSystemUI.fastTitle")} mode (research preview)
     </Text>
   );
 

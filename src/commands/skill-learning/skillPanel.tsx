@@ -4,6 +4,7 @@ import { Dialog } from '@anthropic/ink';
 import { useRegisterOverlay } from '../../context/overlayContext.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { isSkillLearningEnabled } from '../../services/skillLearning/featureCheck.js';
+import { t } from '../../utils/i18n/index.js'
 
 type SkillAction = {
   label: string;
@@ -96,22 +97,22 @@ function SkillPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.ReactN
   const actions = useMemo<SkillAction[]>(
     () => [
       {
-        label: 'Status',
+        label: t('cmdSystemUI.skillStatus'),
         description: 'Show skill learning status for current project',
         run: getStatusText,
       },
       {
-        label: 'Start',
+        label: t('cmdSystemUI.skillStart'),
         description: 'Enable skill learning for this session',
         run: startSkillLearning,
       },
       {
-        label: 'Stop',
+        label: t('cmdSystemUI.skillStop'),
         description: 'Disable skill learning for this session',
         run: stopSkillLearning,
       },
       {
-        label: 'About',
+        label: t('cmdSystemUI.skillAbout'),
         description: 'Detailed description of skill learning features',
         run: () => Promise.resolve(ABOUT_TEXT),
       },
@@ -143,9 +144,9 @@ function SkillPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.ReactN
 
   return (
     <Dialog
-      title="Skill Learning"
+      title={t("cmdSystemUI.skillLearning")}
       subtitle={`${actions.length} actions`}
-      onCancel={() => onDone('Skill panel dismissed', { display: 'system' })}
+      onCancel={() => onDone(t('cmdSystemUI.skillDismissed'), { display: 'system' })}
       color="background"
       hideInputGuide
     >
@@ -157,7 +158,7 @@ function SkillPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.ReactN
           </Box>
         ))}
         <Box marginTop={1}>
-          <Text dimColor>↑/↓ select · Enter run · Esc close</Text>
+          <Text dimColor>{t("cmdSystemUI.skillNav")}</Text>
         </Box>
       </Box>
     </Dialog>

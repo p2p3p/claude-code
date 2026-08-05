@@ -11,6 +11,7 @@ import { safeParseJSON } from '../../../utils/json.js';
 import { parseCellId } from '../../../utils/notebook.js';
 import { HighlightedCode } from '../../HighlightedCode.js';
 import { StructuredDiff } from '../../StructuredDiff.js';
+import { t } from '../../../utils/i18n/index.js';
 
 type Props = {
   notebook_path: string;
@@ -106,13 +107,13 @@ function NotebookEditToolDiffInner({
   let editTypeDescription: string;
   switch (edit_mode) {
     case 'insert':
-      editTypeDescription = 'Insert new cell';
+      editTypeDescription = t('permGeneral.insertNewCell');
       break;
     case 'delete':
-      editTypeDescription = 'Delete cell';
+      editTypeDescription = t('permGeneral.deleteCellLabel');
       break;
     default:
-      editTypeDescription = 'Replace cell contents';
+      editTypeDescription = t('permGeneral.replaceCellContents');
   }
 
   return (

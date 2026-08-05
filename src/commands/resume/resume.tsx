@@ -28,6 +28,7 @@ import {
   searchSessionsByCustomTitle,
 } from '../../utils/sessionStorage.js';
 import { validateUuid } from '../../utils/uuid.js';
+import { t } from '../../utils/i18n/index.js'
 
 type ResumeResult =
   | { resultType: 'sessionNotFound'; arg: string }

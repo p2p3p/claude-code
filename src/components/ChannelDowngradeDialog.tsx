@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text } from '@anthropic/ink';
 import { Select } from './CustomSelect/index.js';
+import { t } from '../utils/i18n/index.js';
 import { Dialog } from '@anthropic/ink';
 
 export type ChannelDowngradeChoice = 'downgrade' | 'stay' | 'cancel';
@@ -28,11 +29,11 @@ export function ChannelDowngradeDialog({ currentVersion, onChoice }: Props): Rea
       <Text>
         The stable channel may have an older version than what you&apos;re currently running ({currentVersion}).
       </Text>
-      <Text dimColor>How would you like to handle this?</Text>
+      <Text dimColor>{t('channelDowngrade.howToHandle')}</Text>
       <Select
         options={[
           {
-            label: 'Allow possible downgrade to stable version',
+            label: t('channelDowngrade.allowDowngrade'),
             value: 'downgrade' as ChannelDowngradeChoice,
           },
           {

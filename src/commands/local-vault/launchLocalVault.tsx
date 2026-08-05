@@ -8,6 +8,7 @@ import { LocalVaultView } from './LocalVaultView.js';
 import { parseLocalVaultArgs } from './parseArgs.js';
 import { launchCommand } from '../_shared/launchCommand.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
+import { t } from '../../utils/i18n/index.js'
 
 const USAGE = 'Usage: /local-vault list | set KEY VALUE | get KEY [--reveal] | delete KEY';
 
@@ -63,7 +64,7 @@ const VAULT_MENU: Array<{
   },
   {
     kind: 'delete',
-    label: 'Delete',
+    label: t('localVault.delete'),
     description: 'Delete a stored secret by KEY',
   },
   {
@@ -244,9 +245,9 @@ function LocalVaultPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.R
   if (step.kind === 'menu') {
     return (
       <Dialog
-        title="Local Vault"
+        title={t("cmdSystemUI.localVaultTitle")}
         subtitle={`${VAULT_MENU.length} actions`}
-        onCancel={() => closeWith('Local vault panel dismissed')}
+        onCancel={() => closeWith(t('cmdSystemUI.localVaultTitle') + ' panel dismissed')}
         color="background"
         hideInputGuide
       >
@@ -272,7 +273,7 @@ function LocalVaultPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.R
 
   if (step.kind === 'confirm-delete') {
     return (
-      <Dialog title="Confirm Delete" onCancel={() => transition({ kind: 'menu' })} color="warning" hideInputGuide>
+      <Dialog title={t("cmdSystemUI.confirmDelete")} onCancel={() => transition({ kind: 'menu' })} color="warning" hideInputGuide>
         <Box flexDirection="column">
           <Text>Delete secret "{step.key}"? This cannot be undone.</Text>
           <Box marginTop={1}>
@@ -286,7 +287,7 @@ function LocalVaultPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.R
 
   if (step.kind === 'confirm-overwrite') {
     return (
-      <Dialog title="Confirm Overwrite" onCancel={() => transition({ kind: 'menu' })} color="warning" hideInputGuide>
+      <Dialog title={t("cmdSystemUI.confirmOverwrite")} onCancel={() => transition({ kind: 'menu' })} color="warning" hideInputGuide>
         <Box flexDirection="column">
           <Text>Secret "{step.key}" already exists. Overwrite? Old value is lost.</Text>
           <Box marginTop={1}>

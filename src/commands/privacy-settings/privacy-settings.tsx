@@ -6,6 +6,7 @@ import {
 } from '../../services/analytics/index.js';
 import { getGroveNoticeConfig, getGroveSettings, isQualifiedForGrove } from '../../services/api/grove.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
+import { t } from '../../utils/i18n/index.js'
 
 const FALLBACK_MESSAGE = 'Review and manage your privacy settings at https://claude.ai/settings/data-privacy-controls';
 
@@ -27,7 +28,7 @@ export async function call(onDone: LocalJSXCommandOnDone): Promise<React.ReactNo
 
   async function onDoneWithDecision(decision: GroveDecision) {
     if (decision === 'escape' || decision === 'defer') {
-      onDone('Privacy settings dialog dismissed', {
+      onDone(t('cmdSystemUI.confirmDelete') + ' settings dialog dismissed', {
         display: 'system',
       });
       return;

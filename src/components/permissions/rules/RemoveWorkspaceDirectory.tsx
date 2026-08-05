@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useCallback } from 'react';
 import { Select } from '../../../components/CustomSelect/select.js';
+import { t } from '../../../utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import type { ToolPermissionContext } from '../../../Tool.js';
 import { applyPermissionUpdate } from '../../../utils/permissions/PermissionUpdate.js';
@@ -44,17 +45,17 @@ export function RemoveWorkspaceDirectory({
   );
 
   return (
-    <Dialog title="Remove directory from workspace?" onCancel={onCancel} color="error">
+    <Dialog title={t('removeDir.title')} onCancel={onCancel} color="error">
       <Box marginX={2} flexDirection="column">
         <Text bold>{directoryPath}</Text>
       </Box>
-      <Text>Claude Code will no longer have access to files in this directory.</Text>
+      <Text>{t('permission.noAccess')}</Text>
       <Select
         onChange={handleSelect}
         onCancel={onCancel}
         options={[
-          { label: 'Yes', value: 'yes' },
-          { label: 'No', value: 'no' },
+          { label: t('removeDir.yes'), value: 'yes' },
+          { label: t('removeDir.no'), value: 'no' },
         ]}
       />
     </Dialog>

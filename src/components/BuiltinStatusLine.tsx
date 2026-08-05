@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { formatCost } from '../cost-tracker.js';
 import { Box, Text } from '@anthropic/ink';
 import { formatTokens } from '../utils/format.js';
-import { useTerminalSize } from '../hooks/useTerminalSize.js';
+
 
 type RateLimitBucket = {
   utilization: number;
@@ -11,7 +11,6 @@ type RateLimitBucket = {
 
 type BuiltinStatusLineProps = {
   modelName: string;
-  contextUsedPct: number;
   usedTokens: number;
   contextWindowSize: number;
   totalCostUsd: number;
@@ -44,13 +43,13 @@ function Separator() {
 
 function BuiltinStatusLineInner({
   modelName,
-  contextUsedPct,
+  
   usedTokens,
   contextWindowSize,
   totalCostUsd,
   rateLimits,
 }: BuiltinStatusLineProps) {
-  const { columns } = useTerminalSize();
+  
 
   // Force re-render every 60s so countdowns stay current
   const [tick, setTick] = useState(0);
@@ -68,8 +67,6 @@ function BuiltinStatusLineInner({
   const modelParts = modelName.split(' ');
   const shortModel = modelParts.length >= 2 ? `${modelParts[0]} ${modelParts[1]}` : modelName;
 
-  const narrow = columns < 60;
-
   const hasFiveHour = rateLimits.five_hour != null;
   const hasSevenDay = rateLimits.seven_day != null;
 
@@ -80,15 +77,13 @@ function BuiltinStatusLineInner({
   const tokenDisplay = `${formatTokens(usedTokens)}/${formatTokens(contextWindowSize)}`;
 
   return (
-    <Box>
+    <Text wrap="truncate">
       {/* Model name */}
       <Text>{shortModel}</Text>
 
-      {/* Context usage with token counts */}
+      {/* Context usage — just show token counts */}
       <Separator />
-      <Text dimColor>Context </Text>
-      <Text>{contextUsedPct}%</Text>
-      {!narrow && <Text dimColor> ({tokenDisplay})</Text>}
+      <Text dimColor>{tokenDisplay}</Text>
 
       {/* 5-hour session rate limit */}
       {hasFiveHour && (
@@ -96,7 +91,7 @@ function BuiltinStatusLineInner({
           <Separator />
           <Text dimColor>Session </Text>
           <Text>{fiveHourPct}%</Text>
-          {!narrow && rateLimits.five_hour!.resets_at > 0 && (
+          {rateLimits.five_hour!.resets_at > 0 && (
             <Text dimColor> {formatCountdown(rateLimits.five_hour!.resets_at)}</Text>
           )}
         </>
@@ -108,7 +103,7 @@ function BuiltinStatusLineInner({
           <Separator />
           <Text dimColor>Weekly </Text>
           <Text>{sevenDayPct}%</Text>
-          {!narrow && rateLimits.seven_day!.resets_at > 0 && (
+          {rateLimits.seven_day!.resets_at > 0 && (
             <Text dimColor> {formatCountdown(rateLimits.seven_day!.resets_at)}</Text>
           )}
         </>
@@ -121,7 +116,7 @@ function BuiltinStatusLineInner({
           <Text>{formatCost(totalCostUsd)}</Text>
         </>
       )}
-    </Box>
+    </Text>
   );
 }
 

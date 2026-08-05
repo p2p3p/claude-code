@@ -19,6 +19,7 @@ import { useAppState, useSetAppState } from '../../state/AppState.js';
 import type { ToolUseContext } from '../../Tool.js';
 import type { LocalJSXCommandContext, LocalJSXCommandOnDone } from '../../types/command.js';
 import { logForDebugging } from '../../utils/debug.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props = {
   onDone: LocalJSXCommandOnDone;
@@ -192,7 +193,7 @@ function BridgeDisconnectDialog({ onDone }: Props): React.ReactNode {
   const qrLines = qrText ? qrText.split('\n').filter(l => l.length > 0) : [];
 
   return (
-    <Dialog title="Remote Control" onCancel={handleContinue} hideInputGuide>
+    <Dialog title={t("cmdSystemUI.bridgeTitle")} onCancel={handleContinue} hideInputGuide>
       <Box flexDirection="column" gap={1}>
         <Text>
           This session is available via Remote Control

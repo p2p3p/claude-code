@@ -1,3 +1,4 @@
+import { APIError } from '@anthropic-ai/sdk'
 import { parseSSEFrames } from 'src/cli/transports/SSETransport.js'
 import { errorMessage } from 'src/utils/errors.js'
 import { getProxyFetchOptions } from 'src/utils/proxy.js'
@@ -45,13 +46,17 @@ export async function* streamGeminiGenerateContent(params: {
 
   if (!response.ok) {
     const body = await response.text()
-    throw new Error(
+    throw APIError.generate(
+      response.status,
+      undefined,
       `Gemini API request failed (${response.status} ${response.statusText}): ${body || 'empty response body'}`,
+      response.headers,
     )
   }
 
   if (!response.body) {
-    throw new Error('Gemini API returned no response body')
+    // biome-ignore lint: APIError.generate needs a status code
+    throw APIError.generate(500, undefined, 'Gemini API returned no response body', undefined)
   }
 
   const reader = response.body.getReader()

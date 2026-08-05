@@ -1,5 +1,6 @@
 import memoize from 'lodash-es/memoize.js'
 import sample from 'lodash-es/sample.js'
+import { t } from './i18n/index.js'
 import { getCwd } from '../utils/cwd.js'
 import { getCurrentProjectConfig, saveCurrentProjectConfig } from './config.js'
 import { env } from './env.js'
@@ -156,7 +157,7 @@ export const getExampleCommandFromCache = memoize(() => {
     'create a util logging.py that...',
   ]
 
-  return `Try "${sample(commands)}"`
+  return t('common.tryCmd', sample(commands))
 })
 
 export const refreshExampleCommands = memoize(async (): Promise<void> => {

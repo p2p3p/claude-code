@@ -20,7 +20,7 @@ export async function call(
   const arg = args.trim().toLowerCase()
 
   if (!arg) {
-    const pref = getGlobalConfig().preferredLanguage ?? 'auto'
+    const pref = getGlobalConfig().aiPreferredLanguage ?? 'auto'
     const resolved = getResolvedLanguage()
     const suffix =
       pref === 'auto' ? ` → ${getLanguageDisplayName(resolved)}` : ''
@@ -38,7 +38,7 @@ export async function call(
   }
 
   const lang = arg as PreferredLanguage
-  saveGlobalConfig(current => ({ ...current, preferredLanguage: lang }))
+  saveGlobalConfig(current => ({ ...current, aiPreferredLanguage: lang }))
 
   const resolved = getResolvedLanguage()
   const suffix = lang === 'auto' ? ` → ${getLanguageDisplayName(resolved)}` : ''

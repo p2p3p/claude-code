@@ -6,7 +6,7 @@ let mockSystemLocale: string | undefined
 
 mock.module('src/utils/config.js', () => ({
   getGlobalConfig: () => ({
-    preferredLanguage: mockPreferredLanguage,
+    aiPreferredLanguage: mockPreferredLanguage,
   }),
 }))
 
@@ -49,7 +49,7 @@ describe('getResolvedLanguage', () => {
     expect(getResolvedLanguage()).toBe('en')
   })
 
-  test('falls back to auto behavior when config preferredLanguage is undefined', () => {
+  test('falls back to auto behavior when config aiPreferredLanguage is undefined', () => {
     mockPreferredLanguage = undefined
     mockSystemLocale = 'zh'
     expect(getResolvedLanguage()).toBe('zh')

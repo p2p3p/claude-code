@@ -2,6 +2,7 @@ import figures from 'figures';
 import { GITHUB_ACTION_SETUP_DOCS_URL } from '../../constants/github-app.js';
 import { Box, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
+import { t } from '../../utils/i18n/index.js'
 
 interface InstallAppStepProps {
   repoUrl: string;
@@ -15,7 +16,7 @@ export function InstallAppStep({ repoUrl, onSubmit }: InstallAppStepProps) {
   return (
     <Box flexDirection="column" borderStyle="round" borderDimColor paddingX={1}>
       <Box flexDirection="column" marginBottom={1}>
-        <Text bold>Install the Claude GitHub App</Text>
+        <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
       </Box>
       <Box marginBottom={1}>
         <Text>Opening browser to install the Claude GitHub App…</Text>

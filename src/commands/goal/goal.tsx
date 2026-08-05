@@ -34,6 +34,7 @@ import { persistCurrentGoal, persistGoalClear } from 'src/services/goal/goalStor
 import type { LocalJSXCommandOnDone } from 'src/types/command.js';
 import { removeByFilter } from 'src/utils/messageQueueManager.js';
 import { GoalReplaceConfirmDialog } from './GoalReplaceConfirmDialog.js';
+import { t } from '../../utils/i18n/index.js'
 
 const MAX_OBJECTIVE_CHARS = 4000;
 const MAX_DISPLAY_CHARS = 80;
@@ -51,7 +52,7 @@ function drainGoalContinuationQueue(): void {
 function formatGoalStatus(): string {
   const goal = getGoal();
   if (!goal) {
-    return 'No active goal. Set one with `/goal <objective>`.';
+    return t('cmdSystemUI.noActiveGoal');
   }
   const tokens = goal.tokenBudget !== null ? `${goal.tokensUsed} / ${goal.tokenBudget}` : `${goal.tokensUsed}`;
   const lines = [
@@ -75,7 +76,7 @@ function applySetGoal(objective: string): string {
   setGoal(objective);
   incrementGoalTurns();
   persistCurrentGoal();
-  return 'Goal set.';
+  return t('cmdSystemUI.goalResumed');
 }
 
 export async function call(
@@ -98,7 +99,7 @@ export async function call(
       persistGoalClear();
       drainGoalContinuationQueue();
     }
-    onDone(cleared ? 'Goal cleared.' : 'No active goal to clear.', {
+    onDone(cleared ? t('cmdSystemUI.goalCleared') : t('cmdSystemUI.goalCleared'), {
       display: 'system',
     });
     return null;
@@ -110,7 +111,7 @@ export async function call(
       persistCurrentGoal();
       drainGoalContinuationQueue();
     }
-    onDone(g ? 'Goal paused.' : 'No active goal to pause.', {
+    onDone(g ? t('cmdSystemUI.goalPaused') : t('cmdSystemUI.goalPaused'), {
       display: 'system',
     });
     return null;
@@ -127,7 +128,7 @@ export async function call(
     }
     const g = resumeGoal();
     if (g) persistCurrentGoal();
-    onDone(g ? 'Goal resumed.' : 'No paused goal to resume.', {
+    onDone(g ? t('cmdSystemUI.goalResumed') : t('cmdSystemUI.goalResumed'), {
       display: 'system',
       shouldQuery: Boolean(g),
     });
@@ -155,7 +156,7 @@ export async function call(
       persistCurrentGoal();
       drainGoalContinuationQueue();
     }
-    onDone(g ? 'Goal marked complete.' : 'No active goal to complete.', {
+    onDone(g ? t('cmdSystemUI.goalComplete') : t('cmdSystemUI.goalComplete'), {
       display: 'system',
     });
     return null;
@@ -198,7 +199,7 @@ export async function call(
         });
       }}
       onCancel={() => {
-        onDone('Kept the current goal. New objective discarded.', {
+        onDone(t('cmdSystemUI.noKeepGoal'), {
           display: 'system',
         });
       }}

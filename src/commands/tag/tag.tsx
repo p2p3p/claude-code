@@ -11,6 +11,7 @@ import { logEvent } from '../../services/analytics/index.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { recursivelySanitizeUnicode } from '../../utils/sanitization.js';
 import { getCurrentSessionTag, getTranscriptPath, saveTag } from '../../utils/sessionStorage.js';
+import { t } from '../../utils/i18n/index.js'
 
 function ConfirmRemoveTag({
   tagName,
@@ -22,14 +23,14 @@ function ConfirmRemoveTag({
   onCancel: () => void;
 }): React.ReactNode {
   return (
-    <Dialog title="Remove tag?" subtitle={`Current tag: #${tagName}`} onCancel={onCancel} color="warning">
+    <Dialog title={t("cmdSystemUI.tagTitle")} subtitle={`Current tag: #${tagName}`} onCancel={onCancel} color="warning">
       <Box flexDirection="column" gap={1}>
-        <Text>This will remove the tag from the current session.</Text>
+        <Text>{t('tag.removeConfirm')}</Text>
         <Select<'yes' | 'no'>
           onChange={value => (value === 'yes' ? onConfirm() : onCancel())}
           options={[
-            { label: 'Yes, remove tag', value: 'yes' },
-            { label: 'No, keep tag', value: 'no' },
+            { label: t('tag.yesRemove'), value: 'yes' },
+            { label: t('tag.noKeep'), value: 'no' },
           ]}
         />
       </Box>

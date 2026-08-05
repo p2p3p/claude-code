@@ -121,9 +121,9 @@ function CachePill({ messages }: CachePillProps): React.ReactNode {
 
   const displayHitRate = usage !== null ? computeHitRate(usage) : lastHitRate;
 
-  // No data yet — show placeholder
+  // No data yet — show nothing
   if (displayHitRate === null && lastResetAt === null) {
-    return <Text dimColor>{' Cache --% --:--'}</Text>;
+    return null;
   }
 
   const countdownText = remaining !== null ? formatCountdown(remaining) : '--:--';
@@ -527,9 +527,6 @@ function StatusLineInner({ messagesRef, lastAssistantMessageId, vimMode }: Props
       builtinCurrentUsage.cache_creation_input_tokens +
       builtinCurrentUsage.cache_read_input_tokens
     : 0;
-  const builtinContextPct = builtinCurrentUsage
-    ? Math.round(calculateContextPercentages(builtinCurrentUsage, builtinContextWindowSize).used ?? 0)
-    : 0;
   const builtinRawUtil = getRawUtilization();
   const builtinRateLimits = {
     ...(builtinRawUtil.five_hour && {
@@ -556,18 +553,18 @@ function StatusLineInner({ messagesRef, lastAssistantMessageId, vimMode }: Props
     <Box flexDirection="column" paddingX={paddingX}>
       {/* Top: built-in fork status (model | ctx | 5h | 7d | cost) + Cache pill */}
       {showBuiltin && (
-        <Box gap={2}>
+        <Text wrap="truncate">
           <BuiltinStatusLine
             modelName={renderModelName(builtinRuntimeModel)}
-            contextUsedPct={builtinContextPct}
             usedTokens={builtinUsedTokens}
             contextWindowSize={builtinContextWindowSize}
             totalCostUsd={getTotalCost()}
             rateLimits={builtinRateLimits}
           />
+          <Text>  </Text>
           <GoalPill />
           <CachePill messages={messagesRef.current} />
-        </Box>
+        </Text>
       )}
       {/* Bottom: user-configured /statusline shell stdout (reserves row in fullscreen) */}
       {statusLineText ? (

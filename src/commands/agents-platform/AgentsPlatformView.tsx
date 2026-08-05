@@ -3,6 +3,7 @@ import { Box, Text } from '@anthropic/ink';
 import type { Theme } from '@anthropic/ink';
 import type { AgentTrigger } from './agentsApi.js';
 import { cronToHuman } from '../../utils/cron.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props =
   | { mode: 'list'; agents: AgentTrigger[] }
@@ -57,7 +58,7 @@ export function AgentsPlatformView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'success' as keyof Theme}>
-            Agent created
+            {t("cmdSystemUI.agentsPlatformTitle")} created
           </Text>
         </Box>
         <Text>ID: {props.agent.id}</Text>

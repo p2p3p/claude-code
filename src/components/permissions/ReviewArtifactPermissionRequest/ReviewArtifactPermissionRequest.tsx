@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../../utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import { Select } from '../../CustomSelect/select.js';
 import { usePermissionRequestLogging } from '../hooks.js';
@@ -42,7 +43,7 @@ export function ReviewArtifactPermissionRequest({
   return (
     <PermissionDialog color="permission" title="Review artifact?" workerBadge={workerBadge}>
       <Box flexDirection="column" marginTop={1} paddingX={1}>
-        <Text>Claude wants to review{title ? `: ${title}` : ' an artifact'}.</Text>
+        <Text>{t('permission.approveArtifact', title)}</Text>
 
         <Box marginTop={1} flexDirection="column">
           <Text dimColor>

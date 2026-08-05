@@ -40,6 +40,7 @@ import { PermissionRuleExplanation } from '../PermissionRuleExplanation.js';
 import { SedEditPermissionRequest } from '../SedEditPermissionRequest/SedEditPermissionRequest.js';
 import { useShellPermissionFeedback } from '../useShellPermissionFeedback.js';
 import { logUnaryPermissionEvent } from '../utils.js';
+import { t } from '../../../utils/i18n/index.js';
 import { bashToolUseOptions } from './bashToolUseOptions.js';
 
 const CHECKING_TEXT = 'Attempting to auto-approve\u2026';
@@ -438,26 +439,24 @@ function BashPermissionRequestInner({
   const classifierSubtitle = feature('BASH_CLASSIFIER') ? (
     toolUseConfirm.classifierAutoApproved ? (
       <Text>
-        <Text color="success">{figures.tick} Auto-approved</Text>
+        <Text color="success">{figures.tick} {t('bashPermission.autoApproved')}</Text>
         {toolUseConfirm.classifierMatchedRule && (
           <Text dimColor>
-            {' \u00b7 matched "'}
-            {toolUseConfirm.classifierMatchedRule}
-            {'"'}
+            {t('bashPermission.matchedRule', toolUseConfirm.classifierMatchedRule)}
           </Text>
         )}
       </Text>
     ) : toolUseConfirm.classifierCheckInProgress ? (
       <ClassifierCheckingSubtitle />
     ) : classifierWasChecking ? (
-      <Text dimColor>Requires manual approval</Text>
+      <Text dimColor>{t('bashPermission.requiresManual')}</Text>
     ) : undefined
   ) : undefined;
 
   return (
     <PermissionDialog
       workerBadge={workerBadge}
-      title={sandboxingEnabled && !isSandboxed ? 'Bash command (unsandboxed)' : 'Bash command'}
+      title={sandboxingEnabled && !isSandboxed ? t('bashPermission.titleUnsandboxed') : t('bashPermission.title')}
       subtitle={classifierSubtitle}
     >
       <Box flexDirection="column" paddingX={2} paddingY={1}>
@@ -494,7 +493,7 @@ function BashPermissionRequestInner({
               </Box>
             )}
             <Text dimColor={feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved : false}>
-              Do you want to proceed?
+              {t('bashPermission.doYouProceed')}
             </Text>
             <Select
               options={
@@ -514,12 +513,12 @@ function BashPermissionRequestInner({
           </Box>
           <Box justifyContent="space-between" marginTop={1}>
             <Text dimColor>
-              Esc to reject
+              {t('bashPermission.escToReject')}
               {((focusedOption === 'yes' && !yesInputMode) || (focusedOption === 'no' && !noInputMode)) &&
-                ' · Tab to add feedback'}
-              {explainerState.enabled && ` · ctrl+e to ${explainerState.visible ? 'hide' : 'explain'}`}
+                t('bashPermission.tabToAddFeedback')}
+              {explainerState.enabled && (explainerState.visible ? t('bashPermission.ctrlEToHide') : t('bashPermission.ctrlEToExplain'))}
             </Text>
-            {toolUseContext.options.debug && <Text dimColor>Ctrl+d to show debug info</Text>}
+            {toolUseContext.options.debug && <Text dimColor>{t('bashPermission.ctrlDToHide')}</Text>}
           </Box>
         </>
       )}

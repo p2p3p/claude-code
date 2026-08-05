@@ -14,6 +14,7 @@ import { PermissionRequestTitle } from '../PermissionRequestTitle.js';
 import { PreviewBox } from './PreviewBox.js';
 import { QuestionNavigationBar } from './QuestionNavigationBar.js';
 import type { QuestionState } from './use-multiple-choice-state.js';
+import { t } from '../../../utils/i18n/index.js';
 
 type Props = {
   question: Question;
@@ -329,17 +330,17 @@ export function PreviewQuestionView({
             {/* Right panel: preview + notes */}
             <Box flexDirection="column" flexGrow={1}>
               <PreviewBox
-                content={previewContent || 'No preview available'}
+                content={previewContent || t('preview.questionNoPreview')}
                 maxLines={previewMaxLines}
                 minWidth={minContentWidth}
                 maxWidth={previewMaxWidth}
               />
               <Box marginTop={1} flexDirection="row" gap={1}>
-                <Text color="suggestion">Notes:</Text>
+                <Text color="suggestion">{t('preview.notes')}</Text>
                 {isInNotesInput ? (
                   <TextInput
                     value={notesValue}
-                    placeholder="Add notes on this design…"
+                    placeholder={t('preview.notesPlaceholder')}
                     onChange={value => {
                       onUpdateQuestionState(questionText, { textInputValue: value }, false);
                     }}
@@ -353,7 +354,7 @@ export function PreviewQuestionView({
                   />
                 ) : (
                   <Text dimColor italic>
-                    {notesValue || 'press n to add notes'}
+                    {notesValue || t('preview.pressNToAddNotes')}
                   </Text>
                 )}
               </Box>
@@ -369,7 +370,7 @@ export function PreviewQuestionView({
               ) : (
                 <Text> </Text>
               )}
-              <Text color={isFooterFocused && footerIndex === 0 ? 'suggestion' : undefined}>Chat about this</Text>
+              <Text color={isFooterFocused && footerIndex === 0 ? 'suggestion' : undefined}>{t('preview.chatAboutThis')}</Text>
             </Box>
             {isInPlanMode && (
               <Box flexDirection="row" gap={1}>
@@ -379,16 +380,16 @@ export function PreviewQuestionView({
                   <Text> </Text>
                 )}
                 <Text color={isFooterFocused && footerIndex === 1 ? 'suggestion' : undefined}>
-                  Skip interview and plan immediately
+                  {t('preview.skipInterview')}
                 </Text>
               </Box>
             )}
           </Box>
           <Box marginTop={1}>
             <Text color="inactive" dimColor>
-              Enter to select · {figures.arrowUp}/{figures.arrowDown} to navigate · n to add notes
-              {questions.length > 1 && <> · Tab to switch questions</>}
-              {isInNotesInput && editorName && <> · ctrl+g to edit in {editorName}</>} · Esc to cancel
+              {t('preview.helpText')}
+              {questions.length > 1 && <>{t('preview.tabToSwitchQuestions')}</>}
+              {isInNotesInput && editorName && <>{t('preview.ctrlGToEdit', editorName)}</>}{t('preview.escCancel')}
             </Text>
           </Box>
         </Box>

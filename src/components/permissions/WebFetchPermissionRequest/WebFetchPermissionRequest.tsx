@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { t } from '../../../utils/i18n/index.js';
 import { Box, Text, useTheme } from '@anthropic/ink';
 import { WebFetchTool } from '@claude-code-best/builtin-tools/tools/WebFetchTool/WebFetchTool.js';
 import { shouldShowAlwaysAllowOptions } from '../../../utils/permissions/permissionsLoader.js';
@@ -46,7 +47,7 @@ export function WebFetchPermissionRequest({
   const options = useMemo((): OptionWithDescription<string>[] => {
     const result: OptionWithDescription<string>[] = [
       {
-        label: 'Yes',
+        label: t('webFetchPermission.yes'),
         value: 'yes',
       },
     ];
@@ -55,7 +56,7 @@ export function WebFetchPermissionRequest({
       result.push({
         label: (
           <Text>
-            Yes, and don&apos;t ask again for <Text bold>{hostname}</Text>
+            {t('webFetchPermission.yesDontAsk', hostname)}
           </Text>
         ),
         value: 'yes-dont-ask-again-domain',
@@ -63,11 +64,7 @@ export function WebFetchPermissionRequest({
     }
 
     result.push({
-      label: (
-        <Text>
-          No, and tell Claude what to do differently <Text bold>(esc)</Text>
-        </Text>
-      ),
+      label: t('webFetchPermission.noAndTell'),
       value: 'no',
     });
 
@@ -111,7 +108,7 @@ export function WebFetchPermissionRequest({
   }
 
   return (
-    <PermissionDialog title="Fetch" workerBadge={workerBadge}>
+    <PermissionDialog title={t('webFetchPermission.title')} workerBadge={workerBadge}>
       <Box flexDirection="column" paddingX={2} paddingY={1}>
         <Text>
           {WebFetchTool.renderToolUseMessage(toolUseConfirm.input as { url: string; prompt: string }, {
@@ -124,7 +121,7 @@ export function WebFetchPermissionRequest({
 
       <Box flexDirection="column">
         <PermissionRuleExplanation permissionResult={toolUseConfirm.permissionResult} toolType="tool" />
-        <Text>Do you want to allow Claude to fetch this content?</Text>
+        <Text>{t('permission.allowFetch')}</Text>
         <Select options={options} onChange={onChange} onCancel={() => onChange('no')} />
       </Box>
     </PermissionDialog>

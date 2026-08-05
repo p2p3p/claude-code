@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js'
 
 type SuccessStepProps = {
   secretExists: boolean;
@@ -18,7 +19,7 @@ export function SuccessStep({
     <>
       <Box flexDirection="column" borderStyle="round" paddingX={1}>
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>Install GitHub App</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
           <Text dimColor>Success</Text>
         </Box>
         {!skipWorkflow && <Text color="success">✓ GitHub Actions workflow created!</Text>}

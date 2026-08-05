@@ -6,6 +6,7 @@ import type { NormalizedUserMessage } from '../types/message.js';
 import { getUserMessageText } from '../utils/messages.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { MessageResponse } from './MessageResponse.js';
+import { t } from '../utils/i18n/index.js';
 
 type Props = {
   message: NormalizedUserMessage;
@@ -32,7 +33,7 @@ export function CompactSummary({ message, screen }: Props): React.ReactNode {
             <Text color="text">{BLACK_CIRCLE}</Text>
           </Box>
           <Box flexDirection="column">
-            <Text bold>Summarized conversation</Text>
+            <Text bold>{t('compactSummary.summarized')}</Text>
             {!isTranscriptMode && (
               <MessageResponse>
                 <Box flexDirection="column">

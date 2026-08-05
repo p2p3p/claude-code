@@ -8,6 +8,7 @@ import { useKeybinding } from '../keybindings/useKeybinding.js';
 import { useShortcutDisplay } from '../keybindings/useShortcutDisplay.js';
 import { useAppState, useSetAppState } from '../state/AppState.js';
 import { gracefulShutdown } from '../utils/gracefulShutdown.js';
+import { t } from '../utils/i18n/index.js';
 import { updateSettingsForSource } from '../utils/settings/settings.js';
 import type { ThemeSetting } from '../utils/theme.js';
 import { Select } from './CustomSelect/index.js';
@@ -70,23 +71,23 @@ export function ThemePicker({
   const exitState = useExitOnCtrlCDWithKeybindings(skipExitHandling ? () => {} : undefined);
 
   const themeOptions: { label: string; value: ThemeSetting }[] = [
-    ...(feature('AUTO_THEME') ? [{ label: 'Auto (match terminal)', value: 'auto' as const }] : []),
-    { label: 'Dark mode', value: 'dark' },
-    { label: 'Light mode', value: 'light' },
+    ...(feature('AUTO_THEME') ? [{ label: t('theme.auto'), value: 'auto' as const }] : []),
+    { label: t('theme.dark'), value: 'dark' },
+    { label: t('theme.light'), value: 'light' },
     {
-      label: 'Dark mode (colorblind-friendly)',
+      label: t('theme.darkColorblind'),
       value: 'dark-daltonized',
     },
     {
-      label: 'Light mode (colorblind-friendly)',
+      label: t('theme.lightColorblind'),
       value: 'light-daltonized',
     },
     {
-      label: 'Dark mode (ANSI colors only)',
+      label: t('theme.darkAnsi'),
       value: 'dark-ansi',
     },
     {
-      label: 'Light mode (ANSI colors only)',
+      label: t('theme.lightAnsi'),
       value: 'light-ansi',
     },
   ];
@@ -95,14 +96,14 @@ export function ThemePicker({
     <Box flexDirection="column" gap={1}>
       <Box flexDirection="column" gap={1}>
         {showIntroText ? (
-          <Text>Let&apos;s get started.</Text>
+          <Text>{t('theme.letsGetStarted')}</Text>
         ) : (
           <Text bold color="permission">
-            Theme
+            {t('theme.title')}
           </Text>
         )}
         <Box flexDirection="column">
-          <Text bold>Choose the text style that looks best with your terminal</Text>
+          <Text bold>{t('theme.chooseStyle')}</Text>
           {helpText && !showHelpTextBelow && <Text dimColor>{helpText}</Text>}
         </Box>
         <Select
@@ -162,12 +163,12 @@ export function ThemePicker({
         <Text dimColor>
           {' '}
           {colorModuleUnavailableReason === 'env'
-            ? `Syntax highlighting disabled (via CLAUDE_CODE_SYNTAX_HIGHLIGHT=${process.env.CLAUDE_CODE_SYNTAX_HIGHLIGHT})`
+            ? t('theme.syntaxDisabledEnv', process.env.CLAUDE_CODE_SYNTAX_HIGHLIGHT)
             : syntaxHighlightingDisabled
-              ? `Syntax highlighting disabled (${syntaxToggleShortcut} to enable)`
+              ? t('theme.syntaxDisabled', syntaxToggleShortcut)
               : syntaxTheme
-                ? `Syntax theme: ${syntaxTheme.theme}${syntaxTheme.source ? ` (from ${syntaxTheme.source})` : ''} (${syntaxToggleShortcut} to disable)`
-                : `Syntax highlighting enabled (${syntaxToggleShortcut} to disable)`}
+                ? t('theme.syntaxTheme', syntaxTheme.theme, syntaxTheme.source, syntaxToggleShortcut)
+                : t('theme.syntaxEnabled', syntaxToggleShortcut)}
         </Text>
       </Box>
     </Box>
@@ -188,7 +189,7 @@ export function ThemePicker({
             <Box>
               <Text dimColor italic>
                 {exitState.pending ? (
-                  <>Press {exitState.keyName} again to exit</>
+                  <>{t('common.pressAgain', exitState.keyName)}</>
                 ) : (
                   <Byline>
                     <KeyboardShortcutHint shortcut="Enter" action="select" />

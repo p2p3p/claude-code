@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Text } from '@anthropic/ink';
+import { t } from '../utils/i18n/index.js';
 import {
   getCachedKeybindingWarnings,
   getKeybindingsPath,
@@ -34,7 +35,7 @@ export function KeybindingWarnings(): React.ReactNode {
         Keybinding Configuration Issues
       </Text>
       <Box>
-        <Text dimColor>Location: </Text>
+        <Text dimColor>{t('keybindingWarnings.location')}</Text>
         <Text dimColor>{getKeybindingsPath()}</Text>
       </Box>
       <Box marginLeft={1} flexDirection="column" marginTop={1}>

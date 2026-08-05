@@ -4,6 +4,7 @@ import { getTheme } from '../../../utils/theme.js';
 import { env } from '../../../utils/env.js';
 import { shouldShowAlwaysAllowOptions } from '../../../utils/permissions/permissionsLoader.js';
 import { truncateToLines } from '../../../utils/stringUtils.js';
+import { t } from '../../../utils/i18n/index.js';
 import { logUnaryEvent } from '../../../utils/unaryLogging.js';
 import { PermissionDialog } from '../PermissionDialog.js';
 import { PermissionPrompt, type PermissionPromptOption } from '../PermissionPrompt.js';
@@ -36,7 +37,7 @@ export function MonitorPermissionRequest({
   const options: PermissionPromptOption<OptionValue>[] = useMemo(() => {
     const opts: PermissionPromptOption<OptionValue>[] = [
       {
-        label: 'Yes',
+        label: t('permGeneral.yes'),
         value: 'yes',
         feedbackConfig: { type: 'accept' as const },
       },
@@ -45,14 +46,14 @@ export function MonitorPermissionRequest({
       opts.push({
         label: (
           <Text>
-            Yes, and don{'\u2019'}t ask again for <Text bold>{toolUseConfirm.tool.name}</Text> commands
+            {t('permGeneral.yesDontAskMonitor', toolUseConfirm.tool.name)}
           </Text>
         ),
         value: 'yes-dont-ask-again',
       });
     }
     opts.push({
-      label: 'No',
+      label: t('permGeneral.no'),
       value: 'no',
       feedbackConfig: { type: 'reject' as const },
     });
@@ -130,7 +131,7 @@ export function MonitorPermissionRequest({
   }, [toolUseConfirm, onDone, onReject]);
 
   return (
-    <PermissionDialog title="Monitor" workerBadge={workerBadge}>
+    <PermissionDialog title={t('permGeneral.monitor')} workerBadge={workerBadge}>
       <Box flexDirection="column" gap={1}>
         <Box flexDirection="column">
           <Text bold color={theme.permission as any}>

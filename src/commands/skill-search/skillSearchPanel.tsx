@@ -4,6 +4,7 @@ import { Dialog } from '@anthropic/ink';
 import { useRegisterOverlay } from '../../context/overlayContext.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { isSkillSearchEnabled } from '../../services/skillSearch/featureCheck.js';
+import { t } from '../../utils/i18n/index.js'
 
 type SkillSearchAction = {
   label: string;
@@ -77,22 +78,22 @@ function SkillSearchPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
   const actions = useMemo<SkillSearchAction[]>(
     () => [
       {
-        label: 'Status',
+        label: t('cmdSystemUI.skillStatus'),
         description: 'Show whether automatic skill matching is active',
         run: () => Promise.resolve(getStatusText()),
       },
       {
-        label: 'Start',
+        label: t('cmdSystemUI.skillStart'),
         description: 'Enable automatic skill matching for this session',
         run: startSkillSearch,
       },
       {
-        label: 'Stop',
+        label: t('cmdSystemUI.skillStop'),
         description: 'Disable automatic skill matching for this session',
         run: stopSkillSearch,
       },
       {
-        label: 'About',
+        label: t('cmdSystemUI.skillAbout'),
         description: 'How automatic skill matching works',
         run: () => Promise.resolve(ABOUT_TEXT),
       },
@@ -124,9 +125,9 @@ function SkillSearchPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
 
   return (
     <Dialog
-      title="Skill Search"
+      title={t("cmdSystemUI.skillSearch")}
       subtitle={`${actions.length} actions`}
-      onCancel={() => onDone('Skill search panel dismissed', { display: 'system' })}
+      onCancel={() => onDone(t('cmdSystemUI.skillDismissed'), { display: 'system' })}
       color="background"
       hideInputGuide
     >
@@ -138,7 +139,7 @@ function SkillSearchPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
           </Box>
         ))}
         <Box marginTop={1}>
-          <Text dimColor>↑/↓ select · Enter run · Esc close</Text>
+          <Text dimColor>{t("cmdSystemUI.skillNav")}</Text>
         </Box>
       </Box>
     </Dialog>

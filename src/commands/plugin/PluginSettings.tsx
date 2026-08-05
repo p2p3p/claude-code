@@ -5,6 +5,7 @@ import { ConfigurableShortcutHint } from '../../components/ConfigurableShortcutH
 import { Byline, Pane, Tab, Tabs } from '@anthropic/ink';
 import { useExitOnCtrlCDWithKeybindings } from '../../hooks/useExitOnCtrlCDWithKeybindings.js';
 import { Box, Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import { useKeybinding, useKeybindings } from '../../keybindings/useKeybinding.js';
 import { useAppState, useSetAppState } from '../../state/AppState.js';
 import type { PluginError } from '../../types/plugin.js';
@@ -35,19 +36,19 @@ function MarketplaceList({ onComplete }: { onComplete: (result?: string) => void
         const names = Object.keys(config);
 
         if (names.length === 0) {
-          onComplete('No marketplaces configured');
+          onComplete(t('pluginUI.noMarketplaces'));
         } else {
           onComplete(`Configured marketplaces:\n${names.map(n => `  • ${n}`).join('\n')}`);
         }
       } catch (err) {
-        onComplete(`Error loading marketplaces: ${errorMessage(err)}`);
+        onComplete(`Error loading marketplaces: ${errorMessage(err)}`); // Not translated (CLI output)
       }
     }
 
     void loadList();
   }, [onComplete]);
 
-  return <Text>Loading marketplaces...</Text>;
+  return <Text>{t('pluginUI.marketplaces')}...</Text>;
 }
 
 function McpRedirectBanner(): React.ReactNode {
@@ -494,11 +495,11 @@ function ErrorsTabContent({
     return (
       <Box flexDirection="column">
         <Box marginLeft={1}>
-          <Text dimColor>No plugin errors</Text>
+          <Text dimColor>{t('pluginUI.noPluginErrors')}</Text>
         </Box>
         <Box marginTop={1}>
           <Text dimColor italic>
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('pluginUI.back')} />
           </Text>
         </Box>
       </Box>
@@ -548,7 +549,7 @@ function ErrorsTabContent({
                 description="resolve"
               />
             )}
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('pluginUI.back')} />
           </Byline>
         </Text>
       </Box>
@@ -661,7 +662,7 @@ export function PluginSettings({ onComplete, args, showMcpRedirectMessage }: Plu
     }
     return count;
   });
-  const errorsTabTitle = pluginErrorCount > 0 ? `Errors (${pluginErrorCount})` : 'Errors';
+  const errorsTabTitle = pluginErrorCount > 0 ? `${t('pluginUI.errors')} (${pluginErrorCount})` : t('pluginUI.errors');
 
   const exitState = useExitOnCtrlCDWithKeybindings();
 
@@ -757,7 +758,7 @@ export function PluginSettings({ onComplete, args, showMcpRedirectMessage }: Plu
   if (viewState.type === 'help') {
     return (
       <Box flexDirection="column">
-        <Text bold>Plugin Command Usage:</Text>
+        <Text bold>{t('pluginUI.pluginCommandUsage')}:</Text>
         <Text> </Text>
         <Text dimColor>Installation:</Text>
         <Text> /plugin install - Browse and install plugins</Text>
@@ -827,14 +828,14 @@ export function PluginSettings({ onComplete, args, showMcpRedirectMessage }: Plu
   return (
     <Pane color="suggestion">
       <Tabs
-        title="Plugins"
+        title="plugins"
         selectedTab={activeTab}
         onTabChange={handleTabChange}
         color="suggestion"
         disableNavigation={childSearchActive}
         banner={showMcpRedirectMessage && activeTab === 'installed' ? <McpRedirectBanner /> : undefined}
       >
-        <Tab id="discover" title="Discover">
+        <Tab id="discover" title={t('pluginUI.discoverPlugins')}>
           {viewState.type === 'browse-marketplace' ? (
             <BrowseMarketplace
               error={error}
@@ -859,7 +860,7 @@ export function PluginSettings({ onComplete, args, showMcpRedirectMessage }: Plu
             />
           )}
         </Tab>
-        <Tab id="installed" title="Installed">
+        <Tab id="installed" title={t('pluginUI.installed')}>
           <ManagePlugins
             setViewState={setViewState}
             setResult={setResult}
@@ -870,7 +871,7 @@ export function PluginSettings({ onComplete, args, showMcpRedirectMessage }: Plu
             action={viewState.type === 'manage-plugins' ? viewState.action : undefined}
           />
         </Tab>
-        <Tab id="marketplaces" title="Marketplaces">
+        <Tab id="marketplaces" title={t('pluginUI.marketplaces')}>
           <ManageMarketplaces
             setViewState={setViewState}
             error={error}

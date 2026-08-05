@@ -1,5 +1,6 @@
 import { GITHUB_ACTION_SETUP_DOCS_URL } from '../../constants/github-app.js';
 import { Box, Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js'
 
 interface ErrorStepProps {
   error: string | undefined;
@@ -12,7 +13,7 @@ export function ErrorStep({ error, errorReason, errorInstructions }: ErrorStepPr
     <>
       <Box flexDirection="column" borderStyle="round" paddingX={1}>
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>Install GitHub App</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
         </Box>
         <Text color="error">Error: {error}</Text>
         {errorReason && (

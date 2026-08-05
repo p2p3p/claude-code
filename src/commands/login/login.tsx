@@ -8,6 +8,7 @@ import { ConsoleOAuthFlow } from '../../components/ConsoleOAuthFlow.js';
 import { Box, Dialog, useInput } from '@anthropic/ink';
 import { useMainLoopModel } from '../../hooks/useMainLoopModel.js';
 import { Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import { refreshGrowthBookAfterAuthChange } from '../../services/analytics/growthbook.js';
 import { refreshPolicyLimits } from '../../services/policyLimits/index.js';
 import { refreshRemoteManagedSettings } from '../../services/remoteManagedSettings/index.js';
@@ -142,7 +143,7 @@ export function Login(props: {
 
   return (
     <Dialog
-      title="Login"
+      title={t('login.loginTitle')}
       onCancel={() => props.onDone(false, mainLoopModel)}
       color="permission"
       inputGuide={exitState =>
@@ -165,20 +166,20 @@ export function Login(props: {
         ) : removeState.phase === 'confirm-remove' || removeState.phase === 'removing' ? (
           <Box flexDirection="column" marginBottom={1}>
             <Text>
-              Remove the saved workspace API key? <Text dimColor>(settings.json only — env var is unaffected)</Text>
+              Remove the saved workspace API key? <Text dimColor>{t('login.removeKeyDesc')}</Text>
             </Text>
-            <Text dimColor>{removeState.phase === 'removing' ? 'Removing…' : 'Press Y to confirm, N to cancel'}</Text>
+            <Text dimColor>{removeState.phase === 'removing' ? t('login.removing') : t('login.confirmRemove')}</Text>
           </Box>
         ) : (
           <>
             <Box flexDirection="column" marginBottom={1}>
               {!workspaceKeySet ? (
-                <Text dimColor>Press W to enter workspace API key (saves to settings, no restart needed)</Text>
+                <Text dimColor>{t('login.pressW')}</Text>
               ) : workspaceKeyFromSettings ? (
-                <Text dimColor>Press W to replace workspace API key · Press D to remove it</Text>
+                <Text dimColor>{t('login.pressWReplace')}</Text>
               ) : (
                 <Text dimColor>
-                  Workspace API key from ANTHROPIC_API_KEY env. Press W to override with a settings-saved key.
+                  {t('login.envOverride')}
                 </Text>
               )}
               {removeState.phase === 'error' && <Text color="error">{removeState.message}</Text>}

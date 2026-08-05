@@ -1,5 +1,6 @@
 import figures from 'figures';
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js';
 import { useEffect, useRef, useState } from 'react';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -365,7 +366,7 @@ export function ManageMarketplaces({
         value: 'browse',
       },
       {
-        label: 'Update marketplace',
+        label: t('pluginUI.updateMarketplace'),
         secondaryLabel: marketplace.lastUpdated
           ? `(last updated ${new Date(marketplace.lastUpdated).toLocaleDateString()})`
           : undefined,
@@ -381,7 +382,7 @@ export function ManageMarketplaces({
       });
     }
 
-    options.push({ label: 'Remove marketplace', value: 'remove' });
+    options.push({ label: t('pluginUI.removeMarketplace'), value: 'remove' });
 
     return options;
   };

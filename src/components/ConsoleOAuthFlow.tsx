@@ -8,6 +8,7 @@ import { useTerminalSize } from '../hooks/useTerminalSize.js';
 import { setClipboard, useTerminalNotification, Box, Link, Text, KeyboardShortcutHint } from '@anthropic/ink';
 import { useKeybinding } from '../keybindings/useKeybinding.js';
 import { getSSLErrorHint } from '@ant/model-provider';
+import { t } from '../utils/i18n/index.js';
 import { sendNotification } from '../services/notifier.js';
 import {
   completeChatGPTDeviceLogin,
@@ -83,7 +84,7 @@ type OAuthStatus =
       toRetry?: OAuthStatus;
     };
 
-const PASTE_HERE_MSG = 'Paste code here if prompted > ';
+const PASTE_HERE_MSG = t('loginFlow.pasteCodeHere');
 export function ConsoleOAuthFlow({
   onDone,
   startingMessage,
@@ -95,9 +96,9 @@ export function ConsoleOAuthFlow({
   const orgUUID = settings.forceLoginOrgUUID;
   const forcedMethodMessage =
     forceLoginMethod === 'claudeai'
-      ? 'Login method pre-selected: Subscription Plan (Claude Pro/Max)'
+      ? t('loginFlow.preSelectedSub')
       : forceLoginMethod === 'console'
-        ? 'Login method pre-selected: API Usage Billing (Anthropic Console)'
+        ? t('loginFlow.preSelectedApi')
         : null;
 
   const terminal = useTerminalNotification();
@@ -206,7 +207,7 @@ export function ConsoleOAuthFlow({
       if (!authorizationCode || !state) {
         setOAuthStatus({
           state: 'error',
-          message: 'Invalid code. Please make sure the full code was copied',
+          message: t('loginFlow.invalidCode'),
           toRetry: { state: 'waiting_for_login', url },
         });
         return;
@@ -256,7 +257,7 @@ export function ConsoleOAuthFlow({
             message:
               sslHint ??
               (isTokenExchangeError
-                ? 'Failed to exchange authorization code for access token. Please try again.'
+                ? t('loginFlow.failedExchange')
                 : err.message),
             toRetry: mode === 'setup-token' ? { state: 'ready_to_start' } : { state: 'idle' },
           });
@@ -351,9 +352,9 @@ export function ConsoleOAuthFlow({
       {oauthStatus.state === 'waiting_for_login' && showPastePrompt && (
         <Box flexDirection="column" key="urlToCopy" gap={1} paddingBottom={1}>
           <Box paddingX={1}>
-            <Text dimColor>Browser didn&apos;t open? Use the url below to sign in </Text>
+            <Text dimColor>{t('loginFlow.browserDidntOpen')}</Text>
             {urlCopied ? (
-              <Text color="success">(Copied!)</Text>
+              <Text color="success">{t('loginFlow.copied')}</Text>
             ) : (
               <Text dimColor>
                 <KeyboardShortcutHint shortcut="c" action="copy" parens />
@@ -367,12 +368,12 @@ export function ConsoleOAuthFlow({
       )}
       {mode === 'setup-token' && oauthStatus.state === 'success' && oauthStatus.token && (
         <Box key="tokenOutput" flexDirection="column" gap={1} paddingTop={1}>
-          <Text color="success">✓ Long-lived authentication token created successfully!</Text>
+          <Text color="success">{t('loginFlow.tokenCreated')}</Text>
           <Box flexDirection="column" gap={1}>
-            <Text>Your OAuth token (valid for 1 year):</Text>
+            <Text>{t('login.oauthToken')}</Text>
             <Text color="warning">{oauthStatus.token}</Text>
-            <Text dimColor>Store this token securely. You won&apos;t be able to see it again.</Text>
-            <Text dimColor>Use this token by setting: export CLAUDE_CODE_OAUTH_TOKEN=&lt;token&gt;</Text>
+            <Text dimColor>{t('loginFlow.storeTokenSecurely')}</Text>
+            <Text dimColor>{t('loginFlow.useToken')}</Text>
           </Box>
         </Box>
       )}
@@ -438,10 +439,10 @@ function OAuthStatusMessage({
           <Text bold>
             {startingMessage
               ? startingMessage
-              : `Claude Code can be used with your Claude subscription or billed based on API usage through your Console account.`}
+              : t('login.subtitle')}
           </Text>
 
-          <Text>Select login method:</Text>
+          <Text>{t('login.selectMethod')}</Text>
 
           <Box>
             <Select
@@ -449,7 +450,7 @@ function OAuthStatusMessage({
                 {
                   label: (
                     <Text>
-                      Anthropic Compatible · <Text dimColor>Configure your own API endpoint</Text>
+                      {t('login.anthropic')} · <Text dimColor>{t('login.anthropicDesc')}</Text>
                       {'\n'}
                     </Text>
                   ),
@@ -458,7 +459,7 @@ function OAuthStatusMessage({
                 {
                   label: (
                     <Text>
-                      OpenAI Compatible · <Text dimColor>Ollama, DeepSeek, vLLM, One API, etc.</Text>
+                      {t('login.openai')} · <Text dimColor>{t('login.openaiDesc')}</Text>
                       {'\n'}
                     </Text>
                   ),
@@ -467,7 +468,7 @@ function OAuthStatusMessage({
                 {
                   label: (
                     <Text>
-                      China LLM Providers · <Text dimColor>DeepSeek, Zhipu GLM, Qwen, MiMo</Text>
+                      {t('login.china')} · <Text dimColor>{t('login.chinaDesc')}</Text>
                       {'\n'}
                     </Text>
                   ),
@@ -476,7 +477,7 @@ function OAuthStatusMessage({
                 {
                   label: (
                     <Text>
-                      ChatGPT account with subscription · <Text dimColor>Plus, Pro, Business, Edu, or Enterprise</Text>
+                      {t('login.chatgpt')} · <Text dimColor>{t('login.chatgptDesc')}</Text>
                       {'\n'}
                     </Text>
                   ),
@@ -485,7 +486,7 @@ function OAuthStatusMessage({
                 {
                   label: (
                     <Text>
-                      Gemini API · <Text dimColor>Google Gemini native REST/SSE</Text>
+                      {t('login.gemini')} · <Text dimColor>{t('login.geminiDesc')}</Text>
                       {'\n'}
                     </Text>
                   ),
@@ -494,7 +495,7 @@ function OAuthStatusMessage({
                 {
                   label: (
                     <Text>
-                      Claude account with subscription · <Text dimColor>Pro, Max, Team, or Enterprise</Text>
+                      {t('loginFlow.claudeAccount')}
                       {process.env.USER_TYPE === 'ant' && (
                         <Text>
                           {'\n'}
@@ -513,7 +514,7 @@ function OAuthStatusMessage({
                 {
                   label: (
                     <Text>
-                      Anthropic Console account · <Text dimColor>API usage billing</Text>
+                      {t('loginFlow.consoleAccount')}
                       {'\n'}
                     </Text>
                   ),
@@ -522,7 +523,7 @@ function OAuthStatusMessage({
                 {
                   label: (
                     <Text>
-                      3rd-party platform · <Text dimColor>Amazon Bedrock, Microsoft Foundry, or Vertex AI</Text>
+                      {t('loginFlow.thirdParty')}
                       {'\n'}
                     </Text>
                   ),
@@ -689,7 +690,7 @@ function OAuthStatusMessage({
         if (error) {
           setOAuthStatus({
             state: 'error',
-            message: 'Failed to save settings. Please try again.',
+            message: t('loginFlow.failedSave'),
             toRetry: {
               state: 'custom_platform',
               baseUrl: finalVals.base_url ?? '',
@@ -785,15 +786,15 @@ function OAuthStatusMessage({
 
       return (
         <Box flexDirection="column" gap={1}>
-          <Text bold>Anthropic Compatible Setup</Text>
+          <Text bold>{t('login.anthropicSetup')}</Text>
           <Box flexDirection="column" gap={1}>
-            {renderRow('base_url', 'Base URL ')}
-            {renderRow('api_key', 'API Key  ', { mask: true })}
-            {renderRow('haiku_model', 'Haiku    ')}
-            {renderRow('sonnet_model', 'Sonnet   ')}
-            {renderRow('opus_model', 'Opus     ')}
+            {renderRow('base_url', t('login.baseUrl') + ' ')}
+            {renderRow('api_key', t('login.apiKey') + '  ', { mask: true })}
+            {renderRow('haiku_model', t('login.haiku') + '    ')}
+            {renderRow('sonnet_model', t('login.sonnet') + '   ')}
+            {renderRow('opus_model', t('login.opus') + '     ')}
           </Box>
-          <Text dimColor>↑↓/Tab to switch · Enter on last field to save · Esc to go back</Text>
+          <Text dimColor>{t('login.fieldSwitch')}</Text>
         </Box>
       );
     }
@@ -892,7 +893,7 @@ function OAuthStatusMessage({
         if (error) {
           setOAuthStatus({
             state: 'error',
-            message: 'Failed to save settings. Please try again.',
+            message: t('loginFlow.failedSave'),
             toRetry: {
               state: 'openai_chat_api',
               baseUrl: finalVals.base_url ?? '',
@@ -999,16 +1000,16 @@ function OAuthStatusMessage({
 
       return (
         <Box flexDirection="column" gap={1}>
-          <Text bold>OpenAI Compatible API Setup</Text>
-          <Text dimColor>Configure an OpenAI Chat Completions compatible endpoint (e.g. Ollama, DeepSeek, vLLM).</Text>
+          <Text bold>{t('login.openaiSetup')}</Text>
+          <Text dimColor>{t('login.openaiDesc2')}</Text>
           <Box flexDirection="column" gap={1}>
-            {renderOpenAIRow('base_url', 'Base URL ')}
-            {renderOpenAIRow('api_key', 'API Key  ', { mask: true })}
-            {renderOpenAIRow('haiku_model', 'Haiku    ')}
-            {renderOpenAIRow('sonnet_model', 'Sonnet   ')}
-            {renderOpenAIRow('opus_model', 'Opus     ')}
+            {renderOpenAIRow('base_url', t('login.baseUrl') + ' ')}
+            {renderOpenAIRow('api_key', t('login.apiKey') + '  ', { mask: true })}
+            {renderOpenAIRow('haiku_model', t('login.haiku') + '    ')}
+            {renderOpenAIRow('sonnet_model', t('login.sonnet') + '   ')}
+            {renderOpenAIRow('opus_model', t('login.opus') + '     ')}
           </Box>
-          <Text dimColor>↑↓/Tab to switch · Enter on last field to save · Esc to go back</Text>
+          <Text dimColor>{t('login.fieldSwitch')}</Text>
         </Box>
       );
     }
@@ -1047,7 +1048,7 @@ function OAuthStatusMessage({
             };
             const { error } = updateSettingsForSource('userSettings', settingsUpdate);
             if (error) {
-              throw new Error('Failed to save settings. Please try again.');
+              throw new Error(t('loginFlow.failedSave'));
             }
             for (const [k, v] of Object.entries(env)) process.env[k] = v;
             // Drop any cached OpenAI client built from prior OpenAI Compatible
@@ -1078,16 +1079,16 @@ function OAuthStatusMessage({
 
       return (
         <Box flexDirection="column" gap={1}>
-          <Text bold>ChatGPT Account Setup</Text>
+          <Text bold>{t('loginFlow.chatgptSetup')}</Text>
           {status.phase === 'requesting' && (
             <Box>
               <Spinner />
-              <Text>Requesting sign-in code…</Text>
+              <Text>{t('login.requestCode')}</Text>
             </Box>
           )}
           {status.phase === 'waiting' && status.deviceCode && (
             <Box flexDirection="column" gap={1}>
-              <Text>Open this link and sign in with your ChatGPT account:</Text>
+              <Text>{t('login.openLink')}</Text>
               <Link url={status.deviceCode.verificationUrl}>
                 <Text dimColor>{status.deviceCode.verificationUrl}</Text>
               </Link>
@@ -1096,11 +1097,11 @@ function OAuthStatusMessage({
               </Text>
               <Box>
                 <Spinner />
-                <Text>Waiting for ChatGPT authorization…</Text>
+                <Text>{t('login.waitingChatgpt')}</Text>
               </Box>
             </Box>
           )}
-          <Text dimColor>Esc to go back. Device codes expire after 15 minutes.</Text>
+          <Text dimColor>{t('login.escBack')}</Text>
         </Box>
       );
     }
@@ -1163,7 +1164,7 @@ function OAuthStatusMessage({
         if (!finalVals.haiku_model || !finalVals.sonnet_model || !finalVals.opus_model) {
           setOAuthStatus({
             state: 'error',
-            message: 'Gemini setup requires Haiku, Sonnet, and Opus model names.',
+            message: t('loginFlow.geminiModelsRequired'),
             toRetry: {
               state: 'gemini_api',
               baseUrl: finalVals.base_url,
@@ -1190,7 +1191,7 @@ function OAuthStatusMessage({
         if (error) {
           setOAuthStatus({
             state: 'error',
-            message: `Failed to save: ${error.message}`,
+            message: t('loginFlow.failedSaveError', error.message),
             toRetry: {
               state: 'gemini_api',
               baseUrl: '',
@@ -1286,19 +1287,18 @@ function OAuthStatusMessage({
 
       return (
         <Box flexDirection="column" gap={1}>
-          <Text bold>Gemini API Setup</Text>
+          <Text bold>{t('login.geminiSetup')}</Text>
           <Text dimColor>
-            Configure a Gemini Generate Content compatible endpoint. Base URL is optional and defaults to Google&apos;s
-            v1beta API.
+            {t('login.geminiDesc2')}
           </Text>
           <Box flexDirection="column" gap={1}>
-            {renderGeminiRow('base_url', 'Base URL ')}
-            {renderGeminiRow('api_key', 'API Key  ', { mask: true })}
-            {renderGeminiRow('haiku_model', 'Haiku    ')}
-            {renderGeminiRow('sonnet_model', 'Sonnet   ')}
-            {renderGeminiRow('opus_model', 'Opus     ')}
+            {renderGeminiRow('base_url', t('login.baseUrl') + ' ')}
+            {renderGeminiRow('api_key', t('login.apiKey') + '  ', { mask: true })}
+            {renderGeminiRow('haiku_model', t('login.haiku') + '    ')}
+            {renderGeminiRow('sonnet_model', t('login.sonnet') + '   ')}
+            {renderGeminiRow('opus_model', t('login.opus') + '     ')}
           </Box>
-          <Text dimColor>↑↓/Tab to switch · Enter on last field to save · Esc to go back</Text>
+          <Text dimColor>{t('login.fieldSwitch')}</Text>
         </Box>
       );
     }
@@ -1306,8 +1306,8 @@ function OAuthStatusMessage({
     case 'china_provider_select': {
       return (
         <Box flexDirection="column" gap={1} marginTop={1}>
-          <Text bold>Select China LLM Provider</Text>
-          <Text dimColor>Direct connection, no proxy needed. All providers are OpenAI-compatible.</Text>
+          <Text bold>{t('login.chinaSelect')}</Text>
+          <Text dimColor>{t('loginFlow.directConnection')}</Text>
           <Box>
             <Select
               options={CHINA_LLM_PROVIDERS.map(p => ({
@@ -1338,13 +1338,13 @@ function OAuthStatusMessage({
     case 'china_mode_select': {
       const { provider } = oauthStatus;
       const modeOptions = [
-        { id: 'api' as const, label: 'Pay-as-you-go (API)', desc: 'Top up freely, pay per use' },
-        { id: 'coding-plan' as const, label: 'Coding Plan', desc: 'Fixed monthly fee, high usage' },
+        { id: 'api' as const, label: t('loginFlow.payAsYouGo'), desc: 'Top up freely, pay per use' },
+        { id: 'coding-plan' as const, label: t('loginFlow.codingPlan'), desc: 'Fixed monthly fee, high usage' },
       ];
       return (
         <Box flexDirection="column" gap={1} marginTop={1}>
           <Text bold>
-            {provider.icon} {provider.label} — Select Access Mode
+            {t('loginFlow.selectAccessMode', provider.icon, provider.label)}
           </Text>
           <Box>
             <Select
@@ -1369,8 +1369,8 @@ function OAuthStatusMessage({
             />
           </Box>
           <Text dimColor>
-            No plan? Select "Pay-as-you-go"
-            {provider.id === 'zhipu' ? ' · GLM-4.7-Flash is free forever' : ''}
+            {t('loginFlow.noPlan')}
+            {provider.id === 'zhipu' ? t('loginFlow.glmFree') : ''}
           </Text>
         </Box>
       );
@@ -1382,7 +1382,7 @@ function OAuthStatusMessage({
       return (
         <Box flexDirection="column" gap={1} marginTop={1}>
           <Text bold>
-            {provider.icon} {provider.label} — Select Model
+            {t('loginFlow.selectModel', provider.icon, provider.label)}
           </Text>
           <Box>
             <Select
@@ -1390,7 +1390,7 @@ function OAuthStatusMessage({
                 ...models.map(m => {
                   const priceLabel =
                     m.inputPricePerMTok === 0 && m.outputPricePerMTok === 0
-                      ? 'Free'
+                      ? t('loginFlow.free')
                       : `¥${m.inputPricePerMTok}/¥${m.outputPricePerMTok}`;
                   const tagLabel = m.tags?.length ? ` [${m.tags.join(', ')}]` : '';
                   return {
@@ -1410,8 +1410,8 @@ function OAuthStatusMessage({
                 {
                   label: (
                     <Text>
-                      ✏️ Custom model
-                      <Text dimColor> · enter model name manually</Text>
+                      {t('loginFlow.customModel')}
+                      <Text dimColor>{t('loginFlow.customModelDesc')}</Text>
                       {'\n'}
                     </Text>
                   ),
@@ -1438,7 +1438,7 @@ function OAuthStatusMessage({
       const doChinaSave = useCallback(() => {
         const effectiveModelId = modelId === '__custom__' ? chinaKeyValue.trim() : modelId;
         if (!effectiveModelId) {
-          setChinaKeyError(modelId === '__custom__' ? 'Please enter a model name' : 'Please enter an API key');
+          setChinaKeyError(modelId === '__custom__' ? t('loginFlow.enterModelName') : t('loginFlow.enterApiKey'));
           return;
         }
         if (modelId === '__custom__') {
@@ -1449,7 +1449,7 @@ function OAuthStatusMessage({
           return;
         }
         if (!chinaKeyValue.trim()) {
-          setChinaKeyError('Please enter an API key');
+          setChinaKeyError(t('loginFlow.enterApiKey'));
           return;
         }
         const baseUrl = resolveChinaProviderBaseURL(provider.id, accessMode);
@@ -1469,7 +1469,7 @@ function OAuthStatusMessage({
         if (error) {
           setOAuthStatus({
             state: 'error',
-            message: 'Failed to save settings. Please try again.',
+            message: t('loginFlow.failedSave'),
             toRetry: { state: 'china_apikey', provider, mode: accessMode, modelId, apiKey: chinaKeyValue },
           });
         } else {
@@ -1521,24 +1521,24 @@ function OAuthStatusMessage({
       return (
         <Box flexDirection="column" gap={1} marginTop={1}>
           <Text bold>
-            {provider.icon} {provider.label} {isCustomModelEntry ? '— Custom Model' : 'API Key'}
+            {provider.icon} {provider.label} {isCustomModelEntry ? t('login.customModel') : t('login.apiKey')}
           </Text>
           <Box flexDirection="column" gap={0}>
             {isCustomModelEntry ? (
-              <Text dimColor> Enter any model ID supported by this provider. Browse models: {provider.modelsPage}</Text>
+              <Text dimColor> {t('loginFlow.browseModels', provider.modelsPage)}</Text>
             ) : (
               <>
-                <Text dimColor> Get your key: {keyPage}</Text>
+                <Text dimColor> {t('loginFlow.getYourKey', keyPage)}</Text>
                 <Text dimColor>
                   {' '}
-                  {accessMode === 'coding-plan' ? 'Use your Coding Plan credential here' : provider.freeTier}
+                  {accessMode === 'coding-plan' ? t('loginFlow.useCodingPlan') : provider.freeTier}
                 </Text>
-                <Text dimColor> Key format: {keyFormat}</Text>
+                <Text dimColor> {t('loginFlow.keyFormat', keyFormat)}</Text>
               </>
             )}
           </Box>
           <Box>
-            <Text>{isCustomModelEntry ? 'Model name: ' : 'API Key: '}</Text>
+            <Text>{isCustomModelEntry ? t('login.modelName') : t('login.apiKeyLabel')}</Text>
             <TextInput
               value={chinaKeyValue}
               onChange={v => {
@@ -1556,7 +1556,7 @@ function OAuthStatusMessage({
           {chinaKeyError ? <Text color="error">{chinaKeyError}</Text> : null}
           {isCustomModelEntry && modelSuggestions.length > 0 && (
             <Box flexDirection="column" gap={0}>
-              <Text dimColor>{chinaKeyValue.trim() ? 'Matching models:' : 'Known models:'}</Text>
+              <Text dimColor>{chinaKeyValue.trim() ? t('loginFlow.matchingModels') : t('loginFlow.knownModels')}</Text>
               {modelSuggestions.map(m => (
                 <Text key={m.id} dimColor>
                   {' '}
@@ -1569,7 +1569,7 @@ function OAuthStatusMessage({
             </Box>
           )}
           <Text dimColor>
-            {isCustomModelEntry ? 'Enter to continue · Esc to go back' : 'Enter to confirm · Esc to go back'}
+            {isCustomModelEntry ? t('login.enterContinue') : t('login.enterConfirm')}
           </Text>
         </Box>
       );
@@ -1578,7 +1578,7 @@ function OAuthStatusMessage({
     case 'platform_setup':
       return (
         <Box flexDirection="column" gap={1} marginTop={1}>
-          <Text bold>Using 3rd-party platforms</Text>
+          <Text bold>{t('loginFlow.usingThirdParty')}</Text>
 
           <Box flexDirection="column" gap={1}>
             <Text>
@@ -1633,7 +1633,7 @@ function OAuthStatusMessage({
           {!showPastePrompt && (
             <Box>
               <Spinner />
-              <Text>Opening browser to sign in…</Text>
+              <Text>{t('login.openingBrowser')}</Text>
             </Box>
           )}
 
@@ -1659,7 +1659,7 @@ function OAuthStatusMessage({
         <Box flexDirection="column" gap={1}>
           <Box>
             <Spinner />
-            <Text>Creating API key for Claude Code…</Text>
+            <Text>{t('login.creatingKey')}</Text>
           </Box>
         </Box>
       );
@@ -1667,7 +1667,7 @@ function OAuthStatusMessage({
     case 'about_to_retry':
       return (
         <Box flexDirection="column" gap={1}>
-          <Text color="permission">Retrying…</Text>
+          <Text color="permission">{t('loginFlow.retrying')}</Text>
         </Box>
       );
 
@@ -1678,11 +1678,11 @@ function OAuthStatusMessage({
             <>
               {getOauthAccountInfo()?.emailAddress ? (
                 <Text dimColor>
-                  Logged in as <Text>{getOauthAccountInfo()?.emailAddress}</Text>
+                  {t('login.loggedInAs')} <Text>{getOauthAccountInfo()?.emailAddress}</Text>
                 </Text>
               ) : null}
               <Text color="success">
-                Login successful. Press <Text bold>Enter</Text> to continue…
+                {t('loginFlow.loginSuccessful')} <Text bold>Enter</Text> {t('loginFlow.toContinue')}
               </Text>
             </>
           )}
@@ -1692,7 +1692,7 @@ function OAuthStatusMessage({
     case 'error':
       return (
         <Box flexDirection="column" gap={1}>
-          <Text color="error">OAuth error: {oauthStatus.message}</Text>
+          <Text color="error">{t('loginFlow.oauthError', oauthStatus.message)}</Text>
 
           {oauthStatus.toRetry && (
             <Box marginTop={1}>

@@ -3,6 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { Dialog } from '@anthropic/ink';
 // eslint-disable-next-line custom-rules/prefer-use-keybindings -- raw text input for config dialog
 import { Box, Text, useInput, stringWidth } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import { useKeybinding, useKeybindings } from '../../keybindings/useKeybinding.js';
 import { isEnvTruthy } from '../../utils/envUtils.js';
 import type { PluginOptionSchema, PluginOptionValues } from '../../utils/plugins/pluginOptionsStorage.js';
@@ -166,12 +167,12 @@ export function PluginOptionsDialog({
 
       <Box flexDirection="column">
         <Text dimColor={true}>
-          Field {currentFieldIndex + 1} of {fields.length}
+          {t('pluginUI.fieldOf', currentFieldIndex + 1, fields.length)}
         </Text>
         {currentFieldIndex < fields.length - 1 && (
-          <Text dimColor={true}>Tab: Next field · Enter: Save and continue</Text>
+          <Text dimColor={true}>{t('pluginUI.tabNextField')}</Text>
         )}
-        {currentFieldIndex === fields.length - 1 && <Text dimColor={true}>Enter: Save configuration</Text>}
+        {currentFieldIndex === fields.length - 1 && <Text dimColor={true}>{t('pluginUI.enterSave')}</Text>}
       </Box>
     </Dialog>
   );

@@ -4,6 +4,7 @@ import figures from 'figures';
 import React, { useMemo } from 'react';
 import { Ansi, Box, color, Text, useTheme } from '@anthropic/ink';
 import { useAppState } from '../../state/AppState.js';
+import { t } from '../../utils/i18n/index.js';
 import type { PermissionMode } from '../../utils/permissions/PermissionMode.js';
 import { permissionModeTitle } from '../../utils/permissions/PermissionMode.js';
 import type { PermissionDecision, PermissionDecisionReason } from '../../utils/permissions/PermissionResult.js';
@@ -33,7 +34,7 @@ function decisionReasonDisplayString(
     case 'mode':
       return `${permissionModeTitle(decisionReason.mode)} mode`;
     case 'sandboxOverride':
-      return 'Requires permission to bypass sandbox';
+      return t('permissionDebug.requiresSandbox');
     case 'workingDir':
       return decisionReason.reason;
     case 'safetyCheck':

@@ -1,5 +1,6 @@
 import { Box, Text } from '@anthropic/ink';
 import type { Workflow } from './types.js';
+import { t } from '../../utils/i18n/index.js'
 
 interface CreatingStepProps {
   currentWorkflowInstallStep: number;
@@ -35,7 +36,7 @@ export function CreatingStep({
     <>
       <Box flexDirection="column" borderStyle="round" paddingX={1}>
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>Install GitHub App</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
           <Text dimColor>Create GitHub Actions workflow</Text>
         </Box>
         {progressSteps.map((stepText, index) => {

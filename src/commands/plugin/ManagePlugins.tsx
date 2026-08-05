@@ -4,6 +4,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { t } from '../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../components/ConfigurableShortcutHint.js';
 import { Byline } from '@anthropic/ink';
 import { MCPRemoteServerMenu } from '../../components/mcp/MCPRemoteServerMenu.js';
@@ -384,10 +385,9 @@ function PluginComponentsDisplay({
 
   return (
     <Box flexDirection="column" marginBottom={1}>
-      <Text bold>Installed components:</Text>
+      <Text bold>{t('pluginUI.installedComponents')}</Text>
       {components.commands ? (
-        <Text dimColor>
-          • Commands:{' '}
+        <Text dimColor>{t('pluginUI.commands')}
           {typeof components.commands === 'string'
             ? components.commands
             : Array.isArray(components.commands)
@@ -396,8 +396,7 @@ function PluginComponentsDisplay({
         </Text>
       ) : null}
       {components.agents ? (
-        <Text dimColor>
-          • Agents:{' '}
+        <Text dimColor>{t('pluginUI.agents')}
           {typeof components.agents === 'string'
             ? components.agents
             : Array.isArray(components.agents)
@@ -406,8 +405,7 @@ function PluginComponentsDisplay({
         </Text>
       ) : null}
       {components.skills ? (
-        <Text dimColor>
-          • Skills:{' '}
+        <Text dimColor>{t('pluginUI.skills')}
           {typeof components.skills === 'string'
             ? components.skills
             : Array.isArray(components.skills)
@@ -416,8 +414,7 @@ function PluginComponentsDisplay({
         </Text>
       ) : null}
       {components.hooks ? (
-        <Text dimColor>
-          • Hooks:{' '}
+        <Text dimColor>{t('pluginUI.hooks')}
           {typeof components.hooks === 'string'
             ? components.hooks
             : Array.isArray(components.hooks)
@@ -428,8 +425,7 @@ function PluginComponentsDisplay({
         </Text>
       ) : null}
       {components.mcpServers ? (
-        <Text dimColor>
-          • MCP Servers:{' '}
+        <Text dimColor>{t('pluginUI.mcpServers')}
           {typeof components.mcpServers === 'string'
             ? components.mcpServers
             : Array.isArray(components.mcpServers)
@@ -550,7 +546,7 @@ export function ManagePlugins({
       // User can configure later via the Configure options menu if they want.
       setViewState('plugin-list');
       setSelectedPlugin(null);
-      setResult('Plugin enabled. Configuration skipped — run /reload-plugins to apply.');
+      setResult(t('pluginUI.reloadToApply'));
       if (onManageComplete) {
         void onManageComplete();
       }
@@ -566,7 +562,7 @@ export function ManagePlugins({
       setViewState({ type: 'mcp-tools', client: viewState.client });
     } else {
       if (pendingToggles.size > 0) {
-        setResult('Run /reload-plugins to apply plugin changes.');
+        setResult(t('pluginUI.reloadToApply'));
         return;
       }
       setParentViewState({ type: 'menu' });
@@ -1396,7 +1392,7 @@ export function ManagePlugins({
     const menuItems: Array<{ label: string; action: () => void }> = [];
 
     menuItems.push({
-      label: isEnabled ? 'Disable plugin' : 'Enable plugin',
+      label: isEnabled ? t('pluginUI.disablePlugin') : t('pluginUI.enablePlugin'),
       action: () => void handleSingleOperation(isEnabled ? 'disable' : 'enable'),
     });
 
@@ -1433,7 +1429,7 @@ export function ManagePlugins({
 
       if (selectedPluginHasMcpb) {
         menuItems.push({
-          label: 'Configure',
+          label: 'Configure', // Not translated (MCPB action)
           action: async () => {
             setIsLoadingConfig(true);
             try {
@@ -1488,7 +1484,7 @@ export function ManagePlugins({
         Object.keys(selectedPlugin.plugin.manifest.userConfig).length > 0
       ) {
         menuItems.push({
-          label: 'Configure options',
+          label: t('pluginUI.pluginOptions'),
           action: () => {
             setViewState({
               type: 'configuring-options',
@@ -1499,19 +1495,19 @@ export function ManagePlugins({
       }
 
       menuItems.push({
-        label: 'Update now',
+        label: 'Update now', // Not translated (command)
         action: () => void handleSingleOperation('update'),
       });
 
       menuItems.push({
-        label: 'Uninstall',
+        label: t('pluginUI.uninstall'),
         action: () => void handleSingleOperation('uninstall'),
       });
     }
 
     if (selectedPlugin.plugin.manifest.homepage) {
       menuItems.push({
-        label: 'Open homepage',
+        label: 'Open homepage', // Not translated (URL action)
         action: () => void openBrowser(selectedPlugin.plugin.manifest.homepage!),
       });
     }
@@ -1521,13 +1517,13 @@ export function ManagePlugins({
         // Generic label — manifest.repository can be GitLab, Bitbucket,
         // Azure DevOps, etc. (gh-31598). pluginDetailsHelpers.tsx:74 keeps
         // 'View on GitHub' because that path has an explicit isGitHub check.
-        label: 'View repository',
+        label: 'View repository', // Not translated (URL action)
         action: () => void openBrowser(selectedPlugin.plugin.manifest.repository!),
       });
     }
 
     menuItems.push({
-      label: 'Back to plugin list',
+      label: 'Back to plugin list', // Not translated (navigation)
       action: () => {
         setViewState('plugin-list');
         setSelectedPlugin(null);
@@ -1752,7 +1748,7 @@ export function ManagePlugins({
 
   // Loading state
   if (loading) {
-    return <Text>Loading installed plugins…</Text>;
+    return <Text>{t('pluginUI.installed')}…</Text>;
   }
 
   // No plugins or MCPs installed
@@ -1760,11 +1756,11 @@ export function ManagePlugins({
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Manage plugins</Text>
+          <Text bold>{t('pluginUI.managePlugins')}</Text>
         </Box>
-        <Text>No plugins or MCP servers installed.</Text>
+        <Text>{t('pluginUI.noPluginsInstalled')}</Text>
         <Box marginTop={1}>
-          <Text dimColor>Esc to go back</Text>
+          <Text dimColor>{t('pluginUI.escBack')}</Text>
         </Box>
       </Box>
     );
@@ -1808,8 +1804,8 @@ export function ManagePlugins({
     const pluginId = `${selectedPlugin.plugin.name}@${selectedPlugin.marketplace}`;
     return (
       <PluginOptionsDialog
-        title={`Configure ${selectedPlugin.plugin.name}`}
-        subtitle="Plugin options"
+        title={t('pluginUI.configure', selectedPlugin.plugin.name)}
+        subtitle={t('pluginUI.pluginOptions')}
         configSchema={viewState.schema}
         initialValues={loadPluginOptions(pluginId)}
         onSave={values => {
@@ -1878,8 +1874,8 @@ export function ManagePlugins({
 
     return (
       <PluginOptionsDialog
-        title={`Configure ${configNeeded.manifest.name}`}
-        subtitle={`Plugin: ${selectedPlugin.plugin.name}`}
+        title={t('pluginUI.configure', configNeeded.manifest.name)}
+        subtitle={t('pluginUI.plugin', selectedPlugin.plugin.name)}
         configSchema={configNeeded.configSchema}
         initialValues={configNeeded.existingConfig}
         onSave={handleSave}
@@ -1900,26 +1896,26 @@ export function ManagePlugins({
         </Box>
 
         <Box marginBottom={1}>
-          <Text dimColor>Status: </Text>
-          <Text color="error">Removed</Text>
+          <Text dimColor>{t('pluginUI.status')}</Text>
+          <Text color="error">{t('pluginUI.flagged')}</Text>
         </Box>
 
         <Box marginBottom={1} flexDirection="column">
-          <Text color="error">Removed from marketplace · reason: {fp.reason}</Text>
+          <Text color="error">{t('pluginUI.flagged')} · reason: {fp.reason}</Text>
           <Text>{fp.text}</Text>
-          <Text dimColor>Flagged on {new Date(fp.flaggedAt).toLocaleDateString()}</Text>
+          <Text dimColor>{t('pluginUI.flagged')} on {new Date(fp.flaggedAt).toLocaleDateString()}</Text>
         </Box>
 
         <Box marginTop={1} flexDirection="column">
           <Box>
             <Text>{figures.pointer} </Text>
-            <Text color="suggestion">Dismiss</Text>
+            <Text color="suggestion">{t('pluginUI.flagged')}</Text>
           </Box>
         </Box>
 
         <Byline>
-          <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description="dismiss" />
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+          <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description={t('pluginUI.details')} />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('pluginUI.back')} />
         </Byline>
       </Box>
     );
@@ -2040,14 +2036,14 @@ export function ManagePlugins({
 
         {/* Scope */}
         <Box>
-          <Text dimColor>Scope: </Text>
+          <Text dimColor>{t('pluginUI.scope')}</Text>
           <Text>{selectedPlugin.scope || 'user'}</Text>
         </Box>
 
         {/* Plugin details */}
         {selectedPlugin.plugin.manifest.version && (
           <Box>
-            <Text dimColor>Version: </Text>
+            <Text dimColor>{t('pluginUI.version')}</Text>
             <Text>{selectedPlugin.plugin.manifest.version}</Text>
           </Box>
         )}
@@ -2060,15 +2056,15 @@ export function ManagePlugins({
 
         {selectedPlugin.plugin.manifest.author && (
           <Box>
-            <Text dimColor>Author: </Text>
+            <Text dimColor>{t('pluginUI.author')}</Text>
             <Text>{selectedPlugin.plugin.manifest.author.name}</Text>
           </Box>
         )}
 
         {/* Current status */}
         <Box marginBottom={1}>
-          <Text dimColor>Status: </Text>
-          <Text color={isEnabled ? 'success' : 'warning'}>{isEnabled ? 'Enabled' : 'Disabled'}</Text>
+          <Text dimColor>{t('pluginUI.status')}</Text>
+          <Text color={isEnabled ? 'success' : 'warning'}>{isEnabled ? t('pluginUI.enabled') : t('pluginUI.disabled')}</Text>
           {selectedPlugin.pendingUpdate && <Text color="suggestion"> · Marked for update</Text>}
         </Box>
 
@@ -2123,7 +2119,7 @@ export function ManagePlugins({
             <Byline>
               <ConfigurableShortcutHint action="select:previous" context="Select" fallback="↑" description="navigate" />
               <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description="select" />
-              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('pluginUI.back')} />
             </Byline>
           </Text>
         </Box>
@@ -2172,7 +2168,7 @@ export function ManagePlugins({
                   description="remove"
                 />
               )}
-              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('pluginUI.back')} />
             </Byline>
           </Text>
         </Box>
@@ -2486,7 +2482,7 @@ export function ManagePlugins({
             <Text>type to search</Text>
             <ConfigurableShortcutHint action="plugin:toggle" context="Plugin" fallback="Space" description="toggle" />
             <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description="details" />
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('pluginUI.back')} />
           </Byline>
         </Text>
       </Box>

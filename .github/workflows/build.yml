@@ -1,0 +1,140 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      build-type:
+        description: 构建类型
+        type: choice
+        options:
+          - bundle (单文件 JS，中等内存 ~370MB)
+          - code-split (代码分割，最低内存 ~35-500MB)
+          - binary (独立二进制，最高内存)
+        default: bundle (单文件 JS，中等内存 ~370MB)
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.getver.outputs.version }}
+      build-type: ${{ steps.build-type.outputs.type }}
+
+    steps:
+      - uses: actions/checkout@v4
+        env:
+          GIT_CONFIG_COUNT: 2
+          GIT_CONFIG_KEY_0: init.defaultBranch
+          GIT_CONFIG_KEY_1: advice.defaultBranchName
+          GIT_CONFIG_VALUE_0: main
+          GIT_CONFIG_VALUE_1: "false"
+
+      - id: getver
+        run: |
+          VERSION=$(cat package.json | grep '"version"' | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - id: build-type
+        run: |
+          TYPE="${{ inputs.build-type }}"
+          if echo "$TYPE" | grep -q "bundle"; then
+            echo "type=bundle" >> $GITHUB_OUTPUT
+          elif echo "$TYPE" | grep -q "code-split"; then
+            echo "type=code-split" >> $GITHUB_OUTPUT
+          elif echo "$TYPE" | grep -q "binary"; then
+            echo "type=binary" >> $GITHUB_OUTPUT
+          else
+            echo "type=bundle" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        env:
+          CLAUDE_CODE_SKIP_CHROME_MCP_SETUP: "1"
+        run: bun install --frozen-lockfile
+
+      # === bundle (单文件 JS，中等内存) ===
+      - name: Build bundle (单文件 JS)
+        if: steps.build-type.outputs.type == 'bundle'
+        run: bun run scripts/build-bundle.ts
+
+      - name: Package bundle
+        if: steps.build-type.outputs.type == 'bundle'
+        run: |
+          VERSION="${{ steps.getver.outputs.version }}"
+          mkdir -p "claude-code-v$VERSION"
+          cp dist/claude-bundle.js "claude-code-v$VERSION/"
+          tar czf "claude-code-v$VERSION.tar.gz" "claude-code-v$VERSION"
+          echo "artifact=claude-code-v$VERSION.tar.gz" >> $GITHUB_OUTPUT
+        id: package-bundle
+
+      # === code-split (代码分割，最低内存) ===
+      - name: Build code-split (最低内存)
+        if: steps.build-type.outputs.type == 'code-split'
+        run: bun run build.ts
+
+      - name: Package code-split
+        if: steps.build-type.outputs.type == 'code-split'
+        run: |
+          VERSION="${{ steps.getver.outputs.version }}"
+          tar czf "claude-code-v$VERSION-code-split.tar.gz" dist/
+          echo "artifact=claude-code-v$VERSION-code-split.tar.gz" >> $GITHUB_OUTPUT
+        id: package-split
+
+      # === binary (独立二进制，最高内存) ===
+      - name: Compile binary (最高内存)
+        if: steps.build-type.outputs.type == 'binary'
+        run: |
+          bun build --compile \
+            --target=bun-linux-x64 \
+            --define.process.env.NODE_ENV="production" \
+            --sourcemap \
+            ./src/entrypoints/cli.tsx \
+            --outfile claude-code-linux-x64
+
+      - name: Package binary
+        if: steps.build-type.outputs.type == 'binary'
+        run: |
+          VERSION="${{ steps.getver.outputs.version }}"
+          chmod +x claude-code-linux-x64
+          tar czf "claude-code-v$VERSION-linux-x64.tar.gz" claude-code-linux-x64
+          echo "artifact=claude-code-v$VERSION-linux-x64.tar.gz" >> $GITHUB_OUTPUT
+        id: package-binary
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-code-build
+          path: ${{ steps.package-bundle.outputs.artifact || steps.package-split.outputs.artifact || steps.package-binary.outputs.artifact }}
+          compression-level: 0
+
+  release:
+    needs: [build]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: claude-code-build
+          path: artifacts
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+          TYPE="${{ needs.build.outputs.build-type }}"
+          TAG="v$VERSION-${TYPE}"
+          gh release create "$TAG" --repo ${{ github.repository }} \
+            --title "claude-code v$VERSION ($TYPE)" \
+            --notes "构建类型: $TYPE" || true
+          for f in artifacts/*; do
+            echo "Uploading: $f"
+            gh release upload "$TAG" --repo ${{ github.repository }} "$f" --clobber || true
+          done

@@ -15,6 +15,7 @@ import TextInput from '../../components/TextInput.js';
 import { LocalMemoryView } from './LocalMemoryView.js';
 import { parseLocalMemoryArgs } from './parseArgs.js';
 import { launchCommand } from '../_shared/launchCommand.js';
+import { t } from '../../utils/i18n/index.js'
 
 const USAGE =
   'Usage: /local-memory list | create STORE | store STORE KEY VALUE | fetch STORE KEY | entries STORE | archive STORE';
@@ -79,7 +80,7 @@ const MENU: Array<{
   { kind: 'list', label: 'List', description: 'Show all stores' },
   {
     kind: 'create',
-    label: 'Create',
+    label: t('localMemory.create'),
     description: 'Create a new memory store',
   },
   {
@@ -94,12 +95,12 @@ const MENU: Array<{
   },
   {
     kind: 'entries',
-    label: 'Entries',
+    label: t('localMemory.entries'),
     description: 'List entry keys in a store',
   },
   {
     kind: 'archive',
-    label: 'Archive',
+    label: t('localMemory.archive'),
     description: 'Archive a store (rename to *.archived)',
   },
   {
@@ -295,9 +296,9 @@ function LocalMemoryPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
   if (step.kind === 'menu') {
     return (
       <Dialog
-        title="Local Memory"
+        title={t("cmdSystemUI.localMemoryTitle")}
         subtitle={`${MENU.length} actions`}
-        onCancel={() => closeWith('Local memory panel dismissed')}
+        onCancel={() => closeWith(t('cmdSystemUI.localMemoryTitle') + ' panel dismissed')}
         color="background"
         hideInputGuide
       >
@@ -319,7 +320,7 @@ function LocalMemoryPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
   // Confirmation prompts
   if (step.kind === 'confirm-archive') {
     return (
-      <Dialog title="Confirm Archive" onCancel={() => transition({ kind: 'menu' })} color="warning" hideInputGuide>
+      <Dialog title={t("cmdSystemUI.confirmArchive")} onCancel={() => transition({ kind: 'menu' })} color="warning" hideInputGuide>
         <Box flexDirection="column">
           <Text>Archive store "{step.store}"? This renames it to *.archived.</Text>
           <Box marginTop={1}>
@@ -331,7 +332,7 @@ function LocalMemoryPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
   }
   if (step.kind === 'confirm-overwrite') {
     return (
-      <Dialog title="Confirm Overwrite" onCancel={() => transition({ kind: 'menu' })} color="warning" hideInputGuide>
+      <Dialog title={t("cmdSystemUI.confirmOverwrite")} onCancel={() => transition({ kind: 'menu' })} color="warning" hideInputGuide>
         <Box flexDirection="column">
           <Text>
             Entry "{step.store}/{step.key}" already exists. Overwrite with new value ({step.value.length} chars)?

@@ -1,3 +1,4 @@
+import { t } from '../../../utils/i18n/index.js';
 import chalk from 'chalk';
 import figures from 'figures';
 import * as React from 'react';
@@ -50,12 +51,9 @@ function RuleSourceText({ rule }: RuleSourceTextProps): React.ReactNode {
 // Helper function to get the appropriate label for rule behavior
 function getRuleBehaviorLabel(ruleBehavior: PermissionBehavior): string {
   switch (ruleBehavior) {
-    case 'allow':
-      return 'allowed';
-    case 'deny':
-      return 'denied';
-    case 'ask':
-      return 'ask';
+    case 'allow': return t('permRuleList.ruleAllowed');
+    case 'deny': return t('permRuleList.ruleDenied');
+    case 'ask': return t('permRuleList.ruleAsk');
   }
 }
 
@@ -84,9 +82,9 @@ function RuleDetails({
   const footer = (
     <Box marginLeft={3}>
       {exitState.pending ? (
-        <Text dimColor>Press {exitState.keyName} again to exit</Text>
+        <Text dimColor>{t('permRuleList.pressAgain', exitState.keyName)}</Text>
       ) : (
-        <Text dimColor>Esc to cancel</Text>
+        <Text dimColor>{t('permRuleList.escCancel')}</Text>
       )}
     </Box>
   );
@@ -104,13 +102,13 @@ function RuleDetails({
           borderColor="permission"
         >
           <Text bold color="permission">
-            Rule details
+            {t('permRuleList.ruleDetails')}
           </Text>
           {ruleDescription}
           <Text italic>
-            This rule is configured by managed settings and cannot be modified.
+            {t('permRuleList.managedSettings')}
             {'\n'}
-            Contact your system administrator for more information.
+            {t('permRuleList.contactAdmin')}
           </Text>
         </Box>
         {footer}
@@ -122,16 +120,16 @@ function RuleDetails({
     <>
       <Box flexDirection="column" gap={1} borderStyle="round" paddingLeft={1} paddingRight={1} borderColor="error">
         <Text bold color="error">
-          Delete {getRuleBehaviorLabel(rule.ruleBehavior)} tool?
+          {t('permRuleList.deleteTool', getRuleBehaviorLabel(rule.ruleBehavior))}
         </Text>
         {ruleDescription}
-        <Text>Are you sure you want to delete this permission rule?</Text>
+        <Text>{t('permission.confirmDelete')}</Text>
         <Select
           onChange={_ => (_ === 'yes' ? onDelete() : onCancel())}
           onCancel={onCancel}
           options={[
-            { label: 'Yes', value: 'yes' },
-            { label: 'No', value: 'no' },
+            { label: t('permRuleList.yes'), value: 'yes' },
+            { label: t('permRuleList.no'), value: 'no' },
           ]}
         />
       </Box>
@@ -213,9 +211,9 @@ function PermissionRulesTab({
       <Text>
         {
           {
-            allow: "Claude Code won't ask before using allowed tools.",
-            ask: 'Claude Code will always ask for confirmation before using these tools.',
-            deny: 'Claude Code will always reject requests to use denied tools.',
+            allow: t('permRuleList.allowDesc'),
+            ask: t('permRuleList.askDesc'),
+            deny: t('permRuleList.denyDesc'),
           }[tab]
         }
       </Text>
@@ -322,7 +320,7 @@ export function PermissionRuleList({ onExit, initialTab, onRetryDenials }: Props
       // Only show "Add a new rule" for allow and deny tabs (and not when searching)
       if (tab !== 'workspace' && tab !== 'recent' && !query) {
         options.push({
-          label: `Add a new rule${figures.ellipsis}`,
+          label: t('permRuleList.addNewRule'),
           value: 'add-new-rule',
         });
       }
@@ -438,7 +436,7 @@ export function PermissionRuleList({ onExit, initialTab, onRetryDenials }: Props
     for (const rule of rules) {
       setChanges(prev => [
         ...prev,
-        `Added ${rule.ruleBehavior} rule ${chalk.bold(permissionRuleValueToString(rule.ruleValue))}`,
+        `${t('permRuleList.addedRule', rule.ruleBehavior, chalk.bold(permissionRuleValueToString(rule.ruleValue)))}`,
       ]);
     }
 
@@ -448,9 +446,9 @@ export function PermissionRuleList({ onExit, initialTab, onRetryDenials }: Props
         const severity = u.shadowType === 'deny' ? 'blocked' : 'shadowed';
         setChanges(prev => [
           ...prev,
-          chalk.yellow(`${figures.warning} Warning: ${permissionRuleValueToString(u.rule.ruleValue)} is ${severity}`),
-          chalk.dim(`  ${u.reason}`),
-          chalk.dim(`  Fix: ${u.fix}`),
+          chalk.yellow(`${figures.warning} ${t('permRuleList.warning', permissionRuleValueToString(u.rule.ruleValue), severity)}`),
+          chalk.dim(t('permRuleList.warningReason', u.reason)),
+          chalk.dim(t('permRuleList.warningFix', u.fix)),
         ]);
       }
     }
@@ -476,7 +474,7 @@ export function PermissionRuleList({ onExit, initialTab, onRetryDenials }: Props
       onExit(undefined, {
         shouldQuery: true,
         metaMessages: [
-          `Permission granted for: ${commands.join(', ')}. You may now retry ${commands.length === 1 ? 'this command' : 'these commands'} if you would like.`,
+          t('permRuleList.permissionGrantedPlural', commands.join(', ')),
         ],
       });
       return;
@@ -485,10 +483,10 @@ export function PermissionRuleList({ onExit, initialTab, onRetryDenials }: Props
     const approvedDenials = denialsFor(s.approved);
     if (approvedDenials.length > 0 || changes.length > 0) {
       const approvedMsg =
-        approvedDenials.length > 0 ? [`Approved ${approvedDenials.map(d => chalk.bold(d.display)).join(', ')}`] : [];
+        approvedDenials.length > 0 ? [`${t('permRuleList.permissionGranted', approvedDenials.map(d => chalk.bold(d.display)).join(', '))}`] : [];
       onExit([...approvedMsg, ...changes].join('\n'));
     } else {
-      onExit('Permissions dialog dismissed', {
+      onExit(t('permRuleList.permissionDismissed'), {
         display: 'system',
       });
     }
@@ -537,7 +535,7 @@ export function PermissionRuleList({ onExit, initialTab, onRetryDenials }: Props
 
     setChanges(prev => [
       ...prev,
-      `Deleted ${selectedRule.ruleBehavior} rule ${chalk.bold(permissionRuleValueToString(selectedRule.ruleValue))}`,
+      t('permRuleList.deletedRule', selectedRule.ruleBehavior, chalk.bold(permissionRuleValueToString(selectedRule.ruleValue))),
     ]);
     setSelectedRule(undefined);
   };
@@ -600,7 +598,7 @@ export function PermissionRuleList({ onExit, initialTab, onRetryDenials }: Props
 
           setChanges(prev => [
             ...prev,
-            `Added directory ${chalk.bold(path)} to workspace${remember ? ' and saved to local settings' : ' for this session'}`,
+            remember ? t('permRuleList.addedDirSaved', chalk.bold(path)) : t('permRuleList.addedDir', chalk.bold(path)),
           ]);
           setIsAddingWorkspaceDirectory(false);
         }}
@@ -615,7 +613,7 @@ export function PermissionRuleList({ onExit, initialTab, onRetryDenials }: Props
       <RemoveWorkspaceDirectory
         directoryPath={removingDirectory}
         onRemove={() => {
-          setChanges(prev => [...prev, `Removed directory ${chalk.bold(removingDirectory)} from workspace`]);
+          setChanges(prev => [...prev, t('permRuleList.removedDir', chalk.bold(removingDirectory))]);
           setRemovingDirectory(null);
         }}
         onCancel={() => setRemovingDirectory(null)}
@@ -670,7 +668,7 @@ export function PermissionRuleList({ onExit, initialTab, onRetryDenials }: Props
           </Tab>
           <Tab id="workspace" title="Workspace">
             <Box flexDirection="column">
-              <Text>Claude Code can read files in the workspace, and make edits when auto-accept edits is on.</Text>
+              <Text>{t('permission.autoReadInfo')}</Text>
               <WorkspaceTab
                 onExit={onExit}
                 toolPermissionContext={toolPermissionContext}
@@ -684,15 +682,15 @@ export function PermissionRuleList({ onExit, initialTab, onRetryDenials }: Props
         <Box marginTop={1} paddingLeft={1}>
           <Text dimColor>
             {exitState.pending ? (
-              <>Press {exitState.keyName} again to exit</>
+              <>{t('permRuleList.footerPending', exitState.keyName)}</>
             ) : headerFocused ? (
-              <>←/→ tab switch · ↓ return · Esc cancel</>
+              <>{t('permRuleList.footerHeader')}</>
             ) : isSearchMode ? (
-              <>Type to filter · Enter/↓ select · ↑ tabs · Esc clear</>
+              <>{t('permRuleList.footerSearch')}</>
             ) : hasDenials && defaultTab === 'recent' ? (
-              <>Enter approve · r retry · ↑↓ navigate · ←/→ switch · Esc cancel</>
+              <>{t('permRuleList.footerRecent')}</>
             ) : (
-              <>↑↓ navigate · Enter select · Type to search · ←/→ switch · Esc cancel</>
+              <>{t('permRuleList.footerDefault')}</>
             )}
           </Text>
         </Box>

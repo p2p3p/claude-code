@@ -72,9 +72,11 @@ import {
 import { resolveAppliedEffort } from '../../utils/effort.js'
 import { isEnvTruthy } from '../../utils/envUtils.js'
 import { errorMessage } from '../../utils/errors.js'
+import { sleep } from '../../utils/sleep.js'
 import { captureAPIRequest, logError } from '../../utils/log.js'
 import {
   createAssistantAPIErrorMessage,
+  createSystemAPIErrorMessage,
   createUserMessage,
   ensureToolResultPairing,
   normalizeContentFromAPI,
@@ -118,6 +120,7 @@ import type { ClientOptions } from '@anthropic-ai/sdk'
 import {
   APIConnectionTimeoutError,
   APIError,
+  APIConnectionError,
   APIUserAbortError,
 } from '@anthropic-ai/sdk/error'
 import {
@@ -259,6 +262,8 @@ import {
 import {
   CannotRetryError,
   FallbackTriggeredError,
+  getDefaultMaxRetries,
+  getRetryDelay,
   is529Error,
   type RetryContext,
   withRetry,
@@ -1045,6 +1050,71 @@ export function stripExcessMediaItems(
  */
 const lastAnnouncedDeferredTools = new Set<string>()
 
+/**
+ * Convert a non-Anthropic provider error to an APIError so withRetry's
+ * retry logic (429/529/5xx backoff, auth refresh, etc.) can handle it.
+ */
+function normalizeProviderError(error: unknown): APIError {
+  if (error instanceof APIError) return error
+  if (error instanceof APIUserAbortError) return error
+  if (error instanceof APIConnectionError) return error
+
+  // SDK errors with .status (OpenAI SDK, etc.)
+  if (error && typeof error === 'object' && 'status' in error) {
+    const status = (error as { status: unknown }).status
+    if (typeof status === 'number') {
+      return APIError.generate(status, undefined, String(error), undefined)
+    }
+  }
+
+  // Raw fetch errors (TypeError, ECONNRESET, etc.)
+  return new APIConnectionError({
+    cause: error instanceof Error ? error : new Error(String(error)),
+  })
+}
+
+/**
+ * Wrap an AsyncGenerator<BetaRawMessageStreamEvent> into a Stream-compatible
+ * object so the outer iteration code (which expects the SDK's Stream type)
+ * can iterate it and abort it uniformly.
+ */
+function toStreamLike(
+  gen: AsyncGenerator<BetaRawMessageStreamEvent, void, unknown>,
+): Stream<BetaRawMessageStreamEvent> {
+  const controller = new AbortController()
+  const iterator = gen[Symbol.asyncIterator]()
+  return {
+    [Symbol.asyncIterator]() {
+      return {
+        next: async (): Promise<IteratorResult<BetaRawMessageStreamEvent, BetaMessage>> => {
+          if (controller.signal.aborted) {
+            await iterator.return?.()
+            return { done: true as const, value: undefined as unknown as BetaMessage }
+          }
+          // Use a race so controller.abort() interrupts a blocked .next()
+          const result = await Promise.race([
+            iterator.next(),
+            new Promise<IteratorResult<BetaRawMessageStreamEvent, BetaMessage>>(resolve => {
+              const onAbort = () => {
+                controller.signal.removeEventListener('abort', onAbort)
+                iterator.return?.()
+                resolve({ done: true as const, value: undefined as unknown as BetaMessage })
+              }
+              if (controller.signal.aborted) {
+                onAbort()
+              } else {
+                controller.signal.addEventListener('abort', onAbort)
+              }
+            }),
+          ])
+          return result as unknown as IteratorResult<BetaRawMessageStreamEvent, BetaMessage>
+        },
+      }
+    },
+    controller,
+  } as unknown as Stream<BetaRawMessageStreamEvent>
+}
+
 async function* queryModel(
   messages: Message[],
   systemPrompt: SystemPrompt,
@@ -1336,49 +1406,6 @@ async function* queryModel(
     messagesForAPI,
     API_MAX_MEDIA_PER_REQUEST,
   )
-
-  // OpenAI-compatible provider: delegate to the OpenAI adapter layer
-  // after shared preprocessing (message normalization, tool filtering,
-  // media stripping) but before Anthropic-specific logic (betas, thinking, caching).
-  if (getAPIProvider() === 'openai') {
-    const { queryModelOpenAI } = await import('./openai/index.js')
-    // OpenAI emulates Anthropic's dynamic tool loading client-side. It needs
-    // the full tool pool so SearchExtraToolsTool can search deferred MCP tools that
-    // were intentionally filtered out of the initial API tool list above.
-    yield* queryModelOpenAI(
-      messagesForAPI,
-      systemPrompt,
-      tools,
-      signal,
-      options,
-    )
-    return
-  }
-
-  if (getAPIProvider() === 'gemini') {
-    const { queryModelGemini } = await import('./gemini/index.js')
-    yield* queryModelGemini(
-      messagesForAPI,
-      systemPrompt,
-      filteredTools,
-      signal,
-      options,
-      thinkingConfig,
-    )
-    return
-  }
-
-  if (getAPIProvider() === 'grok') {
-    const { queryModelGrok } = await import('./grok/index.js')
-    yield* queryModelGrok(
-      messagesForAPI,
-      systemPrompt,
-      filteredTools,
-      signal,
-      options,
-    )
-    return
-  }
 
   // Instrumentation: Track message count after normalization
   logEvent('tengu_api_after_normalize', {
@@ -1884,36 +1911,75 @@ async function* queryModel(
         isFastModeRequest = context.fastMode ?? false
         start = Date.now()
         attemptStartTimes.push(start)
-        // Client has been created by withRetry's getClient() call. This fires
-        // once per attempt; on retries the client is usually cached (withRetry
-        // only calls getClient() again after auth errors), so the delta from
-        // client_creation_start is meaningful on attempt 1.
         queryCheckpoint('query_client_creation_end')
 
         const params = paramsFromContext(context)
-        captureAPIRequest(params, options.querySource) // Capture for bug reports
+        captureAPIRequest(params, options.querySource)
 
         maxOutputTokens = params.max_tokens
 
-        // Fire immediately before the fetch is dispatched. .withResponse() below
-        // awaits until response headers arrive, so this MUST be before the await
-        // or the "Network TTFB" phase measurement is wrong.
         queryCheckpoint('query_api_request_sent')
         if (!options.agentId) {
           headlessProfilerCheckpoint('api_request_sent')
         }
 
-        // Generate and track client request ID so timeouts (which return no
-        // server request ID) can still be correlated with server logs.
-        // First-party only — 3P providers don't log it (inc-4029 class).
         clientRequestId =
           getAPIProvider() === 'firstParty' && isFirstPartyAnthropicBaseUrl()
             ? randomUUID()
             : undefined
 
-        // Use raw stream instead of BetaMessageStream to avoid O(n²) partial JSON parsing
-        // BetaMessageStream calls partialParse() on every input_json_delta, which we don't need
-        // since we handle tool input accumulation ourselves
+        // Branch by provider: external providers (openai/gemini/grok) create
+        // their own streams; Anthropic SDK path uses the client from getClient().
+        if (getAPIProvider() === 'openai') {
+          try {
+            const { createOpenAIStream } = await import('./openai/index.js')
+            const adaptedStream = await createOpenAIStream(
+              messagesForAPI,
+              systemPrompt,
+              tools,
+              signal,
+              options,
+            )
+            return toStreamLike(adaptedStream)
+          } catch (error) {
+            throw normalizeProviderError(error)
+          }
+        }
+
+        if (getAPIProvider() === 'gemini') {
+          try {
+            const { createGeminiStream } = await import('./gemini/index.js')
+            const adaptedStream = await createGeminiStream(
+              messagesForAPI,
+              systemPrompt,
+              filteredTools,
+              signal,
+              options,
+              thinkingConfig,
+            )
+            return toStreamLike(adaptedStream)
+          } catch (error) {
+            throw normalizeProviderError(error)
+          }
+        }
+
+        if (getAPIProvider() === 'grok') {
+          try {
+            const { createGrokStream } = await import('./grok/index.js')
+            const adaptedStream = await createGrokStream(
+              messagesForAPI,
+              systemPrompt,
+              filteredTools,
+              signal,
+              options,
+            )
+            return toStreamLike(adaptedStream)
+          } catch (error) {
+            throw normalizeProviderError(error)
+          }
+        }
+
+        // Anthropic SDK path (firstParty, bedrock, vertex, foundry)
         const result = await anthropic.beta.messages
           .create(
             { ...params, stream: true },

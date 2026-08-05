@@ -3,6 +3,7 @@ import TextInput from '../../components/TextInput.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { Box, Text } from '@anthropic/ink';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
+import { t } from '../../utils/i18n/index.js'
 
 interface ChooseRepoStepProps {
   currentRepo: string | null;
@@ -68,7 +69,7 @@ export function ChooseRepoStep({
     <>
       <Box flexDirection="column" borderStyle="round" paddingX={1}>
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>Install GitHub App</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
           <Text dimColor>Select GitHub repository</Text>
         </Box>
         {currentRepo && (

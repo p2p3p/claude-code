@@ -11,6 +11,7 @@ import { type KeyboardEvent, setClipboard, Box, Link, Text } from '@anthropic/in
 import { OAuthService } from '../../services/oauth/index.js';
 import { saveOAuthTokensIfNeeded } from '../../utils/auth.js';
 import { logError } from '../../utils/log.js';
+import { t } from '../../utils/i18n/index.js'
 
 interface OAuthFlowStepProps {
   onSuccess: (token: string) => void;
@@ -274,14 +275,14 @@ export function OAuthFlowStep({ onSuccess, onCancel }: OAuthFlowStepProps): Reac
       {/* Show header inline only for initial starting state */}
       {oauthStatus.state === 'starting' && (
         <Box flexDirection="column" gap={1} paddingBottom={1}>
-          <Text bold>Create Authentication Token</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
           <Text dimColor>Creating a long-lived token for GitHub Actions</Text>
         </Box>
       )}
       {/* Show header for non-starting states (to avoid duplicate with inline header)*/}
       {oauthStatus.state !== 'success' && oauthStatus.state !== 'starting' && oauthStatus.state !== 'processing' && (
         <Box key="header" flexDirection="column" gap={1} paddingBottom={1}>
-          <Text bold>Create Authentication Token</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
           <Text dimColor>Creating a long-lived token for GitHub Actions</Text>
         </Box>
       )}

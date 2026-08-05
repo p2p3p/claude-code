@@ -5,6 +5,7 @@ import { useTerminalSize } from '../hooks/useTerminalSize.js';
 import { setClipboard, Box, Text, Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
 import { useKeybinding } from '../keybindings/useKeybinding.js';
 import { getCwd } from '../utils/cwd.js';
+import { t } from '../utils/i18n/index.js';
 import { writeFileSync_DEPRECATED } from '../utils/slowOperations.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { Select } from './CustomSelect/select.js';
@@ -36,7 +37,7 @@ export function ExportDialog({ content, defaultFilename, onDone }: ExportDialogP
       // Copy to clipboard immediately
       const raw = await setClipboard(content);
       if (raw) process.stdout.write(raw);
-      onDone({ success: true, message: 'Conversation copied to clipboard' });
+      onDone({ success: true, message: t('exportDialog.copiedToClipboard') });
     } else if (value === 'file') {
       setSelectedOption('file');
       setShowFilenameInput(true);
@@ -54,12 +55,12 @@ export function ExportDialog({ content, defaultFilename, onDone }: ExportDialogP
       });
       onDone({
         success: true,
-        message: `Conversation exported to: ${filepath}`,
+        message: t('exportDialog.exportedTo', filepath),
       });
     } catch (error) {
       onDone({
         success: false,
-        message: `Failed to export conversation: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message: t('exportDialog.failedExport', error instanceof Error ? error.message : 'Unknown error'),
       });
     }
   };
@@ -70,20 +71,20 @@ export function ExportDialog({ content, defaultFilename, onDone }: ExportDialogP
     if (showFilenameInput) {
       handleGoBack();
     } else {
-      onDone({ success: false, message: 'Export cancelled' });
+      onDone({ success: false, message: t('exportDialog.cancelled') });
     }
   }, [showFilenameInput, handleGoBack, onDone]);
 
   const options = [
     {
-      label: 'Copy to clipboard',
+      label: t('exportDialog.copyToClipboard'),
       value: 'clipboard',
-      description: 'Copy the conversation to your system clipboard',
+      description: t('exportDialog.copyDescription'),
     },
     {
-      label: 'Save to file',
+      label: t('exportDialog.saveToFile'),
       value: 'file',
-      description: 'Save the conversation to a file in the current directory',
+      description: t('exportDialog.fileDescription'),
     },
   ];
 
@@ -93,7 +94,7 @@ export function ExportDialog({ content, defaultFilename, onDone }: ExportDialogP
       return (
         <Byline>
           <KeyboardShortcutHint shortcut="Enter" action="save" />
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="go back" />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('exportDialog.goBack')} />
         </Byline>
       );
     }
@@ -102,7 +103,7 @@ export function ExportDialog({ content, defaultFilename, onDone }: ExportDialogP
       return <Text>Press {exitState.keyName} again to exit</Text>;
     }
 
-    return <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />;
+    return <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('exportDialog.cancel')} />;
   }
 
   // Use Settings context so 'n' key doesn't cancel (allows typing 'n' in filename input)
@@ -113,8 +114,8 @@ export function ExportDialog({ content, defaultFilename, onDone }: ExportDialogP
 
   return (
     <Dialog
-      title="Export Conversation"
-      subtitle="Select export method:"
+      title={t('exportDialog.title')}
+      subtitle={t('exportDialog.subtitle')}
       color="permission"
       onCancel={handleCancel}
       inputGuide={renderInputGuide}
@@ -124,7 +125,7 @@ export function ExportDialog({ content, defaultFilename, onDone }: ExportDialogP
         <Select options={options} onChange={handleSelectOption} onCancel={handleCancel} />
       ) : (
         <Box flexDirection="column">
-          <Text>Enter filename:</Text>
+          <Text>{t('exportDialog.enterFilename')}</Text>
           <Box flexDirection="row" gap={1} marginTop={1}>
             <Text>&gt;</Text>
             <TextInput

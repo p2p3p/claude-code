@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Select } from '../../components/CustomSelect/select.js';
 import { Box, Dialog, Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js'
 
 type Props = {
   onProceed: (signal: AbortSignal) => Promise<void>;
@@ -17,7 +18,7 @@ export function UltrareviewOverageDialog({ onProceed, onCancel }: Props): React.
         setIsLaunching(true);
         // If onProceed rejects (e.g. launchRemoteReview throws), onDone is
         // never called and the dialog stays mounted — restore the Select so
-        // the user can retry or cancel instead of staring at "Launching…".
+        // the user can retry or cancel instead of staring at {t('ultrareview.launching')}.
         void onProceed(abortControllerRef.current.signal).catch(() => setIsLaunching(false));
       } else {
         onCancel();
@@ -40,7 +41,7 @@ export function UltrareviewOverageDialog({ onProceed, onCancel }: Props): React.
   ];
 
   return (
-    <Dialog title="Ultrareview billing" onCancel={handleCancel} color="background">
+    <Dialog title={t("cmdSystemUI.reviewTitle")} onCancel={handleCancel} color="background">
       <Box flexDirection="column" gap={1}>
         <Text>
           Your free ultrareviews for this organization are used. Further reviews bill as Extra Usage (pay-per-use).

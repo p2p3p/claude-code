@@ -15,6 +15,7 @@ import {
   installLatest,
 } from '../utils/nativeInstaller/index.js';
 import { getInitialSettings, updateSettingsForSource } from '../utils/settings/settings.js';
+import { t } from '../utils/i18n/index.js'
 
 interface InstallProps {
   onDone: (result: string, options?: { display?: CommandResultDisplay }) => void;

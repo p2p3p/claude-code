@@ -1,5 +1,6 @@
 import React from 'react';
 import { handlePlanModeTransition } from '../../../bootstrap/state.js';
+import { t } from '../../../utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -38,7 +39,7 @@ export function EnterPlanModePermissionRequest({
   return (
     <PermissionDialog color="planMode" title="Enter plan mode?" workerBadge={workerBadge}>
       <Box flexDirection="column" marginTop={1} paddingX={1}>
-        <Text>Claude wants to enter plan mode to explore and design an implementation approach.</Text>
+        <Text>{t('permission.enterPlanMode')}</Text>
 
         <Box marginTop={1} flexDirection="column">
           <Text dimColor>In plan mode, Claude will:</Text>

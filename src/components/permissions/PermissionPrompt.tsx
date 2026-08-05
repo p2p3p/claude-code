@@ -7,6 +7,7 @@ import {
   logEvent,
 } from '../../services/analytics/index.js';
 import { useSetAppState } from '../../state/AppState.js';
+import { t } from '../../utils/i18n/index.js';
 import { type OptionWithDescription, Select } from '../CustomSelect/select.js';
 
 export type FeedbackType = 'accept' | 'reject';
@@ -53,7 +54,7 @@ export function PermissionPrompt<T extends string>({
   options,
   onSelect,
   onCancel,
-  question = 'Do you want to proceed?',
+  question = t('filePermission.proceed'),
   toolAnalyticsContext,
 }: PermissionPromptProps<T>): React.ReactNode {
   const setAppState = useSetAppState();
