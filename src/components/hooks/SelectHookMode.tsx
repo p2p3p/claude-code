@@ -6,6 +6,7 @@
  * confirmation.
  */
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import type { HookEvent } from 'src/entrypoints/agentSdkTypes.js';
 import type { HookEventMetadata } from 'src/utils/hooks/hooksConfigManager.js';
 import { Box, Text } from '@anthropic/ink';
@@ -45,11 +46,11 @@ export function SelectHookMode({
         title={title}
         subtitle={hookEventMetadata.description}
         onCancel={onCancel}
-        inputGuide={() => <Text>Esc to go back</Text>}
+        inputGuide={() => <Text>{t('selecthookmode.escToGoBack')}</Text>}
       >
         <Box flexDirection="column" gap={1}>
-          <Text dimColor>No hooks configured for this event.</Text>
-          <Text dimColor>To add hooks, edit settings.json directly or ask Claude.</Text>
+          <Text dimColor>{t('selecthookmode.noHooksConfiguredForThisEvent')}</Text>
+          <Text dimColor>{t('selecthookmode.toAddHooksEditSettingsJsonDirectlyOrAskClaude')}</Text>
         </Box>
       </Dialog>
     );

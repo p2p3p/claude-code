@@ -15,6 +15,7 @@ import {
   installLatest,
 } from '../utils/nativeInstaller/index.js';
 import { getInitialSettings, updateSettingsForSource } from '../utils/settings/settings.js';
+import { t } from '../utils/i18n/index.js'
 
 interface InstallProps {
   onDone: (result: string, options?: { display?: CommandResultDisplay }) => void;
@@ -53,7 +54,7 @@ function SetupNotes({ messages }: { messages: string[] }): React.ReactNode {
       <Box>
         <Text color="warning">
           <StatusIcon status="warning" withSpace />
-          Setup notes:
+          {t('installCmd.setupNotes')}
         </Text>
       </Box>
       {messages.map((message, index) => (
@@ -88,9 +89,7 @@ function Install({ onDone, force, target }: InstallProps): React.ReactNode {
 
         // Check specifically for lock failure
         if (result.lockFailed) {
-          throw new Error(
-            'Could not install - another process is currently installing Claude. Please try again in a moment.',
-          );
+          throw new Error(t('installCmd.lockFailed'));
         }
 
         // If we couldn't get the version, there might be an issue
@@ -185,12 +184,12 @@ function Install({ onDone, force, target }: InstallProps): React.ReactNode {
   useEffect(() => {
     if (state.type === 'success') {
       // Give success message time to render before exiting
-      setTimeout(onDone, 2000, 'Claude Code installation completed successfully', {
+      setTimeout(onDone, 2000, t('installCmd.completedSuccessfully'), {
         display: 'system' as const,
       });
     } else if (state.type === 'error') {
       // Give error message time to render before exiting
-      setTimeout(onDone, 3000, 'Claude Code installation failed', {
+      setTimeout(onDone, 3000, t('installCmd.failed'), {
         display: 'system' as const,
       });
     }
@@ -198,15 +197,15 @@ function Install({ onDone, force, target }: InstallProps): React.ReactNode {
 
   return (
     <Box flexDirection="column" marginTop={1}>
-      {state.type === 'checking' && <Text color="claude">Checking installation status...</Text>}
+      {state.type === 'checking' && <Text color="claude">{t('install.checkingInstallationStatus')}</Text>}
 
-      {state.type === 'cleaning-npm' && <Text color="warning">Cleaning up old npm installations...</Text>}
+      {state.type === 'cleaning-npm' && <Text color="warning">{t('install.cleaningUpOldNpmInstallations')}</Text>}
 
       {state.type === 'installing' && (
-        <Text color="claude">Installing Claude Code native build {state.version}...</Text>
+        <Text color="claude">{t('installCmd.installingNativeBuild', state.version)}</Text>
       )}
 
-      {state.type === 'setting-up' && <Text color="claude">Setting up launcher and shell integration...</Text>}
+      {state.type === 'setting-up' && <Text color="claude">{t('install.settingUpLauncherAndShellIntegration')}</Text>}
 
       {state.type === 'set-up' && <SetupNotes messages={state.messages} />}
 
@@ -215,28 +214,28 @@ function Install({ onDone, force, target }: InstallProps): React.ReactNode {
           <Box>
             <StatusIcon status="success" withSpace />
             <Text color="success" bold>
-              Claude Code successfully installed!
+              {t('installCmd.successfullyInstalled')}
             </Text>
           </Box>
           <Box marginLeft={2} flexDirection="column" gap={1}>
             {state.version !== 'current' && (
               <Box>
-                <Text dimColor>Version: </Text>
+                <Text dimColor>{t('install.version')} </Text>
                 <Text color="claude">{state.version}</Text>
               </Box>
             )}
             <Box>
-              <Text dimColor>Location: </Text>
+              <Text dimColor>{t('install.location')} </Text>
               <Text color="text">{getInstallationPath()}</Text>
             </Box>
           </Box>
           <Box marginLeft={2} flexDirection="column" gap={1}>
             <Box marginTop={1}>
-              <Text dimColor>Next: Run </Text>
+              <Text dimColor>{t('install.nextRun')} </Text>
               <Text color="claude" bold>
                 claude --help
               </Text>
-              <Text dimColor> to get started</Text>
+              <Text dimColor>{t('installCmd.toGetStarted')}</Text>
             </Box>
           </Box>
           {state.setupMessages && <SetupNotes messages={state.setupMessages} />}
@@ -247,11 +246,11 @@ function Install({ onDone, force, target }: InstallProps): React.ReactNode {
         <Box flexDirection="column" gap={1}>
           <Box>
             <StatusIcon status="error" withSpace />
-            <Text color="error">Installation failed</Text>
+            <Text color="error">{t('install.installationFailed')}</Text>
           </Box>
           <Text color="error">{state.message}</Text>
           <Box marginTop={1}>
-            <Text dimColor>Try running with --force to override checks</Text>
+            <Text dimColor>{t('install.tryRunningWithForceToOverrideChecks')}</Text>
           </Box>
         </Box>
       )}
@@ -263,7 +262,7 @@ function Install({ onDone, force, target }: InstallProps): React.ReactNode {
 export const install = {
   type: 'local-jsx' as const,
   name: 'install',
-  description: 'Install Claude Code native build',
+  description: t('cmd.descInstall'),
   argumentHint: '[options]',
   async call(
     onDone: (result: string, options?: { display?: CommandResultDisplay }) => void,

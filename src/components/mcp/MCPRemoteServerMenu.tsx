@@ -23,6 +23,7 @@ import {
   filterMcpPromptsByServer,
 } from '../../services/mcp/utils.js';
 import { useAppState, useSetAppState } from '../../state/AppState.js';
+import { t } from '../../utils/i18n/index.js';
 import { getOauthAccountInfo } from '../../utils/auth.js';
 import { openBrowser } from '../../utils/browser.js';
 import { errorMessage } from '../../utils/errors.js';
@@ -411,7 +412,7 @@ export function MCPRemoteServerMenu({
         {authorizationUrl && (
           <Box flexDirection="column">
             <Box>
-              <Text dimColor>If your browser doesn&apos;t open automatically, copy this URL manually </Text>
+              <Text dimColor>{t('mcpremoteservermenu.ifYourBrowserDoesnAposTOpenAutomaticallyCopyThisURLManually')} </Text>
               {urlCopied ? (
                 <Text color="success">(Copied!)</Text>
               ) : (
@@ -445,7 +446,7 @@ export function MCPRemoteServerMenu({
           </Box>
         )}
         <Box marginLeft={3}>
-          <Text dimColor>Return here after authenticating in your browser. Press Esc to go back.</Text>
+          <Text dimColor>{t('mcpremoteservermenu.returnHereAfterAuthenticatingInYourBrowserPressEscToGoBack')}</Text>
         </Box>
       </Box>
     );
@@ -462,7 +463,7 @@ export function MCPRemoteServerMenu({
         {claudeAIAuthUrl && (
           <Box flexDirection="column">
             <Box>
-              <Text dimColor>If your browser doesn&apos;t open automatically, copy this URL manually </Text>
+              <Text dimColor>{t('mcpremoteservermenu.ifYourBrowserDoesnAposTOpenAutomaticallyCopyThisURLManually2')} </Text>
               {urlCopied ? (
                 <Text color="success">(Copied!)</Text>
               ) : (
@@ -476,10 +477,10 @@ export function MCPRemoteServerMenu({
         )}
         <Box marginLeft={3} flexDirection="column">
           <Text color="permission">
-            Press <Text bold>Enter</Text> after authenticating in your browser.
+            Press <Text bold>{t('mcpremoteservermenu.enter')}</Text> after authenticating in your browser.
           </Text>
           <Text dimColor italic>
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.back')} />
           </Text>
         </Box>
       </Box>
@@ -492,11 +493,11 @@ export function MCPRemoteServerMenu({
         <Text color="claude">Clear authentication for {server.name}</Text>
         {claudeAIClearAuthBrowserOpened ? (
           <>
-            <Text>Find the MCP server in the browser and click &quot;Disconnect&quot;.</Text>
+            <Text>{t('mcpremoteservermenu.findTheMCPServerInTheBrowserAndClickQuotDisconnectQuot')}</Text>
             {claudeAIClearAuthUrl && (
               <Box flexDirection="column">
                 <Box>
-                  <Text dimColor>If your browser didn&apos;t open automatically, copy this URL manually </Text>
+                  <Text dimColor>{t('mcpremoteservermenu.ifYourBrowserDidnAposTOpenAutomaticallyCopyThisURLManually')} </Text>
                   {urlCopied ? (
                     <Text color="success">(Copied!)</Text>
                   ) : (
@@ -510,14 +511,14 @@ export function MCPRemoteServerMenu({
             )}
             <Box marginLeft={3} flexDirection="column">
               <Text color="permission">
-                Press <Text bold>Enter</Text> when done.
+                Press <Text bold>{t('mcpremoteservermenu.enter2')}</Text> when done.
               </Text>
               <Text dimColor italic>
                 <ConfigurableShortcutHint
                   action="confirm:no"
                   context="Confirmation"
                   fallback="Esc"
-                  description="back"
+                  description={t('desc.back')}
                 />
               </Text>
             </Box>
@@ -529,14 +530,14 @@ export function MCPRemoteServerMenu({
             </Text>
             <Box marginLeft={3} flexDirection="column">
               <Text color="permission">
-                Press <Text bold>Enter</Text> to open the browser.
+                Press <Text bold>{t('mcpremoteservermenu.enter3')}</Text> to open the browser.
               </Text>
               <Text dimColor italic>
                 <ConfigurableShortcutHint
                   action="confirm:no"
                   context="Confirmation"
                   fallback="Esc"
-                  description="back"
+                  description={t('desc.back')}
                 />
               </Text>
             </Box>
@@ -556,7 +557,7 @@ export function MCPRemoteServerMenu({
           <Spinner />
           <Text> Establishing connection to MCP server</Text>
         </Box>
-        <Text dimColor>This may take a few moments.</Text>
+        <Text dimColor>{t('mcpremoteservermenu.thisMayTakeAFewMoments')}</Text>
       </Box>
     );
   }
@@ -566,14 +567,14 @@ export function MCPRemoteServerMenu({
   // If server is disabled, show Enable first as the primary action
   if (server.client.type === 'disabled') {
     menuOptions.push({
-      label: 'Enable',
+      label: t('mcpRemoteServerMenu.enable'),
       value: 'toggle-enabled',
     });
   }
 
   if (server.client.type === 'connected' && serverToolsCount > 0) {
     menuOptions.push({
-      label: 'View tools',
+      label: t('mcpRemoteServerMenu.viewTools'),
       value: 'tools',
     });
   }
@@ -581,30 +582,30 @@ export function MCPRemoteServerMenu({
   if (server.config.type === 'claudeai-proxy') {
     if (server.client.type === 'connected') {
       menuOptions.push({
-        label: 'Clear authentication',
+        label: t('mcpRemoteServerMenu.clearAuth'),
         value: 'claudeai-clear-auth',
       });
     } else if (server.client.type !== 'disabled') {
       menuOptions.push({
-        label: 'Authenticate',
+        label: t('mcpRemoteServerMenu.authenticate'),
         value: 'claudeai-auth',
       });
     }
   } else {
     if (isEffectivelyAuthenticated) {
       menuOptions.push({
-        label: 'Re-authenticate',
+        label: t('mcpRemoteServerMenu.reauthenticate'),
         value: 'reauth',
       });
       menuOptions.push({
-        label: 'Clear authentication',
+        label: t('mcpRemoteServerMenu.clearAuth'),
         value: 'clear-auth',
       });
     }
 
     if (!isEffectivelyAuthenticated) {
       menuOptions.push({
-        label: 'Authenticate',
+        label: t('mcpRemoteServerMenu.authenticate'),
         value: 'auth',
       });
     }
@@ -613,12 +614,12 @@ export function MCPRemoteServerMenu({
   if (server.client.type !== 'disabled') {
     if (server.client.type !== 'needs-auth') {
       menuOptions.push({
-        label: 'Reconnect',
+        label: t('mcpRemoteServerMenu.reconnect'),
         value: 'reconnectMcpServer',
       });
     }
     menuOptions.push({
-      label: 'Disable',
+      label: t('mcpRemoteServerMenu.disable'),
       value: 'toggle-enabled',
     });
   }
@@ -626,7 +627,7 @@ export function MCPRemoteServerMenu({
   // If there are no other options, add a back option so Select handles escape
   if (menuOptions.length === 0) {
     menuOptions.push({
-      label: 'Back',
+      label: t('mcpRemoteServerMenu.back'),
       value: 'back',
     });
   }
@@ -640,7 +641,7 @@ export function MCPRemoteServerMenu({
 
         <Box flexDirection="column" gap={0}>
           <Box>
-            <Text bold>Status: </Text>
+            <Text bold>{t('mcpremoteservermenu.status')} </Text>
             {server.client.type === 'disabled' ? (
               <Text>{color('inactive', theme)(figures.radioOff)} disabled</Text>
             ) : server.client.type === 'connected' ? (
@@ -659,7 +660,7 @@ export function MCPRemoteServerMenu({
 
           {server.transport !== 'claudeai-proxy' && (
             <Box>
-              <Text bold>Auth: </Text>
+              <Text bold>{t('mcpremoteservermenu.auth')} </Text>
               {isEffectivelyAuthenticated ? (
                 <Text>{color('success', theme)(figures.tick)} authenticated</Text>
               ) : (
@@ -669,12 +670,12 @@ export function MCPRemoteServerMenu({
           )}
 
           <Box>
-            <Text bold>URL: </Text>
+            <Text bold>{t('mcpremoteservermenu.uRL')} </Text>
             <Text dimColor>{server.config.url}</Text>
           </Box>
 
           <Box>
-            <Text bold>Config location: </Text>
+            <Text bold>{t('mcpremoteservermenu.configLocation')} </Text>
             <Text dimColor>{describeMcpConfigFilePath(server.scope)}</Text>
           </Box>
 
@@ -688,7 +689,7 @@ export function MCPRemoteServerMenu({
 
           {server.client.type === 'connected' && serverToolsCount > 0 && (
             <Box>
-              <Text bold>Tools: </Text>
+              <Text bold>{t('mcpremoteservermenu.tools')} </Text>
               <Text dimColor>{serverToolsCount} tools</Text>
             </Box>
           )}
@@ -761,12 +762,12 @@ export function MCPRemoteServerMenu({
       <Box marginTop={1}>
         <Text dimColor italic>
           {exitState.pending ? (
-            <>Press {exitState.keyName} again to exit</>
+            <>{t('common.pressAgain', exitState.keyName)}</>
           ) : (
             <Byline>
               <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
               <KeyboardShortcutHint shortcut="Enter" action="select" />
-              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.back')} />
             </Byline>
           )}
         </Text>

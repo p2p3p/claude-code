@@ -6,6 +6,7 @@ import { isEnvTruthy } from '../../utils/envUtils.js'
 import { refreshActivePlugins } from '../../utils/plugins/refresh.js'
 import { settingsChangeDetector } from '../../utils/settings/changeDetector.js'
 import { plural } from '../../utils/stringUtils.js'
+import { t } from '../../utils/i18n/index.js'
 
 export const call: LocalCommandCall = async (_args, context) => {
   // CCR: re-pull user settings before the cache sweep so enabledPlugins /
@@ -37,20 +38,20 @@ export const call: LocalCommandCall = async (_args, context) => {
   const r = await refreshActivePlugins(context.setAppState)
 
   const parts = [
-    n(r.enabled_count, 'plugin'),
-    n(r.command_count, 'skill'),
-    n(r.agent_count, 'agent'),
-    n(r.hook_count, 'hook'),
+    n(r.enabled_count, t('reloadPlugins.plugin')),
+    n(r.command_count, t('reloadPlugins.skill')),
+    n(r.agent_count, t('reloadPlugins.agent')),
+    n(r.hook_count, t('reloadPlugins.hook')),
     // "plugin MCP/LSP" disambiguates from user-config/built-in servers,
     // which /reload-plugins doesn't touch. Commands/hooks are plugin-only;
     // agent_count is total agents (incl. built-ins). (gh-31321)
-    n(r.mcp_count, 'plugin MCP server'),
-    n(r.lsp_count, 'plugin LSP server'),
+    n(r.mcp_count, t('reloadPlugins.pluginMcpServer')),
+    n(r.lsp_count, t('reloadPlugins.pluginLspServer')),
   ]
-  let msg = `Reloaded: ${parts.join(' · ')}`
+  let msg = t('reloadPlugins.reloaded', parts.join(' · '))
 
   if (r.error_count > 0) {
-    msg += `\n${n(r.error_count, 'error')} during load. Run /doctor for details.`
+    msg += '\n' + t('reloadPlugins.errorsDuringLoad', n(r.error_count, t('reloadPlugins.errorNoun')))
   }
 
   return { type: 'text', value: msg }

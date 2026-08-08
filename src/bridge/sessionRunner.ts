@@ -3,6 +3,7 @@ import { createWriteStream, type WriteStream } from 'fs'
 import { tmpdir } from 'os'
 import { dirname, join } from 'path'
 import { createInterface } from 'readline'
+import { t } from '../utils/i18n/index.js'
 import { jsonParse, jsonStringify } from '../utils/slowOperations.js'
 import { debugTruncate } from './debugUtils.js'
 import type {
@@ -168,7 +169,7 @@ function extractActivities(
       if (subtype === 'success') {
         activities.push({
           type: 'result',
-          summary: 'Session completed',
+          summary: t('sessionRunner.sessionCompleted'),
           timestamp: now,
         })
         onDebug(

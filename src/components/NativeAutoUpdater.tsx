@@ -5,6 +5,7 @@ import { logForDebugging } from 'src/utils/debug.js';
 import { logError } from 'src/utils/log.js';
 import { useInterval } from 'usehooks-ts';
 import { useUpdateNotification } from '../hooks/useUpdateNotification.js';
+import { t } from '../utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import type { AutoUpdaterResult } from '../utils/autoUpdater.js';
 import { getMaxVersion, getMaxVersionMessage } from '../utils/autoUpdater.js';
@@ -98,7 +99,7 @@ export function NativeAutoUpdater({
       const maxVersion = await getMaxVersion();
       if (maxVersion && gt(MACRO.VERSION, maxVersion)) {
         const msg = await getMaxVersionMessage();
-        setMaxVersionIssue(msg ?? 'affects your version');
+        setMaxVersionIssue(msg ?? t('autoupdater.affectsYourVersion'));
       }
 
       const result = await installLatest(channel);
@@ -191,7 +192,7 @@ export function NativeAutoUpdater({
       {isUpdating ? (
         <Box>
           <Text dimColor wrap="truncate">
-            Checking for updates
+            {t('autoupdater.checkingForUpdates')}
           </Text>
         </Box>
       ) : (
@@ -199,18 +200,18 @@ export function NativeAutoUpdater({
         showSuccessMessage &&
         updateSemver && (
           <Text color="success" wrap="truncate">
-            ✓ Update installed · Restart to update
+            {t('autoupdater.updateInstalledRestartToUpdate')}
           </Text>
         )
       )}
       {autoUpdaterResult?.status === 'install_failed' && (
         <Text color="error" wrap="truncate">
-          ✗ Auto-update failed &middot; Try <Text bold>/status</Text>
+          {t('autoupdater.updateFailedStatus')}
         </Text>
       )}
       {maxVersionIssue && process.env.USER_TYPE === 'ant' && (
         <Text color="warning">
-          ⚠ Known issue: {maxVersionIssue} &middot; Run <Text bold>claude rollback --safe</Text> to downgrade
+          {t('autoupdater.knownIssue', maxVersionIssue)}
         </Text>
       )}
     </Box>

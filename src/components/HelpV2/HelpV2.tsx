@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { useExitOnCtrlCDWithKeybindings } from 'src/hooks/useExitOnCtrlCDWithKeybindings.js';
 import { useShortcutDisplay } from 'src/keybindings/useShortcutDisplay.js';
 import {
@@ -57,7 +58,7 @@ export function HelpV2({ onClose, commands }: Props): React.ReactNode {
         commands={builtinCommands}
         maxHeight={maxHeight}
         columns={columns}
-        title="Browse default commands:"
+        title={t('helpv2.browseDefaultCommands')}
         onCancel={close}
       />
     </Tab>,
@@ -69,8 +70,8 @@ export function HelpV2({ onClose, commands }: Props): React.ReactNode {
         commands={customCommands}
         maxHeight={maxHeight}
         columns={columns}
-        title="Browse custom commands:"
-        emptyMessage="No custom commands found"
+        title={t('helpv2.browseCustomCommands')}
+        emptyMessage={t('helpv2.noCustomCommandsFound')}
         onCancel={close}
       />
     </Tab>,
@@ -83,7 +84,7 @@ export function HelpV2({ onClose, commands }: Props): React.ReactNode {
           commands={antOnlyCommands}
           maxHeight={maxHeight}
           columns={columns}
-          title="Browse ant-only commands:"
+          title={t('helpv2.browseAntOnlyCommands')}
           onCancel={close}
         />
       </Tab>,

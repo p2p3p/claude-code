@@ -1,9 +1,10 @@
 import { getIsNonInteractiveSession } from '../../bootstrap/state.js'
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const command: Command = {
   name: 'chrome',
-  description: 'Claude in Chrome (Beta) settings',
+  description: t('cmd.descChrome'),
   availability: [],
   isEnabled: () => !getIsNonInteractiveSession(),
   type: 'local-jsx',

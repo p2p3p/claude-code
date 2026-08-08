@@ -5,6 +5,7 @@ import { extractTag } from 'src/utils/messages.js';
 import { removeSandboxViolationTags } from 'src/utils/sandbox/sandbox-ui-utils.js';
 import { Box, Text } from '@anthropic/ink';
 import { useShortcutDisplay } from '../keybindings/useShortcutDisplay.js';
+import { t } from '../utils/i18n/index.js';
 import { countCharInString } from '../utils/stringUtils.js';
 import { MessageResponse } from './MessageResponse.js';
 
@@ -56,7 +57,7 @@ export function FallbackToolUseErrorMessage({ result, verbose }: Props): React.R
               {transcriptShortcut}
             </Text>
             <Text> </Text>
-            <Text dimColor>to see all)</Text>
+            <Text dimColor>{t('fallbackToolUseError.toSeeAll')}</Text>
           </Box>
         )}
       </Box>

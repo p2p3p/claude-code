@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { logError } from 'src/utils/log.js';
 import { getOriginalCwd } from '../../../bootstrap/state.js';
+import { t } from '../../../utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import { sanitizeToolNameForAnalytics } from '../../../services/analytics/metadata.js';
 import { SKILL_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/SkillTool/constants.js';
@@ -52,7 +53,7 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
   const options = useMemo((): PermissionPromptOption<SkillOptionValue>[] => {
     const baseOptions: PermissionPromptOption<SkillOptionValue>[] = [
       {
-        label: 'Yes',
+        label: t('skillPermission.yes'),
         value: 'yes',
         feedbackConfig: { type: 'accept' },
       },
@@ -65,7 +66,7 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
       alwaysAllowOptions.push({
         label: (
           <Text>
-            Yes, and don&apos;t ask again for <Text bold>{skill}</Text> in <Text bold>{originalCwd}</Text>
+            {t('skillPermission.yesDontAsk', skill, originalCwd)}
           </Text>
         ),
         value: 'yes-exact',
@@ -78,8 +79,7 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
         alwaysAllowOptions.push({
           label: (
             <Text>
-              Yes, and don&apos;t ask again for <Text bold>{commandPrefix + ':*'}</Text> commands in{' '}
-              <Text bold>{originalCwd}</Text>
+              {t('skillPermission.yesPrefix', commandPrefix + ':*', originalCwd)}
             </Text>
           ),
           value: 'yes-prefix',
@@ -88,7 +88,7 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
     }
 
     const noOption: PermissionPromptOption<SkillOptionValue> = {
-      label: 'No',
+      label: t('skillPermission.no'),
       value: 'no',
       feedbackConfig: { type: 'reject' },
     };
@@ -213,8 +213,8 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
   }, [toolUseConfirm, onDone, onReject]);
 
   return (
-    <PermissionDialog title={`Use skill "${skill}"?`} workerBadge={workerBadge}>
-      <Text>Claude may use instructions, code, or files from this Skill.</Text>
+    <PermissionDialog title={t('skillPermission.title', skill)} workerBadge={workerBadge}>
+      <Text>{t('permission.skillUse')}</Text>
       <Box flexDirection="column" paddingX={2} paddingY={1}>
         <Text dimColor>{commandObj?.description}</Text>
       </Box>

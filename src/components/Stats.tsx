@@ -35,6 +35,7 @@ import {
 import { resolveThemeSetting } from '../utils/systemTheme.js';
 import { getTheme, themeColorToAnsi } from '../utils/theme.js';
 import { Spinner } from './Spinner.js';
+import { t } from '../utils/i18n/index.js';
 
 function formatPeakDay(dateStr: string): string {
   const date = new Date(dateStr);
@@ -90,7 +91,7 @@ export function Stats({ onClose }: Props): React.ReactNode {
       fallback={
         <Box marginTop={1}>
           <Spinner />
-          <Text> Loading your Claude Code stats…</Text>
+          <Text> {t('componentsStats.loading')}</Text>
         </Box>
       }
     >
@@ -187,7 +188,7 @@ function StatsContent({ allTimePromise, onClose }: StatsContentProps): React.Rea
   if (allTimeResult.type === 'error') {
     return (
       <Box marginTop={1}>
-        <Text color="error">Failed to load stats: {allTimeResult.message}</Text>
+        <Text color="error">{t('componentsStats.failedToLoad')}{allTimeResult.message}</Text>
       </Box>
     );
   }
@@ -195,7 +196,7 @@ function StatsContent({ allTimePromise, onClose }: StatsContentProps): React.Rea
   if (allTimeResult.type === 'empty') {
     return (
       <Box marginTop={1}>
-        <Text color="warning">No stats available yet. Start using Claude Code!</Text>
+        <Text color="warning">{t('componentsStats.noStats')}</Text>
       </Box>
     );
   }
@@ -204,7 +205,7 @@ function StatsContent({ allTimePromise, onClose }: StatsContentProps): React.Rea
     return (
       <Box marginTop={1}>
         <Spinner />
-        <Text> Loading stats…</Text>
+        <Text> {t('componentsStats.loadingStats')}</Text>
       </Box>
     );
   }
@@ -213,7 +214,7 @@ function StatsContent({ allTimePromise, onClose }: StatsContentProps): React.Rea
     <Pane color="claude">
       <Box flexDirection="row" gap={1} marginBottom={1}>
         <Tabs title="" color="claude" defaultTab="Overview">
-          <Tab title="Overview">
+          <Tab title={t('componentsStats.overview')}>
             <OverviewTab
               stats={displayStats}
               allTimeStats={allTimeStats}
@@ -221,14 +222,14 @@ function StatsContent({ allTimePromise, onClose }: StatsContentProps): React.Rea
               isLoading={isLoadingFiltered}
             />
           </Tab>
-          <Tab title="Models">
+          <Tab title={t('componentsStats.models')}>
             <ModelsTab stats={displayStats} dateRange={dateRange} isLoading={isLoadingFiltered} />
           </Tab>
         </Tabs>
       </Box>
       <Box paddingLeft={2}>
         <Text dimColor>
-          Esc to cancel · r to cycle dates · ctrl+s to copy
+          {t('componentsStats.hint')}
           {copyStatus ? ` · ${copyStatus}` : ''}
         </Text>
       </Box>
@@ -341,7 +342,7 @@ function OverviewTab({
         <Box flexDirection="column" width={28}>
           {favoriteModel && (
             <Text wrap="truncate">
-              Favorite model:{' '}
+              {t('componentsStats.favoriteModel')}
               <Text color="claude" bold>
                 {renderModelName(favoriteModel[0])}
               </Text>
@@ -350,7 +351,7 @@ function OverviewTab({
         </Box>
         <Box flexDirection="column" width={28}>
           <Text wrap="truncate">
-            Total tokens: <Text color="claude">{formatNumber(totalTokens)}</Text>
+            {t('componentsStats.totalTokens')}<Text color="claude">{formatNumber(totalTokens)}</Text>
           </Text>
         </Box>
       </Box>
@@ -359,13 +360,13 @@ function OverviewTab({
       <Box flexDirection="row" gap={4}>
         <Box flexDirection="column" width={28}>
           <Text wrap="truncate">
-            Sessions: <Text color="claude">{formatNumber(stats.totalSessions)}</Text>
+            {t('componentsStats.sessions')}<Text color="claude">{formatNumber(stats.totalSessions)}</Text>
           </Text>
         </Box>
         <Box flexDirection="column" width={28}>
           {stats.longestSession && (
             <Text wrap="truncate">
-              Longest session: <Text color="claude">{formatDuration(stats.longestSession.duration)}</Text>
+              {t('componentsStats.longestSession')}<Text color="claude">{formatDuration(stats.longestSession.duration)}</Text>
             </Text>
           )}
         </Box>
@@ -375,17 +376,17 @@ function OverviewTab({
       <Box flexDirection="row" gap={4}>
         <Box flexDirection="column" width={28}>
           <Text wrap="truncate">
-            Active days: <Text color="claude">{stats.activeDays}</Text>
+            {t('componentsStats.activeDays')}<Text color="claude">{stats.activeDays}</Text>
             <Text color="subtle">/{rangeDays}</Text>
           </Text>
         </Box>
         <Box flexDirection="column" width={28}>
           <Text wrap="truncate">
-            Longest streak:{' '}
+            {t('componentsStats.longestStreak')}
             <Text color="claude" bold>
               {stats.streaks.longestStreak}
             </Text>{' '}
-            {stats.streaks.longestStreak === 1 ? 'day' : 'days'}
+            {stats.streaks.longestStreak === 1 ? t('componentsStats.day') : t('componentsStats.days')}
           </Text>
         </Box>
       </Box>
@@ -395,17 +396,17 @@ function OverviewTab({
         <Box flexDirection="column" width={28}>
           {stats.peakActivityDay && (
             <Text wrap="truncate">
-              Most active day: <Text color="claude">{formatPeakDay(stats.peakActivityDay)}</Text>
+              {t('componentsStats.mostActiveDay')}<Text color="claude">{formatPeakDay(stats.peakActivityDay)}</Text>
             </Text>
           )}
         </Box>
         <Box flexDirection="column" width={28}>
           <Text wrap="truncate">
-            Current streak:{' '}
+            {t('componentsStats.currentStreak')}
             <Text color="claude" bold>
               {allTimeStats.streaks.currentStreak}
             </Text>{' '}
-            {allTimeStats.streaks.currentStreak === 1 ? 'day' : 'days'}
+            {allTimeStats.streaks.currentStreak === 1 ? t('componentsStats.day') : t('componentsStats.days')}
           </Text>
         </Box>
       </Box>
@@ -425,7 +426,7 @@ function OverviewTab({
       {shotStatsData && (
         <>
           <Box marginTop={1}>
-            <Text>Shot distribution</Text>
+            <Text>{t('componentsStats.shotDistribution')}</Text>
           </Box>
           <Box flexDirection="row" gap={4}>
             <Box flexDirection="column" width={28}>
@@ -589,7 +590,7 @@ function ModelsTab({
   if (modelEntries.length === 0) {
     return (
       <Box>
-        <Text color="subtle">No model usage data available</Text>
+        <Text color="subtle">{t('componentsStats.noModelUsageDataAvailable')}</Text>
       </Box>
     );
   }
@@ -618,7 +619,7 @@ function ModelsTab({
       {/* Token usage chart */}
       {chartOutput && (
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>Tokens per Day</Text>
+          <Text bold>{t('componentsStats.tokensPerDay')}</Text>
           <Ansi>{chartOutput.chart}</Ansi>
           <Text color="subtle">{chartOutput.xAxisLabels}</Text>
           <Box>

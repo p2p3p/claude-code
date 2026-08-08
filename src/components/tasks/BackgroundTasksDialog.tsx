@@ -30,6 +30,7 @@ import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import { useShortcutDisplay } from '../../keybindings/useShortcutDisplay.js';
 import { count } from '../../utils/array.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import { AsyncAgentDetailDialog } from './AsyncAgentDetailDialog.js';
 import { BackgroundTask as BackgroundTaskComponent } from './BackgroundTask.js';
 import { DreamDetailDialog } from './DreamDetailDialog.js';
@@ -470,19 +471,19 @@ export function BackgroundTasksDialog({ onDone, toolUseContext, initialDetailTas
               onCancel={goBackToList}
               inputGuide={() => (
                 <Byline>
-                  <KeyboardShortcutHint shortcut="←" action="go back" />
-                  <KeyboardShortcutHint shortcut="Esc" action="close" />
-                  {onKill && <KeyboardShortcutHint shortcut="x" action="stop" />}
+                  <KeyboardShortcutHint shortcut="←" action={t('taskDetail.goBack')} />
+                  <KeyboardShortcutHint shortcut="Esc" action={t('taskDetail.close')} />
+                  {onKill && <KeyboardShortcutHint shortcut="x" action={t('taskDetail.stop')} />}
                 </Byline>
               )}
             >
               {task.status === 'failed' && task.error ? (
                 <Box flexDirection="column">
-                  <Text color="error">失败原因：{task.error}</Text>
-                  <Text color="subtle">用 /workflows 查看阶段与 agent 实时进度</Text>
+                  <Text color="error">{t('taskDetail.workflowFailed')}{task.error}</Text>
+                  <Text color="subtle">{t('taskDetail.workflowHint')}</Text>
                 </Box>
               ) : (
-                <Text color="subtle">用 /workflows 查看阶段与 agent 实时进度</Text>
+                <Text color="subtle">{t('taskDetail.workflowHint')}</Text>
               )}
             </Dialog>
           </Box>
@@ -527,21 +528,21 @@ export function BackgroundTasksDialog({ onDone, toolUseContext, initialDetailTas
       ...(runningTeammateCount > 0
         ? [
             <Text key="teammates">
-              {runningTeammateCount} {runningTeammateCount !== 1 ? 'agents' : 'agent'}
+              {t('taskDetail.agentsCount', runningTeammateCount)}
             </Text>,
           ]
         : []),
       ...(runningBashCount > 0
         ? [
             <Text key="shells">
-              {runningBashCount} {runningBashCount !== 1 ? 'active shells' : 'active shell'}
+              {t('taskDetail.activeShells', runningBashCount)}
             </Text>,
           ]
         : []),
       ...(runningAgentCount > 0
         ? [
             <Text key="agents">
-              {runningAgentCount} {runningAgentCount !== 1 ? 'active agents' : 'active agent'}
+              {t('taskDetail.activeAgents', runningAgentCount)}
             </Text>,
           ]
         : []),
@@ -550,10 +551,10 @@ export function BackgroundTasksDialog({ onDone, toolUseContext, initialDetailTas
   );
 
   const actions = [
-    <KeyboardShortcutHint key="upDown" shortcut="↑/↓" action="select" />,
-    <KeyboardShortcutHint key="enter" shortcut="Enter" action="view" />,
+    <KeyboardShortcutHint key="upDown" shortcut="↑/↓" action={t('taskDetail.select')} />,
+    <KeyboardShortcutHint key="enter" shortcut="Enter" action={t('taskDetail.view')} />,
     ...(currentSelection?.type === 'in_process_teammate' && currentSelection.status === 'running'
-      ? [<KeyboardShortcutHint key="foreground" shortcut="f" action="foreground" />]
+      ? [<KeyboardShortcutHint key="foreground" shortcut="f" action={t('taskDetail.foreground')} />]
       : []),
     ...((currentSelection?.type === 'local_bash' ||
       currentSelection?.type === 'local_agent' ||
@@ -563,19 +564,19 @@ export function BackgroundTasksDialog({ onDone, toolUseContext, initialDetailTas
       currentSelection?.type === 'dream' ||
       currentSelection?.type === 'remote_agent') &&
     currentSelection.status === 'running'
-      ? [<KeyboardShortcutHint key="kill" shortcut="x" action="stop" />]
+      ? [<KeyboardShortcutHint key="kill" shortcut="x" action={t('taskDetail.stop')} />]
       : []),
     ...(agentTasks.some(t => t.status === 'running')
-      ? [<KeyboardShortcutHint key="kill-all" shortcut={killAgentsShortcut} action="stop all agents" />]
+      ? [<KeyboardShortcutHint key="kill-all" shortcut={killAgentsShortcut} action={t('taskDetail.stopAllAgents')} />]
       : []),
-    <KeyboardShortcutHint key="esc" shortcut="←/Esc" action="close" />,
+    <KeyboardShortcutHint key="esc" shortcut="←/Esc" action={t('taskDetail.close')} />,
   ];
 
   const handleCancel = () => onDone('Background tasks dialog dismissed', { display: 'system' });
 
   function renderInputGuide(exitState: ExitState): React.ReactNode {
     if (exitState.pending) {
-      return <Text>Press {exitState.keyName} again to exit</Text>;
+      return <Text>{t('common.pressAgain', exitState.keyName)}</Text>;
     }
     return <Byline>{actions}</Byline>;
   }
@@ -583,21 +584,21 @@ export function BackgroundTasksDialog({ onDone, toolUseContext, initialDetailTas
   return (
     <Box flexDirection="column" tabIndex={0} autoFocus onKeyDown={handleKeyDown}>
       <Dialog
-        title="Background tasks"
+        title={t('taskDetail.backgroundTasks')}
         subtitle={<>{subtitle}</>}
         onCancel={handleCancel}
         color="background"
         inputGuide={renderInputGuide}
       >
         {allSelectableItems.length === 0 ? (
-          <Text dimColor>No tasks currently running</Text>
+          <Text dimColor>{t('taskDetail.noTasksRunning')}</Text>
         ) : (
           <Box flexDirection="column">
             {teammateTasks.length > 0 && (
               <Box flexDirection="column">
                 {(bashTasks.length > 0 || remoteSessions.length > 0 || agentTasks.length > 0) && (
                   <Text dimColor>
-                    <Text bold>{'  '}Agents</Text> ({count(teammateTasks, i => i.type !== 'leader')})
+                    <Text bold>{'  '}{t('taskDetail.sectionAgents')}</Text> ({count(teammateTasks, i => i.type !== 'leader')})
                   </Text>
                 )}
                 <Box flexDirection="column">
@@ -610,7 +611,7 @@ export function BackgroundTasksDialog({ onDone, toolUseContext, initialDetailTas
               <Box flexDirection="column" marginTop={teammateTasks.length > 0 ? 1 : 0}>
                 {(teammateTasks.length > 0 || remoteSessions.length > 0 || agentTasks.length > 0) && (
                   <Text dimColor>
-                    <Text bold>{'  '}Shells</Text> ({bashTasks.length})
+                    <Text bold>{'  '}{t('taskDetail.sectionShells')}</Text> ({bashTasks.length})
                   </Text>
                 )}
                 <Box flexDirection="column">
@@ -624,7 +625,7 @@ export function BackgroundTasksDialog({ onDone, toolUseContext, initialDetailTas
             {mcpMonitors.length > 0 && (
               <Box flexDirection="column" marginTop={teammateTasks.length > 0 || bashTasks.length > 0 ? 1 : 0}>
                 <Text dimColor>
-                  <Text bold>{'  '}Monitors</Text> ({mcpMonitors.length})
+                  <Text bold>{'  '}{t('taskDetail.sectionMonitors')}</Text> ({mcpMonitors.length})
                 </Text>
                 <Box flexDirection="column">
                   {mcpMonitors.map(item => (
@@ -640,7 +641,7 @@ export function BackgroundTasksDialog({ onDone, toolUseContext, initialDetailTas
                 marginTop={teammateTasks.length > 0 || bashTasks.length > 0 || mcpMonitors.length > 0 ? 1 : 0}
               >
                 <Text dimColor>
-                  <Text bold>{'  '}Remote agents</Text> ({remoteSessions.length})
+                  <Text bold>{'  '}{t('taskDetail.sectionRemoteAgents')}</Text> ({remoteSessions.length})
                 </Text>
                 <Box flexDirection="column">
                   {remoteSessions.map(item => (
@@ -663,7 +664,7 @@ export function BackgroundTasksDialog({ onDone, toolUseContext, initialDetailTas
                 }
               >
                 <Text dimColor>
-                  <Text bold>{'  '}Local agents</Text> ({agentTasks.length})
+                  <Text bold>{'  '}{t('taskDetail.sectionLocalAgents')}</Text> ({agentTasks.length})
                 </Text>
                 <Box flexDirection="column">
                   {agentTasks.map(item => (
@@ -687,7 +688,7 @@ export function BackgroundTasksDialog({ onDone, toolUseContext, initialDetailTas
                 }
               >
                 <Text dimColor>
-                  <Text bold>{'  '}Workflows</Text> ({workflowTasks.length})
+                  <Text bold>{'  '}{t('taskDetail.sectionWorkflows')}</Text> ({workflowTasks.length})
                 </Text>
                 <Box flexDirection="column">
                   {workflowTasks.map(item => (
@@ -835,7 +836,7 @@ function TeammateTaskGroups({
         return (
           <Box key={teamName} flexDirection="column">
             <Text dimColor>
-              {'  '}Team: {teamName} ({memberCount})
+              {'  '}{t('taskDetail.teamLabel', teamName)} ({memberCount})
             </Text>
             {/* Render leader first within each team */}
             {leaderItems.map(item => (

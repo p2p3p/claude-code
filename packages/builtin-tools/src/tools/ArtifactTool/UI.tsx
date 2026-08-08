@@ -3,6 +3,7 @@ import { Box, Link, Text } from '@anthropic/ink';
 import type { ToolProgressData } from 'src/Tool.js';
 import type { ProgressMessage } from 'src/types/message.js';
 import type { ArtifactOutput } from './ArtifactTool.js';
+import { t } from 'src/utils/i18n/index.js';
 
 export function renderToolResultMessage(
   content: ArtifactOutput,
@@ -12,7 +13,7 @@ export function renderToolResultMessage(
   if (content.error) {
     return (
       <Box>
-        <Text color="error">⚠ Artifact upload failed: {content.error}</Text>
+        <Text color="error">{t('toolUI.artifact.uploadFailed', content.error)}</Text>
       </Box>
     );
   }
@@ -21,7 +22,7 @@ export function renderToolResultMessage(
     <Box flexDirection="column">
       <Box>
         <Text>
-          <Text color="success">↑</Text> Artifact uploaded:{' '}
+          <Text color="success">↑</Text>{' '}{t('toolUI.artifact.uploaded')}
           <Link url={content.url}>
             <Text color="warning">{content.url}</Text>
           </Link>
@@ -29,7 +30,7 @@ export function renderToolResultMessage(
       </Box>
       {content.expiresAt ? (
         <Box>
-          <Text dimColor>expires: {content.expiresAt}</Text>
+          <Text dimColor>{t('toolUI.artifact.expires')}{content.expiresAt}</Text>
         </Box>
       ) : null}
     </Box>

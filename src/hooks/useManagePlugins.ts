@@ -11,6 +11,7 @@ import type { AgentDefinition } from '@claude-code-best/builtin-tools/tools/Agen
 import { count } from '../utils/array.js'
 import { logForDebugging } from '../utils/debug.js'
 import { logForDiagnosticsNoPII } from '../utils/diagLogs.js'
+import { t } from '../utils/i18n/index.js'
 import { toError } from '../utils/errors.js'
 import { logError } from '../utils/log.js'
 import { loadPluginAgents } from '../utils/plugins/loadPluginAgents.js'
@@ -63,7 +64,7 @@ export function useManagePlugins({
       if (Object.keys(flagged).length > 0) {
         addNotification({
           key: 'plugin-delisted-flagged',
-          text: 'Plugins flagged. Check /plugins',
+          text: t('notif.managePlugins.flagged'),
           color: 'warning',
           priority: 'high',
         })
@@ -304,7 +305,7 @@ export function useManagePlugins({
     if (!enabled || !needsRefresh) return
     addNotification({
       key: 'plugin-reload-pending',
-      text: 'Plugins changed. Run /reload-plugins to activate.',
+      text: t('notif.managePlugins.reloadPending'),
       color: 'suggestion',
       priority: 'low',
     })

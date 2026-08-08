@@ -3,6 +3,7 @@ import TextInput from '../../components/TextInput.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { Box, color, Text, useTheme } from '@anthropic/ink';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
+import { t } from '../../utils/i18n/index.js'
 
 interface ApiKeyStepProps {
   existingApiKey: string | null;
@@ -84,14 +85,14 @@ export function ApiKeyStep({
     <>
       <Box flexDirection="column" borderStyle="round" paddingX={1}>
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>Install GitHub App</Text>
-          <Text dimColor>Choose API key</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
+          <Text dimColor>{t('installGithub.chooseApiKey')}</Text>
         </Box>
         {existingApiKey && (
           <Box marginBottom={1}>
             <Text>
               {selectedOption === 'existing' ? color('success', theme)('> ') : '  '}
-              Use your existing Claude Code API key
+              {t('installGithub.useExistingKey')}
             </Text>
           </Box>
         )}
@@ -99,14 +100,14 @@ export function ApiKeyStep({
           <Box marginBottom={1}>
             <Text>
               {selectedOption === 'oauth' ? color('success', theme)('> ') : '  '}
-              Create a long-lived token with your Claude subscription
+              {t('installGithub.createToken')}
             </Text>
           </Box>
         )}
         <Box marginBottom={1}>
           <Text>
             {selectedOption === 'new' ? color('success', theme)('> ') : '  '}
-            Enter a new API key
+            {t('installGithub.enterNewKey')}
           </Text>
         </Box>
         {selectedOption === 'new' && (
@@ -126,7 +127,7 @@ export function ApiKeyStep({
         )}
       </Box>
       <Box marginLeft={3}>
-        <Text dimColor>↑/↓ to select · Enter to continue</Text>
+        <Text dimColor>{t('installGithub.navSelect')}</Text>
       </Box>
     </>
   );

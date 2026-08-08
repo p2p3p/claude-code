@@ -13,6 +13,7 @@ import { estimateSkillFrontmatterTokens } from '../../skills/loadSkillsDir.js';
 import { formatTokens } from '../../utils/format.js';
 import { getSettingSourceName, type SettingSource } from '../../utils/settings/constants.js';
 import { plural } from '../../utils/stringUtils.js';
+import { t } from '../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Dialog } from '@anthropic/ink';
 import { filterSkills } from './filterSkills.js';
@@ -101,10 +102,10 @@ export function SkillsMenu({ onExit, commands }: Props): React.ReactNode {
 
   if (skills.length === 0) {
     return (
-      <Dialog title="Skills" subtitle="No skills found" onCancel={handleCancel} hideInputGuide>
-        <Text dimColor>Create skills in .claude/skills/ or ~/.claude/skills/</Text>
+      <Dialog title={t('skillsmenu.skills')} subtitle={t('skillsmenu.noSkillsFound')} onCancel={handleCancel} hideInputGuide>
+        <Text dimColor>{t('skillsMenu.createSkillsIn')}</Text>
         <Text dimColor italic>
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="close" />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.close')} />
         </Text>
       </Dialog>
     );
@@ -156,8 +157,8 @@ export function SkillsMenu({ onExit, commands }: Props): React.ReactNode {
   // boundary changes.
   return (
     <FuzzyPicker
-      title="Skills"
-      placeholder="Type to filter skills…"
+      title={t('skillsmenu.skills2')}
+      placeholder={t('skillsMenu.typeToFilterSkills')}
       items={orderedFilteredSkills}
       getKey={s => `${s.name}-${s.source}`}
       visibleCount={12}

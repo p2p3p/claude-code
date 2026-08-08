@@ -4,6 +4,7 @@ import {
   isFastModeEnabled,
 } from '../../utils/fastMode.js'
 import { shouldInferenceConfigCommandBeImmediate } from '../../utils/immediateCommand.js'
+import { t } from '../../utils/i18n/index.js'
 
 const fast = {
   type: 'local-jsx',

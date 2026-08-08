@@ -21,6 +21,7 @@ import { count } from 'src/utils/array.js';
 import { getSearchOrReadFromContent, getSearchReadSummaryText } from 'src/utils/collapseReadSearch.js';
 import { getDisplayPath } from 'src/utils/file.js';
 import { formatDuration, formatNumber } from 'src/utils/format.js';
+import { t } from 'src/utils/i18n/index.js';
 import { buildSubagentLookups, createAssistantMessage, EMPTY_LOOKUPS } from 'src/utils/messages.js';
 import type { ModelAlias } from 'src/utils/model/aliases.js';
 import { getMainLoopModel, parseUserSpecifiedModel, renderModelName } from 'src/utils/model/model.js';
@@ -203,7 +204,7 @@ export function AgentPromptDisplay({
   return (
     <Box flexDirection="column">
       <Text color="success" bold>
-        Prompt:
+        {t('toolUI.agent.prompt')}
       </Text>
       <Box paddingLeft={2}>
         <Markdown>{prompt}</Markdown>
@@ -221,7 +222,7 @@ export function AgentResponseDisplay({
   return (
     <Box flexDirection="column">
       <Text color="success" bold>
-        Response:
+        {t('toolUI.agent.response')}
       </Text>
       {content.map((block: { type: string; text: string }, index: number) => (
         <Box key={index} paddingLeft={2} marginTop={index === 0 ? 0 : 1}>
@@ -307,7 +308,7 @@ export function renderToolResultMessage(
       <Box flexDirection="column">
         <MessageResponse height={1}>
           <Text>
-            Remote agent launched{' '}
+            {t('toolUI.agent.remoteAgentLaunched')}{' '}
             <Text dimColor>
               · {internal.taskId} · {internal.sessionUrl}
             </Text>
@@ -322,7 +323,7 @@ export function renderToolResultMessage(
       <Box flexDirection="column">
         <MessageResponse height={1}>
           <Text>
-            Backgrounded agent
+            {t('toolUI.agent.backgroundedAgent')}
             {!isTranscriptMode && (
               <Text dimColor>
                 {' ('}
@@ -357,12 +358,12 @@ export function renderToolResultMessage(
 
   const { agentId, totalDurationMs, totalToolUseCount, totalTokens, usage, content, prompt } = data;
   const result = [
-    totalToolUseCount === 1 ? '1 tool use' : `${totalToolUseCount} tool uses`,
-    formatNumber(totalTokens) + ' tokens',
+    t('toolUI.agent.toolUses', totalToolUseCount),
+    t('toolUI.agent.tokens', formatNumber(totalTokens)),
     formatDuration(totalDurationMs),
   ];
 
-  const completionMessage = `Done (${result.join(' · ')})`;
+  const completionMessage = t('toolUI.agent.done', result.join(' · '));
 
   const finalAssistantMessage = createAssistantMessage({
     content: completionMessage,
@@ -373,7 +374,7 @@ export function renderToolResultMessage(
     <Box flexDirection="column">
       {process.env.USER_TYPE === 'ant' && (
         <MessageResponse>
-          <Text color="warning">[ANT-ONLY] API calls: {getDisplayPath(getDumpPromptsPath(agentId))}</Text>
+          <Text color="warning">{t('toolUI.agent.antOnlyApiCalls', getDisplayPath(getDumpPromptsPath(agentId)))}</Text>
         </MessageResponse>
       )}
       {isTranscriptMode && prompt && (
@@ -459,7 +460,7 @@ export function renderToolUseTag(
   return <>{tags}</>;
 }
 
-const INITIALIZING_TEXT = 'Initializing…';
+const INITIALIZING_TEXT = t('toolUI.agent.initializing');
 
 export function renderToolUseProgressMessage(
   progressMessages: ProgressMessage<Progress>[],
@@ -524,13 +525,13 @@ export function renderToolUseProgressMessage(
     return (
       <MessageResponse height={1}>
         <Text dimColor>
-          In progress… · <Text bold>{toolUseCount}</Text> tool {toolUseCount === 1 ? 'use' : 'uses'}
+          {t('toolUI.agent.inProgressPrefix')}<Text bold>{toolUseCount}</Text> {t('toolUI.agent.toolUseLabel', toolUseCount)}
           {tokens && ` · ${formatNumber(tokens)} tokens`} ·{' '}
           <ConfigurableShortcutHint
             action="app:toggleTranscript"
             context="Global"
             fallback="ctrl+o"
-            description="expand"
+            description={t('toolUI.agent.expand')}
             parens
           />
         </Text>
@@ -636,7 +637,7 @@ export function renderToolUseProgressMessage(
         </SubAgentProvider>
         {hiddenToolUseCount > 0 && (
           <Text dimColor>
-            +{hiddenToolUseCount} more tool {hiddenToolUseCount === 1 ? 'use' : 'uses'} <CtrlOToExpand />
+            {t('toolUI.agent.moreToolUses', hiddenToolUseCount)} <CtrlOToExpand />
           </Text>
         )}
       </Box>
@@ -670,7 +671,7 @@ export function renderToolUseRejectedMessage(
     <>
       {process.env.USER_TYPE === 'ant' && agentId && (
         <MessageResponse>
-          <Text color="warning">[ANT-ONLY] API calls: {getDisplayPath(getDumpPromptsPath(agentId))}</Text>
+          <Text color="warning">{t('toolUI.agent.antOnlyApiCalls', getDisplayPath(getDumpPromptsPath(agentId)))}</Text>
         </MessageResponse>
       )}
       {renderToolUseProgressMessage(progressMessagesForMessage, {
@@ -836,19 +837,19 @@ export function renderGroupedAgentToolUse(
           {allComplete ? (
             allAsync ? (
               <>
-                <Text bold>{toolUses.length}</Text> background agents launched{' '}
+                <Text bold>{toolUses.length}</Text>{t('toolUI.agent.backgroundAgentsLaunchedLabel')}
                 <Text dimColor>
                   <KeyboardShortcutHint shortcut="↓" action="manage" parens />
                 </Text>
               </>
             ) : (
               <>
-                <Text bold>{toolUses.length}</Text> {commonType ? `${commonType} agents` : 'agents'} finished
+                <Text bold>{toolUses.length}</Text> {t('toolUI.agent.agentsFinishedLabel', commonType ?? '')}
               </>
             )
           ) : (
             <>
-              Running <Text bold>{toolUses.length}</Text> {commonType ? `${commonType} agents` : 'agents'}…
+              {t('toolUI.agent.runningAgentsPrefix')}<Text bold>{toolUses.length}</Text> {t('toolUI.agent.runningAgentsLabel', commonType ?? '')}
             </>
           )}{' '}
         </Text>
@@ -892,11 +893,11 @@ export function userFacingName(
   if (input?.subagent_type && input.subagent_type !== GENERAL_PURPOSE_AGENT.agentType) {
     // Display "worker" agents as "Agent" for cleaner UI
     if (input.subagent_type === 'worker') {
-      return 'Agent';
+      return t('toolUI.agent.agent');
     }
     return input.subagent_type;
   }
-  return 'Agent';
+  return t('toolUI.agent.agent');
 }
 
 export function userFacingNameBackgroundColor(

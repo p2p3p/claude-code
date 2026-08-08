@@ -1,4 +1,5 @@
 import figures from 'figures';
+import { t } from '../../utils/i18n/index.js'
 import * as React from 'react';
 import type { SettingSource } from 'src/utils/settings/constants.js';
 import { type KeyboardEvent, Box, Text } from '@anthropic/ink';
@@ -43,7 +44,7 @@ export function AgentsList({ source, agents, onBack, onSelect, onCreateNew, chan
         <Text color={isCreateNewSelected ? 'suggestion' : undefined}>
           {isCreateNewSelected ? `${figures.pointer} ` : '  '}
         </Text>
-        <Text color={isCreateNewSelected ? 'suggestion' : undefined}>Create new agent</Text>
+        <Text color={isCreateNewSelected ? 'suggestion' : undefined}>{t('agentslist.createNewAgent')}</Text>
       </Box>
     );
   };
@@ -207,11 +208,11 @@ export function AgentsList({ source, agents, onBack, onSelect, onCreateNew, chan
 
   if (hasNoAgents) {
     return (
-      <Dialog title={sourceTitle} subtitle="No agents found" onCancel={onBack} hideInputGuide>
+      <Dialog title={sourceTitle} subtitle={t('agentslist.noAgentsFound')} onCancel={onBack} hideInputGuide>
         <Box flexDirection="column" gap={1} tabIndex={0} autoFocus onKeyDown={handleKeyDown}>
           {onCreateNew && <Box>{renderCreateNewOption()}</Box>}
-          <Text dimColor>No agents found. Create specialized subagents that Claude can delegate to.</Text>
-          <Text dimColor>Each subagent has its own context window, custom system prompt, and specific tools.</Text>
+          <Text dimColor>{t('agentslist.noAgentsFoundCreateSpecializedSubagentsThatClaudeCanDelegateTo')}</Text>
+          <Text dimColor>{t('agentslist.eachSubagentHasItsOwnContextWindowCustomSystemPromptAndSpecificTools')}</Text>
           <Text dimColor>
             Try creating: Code Reviewer, Code Simplifier, Security Reviewer, Tech Lead, or UX Reviewer.
           </Text>
@@ -253,7 +254,7 @@ export function AgentsList({ source, agents, onBack, onSelect, onCreateNew, chan
             {builtInAgents.length > 0 && (
               <Box flexDirection="column" marginBottom={1} paddingLeft={2}>
                 <Text dimColor>
-                  <Text bold>Built-in agents</Text> (always available)
+                  <Text bold>{t('agentslist.builtInAgents')}</Text> (always available)
                 </Text>
                 {builtInAgents.map(renderAgent)}
               </Box>

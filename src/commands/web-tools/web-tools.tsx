@@ -6,6 +6,7 @@ import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { useIsInsideModal } from '../../context/modalContext.js';
 import { getSettings_DEPRECATED, updateSettingsForSource } from '../../utils/settings/settings.js';
 import type { LocalJSXCommandCall, LocalJSXCommandContext } from '../../types/command.js';
+import { t } from '../../utils/i18n/index.js';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -34,16 +35,16 @@ type ViewState = { kind: 'main' } | { kind: 'config'; adapter: AdapterMeta };
 // ── Data ───────────────────────────────────────────────────────────────────
 
 const SEARCH_ADAPTERS: AdapterMeta[] = [
-  { key: 'tavily', label: 'Tavily', description: 'Tavily Search API (default)', hasConfig: true },
-  { key: 'api', label: 'Anthropic API', description: 'Anthropic server-side web search', hasConfig: false },
-  { key: 'bing', label: 'Bing', description: 'Scrape Bing HTML results', hasConfig: false },
-  { key: 'brave', label: 'Brave', description: 'Brave Search API (needs API key)', hasConfig: true },
-  { key: 'exa', label: 'Exa', description: 'Exa AI search (MCP endpoint)', hasConfig: true },
+  { key: 'tavily', label: 'Tavily', description: t('webTools.tavilySearch'), hasConfig: true },
+  { key: 'api', label: t('cmdUI.webSearch'), description: t('webTools.anthropicWebSearch'), hasConfig: false },
+  { key: 'bing', label: 'Bing', description: t('webTools.bingScrape'), hasConfig: false },
+  { key: 'brave', label: 'Brave', description: t('webTools.braveSearch'), hasConfig: true },
+  { key: 'exa', label: 'Exa', description: t('webTools.exaSearch'), hasConfig: true },
 ];
 
 const FETCH_ADAPTERS: AdapterMeta[] = [
-  { key: 'tavily', label: 'Tavily Extract', description: 'Use Tavily /extract (default)', hasConfig: true },
-  { key: 'http', label: 'HTTP Direct', description: 'Fetch URL directly via HTTP', hasConfig: true },
+  { key: 'tavily', label: 'Tavily Extract', description: t('webTools.tavilyExtract'), hasConfig: true },
+  { key: 'http', label: t('cmdUI.webFetch'), description: t('webTools.httpFetch'), hasConfig: true },
 ];
 
 // ── Config field definitions ───────────────────────────────────────────────
@@ -145,7 +146,7 @@ function MainView({
       </Box>
       <Box marginTop={1} flexDirection="row" gap={2}>
         <Text dimColor>{'\u2191\u2193'} navigate · Space select · Enter config · Esc close</Text>
-        <Text dimColor>Tab switch tab</Text>
+        <Text dimColor>{t('webTools.tabSwitchTab')}</Text>
       </Box>
     </Box>
   );
@@ -159,7 +160,7 @@ function getConfigFields(adapter: AdapterMeta): ConfigField[] {
     case 'tavily':
       fields.push({
         key: 'tavilyEndpointUrl',
-        label: 'Endpoint URL',
+        label: t('cmdUI.endpointUrl'),
         placeholder: 'https://tavily.claude-code-best.win',
         maskInput: false,
         getValue: s => s.tavilyEndpointUrl ?? 'https://tavily.claude-code-best.win',
@@ -169,8 +170,8 @@ function getConfigFields(adapter: AdapterMeta): ConfigField[] {
     case 'brave':
       fields.push({
         key: 'braveApiKey',
-        label: 'API Key',
-        placeholder: 'BSA...',
+        label: t('cmdUI.apiKey'),
+        placeholder: t('webTools.bsaPlaceholder'),
         maskInput: true,
         getValue: s => s.braveApiKey ?? '',
         setValue: (s, v) => ({ ...s, braveApiKey: v || undefined }),
@@ -179,15 +180,15 @@ function getConfigFields(adapter: AdapterMeta): ConfigField[] {
     case 'exa':
       fields.push({
         key: 'exaApiKey',
-        label: 'API Key',
-        placeholder: 'exa-...',
+        label: t('cmdUI.apiKey'),
+        placeholder: t('webTools.exaPlaceholder'),
         maskInput: true,
         getValue: s => s.exaApiKey ?? '',
         setValue: (s, v) => ({ ...s, exaApiKey: v || undefined }),
       });
       fields.push({
         key: 'exaEndpointUrl',
-        label: 'Endpoint URL',
+        label: t('cmdUI.endpointUrl'),
         placeholder: 'https://mcp.exa.ai/mcp',
         maskInput: false,
         getValue: s => s.exaEndpointUrl ?? 'https://mcp.exa.ai/mcp',
@@ -197,7 +198,7 @@ function getConfigFields(adapter: AdapterMeta): ConfigField[] {
     case 'http':
       fields.push({
         key: 'webFetchHttpTimeoutMs',
-        label: 'Timeout (ms)',
+        label: t('cmdUI.timeoutMs'),
         placeholder: '60000',
         maskInput: false,
         getValue: s => String(s.webFetchHttpTimeoutMs ?? 60000),
@@ -262,7 +263,7 @@ function NoConfigView({
       <Box flexDirection="column" marginTop={1}>
         <Text>{adapter.description}</Text>
         <Box marginTop={1}>
-          <Text dimColor>No additional configuration needed.</Text>
+          <Text dimColor>{t('cmdUI.noConfig')}</Text>
         </Box>
       </Box>
       <Box flexDirection="column" marginTop={1}>
@@ -273,7 +274,7 @@ function NoConfigView({
             color={cursor === 0 ? 'inverseText' : undefined}
             bold
           >
-            [ Select & Close ]
+            {t('cmdUI.selectClose')}
           </Text>
         </Box>
         <Box>
@@ -282,7 +283,7 @@ function NoConfigView({
             backgroundColor={cursor === 1 ? 'suggestion' : undefined}
             color={cursor === 1 ? 'inverseText' : undefined}
           >
-            [ Back ]
+            {t('cmdUI.back')}
           </Text>
         </Box>
       </Box>
@@ -440,7 +441,7 @@ function ConfigFieldsEditor({
             color={cursor === saveRow ? 'inverseText' : undefined}
             bold
           >
-            [ Save ]
+            {t('cmdUI.save')}
           </Text>
         </Box>
         <Box>
@@ -449,7 +450,7 @@ function ConfigFieldsEditor({
             backgroundColor={cursor === backRow ? 'suggestion' : undefined}
             color={cursor === backRow ? 'inverseText' : undefined}
           >
-            [ Back ]
+            {t('cmdUI.back')}
           </Text>
         </Box>
       </Box>
@@ -542,30 +543,30 @@ function WebToolsPanel({
   const current = currentTab === 'search' ? currentSearch : currentFetch;
 
   return (
-    <Tabs title="Web Tools" contentHeight={contentHeight}>
-      <Tab key="search" title="Search">
+    <Tabs title={t('cmdUI.webTools')} contentHeight={contentHeight}>
+      <Tab key="search" title={t('webTools.search')}>
         <MainView
           tab={currentTab}
           adapters={SEARCH_ADAPTERS}
           current={currentSearch}
-          fieldLabel="Choose a web search backend:"
+          fieldLabel={t('cmdUI.chooseSearch')}
           onConfigure={handleConfigure}
           onSwitchTab={setCurrentTab}
           onSelectAdapter={handleSelectAdapter}
-          onClose={() => onClose('Web tools panel dismissed')}
+          onClose={() => onClose(t('cmdUI.webTools') + ' panel dismissed')}
           contentHeight={contentHeight}
         />
       </Tab>
-      <Tab key="fetch" title="Fetch">
+      <Tab key="fetch" title={t('webTools.fetch')}>
         <MainView
           tab={currentTab}
           adapters={FETCH_ADAPTERS}
           current={currentFetch}
-          fieldLabel="Choose a web fetch backend:"
+          fieldLabel={t('cmdUI.chooseFetch')}
           onConfigure={handleConfigure}
           onSwitchTab={setCurrentTab}
           onSelectAdapter={handleSelectAdapter}
-          onClose={() => onClose('Web tools panel dismissed')}
+          onClose={() => onClose(t('cmdUI.webTools') + ' panel dismissed')}
           contentHeight={contentHeight}
         />
       </Tab>

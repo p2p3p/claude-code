@@ -5,6 +5,7 @@
 import '../utils/performanceShim.js';
 import { feature } from 'bun:bundle';
 import { isEnvTruthy } from '../utils/envUtils.js';
+import { t } from '../utils/i18n/index.js';
 
 // Runtime fallback for MACRO.* when not injected by build/dev defines.
 // This happens when running cli.tsx directly (not via `bun run dev` or built dist/).
@@ -164,7 +165,7 @@ async function main(): Promise<void> {
   if (args[0] === '--daemon-worker' || args[0]?.startsWith('--daemon-worker=')) {
     if (!feature('DAEMON')) {
       console.error(
-        'Error: --daemon-worker requires DAEMON feature to be enabled. Set FEATURE_DAEMON=1 or add DAEMON to DEFAULT_BUILD_FEATURES.',
+        t('entrypoint.daemonWorkerError'),
       );
       process.exitCode = 1;
       return;
@@ -280,7 +281,7 @@ async function main(): Promise<void> {
     (args[0] === 'ps' || args[0] === 'logs' || args[0] === 'attach' || args[0] === 'kill')
   ) {
     const mapped = args[0] === 'ps' ? 'status' : args[0];
-    console.error(`[deprecated] Use: claude daemon ${mapped}${args[1] ? ' ' + args[1] : ''}`);
+    console.error(`[deprecated] ${t('entrypoint.useClaudeDaemon', mapped)}${args[1] ? ' ' + args[1] : ''}`);
     profileCheckpoint('cli_daemon_path');
     const { enableConfigs } = await import('../utils/config.js');
     enableConfigs();
@@ -306,7 +307,7 @@ async function main(): Promise<void> {
 
   // Backward-compat: new/list/reply → job <sub> (deprecated)
   if (feature('TEMPLATES') && (args[0] === 'new' || args[0] === 'list' || args[0] === 'reply')) {
-    console.error(`[deprecated] Use: claude job ${args[0]} ${args.slice(1).join(' ')}`.trim());
+    console.error(`[deprecated] ${t('entrypoint.useClaudeJob', args[0], args.slice(1).join(' '))}`.trim());
     profileCheckpoint('cli_templates_path');
     const { templatesMain } = await import('../cli/handlers/templateJobs.js');
     await templatesMain(args);

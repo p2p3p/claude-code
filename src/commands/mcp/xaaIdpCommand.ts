@@ -20,17 +20,16 @@ import {
 } from '../../services/mcp/xaaIdpLogin.js'
 import { errorMessage } from '../../utils/errors.js'
 import { updateSettingsForSource } from '../../utils/settings/settings.js'
+import { t } from '../../utils/i18n/index.js'
 
 export function registerMcpXaaIdpCommand(mcp: Command): void {
   const xaaIdp = mcp
     .command('xaa')
-    .description('Manage the XAA (SEP-990) IdP connection')
+    .description(t('xaaIdp.manageIdp'))
 
   xaaIdp
     .command('setup')
-    .description(
-      'Configure the IdP connection (one-time setup for all XAA-enabled servers)',
-    )
+    .description(t('xaaIdp.setupIdp'))
     .requiredOption('--issuer <url>', 'IdP issuer URL (OIDC discovery)')
     .requiredOption('--client-id <id>', "Claude Code's client_id at the IdP")
     .option(
@@ -218,7 +217,7 @@ export function registerMcpXaaIdpCommand(mcp: Command): void {
 
   xaaIdp
     .command('show')
-    .description('Show the current IdP connection config')
+    .description(t('xaaIdp.showIdpConfig'))
     .action(() => {
       const idp = getXaaIdpSettings()
       if (!idp) {
@@ -242,7 +241,7 @@ export function registerMcpXaaIdpCommand(mcp: Command): void {
 
   xaaIdp
     .command('clear')
-    .description('Clear the IdP connection config and cached id_token')
+    .description(t('xaaIdp.clearIdp'))
     .action(() => {
       // Read issuer first so we can clear the right keychain slots.
       const idp = getXaaIdpSettings()

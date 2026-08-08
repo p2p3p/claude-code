@@ -12,13 +12,12 @@ import { Box, Text } from '@anthropic/ink';
 import type { Tools } from 'src/Tool.js';
 import type { ProgressMessage } from 'src/types/message.js';
 import { buildSubagentLookups, EMPTY_LOOKUPS } from 'src/utils/messages.js';
-import { plural } from 'src/utils/stringUtils.js';
+import { t } from 'src/utils/i18n/index.js';
 import type { inputSchema, Output, Progress } from './SkillTool.js';
 
 type Input = z.infer<ReturnType<typeof inputSchema>>;
 
 const MAX_PROGRESS_MESSAGES_TO_SHOW = 3;
-const INITIALIZING_TEXT = 'Initializing…';
 
 export function renderToolResultMessage(output: Output): React.ReactNode {
   // Handle forked skill result
@@ -26,18 +25,18 @@ export function renderToolResultMessage(output: Output): React.ReactNode {
     return (
       <MessageResponse height={1}>
         <Text>
-          <Byline>{['Done']}</Byline>
+          <Byline>{[t('toolUI.skill.done')]}</Byline>
         </Text>
       </MessageResponse>
     );
   }
 
-  const parts: string[] = ['Successfully loaded skill'];
+  const parts: string[] = [t('toolUI.skill.loaded')];
 
   // Show tools count (only for inline skills)
   if ('allowedTools' in output && output.allowedTools && output.allowedTools.length > 0) {
     const count = output.allowedTools.length;
-    parts.push(`${count} ${plural(count, 'tool')} allowed`);
+    parts.push(t('toolUI.skill.toolsAllowed', count));
   }
 
   // Show model if non-default (only for inline skills)
@@ -80,7 +79,7 @@ export function renderToolUseProgressMessage(
   if (!progressMessages.length) {
     return (
       <MessageResponse height={1}>
-        <Text dimColor>{INITIALIZING_TEXT}</Text>
+        <Text dimColor>{t('toolUI.skill.initializing')}</Text>
       </MessageResponse>
     );
   }
@@ -117,7 +116,7 @@ export function renderToolUseProgressMessage(
         </SubAgentProvider>
         {hiddenCount > 0 && (
           <Text dimColor>
-            +{hiddenCount} more tool {plural(hiddenCount, 'use')}
+            {t('toolUI.skill.moreToolUses', hiddenCount)}
           </Text>
         )}
       </Box>

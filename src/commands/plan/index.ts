@@ -1,4 +1,5 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const plan = {
   bridgeSafe: true,
@@ -11,7 +12,7 @@ const plan = {
   },
   type: 'local-jsx',
   name: 'plan',
-  description: 'Enable plan mode or view the current session plan',
+  description: t('cmd.descPlan'),
   argumentHint: '[open|<description>]',
   load: () => import('./plan.js'),
 } satisfies Command

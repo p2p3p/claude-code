@@ -5,6 +5,7 @@ import { Box, Byline, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js';
 import { createAbortController } from '../../../../utils/abortController.js';
 import { editPromptInEditor } from '../../../../utils/promptEditor.js';
+import { t } from '../../../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { Spinner } from '../../../Spinner.js';
 import TextInput from '../../../TextInput.js';
@@ -125,7 +126,7 @@ export function GenerateStep(): ReactNode {
       <WizardDialogLayout
         subtitle={subtitle}
         footerText={
-          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="cancel" />
+          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.cancel')} />
         }
       >
         <Box flexDirection="row" alignItems="center">
@@ -141,14 +142,14 @@ export function GenerateStep(): ReactNode {
       subtitle={subtitle}
       footerText={
         <Byline>
-          <ConfigurableShortcutHint action="confirm:yes" context="Confirmation" fallback="Enter" description="submit" />
+          <ConfigurableShortcutHint action="confirm:yes" context="Confirmation" fallback="Enter" description={t('desc.submit')} />
           <ConfigurableShortcutHint
             action="chat:externalEditor"
             context="Chat"
             fallback="ctrl+g"
-            description="open in editor"
+            description={t('desc.openInEditor')}
           />
-          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="go back" />
+          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.goBack')} />
         </Byline>
       }
     >

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { getIsRemoteMode } from '../../bootstrap/state.js'
+import { t } from '../../utils/i18n/index.js'
 import {
   type Notification,
   useNotifications,
@@ -22,7 +23,7 @@ function foldSpawn(acc: Notification, _incoming: Notification): Notification {
 function makeSpawnNotif(count: number): Notification {
   return {
     key: 'teammate-spawn',
-    text: count === 1 ? '1 agent spawned' : `${count} agents spawned`,
+    text: t('notif.teammate.agentsSpawned', { count }),
     priority: 'low',
     timeoutMs: 5000,
     fold: foldSpawn,
@@ -39,7 +40,7 @@ function foldShutdown(
 function makeShutdownNotif(count: number): Notification {
   return {
     key: 'teammate-shutdown',
-    text: count === 1 ? '1 agent shut down' : `${count} agents shut down`,
+    text: t('notif.teammate.agentsShutDown', { count }),
     priority: 'low',
     timeoutMs: 5000,
     fold: foldShutdown,

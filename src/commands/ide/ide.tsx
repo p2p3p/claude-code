@@ -28,6 +28,7 @@ import {
   toIDEDisplayName,
 } from '../../utils/ide.js';
 import { getCurrentWorktreeSession } from '../../utils/worktree.js';
+import { t } from '../../utils/i18n/index.js'
 
 type IDEScreenProps = {
   availableIDEs: DetectedIDEInfo[];
@@ -97,8 +98,8 @@ function IDEScreen({
 
   return (
     <Dialog
-      title="Select IDE"
-      subtitle="Connect to an IDE for integrated development features."
+      title={t("cmdSystemUI.selectIDE")}
+      subtitle={t('commandsIde.connectToAnIDEForIntegratedDevelopmentFeatures')}
       onCancel={onClose}
       color="ide"
     >
@@ -126,7 +127,7 @@ function IDEScreen({
         {availableIDEs.length !== 0 &&
           availableIDEs.some(ide => ide.name === 'VS Code' || ide.name === 'Visual Studio Code') && (
             <Box marginTop={1}>
-              <Text color="warning">Note: Only one Claude Code instance can be connected to VS Code at a time.</Text>
+              <Text color="warning">{t('commandsIde.noteOnlyOneClaudeCodeInstanceCanBeConnectedToVSCodeAtATime')}</Text>
             </Box>
           )}
         {availableIDEs.length !== 0 && !isSupportedTerminal() && (
@@ -200,7 +201,7 @@ function IDEOpenSelection({ availableIDEs, onSelectIDE, onDone }: IDEOpenSelecti
   }
 
   return (
-    <Dialog title="Select an IDE to open the project" onCancel={handleCancel} color="ide">
+    <Dialog title={t("cmdSystemUI.selectIDEToOpen")} onCancel={handleCancel} color="ide">
       <Select
         defaultValue={selectedValue}
         defaultFocusValue={selectedValue}
@@ -242,7 +243,7 @@ function RunningIDESelector({
   }
 
   return (
-    <Dialog title="Select IDE to install extension" onCancel={handleCancel} color="ide">
+    <Dialog title={t("cmdSystemUI.selectIDEToInstall")} onCancel={handleCancel} color="ide">
       <Select
         defaultFocusValue={selectedValue}
         options={options}

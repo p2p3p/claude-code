@@ -10,6 +10,7 @@ import { type ExtraUsage, fetchUtilization, type RateLimit, type Utilization } f
 import { formatResetText } from '../../utils/format.js';
 import { logError } from '../../utils/log.js';
 import { jsonStringify } from '../../utils/slowOperations.js';
+import { t } from '../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Byline, ProgressBar } from '@anthropic/ink';
 import { isEligibleForOverageCreditGrant, OverageCreditUpsell } from '../LogoV2/OverageCreditUpsell.js';
@@ -126,11 +127,11 @@ export function Usage(): React.ReactNode {
   if (error) {
     return (
       <Box flexDirection="column" gap={1}>
-        <Text color="error">Error: {error}</Text>
+        <Text color="error">{t('settingsUsage.error')}: {error}</Text>
         <Text dimColor>
           <Byline>
-            <ConfigurableShortcutHint action="settings:retry" context="Settings" fallback="r" description="retry" />
-            <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="cancel" />
+            <ConfigurableShortcutHint action="settings:retry" context="Settings" fallback="r" description={t('desc.retry')} />
+            <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.cancel')} />
           </Byline>
         </Text>
       </Box>
@@ -140,9 +141,9 @@ export function Usage(): React.ReactNode {
   if (!utilization) {
     return (
       <Box flexDirection="column" gap={1}>
-        <Text dimColor>Loading usage data…</Text>
+        <Text dimColor>{t('settingsUsage.loading')}</Text>
         <Text dimColor>
-          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="cancel" />
+          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.cancel')} />
         </Text>
       </Box>
     );
@@ -157,17 +158,17 @@ export function Usage(): React.ReactNode {
 
   const limits = [
     {
-      title: 'Current session',
+      title: t('settingsUsage.currentSession'),
       limit: utilization.five_hour,
     },
     {
-      title: 'Current week (all models)',
+      title: t('settingsUsage.currentWeekAll'),
       limit: utilization.seven_day,
     },
     ...(showSonnetBar
       ? [
           {
-            title: 'Current week (Sonnet only)',
+            title: t('settingsUsage.currentWeekSonnet'),
             limit: utilization.seven_day_sonnet,
           },
         ]
@@ -176,7 +177,7 @@ export function Usage(): React.ReactNode {
 
   return (
     <Box flexDirection="column" gap={1} width="100%">
-      {limits.some(({ limit }) => limit) || <Text dimColor>/usage is only available for subscription plans.</Text>}
+      {limits.some(({ limit }) => limit) || <Text dimColor>{t('settingsUsage.onlyAvailableForSubscriptions')}</Text>}
 
       {limits.map(
         ({ title, limit }) => limit && <LimitBar key={title} title={title} limit={limit} maxWidth={maxWidth} />,
@@ -187,7 +188,7 @@ export function Usage(): React.ReactNode {
       {isEligibleForOverageCreditGrant() && <OverageCreditUpsell maxWidth={maxWidth} />}
 
       <Text dimColor>
-        <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="cancel" />
+        <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.cancel')} />
       </Text>
     </Box>
   );
@@ -213,7 +214,7 @@ function ExtraUsageSection({ extraUsage, maxWidth }: ExtraUsageSectionProps): Re
       return (
         <Box flexDirection="column">
           <Text bold>{EXTRA_USAGE_SECTION_TITLE}</Text>
-          <Text dimColor>Extra usage not enabled · /extra-usage to enable</Text>
+          <Text dimColor>{t('settingsUsage2.extraUsageNotEnabled')}</Text>
         </Box>
       );
     }
@@ -225,7 +226,7 @@ function ExtraUsageSection({ extraUsage, maxWidth }: ExtraUsageSectionProps): Re
     return (
       <Box flexDirection="column">
         <Text bold>{EXTRA_USAGE_SECTION_TITLE}</Text>
-        <Text dimColor>Unlimited</Text>
+        <Text dimColor>{t('settingsUsage.unlimited')}</Text>
       </Box>
     );
   }

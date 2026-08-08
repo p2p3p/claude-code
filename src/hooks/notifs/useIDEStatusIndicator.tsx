@@ -5,6 +5,7 @@ import type { MCPServerConnection } from 'src/services/mcp/types.js';
 import { getGlobalConfig, saveGlobalConfig } from 'src/utils/config.js';
 import { detectIDEs, type IDEExtensionInstallationStatus, isJetBrainsIde, isSupportedTerminal } from 'src/utils/ide.js';
 import { getIsRemoteMode } from '../../bootstrap/state.js';
+import { t } from '../../utils/i18n/index.js';
 import { useIdeConnectionStatus } from '../useIdeConnectionStatus.js';
 import type { IDESelection } from '../useIdeSelection.js';
 
@@ -62,7 +63,7 @@ export function useIDEStatusIndicator({ ideSelection, mcpClients, ideInstallatio
               key: 'ide-status-hint',
               jsx: (
                 <Text dimColor>
-                  /ide for <Text color="ide">{ideName}</Text>
+                  {t('notif.ideStatus.hint')}<Text color="ide">{ideName}</Text>
                 </Text>
               ),
               priority: 'low',
@@ -86,7 +87,7 @@ export function useIDEStatusIndicator({ ideSelection, mcpClients, ideInstallatio
     }
     addNotification({
       key: 'ide-status-disconnected',
-      text: `${ideName} disconnected`,
+      text: t('notif.ideStatus.disconnected', { ideName }),
       color: 'error',
       priority: 'medium',
     });
@@ -101,7 +102,7 @@ export function useIDEStatusIndicator({ ideSelection, mcpClients, ideInstallatio
     }
     addNotification({
       key: 'ide-status-jetbrains-disconnected',
-      text: 'IDE plugin not connected · /status for info',
+      text: t('notif.ideStatus.pluginNotConnected'),
       priority: 'medium',
     });
   }, [addNotification, removeNotification, showJetBrainsInfo]);
@@ -115,7 +116,7 @@ export function useIDEStatusIndicator({ ideSelection, mcpClients, ideInstallatio
     }
     addNotification({
       key: 'ide-status-install-error',
-      text: 'IDE extension install failed (see /status for info)',
+      text: t('notif.ideStatus.installFailed'),
       color: 'error',
       priority: 'medium',
     });

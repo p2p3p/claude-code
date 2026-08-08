@@ -1,5 +1,6 @@
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { Box, Link, Text, type TextProps } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js'
 import { FilePathLink } from '../FilePathLink.js';
 import { feature } from 'bun:bundle';
 import * as React from 'react';
@@ -70,7 +71,7 @@ export function SystemTextMessage({ message, addMargin, verbose, isTranscriptMod
         <Box minWidth={2}>
           <Text color="error">{BLACK_CIRCLE}</Text>
         </Box>
-        <Text dimColor>All background agents stopped</Text>
+        <Text dimColor>{t('systemtextmessage.allBackgroundAgentsStopped')}</Text>
       </Box>
     );
   }
@@ -101,7 +102,7 @@ export function SystemTextMessage({ message, addMargin, verbose, isTranscriptMod
     return (
       <Box marginTop={addMargin ? 1 : 0} backgroundColor={bg} width="100%">
         <Text dimColor>{TEARDROP_ASTERISK} </Text>
-        <Text>Allowed </Text>
+        <Text>{t('systemtextmessage.allowed')} </Text>
         <Text bold>{(message.commands as string[]).join(', ')}</Text>
       </Box>
     );

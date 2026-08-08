@@ -4,9 +4,10 @@ import type { ToolProgressData } from 'src/Tool.js';
 import type { ProgressMessage } from 'src/types/message.js';
 import type { ThemeName } from 'src/utils/theme.js';
 import type { Output } from './EnterWorktreeTool.js';
+import { t } from 'src/utils/i18n/index.js';
 
 export function renderToolUseMessage(): React.ReactNode {
-  return 'Creating worktree…';
+  return t('toolUI.enterWorktree.creating');
 }
 
 export function renderToolResultMessage(
@@ -18,11 +19,11 @@ export function renderToolResultMessage(
   return (
     <Box flexDirection="column">
       <Text>
-        Switched to worktree
+        {t('toolUI.enterWorktree.switched')}
         {output.worktreeBranch ? (
           <>
             {' '}
-            on branch <Text bold>{output.worktreeBranch}</Text>
+            {t('toolUI.enterWorktree.onBranch')}<Text bold>{output.worktreeBranch}</Text>
           </>
         ) : null}
       </Text>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { BLACK_CIRCLE } from '../../constants/figures.js';
 import { Box, Text } from '@anthropic/ink';
 import { useDebouncedDigitInput } from './useDebouncedDigitInput.js';
@@ -35,7 +36,7 @@ export function TranscriptSharePrompt({ onSelect, inputValue, setInputValue }: P
     <Box flexDirection="column" marginTop={1}>
       <Box>
         <Text color="ansi:cyan">{BLACK_CIRCLE} </Text>
-        <Text bold>Can Anthropic look at your session transcript to help us improve Claude Code?</Text>
+        <Text bold>{t('transcriptshareprompt.canAnthropicLookAtYourSessionTranscriptToHelpUsImproveClaudeCode')}</Text>
       </Box>
 
       <Box marginLeft={2}>

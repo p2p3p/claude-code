@@ -1,5 +1,6 @@
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { feature } from 'bun:bundle';
+import { t } from '../utils/i18n/index.js'
 import { spawnSync } from 'child_process';
 import {
   snapshotOutputTokensForTurn,
@@ -6446,7 +6447,7 @@ export function REPL({
                         inputValue={inputValue}
                         setInputValue={setInputValue}
                         onRequestFeedback={handleSurveyRequestFeedback}
-                        message="How well did Claude use its memory? (optional)"
+                        message={t('repl.howWellDidClaudeUseItsMemoryOptional')}
                       />
                     ) : (
                       <FeedbackSurvey

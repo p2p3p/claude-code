@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { Select } from '../../../components/CustomSelect/select.js';
 import { Box, Dialog, Text } from '@anthropic/ink';
 import type { ToolPermissionContext } from '../../../Tool.js';
+import { t } from '../../../utils/i18n/index.js';
 import type {
   PermissionBehavior,
   PermissionRule,
@@ -22,19 +23,19 @@ export function optionForPermissionSaveDestination(saveDestination: EditableSett
   switch (saveDestination) {
     case 'localSettings':
       return {
-        label: 'Project settings (local)',
+        label: t('addPermissionRules.projectLocal'),
         description: `Saved in ${getRelativeSettingsFilePathForSource('localSettings')}`,
         value: saveDestination,
       };
     case 'projectSettings':
       return {
-        label: 'Project settings',
+        label: t('addPermissionRules.project'),
         description: `Checked in at ${getRelativeSettingsFilePathForSource('projectSettings')}`,
         value: saveDestination,
       };
     case 'userSettings':
       return {
-        label: 'User settings',
+        label: t('addPermissionRules.user'),
         description: `Saved in at ~/.claude/settings.json`,
         value: saveDestination,
       };

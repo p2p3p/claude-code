@@ -1,5 +1,6 @@
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import React, { useMemo } from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Ansi, Box, Text } from '@anthropic/ink';
 import { FilePathLink } from '../FilePathLink.js';
 import { toInkColor } from '../../utils/ink.js';
@@ -80,7 +81,7 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
             return (
               <Box key={idx} paddingLeft={2}>
                 <Text>{BLACK_CIRCLE} </Text>
-                <Text>Task assigned: </Text>
+                <Text>{t('attachmentmessage.taskAssigned')} </Text>
                 <Text bold>#{parsedMsg.taskId}</Text>
                 <Text> - {parsedMsg.subject}</Text>
                 <Text dimColor> (from {parsedMsg.assignedBy || msg.from})</Text>
@@ -146,7 +147,7 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
       const names = attachment.tools.map(t => t.name).join(', ');
       return (
         <Line>
-          <Text dimColor>Discovered tools: </Text>
+          <Text dimColor>{t('attachmentmessage.discoveredTools')} </Text>
           <Text>{names}</Text>
         </Line>
       );

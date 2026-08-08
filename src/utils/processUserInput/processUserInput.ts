@@ -53,6 +53,7 @@ import {
   createSystemMessage,
   createUserMessage,
 } from '../messages.js'
+import { t } from '../i18n/index.js'
 import { queryCheckpoint } from '../queryProfiler.js'
 import { parseSlashCommand } from '../slashCommandParsing.js'
 import {
@@ -220,8 +221,8 @@ export async function processUserInput({
     // prompt in context.
     if (hookResult.preventContinuation) {
       const message = hookResult.stopReason
-        ? `Operation stopped by hook: ${hookResult.stopReason}`
-        : 'Operation stopped by hook'
+        ? t('processUserInput.stoppedByHookReason', { reason: hookResult.stopReason })
+        : t('processUserInput.stoppedByHook')
       result.messages.push(
         createUserMessage({
           content: message,
@@ -283,7 +284,7 @@ const MAX_HOOK_OUTPUT_LENGTH = 10000
 
 function applyTruncation(content: string): string {
   if (content.length > MAX_HOOK_OUTPUT_LENGTH) {
-    return `${content.substring(0, MAX_HOOK_OUTPUT_LENGTH)}… [output truncated - exceeded ${MAX_HOOK_OUTPUT_LENGTH} characters]`
+    return `${content.substring(0, MAX_HOOK_OUTPUT_LENGTH)}… ${t('processUserInput.outputTruncated', { maxChars: MAX_HOOK_OUTPUT_LENGTH })}`
   }
   return content
 }
@@ -424,7 +425,7 @@ async function processUserInputBase(
       }
     } else if (sourcePath) {
       // If we have a source path but no dimensions, still add source info
-      imageMetadataTexts.push(`[Image source: ${sourcePath}]`)
+      imageMetadataTexts.push(t('processUserInput.imageSource', { sourcePath }))
     }
     imageContentBlocks.push(resized.block)
   }
@@ -449,7 +450,7 @@ async function processUserInputBase(
       } else {
         const msg =
           safety.reason ??
-          `/${getCommandName(cmd)} isn't available over Remote Control.`
+          t('processUserInput.remoteControlUnavailable', { command: getCommandName(cmd) })
         return {
           messages: [
             createUserMessage({ content: inputString, uuid }),

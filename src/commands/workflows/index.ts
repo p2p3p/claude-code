@@ -1,4 +1,5 @@
 import type { Command } from '../../types/command.js'
+import { t } from '../../utils/i18n/index.js'
 
 const workflows = {
   type: 'local-jsx',

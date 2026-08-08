@@ -5,6 +5,7 @@ import { OutputLine } from 'src/components/shell/OutputLine.js';
 import type { ToolProgressData } from 'src/Tool.js';
 import type { ProgressMessage } from 'src/types/message.js';
 import { jsonStringify } from 'src/utils/slowOperations.js';
+import { t } from 'src/utils/i18n/index.js';
 import type { Output } from './LocalMemoryRecallTool.js';
 
 // H6 fix: second `options` parameter matches Tool interface contract
@@ -28,7 +29,7 @@ export function renderToolUseMessage(
   const action = input.action ?? 'list_stores';
   const store = input.store ? ` ${input.store}` : '';
   const key = input.key ? `/${input.key}` : '';
-  const preview = action === 'fetch' && input.preview_only === false ? ' (full)' : '';
+  const preview = action === 'fetch' && input.preview_only === false ? t('toolUI.localMemoryRecall.full') : '';
   return `${action}${store}${key}${preview}`;
 }
 
@@ -40,7 +41,7 @@ export function renderToolResultMessage(
   if (output.error) {
     return (
       <MessageResponse height={1}>
-        <Text color="error">Error: {output.error}</Text>
+        <Text color="error">{t('toolUI.localMemoryRecall.error', output.error)}</Text>
       </MessageResponse>
     );
   }
@@ -49,13 +50,13 @@ export function renderToolResultMessage(
     if (!output.stores || output.stores.length === 0) {
       return (
         <MessageResponse height={1}>
-          <Text dimColor>(No stores)</Text>
+          <Text dimColor>{t('toolUI.localMemoryRecall.noStores')}</Text>
         </MessageResponse>
       );
     }
     return (
       <MessageResponse height={Math.min(output.stores.length, 10)}>
-        <Text>Stores: {output.stores.join(', ')}</Text>
+        <Text>{t('toolUI.localMemoryRecall.stores', output.stores.join(', '))}</Text>
       </MessageResponse>
     );
   }
@@ -64,14 +65,14 @@ export function renderToolResultMessage(
     if (!output.entries || output.entries.length === 0) {
       return (
         <MessageResponse height={1}>
-          <Text dimColor>(No entries in {output.store ?? '?'})</Text>
+          <Text dimColor>{t('toolUI.localMemoryRecall.noEntries', output.store ?? '?')}</Text>
         </MessageResponse>
       );
     }
     return (
       <MessageResponse height={Math.min(output.entries.length, 10)}>
         <Text>
-          {output.store}: {output.entries.join(', ')}
+          {t('toolUI.localMemoryRecall.entries', output.store ?? '', output.entries.join(', '))}
         </Text>
       </MessageResponse>
     );

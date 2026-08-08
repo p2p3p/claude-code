@@ -7,16 +7,17 @@ import type { ToolProgressData } from 'src/Tool.js';
 import type { ProgressMessage } from 'src/types/message.js';
 import { jsonStringify } from 'src/utils/slowOperations.js';
 import type { inputSchema, Output } from './ReadMcpResourceTool.js';
+import { t } from 'src/utils/i18n/index.js';
 
 export function renderToolUseMessage(input: Partial<z.infer<ReturnType<typeof inputSchema>>>): React.ReactNode {
   if (!input.uri || !input.server) {
     return null;
   }
-  return `Read resource "${input.uri}" from server "${input.server}"`;
+  return t('toolUI.readMcpResource.read', input.uri, input.server);
 }
 
 export function userFacingName(): string {
-  return 'readMcpResource';
+  return t('toolUI.readMcpResource.name');
 }
 
 export function renderToolResultMessage(
@@ -28,7 +29,7 @@ export function renderToolResultMessage(
     return (
       <Box justifyContent="space-between" overflowX="hidden" width="100%">
         <MessageResponse height={1}>
-          <Text dimColor>(No content)</Text>
+          <Text dimColor>{t('toolUI.readMcpResource.noContent')}</Text>
         </MessageResponse>
       </Box>
     );

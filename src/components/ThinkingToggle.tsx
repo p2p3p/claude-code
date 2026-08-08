@@ -6,6 +6,7 @@ import { useKeybinding } from '../keybindings/useKeybinding.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { Select } from './CustomSelect/index.js';
 import { Byline, KeyboardShortcutHint, Pane } from '@anthropic/ink';
+import { t } from '../utils/i18n/index.js';
 
 export type Props = {
   currentValue: boolean;
@@ -21,13 +22,13 @@ export function ThinkingToggle({ currentValue, onSelect, onCancel, isMidConversa
   const options = [
     {
       value: 'true',
-      label: 'Enabled',
-      description: 'Claude will think before responding',
+      label: t('thinkingToggle.enabled'),
+      description: t('thinkingToggle.enabledDesc'),
     },
     {
       value: 'false',
-      label: 'Disabled',
-      description: 'Claude will respond without extended thinking',
+      label: t('thinkingToggle.disabled'),
+      description: t('thinkingToggle.disabledDesc'),
     },
   ];
 
@@ -69,9 +70,9 @@ export function ThinkingToggle({ currentValue, onSelect, onCancel, isMidConversa
       <Box flexDirection="column">
         <Box marginBottom={1} flexDirection="column">
           <Text color="remember" bold>
-            Toggle thinking mode
+            {t('thinkingToggle.title')}
           </Text>
-          <Text dimColor>Enable or disable thinking for this session.</Text>
+          <Text dimColor>{t('thinkingToggle.desc')}</Text>
         </Box>
 
         {confirmationPending !== null ? (
@@ -80,7 +81,7 @@ export function ThinkingToggle({ currentValue, onSelect, onCancel, isMidConversa
               Changing thinking mode mid-conversation will increase latency and may reduce quality. For best results,
               set this at the start of a session.
             </Text>
-            <Text color="warning">Do you want to proceed?</Text>
+            <Text color="warning">{t('thinkingtoggle.doYouWantToProceed')}</Text>
           </Box>
         ) : (
           <Box flexDirection="column" marginBottom={1}>
@@ -97,16 +98,16 @@ export function ThinkingToggle({ currentValue, onSelect, onCancel, isMidConversa
       </Box>
       <Text dimColor italic>
         {exitState.pending ? (
-          <>Press {exitState.keyName} again to exit</>
+          <>{t('common.pressAgain', exitState.keyName)}</>
         ) : confirmationPending !== null ? (
           <Byline>
             <KeyboardShortcutHint shortcut="Enter" action="confirm" />
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
           </Byline>
         ) : (
           <Byline>
             <KeyboardShortcutHint shortcut="Enter" action="confirm" />
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="exit" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.exit')} />
           </Byline>
         )}
       </Text>

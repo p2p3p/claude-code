@@ -4,6 +4,7 @@ import { homedir } from 'os'
 import { delimiter, join, posix, win32 } from 'path'
 import { checkGlobalInstallPermissions } from './autoUpdater.js'
 import { isInBundledMode } from './bundledMode.js'
+import { t } from './i18n/index.js'
 import {
   formatAutoUpdaterDisabledReason,
   getAutoUpdaterDisabledReason,
@@ -343,7 +344,7 @@ async function detectConfigurationIssues(
         // wrong (an object, a string, etc.).
         warnings.push({
           issue: `managed-settings.json: strictPluginOnlyCustomization has an invalid value (expected true or an array, got ${typeof field})`,
-          fix: `The field is silently ignored (schema .catch rescues it). Set it to true, or an array of: ${CUSTOMIZATION_SURFACES.join(', ')}.`,
+          fix: t('doctorDiagnostic.strictPluginOnlyCustomizationFix', { surfaces: CUSTOMIZATION_SURFACES.join(', ') }),
         })
       } else {
         const unknown = field.filter(
@@ -353,8 +354,8 @@ async function detectConfigurationIssues(
         )
         if (unknown.length > 0) {
           warnings.push({
-            issue: `managed-settings.json: strictPluginOnlyCustomization has ${unknown.length} value(s) this client doesn't recognize: ${unknown.map(String).join(', ')}`,
-            fix: `These are silently ignored (forwards-compat). Known surfaces for this version: ${CUSTOMIZATION_SURFACES.join(', ')}. Either remove them, or this client is older than the managed-settings intended.`,
+            issue: t('doctorDiagnostic.strictPluginOnlyCustomizationIssue', { count: unknown.length, values: unknown.map(String).join(', ') }),
+            fix: t('doctorDiagnostic.strictPluginOnlyCustomizationFix2', { surfaces: CUSTOMIZATION_SURFACES.join(', ') }),
           })
         }
       }
@@ -381,7 +382,7 @@ async function detectConfigurationIssues(
         if (hasWslBash && !hasGitBash) {
           warnings.push({
             issue:
-              'Windows PATH has WSL bash (C:\\Windows\\System32\\bash.exe) but no Git for Windows bash',
+              t('doctorDiagnostic.wslBashNoGitBash'),
             fix: 'Install Git for Windows (https://git-scm.com/download/windows). Without it, CCB cannot run hooks or BashTool correctly on Windows. If you cannot install it, set CLAUDE_CODE_GIT_BASH_PATH to a working bash.exe.',
           })
         }
@@ -436,8 +437,8 @@ async function detectConfigurationIssues(
           .split(posix.sep)
           .join(win32.sep)
         warnings.push({
-          issue: `Native installation exists but ${windowsLocalBinPath} is not in your PATH`,
-          fix: `Add it by opening: System Properties → Environment Variables → Edit User PATH → New → Add the path above. Then restart your terminal.`,
+          issue: t('doctorDiagnostic.nativeNotInPathWindows', { path: windowsLocalBinPath }),
+          fix: t('doctorDiagnostic.nativeNotInPathWindowsFix'),
         })
       } else {
         // Unix-style PATH instructions
@@ -450,8 +451,8 @@ async function detectConfigurationIssues(
 
         warnings.push({
           issue:
-            'Native installation exists but ~/.local/bin is not in your PATH',
-          fix: `Run: echo 'export PATH="$HOME/.local/bin:$PATH"' >> ${displayPath} then open a new terminal or run: source ${displayPath}`,
+            t('doctorDiagnostic.nativeNotInPath'),
+          fix: t('doctorDiagnostic.nativeNotInPathFix', { displayPath }),
         })
       }
     }
@@ -462,23 +463,23 @@ async function detectConfigurationIssues(
   if (!isEnvTruthy(process.env.DISABLE_INSTALLATION_CHECKS)) {
     if (type === 'npm-local' && config.installMethod !== 'local') {
       warnings.push({
-        issue: `Running from local installation but config install method is '${config.installMethod}'`,
-        fix: 'Consider using native installation: claude install',
+        issue: t('doctorDiagnostic.runningFromLocalInstall', { method: config.installMethod }),
+        fix: t('doctorDiagnostic.considerNativeInstall'),
       })
     }
 
     if (type === 'native' && config.installMethod !== 'native') {
       warnings.push({
-        issue: `Running native installation but config install method is '${config.installMethod}'`,
-        fix: 'Run claude install to update configuration',
+        issue: t('doctorDiagnostic.runningNativeInstallMethodMismatch', { method: config.installMethod }),
+        fix: t('doctorDiagnostic.runClaudeInstall'),
       })
     }
   }
 
   if (type === 'npm-global' && (await localInstallationExists())) {
     warnings.push({
-      issue: 'Local installation exists but not being used',
-      fix: 'Consider using native installation: claude install',
+      issue: t('doctorDiagnostic.localInstallNotUsed'),
+      fix: t('doctorDiagnostic.considerNativeInstall'),
     })
   }
 
@@ -496,14 +497,14 @@ async function detectConfigurationIssues(
       if (existingAlias) {
         // Alias exists but points to invalid target
         warnings.push({
-          issue: 'Local installation not accessible',
-          fix: `Alias exists but points to invalid target: ${existingAlias}. Update alias: alias claude="~/.claude/local/claude"`,
+          issue: t('doctorDiagnostic.localInstallNotAccessible'),
+          fix: t('doctorDiagnostic.localInstallAliasFix', { existingAlias }),
         })
       } else {
         // No alias exists and not in PATH
         warnings.push({
-          issue: 'Local installation not accessible',
-          fix: 'Create alias: alias claude="~/.claude/local/claude"',
+          issue: t('doctorDiagnostic.localInstallNotAccessible'),
+          fix: t('doctorDiagnostic.localInstallCreateAlias'),
         })
       }
     }
@@ -531,8 +532,8 @@ export function detectLinuxGlobPatternWarnings(): Array<{
       remaining > 0 ? `${displayPatterns} (${remaining} more)` : displayPatterns
 
     warnings.push({
-      issue: `Glob patterns in sandbox permission rules are not fully supported on Linux`,
-      fix: `Found ${globPatterns.length} pattern(s): ${patternList}. On Linux, glob patterns in Edit/Read rules will be ignored.`,
+      issue: t('doctorDiagnostic.sandboxGlobNotSupported'),
+      fix: t('doctorDiagnostic.sandboxGlobFix', { count: globPatterns.length, patternList }),
     })
   }
 
@@ -572,22 +573,22 @@ export async function getDoctorDiagnostic(): Promise<DiagnosticInfo> {
           uninstallCmd += ` && npm -g uninstall ${MACRO.PACKAGE_URL}`
         }
         warnings.push({
-          issue: `Leftover npm global installation at ${install.path}`,
-          fix: `Run: ${uninstallCmd}`,
+          issue: t('doctorDiagnostic.leftoverNpmGlobal', { path: install.path }),
+          fix: t('doctorDiagnostic.runCmd', { cmd: uninstallCmd }),
         })
       } else if (install.type === 'npm-global-orphan') {
         warnings.push({
-          issue: `Orphaned npm global package at ${install.path}`,
+          issue: t('doctorDiagnostic.orphanedNpmGlobal', { path: install.path }),
           fix: isWindows
-            ? `Run: rmdir /s /q "${install.path}"`
-            : `Run: rm -rf ${install.path}`,
+            ? t('doctorDiagnostic.rmdirCmd', { path: install.path })
+            : t('doctorDiagnostic.rmCmd', { path: install.path }),
         })
       } else if (install.type === 'npm-local') {
         warnings.push({
-          issue: `Leftover npm local installation at ${install.path}`,
+          issue: t('doctorDiagnostic.leftoverNpmLocal', { path: install.path }),
           fix: isWindows
-            ? `Run: rmdir /s /q "${install.path}"`
-            : `Run: rm -rf ${install.path}`,
+            ? t('doctorDiagnostic.rmdirCmd', { path: install.path })
+            : t('doctorDiagnostic.rmCmd', { path: install.path }),
         })
       }
     }
@@ -607,8 +608,8 @@ export async function getDoctorDiagnostic(): Promise<DiagnosticInfo> {
     // Add warning if no permissions
     if (!hasUpdatePermissions && !getAutoUpdaterDisabledReason()) {
       warnings.push({
-        issue: 'Insufficient permissions for auto-updates',
-        fix: 'Do one of: (1) Re-install node without sudo, or (2) Use `claude install` for native installation',
+        issue: t('doctorDiagnostic.insufficientPermsAutoUpdates'),
+        fix: t('doctorDiagnostic.insufficientPermsFix'),
       })
     }
   }

@@ -28,6 +28,7 @@ import {
   searchSessionsByCustomTitle,
 } from '../../utils/sessionStorage.js';
 import { validateUuid } from '../../utils/uuid.js';
+import { t } from '../../utils/i18n/index.js'
 
 type ResumeResult =
   | { resultType: 'sessionNotFound'; arg: string }
@@ -171,7 +172,7 @@ function ResumeCommand({
     return (
       <Box>
         <Spinner />
-        <Text> Loading conversations…</Text>
+        <Text> {t('resume2.loadingConversations')}</Text>
       </Box>
     );
   }

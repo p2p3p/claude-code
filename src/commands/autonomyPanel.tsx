@@ -5,6 +5,7 @@ import { useRegisterOverlay } from '../context/overlayContext.js';
 import type { LocalJSXCommandOnDone } from '../types/command.js';
 import { getAutonomyCommandText, getAutonomyDeepSectionText, getAutonomyStatusText } from '../cli/handlers/autonomy.js';
 import { listAutonomyFlows, type AutonomyFlowRecord } from '../utils/autonomyFlows.js';
+import { t } from '../utils/i18n/index.js'
 
 type AutonomyAction = {
   label: string;
@@ -37,73 +38,73 @@ function AutonomyPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.Rea
   const actions = useMemo<AutonomyAction[]>(() => {
     const base: AutonomyAction[] = [
       {
-        label: 'Overview',
-        description: 'Show run and flow counts plus the latest automatic activity',
+        label: t('autonomy.overview'),
+        description: t('autonomy.overviewDesc'),
         run: () => getAutonomyStatusText(),
       },
       {
-        label: 'Full deep status',
-        description: 'Print every local autonomy surface in one diagnostic report',
+        label: t('autonomy.fullDeepStatus'),
+        description: t('autonomy.fullDeepStatusDesc'),
         run: () => getAutonomyStatusText({ deep: true }),
       },
       {
-        label: 'Auto mode',
-        description: 'Check whether auto permission mode is available and why',
+        label: t('autonomy.autoMode'),
+        description: t('autonomy.autoModeDesc'),
         run: () => getAutonomyDeepSectionText('auto-mode'),
       },
       {
-        label: 'Runs summary',
-        description: 'Show queued/running/completed/failed run totals and latest run',
+        label: t('autonomy.runsSummary'),
+        description: t('autonomy.runsSummaryDesc'),
         run: () => getAutonomyDeepSectionText('runs'),
       },
       {
-        label: 'Recent runs',
-        description: 'List recent autonomy run IDs, triggers, statuses, and prompts',
+        label: t('autonomy.recentRuns'),
+        description: t('autonomy.recentRunsDesc'),
         run: () => getAutonomyCommandText('runs 10'),
       },
       {
-        label: 'Flows summary',
-        description: 'Show managed flow totals across queued/running/waiting states',
+        label: t('autonomy.flowsSummary'),
+        description: t('autonomy.flowsSummaryDesc'),
         run: () => getAutonomyDeepSectionText('flows'),
       },
       {
-        label: 'Recent flows',
-        description: 'List recent managed flow IDs, status, current step, and goal',
+        label: t('autonomy.recentFlows'),
+        description: t('autonomy.recentFlowsDesc'),
         run: () => getAutonomyCommandText('flows 10'),
       },
       {
-        label: 'Cron',
-        description: 'Show scheduled autonomy jobs, durability, recurrence, and next run',
+        label: t('autonomy.cron'),
+        description: t('autonomy.cronDesc'),
         run: () => getAutonomyDeepSectionText('cron'),
       },
       {
-        label: 'Workflow runs',
-        description: 'Show persisted WorkflowTool runs and their current workflow step',
+        label: t('autonomy.workflowRuns'),
+        description: t('autonomy.workflowRunsDesc'),
         run: () => getAutonomyDeepSectionText('workflow-runs'),
       },
       {
-        label: 'Teams',
-        description: 'Show Agent Teams, teammate backends, activity, and open tasks',
+        label: t('autonomy.teams'),
+        description: t('autonomy.teamsDesc'),
         run: () => getAutonomyDeepSectionText('teams'),
       },
       {
-        label: 'Pipes',
-        description: 'Show UDS/named-pipe and LAN registry for terminal messaging',
+        label: t('autonomy.pipes'),
+        description: t('autonomy.pipesDesc'),
         run: () => getAutonomyDeepSectionText('pipes'),
       },
       {
-        label: 'Runtime',
-        description: 'Show daemon state and live background or interactive sessions',
+        label: t('autonomy.runtime'),
+        description: t('autonomy.runtimeDesc'),
         run: () => getAutonomyDeepSectionText('runtime'),
       },
       {
-        label: 'Remote Control',
-        description: 'Show bridge mode, base URL, token presence, and entitlement note',
+        label: t('autonomy.remoteControl'),
+        description: t('autonomy.remoteControlDesc'),
         run: () => getAutonomyDeepSectionText('remote-control'),
       },
       {
-        label: 'RemoteTrigger',
-        description: 'Show recent remote trigger audit records, failures, and latest call',
+        label: t('autonomy.remoteTrigger'),
+        description: t('autonomy.remoteTriggerDesc'),
         run: () => getAutonomyDeepSectionText('remote-trigger'),
       },
     ];
@@ -112,15 +113,15 @@ function AutonomyPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.Rea
       const shortId = flow.flowId.slice(0, 8);
       const items: AutonomyAction[] = [
         {
-          label: `Flow ${shortId}`,
+          label: t('autonomy.flow', shortId),
           description: `${flow.status}: ${flow.goal}`,
           run: () => getAutonomyCommandText(`flow ${flow.flowId}`),
         },
       ];
       if (flow.status === 'waiting') {
         items.push({
-          label: `Resume ${shortId}`,
-          description: flow.currentStep ? `Resume waiting step: ${flow.currentStep}` : 'Resume waiting flow',
+          label: t('autonomy.resume', shortId),
+          description: flow.currentStep ? t('autonomy.resumeWaitingStep', flow.currentStep) : t('autonomy.resumeWaitingFlow'),
           run: () =>
             getAutonomyCommandText(`flow resume ${flow.flowId}`, {
               enqueueInMemory: true,
@@ -134,8 +135,8 @@ function AutonomyPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.Rea
         flow.status === 'blocked'
       ) {
         items.push({
-          label: `Cancel ${shortId}`,
-          description: `Cancel ${flow.status} flow`,
+          label: t('autonomy.cancel', shortId),
+          description: t('autonomy.cancelFlow', flow.status),
           run: () =>
             getAutonomyCommandText(`flow cancel ${flow.flowId}`, {
               removeQueuedInMemory: true,
@@ -172,9 +173,9 @@ function AutonomyPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.Rea
 
   return (
     <Dialog
-      title="Autonomy"
-      subtitle={`${actions.length} actions`}
-      onCancel={() => onDone('Autonomy panel dismissed', { display: 'system' })}
+      title={t("cmdSystemUI.autonomyTitle")}
+      subtitle={t('autonomy.actionsCount', actions.length)}
+      onCancel={() => onDone(t('cmdSystemUI.autonomyTitle') + ' panel dismissed', { display: 'system' })}
       color="background"
       hideInputGuide
     >
@@ -186,7 +187,7 @@ function AutonomyPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.Rea
           </Box>
         ))}
         <Box marginTop={1}>
-          <Text dimColor>↑/↓ select · Enter run · Esc close</Text>
+          <Text dimColor>{t('autonomy.navHint')}</Text>
         </Box>
       </Box>
     </Dialog>

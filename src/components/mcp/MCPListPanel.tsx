@@ -6,7 +6,7 @@ import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import type { ConfigScope } from '../../services/mcp/types.js';
 import { describeMcpConfigFilePath } from '../../services/mcp/utils.js';
 import { isDebugMode } from '../../utils/debug.js';
-import { plural } from '../../utils/stringUtils.js';
+import { t } from '../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
 import { McpParsingWarnings } from './McpParsingWarnings.js';
@@ -33,15 +33,15 @@ const SCOPE_ORDER: ConfigScope[] = ['project', 'local', 'user', 'enterprise'];
 function getScopeHeading(scope: ConfigScope): { label: string; path?: string } {
   switch (scope) {
     case 'project':
-      return { label: 'Project MCPs', path: describeMcpConfigFilePath(scope) };
+      return { label: t('mcpListPanel.scopeProject'), path: describeMcpConfigFilePath(scope) };
     case 'user':
-      return { label: 'User MCPs', path: describeMcpConfigFilePath(scope) };
+      return { label: t('mcpListPanel.scopeUser'), path: describeMcpConfigFilePath(scope) };
     case 'local':
-      return { label: 'Local MCPs', path: describeMcpConfigFilePath(scope) };
+      return { label: t('mcpListPanel.scopeLocal'), path: describeMcpConfigFilePath(scope) };
     case 'enterprise':
-      return { label: 'Enterprise MCPs' };
+      return { label: t('mcpListPanel.scopeEnterprise') };
     case 'dynamic':
-      return { label: 'Built-in MCPs', path: 'always available' };
+      return { label: t('mcpListPanel.scopeDynamic'), path: t('mcpListPanel.alwaysAvailable') };
     default:
       return { label: scope };
   }
@@ -222,8 +222,8 @@ export function MCPListPanel({
       <McpParsingWarnings />
 
       <Dialog
-        title="Manage MCP servers"
-        subtitle={`${totalServers} ${plural(totalServers, 'server')}`}
+        title={t('mcpListPanel.title')}
+        subtitle={t('mcpListPanel.serverCount', totalServers)}
         onCancel={handleCancel}
         hideInputGuide
       >
@@ -258,7 +258,7 @@ export function MCPListPanel({
           {agentServers.length > 0 && (
             <Box flexDirection="column" marginBottom={1}>
               <Box paddingLeft={2}>
-                <Text bold>Agent MCPs</Text>
+                <Text bold>{t('mcplistpanel.agentMCPs')}</Text>
               </Box>
               {/* Group servers by source agent */}
               {[...new Set(agentServers.flatMap(s => s.sourceAgents))].map(agentName => (
@@ -305,7 +305,7 @@ export function MCPListPanel({
           <Byline>
             <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
             <KeyboardShortcutHint shortcut="Enter" action="confirm" />
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
           </Byline>
         </Text>
       </Box>

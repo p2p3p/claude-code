@@ -15,6 +15,7 @@ import { getSecureStorage } from '../../utils/secureStorage/index.js';
 import { getSettingsForSource, updateSettingsForSource } from '../../utils/settings/settings.js';
 import { clearToolSchemaCache } from '../../utils/toolSchemaCache.js';
 import { resetUserCache } from '../../utils/user.js';
+import { t } from '../../utils/i18n/index.js'
 
 export async function performLogout({ clearOnboarding = false }): Promise<void> {
   // Flush telemetry BEFORE clearing credentials to prevent org data leakage
@@ -90,7 +91,7 @@ export async function clearAuthRelatedCaches(): Promise<void> {
 export async function call(): Promise<React.ReactNode> {
   await performLogout({ clearOnboarding: true });
 
-  const message = <Text>Successfully logged out.</Text>;
+  const message = <Text>{t('logout.successfullyLoggedOut')}</Text>;
 
   setTimeout(() => {
     gracefulShutdownSync(0, 'logout');

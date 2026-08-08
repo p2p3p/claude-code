@@ -6,6 +6,7 @@ import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import { useAppState } from '../../state/AppState.js';
 import type { LocalJSXCommandCall } from '../../types/command.js';
 import { logForDebugging } from '../../utils/debug.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props = {
   onDone: () => void;
@@ -40,8 +41,8 @@ function SessionInfo({ onDone }: Props): React.ReactNode {
   if (!remoteSessionUrl) {
     return (
       <Pane>
-        <Text color="warning">Not in remote mode. Start with `claude --remote` to use this command.</Text>
-        <Text dimColor>(press esc to close)</Text>
+        <Text color="warning">{t("cmdSystemUI.notRemoteMode")}</Text>
+        <Text dimColor>{t("cmdSystemUI.pressEscClose")}</Text>
       </Pane>
     );
   }
@@ -52,20 +53,20 @@ function SessionInfo({ onDone }: Props): React.ReactNode {
   return (
     <Pane>
       <Box marginBottom={1}>
-        <Text bold>Remote session</Text>
+        <Text bold>{t("cmdSystemUI.remoteSession")}</Text>
       </Box>
 
       {/* QR Code - silently fails if generation errors, URL is still shown */}
-      {isLoading ? <Text dimColor>Generating QR code…</Text> : lines.map((line, i) => <Text key={i}>{line}</Text>)}
+      {isLoading ? <Text dimColor>{t("cmdSystemUI.generatingQR")}</Text> : lines.map((line, i) => <Text key={i}>{line}</Text>)}
 
       {/* URL */}
       <Box marginTop={1}>
-        <Text dimColor>Open in browser: </Text>
+        <Text dimColor>{t("cmdSystemUI.openInBrowser")}</Text>
         <Text color="ide">{remoteSessionUrl}</Text>
       </Box>
 
       <Box marginTop={1}>
-        <Text dimColor>(press esc to close)</Text>
+        <Text dimColor>{t("cmdSystemUI.pressEscClose")}</Text>
       </Box>
     </Pane>
   );

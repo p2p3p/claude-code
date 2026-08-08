@@ -2,6 +2,7 @@ import React from 'react';
 import stripAnsi from 'strip-ansi';
 import { Box, Text } from '@anthropic/ink';
 import { formatFileSize } from '../../utils/format.js';
+import { t } from '../../utils/i18n/index.js';
 import { MessageResponse } from '../MessageResponse.js';
 import { OffscreenFreeze } from '../OffscreenFreeze.js';
 import { ShellTimeDisplay } from './ShellTimeDisplay.js';
@@ -39,7 +40,7 @@ export function ShellProgressMessage({
     return (
       <MessageResponse>
         <OffscreenFreeze>
-          <Text dimColor>Running… </Text>
+          <Text dimColor>{t('shellProgress.running')}</Text>
           <ShellTimeDisplay elapsedTimeSeconds={elapsedTimeSeconds} timeoutMs={timeoutMs} />
         </OffscreenFreeze>
       </MessageResponse>

@@ -1,4 +1,5 @@
 import { basename } from 'path';
+import { t } from '../utils/i18n/index.js'
 import { toString as qrToString } from 'qrcode';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
@@ -124,7 +125,7 @@ export function BridgeDialog({ onDone }: Props): React.ReactNode {
       : undefined;
 
   return (
-    <Dialog title="Remote Control" onCancel={onDone} hideInputGuide>
+    <Dialog title={t('bridgedialog.remoteControl')} onCancel={onDone} hideInputGuide>
       <Box flexDirection="column" gap={1}>
         <Box flexDirection="column">
           <Text>
@@ -145,7 +146,7 @@ export function BridgeDialog({ onDone }: Props): React.ReactNode {
           </Box>
         )}
         {footerText && <Text dimColor>{footerText}</Text>}
-        <Text dimColor>d to disconnect · space for QR code · Enter/Esc to close</Text>
+        <Text dimColor>{t('bridgeDialog.disconnectHint')}</Text>
       </Box>
     </Dialog>
   );

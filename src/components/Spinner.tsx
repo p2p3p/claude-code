@@ -36,6 +36,7 @@ import { getCurrentTurnTokenBudget, getTurnOutputTokens } from '../bootstrap/sta
 import { TeammateSpinnerTree } from './Spinner/TeammateSpinnerTree.js';
 import { useAnimationFrame } from '@anthropic/ink';
 import { getGlobalConfig } from '../utils/config.js';
+import { t } from '../utils/i18n/index.js';
 export type { SpinnerMode } from './Spinner/index.js';
 
 const DEFAULT_CHARACTERS = getDefaultCharacters();
@@ -263,8 +264,8 @@ function SpinnerWithVerbInner({
       <Box flexDirection="column" width="100%" alignItems="flex-start">
         <Box flexDirection="row" flexWrap="wrap" marginTop={1} width="100%">
           <Text dimColor>
-            {TEARDROP_ASTERISK} Idle
-            {!allIdle && ' · teammates running'}
+            {TEARDROP_ASTERISK} {t('spinner.idle')}
+            {!allIdle && t('spinner.teammatesRunning')}
           </Text>
         </Box>
         {showSpinnerTree && (
@@ -273,7 +274,7 @@ function SpinnerWithVerbInner({
             isInSelectionMode={viewSelectionMode === 'selecting-agent'}
             allIdle={allIdle}
             leaderTokenCount={leaderTokenCount}
-            leaderIdleText="Idle"
+            leaderIdleText={t('spinner.idle')}
           />
         )}
       </Box>
@@ -283,8 +284,8 @@ function SpinnerWithVerbInner({
   // When viewing an idle teammate, show static idle display instead of animated spinner
   if (foregroundedTeammate?.isIdle) {
     const idleText = allIdle
-      ? `${TEARDROP_ASTERISK} Worked for ${formatDuration(Date.now() - foregroundedTeammate.startTime)}`
-      : `${TEARDROP_ASTERISK} Idle`;
+      ? `${TEARDROP_ASTERISK} ${t('spinner.workedFor', formatDuration(Date.now() - foregroundedTeammate.startTime))}`
+      : `${TEARDROP_ASTERISK} ${t('spinner.idle')}`;
     return (
       <Box flexDirection="column" width="100%" alignItems="flex-start">
         <Box flexDirection="row" flexWrap="wrap" marginTop={1} width="100%">
@@ -296,7 +297,7 @@ function SpinnerWithVerbInner({
             isInSelectionMode={viewSelectionMode === 'selecting-agent'}
             allIdle={allIdle}
             leaderVerb={leaderIsIdle ? undefined : leaderVerb}
-            leaderIdleText={leaderIsIdle ? 'Idle' : undefined}
+            leaderIdleText={leaderIsIdle ? t('spinner.idle') : undefined}
             leaderTokenCount={leaderTokenCount}
           />
         )}
@@ -315,9 +316,9 @@ function SpinnerWithVerbInner({
   const effectiveTip = contextTipsActive
     ? undefined
     : showClearTip && !nextTask
-      ? 'Use /clear to start fresh when switching topics and free up context'
+      ? t('spinner.clearTip')
       : showBtwTip && !nextTask
-        ? "Use /btw to ask a quick side question without interrupting Claude's current work"
+        ? t('spinner.btwTip')
         : spinnerTip;
 
   // Budget text (ant-only) — shown above the tip line
@@ -369,7 +370,7 @@ function SpinnerWithVerbInner({
           isInSelectionMode={viewSelectionMode === 'selecting-agent'}
           allIdle={allIdle}
           leaderVerb={leaderIsIdle ? undefined : leaderVerb}
-          leaderIdleText={leaderIsIdle ? 'Idle' : undefined}
+          leaderIdleText={leaderIsIdle ? t('spinner.idle') : undefined}
           leaderTokenCount={leaderTokenCount}
         />
       ) : showExpandedTodos && tasksV2 && tasksV2.length > 0 ? (
@@ -390,7 +391,7 @@ function SpinnerWithVerbInner({
           )}
           {(nextTask || effectiveTip) && (
             <MessageResponse>
-              <Text dimColor>{nextTask ? `Next: ${nextTask.subject}` : `Tip: ${effectiveTip}`}</Text>
+              <Text dimColor>{nextTask ? t('spinner.next', nextTask.subject) : t('spinner.tip', effectiveTip)}</Text>
             </MessageResponse>
           )}
         </Box>
@@ -416,7 +417,7 @@ type BriefSpinnerProps = {
 function BriefSpinner({ mode, overrideMessage }: BriefSpinnerProps): React.ReactNode {
   const settings = useSettings();
   const reducedMotion = settings.prefersReducedMotion ?? false;
-  const [randomVerb] = useState(() => sample(getSpinnerVerbs()) ?? 'Working');
+  const [randomVerb] = useState(() => sample(getSpinnerVerbs()) ?? t('spinner.working'));
   const verb = overrideMessage ?? randomVerb;
   const connStatus = useAppState(s => s.remoteConnectionStatus);
 
@@ -442,7 +443,7 @@ function BriefSpinner({ mode, overrideMessage }: BriefSpinnerProps): React.React
   // Connection trouble overrides the verb — `claude assistant` is a pure viewer,
   // nothing useful is happening while the WS is down.
   const showConnWarning = connStatus === 'reconnecting' || connStatus === 'disconnected';
-  const connText = connStatus === 'reconnecting' ? 'Reconnecting' : 'Disconnected';
+  const connText = connStatus === 'reconnecting' ? t('spinner.reconnecting') : t('spinner.disconnected');
 
   // Dots padded to a fixed 3 columns so the right-aligned count doesn't
   // jitter as the cycle advances.
@@ -457,7 +458,7 @@ function BriefSpinner({ mode, overrideMessage }: BriefSpinnerProps): React.React
   const { before, shimmer, after } = computeShimmerSegments(verb, glimmerIndex);
 
   const { columns } = useTerminalSize();
-  const rightText = runningCount > 0 ? `${runningCount} in background` : '';
+  const rightText = runningCount > 0 ? t('spinner.inBackground', runningCount) : '';
   // Manual right-align via space padding — flexGrow spacers inside
   // FullscreenLayout's `main` slot don't resolve a width and caused the
   // diff engine to miss dot-frame updates.
@@ -496,9 +497,9 @@ export function BriefIdleStatus(): React.ReactNode {
   const { columns } = useTerminalSize();
 
   const showConnWarning = connStatus === 'reconnecting' || connStatus === 'disconnected';
-  const connText = connStatus === 'reconnecting' ? 'Reconnecting…' : 'Disconnected';
+  const connText = connStatus === 'reconnecting' ? t('spinner.reconnectingDots') : t('spinner.disconnected');
   const leftText = showConnWarning ? connText : '';
-  const rightText = runningCount > 0 ? `${runningCount} in background` : '';
+  const rightText = runningCount > 0 ? t('spinner.inBackground', runningCount) : '';
 
   if (!leftText && !rightText) return <Box height={2} />;
 

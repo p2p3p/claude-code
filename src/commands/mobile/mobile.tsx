@@ -5,6 +5,7 @@ import { Pane } from '@anthropic/ink';
 import { type KeyboardEvent, Box, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Platform = 'ios' | 'android';
 
@@ -93,7 +94,7 @@ function MobileQRCode({ onDone }: Props): React.ReactNode {
               Android
             </Text>
           </Text>
-          <Text dimColor>(tab to switch, esc to close)</Text>
+          <Text dimColor>{t("cmdSystemUI.pressEscClose")}</Text>
         </Box>
         <Text dimColor>{url}</Text>
       </Box>

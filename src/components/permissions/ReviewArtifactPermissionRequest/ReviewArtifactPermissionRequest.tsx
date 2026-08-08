@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../../utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import { Select } from '../../CustomSelect/select.js';
 import { usePermissionRequestLogging } from '../hooks.js';
@@ -40,9 +41,9 @@ export function ReviewArtifactPermissionRequest({
   }
 
   return (
-    <PermissionDialog color="permission" title="Review artifact?" workerBadge={workerBadge}>
+    <PermissionDialog color="permission" title={t('reviewartifactpermissionrequest.reviewArtifact')} workerBadge={workerBadge}>
       <Box flexDirection="column" marginTop={1} paddingX={1}>
-        <Text>Claude wants to review{title ? `: ${title}` : ' an artifact'}.</Text>
+        <Text>{t('permission.approveArtifact', title)}</Text>
 
         <Box marginTop={1} flexDirection="column">
           <Text dimColor>
@@ -54,8 +55,8 @@ export function ReviewArtifactPermissionRequest({
         <Box marginTop={1}>
           <Select
             options={[
-              { label: 'Yes, show review', value: 'yes' as const },
-              { label: 'No, skip', value: 'no' as const },
+              { label: t('reviewArtifactPermission.yesShowReview'), value: 'yes' as const },
+              { label: t('reviewArtifactPermission.noSkip'), value: 'no' as const },
             ]}
             onChange={handleResponse}
             onCancel={() => handleResponse('no')}

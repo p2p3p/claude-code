@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, color, Link, Text, useTheme, Pane, Tab, Tabs, useTabHeaderFocus } from '@anthropic/ink';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import type { CommandResultDisplay } from '../../types/command.js';
@@ -105,13 +106,13 @@ export function SandboxSettings({ onComplete, depCheck }: Props): React.ReactNod
   );
 
   const overridesTab = (
-    <Tab key="overrides" title="Overrides">
+    <Tab key="overrides" title={t('sandboxsettings.overrides')}>
       <SandboxOverridesTab onComplete={onComplete} />
     </Tab>
   );
 
   const configTab = (
-    <Tab key="config" title="Config">
+    <Tab key="config" title={t('sandboxsettings.config')}>
       <SandboxConfigTab />
     </Tab>
   );
@@ -122,7 +123,7 @@ export function SandboxSettings({ onComplete, depCheck }: Props): React.ReactNod
   // If only optional deps missing, show all tabs
   const tabs = hasErrors
     ? [
-        <Tab key="dependencies" title="Dependencies">
+        <Tab key="dependencies" title={t('sandboxsettings.dependencies')}>
           <SandboxDependenciesTab depCheck={depCheck} />
         </Tab>,
       ]
@@ -130,7 +131,7 @@ export function SandboxSettings({ onComplete, depCheck }: Props): React.ReactNod
         modeTab,
         ...(hasWarnings
           ? [
-              <Tab key="dependencies" title="Dependencies">
+              <Tab key="dependencies" title={t('sandboxsettings.dependencies2')}>
                 <SandboxDependenciesTab depCheck={depCheck} />
               </Tab>,
             ]
@@ -141,7 +142,7 @@ export function SandboxSettings({ onComplete, depCheck }: Props): React.ReactNod
 
   return (
     <Pane color="permission">
-      <Tabs title="Sandbox:" color="permission" defaultTab="Mode">
+      <Tabs title={t('sandboxsettings.sandbox')} color="permission" defaultTab="Mode">
         {tabs}
       </Tabs>
     </Pane>
@@ -164,11 +165,11 @@ function SandboxModeTab({
     <Box flexDirection="column" paddingY={1}>
       {showSocketWarning && (
         <Box marginBottom={1}>
-          <Text color="warning">Cannot block unix domain sockets (see Dependencies tab)</Text>
+          <Text color="warning">{t('sandboxsettings.cannotBlockUnixDomainSocketsSeeDependenciesTab')}</Text>
         </Box>
       )}
       <Box marginBottom={1}>
-        <Text bold>Configure Mode:</Text>
+        <Text bold>{t('sandboxsettings.configureMode')}</Text>
       </Box>
       <Select
         options={options}

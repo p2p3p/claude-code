@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { useEffect, useState } from 'react';
 import { Box, Text } from '@anthropic/ink';
 import { getDynamicConfig_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js';
@@ -77,16 +78,16 @@ export function DesktopUpsellStartup({ onDone }: Props): React.ReactNode {
   }
 
   const options = [
-    { label: 'Open in Claude Code Desktop', value: 'try' as const },
-    { label: 'Not now', value: 'not-now' as const },
-    { label: "Don't ask again", value: 'never' as const },
+    { label: t('desktopUpsell.openInDesktop'), value: 'try' as const },
+    { label: t('desktopUpsell.notNow'), value: 'not-now' as const },
+    { label: t('desktopUpsell.dontAskAgain'), value: 'never' as const },
   ];
 
   return (
-    <PermissionDialog title="Try Claude Code Desktop">
+    <PermissionDialog title={t('desktopupsellstartup.tryClaudeCodeDesktop')}>
       <Box flexDirection="column" paddingX={2} paddingY={1}>
         <Box marginBottom={1}>
-          <Text>Same Claude Code with visual diffs, live app preview, parallel sessions, and more.</Text>
+          <Text>{t('desktopupsellstartup.sameClaudeCodeWithVisualDiffsLiveAppPreviewParallelSessionsAndMore')}</Text>
         </Box>
         <Select options={options} onChange={handleSelect} onCancel={() => handleSelect('not-now')} />
       </Box>

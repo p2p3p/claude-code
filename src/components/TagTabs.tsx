@@ -1,15 +1,16 @@
 import React from 'react';
 import { Box, Text, stringWidth } from '@anthropic/ink';
 import { truncateToWidth } from '../utils/format.js';
+import { t } from '../utils/i18n/index.js';
 
 // Constants for width calculations - derived from actual rendered strings
-const ALL_TAB_LABEL = 'All';
+const ALL_TAB_LABEL = t('tagTabs.all');
 const TAB_PADDING = 2; // Space before and after tab text: " {tab} "
 const HASH_PREFIX_LENGTH = 1; // "#" prefix for non-All tabs
 const LEFT_ARROW_PREFIX = '← ';
 const RIGHT_HINT_WITH_COUNT_PREFIX = '→';
-const RIGHT_HINT_SUFFIX = ' (tab to cycle)';
-const RIGHT_HINT_NO_COUNT = '(tab to cycle)';
+const RIGHT_HINT_SUFFIX = t('tagTabs.tabToCycle');
+const RIGHT_HINT_NO_COUNT = t('tagTabs.tabToCycle');
 const MAX_OVERFLOW_DIGITS = 2; // Assume max 99 hidden tabs for width calculation
 
 // Computed widths
@@ -54,7 +55,7 @@ function truncateTag(tag: string, maxWidth: number): string {
 }
 
 export function TagTabs({ tabs, selectedIndex, availableWidth, showAllProjects = false }: Props): React.ReactNode {
-  const resumeLabel = showAllProjects ? 'Resume (All Projects)' : 'Resume';
+  const resumeLabel = showAllProjects ? t('tagTabs.resumeAll') : t('tagTabs.resume');
   const resumeLabelWidth = resumeLabel.length + 1; // +1 for gap
 
   // Calculate how much space we have for tabs (use worst-case hint width)

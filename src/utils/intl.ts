@@ -83,6 +83,22 @@ let cachedSystemLocaleLanguage: string | undefined | null = null
 
 export function getSystemLocaleLanguage(): string | undefined {
   if (cachedSystemLocaleLanguage === null) {
+    // Android/Termux: LANG is always en_US.UTF-8 regardless of system locale.
+    // Use getprop to read the actual device language.
+    try {
+      const { execFileSync } = require('child_process') as typeof import('child_process')
+      const prop = execFileSync('getprop', ['persist.sys.locale'], { encoding: 'utf8', timeout: 1000 }).trim()
+        || execFileSync('getprop', ['ro.product.locale'], { encoding: 'utf8', timeout: 1000 }).trim()
+      if (prop) {
+        const match = prop.match(/^([a-z]+)/i)
+        if (match) {
+          cachedSystemLocaleLanguage = match[1]
+          return cachedSystemLocaleLanguage
+        }
+      }
+    } catch {
+      // getprop not available — not Android
+    }
     try {
       const locale = Intl.DateTimeFormat().resolvedOptions().locale
       cachedSystemLocaleLanguage = new Intl.Locale(locale).language

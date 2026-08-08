@@ -1,5 +1,6 @@
 import { feature } from 'bun:bundle'
 import { microcompactMessages } from '../../services/compact/microCompact.js'
+import { t } from '../../utils/i18n/index.js'
 import type { AppState } from '../../state/AppStateStore.js'
 import type { Tools, ToolUseContext } from '../../Tool.js'
 import type { AgentDefinitionsResult } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
@@ -103,9 +104,9 @@ function formatContextAsMarkdownTable(data: ContextData): string {
     systemPromptSections,
   } = data
 
-  let output = `## Context Usage\n\n`
-  output += `**Model:** ${model}  \n`
-  output += `**Tokens:** ${formatTokens(totalTokens)} / ${formatTokens(rawMaxTokens)} (${percentage}%)\n`
+  let output = `${t('contextCmd.title')}\n\n`
+  output += `${t('contextCmd.modelLabel')} ${model}  \n`
+  output += `${t('contextCmd.tokensLabel')} ${formatTokens(totalTokens)} / ${formatTokens(rawMaxTokens)} (${percentage}%)\n`
 
   // Context-collapse status. Always show when the runtime gate is on —
   // the user needs to know which strategy is managing their context
@@ -121,27 +122,25 @@ function formatContextAsMarkdownTable(data: ContextData): string {
 
       const parts = []
       if (s.collapsedSpans > 0) {
-        parts.push(
-          `${s.collapsedSpans} ${plural(s.collapsedSpans, 'span')} summarized (${s.collapsedMessages} messages)`,
-        )
+        parts.push(t('contextCmd.spansSummarized', s.collapsedSpans, s.collapsedMessages))
       }
-      if (s.stagedSpans > 0) parts.push(`${s.stagedSpans} staged`)
+      if (s.stagedSpans > 0) parts.push(t('contextCmd.spanStaged', s.stagedSpans))
       const summary =
         parts.length > 0
           ? parts.join(', ')
           : h.totalSpawns > 0
-            ? `${h.totalSpawns} ${plural(h.totalSpawns, 'spawn')}, nothing staged yet`
-            : 'waiting for first trigger'
-      output += `**Context strategy:** collapse (${summary})\n`
+            ? t('contextCmd.spawnsNothingStaged', h.totalSpawns)
+            : t('contextCmd.waitingForFirstTrigger')
+      output += `${t('contextCmd.contextStrategy')} collapse (${summary})\n`
 
       if (h.totalErrors > 0) {
-        output += `**Collapse errors:** ${h.totalErrors}/${h.totalSpawns} spawns failed`
+        output += `${t('contextCmd.collapseErrors')} ${h.totalErrors}/${h.totalSpawns} ${t('contextCmd.spawnsFailed')}`
         if (h.lastError) {
-          output += ` (last: ${h.lastError.slice(0, 80)})`
+          output += ` (${t('contextCmd.last')}: ${h.lastError.slice(0, 80)})`
         }
         output += '\n'
       } else if (h.emptySpawnWarningEmitted) {
-        output += `**Collapse idle:** ${h.totalEmptySpawns} consecutive empty runs\n`
+        output += `${t('contextCmd.collapseIdle')} ${h.totalEmptySpawns} ${t('contextCmd.consecutiveEmptyRuns')}\n`
       }
     }
   }
@@ -156,8 +155,8 @@ function formatContextAsMarkdownTable(data: ContextData): string {
   )
 
   if (visibleCategories.length > 0) {
-    output += `### Estimated usage by category\n\n`
-    output += `| Category | Tokens | Percentage |\n`
+    output += `${t('contextCmd.estimatedUsageSection')}\n\n`
+    output += t('contextCmd.categoryTableHeader')
     output += `|----------|--------|------------|\n`
 
     for (const cat of visibleCategories) {
@@ -171,7 +170,7 @@ function formatContextAsMarkdownTable(data: ContextData): string {
         (freeSpaceCategory.tokens / rawMaxTokens) *
         100
       ).toFixed(1)
-      output += `| Free space | ${formatTokens(freeSpaceCategory.tokens)} | ${percentDisplay}% |\n`
+      output += `| ${t('contextCmd.freeSpace')} | ${formatTokens(freeSpaceCategory.tokens)} | ${percentDisplay}% |\n`
     }
 
     const autocompactCategory = categories.find(
@@ -182,7 +181,7 @@ function formatContextAsMarkdownTable(data: ContextData): string {
         (autocompactCategory.tokens / rawMaxTokens) *
         100
       ).toFixed(1)
-      output += `| Autocompact buffer | ${formatTokens(autocompactCategory.tokens)} | ${percentDisplay}% |\n`
+      output += `| ${t('contextCmd.autocompactBuffer')} | ${formatTokens(autocompactCategory.tokens)} | ${percentDisplay}% |\n`
     }
 
     output += `\n`
@@ -190,8 +189,8 @@ function formatContextAsMarkdownTable(data: ContextData): string {
 
   // MCP tools
   if (mcpTools.length > 0) {
-    output += `### MCP Tools\n\n`
-    output += `| Tool | Server | Tokens |\n`
+    output += `${t('contextCmd.mcpToolsSection')}\n\n`
+    output += t('contextCmd.mcpToolsHeader')
     output += `|------|--------|--------|\n`
     for (const tool of mcpTools) {
       output += `| ${tool.name} | ${tool.serverName} | ${formatTokens(tool.tokens)} |\n`
@@ -205,8 +204,8 @@ function formatContextAsMarkdownTable(data: ContextData): string {
     systemTools.length > 0 &&
     process.env.USER_TYPE === 'ant'
   ) {
-    output += `### [ANT-ONLY] System Tools\n\n`
-    output += `| Tool | Tokens |\n`
+    output += `${t('contextCmd.systemToolsSection')}\n\n`
+    output += t('contextCmd.systemToolsHeader')
     output += `|------|--------|\n`
     for (const tool of systemTools) {
       output += `| ${tool.name} | ${formatTokens(tool.tokens)} |\n`
@@ -220,8 +219,8 @@ function formatContextAsMarkdownTable(data: ContextData): string {
     systemPromptSections.length > 0 &&
     process.env.USER_TYPE === 'ant'
   ) {
-    output += `### [ANT-ONLY] System Prompt Sections\n\n`
-    output += `| Section | Tokens |\n`
+    output += `${t('contextCmd.systemPromptSectionsSection')}\n\n`
+    output += t('contextCmd.systemPromptSectionsHeader')
     output += `|---------|--------|\n`
     for (const section of systemPromptSections) {
       output += `| ${section.name} | ${formatTokens(section.tokens)} |\n`
@@ -231,32 +230,32 @@ function formatContextAsMarkdownTable(data: ContextData): string {
 
   // Custom agents
   if (agents.length > 0) {
-    output += `### Custom Agents\n\n`
-    output += `| Agent Type | Source | Tokens |\n`
+    output += `${t('contextCmd.customAgentsSection')}\n\n`
+    output += t('contextCmd.customAgentsHeader')
     output += `|------------|--------|--------|\n`
     for (const agent of agents) {
       let sourceDisplay: string
       switch (agent.source) {
         case 'projectSettings':
-          sourceDisplay = 'Project'
+          sourceDisplay = t('contextCmd.sourceProject')
           break
         case 'userSettings':
-          sourceDisplay = 'User'
+          sourceDisplay = t('contextCmd.sourceUser')
           break
         case 'localSettings':
-          sourceDisplay = 'Local'
+          sourceDisplay = t('contextCmd.sourceLocal')
           break
         case 'flagSettings':
-          sourceDisplay = 'Flag'
+          sourceDisplay = t('contextCmd.sourceFlag')
           break
         case 'policySettings':
-          sourceDisplay = 'Policy'
+          sourceDisplay = t('contextCmd.sourcePolicy')
           break
         case 'plugin':
-          sourceDisplay = 'Plugin'
+          sourceDisplay = t('contextCmd.sourcePlugin')
           break
         case 'built-in':
-          sourceDisplay = 'Built-in'
+          sourceDisplay = t('contextCmd.sourceBuiltin')
           break
         default:
           sourceDisplay = String(agent.source)
@@ -268,8 +267,8 @@ function formatContextAsMarkdownTable(data: ContextData): string {
 
   // Memory files
   if (memoryFiles.length > 0) {
-    output += `### Memory Files\n\n`
-    output += `| Type | Path | Tokens |\n`
+    output += `${t('contextCmd.memoryFilesSection')}\n\n`
+    output += t('contextCmd.memoryFilesHeader')
     output += `|------|------|--------|\n`
     for (const file of memoryFiles) {
       output += `| ${file.type} | ${file.path} | ${formatTokens(file.tokens)} |\n`
@@ -279,8 +278,8 @@ function formatContextAsMarkdownTable(data: ContextData): string {
 
   // Skills
   if (skills && skills.tokens > 0 && skills.skillFrontmatter.length > 0) {
-    output += `### Skills\n\n`
-    output += `| Skill | Source | Tokens |\n`
+    output += `${t('contextCmd.skillsSection')}\n\n`
+    output += t('contextCmd.skillsHeader')
     output += `|-------|--------|--------|\n`
     for (const skill of skills.skillFrontmatter) {
       output += `| ${skill.name} | ${getSourceDisplayName(skill.source)} | ${formatTokens(skill.tokens)} |\n`
@@ -290,19 +289,19 @@ function formatContextAsMarkdownTable(data: ContextData): string {
 
   // Message breakdown (ant-only)
   if (messageBreakdown && process.env.USER_TYPE === 'ant') {
-    output += `### [ANT-ONLY] Message Breakdown\n\n`
-    output += `| Category | Tokens |\n`
+    output += `${t('contextCmd.messageBreakdownSection')}\n\n`
+    output += t('contextCmd.messageBreakdownHeader')
     output += `|----------|--------|\n`
-    output += `| Tool calls | ${formatTokens(messageBreakdown.toolCallTokens)} |\n`
-    output += `| Tool results | ${formatTokens(messageBreakdown.toolResultTokens)} |\n`
-    output += `| Attachments | ${formatTokens(messageBreakdown.attachmentTokens)} |\n`
-    output += `| Assistant messages (non-tool) | ${formatTokens(messageBreakdown.assistantMessageTokens)} |\n`
-    output += `| User messages (non-tool-result) | ${formatTokens(messageBreakdown.userMessageTokens)} |\n`
+    output += t('contextCmd.breakdownToolCalls', formatTokens(messageBreakdown.toolCallTokens)) + '\n'
+    output += t('contextCmd.breakdownToolResults', formatTokens(messageBreakdown.toolResultTokens)) + '\n'
+    output += t('contextCmd.breakdownAttachments', formatTokens(messageBreakdown.attachmentTokens)) + '\n'
+    output += t('contextCmd.breakdownAssistantMessages', formatTokens(messageBreakdown.assistantMessageTokens)) + '\n'
+    output += t('contextCmd.breakdownUserMessages', formatTokens(messageBreakdown.userMessageTokens)) + '\n'
     output += `\n`
 
     if (messageBreakdown.toolCallsByType.length > 0) {
-      output += `#### Top Tools\n\n`
-      output += `| Tool | Call Tokens | Result Tokens |\n`
+      output += `${t('contextCmd.topToolsSection')}\n\n`
+      output += t('contextCmd.topToolsHeader')
       output += `|------|-------------|---------------|\n`
       for (const tool of messageBreakdown.toolCallsByType) {
         output += `| ${tool.name} | ${formatTokens(tool.callTokens)} | ${formatTokens(tool.resultTokens)} |\n`
@@ -311,8 +310,8 @@ function formatContextAsMarkdownTable(data: ContextData): string {
     }
 
     if (messageBreakdown.attachmentsByType.length > 0) {
-      output += `#### Top Attachments\n\n`
-      output += `| Attachment | Tokens |\n`
+      output += `${t('contextCmd.topAttachmentsSection')}\n\n`
+      output += t('contextCmd.topAttachmentsHeader')
       output += `|------------|--------|\n`
       for (const attachment of messageBreakdown.attachmentsByType) {
         output += `| ${attachment.name} | ${formatTokens(attachment.tokens)} |\n`

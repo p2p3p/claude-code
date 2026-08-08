@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { useCallback, useEffect, useState } from 'react';
 import type { CommandResultDisplay } from '../../commands.js';
 import { TEARDROP_ASTERISK } from '../../constants/figures.js';
@@ -120,9 +121,9 @@ export function Passes({ onDone }: Props): React.ReactNode {
     return (
       <Pane>
         <Box flexDirection="column" gap={1}>
-          <Text dimColor>Loading guest pass information…</Text>
+          <Text dimColor>{t('passesLoading.loadingGuestPass')}</Text>
           <Text dimColor italic>
-            {exitState.pending ? <>Press {exitState.keyName} again to exit</> : <>Esc to cancel</>}
+            {exitState.pending ? <>Press {exitState.keyName} again to exit</> : <>{t('passes.escToCancel')}</>}
           </Text>
         </Box>
       </Pane>
@@ -133,9 +134,9 @@ export function Passes({ onDone }: Props): React.ReactNode {
     return (
       <Pane>
         <Box flexDirection="column" gap={1}>
-          <Text>Guest passes are not currently available.</Text>
+          <Text>{t('passes.guestPassesAreNotCurrentlyAvailable')}</Text>
           <Text dimColor italic>
-            {exitState.pending ? <>Press {exitState.keyName} again to exit</> : <>Esc to cancel</>}
+            {exitState.pending ? <>Press {exitState.keyName} again to exit</> : <>{t('passes.escToCancel2')}</>}
           </Text>
         </Box>
       </Pane>

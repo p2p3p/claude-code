@@ -3,6 +3,7 @@ import { logEvent } from 'src/services/analytics/index.js';
 import { Box, Dialog, Link, Text } from '@anthropic/ink';
 import type { ExternalClaudeMdInclude } from '../utils/claudemd.js';
 import { saveCurrentProjectConfig } from '../utils/config.js';
+import { t } from '../utils/i18n/index.js';
 import { Select } from './CustomSelect/index.js';
 
 type Props = {
@@ -51,20 +52,19 @@ export function ClaudeMdExternalIncludesDialog({
 
   return (
     <Dialog
-      title="Allow external CLAUDE.md file imports?"
+      title={t('claudeMdExternalIncludes.title')}
       color="warning"
       onCancel={handleEscape}
       hideBorder={!isStandaloneDialog}
       hideInputGuide={!isStandaloneDialog}
     >
       <Text>
-        This project&apos;s CLAUDE.md imports files outside the current working directory. Never allow this for
-        third-party repositories.
+        {t('claudeMdExternalIncludes.body')}
       </Text>
 
       {externalIncludes && externalIncludes.length > 0 && (
         <Box flexDirection="column">
-          <Text dimColor>External imports:</Text>
+          <Text dimColor>{t('claudeMdExternalIncludes.externalImports')}</Text>
           {externalIncludes.map((include, i) => (
             <Text key={i} dimColor>
               {'  '}
@@ -75,14 +75,14 @@ export function ClaudeMdExternalIncludesDialog({
       )}
 
       <Text dimColor>
-        Important: Only use Claude Code with files you trust. Accessing untrusted files may pose security risks{' '}
+        {t('claudeMdExternalIncludes.warning')}{' '}
         <Link url="https://code.claude.com/docs/en/security" />{' '}
       </Text>
 
       <Select
         options={[
-          { label: 'Yes, allow external imports', value: 'yes' },
-          { label: 'No, disable external imports', value: 'no' },
+          { label: t('claudeMdExternalIncludes.yes'), value: 'yes' },
+          { label: t('claudeMdExternalIncludes.no'), value: 'no' },
         ]}
         onChange={value => handleSelection(value as 'yes' | 'no')}
       />

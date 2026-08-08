@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import { mkdir } from 'fs/promises';
 import { join } from 'path';
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js';
 import { use, useEffect, useState } from 'react';
 import { getOriginalCwd } from '../../bootstrap/state.js';
 import { useExitOnCtrlCDWithKeybindings } from '../../hooks/useExitOnCtrlCDWithKeybindings.js';
@@ -146,7 +147,7 @@ export function MemoryFileSelector({ onSelect, onCancel }: Props): React.ReactNo
   if (isAutoMemoryEnabled()) {
     // Always show auto-memory folder option
     folderOptions.push({
-      label: 'Open auto-memory folder',
+      label: t('memoryFileSelector.openAutoMemoryFolder'),
       value: `${OPEN_FOLDER_PREFIX}${getAutoMemPath()}`,
       description: '',
     });
@@ -154,7 +155,7 @@ export function MemoryFileSelector({ onSelect, onCancel }: Props): React.ReactNo
     // Team memory directly below auto-memory (team dir is a subdir of auto dir)
     if (feature('TEAMMEM') && teamMemPaths!.isTeamMemoryEnabled()) {
       folderOptions.push({
-        label: 'Open team memory folder',
+        label: t('memoryFileSelector.openTeamMemoryFolder'),
         value: `${OPEN_FOLDER_PREFIX}${teamMemPaths!.getTeamMemPath()}`,
         description: '',
       });
@@ -264,9 +265,9 @@ export function MemoryFileSelector({ onSelect, onCancel }: Props): React.ReactNo
         {showDreamRow && (
           <ListItem isFocused={focusedToggle === 1} styled={false}>
             <Text color={focusedToggle === 1 ? 'suggestion' : undefined}>
-              Auto-dream: {autoDreamOn ? 'on' : 'off'}
+              {t('memoryFileSelector.autoDreamOn').replace('{state}', autoDreamOn ? 'on' : 'off')}
               {dreamStatus && <Text dimColor> · {dreamStatus}</Text>}
-              {!isDreamRunning && autoDreamOn && <Text dimColor> · /dream to run</Text>}
+              {!isDreamRunning && autoDreamOn && <Text dimColor> · {t('memoryFileSelector.dreamToRun')}</Text>}
             </Text>
           </ListItem>
         )}

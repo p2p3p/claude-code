@@ -1,6 +1,7 @@
 import capitalize from 'lodash-es/capitalize.js';
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import { t } from '../utils/i18n/index.js';
 import { has1mContext } from '../utils/context.js';
 import { useExitOnCtrlCDWithKeybindings } from 'src/hooks/useExitOnCtrlCDWithKeybindings.js';
 import {
@@ -118,7 +119,7 @@ export function ModelPicker({
         {
           value: initial,
           label: modelDisplayString(initial),
-          description: 'Current model',
+          description: t('modelPicker.currentModel'),
         },
       ];
     }
@@ -299,14 +300,13 @@ export function ModelPicker({
           showFastModeNotice ? (
             <Box marginBottom={1}>
               <Text dimColor>
-                Fast mode is <Text bold>ON</Text> and available with {FAST_MODE_MODEL_DISPLAY} only (/fast). Switching
-                to other models turn off fast mode.
+                {t('modelPicker.fastModeOnPrefix')}<Text bold>ON</Text>{t('modelPicker.fastModeOnSuffix').replace('{model}', FAST_MODE_MODEL_DISPLAY)}
               </Text>
             </Box>
           ) : isFastModeAvailable() && !isFastModeCooldown() ? (
             <Box marginBottom={1}>
               <Text dimColor>
-                Use <Text bold>/fast</Text> to turn on Fast mode ({FAST_MODE_MODEL_DISPLAY} only).
+                {t('modelPicker.useFastMode').replace('{model}', FAST_MODE_MODEL_DISPLAY)}
               </Text>
             </Box>
           ) : null
@@ -316,11 +316,11 @@ export function ModelPicker({
       {isStandaloneCommand && (
         <Text dimColor italic>
           {exitState.pending ? (
-            <>Press {exitState.keyName} again to exit</>
+            <>{t('common.pressAgain', exitState.keyName)}</>
           ) : (
             <Byline>
               <KeyboardShortcutHint shortcut="Enter" action="confirm" />
-              <ConfigurableShortcutHint action="select:cancel" context="Select" fallback="Esc" description="exit" />
+              <ConfigurableShortcutHint action="select:cancel" context="Select" fallback="Esc" description={t('desc.exit')} />
             </Byline>
           )}
         </Text>

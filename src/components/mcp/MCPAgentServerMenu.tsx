@@ -5,6 +5,7 @@ import { Box, color, Link, Text, useTheme } from '@anthropic/ink';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import { AuthenticationCancelledError, performMCPOAuthFlow } from '../../services/mcp/auth.js';
 import { capitalize } from '../../utils/stringUtils.js';
+import { t } from '../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Select } from '../CustomSelect/index.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
@@ -92,14 +93,14 @@ export function MCPAgentServerMenu({ agentServer, onCancel, onComplete }: Props)
         </Box>
         {authorizationUrl && (
           <Box flexDirection="column">
-            <Text dimColor>If your browser doesn&apos;t open automatically, copy this URL manually:</Text>
+            <Text dimColor>{t('mcpAgentServer.browserNotOpen')}</Text>
             <Link url={authorizationUrl} />
           </Box>
         )}
         <Box marginLeft={3}>
           <Text dimColor>
-            Return here after authenticating in your browser.{' '}
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="go back" />
+            {t('mcpAgentServer.returnAfterAuth')}{' '}
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.goBack')} />
           </Text>
         </Box>
       </Box>
@@ -111,66 +112,66 @@ export function MCPAgentServerMenu({ agentServer, onCancel, onComplete }: Props)
   // Only show authenticate option for HTTP/SSE servers
   if (agentServer.needsAuth) {
     menuOptions.push({
-      label: agentServer.isAuthenticated ? 'Re-authenticate' : 'Authenticate',
+      label: agentServer.isAuthenticated ? t('mcpAgentServer.reauthenticate') : t('mcpAgentServer.authenticate'),
       value: 'auth',
     });
   }
 
   menuOptions.push({
-    label: 'Back',
+    label: t('mcpAgentServer.back'),
     value: 'back',
   });
 
   return (
     <Dialog
-      title={`${capitalizedServerName} MCP Server`}
-      subtitle="agent-only"
+      title={t('mcpAgentServer.title', capitalizedServerName)}
+      subtitle={t('mcpAgentServer.agentOnly')}
       onCancel={onCancel}
       inputGuide={exitState =>
         exitState.pending ? (
-          <Text>Press {exitState.keyName} again to exit</Text>
+          <Text>{t('common.pressAgain', exitState.keyName)}</Text>
         ) : (
           <Byline>
             <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
             <KeyboardShortcutHint shortcut="Enter" action="confirm" />
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="go back" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.goBack')} />
           </Byline>
         )
       }
     >
       <Box flexDirection="column" gap={0}>
         <Box>
-          <Text bold>Type: </Text>
+          <Text bold>{t('mcpAgentServer.type')}: </Text>
           <Text dimColor>{agentServer.transport}</Text>
         </Box>
 
         {agentServer.url && (
           <Box>
-            <Text bold>URL: </Text>
+            <Text bold>{t('mcpagentservermenu.uRL')} </Text>
             <Text dimColor>{agentServer.url}</Text>
           </Box>
         )}
 
         {agentServer.command && (
           <Box>
-            <Text bold>Command: </Text>
+            <Text bold>{t('mcpagentservermenu.command')} </Text>
             <Text dimColor>{agentServer.command}</Text>
           </Box>
         )}
 
         <Box>
-          <Text bold>Used by: </Text>
+          <Text bold>{t('mcpagentservermenu.usedBy')} </Text>
           <Text dimColor>{agentServer.sourceAgents.join(', ')}</Text>
         </Box>
 
         <Box marginTop={1}>
-          <Text bold>Status: </Text>
+          <Text bold>{t('mcpagentservermenu.status')} </Text>
           <Text>{color('inactive', theme)(figures.radioOff)} not connected (agent-only)</Text>
         </Box>
 
         {agentServer.needsAuth && (
           <Box>
-            <Text bold>Auth: </Text>
+            <Text bold>{t('mcpagentservermenu.auth')} </Text>
             {agentServer.isAuthenticated ? (
               <Text>{color('success', theme)(figures.tick)} authenticated</Text>
             ) : (
@@ -181,7 +182,7 @@ export function MCPAgentServerMenu({ agentServer, onCancel, onComplete }: Props)
       </Box>
 
       <Box>
-        <Text dimColor>This server connects only when running the agent.</Text>
+        <Text dimColor>{t('mcpagentservermenu.thisServerConnectsOnlyWhenRunningTheAgent')}</Text>
       </Box>
 
       {error && (

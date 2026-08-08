@@ -1,10 +1,11 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const history = {
   type: 'local',
   name: 'history',
   aliases: ['hist'],
-  description: 'View session history of a connected sub CLI',
+  description: t('cmd.descHistory'),
   supportsNonInteractive: false,
   load: () => import('./history.js'),
 } satisfies Command

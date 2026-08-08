@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { t } from './i18n/index.js'
 import { useTimeout } from '../hooks/useTimeout.js';
 import { Box, Text } from '@anthropic/ink';
 import { Spinner } from '../components/Spinner.js';
@@ -48,13 +49,13 @@ export function PreflightStep({ onSuccess }: PreflightStepProps): React.ReactNod
       {isChecking && showSpinner ? (
         <Box paddingLeft={1}>
           <Spinner />
-          <Text>Checking connectivity...</Text>
+          <Text>{t('preflightchecks.checkingConnectivity')}</Text>
         </Box>
       ) : (
         !result?.success &&
         !isChecking && (
           <Box flexDirection="column" gap={1}>
-            <Text color="error">Unable to connect to Anthropic services</Text>
+            <Text color="error">{t('preflightchecks.unableToConnectToAnthropicServices')}</Text>
             <Text color="error">{result?.error}</Text>
           </Box>
         )

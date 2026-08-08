@@ -1,9 +1,10 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const attach = {
   type: 'local',
   name: 'attach',
-  description: 'Attach to a sub Claude CLI instance via named pipe',
+  description: t('cmd.descAttach'),
   supportsNonInteractive: false,
   load: () => import('./attach.js'),
 } satisfies Command

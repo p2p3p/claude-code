@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Box, Dialog, Text, useInput } from '@anthropic/ink';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { callBreakCache } from './index.js';
+import { t } from '../../utils/i18n/index.js'
 
 type BreakCacheAction = {
   label: string;
@@ -24,28 +25,28 @@ function BreakCachePanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.R
   const actions = useMemo<BreakCacheAction[]>(
     () => [
       {
-        label: 'Status',
-        description: 'Show pending marker, always mode, and break count',
+        label: t('breakCache.status'),
+        description: t('breakCache.statusDesc'),
         run: () => void runBreakCacheAction('status', onDone),
       },
       {
-        label: 'Once',
-        description: 'Break prompt cache on the next API call only',
+        label: t('breakCache.once'),
+        description: t('breakCache.onceDesc'),
         run: () => void runBreakCacheAction('once', onDone),
       },
       {
-        label: 'Always',
-        description: 'Break prompt cache on every API call',
+        label: t('breakCache.always'),
+        description: t('breakCache.alwaysDesc'),
         run: () => void runBreakCacheAction('always', onDone),
       },
       {
-        label: 'Off',
-        description: 'Disable always mode and clear pending once marker',
+        label: t('breakCache.off'),
+        description: t('breakCache.offDesc'),
         run: () => void runBreakCacheAction('off', onDone),
       },
       {
-        label: 'Clear Once',
-        description: 'Cancel the pending one-time cache break',
+        label: t('breakCache.clearOnce'),
+        description: t('breakCache.clearOnceDesc'),
         run: () => void runBreakCacheAction('--clear', onDone),
       },
     ],
@@ -74,9 +75,9 @@ function BreakCachePanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.R
 
   return (
     <Dialog
-      title="Break Cache"
-      subtitle={`${actions.length} actions`}
-      onCancel={() => onDone('Break-cache panel dismissed', { display: 'system' })}
+      title={t("cmdSystemUI.breakCacheTitle")}
+      subtitle={`${actions.length} ${t('breakCache.actions')}`}
+      onCancel={() => onDone(t('cmdSystemUI.breakCacheTitle') + ' panel dismissed', { display: 'system' })}
       color="background"
       hideInputGuide
     >
@@ -88,7 +89,7 @@ function BreakCachePanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.R
           </Box>
         ))}
         <Box marginTop={1}>
-          <Text dimColor>↑/↓ select · Enter run · Esc close</Text>
+          <Text dimColor>{t('breakCachePanel.selectRunClose')}</Text>
         </Box>
       </Box>
     </Dialog>

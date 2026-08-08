@@ -1,4 +1,5 @@
 import type { ToolUseBlock } from '@anthropic-ai/sdk/resources';
+import { t } from '../../utils/i18n/index.js'
 import { getRemoteSessionUrl } from '../../constants/product.js';
 import {
   OUTPUT_FILE_TAG,
@@ -506,7 +507,7 @@ function enqueueRemoteReviewNotification(taskId: string, reviewContent: string, 
 <${TASK_ID_TAG}>${taskId}</${TASK_ID_TAG}>
 <${TASK_TYPE_TAG}>remote_agent</${TASK_TYPE_TAG}>
 <${STATUS_TAG}>completed</${STATUS_TAG}>
-<${SUMMARY_TAG}>Remote review completed</${SUMMARY_TAG}>
+<${SUMMARY_TAG}>{t('remoteagenttask.remoteReviewCompleted')}</${SUMMARY_TAG}>
 </${TASK_NOTIFICATION_TAG}>
 The remote review produced the following findings:
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNotifications } from 'src/context/notifications.js';
 import { getIsRemoteMode } from '../../bootstrap/state.js';
+import { t } from '../../utils/i18n/index.js';
 import { getSettingsWithAllErrors } from '../../utils/settings/allErrors.js';
 import type { ValidationError } from '../../utils/settings/validation.js';
 import { useSettingsChange } from '../useSettingsChange.js';
@@ -24,10 +25,9 @@ export function useSettingsErrors(): ValidationError[] {
   useEffect(() => {
     if (getIsRemoteMode()) return;
     if (errors.length > 0) {
-      const message = `Found ${errors.length} settings ${errors.length === 1 ? 'issue' : 'issues'} · /doctor for details`;
       addNotification({
         key: SETTINGS_ERRORS_NOTIFICATION_KEY,
-        text: message,
+        text: t('notif.settingsErrors.foundIssues', { count: errors.length }),
         color: 'warning',
         priority: 'high',
         timeoutMs: 60000,

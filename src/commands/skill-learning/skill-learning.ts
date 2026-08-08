@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import type { LocalCommandCall } from '../../types/command.js'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
+import { t } from '../../utils/i18n/index.js'
 import {
   analyzeObservations,
   applySkillLifecycleDecision,
@@ -39,9 +40,9 @@ export const call: LocalCommandCall = async (
       return {
         type: 'text',
         value: [
-          `Skill Learning status for ${project.projectName} (${project.projectId})`,
-          `Observations: ${observations.length}`,
-          `Instincts: ${instincts.length}`,
+          t('skillLearning.statusHeader', project.projectName, project.projectId),
+          t('skillLearning.observationsCount', observations.length),
+          t('skillLearning.instinctsCount', instincts.length),
         ].join('\n'),
       }
     }
@@ -50,8 +51,7 @@ export const call: LocalCommandCall = async (
       if (!transcript) {
         return {
           type: 'text',
-          value:
-            'Usage: /skill-learning ingest <transcript.jsonl> [--min-session-length=<n>]',
+          value: t('skillLearning.usageIngest'),
         }
       }
       const minSessionLength = parseFlagNumber(
@@ -63,7 +63,7 @@ export const call: LocalCommandCall = async (
       if (observations.length < minSessionLength) {
         return {
           type: 'text',
-          value: `Session too short for learning (${observations.length} < min=${minSessionLength}). Skipping instinct extraction.`,
+          value: t('skillLearning.sessionTooShort', observations.length, minSessionLength),
         }
       }
       const instincts = analyzeObservations(observations)
@@ -73,7 +73,7 @@ export const call: LocalCommandCall = async (
       }
       return {
         type: 'text',
-        value: `Ingested ${observations.length} observations and saved ${saved.length} instincts.`,
+        value: t('skillLearning.ingested', observations.length, saved.length),
       }
     }
     case 'evolve': {
@@ -91,15 +91,15 @@ export const call: LocalCommandCall = async (
           const decision = decideSkillLifecycle(draft, existing)
           const result = await applySkillLifecycleDecision(decision)
           written.push(
-            `${decision.type}: ${result.activePath ?? result.archivedPath ?? result.deletedPath ?? 'no active write'}`,
+            t('skillLearning.evolveResult', decision.type, result.activePath ?? result.archivedPath ?? result.deletedPath ?? t('skillLearning.noActiveWrite')),
           )
         }
       }
       return {
         type: 'text',
         value: generate
-          ? `Generated ${written.length} learned skill(s):\n${written.join('\n')}`
-          : `Found ${drafts.length} skill candidate(s). Use --generate to write them.`,
+          ? t('skillLearning.evolveGenerated', written.length, written.join('\n'))
+          : t('skillLearning.evolveFound', drafts.length),
       }
     }
     case 'export': {
@@ -125,14 +125,14 @@ export const call: LocalCommandCall = async (
         await exportInstincts(output, options)
       }
       const parts2: string[] = [
-        `Exported ${filtered.length} instincts to ${output}`,
+        t('skillLearning.exported', filtered.length, output),
       ]
       if (scope || minConf !== undefined || domain) {
         const filters: string[] = []
         if (scope) filters.push(`scope=${scope}`)
         if (minConf !== undefined) filters.push(`min-conf=${minConf}`)
         if (domain) filters.push(`domain=${domain}`)
-        parts2.push(`(filters: ${filters.join(', ')})`)
+        parts2.push(t('skillLearning.exportFilters', filters.join(', ')))
       }
       return { type: 'text', value: parts2.join(' ') }
     }
@@ -141,8 +141,7 @@ export const call: LocalCommandCall = async (
       if (!input) {
         return {
           type: 'text',
-          value:
-            'Usage: /skill-learning import <instincts.json> [--scope=<scope>] [--min-conf=<n>] [--domain=<d>] [--dry-run]',
+          value: t('skillLearning.usageImport'),
         }
       }
       const scope = parseFlagString(parts, '--scope')
@@ -165,7 +164,7 @@ export const call: LocalCommandCall = async (
       if (dryRun) {
         return {
           type: 'text',
-          value: `Dry run: would import ${filtered.length}/${parsed.length} instincts.`,
+          value: t('skillLearning.dryRun', filtered.length, parsed.length),
         }
       }
       for (const instinct of filtered) {
@@ -173,7 +172,7 @@ export const call: LocalCommandCall = async (
       }
       return {
         type: 'text',
-        value: `Imported ${filtered.length}/${parsed.length} instincts.`,
+        value: t('skillLearning.imported', filtered.length, parsed.length),
       }
     }
     case 'prune': {
@@ -185,7 +184,7 @@ export const call: LocalCommandCall = async (
       const pruned = await prunePendingInstincts(maxAge, options)
       return {
         type: 'text',
-        value: `Pruned ${pruned.length} pending instincts.`,
+        value: t('skillLearning.pruned', pruned.length),
       }
     }
     case 'promote': {
@@ -195,13 +194,11 @@ export const call: LocalCommandCall = async (
         const instincts = await loadInstincts(options)
         const candidates = findPromotionCandidates(instincts)
         const lines = [
-          `Promotion candidates for ${project.projectName} (${project.projectId}):`,
-          `Pending gaps: ${gaps.filter(g => g.status === 'pending').length}`,
-          `Global-eligible instincts (>=2 projects, avg confidence >=0.8): ${candidates.length}`,
+          t('skillLearning.promoteCandidatesHeader', project.projectName, project.projectId),
+          t('skillLearning.pendingGaps', gaps.filter(g => g.status === 'pending').length),
+          t('skillLearning.globalEligible', candidates.length),
           '',
-          'Usage:',
-          '  /skill-learning promote gap <gap-key>           # pending gap -> draft',
-          '  /skill-learning promote instinct <instinct-id>  # project instinct -> global',
+          t('skillLearning.promoteUsage'),
         ]
         return { type: 'text', value: lines.join('\n') }
       }
@@ -211,16 +208,16 @@ export const call: LocalCommandCall = async (
         if (!gapKey) {
           return {
             type: 'text',
-            value: 'Usage: /skill-learning promote gap <gap-key>',
+            value: t('skillLearning.usagePromoteGap'),
           }
         }
         const updated = await promoteGapToDraft(gapKey, project, rootDir)
         if (!updated) {
-          return { type: 'text', value: `No gap found for key "${gapKey}".` }
+          return { type: 'text', value: t('skillLearning.noGapFound', gapKey) }
         }
         return {
           type: 'text',
-          value: `Promoted gap ${gapKey} to status=${updated.status} (draft=${updated.draft?.skillPath ?? 'none'}).`,
+          value: t('skillLearning.promotedGap', gapKey, updated.status, updated.draft?.skillPath ?? t('skillLearning.none')),
         }
       }
 
@@ -229,7 +226,7 @@ export const call: LocalCommandCall = async (
         if (!instinctId) {
           return {
             type: 'text',
-            value: 'Usage: /skill-learning promote instinct <instinct-id>',
+            value: t('skillLearning.usagePromoteInstinct'),
           }
         }
         const projectInstincts = await loadInstincts(options)
@@ -237,35 +234,34 @@ export const call: LocalCommandCall = async (
         if (!match) {
           return {
             type: 'text',
-            value: `No project-scoped instinct found for id "${instinctId}".`,
+            value: t('skillLearning.noInstinctFound', instinctId),
           }
         }
         if (match.scope === 'global') {
           return {
             type: 'text',
-            value: `Instinct ${instinctId} is already global.`,
+            value: t('skillLearning.instinctAlreadyGlobal', instinctId),
           }
         }
         const globalCopy = { ...match, scope: 'global' as const }
         await saveInstinct(globalCopy, { scope: 'global', rootDir })
         return {
           type: 'text',
-          value: `Promoted instinct ${instinctId} to global scope.`,
+          value: t('skillLearning.promotedInstinct', instinctId),
         }
       }
 
       return {
         type: 'text',
-        value:
-          'Usage: /skill-learning promote [gap <gap-key>|instinct <instinct-id>]',
+        value: t('skillLearning.usagePromote'),
       }
     }
     case 'projects': {
       const projects = listKnownProjects()
       if (projects.length === 0) {
-        return { type: 'text', value: 'No known project scopes yet.' }
+        return { type: 'text', value: t('skillLearning.noKnownProjects') }
       }
-      const lines = ['Known project scopes:']
+      const lines = [t('skillLearning.knownProjectsHeader')]
       for (const record of projects) {
         const projectOptions = { project: record, rootDir }
         const [instincts, observations] = await Promise.all([
@@ -273,7 +269,7 @@ export const call: LocalCommandCall = async (
           readObservations(projectOptions),
         ])
         lines.push(
-          `- ${record.projectName} (${record.projectId}) — instincts: ${instincts.length}, observations: ${observations.length}, lastSeen: ${record.lastSeenAt}`,
+          t('skillLearning.projectLine', record.projectName, record.projectId, instincts.length, observations.length, record.lastSeenAt),
         )
       }
       return { type: 'text', value: lines.join('\n') }
@@ -281,8 +277,7 @@ export const call: LocalCommandCall = async (
     default:
       return {
         type: 'text',
-        value:
-          'Usage: /skill-learning [status|ingest|evolve|export|import|prune|promote|projects]',
+        value: t('skillLearning.usageDefault'),
       }
   }
 }

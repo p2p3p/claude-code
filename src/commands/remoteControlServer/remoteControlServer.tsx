@@ -14,6 +14,7 @@ import { buildCliLaunch, spawnCli } from '../../utils/cliLaunch.js';
 import type { ToolUseContext } from '../../Tool.js';
 import type { LocalJSXCommandContext, LocalJSXCommandOnDone } from '../../types/command.js';
 import { errorMessage } from '../../utils/errors.js';
+import { t } from '../../utils/i18n/index.js'
 
 type ServerStatus = 'stopped' | 'starting' | 'running' | 'error';
 
@@ -145,10 +146,10 @@ function ServerManagementDialog({ onDone }: Props): React.ReactNode {
   );
 
   return (
-    <Dialog title="Remote Control Server" onCancel={handleContinue} hideInputGuide>
+    <Dialog title={t("cmdSystemUI.rcsTitle")} onCancel={handleContinue} hideInputGuide>
       <Box flexDirection="column" gap={1}>
         <Text>
-          Remote Control Server is{' '}
+          {t("cmdSystemUI.rcsRunning")}{' '}
           <Text bold color="success">
             running
           </Text>
@@ -156,7 +157,7 @@ function ServerManagementDialog({ onDone }: Props): React.ReactNode {
         </Text>
         {logPreview.length > 0 && (
           <Box flexDirection="column">
-            <Text dimColor>Recent logs:</Text>
+            <Text dimColor>{t("cmdSystemUI.rcsRecentLogs")}</Text>
             {logPreview.map((line, i) => (
               <Text key={i} dimColor>
                 {line}
@@ -166,16 +167,16 @@ function ServerManagementDialog({ onDone }: Props): React.ReactNode {
         )}
         <Box flexDirection="column">
           <ListItem isFocused={focusIndex === 0}>
-            <Text>Stop server</Text>
+            <Text>{t("cmdSystemUI.rcsStop")}</Text>
           </ListItem>
           <ListItem isFocused={focusIndex === 1}>
-            <Text>Restart server</Text>
+            <Text>{t("cmdSystemUI.rcsRestart")}</Text>
           </ListItem>
           <ListItem isFocused={focusIndex === 2}>
-            <Text>Continue</Text>
+            <Text>{t('remotecontrolserver.continue')}</Text>
           </ListItem>
         </Box>
-        <Text dimColor>Enter to select · Esc to continue</Text>
+        <Text dimColor>{t("cmdSystemUI.rcsNav")}</Text>
       </Box>
     </Dialog>
   );

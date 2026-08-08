@@ -1,6 +1,7 @@
 import { POWERSHELL_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/PowerShellTool/toolName.js';
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js';
 import { shouldShowAlwaysAllowOptions } from '../../../utils/permissions/permissionsLoader.js';
+import { t } from '../../../utils/i18n/index.js';
 import type { OptionWithDescription } from '../../CustomSelect/select.js';
 import { generateShellSuggestionsLabel } from '../shellPermissionHelpers.js';
 
@@ -28,15 +29,15 @@ export function powershellToolUseOptions({
   if (yesInputMode) {
     options.push({
       type: 'input',
-      label: 'Yes',
+      label: t('bashToolUse.yes'),
       value: 'yes',
-      placeholder: 'and tell Claude what to do next',
+      placeholder: t('bashToolUse.yesAndTell'),
       onChange: onAcceptFeedbackChange,
       allowEmptySubmitToCancel: true,
     });
   } else {
     options.push({
-      label: 'Yes',
+      label: t('bashToolUse.yes'),
       value: 'yes',
     });
   }
@@ -58,9 +59,9 @@ export function powershellToolUseOptions({
     if (editablePrefix !== undefined && onEditablePrefixChange && !hasNonPowerShellSuggestions) {
       options.push({
         type: 'input',
-        label: 'Yes, and don\u2019t ask again for',
+        label: t('bashToolUse.yesDontAsk'),
         value: 'yes-prefix-edited',
-        placeholder: 'command prefix (e.g., Get-Process:*)',
+        placeholder: t('bashToolUse.powershellPrefix'),
         initialValue: editablePrefix,
         onChange: onEditablePrefixChange,
         allowEmptySubmitToCancel: true,
@@ -82,15 +83,15 @@ export function powershellToolUseOptions({
   if (noInputMode) {
     options.push({
       type: 'input',
-      label: 'No',
+      label: t('bashToolUse.no'),
       value: 'no',
-      placeholder: 'and tell Claude what to do differently',
+      placeholder: t('bashToolUse.tellDifferent'),
       onChange: onRejectFeedbackChange,
       allowEmptySubmitToCancel: true,
     });
   } else {
     options.push({
-      label: 'No',
+      label: t('bashToolUse.no'),
       value: 'no',
     });
   }

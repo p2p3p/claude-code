@@ -8,6 +8,7 @@ import type { LocalAgentTaskState } from '../../tasks/LocalAgentTask/LocalAgentT
 import { getTools } from '../../tools.js';
 import { formatNumber } from '../../utils/format.js';
 import { extractTag } from '../../utils/messages.js';
+import { t } from '../../utils/i18n/index.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
 import { UserPlanMessage } from '../messages/UserPlanMessage.js';
 import { renderToolActivity } from './renderToolActivity.js';
@@ -66,7 +67,7 @@ export function AsyncAgentDetailDialog({ agent, onDone, onKillAgent, onBack }: P
 
   const title = (
     <Text>
-      {agent.selectedAgent?.agentType ?? 'agent'} › {agent.description || 'Async agent'}
+      {agent.selectedAgent?.agentType ?? t('taskDetail.agent')} › {agent.description || t('taskDetail.asyncAgent')}
     </Text>
   );
 
@@ -76,17 +77,17 @@ export function AsyncAgentDetailDialog({ agent, onDone, onKillAgent, onBack }: P
       {agent.status !== 'running' && (
         <Text color={getTaskStatusColor(agent.status)}>
           {getTaskStatusIcon(agent.status)}{' '}
-          {agent.status === 'completed' ? 'Completed' : agent.status === 'failed' ? 'Failed' : 'Stopped'}
+          {agent.status === 'completed' ? t('taskDetail.completed') : agent.status === 'failed' ? t('taskDetail.failed') : t('taskDetail.stopped')}
           {' · '}
         </Text>
       )}
       <Text dimColor>
         {elapsedTime}
-        {tokenCount !== undefined && tokenCount > 0 && <> · {formatNumber(tokenCount)} tokens</>}
+        {tokenCount !== undefined && tokenCount > 0 && <> · {formatNumber(tokenCount)} {t('taskDetail.tokens')}</>}
         {toolUseCount !== undefined && toolUseCount > 0 && (
           <>
             {' '}
-            · {toolUseCount} {toolUseCount === 1 ? 'tool' : 'tools'}
+            · {toolUseCount} {toolUseCount === 1 ? t('taskDetail.tool') : t('taskDetail.tools')}
           </>
         )}
       </Text>
@@ -102,12 +103,12 @@ export function AsyncAgentDetailDialog({ agent, onDone, onKillAgent, onBack }: P
         color="background"
         inputGuide={exitState =>
           exitState.pending ? (
-            <Text>Press {exitState.keyName} again to exit</Text>
+            <Text>{t('common.pressAgain', exitState.keyName)}</Text>
           ) : (
             <Byline>
-              {onBack && <KeyboardShortcutHint shortcut="←" action="go back" />}
-              <KeyboardShortcutHint shortcut="Esc/Enter/Space" action="close" />
-              {agent.status === 'running' && onKillAgent && <KeyboardShortcutHint shortcut="x" action="stop" />}
+              {onBack && <KeyboardShortcutHint shortcut="←" action={t('taskDetail.goBack')} />}
+              <KeyboardShortcutHint shortcut="Esc/Enter/Space" action={t('taskDetail.close')} />
+              {agent.status === 'running' && onKillAgent && <KeyboardShortcutHint shortcut="x" action={t('taskDetail.stop')} />}
             </Byline>
           )
         }
@@ -119,7 +120,7 @@ export function AsyncAgentDetailDialog({ agent, onDone, onKillAgent, onBack }: P
             agent.progress.recentActivities.length > 0 && (
               <Box flexDirection="column">
                 <Text bold dimColor>
-                  Progress
+                  {t('taskDetail.progress')}
                 </Text>
                 {agent.progress.recentActivities.map((activity, i) => (
                   <Text key={i} dimColor={i < agent.progress!.recentActivities!.length - 1} wrap="truncate-end">
@@ -139,7 +140,7 @@ export function AsyncAgentDetailDialog({ agent, onDone, onKillAgent, onBack }: P
             /* Prompt section - only shown when no plan */
             <Box flexDirection="column" marginTop={1}>
               <Text bold dimColor>
-                Prompt
+                {t('taskDetail.prompt')}
               </Text>
               <Text wrap="wrap">{displayPrompt}</Text>
             </Box>
@@ -149,7 +150,7 @@ export function AsyncAgentDetailDialog({ agent, onDone, onKillAgent, onBack }: P
           {agent.status === 'failed' && agent.error && (
             <Box flexDirection="column" marginTop={1}>
               <Text bold color="error">
-                Error
+                {t('taskDetail.error')}
               </Text>
               <Text color="error" wrap="wrap">
                 {agent.error}

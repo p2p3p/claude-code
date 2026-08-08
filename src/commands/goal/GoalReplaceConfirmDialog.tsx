@@ -10,6 +10,7 @@ import type { GoalState } from 'src/types/logs.js';
 import { Select } from 'src/components/CustomSelect/index.js';
 import { PermissionDialog } from 'src/components/permissions/PermissionDialog.js';
 import { formatGoalElapsed, formatGoalStatusLabel } from 'src/services/goal/goalState.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props = {
   currentGoal: GoalState;
@@ -30,12 +31,12 @@ export function GoalReplaceConfirmDialog({ currentGoal, newObjective, onConfirm,
       : `${currentGoal.tokensUsed}`;
 
   return (
-    <PermissionDialog color="warning" title="Replace active goal?">
+    <PermissionDialog color="warning" title={t("cmdSystemUI.replaceGoalTitle")}>
       <Box flexDirection="column" marginTop={1} paddingX={1}>
-        <Text>A goal is already in progress. Replacing it will reset all progress and counters.</Text>
+        <Text>{t("cmdSystemUI.replaceGoalBody")}</Text>
 
         <Box marginTop={1} flexDirection="column">
-          <Text dimColor>Current goal:</Text>
+          <Text dimColor>{t("cmdSystemUI.currentGoal")}</Text>
           <Text>
             <Text dimColor>· Objective: </Text>
             {currentGoal.objective}
@@ -55,15 +56,15 @@ export function GoalReplaceConfirmDialog({ currentGoal, newObjective, onConfirm,
         </Box>
 
         <Box marginTop={1} flexDirection="column">
-          <Text dimColor>New objective:</Text>
+          <Text dimColor>{t("cmdSystemUI.newObjective")}</Text>
           <Text>{newObjective}</Text>
         </Box>
 
         <Box marginTop={1}>
           <Select
             options={[
-              { label: 'Yes, replace the goal', value: 'yes' as const },
-              { label: 'No, keep the current goal', value: 'no' as const },
+              { label: t('cmdSystemUI.yesReplace'), value: 'yes' as const },
+              { label: t('cmdSystemUI.noKeepGoal'), value: 'no' as const },
             ]}
             onChange={handleResponse}
             onCancel={onCancel}

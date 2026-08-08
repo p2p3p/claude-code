@@ -1,4 +1,5 @@
 import type { StructuredPatchHunk } from 'diff';
+import { t } from '../../utils/i18n/index.js'
 import { resolve } from 'path';
 import React, { useMemo } from 'react';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
@@ -52,7 +53,7 @@ export function DiffDetailView({
       <Box flexDirection="column" width="100%">
         <Box>
           <Text bold>{filePath}</Text>
-          <Text dimColor> (untracked)</Text>
+          <Text dimColor>{t('diffDetail.untracked')}</Text>
         </Box>
         <Divider padding={4} />
         <Box flexDirection="column">
@@ -108,13 +109,13 @@ export function DiffDetailView({
     <Box flexDirection="column" width="100%">
       <Box>
         <Text bold>{filePath}</Text>
-        {isTruncated && <Text dimColor> (truncated)</Text>}
+        {isTruncated && <Text dimColor>{t('diffDetail.truncated')}</Text>}
       </Box>
 
       <Divider padding={4} />
       <Box flexDirection="column">
         {hunks.length === 0 ? (
-          <Text dimColor>No diff content</Text>
+          <Text dimColor>{t('diffdetailview.noDiffContent')}</Text>
         ) : (
           hunks.map((hunk, index) => (
             <StructuredDiff

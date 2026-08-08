@@ -3,6 +3,7 @@ import TextInput from '../../components/TextInput.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { Box, color, Text, useTheme } from '@anthropic/ink';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
+import { t } from '../../utils/i18n/index.js'
 
 interface CheckExistingSecretStepProps {
   useExistingSecret: boolean;
@@ -48,38 +49,38 @@ export function CheckExistingSecretStep({
     <>
       <Box flexDirection="column" borderStyle="round" paddingX={1}>
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>Install GitHub App</Text>
-          <Text dimColor>Setup API key secret</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
+          <Text dimColor>{t('installGithub.setupApiKeySecret')}</Text>
         </Box>
         <Box marginBottom={1}>
-          <Text color="warning">ANTHROPIC_API_KEY already exists in repository secrets!</Text>
+          <Text color="warning">{t('installGithub.apiKeyExists')}</Text>
         </Box>
         <Box marginBottom={1}>
-          <Text>Would you like to:</Text>
+          <Text>{t('installGithub.wouldYouLike')}</Text>
         </Box>
         <Box marginBottom={1}>
           <Text>
             {useExistingSecret ? color('success', theme)('> ') : '  '}
-            Use the existing API key
+            {t('installGithub.useExistingKey')}
           </Text>
         </Box>
         <Box marginBottom={1}>
           <Text>
             {!useExistingSecret ? color('success', theme)('> ') : '  '}
-            Create a new secret with a different name
+            {t('installGithub.createNewSecret')}
           </Text>
         </Box>
         {!useExistingSecret && (
           <>
             <Box marginBottom={1}>
-              <Text>Enter new secret name (alphanumeric with underscores):</Text>
+              <Text>{t('installGithub.enterSecretName')}</Text>
             </Box>
             <TextInput
               value={secretName}
               onChange={onSecretNameChange}
               onSubmit={onSubmit}
               focus={true}
-              placeholder="e.g., CLAUDE_API_KEY"
+              placeholder={t('installGithub.secretNamePlaceholder')}
               columns={terminalSize.columns}
               cursorOffset={cursorOffset}
               onChangeCursorOffset={setCursorOffset}
@@ -89,7 +90,7 @@ export function CheckExistingSecretStep({
         )}
       </Box>
       <Box marginLeft={3}>
-        <Text dimColor>↑/↓ to select · Enter to continue</Text>
+        <Text dimColor>{'↑/↓ ' + t('installGithub.toSelect') + ' · ' + t('installGithub.enterContinue')}</Text>
       </Box>
     </>
   );

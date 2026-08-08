@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { t } from '../utils/i18n/index.js';
 import type { CommandResultDisplay } from '../commands.js';
 // eslint-disable-next-line custom-rules/prefer-use-keybindings -- raw input for "any key" dismiss and y/n prompt
 import { Box, Text, useInput, LoadingState } from '@anthropic/ink';
@@ -105,8 +106,8 @@ export function DesktopHandoff({ onDone }: Props): React.ReactNode {
   if (state === 'error') {
     return (
       <Box flexDirection="column" paddingX={2}>
-        <Text color="error">Error: {error}</Text>
-        <Text dimColor>Press any key to continue…</Text>
+        <Text color="error">{t('desktopHandoff.error').replace('{error}', error)}</Text>
+        <Text dimColor>{t('desktopHandoff.pressAnyKeyContinue')}</Text>
       </Box>
     );
   }
@@ -115,7 +116,7 @@ export function DesktopHandoff({ onDone }: Props): React.ReactNode {
     return (
       <Box flexDirection="column" paddingX={2}>
         <Text>{downloadMessage}</Text>
-        <Text>Download now? (y/n)</Text>
+        <Text>{t('desktopHandoff.downloadNow')}</Text>
       </Box>
     );
   }

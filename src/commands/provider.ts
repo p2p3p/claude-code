@@ -4,6 +4,7 @@ import { getAPIProvider } from '../utils/model/providers.js'
 import { updateSettingsForSource } from '../utils/settings/settings.js'
 import { getSettings_DEPRECATED } from '../utils/settings/settings.js'
 import { applyConfigEnvironmentVariables } from '../utils/managedEnv.js'
+import { t } from '../utils/i18n/index.js'
 
 function getEnvVarForProvider(provider: string): string {
   switch (provider) {
@@ -42,7 +43,7 @@ const call: LocalCommandCall = async (args, _context) => {
   // No argument: show current provider
   if (!arg) {
     const current = getAPIProvider()
-    return { type: 'text', value: `Current API provider: ${current}` }
+    return { type: 'text', value: t('providerCmd.currentProvider', current) }
   }
 
   // unset - clear settings, fallback to env vars
@@ -57,7 +58,7 @@ const call: LocalCommandCall = async (args, _context) => {
     delete process.env.CLAUDE_CODE_USE_GROK
     return {
       type: 'text',
-      value: 'API provider cleared (will use environment variables).',
+      value: t('providerCmd.cleared'),
     }
   }
 
@@ -74,7 +75,7 @@ const call: LocalCommandCall = async (args, _context) => {
   if (!validProviders.includes(arg)) {
     return {
       type: 'text',
-      value: `Invalid provider: ${arg}\nValid: ${validProviders.join(', ')}`,
+      value: t('providerCmd.invalid', arg, validProviders.join(', ')),
     }
   }
 
@@ -91,7 +92,7 @@ const call: LocalCommandCall = async (args, _context) => {
       if (!hasUrl) missing.push('OPENAI_BASE_URL')
       return {
         type: 'text',
-        value: `Switched to OpenAI provider.\nWarning: Missing env vars: ${missing.join(', ')}\nConfigure them via /login or set manually.`,
+        value: t('providerCmd.switchedOpenaiMissing', missing.join(', ')),
       }
     }
   }
@@ -104,7 +105,7 @@ const call: LocalCommandCall = async (args, _context) => {
       updateSettingsForSource('userSettings', { modelType: 'grok' })
       return {
         type: 'text',
-        value: `Switched to Grok provider.\nWarning: Missing env var: GROK_API_KEY (or XAI_API_KEY)\nConfigure it via settings.json env or set manually.`,
+        value: t('providerCmd.switchedGrokMissing'),
       }
     }
   }
@@ -118,7 +119,7 @@ const call: LocalCommandCall = async (args, _context) => {
       updateSettingsForSource('userSettings', { modelType: 'gemini' })
       return {
         type: 'text',
-        value: `Switched to Gemini provider.\nWarning: Missing env var: GEMINI_API_KEY\nConfigure it via /login or set manually.`,
+        value: t('providerCmd.switchedGeminiMissing'),
       }
     }
   }
@@ -143,7 +144,7 @@ const call: LocalCommandCall = async (args, _context) => {
     updateSettingsForSource('userSettings', { modelType: arg })
     // Ensure settings.env gets applied to process.env
     applyConfigEnvironmentVariables()
-    return { type: 'text', value: `API provider set to ${arg}.` }
+    return { type: 'text', value: t('providerCmd.set', arg) }
   } else {
     // Cloud providers: set env vars only, do NOT touch settings.json
     delete process.env.CLAUDE_CODE_USE_OPENAI
@@ -156,7 +157,7 @@ const call: LocalCommandCall = async (args, _context) => {
     applyConfigEnvironmentVariables()
     return {
       type: 'text',
-      value: `API provider set to ${arg} (via environment variable).`,
+      value: t('providerCmd.setEnv', arg),
     }
   }
 }
@@ -164,8 +165,7 @@ const call: LocalCommandCall = async (args, _context) => {
 const provider = {
   type: 'local',
   name: 'provider',
-  description:
-    'Switch API provider (anthropic/openai/gemini/grok/bedrock/vertex/foundry)',
+  description: t('cmd.descProvider'),
   aliases: ['api'],
   argumentHint: '[anthropic|openai|gemini|grok|bedrock|vertex|foundry|unset]',
   supportsNonInteractive: true,

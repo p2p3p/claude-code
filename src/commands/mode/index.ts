@@ -1,10 +1,10 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const mode = {
   type: 'local-jsx',
   name: 'mode',
-  description:
-    'Switch interaction mode (default, gentle, sharp, workhorse, token-saver, super-ai)',
+  description: t('cmd.descMode'),
   isEnabled: () => true,
   argumentHint: '<mode-slug>',
   load: () => import('./mode.js'),

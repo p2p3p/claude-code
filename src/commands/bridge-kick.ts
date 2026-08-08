@@ -1,6 +1,7 @@
 import { getBridgeDebugHandle } from '../bridge/bridgeDebug.js'
 import type { Command } from '../commands.js'
 import type { LocalCommandCall } from '../types/command.js'
+import { t } from '../utils/i18n/index.js'
 
 /**
  * Ant-only: inject bridge failure states to manually test recovery paths.
@@ -37,24 +38,14 @@ import type { LocalCommandCall } from '../types/command.js'
  *     after fix: tengu_bridge_repl_env_lost → doReconnect
  */
 
-const USAGE = `/bridge-kick <subcommand>
-  close <code>              fire ws_closed with the given code (e.g. 1002)
-  poll <status> [type]      next poll throws BridgeFatalError(status, type)
-  poll transient            next poll throws axios-style rejection (5xx/net)
-  register fail [N]         next N registers transient-fail (default 1)
-  register fatal            next register 403s (terminal)
-  reconnect-session fail    next POST /bridge/reconnect fails
-  heartbeat <status>        next heartbeat throws BridgeFatalError(status)
-  reconnect                 call reconnectEnvironmentWithSession directly
-  status                    print bridge state`
+const USAGE = t('bridgeKick.usage')
 
 const call: LocalCommandCall = async args => {
   const h = getBridgeDebugHandle()
   if (!h) {
     return {
       type: 'text',
-      value:
-        'No bridge debug handle registered. Remote Control must be connected (USER_TYPE=ant).',
+      value: t('bridgeKick.noDebugHandle'),
     }
   }
 
@@ -64,12 +55,12 @@ const call: LocalCommandCall = async args => {
     case 'close': {
       const code = Number(a)
       if (!Number.isFinite(code)) {
-        return { type: 'text', value: `close: need a numeric code\n${USAGE}` }
+        return { type: 'text', value: t('bridgeKick.needNumericCode', USAGE) }
       }
       h.fireClose(code)
       return {
         type: 'text',
-        value: `Fired transport close(${code}). Watch debug.log for [bridge:repl] recovery.`,
+        value: t('bridgeKick.firedClose', code),
       }
     }
 
@@ -84,15 +75,14 @@ const call: LocalCommandCall = async args => {
         h.wakePollLoop()
         return {
           type: 'text',
-          value:
-            'Next poll will throw a transient (axios rejection). Poll loop woken.',
+          value: t('bridgeKick.transientPoll'),
         }
       }
       const status = Number(a)
       if (!Number.isFinite(status)) {
         return {
           type: 'text',
-          value: `poll: need 'transient' or a status code\n${USAGE}`,
+          value: t('bridgeKick.needStatusCode', USAGE),
         }
       }
       // Default to what the server ACTUALLY sends for 404 (BQ-verified),
@@ -109,7 +99,7 @@ const call: LocalCommandCall = async args => {
       h.wakePollLoop()
       return {
         type: 'text',
-        value: `Next poll will throw BridgeFatalError(${status}, ${errorType}). Poll loop woken.`,
+        value: t('bridgeKick.fatalPoll', status, errorType),
       }
     }
 
@@ -124,8 +114,7 @@ const call: LocalCommandCall = async args => {
         })
         return {
           type: 'text',
-          value:
-            'Next registerBridgeEnvironment will 403. Trigger with close/reconnect.',
+          value: t('bridgeKick.registerFatal'),
         }
       }
       const n = Number(b) || 1
@@ -137,7 +126,7 @@ const call: LocalCommandCall = async args => {
       })
       return {
         type: 'text',
-        value: `Next ${n} registerBridgeEnvironment call(s) will transient-fail. Trigger with close/reconnect.`,
+        value: t('bridgeKick.registerTransient', n),
       }
     }
 
@@ -151,8 +140,7 @@ const call: LocalCommandCall = async args => {
       })
       return {
         type: 'text',
-        value:
-          'Next 2 POST /bridge/reconnect calls will 404. doReconnect Strategy 1 falls through to Strategy 2.',
+        value: t('bridgeKick.reconnectSession'),
       }
     }
 
@@ -167,7 +155,7 @@ const call: LocalCommandCall = async args => {
       })
       return {
         type: 'text',
-        value: `Next heartbeat will ${status}. Watch for onHeartbeatFatal → work-state teardown.`,
+        value: t('bridgeKick.heartbeatFatal', status),
       }
     }
 
@@ -175,7 +163,7 @@ const call: LocalCommandCall = async args => {
       h.forceReconnect()
       return {
         type: 'text',
-        value: 'Called reconnectEnvironmentWithSession(). Watch debug.log.',
+        value: t('bridgeKick.calledReconnect'),
       }
     }
 
@@ -191,7 +179,7 @@ const call: LocalCommandCall = async args => {
 const bridgeKick = {
   type: 'local',
   name: 'bridge-kick',
-  description: 'Inject bridge failure states for manual recovery testing',
+  description: t('bridgeKick.description'),
   isEnabled: () => process.env.USER_TYPE === 'ant',
   supportsNonInteractive: false,
   load: () => Promise.resolve({ call }),

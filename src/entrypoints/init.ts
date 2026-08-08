@@ -57,6 +57,7 @@ import { initSentry } from '../utils/sentry.js'
 import { initUser } from '../utils/user.js'
 import { initLangfuse, shutdownLangfuse } from '../services/langfuse/index.js'
 import { setThemeConfigCallbacks } from '@anthropic/ink'
+import { setLocale, t } from '../utils/i18n/index.js'
 
 // initialize1PEventLogging is dynamically imported to defer OpenTelemetry sdk-logs/resources
 
@@ -77,6 +78,13 @@ export const init = memoize(async (): Promise<void> => {
       saveTheme: setting =>
         saveGlobalConfig(current => ({ ...current, theme: setting })),
     })
+    // Initialize UI language from config
+    const prefLang = getGlobalConfig().preferredLanguage
+    if (prefLang === 'zh') setLocale('zh_CN')
+    else if (prefLang === 'en') setLocale('en')
+    // auto: fall back to system locale
+    const { getSystemLocaleLanguage } = await import('../utils/intl.js')
+    if (getSystemLocaleLanguage() === 'zh') setLocale('zh_CN')
     logForDiagnosticsNoPII('info', 'init_configs_enabled', {
       duration_ms: Date.now() - configsStart,
     })
@@ -261,7 +269,7 @@ export const init = memoize(async (): Promise<void> => {
       // manager running `plugin marketplace list --json` in a VM sandbox).
       if (getIsNonInteractiveSession()) {
         process.stderr.write(
-          `Configuration error in ${error.filePath}: ${error.message}\n`,
+          t('entrypoint.configError', error.filePath, error.message) + '\n',
         )
         gracefulShutdownSync(1)
         return

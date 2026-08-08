@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, Text } from '@anthropic/ink';
 import { SandboxManager, shouldAllowManagedSandboxDomainsOnly } from '../../utils/sandbox/sandbox-adapter.js';
 
@@ -21,7 +22,7 @@ export function SandboxConfigTab(): React.ReactNode {
   if (!isEnabled) {
     return (
       <Box flexDirection="column" paddingY={1}>
-        <Text color="subtle">Sandbox is not enabled</Text>
+        <Text color="subtle">{t('sandboxconfigtab.sandboxIsNotEnabled')}</Text>
         {warningsNote}
       </Box>
     );

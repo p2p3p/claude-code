@@ -5,11 +5,12 @@ import {
   getAllReleaseNotes,
   getStoredChangelog,
 } from '../../utils/releaseNotes.js'
+import { t } from '../../utils/i18n/index.js'
 
 function formatReleaseNotes(notes: Array<[string, string[]]>): string {
   return notes
     .map(([version, notes]) => {
-      const header = `Version ${version}:`
+      const header = t('releaseNotes.versionHeader', version)
       const bulletPoints = notes.map(note => `· ${note}`).join('\n')
       return `${header}\n${bulletPoints}`
     })
@@ -45,6 +46,6 @@ export async function call(): Promise<LocalCommandResult> {
   // Nothing available, show link
   return {
     type: 'text',
-    value: `See the full changelog at: ${CHANGELOG_URL}`,
+    value: t('releaseNotes.changelogLink', CHANGELOG_URL),
   }
 }

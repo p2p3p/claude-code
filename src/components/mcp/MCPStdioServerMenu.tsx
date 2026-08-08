@@ -9,6 +9,7 @@ import { describeMcpConfigFilePath, filterMcpPromptsByServer } from '../../servi
 import { useAppState } from '../../state/AppState.js';
 import { errorMessage } from '../../utils/errors.js';
 import { capitalize } from '../../utils/stringUtils.js';
+import { t } from '../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Select } from '../CustomSelect/index.js';
 import { Byline, KeyboardShortcutHint } from '@anthropic/ink';
@@ -64,7 +65,7 @@ export function MCPStdioServerMenu({
   // Only show "View tools" if server is not disabled and has tools
   if (server.client.type !== 'disabled' && serverToolsCount > 0) {
     menuOptions.push({
-      label: 'View tools',
+      label: t('mcpStdioServerMenu.viewTools'),
       value: 'tools',
     });
   }
@@ -72,20 +73,20 @@ export function MCPStdioServerMenu({
   // Only show reconnect option if the server is not disabled
   if (server.client.type !== 'disabled') {
     menuOptions.push({
-      label: 'Reconnect',
+      label: t('mcpStdioServerMenu.reconnect'),
       value: 'reconnectMcpServer',
     });
   }
 
   menuOptions.push({
-    label: server.client.type !== 'disabled' ? 'Disable' : 'Enable',
+    label: server.client.type !== 'disabled' ? t('mcpStdioServerMenu.disable') : t('mcpStdioServerMenu.enable'),
     value: 'toggle-enabled',
   });
 
   // If there are no other options, add a back option so Select handles escape
   if (menuOptions.length === 0) {
     menuOptions.push({
-      label: 'Back',
+      label: t('mcpStdioServerMenu.back'),
       value: 'back',
     });
   }
@@ -94,13 +95,13 @@ export function MCPStdioServerMenu({
     return (
       <Box flexDirection="column" gap={1} padding={1}>
         <Text color="text">
-          Reconnecting to <Text bold>{server.name}</Text>
+          {t('mcpstdioservermenu.reconnectingToPrefix')}<Text bold>{server.name}</Text>
         </Text>
         <Box>
           <Spinner />
-          <Text> Restarting MCP server process</Text>
+          <Text> {t('mcpstdioservermenu.restartingProcess')}</Text>
         </Box>
-        <Text dimColor>This may take a few moments.</Text>
+        <Text dimColor>{t('mcpstdioservermenu.thisMayTakeAFewMoments')}</Text>
       </Box>
     );
   }
@@ -114,7 +115,7 @@ export function MCPStdioServerMenu({
 
         <Box flexDirection="column" gap={0}>
           <Box>
-            <Text bold>Status: </Text>
+            <Text bold>{t('mcpstdioservermenu.status')} </Text>
             {server.client.type === 'disabled' ? (
               <Text>{color('inactive', theme)(figures.radioOff)} disabled</Text>
             ) : server.client.type === 'connected' ? (
@@ -130,19 +131,19 @@ export function MCPStdioServerMenu({
           </Box>
 
           <Box>
-            <Text bold>Command: </Text>
+            <Text bold>{t('mcpstdioservermenu.command')} </Text>
             <Text dimColor>{server.config.command}</Text>
           </Box>
 
           {server.config.args && server.config.args.length > 0 && (
             <Box>
-              <Text bold>Args: </Text>
+              <Text bold>{t('mcpstdioservermenu.args')} </Text>
               <Text dimColor>{server.config.args.join(' ')}</Text>
             </Box>
           )}
 
           <Box>
-            <Text bold>Config location: </Text>
+            <Text bold>{t('mcpstdioservermenu.configLocation')} </Text>
             <Text dimColor>{describeMcpConfigFilePath(getMcpConfigByName(server.name)?.scope ?? 'dynamic')}</Text>
           </Box>
 
@@ -156,7 +157,7 @@ export function MCPStdioServerMenu({
 
           {server.client.type === 'connected' && serverToolsCount > 0 && (
             <Box>
-              <Text bold>Tools: </Text>
+              <Text bold>{t('mcpstdioservermenu.tools')} </Text>
               <Text dimColor>{serverToolsCount} tools</Text>
             </Box>
           )}
@@ -200,7 +201,7 @@ export function MCPStdioServerMenu({
             <Byline>
               <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
               <KeyboardShortcutHint shortcut="Enter" action="select" />
-              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.back')} />
             </Byline>
           )}
         </Text>

@@ -7,6 +7,7 @@ import {
   logEvent,
 } from '../../services/analytics/index.js';
 import { useSetAppState } from '../../state/AppState.js';
+import { t } from '../../utils/i18n/index.js';
 import { type OptionWithDescription, Select } from '../CustomSelect/select.js';
 
 export type FeedbackType = 'accept' | 'reject';
@@ -35,8 +36,8 @@ export type PermissionPromptProps<T extends string> = {
 };
 
 const DEFAULT_PLACEHOLDERS: Record<FeedbackType, string> = {
-  accept: 'tell Claude what to do next',
-  reject: 'tell Claude what to do differently',
+  accept: t('permissions.feedbackPlaceholderAccept'),
+  reject: t('permissions.feedbackPlaceholderReject'),
 };
 
 /**
@@ -53,7 +54,7 @@ export function PermissionPrompt<T extends string>({
   options,
   onSelect,
   onCancel,
-  question = 'Do you want to proceed?',
+  question = t('filePermission.proceed'),
   toolAnalyticsContext,
 }: PermissionPromptProps<T>): React.ReactNode {
   const setAppState = useSetAppState();
@@ -242,7 +243,7 @@ export function PermissionPrompt<T extends string>({
         onInputModeToggle={handleInputModeToggle}
       />
       <Box marginTop={1}>
-        <Text dimColor>Esc to cancel{showTabHint && ' · Tab to amend'}</Text>
+        <Text dimColor>{t('permissions.escToCancel')}{showTabHint && ` · ${t('permissions.tabToAmend')}`}</Text>
       </Box>
     </Box>
   );

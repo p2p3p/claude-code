@@ -11,6 +11,7 @@ import {
   type TeleportResult,
   teleportResumeCodeSession,
 } from '../utils/teleport.js';
+import { t } from '../utils/i18n/index.js';
 
 type Props = {
   currentStep: TeleportProgressStep;
@@ -19,16 +20,16 @@ type Props = {
 
 const SPINNER_FRAMES = ['◐', '◓', '◑', '◒'];
 
-const STEPS: { key: TeleportProgressStep; label: string }[] = [
-  { key: 'validating', label: 'Validating session' },
-  { key: 'fetching_logs', label: 'Fetching session logs' },
-  { key: 'fetching_branch', label: 'Getting branch info' },
-  { key: 'checking_out', label: 'Checking out branch' },
-];
-
 export function TeleportProgress({ currentStep, sessionId }: Props): React.ReactNode {
   const [ref, time] = useAnimationFrame(100);
   const frame = Math.floor(time / 100) % SPINNER_FRAMES.length;
+
+  const STEPS: { key: TeleportProgressStep; label: string }[] = [
+    { key: 'validating', label: t('teleportProgress.validating') },
+    { key: 'fetching_logs', label: t('teleportProgress.fetchingLogs') },
+    { key: 'fetching_branch', label: t('teleportProgress.gettingBranch') },
+    { key: 'checking_out', label: t('teleportProgress.checkingOut') },
+  ];
 
   const currentStepIndex = STEPS.findIndex(s => s.key === currentStep);
 
@@ -36,7 +37,7 @@ export function TeleportProgress({ currentStep, sessionId }: Props): React.React
     <Box ref={ref} flexDirection="column" paddingX={1} paddingY={1}>
       <Box marginBottom={1}>
         <Text bold color="claude">
-          {SPINNER_FRAMES[frame]} Teleporting session…
+          {SPINNER_FRAMES[frame]} {t('teleportProgress.teleporting')}
         </Text>
       </Box>
 

@@ -1,4 +1,4 @@
-import figures from 'figures';
+import { t } from '../../../utils/i18n/index.js';
 import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebounceCallback } from 'usehooks-ts';
@@ -28,22 +28,22 @@ const REMEMBER_DIRECTORY_OPTIONS: Array<{
 }> = [
   {
     value: 'yes-session',
-    label: 'Yes, for this session',
+    label: t('workspaceDir.yesSession'),
   },
   {
     value: 'yes-remember',
-    label: 'Yes, and remember this directory',
+    label: t('workspaceDir.yesRemember'),
   },
   {
     value: 'no',
-    label: 'No',
+    label: t('workspaceDir.no'),
   },
 ];
 
 function PermissionDescription(): React.ReactNode {
   return (
     <Text dimColor>
-      Claude Code will be able to read files in this directory and make edits when auto-accept edits is on.
+      {t('workspaceDir.permissionDesc')}
     </Text>
   );
 }
@@ -74,11 +74,11 @@ function DirectoryInput({
 }): React.ReactNode {
   return (
     <Box flexDirection="column">
-      <Text>Enter the path to the directory:</Text>
+      <Text>{t('permission.enterPath')}</Text>
       <Box borderDimColor borderStyle="round" marginY={1} paddingLeft={1}>
         <TextInput
           showCursor
-          placeholder={`Directory path${figures.ellipsis}`}
+          placeholder={t('workspaceDir.placeholder')}
           value={value}
           onChange={onChange}
           onSubmit={onSubmit}
@@ -215,7 +215,7 @@ export function AddWorkspaceDirectory({
   return (
     <Box flexDirection="column" tabIndex={0} autoFocus onKeyDown={handleKeyDown}>
       <Dialog
-        title="Add directory to workspace"
+        title={t('workspaceDir.title')}
         onCancel={onCancel}
         color="permission"
         isCancelActive={false}
@@ -224,7 +224,7 @@ export function AddWorkspaceDirectory({
             ? undefined
             : exitState =>
                 exitState.pending ? (
-                  <Text>Press {exitState.keyName} again to exit</Text>
+                  <Text>{t('permission.pressAgain', exitState.keyName)}</Text>
                 ) : (
                   <Byline>
                     <KeyboardShortcutHint shortcut="Tab" action="complete" />
@@ -233,7 +233,7 @@ export function AddWorkspaceDirectory({
                       action="confirm:no"
                       context="Settings"
                       fallback="Esc"
-                      description="cancel"
+                      description={t('desc.cancel')}
                     />
                   </Byline>
                 )

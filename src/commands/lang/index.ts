@@ -1,9 +1,10 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const lang = {
   type: 'local-jsx',
   name: 'lang',
-  description: 'Set display language (en/zh/auto)',
+  description: t('cmd.descLang'),
   immediate: true,
   argumentHint: '<en|zh|auto>',
   load: () => import('./lang.js'),

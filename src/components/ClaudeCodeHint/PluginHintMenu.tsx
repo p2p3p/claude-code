@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, Text } from '@anthropic/ink';
 import { Select } from '../CustomSelect/select.js';
 import { PermissionDialog } from '../permissions/PermissionDialog.js';
@@ -45,35 +46,38 @@ export function PluginHintMenu({
     {
       label: (
         <Text>
-          Yes, install <Text bold>{pluginName}</Text>
+          {t('pluginhintmenu.yesInstallPrefix')}
+          <Text bold>{pluginName}</Text>
         </Text>
       ),
       value: 'yes',
     },
     {
-      label: 'No',
+      label: t('pluginHintMenu.no'),
       value: 'no',
     },
     {
-      label: "No, and don't show plugin installation hints again",
+      label: t('pluginhintmenu.noAndDontShowAgain'),
       value: 'disable',
     },
   ];
 
   return (
-    <PermissionDialog title="Plugin Recommendation">
+    <PermissionDialog title={t('pluginhintmenu.pluginRecommendation')}>
       <Box flexDirection="column" paddingX={2} paddingY={1}>
         <Box marginBottom={1}>
           <Text dimColor>
-            The <Text bold>{sourceCommand}</Text> command suggests installing a plugin.
+            {t('pluginhintmenu.commandSuggestsInstallingPrefix')}
+            <Text bold>{sourceCommand}</Text>
+            {t('pluginhintmenu.commandSuggestsInstallingSuffix')}
           </Text>
         </Box>
         <Box>
-          <Text dimColor>Plugin:</Text>
+          <Text dimColor>{t('pluginhintmenu.plugin')}</Text>
           <Text> {pluginName}</Text>
         </Box>
         <Box>
-          <Text dimColor>Marketplace:</Text>
+          <Text dimColor>{t('pluginhintmenu.marketplace')}</Text>
           <Text> {marketplaceName}</Text>
         </Box>
         {pluginDescription && (
@@ -82,7 +86,7 @@ export function PluginHintMenu({
           </Box>
         )}
         <Box marginTop={1}>
-          <Text>Would you like to install it?</Text>
+          <Text>{t('pluginhintmenu.wouldYouLikeToInstallIt')}</Text>
         </Box>
         <Box>
           <Select options={options} onChange={onSelect} onCancel={() => onResponse('no')} />

@@ -2,6 +2,7 @@ import { type ReactNode, useCallback, useState } from 'react';
 import { Box, Byline, KeyboardShortcutHint, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js';
 import { editPromptInEditor } from '../../../../utils/promptEditor.js';
+import { t } from '../../../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import TextInput from '../../../TextInput.js';
 import { useWizard } from '../../../wizard/index.js';
@@ -43,7 +44,7 @@ export function DescriptionStep(): ReactNode {
 
   return (
     <WizardDialogLayout
-      subtitle="Description (tell Claude when to use this agent)"
+      subtitle={t('descriptionstep.descriptionTellClaudeWhenToUseThisAgent')}
       footerText={
         <Byline>
           <KeyboardShortcutHint shortcut="Type" action="enter text" />
@@ -52,14 +53,14 @@ export function DescriptionStep(): ReactNode {
             action="chat:externalEditor"
             context="Chat"
             fallback="ctrl+g"
-            description="open in editor"
+            description={t('desc.openInEditor')}
           />
-          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="go back" />
+          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.goBack')} />
         </Byline>
       }
     >
       <Box flexDirection="column">
-        <Text>When should Claude use this agent?</Text>
+        <Text>{t('descriptionstep.whenShouldClaudeUseThisAgent')}</Text>
 
         <Box marginTop={1}>
           <TextInput

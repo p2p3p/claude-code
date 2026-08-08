@@ -4,6 +4,7 @@ import { Box, Text, type TextProps } from '@anthropic/ink';
 import { useAppState } from '../../state/AppState.js';
 import { getRunningTeammatesSorted } from '../../tasks/InProcessTeammateTask/InProcessTeammateTask.js';
 import { formatNumber } from '../../utils/format.js';
+import { t } from '../../utils/i18n/index.js';
 import { TeammateSpinnerLine } from './TeammateSpinnerLine.js';
 import { TEAMMATE_SELECT_HINT } from './teammateSelectHint.js';
 
@@ -72,7 +73,7 @@ export function TeammateSpinnerTree({
           )}
           {/* Hints - select hint when highlighted, view hint when selected but not foregrounded */}
           {isLeaderHighlighted && <Text dimColor> · {TEAMMATE_SELECT_HINT}</Text>}
-          {isLeaderSelected && !isLeaderForegrounded && <Text dimColor> · enter to view</Text>}
+          {isLeaderSelected && !isLeaderForegrounded && <Text dimColor>{t('teammateSpinner.enterToView')}</Text>}
         </Box>
       }
       {teammateTasks.map((teammate, index) => (
@@ -104,7 +105,7 @@ function HideRow({ isSelected }: { isSelected: boolean }): React.ReactNode {
       <Text dimColor={!isSelected} bold={isSelected}>
         hide
       </Text>
-      {isSelected && <Text dimColor> · enter to collapse</Text>}
+      {isSelected && <Text dimColor>{t('teammateSpinner.enterToCollapse')}</Text>}
     </Box>
   );
 }

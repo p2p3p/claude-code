@@ -1,5 +1,6 @@
 import React from 'react';
 import { handlePlanModeTransition } from '../../../bootstrap/state.js';
+import { t } from '../../../utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -36,27 +37,27 @@ export function EnterPlanModePermissionRequest({
   }
 
   return (
-    <PermissionDialog color="planMode" title="Enter plan mode?" workerBadge={workerBadge}>
+    <PermissionDialog color="planMode" title={t('enterplanmodepermissionrequest.enterPlanMode')} workerBadge={workerBadge}>
       <Box flexDirection="column" marginTop={1} paddingX={1}>
-        <Text>Claude wants to enter plan mode to explore and design an implementation approach.</Text>
+        <Text>{t('permission.enterPlanMode')}</Text>
 
         <Box marginTop={1} flexDirection="column">
-          <Text dimColor>In plan mode, Claude will:</Text>
-          <Text dimColor> · Explore the codebase thoroughly</Text>
-          <Text dimColor> · Identify existing patterns</Text>
-          <Text dimColor> · Design an implementation strategy</Text>
-          <Text dimColor> · Present a plan for your approval</Text>
+          <Text dimColor>{t('enterplanmodepermissionrequest.inPlanModeClaudeWill')}</Text>
+          <Text dimColor> · {t('enterPlanModePermission.exploreCodebase')}</Text>
+          <Text dimColor> · {t('enterPlanModePermission.identifyPatterns')}</Text>
+          <Text dimColor> · {t('enterPlanModePermission.designStrategy')}</Text>
+          <Text dimColor> · {t('enterPlanModePermission.presentPlan')}</Text>
         </Box>
 
         <Box marginTop={1}>
-          <Text dimColor>No code changes will be made until you approve the plan.</Text>
+          <Text dimColor>{t('enterplanmodepermissionrequest.noCodeChangesWillBeMadeUntilYouApproveThePlan')}</Text>
         </Box>
 
         <Box marginTop={1}>
           <Select
             options={[
-              { label: 'Yes, enter plan mode', value: 'yes' as const },
-              { label: 'No, start implementing now', value: 'no' as const },
+              { label: t('enterPlanModePermission.yesEnterPlanMode'), value: 'yes' as const },
+              { label: t('enterPlanModePermission.noStartNow'), value: 'no' as const },
             ]}
             onChange={handleResponse}
             onCancel={() => handleResponse('no')}

@@ -3,6 +3,7 @@ import type { RemoteAgentTaskState } from 'src/tasks/RemoteAgentTask/RemoteAgent
 import type { DeepImmutable } from 'src/types/utils.js';
 import { DIAMOND_FILLED, DIAMOND_OPEN } from '../../constants/figures.js';
 import { useSettings } from '../../hooks/useSettings.js';
+import { t } from '../../utils/i18n/index.js';
 import { Text, useAnimationFrame } from '@anthropic/ink';
 import { count } from '../../utils/array.js';
 import { getRainbowColor } from '../../utils/thinking.js';
@@ -27,20 +28,20 @@ export function formatReviewStageCounts(
   refuted: number,
 ): string {
   // Pre-stage orchestrator images don't write the stage field.
-  if (!stage) return `${found} found · ${verified} verified`;
+  if (!stage) return `${found} ${t('taskDetail.foundLabel')} · ${verified} ${t('taskDetail.verifiedLabel')}`;
   if (stage === 'synthesizing') {
-    const parts = [`${verified} verified`];
-    if (refuted > 0) parts.push(`${refuted} refuted`);
-    parts.push('deduping');
+    const parts = [`${verified} ${t('taskDetail.verifiedLabel')}`];
+    if (refuted > 0) parts.push(t('taskDetail.refutedCount', refuted));
+    parts.push(t('taskDetail.deduping'));
     return parts.join(' · ');
   }
   if (stage === 'verifying') {
-    const parts = [`${found} found`, `${verified} verified`];
-    if (refuted > 0) parts.push(`${refuted} refuted`);
+    const parts = [`${found} ${t('taskDetail.foundLabel')}`, `${verified} ${t('taskDetail.verifiedLabel')}`];
+    if (refuted > 0) parts.push(t('taskDetail.refutedCount', refuted));
     return parts.join(' · ');
   }
   // stage === 'finding'
-  return found > 0 ? `${found} found` : 'finding';
+  return found > 0 ? `${found} ${t('taskDetail.foundLabel')}` : t('taskDetail.finding');
 }
 
 // Per-character rainbow gradient, same treatment as the ultraplan keyword.
@@ -115,7 +116,10 @@ function ReviewRainbowLine({ session }: { session: DeepImmutable<RemoteAgentTask
       <>
         <Text color="background">{DIAMOND_FILLED} </Text>
         <RainbowText text="ultrareview" phase={0} />
-        <Text dimColor> ready · shift+↓ to view</Text>
+        <Text dimColor>
+          {' '}
+          {t('taskDetail.phasePlanReady')} · {t('taskDetail.shiftToView')}
+        </Text>
       </>
     );
   }
@@ -126,7 +130,7 @@ function ReviewRainbowLine({ session }: { session: DeepImmutable<RemoteAgentTask
         <RainbowText text="ultrareview" phase={0} />
         <Text color="error" dimColor>
           {' · '}
-          error
+          {t('taskDetail.errorLabel')}
         </Text>
       </>
     );
@@ -135,7 +139,7 @@ function ReviewRainbowLine({ session }: { session: DeepImmutable<RemoteAgentTask
   // The !p branch ("setting up") covers the window before the orchestrator
   // writes its first progress snapshot — container boot + repo clone can
   // take 1-3 min, during which "0 found" looked hung.
-  const tail = !p ? 'setting up' : formatReviewStageCounts(p.stage, found, verified, refuted);
+  const tail = !p ? t('taskDetail.reviewSettingUp') : formatReviewStageCounts(p.stage, found, verified, refuted);
   return (
     <>
       <Text color="background">{DIAMOND_OPEN} </Text>
@@ -156,7 +160,7 @@ export function RemoteSessionProgress({ session }: { session: DeepImmutable<Remo
   if (session.status === 'completed') {
     return (
       <Text bold color="success" dimColor>
-        done
+        {t('taskDetail.doneLabel')}
       </Text>
     );
   }
@@ -164,7 +168,7 @@ export function RemoteSessionProgress({ session }: { session: DeepImmutable<Remo
   if (session.status === 'failed') {
     return (
       <Text bold color="error" dimColor>
-        error
+        {t('taskDetail.errorLabel')}
       </Text>
     );
   }

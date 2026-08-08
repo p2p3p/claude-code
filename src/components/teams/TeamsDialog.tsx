@@ -15,6 +15,7 @@ import { logForDebugging } from '../../utils/debug.js';
 import { execFileNoThrow } from '../../utils/execFileNoThrow.js';
 import { truncateToWidth } from '../../utils/format.js';
 import { getNextPermissionMode } from '../../utils/permissions/getNextPermissionMode.js';
+import { t } from '../../utils/i18n/index.js';
 import {
   getModeColor,
   type PermissionMode,
@@ -311,7 +312,7 @@ function TeamDetailView({ teamName, teammates, selectedIndex, onCancel }: TeamDe
     <>
       <Dialog title={`Team ${teamName}`} subtitle={subtitle} onCancel={onCancel} color="background" hideInputGuide>
         {teammates.length === 0 ? (
-          <Text dimColor>No teammates</Text>
+          <Text dimColor>{t('teamsdialog.noTeammates')}</Text>
         ) : (
           <Box flexDirection="column">
             {teammates.map((teammate, index) => (
@@ -423,7 +424,7 @@ function TeammateDetailView({ teammate, teamName, onCancel }: TeammateDetailView
         {/* Tasks section */}
         {teammateTasks.length > 0 && (
           <Box flexDirection="column">
-            <Text bold>Tasks</Text>
+            <Text bold>{t('teamsdialog.tasks')}</Text>
             {teammateTasks.map(task => (
               <Text key={task.id} color={task.status === 'completed' ? 'success' : undefined}>
                 {task.status === 'completed' ? figures.tick : '◼'} {task.subject}
@@ -435,10 +436,10 @@ function TeammateDetailView({ teammate, teamName, onCancel }: TeammateDetailView
         {/* Prompt section */}
         {teammate.prompt && (
           <Box flexDirection="column">
-            <Text bold>Prompt</Text>
+            <Text bold>{t('teamsdialog.prompt')}</Text>
             <Text>
               {promptExpanded ? teammate.prompt : truncateToWidth(teammate.prompt, 80)}
-              {stringWidth(teammate.prompt) > 80 && !promptExpanded && <Text dimColor> (p to expand)</Text>}
+              {stringWidth(teammate.prompt) > 80 && !promptExpanded && <Text dimColor> {t('shortcutHint.pToExpand')}</Text>}
             </Text>
           </Box>
         )}

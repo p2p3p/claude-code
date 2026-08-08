@@ -6,6 +6,7 @@ import { getAllBaseTools } from '../tools.js';
 import type { LogOption } from '../types/logs.js';
 import { formatRelativeTimeAgo } from '../utils/format.js';
 import { getSessionIdFromLog, isLiteLog, loadFullLog } from '../utils/sessionStorage.js';
+import { t } from '../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { Messages } from './Messages.js';
 
@@ -49,10 +50,10 @@ export function SessionPreview({ log, onExit, onSelect }: Props): React.ReactNod
   if (isLoading) {
     return (
       <Box flexDirection="column" padding={1}>
-        <LoadingState message="Loading session…" />
+        <LoadingState message={t('sessionPreview.loading')} />
         <Text dimColor>
           <Byline>
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
           </Byline>
         </Text>
       </Box>
@@ -93,7 +94,7 @@ export function SessionPreview({ log, onExit, onSelect }: Props): React.ReactNod
         <Text dimColor>
           <Byline>
             <KeyboardShortcutHint shortcut="Enter" action="resume" />
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
           </Byline>
         </Text>
       </Box>

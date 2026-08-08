@@ -1,5 +1,6 @@
 import { feature } from 'bun:bundle'
 import type { PartialCompactDirection } from '../../types/message.js'
+import { t } from '../../utils/i18n/index.js'
 
 // Dead code elimination: conditional import for proactive mode
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -272,6 +273,15 @@ const NO_TOOLS_TRAILER =
   'an <analysis> block followed by a <summary> block. ' +
   'Tool calls will be rejected and you will fail the task.'
 
+/**
+ * Returns a language instruction appended to compact prompts, so the
+ * summary is generated in the user's preferred language rather than
+ * defaulting to English.
+ */
+function getLanguageInstruction(): string {
+  return `\n\n${t('compactSummary.languageInstruction')}`
+}
+
 export function getPartialCompactPrompt(
   customInstructions?: string,
   direction: PartialCompactDirection = 'from',
@@ -281,6 +291,8 @@ export function getPartialCompactPrompt(
       ? PARTIAL_COMPACT_UP_TO_PROMPT
       : PARTIAL_COMPACT_PROMPT
   let prompt = NO_TOOLS_PREAMBLE + template
+
+  prompt += getLanguageInstruction()
 
   if (customInstructions && customInstructions.trim() !== '') {
     prompt += `\n\nAdditional Instructions:\n${customInstructions}`
@@ -293,6 +305,8 @@ export function getPartialCompactPrompt(
 
 export function getCompactPrompt(customInstructions?: string): string {
   let prompt = NO_TOOLS_PREAMBLE + BASE_COMPACT_PROMPT
+
+  prompt += getLanguageInstruction()
 
   if (customInstructions && customInstructions.trim() !== '') {
     prompt += `\n\nAdditional Instructions:\n${customInstructions}`
@@ -343,29 +357,27 @@ export function getCompactUserSummaryMessage(
 ): string {
   const formattedSummary = formatCompactSummary(summary)
 
-  let baseSummary = `This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+  let baseSummary = `${t('compactSummary.sessionContinued')}
 
 ${formattedSummary}`
 
   if (transcriptPath) {
-    baseSummary += `\n\nIf you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: ${transcriptPath}`
+    baseSummary += `\n\n${t('compactSummary.transcriptPath', transcriptPath)}`
   }
 
   if (recentMessagesPreserved) {
-    baseSummary += `\n\nRecent messages are preserved verbatim.`
+    baseSummary += `\n\n${t('compactSummary.recentPreserved')}`
   }
 
   if (suppressFollowUpQuestions) {
     let continuation = `${baseSummary}
-Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.`
+${t('compactSummary.resumeDirectly')}`
 
     if (
       (feature('PROACTIVE') || feature('KAIROS')) &&
       proactiveModule?.isProactiveActive()
     ) {
-      continuation += `
-
-You are running in autonomous/proactive mode. This is NOT a first wake-up — you were already working autonomously before compaction. Continue your work loop: pick up where you left off based on the summary above. Do not greet the user or ask what to work on.`
+      continuation += t('compactSummary.proactiveResume')
     }
 
     return continuation

@@ -8,6 +8,7 @@ import { Box, Newline, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../../keybindings/useKeybinding.js';
 import { BashTool } from '@claude-code-best/builtin-tools/tools/BashTool/BashTool.js';
 import { WebFetchTool } from '@claude-code-best/builtin-tools/tools/WebFetchTool/WebFetchTool.js';
+import { t } from '../../../utils/i18n/index.js';
 import type { PermissionBehavior, PermissionRuleValue } from '../../../utils/permissions/PermissionRule.js';
 import {
   permissionRuleValueFromString,
@@ -78,7 +79,7 @@ export function PermissionRuleInput({ onCancel, onSubmit, ruleBehavior }: Permis
         {exitState.pending ? (
           <Text dimColor>Press {exitState.keyName} again to exit</Text>
         ) : (
-          <Text dimColor>Enter to submit · Esc to cancel</Text>
+          <Text dimColor>{t('permissionRuleInput.enterToSubmitEscToCancel')}</Text>
         )}
       </Box>
     </>

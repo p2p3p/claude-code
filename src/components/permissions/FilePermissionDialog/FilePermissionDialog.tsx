@@ -8,6 +8,7 @@ import { getCwd } from '../../../utils/cwd.js';
 import { getFsImplementation, safeResolvePath } from '../../../utils/fsOperations.js';
 import { expandPath } from '../../../utils/path.js';
 import type { CompletionType } from '../../../utils/unaryLogging.js';
+import { t } from '../../../utils/i18n/index.js';
 import { Select } from '../../CustomSelect/index.js';
 import { ShowInIDEPrompt } from '../../ShowInIDEPrompt.js';
 import { usePermissionRequestLogging } from '../hooks.js';
@@ -54,7 +55,7 @@ export function FilePermissionDialog<T extends ToolInput = ToolInput>({
   onReject,
   title,
   subtitle,
-  question = 'Do you want to proceed?',
+  question = t('filePermission.proceed'),
   content,
   completionType = 'tool_use_single',
   path,
@@ -196,8 +197,8 @@ export function FilePermissionDialog<T extends ToolInput = ToolInput>({
     <Box paddingX={1} marginBottom={1}>
       <Text color="warning">
         {isSymlinkOutsideCwd
-          ? `This will modify ${symlinkTarget} (outside working directory) via a symlink`
-          : `Symlink target: ${symlinkTarget}`}
+          ? t('filePermission.symlinkOutside', symlinkTarget)
+          : t('filePermission.symlinkTarget', symlinkTarget)}
       </Text>
     </Box>
   ) : null;
@@ -238,9 +239,9 @@ export function FilePermissionDialog<T extends ToolInput = ToolInput>({
       </PermissionDialog>
       <Box paddingX={1} marginTop={1}>
         <Text dimColor>
-          Esc to reject
+          {t('filePermission.escToReject')}
           {((focusedOption === 'yes' && !yesInputMode) || (focusedOption === 'no' && !noInputMode)) &&
-            ' · Tab to add feedback'}
+            t('filePermission.tabToAddFeedback')}
         </Text>
       </Box>
     </>

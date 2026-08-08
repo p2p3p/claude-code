@@ -11,6 +11,7 @@ import { Byline } from '@anthropic/ink';
 import TextInput from '../TextInput.js';
 import type { OptionWithDescription } from './select.js';
 import { SelectOption } from './select-option.js';
+import { t } from '../../utils/i18n/index.js';
 
 type Props<T> = {
   option: Extract<OptionWithDescription<T>, { type: 'input' }>;
@@ -336,13 +337,13 @@ export function SelectInputOption<T>({
                         action="attachments:next"
                         context="Attachments"
                         fallback="→"
-                        description="next"
+                        description={t('desc.next')}
                       />
                       <ConfigurableShortcutHint
                         action="attachments:previous"
                         context="Attachments"
                         fallback="←"
-                        description="prev"
+                        description={t('desc.prev')}
                       />
                     </>
                   )}
@@ -350,17 +351,17 @@ export function SelectInputOption<T>({
                     action="attachments:remove"
                     context="Attachments"
                     fallback="backspace"
-                    description="remove"
+                    description={t('desc.remove')}
                   />
                   <ConfigurableShortcutHint
                     action="attachments:exit"
                     context="Attachments"
                     fallback="esc"
-                    description="cancel"
+                    description={t('desc.cancel')}
                   />
                 </Byline>
               ) : isFocused ? (
-                '(↓ to select)'
+                t('shortcutHint.downToSelect')
               ) : null}
             </Text>
           </Box>

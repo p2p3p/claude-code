@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { t } from '../utils/i18n/index.js'
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useRegisterOverlay } from '../context/overlayContext.js';
@@ -124,8 +125,8 @@ export function QuickOpenDialog({ onDone, onInsert }: Props): React.ReactNode {
 
   return (
     <FuzzyPicker
-      title="Quick Open"
-      placeholder="Type to search files…"
+      title={t('quickopendialog.quickOpen')}
+      placeholder={t('quickOpen.typeToSearchFiles')}
       items={results}
       getKey={p => p}
       visibleCount={visibleResults}
@@ -157,7 +158,7 @@ export function QuickOpenDialog({ onDone, onInsert }: Props): React.ReactNode {
             ))}
           </>
         ) : (
-          <LoadingState message="Loading preview…" dimColor />
+          <LoadingState message={t('quickOpen.loadingPreview')} dimColor />
         )
       }
     />

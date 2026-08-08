@@ -1,9 +1,10 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const stickers = {
   type: 'local',
   name: 'stickers',
-  description: 'Order Claude Code stickers',
+  description: t('cmd.descStickers'),
   supportsNonInteractive: false,
   load: () => import('./stickers.js'),
 } satisfies Command

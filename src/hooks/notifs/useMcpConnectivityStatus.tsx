@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNotifications } from 'src/context/notifications.js';
 import { getIsRemoteMode } from '../../bootstrap/state.js';
 import { Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import { hasClaudeAiMcpEverConnected } from '../../services/mcp/claudeai.js';
 import type { MCPServerConnection } from '../../services/mcp/types.js';
 
@@ -55,9 +56,9 @@ export function useMcpConnectivityStatus({ mcpClients = EMPTY_MCP_CLIENTS }: Pro
         jsx: (
           <>
             <Text color="error">
-              {failedLocalClients.length} MCP {failedLocalClients.length === 1 ? 'server' : 'servers'} failed
+              {t('notif.mcpConnect.failedLocal', { count: failedLocalClients.length })}
             </Text>
-            <Text dimColor> · /mcp</Text>
+            <Text dimColor>{t('notif.mcpConnect.slashMcp')}</Text>
           </>
         ),
         priority: 'medium',
@@ -69,10 +70,9 @@ export function useMcpConnectivityStatus({ mcpClients = EMPTY_MCP_CLIENTS }: Pro
         jsx: (
           <>
             <Text color="error">
-              {failedClaudeAiClients.length} claude.ai {failedClaudeAiClients.length === 1 ? 'connector' : 'connectors'}{' '}
-              unavailable
+              {t('notif.mcpConnect.failedClaudeAi', { count: failedClaudeAiClients.length })}
             </Text>
-            <Text dimColor> · /mcp</Text>
+            <Text dimColor>{t('notif.mcpConnect.slashMcp')}</Text>
           </>
         ),
         priority: 'medium',
@@ -84,10 +84,9 @@ export function useMcpConnectivityStatus({ mcpClients = EMPTY_MCP_CLIENTS }: Pro
         jsx: (
           <>
             <Text color="warning">
-              {needsAuthLocalServers.length} MCP {needsAuthLocalServers.length === 1 ? 'server needs' : 'servers need'}{' '}
-              auth
+              {t('notif.mcpConnect.needsAuthLocal', { count: needsAuthLocalServers.length })}
             </Text>
-            <Text dimColor> · /mcp</Text>
+            <Text dimColor>{t('notif.mcpConnect.slashMcp')}</Text>
           </>
         ),
         priority: 'medium',
@@ -99,10 +98,9 @@ export function useMcpConnectivityStatus({ mcpClients = EMPTY_MCP_CLIENTS }: Pro
         jsx: (
           <>
             <Text color="warning">
-              {needsAuthClaudeAiServers.length} claude.ai{' '}
-              {needsAuthClaudeAiServers.length === 1 ? 'connector needs' : 'connectors need'} auth
+              {t('notif.mcpConnect.needsAuthClaudeAi', { count: needsAuthClaudeAiServers.length })}
             </Text>
-            <Text dimColor> · /mcp</Text>
+            <Text dimColor>{t('notif.mcpConnect.slashMcp')}</Text>
           </>
         ),
         priority: 'medium',

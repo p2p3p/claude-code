@@ -4,6 +4,7 @@ import { logEvent } from 'src/services/analytics/index.js';
 import { Box, Dialog, Link, Newline, Text, useInput } from '@anthropic/ink';
 import { isChromeExtensionInstalled } from '../utils/claudeInChrome/setup.js';
 import { saveGlobalConfig } from '../utils/config.js';
+import { t } from '../utils/i18n/index.js';
 
 const CHROME_EXTENSION_URL = 'https://claude.ai/chrome';
 const CHROME_PERMISSIONS_URL = 'https://clau.de/chrome/permissions';
@@ -31,35 +32,32 @@ export function ClaudeInChromeOnboarding({ onDone }: Props): React.ReactNode {
   });
 
   return (
-    <Dialog title="Claude in Chrome (Beta)" onCancel={onDone} color="chromeYellow">
+    <Dialog title={t('claudeInChrome.title')} onCancel={onDone} color="chromeYellow">
       <Box flexDirection="column" gap={1}>
         <Text>
-          Claude in Chrome works with the Chrome extension to let you control your browser directly from Claude Code.
-          You can navigate websites, fill forms, capture screenshots, record GIFs, and debug with console logs and
-          network requests.
-          {!isExtensionInstalled && (
-            <>
-              <Newline />
-              <Newline />
-              Requires the Chrome extension. Get started at <Link url={CHROME_EXTENSION_URL} />
-            </>
-          )}
-        </Text>
+            {t('claudeInChrome.body')}
+            {!isExtensionInstalled && (
+              <>
+                <Newline />
+                <Newline />
+                {t('claudeInChrome.requiresExt')} <Link url={CHROME_EXTENSION_URL} />
+              </>
+            )}
+          </Text>
 
-        <Text dimColor>
-          Site-level permissions are inherited from the Chrome extension. Manage permissions in the Chrome extension
-          settings to control which sites Claude can browse, click, and type on
-          {isExtensionInstalled && (
-            <>
-              {' '}
-              (<Link url={CHROME_PERMISSIONS_URL} />)
-            </>
-          )}
-          .
-        </Text>
-        <Text dimColor>
-          For more info, use{' '}
-          <Text bold color="chromeYellow">
+          <Text dimColor>
+            {t('claudeInChrome.permissions')}
+            {isExtensionInstalled && (
+              <>
+                {' '}
+                (<Link url={CHROME_PERMISSIONS_URL} />)
+              </>
+            )}
+            .
+          </Text>
+          <Text dimColor>
+            {t('claudeInChrome.moreInfo')}{' '}
+            <Text bold color="chromeYellow">
             /chrome
           </Text>{' '}
           or visit <Link url="https://code.claude.com/docs/en/chrome" />

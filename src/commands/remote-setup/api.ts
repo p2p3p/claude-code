@@ -3,6 +3,7 @@ import { getOauthConfig } from '../../constants/oauth.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { getOAuthHeaders, prepareApiRequest } from '../../utils/teleport/api.js'
 import { fetchEnvironments } from '../../utils/teleport/environments.js'
+import { t } from '../../utils/i18n/index.js'
 
 const CCR_BYOC_BETA_HEADER = 'ccr-byoc-2025-07-29'
 
@@ -143,7 +144,7 @@ export async function createDefaultEnvironment(): Promise<boolean> {
       {
         name: 'Default',
         kind: 'anthropic_cloud',
-        description: 'Default - trusted network access',
+        description: t('remoteSetup.defaultTrustedNetwork'),
         config: {
           environment_type: 'anthropic',
           cwd: '/home/user',

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../utils/i18n/index.js'
 import { useEffect, useMemo, useState } from 'react';
 import { useRegisterOverlay } from '../context/overlayContext.js';
 import { getTimestampedHistory, type TimestampedHistoryEntry } from '../history.js';
@@ -84,8 +85,8 @@ export function HistorySearchDialog({ initialQuery, onSelect, onCancel }: Props)
 
   return (
     <FuzzyPicker
-      title="Search prompts"
-      placeholder="Filter history…"
+      title={t('historysearchdialog.searchPrompts')}
+      placeholder={t('historysearchdialog.filterHistory')}
       initialQuery={initialQuery}
       items={filtered}
       getKey={item => String(item.entry.timestamp)}
@@ -98,8 +99,8 @@ export function HistorySearchDialog({ initialQuery, onSelect, onCancel }: Props)
         void item.entry.resolve().then(onSelect);
       }}
       onCancel={onCancel}
-      emptyMessage={q => (items === null ? 'Loading…' : q ? 'No matching prompts' : 'No history yet')}
-      selectAction="use"
+      emptyMessage={q => (items === null ? t('historySearch.loading') : q ? t('historySearch.noMatchingPrompts') : t('historySearch.noHistory'))}
+      selectAction={t('historysearchdialog.use')}
       direction="up"
       previewPosition={previewOnRight ? 'right' : 'bottom'}
       renderItem={(item, isFocused) => (

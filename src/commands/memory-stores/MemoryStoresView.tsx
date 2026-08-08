@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import type { Theme } from '@anthropic/ink';
 import type { Memory, MemoryStore, MemoryVersion } from './memoryStoresApi.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props =
   | { mode: 'list'; stores: MemoryStore[] }
@@ -25,16 +26,16 @@ function StoreRow({ store }: { store: MemoryStore }): React.ReactNode {
       <Box>
         <Text bold>{store.memory_store_id}</Text>
         <Text dimColor> · </Text>
-        <Text color={(isArchived ? 'warning' : 'success') as keyof Theme}>{isArchived ? 'archived' : 'active'}</Text>
+        <Text color={(isArchived ? 'warning' : 'success') as keyof Theme}>{isArchived ? t('memoryStores.archived') : t('memoryStores.active')}</Text>
         {store.namespace ? (
           <>
-            <Text dimColor> · ns: </Text>
+            <Text dimColor> · {t('memoryStores.ns')} </Text>
             <Text>{store.namespace}</Text>
           </>
         ) : null}
       </Box>
-      <Text>Name: {store.name}</Text>
-      <Text dimColor>Created: {createdAt}</Text>
+      <Text>{t('memoryStores.name')} {store.name}</Text>
+      <Text dimColor>{t('memoryStores.created')} {createdAt}</Text>
     </Box>
   );
 }
@@ -44,14 +45,14 @@ export function MemoryStoresView(props: Props): React.ReactNode {
     if (props.stores.length === 0) {
       return (
         <Box>
-          <Text dimColor>No memory stores found. Use /memory-stores create &lt;name&gt; to create one.</Text>
+          <Text dimColor>{t('memoryStores.noStoresFound')}</Text>
         </Box>
       );
     }
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Memory Stores ({props.stores.length})</Text>
+          <Text bold>{t('memoryStores.storesCount', props.stores.length)}</Text>
         </Box>
         {props.stores.map(store => (
           <StoreRow key={store.memory_store_id} store={store} />
@@ -68,16 +69,16 @@ export function MemoryStoresView(props: Props): React.ReactNode {
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Memory Store: {store.memory_store_id}</Text>
+          <Text bold>{t('memoryStores.storeDetail')} {store.memory_store_id}</Text>
         </Box>
-        <Text>Name: {store.name}</Text>
-        {store.namespace ? <Text>Namespace: {store.namespace}</Text> : null}
+        <Text>{t('memoryStores.name')} {store.name}</Text>
+        {store.namespace ? <Text>{t('memoryStores.namespace')} {store.namespace}</Text> : null}
         <Text>
-          Status:{' '}
-          <Text color={(isArchived ? 'warning' : 'success') as keyof Theme}>{isArchived ? 'archived' : 'active'}</Text>
+          {t('memoryStores.status')}{' '}
+          <Text color={(isArchived ? 'warning' : 'success') as keyof Theme}>{isArchived ? t('memoryStores.archived') : t('memoryStores.active')}</Text>
         </Text>
-        <Text dimColor>Created: {createdAt}</Text>
-        {archivedAt ? <Text dimColor>Archived: {archivedAt}</Text> : null}
+        <Text dimColor>{t('memoryStores.created')} {createdAt}</Text>
+        {archivedAt ? <Text dimColor>{t('memoryStores.archivedAt')} {archivedAt}</Text> : null}
       </Box>
     );
   }
@@ -88,12 +89,12 @@ export function MemoryStoresView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'success' as keyof Theme}>
-            Memory store created
+            {t('memoryStores.storeCreated')}
           </Text>
         </Box>
-        <Text>ID: {store.memory_store_id}</Text>
-        <Text>Name: {store.name}</Text>
-        {store.namespace ? <Text>Namespace: {store.namespace}</Text> : null}
+        <Text>{t('memoryStores.id')} {store.memory_store_id}</Text>
+        <Text>{t('memoryStores.name')} {store.name}</Text>
+        {store.namespace ? <Text>{t('memoryStores.namespace')} {store.namespace}</Text> : null}
       </Box>
     );
   }
@@ -105,11 +106,11 @@ export function MemoryStoresView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'warning' as keyof Theme}>
-            Memory store archived
+            {t('memoryStores.storeArchived')}
           </Text>
         </Box>
-        <Text>ID: {store.memory_store_id}</Text>
-        <Text dimColor>Archived at: {archivedAt}</Text>
+        <Text>{t('memoryStores.id')} {store.memory_store_id}</Text>
+        <Text dimColor>{t('memoryStores.archivedAtLabel')} {archivedAt}</Text>
       </Box>
     );
   }
@@ -120,7 +121,7 @@ export function MemoryStoresView(props: Props): React.ReactNode {
       return (
         <Box>
           <Text dimColor>
-            No memories in store {storeId}. Use /memory-stores create-memory {storeId} &lt;content&gt; to add one.
+            {t('memoryStores.noMemories', storeId)}
           </Text>
         </Box>
       );
@@ -129,7 +130,7 @@ export function MemoryStoresView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box marginBottom={1}>
           <Text bold>
-            Memories in {storeId} ({memories.length})
+            {t('memoryStores.memoriesIn', storeId, memories.length)}
           </Text>
         </Box>
         {memories.map(mem => (
@@ -149,12 +150,12 @@ export function MemoryStoresView(props: Props): React.ReactNode {
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Memory: {memory.memory_id}</Text>
+          <Text bold>{t('memoryStores.memoryDetail')} {memory.memory_id}</Text>
         </Box>
-        <Text>Store: {memory.memory_store_id}</Text>
-        <Text>Content: {memory.content}</Text>
-        <Text dimColor>Created: {createdAt}</Text>
-        <Text dimColor>Updated: {updatedAt}</Text>
+        <Text>{t('memoryStores.storeLabel')} {memory.memory_store_id}</Text>
+        <Text>{t('memoryStores.content')} {memory.content}</Text>
+        <Text dimColor>{t('memoryStores.created')} {createdAt}</Text>
+        <Text dimColor>{t('memoryStores.updated')} {updatedAt}</Text>
       </Box>
     );
   }
@@ -165,12 +166,12 @@ export function MemoryStoresView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'success' as keyof Theme}>
-            Memory created
+            {t('memoryStores.memoryCreated')}
           </Text>
         </Box>
-        <Text>ID: {memory.memory_id}</Text>
-        <Text>Store: {memory.memory_store_id}</Text>
-        <Text dimColor>Content: {memory.content}</Text>
+        <Text>{t('memoryStores.id')} {memory.memory_id}</Text>
+        <Text>{t('memoryStores.storeLabel')} {memory.memory_store_id}</Text>
+        <Text dimColor>{t('memoryStores.content')} {memory.content}</Text>
       </Box>
     );
   }
@@ -181,11 +182,11 @@ export function MemoryStoresView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'success' as keyof Theme}>
-            Memory updated
+            {t('memoryStores.memoryUpdated')}
           </Text>
         </Box>
-        <Text>ID: {memory.memory_id}</Text>
-        <Text dimColor>Content: {memory.content}</Text>
+        <Text>{t('memoryStores.id')} {memory.memory_id}</Text>
+        <Text dimColor>{t('memoryStores.content')} {memory.content}</Text>
       </Box>
     );
   }
@@ -194,7 +195,7 @@ export function MemoryStoresView(props: Props): React.ReactNode {
     return (
       <Box>
         <Text color={'success' as keyof Theme}>
-          Memory {props.memoryId} deleted from store {props.storeId}.
+          {t('memoryStores.memoryDeleted', props.memoryId, props.storeId)}
         </Text>
       </Box>
     );
@@ -205,7 +206,7 @@ export function MemoryStoresView(props: Props): React.ReactNode {
     if (versions.length === 0) {
       return (
         <Box>
-          <Text dimColor>No memory versions found for store {storeId}.</Text>
+          <Text dimColor>{t('memoryStores.noVersions', storeId)}</Text>
         </Box>
       );
     }
@@ -213,7 +214,7 @@ export function MemoryStoresView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box marginBottom={1}>
           <Text bold>
-            Memory Versions in {storeId} ({versions.length})
+            {t('memoryStores.versionsIn', storeId, versions.length)}
           </Text>
         </Box>
         {versions.map(ver => {
@@ -226,11 +227,11 @@ export function MemoryStoresView(props: Props): React.ReactNode {
                 {isRedacted ? (
                   <>
                     <Text dimColor> · </Text>
-                    <Text color={'warning' as keyof Theme}>redacted</Text>
+                    <Text color={'warning' as keyof Theme}>{t('memoryStores.redacted')}</Text>
                   </>
                 ) : null}
               </Box>
-              <Text dimColor>Created: {createdAt}</Text>
+              <Text dimColor>{t('memoryStores.created')} {createdAt}</Text>
             </Box>
           );
         })}
@@ -245,11 +246,11 @@ export function MemoryStoresView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'warning' as keyof Theme}>
-            Version redacted
+            {t('memoryStores.versionRedacted')}
           </Text>
         </Box>
-        <Text>ID: {version.version_id}</Text>
-        <Text dimColor>Redacted at: {redactedAt}</Text>
+        <Text>{t('memoryStores.id')} {version.version_id}</Text>
+        <Text dimColor>{t('memoryStores.redactedAt')} {redactedAt}</Text>
       </Box>
     );
   }

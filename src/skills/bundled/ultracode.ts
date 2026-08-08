@@ -1,4 +1,5 @@
 import { registerBundledSkill } from '../bundledSkills.js'
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * /ultracode — multi-agent workflow orchestration playbook (knowledge-only prompt skill).

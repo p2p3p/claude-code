@@ -1,6 +1,6 @@
 import chalk from 'chalk'
-import { ctrlOToExpand } from '../components/CtrlOToExpand.js'
 import { stringWidth } from '@anthropic/ink'
+import { t } from './i18n/index.js'
 import sliceAnsi from './sliceAnsi.js'
 
 // Text rendering utilities for terminal display
@@ -104,7 +104,7 @@ export function renderTruncatedContent(
     aboveTheFold,
     estimatedRemaining > 0
       ? chalk.dim(
-          `… +${estimatedRemaining} lines${suppressExpandHint ? '' : ` ${ctrlOToExpand()}`}`,
+          suppressExpandHint ? t('terminal.moreLinesCompact', { count: estimatedRemaining }) : t('terminal.moreLines', { count: estimatedRemaining }),
         )
       : '',
   ]

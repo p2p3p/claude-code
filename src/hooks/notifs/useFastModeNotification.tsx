@@ -11,6 +11,7 @@ import {
 } from 'src/utils/fastMode.js';
 import { formatDuration } from 'src/utils/format.js';
 import { getIsRemoteMode } from '../../bootstrap/state.js';
+import { t } from '../../utils/i18n/index.js';
 
 const COOLDOWN_STARTED_KEY = 'fast-mode-cooldown-started';
 const COOLDOWN_EXPIRED_KEY = 'fast-mode-cooldown-expired';
@@ -35,7 +36,7 @@ export function useFastModeNotification(): void {
           key: ORG_CHANGED_KEY,
           color: 'fastMode',
           priority: 'immediate',
-          text: 'Fast mode is now available · /fast to turn on',
+          text: t('notif.fastMode.nowAvailable'),
         });
       } else if (isFastMode) {
         // Org disabled fast mode — permanently turn off fast mode
@@ -44,7 +45,7 @@ export function useFastModeNotification(): void {
           key: ORG_CHANGED_KEY,
           color: 'warning',
           priority: 'immediate',
-          text: 'Fast mode has been disabled by your organization',
+          text: t('notif.fastMode.disabledByOrg'),
         });
       }
     });
@@ -90,7 +91,7 @@ export function useFastModeNotification(): void {
         key: COOLDOWN_EXPIRED_KEY,
         invalidates: [COOLDOWN_STARTED_KEY],
         color: 'fastMode',
-        text: `Fast limit reset · now using fast mode`,
+        text: t('notif.fastMode.limitReset'),
         priority: 'immediate',
       });
     });
@@ -104,8 +105,8 @@ export function useFastModeNotification(): void {
 function getCooldownMessage(reason: CooldownReason, resetIn: string): string {
   switch (reason) {
     case 'overloaded':
-      return `Fast mode overloaded and is temporarily unavailable · resets in ${resetIn}`;
+      return t('notif.fastMode.overloaded', { resetIn });
     case 'rate_limit':
-      return `Fast limit reached and temporarily disabled · resets in ${resetIn}`;
+      return t('notif.fastMode.rateLimit', { resetIn });
   }
 }

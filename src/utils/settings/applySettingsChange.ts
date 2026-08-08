@@ -9,6 +9,8 @@ import {
   transitionPlanAutoMode,
 } from '../permissions/permissionSetup.js'
 import { syncPermissionRulesFromDisk } from '../permissions/permissions.js'
+import { applyPermissionUpdate } from '../permissions/PermissionUpdate.js'
+import type { ExternalPermissionMode, PermissionMode } from '../permissions/PermissionMode.js'
 import { loadAllPermissionRulesFromDisk } from '../permissions/permissionsLoader.js'
 import type { SettingSource } from './constants.js'
 import { getInitialSettings } from './settings.js'
@@ -66,6 +68,20 @@ export function applySettingsChange(
     }
 
     newContext = transitionPlanAutoMode(newContext)
+
+    // Sync permissions.defaultMode from settings to toolPermissionContext.mode
+    // so that editing ~/.claude/settings.json is hot-reloaded without restart.
+    const newDefaultMode = newSettings.permissions?.defaultMode
+    if (newDefaultMode) {
+      // 'auto' is an internal mode — map to 'default' for setMode which only
+      // accepts external permission modes
+      const mappedMode = newDefaultMode === 'auto' ? 'default' : newDefaultMode
+      newContext = applyPermissionUpdate(newContext, {
+        type: 'setMode',
+        mode: mappedMode === 'default' ? 'default' : (mappedMode as ExternalPermissionMode),
+        destination: 'userSettings',
+      })
+    }
 
     // Sync effortLevel from settings to top-level AppState when it changes
     // (e.g. via applyFlagSettings from IDE). Only propagate if the setting

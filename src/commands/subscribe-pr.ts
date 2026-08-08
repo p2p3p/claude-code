@@ -3,6 +3,7 @@ import * as path from 'node:path'
 import type { Command, LocalCommandCall } from '../types/command.js'
 import { detectCurrentRepositoryWithHost } from '../utils/detectRepository.js'
 import { getClaudeConfigHomeDir } from '../utils/envUtils.js'
+import { t } from '../utils/i18n/index.js'
 
 /**
  * File-backed store for PR webhook subscriptions.
@@ -71,7 +72,7 @@ async function parsePRArg(
     if (!detected) {
       return {
         error:
-          'Could not detect the GitHub repository for the current directory. Provide a full PR URL instead.',
+          t('subscribePr.noRepoDetected'),
       }
     }
     const repo = `${detected.owner}/${detected.name}`
@@ -79,7 +80,7 @@ async function parsePRArg(
   }
 
   return {
-    error: `Unrecognised PR reference: "${trimmed}". Expected a PR URL, owner/repo#123, or a PR number.`,
+    error: t('subscribePr.unrecognised', trimmed),
   }
 }
 
@@ -93,15 +94,15 @@ const call: LocalCommandCall = async (args, _context) => {
       return {
         type: 'text',
         value:
-          'No active PR subscriptions. Usage: /subscribe-pr <pr-url-or-number>',
+          t('subscribePr.noSubscriptions'),
       }
     }
     const lines = subs.map(
-      s => `  ${s.repo}#${s.prNumber}  (since ${s.subscribedAt})`,
+      s => t('subscribePr.listLine', `${s.repo}#${s.prNumber}`, s.subscribedAt),
     )
     return {
       type: 'text',
-      value: `Active PR subscriptions:\n${lines.join('\n')}`,
+      value: `${t('subscribePr.listTitle')}\n${lines.join('\n')}`,
     }
   }
 
@@ -120,13 +121,13 @@ const call: LocalCommandCall = async (args, _context) => {
     if (after.length === before) {
       return {
         type: 'text',
-        value: `No subscription found for ${parsed.repo}#${parsed.prNumber}.`,
+        value: t('subscribePr.notFound', `${parsed.repo}#${parsed.prNumber}`),
       }
     }
     writeSubscriptions(after)
     return {
       type: 'text',
-      value: `Unsubscribed from ${parsed.repo}#${parsed.prNumber}.`,
+      value: t('subscribePr.unsubscribed', `${parsed.repo}#${parsed.prNumber}`),
     }
   }
 
@@ -143,7 +144,7 @@ const call: LocalCommandCall = async (args, _context) => {
   if (existing) {
     return {
       type: 'text',
-      value: `Already subscribed to ${parsed.repo}#${parsed.prNumber} (since ${existing.subscribedAt}).`,
+      value: t('subscribePr.alreadySubscribed', `${parsed.repo}#${parsed.prNumber}`, existing.subscribedAt),
     }
   }
 
@@ -156,7 +157,7 @@ const call: LocalCommandCall = async (args, _context) => {
 
   return {
     type: 'text',
-    value: `Subscribed to ${parsed.repo}#${parsed.prNumber}. You will receive notifications for comments, CI status, and reviews.`,
+    value: t('subscribePr.subscribed', `${parsed.repo}#${parsed.prNumber}`),
   }
 }
 
@@ -164,7 +165,7 @@ const subscribePr = {
   type: 'local',
   name: 'subscribe-pr',
   aliases: ['watch-pr'],
-  description: 'Subscribe to GitHub PR activity (comments, CI, reviews)',
+  description: t('cmd.descSubscribePr'),
   argumentHint: '<pr-url-or-number>',
   supportsNonInteractive: false,
   isHidden: true,

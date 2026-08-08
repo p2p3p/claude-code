@@ -1,9 +1,10 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const help = {
   type: 'local-jsx',
   name: 'help',
-  description: 'Show help and available commands',
+  description: t('cmd.descHelp'),
   load: () => import('./help.js'),
 } satisfies Command
 

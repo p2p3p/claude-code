@@ -3,6 +3,7 @@ import type { Command } from '../commands.js'
 import { maybeMarkProjectOnboardingComplete } from '../projectOnboardingState.js'
 import { AUTONOMY_AGENTS_PATH_POSIX } from '../utils/autonomyAuthority.js'
 import { isEnvTruthy } from '../utils/envUtils.js'
+import { t } from '../utils/i18n/index.js'
 
 const OLD_INIT_PROMPT = `Please analyze this codebase and create a CLAUDE.md file, which will be given to future instances of Claude Code to operate in this repository.
 
@@ -231,11 +232,11 @@ const command = {
     return feature('NEW_INIT') &&
       (process.env.USER_TYPE === 'ant' ||
         isEnvTruthy(process.env.CLAUDE_CODE_NEW_INIT))
-      ? 'Initialize new CLAUDE.md file(s) and optional skills/hooks with codebase documentation'
-      : 'Initialize a new CLAUDE.md file with codebase documentation'
+      ? t('initCmd.descNew')
+      : t('initCmd.descOld')
   },
   contentLength: 0, // Dynamic content
-  progressMessage: 'analyzing your codebase',
+  progressMessage: t('initCmd.progressMessage'),
   source: 'builtin',
   async getPromptForCommand() {
     maybeMarkProjectOnboardingComplete()

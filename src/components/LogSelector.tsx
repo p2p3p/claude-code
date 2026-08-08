@@ -25,6 +25,7 @@ import { formatLogMetadata, truncateToWidth } from '../utils/format.js';
 import { getWorktreePaths } from '../utils/getWorktreePaths.js';
 import { getBranch } from '../utils/git.js';
 import { getLogDisplayTitle } from '../utils/log.js';
+import { t } from '../utils/i18n/index.js';
 import {
   getFirstMeaningfulUserMessageTextContent,
   getSessionIdFromLog,
@@ -546,10 +547,10 @@ export function LogSelector({
     const isChildNode = sessionLogs.indexOf(focusedLog) > 0;
 
     if (isChildNode) {
-      return '← to collapse';
+      return t('shortcutHint.leftToCollapse');
     }
 
-    return isExpanded ? '← to collapse' : '→ to expand';
+    return isExpanded ? t('shortcutHint.leftToCollapse') : t('shortcutHint.rightToExpand');
   };
 
   const handleRenameSubmit = React.useCallback(async () => {
@@ -946,7 +947,7 @@ export function LogSelector({
       {agenticSearchState.status === 'searching' && (
         <Box paddingLeft={1} flexShrink={0}>
           <Spinner />
-          <Text> Searching…</Text>
+          <Text> {t('logSelector.searching')}</Text>
         </Box>
       )}
 
@@ -1002,7 +1003,7 @@ export function LogSelector({
       {/* Hide session list when agentic search is in progress */}
       {agenticSearchState.status === 'searching' ? null : viewMode === 'rename' && focusedLog ? (
         <Box paddingLeft={2} flexDirection="column">
-          <Text bold>Rename session:</Text>
+          <Text bold>{t('logselector.renameSession')}</Text>
           <Box paddingTop={1}>
             <TextInput
               value={renameValue}
@@ -1079,7 +1080,7 @@ export function LogSelector({
       )}
       <Box paddingLeft={2}>
         {exitState.pending ? (
-          <Text dimColor>Press {exitState.keyName} again to exit</Text>
+          <Text dimColor>{t('common.pressAgain', exitState.keyName)}</Text>
         ) : viewMode === 'rename' ? (
           <Text dimColor>
             <Byline>
@@ -1088,19 +1089,19 @@ export function LogSelector({
                 action="confirm:no"
                 context="Confirmation"
                 fallback="Esc"
-                description="cancel"
+                description={t('desc.cancel')}
               />
             </Byline>
           </Text>
         ) : agenticSearchState.status === 'searching' ? (
           <Text dimColor>
             <Byline>
-              <Text>Searching with Claude…</Text>
+              <Text>{t('logSelector.searchingWithClaude')}</Text>
               <ConfigurableShortcutHint
                 action="confirm:no"
                 context="Confirmation"
                 fallback="Esc"
-                description="cancel"
+                description={t('desc.cancel')}
               />
             </Byline>
           </Text>
@@ -1113,16 +1114,16 @@ export function LogSelector({
                 action="confirm:no"
                 context="Confirmation"
                 fallback="Esc"
-                description="cancel"
+                description={t('desc.cancel')}
               />
             </Byline>
           </Text>
         ) : viewMode === 'search' ? (
           <Text dimColor>
             <Byline>
-              <Text>{isSearching && isDeepSearchEnabled ? 'Searching…' : 'Type to Search'}</Text>
+              <Text>{isSearching && isDeepSearchEnabled ? t('logSelector.searching') : t('logSelector.typeToSearch')}</Text>
               <KeyboardShortcutHint shortcut="Enter" action="select" />
-              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="clear" />
+              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.clear')} />
             </Byline>
           </Text>
         ) : (
@@ -1143,12 +1144,12 @@ export function LogSelector({
               )}
               <KeyboardShortcutHint shortcut="Ctrl+V" action="preview" />
               <KeyboardShortcutHint shortcut="Ctrl+R" action="rename" />
-              <Text>Type to search</Text>
+              <Text>{t('logSelector.typeToSearch')}</Text>
               <ConfigurableShortcutHint
                 action="confirm:no"
                 context="Confirmation"
                 fallback="Esc"
-                description="cancel"
+                description={t('desc.cancel')}
               />
               {getExpandCollapseHint() && <Text>{getExpandCollapseHint()}</Text>}
             </Byline>

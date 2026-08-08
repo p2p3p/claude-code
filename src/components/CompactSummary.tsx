@@ -6,6 +6,7 @@ import type { NormalizedUserMessage } from '../types/message.js';
 import { getUserMessageText } from '../utils/messages.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { MessageResponse } from './MessageResponse.js';
+import { t } from '../utils/i18n/index.js';
 
 type Props = {
   message: NormalizedUserMessage;
@@ -32,13 +33,12 @@ export function CompactSummary({ message, screen }: Props): React.ReactNode {
             <Text color="text">{BLACK_CIRCLE}</Text>
           </Box>
           <Box flexDirection="column">
-            <Text bold>Summarized conversation</Text>
+            <Text bold>{t('compactSummary.summarized')}</Text>
             {!isTranscriptMode && (
               <MessageResponse>
                 <Box flexDirection="column">
                   <Text dimColor>
-                    Summarized {metadata.messagesSummarized} messages{' '}
-                    {metadata.direction === 'up_to' ? 'up to this point' : 'from this point'}
+                    {t('compactSummary.summarizedMessages', metadata.messagesSummarized, metadata.direction)}
                   </Text>
                   {metadata.userContext && (
                     <Text dimColor>
@@ -52,7 +52,7 @@ export function CompactSummary({ message, screen }: Props): React.ReactNode {
                       action="app:toggleTranscript"
                       context="Global"
                       fallback="ctrl+o"
-                      description="expand history"
+                      description={t('desc.expandHistory')}
                       parens
                     />
                   </Text>
@@ -79,7 +79,7 @@ export function CompactSummary({ message, screen }: Props): React.ReactNode {
         </Box>
         <Box flexDirection="column">
           <Text bold>
-            Conversation summarized to free up context
+            {t('compactSummary.conversationSummarized')}
             {!isTranscriptMode && (
               <Text dimColor>
                 {' '}
@@ -87,7 +87,7 @@ export function CompactSummary({ message, screen }: Props): React.ReactNode {
                   action="app:toggleTranscript"
                   context="Global"
                   fallback="ctrl+o"
-                  description="view summary"
+                  description={t('desc.viewSummary')}
                   parens
                 />
               </Text>

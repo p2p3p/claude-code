@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, Text } from '@anthropic/ink';
 import { Byline } from '@anthropic/ink';
 
@@ -26,7 +27,7 @@ export function CapabilitiesSection({
 
   return (
     <Box>
-      <Text bold>Capabilities: </Text>
+      <Text bold>{t('capabilitiessection.capabilities')} </Text>
       <Text color="text">{capabilities.length > 0 ? <Byline>{capabilities}</Byline> : 'none'}</Text>
     </Box>
   );

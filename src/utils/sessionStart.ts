@@ -2,6 +2,7 @@ import { getMainThreadAgentType } from '../bootstrap/state.js'
 import type { HookResultMessage } from '../types/message.js'
 import { createAttachmentMessage } from './attachments.js'
 import { logForDebugging } from './debug.js'
+import { t } from './i18n/index.js'
 import { withDiagnosticsTiming } from './diagLogs.js'
 import { isBareMode } from './envUtils.js'
 import { updateWatchPaths } from './hooks/fileChangedWatcher.js'
@@ -94,14 +95,14 @@ export async function processSessionStartHooks(
         errorMessage.includes('ENOTFOUND')
       ) {
         userGuidance =
-          'This appears to be a network issue. Check your internet connection and try again.'
+          t('sessionStart.networkIssue')
       } else if (
         errorMessage.includes('Permission denied') ||
         errorMessage.includes('EACCES') ||
         errorMessage.includes('EPERM')
       ) {
         userGuidance =
-          'This appears to be a permissions issue. Check file permissions on ~/.claude/plugins/'
+          t('sessionStart.permissionsIssue')
       } else if (
         errorMessage.includes('Invalid') ||
         errorMessage.includes('parse') ||
@@ -109,10 +110,10 @@ export async function processSessionStartHooks(
         errorMessage.includes('schema')
       ) {
         userGuidance =
-          'This appears to be a configuration issue. Check your plugin settings in .claude/settings.json'
+          t('sessionStart.configIssue')
       } else {
         userGuidance =
-          'Please fix the plugin configuration or remove problematic plugins from your settings.'
+          t('sessionStart.fixPlugins')
       }
 
       logForDebugging(

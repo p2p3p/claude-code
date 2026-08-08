@@ -1,4 +1,5 @@
 import { feature } from 'bun:bundle';
+import { t } from '../../../utils/i18n/index.js'
 import figures from 'figures';
 import * as React from 'react';
 import { SentryErrorBoundary } from 'src/components/SentryErrorBoundary.js';
@@ -133,7 +134,7 @@ export function UserToolSuccessMessage({
         {feature('TRANSCRIPT_CLASSIFIER')
           ? yoloReason && (
               <MessageResponse height={1}>
-                <Text dimColor>Allowed by auto mode classifier</Text>
+                <Text dimColor>{t('usertoolsuccessmessage.allowedByAutoModeClassifier')}</Text>
               </MessageResponse>
             )
           : null}

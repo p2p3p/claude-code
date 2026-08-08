@@ -3,6 +3,7 @@ import { getOriginalCwd } from '../../bootstrap/state.js';
 import { Box, Text, useTheme } from '@anthropic/ink';
 import { sanitizeToolNameForAnalytics } from '../../services/analytics/metadata.js';
 import { env } from '../../utils/env.js';
+import { t } from '../../utils/i18n/index.js';
 import { shouldShowAlwaysAllowOptions } from '../../utils/permissions/permissionsLoader.js';
 import { truncateToLines } from '../../utils/stringUtils.js';
 import { logUnaryEvent } from '../../utils/unaryLogging.js';
@@ -119,7 +120,7 @@ export function FallbackPermissionRequest({
   const options = useMemo((): PermissionPromptOption<FallbackOptionValue>[] => {
     const result: PermissionPromptOption<FallbackOptionValue>[] = [
       {
-        label: 'Yes',
+        label: t('permGeneral.yes'),
         value: 'yes',
         feedbackConfig: { type: 'accept' },
       },
@@ -129,8 +130,7 @@ export function FallbackPermissionRequest({
       result.push({
         label: (
           <Text>
-            Yes, and don&apos;t ask again for <Text bold>{userFacingName}</Text> commands in{' '}
-            <Text bold>{originalCwd}</Text>
+            {t('permGeneral.yesDontAsk', userFacingName, originalCwd)}
           </Text>
         ),
         value: 'yes-dont-ask-again',
@@ -138,7 +138,7 @@ export function FallbackPermissionRequest({
     }
 
     result.push({
-      label: 'No',
+      label: t('permGeneral.no'),
       value: 'no',
       feedbackConfig: { type: 'reject' },
     });
@@ -155,7 +155,7 @@ export function FallbackPermissionRequest({
   );
 
   return (
-    <PermissionDialog title="Tool use" workerBadge={workerBadge}>
+    <PermissionDialog title={t('permGeneral.toolUse')} workerBadge={workerBadge}>
       <Box flexDirection="column" paddingX={2} paddingY={1}>
         <Text>
           {userFacingName}(

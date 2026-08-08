@@ -3,6 +3,7 @@ import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,
 } from 'src/services/analytics/index.js';
+import { t } from 'src/utils/i18n/index.js';
 import type { TeleportRemoteResponse } from 'src/utils/conversationRecovery.js';
 import type { CodeSession } from 'src/utils/teleport/api.js';
 import { type TeleportSource, useTeleportResume } from '../hooks/useTeleportResume.js';
@@ -69,9 +70,9 @@ export function TeleportResumeWrapper({
       <Box flexDirection="column" padding={1}>
         <Box flexDirection="row">
           <Spinner />
-          <Text bold>Resuming session…</Text>
+          <Text bold>{t('teleportResume.resumingSession')}</Text>
         </Box>
-        <Text dimColor>Loading &quot;{selectedSession.title}&quot;…</Text>
+        <Text dimColor>{t('teleportResume.loadingTitle').replace('{title}', selectedSession.title)}</Text>
       </Box>
     );
   }
@@ -81,12 +82,12 @@ export function TeleportResumeWrapper({
     return (
       <Box flexDirection="column" padding={1}>
         <Text bold color="error">
-          Failed to resume session
+          {t('teleportResume.failedToResume')}
         </Text>
         <Text dimColor>{error.message}</Text>
         <Box marginTop={1}>
           <Text dimColor>
-            Press <Text bold>Esc</Text> to cancel
+            {t('teleportResume.pressEscToCancel')}
           </Text>
         </Box>
       </Box>

@@ -6,6 +6,7 @@
  */
 import type { Command, LocalCommandCall } from '../../types/command.js'
 import type { Message } from '../../types/message.js'
+import { t } from '../../utils/i18n/index.js'
 
 /** Only user/assistant/system messages are valid for API calls. */
 const API_SAFE_TYPES = new Set(['user', 'assistant', 'system'])
@@ -24,7 +25,7 @@ const call: LocalCommandCall = async (_args, context) => {
   )
 
   if (safeMessages.length === 0) {
-    return { type: 'text', value: 'No messages to summarize.' }
+    return { type: 'text', value: t('summaryCmd.noMessages') }
   }
 
   try {
@@ -41,7 +42,7 @@ const call: LocalCommandCall = async (_args, context) => {
     if (!result.success) {
       return {
         type: 'text',
-        value: `Failed to generate session summary: ${result.error ?? 'unknown error'}`,
+        value: t('summaryCmd.failedGenerate', result.error ?? t('summaryCmd.unknownError')),
       }
     }
 
@@ -50,18 +51,18 @@ const call: LocalCommandCall = async (_args, context) => {
     if (!content || content.trim().length === 0) {
       return {
         type: 'text',
-        value: 'Session summary was updated, but the content is empty.',
+        value: t('summaryCmd.empty'),
       }
     }
 
     return {
       type: 'text',
-      value: `Session summary updated.\n\n${content}`,
+      value: t('summaryCmd.updated', content),
     }
   } catch (error) {
     return {
       type: 'text',
-      value: `Failed to generate session summary: ${error instanceof Error ? error.message : String(error)}`,
+      value: t('summaryCmd.failedGenerate', error instanceof Error ? error.message : String(error)),
     }
   }
 }
@@ -69,7 +70,7 @@ const call: LocalCommandCall = async (_args, context) => {
 const summary = {
   type: 'local',
   name: 'summary',
-  description: 'Generate and display a session summary',
+  description: t('cmd.descSummary'),
   supportsNonInteractive: true,
   isHidden: false,
   load: () => Promise.resolve({ call }),

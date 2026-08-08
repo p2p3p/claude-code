@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { t } from '../utils/i18n/index.js'
 import type { CommandResultDisplay } from 'src/commands.js';
 import { logEvent } from 'src/services/analytics/index.js';
 import { logForDebugging } from 'src/utils/debug.js';
@@ -185,7 +186,7 @@ export function WorktreeExitDialog({ onDone, onCancel }: Props): React.ReactNode
     return (
       <Box flexDirection="row" marginY={1}>
         <Spinner />
-        <Text>Keeping worktree…</Text>
+        <Text>{t('worktreeExit.keepingWorktree')}</Text>
       </Box>
     );
   }
@@ -194,7 +195,7 @@ export function WorktreeExitDialog({ onDone, onCancel }: Props): React.ReactNode
     return (
       <Box flexDirection="row" marginY={1}>
         <Spinner />
-        <Text>Removing worktree…</Text>
+        <Text>{t('worktreeExit.removingWorktree')}</Text>
       </Box>
     );
   }
@@ -232,29 +233,29 @@ export function WorktreeExitDialog({ onDone, onCancel }: Props): React.ReactNode
   const options = hasTmuxSession
     ? [
         {
-          label: 'Keep worktree and tmux session',
+          label: t('worktreeExit.keepWorktreeAndTmux'),
           value: 'keep-with-tmux',
           description: `Stays at ${worktreeSession.worktreePath}. Reattach with: tmux attach -t ${worktreeSession.tmuxSessionName}`,
         },
         {
-          label: 'Keep worktree, kill tmux session',
+          label: t('worktreeExit.keepWorktreeKillTmux'),
           value: 'keep-kill-tmux',
           description: `Keeps worktree at ${worktreeSession.worktreePath}, terminates tmux session.`,
         },
         {
-          label: 'Remove worktree and tmux session',
+          label: t('worktreeExit.removeWorktreeAndTmux'),
           value: 'remove-with-tmux',
           description: removeDescription,
         },
       ]
     : [
         {
-          label: 'Keep worktree',
+          label: t('worktreeExit.keepWorktree'),
           value: 'keep',
           description: `Stays at ${worktreeSession.worktreePath}`,
         },
         {
-          label: 'Remove worktree',
+          label: t('worktreeExit.removeWorktree'),
           value: 'remove',
           description: removeDescription,
         },
@@ -263,7 +264,7 @@ export function WorktreeExitDialog({ onDone, onCancel }: Props): React.ReactNode
   const defaultValue = hasTmuxSession ? 'keep-with-tmux' : 'keep';
 
   return (
-    <Dialog title="Exiting worktree session" subtitle={subtitle} onCancel={handleCancel}>
+    <Dialog title={t('worktreeexitdialog.exitingWorktreeSession')} subtitle={subtitle} onCancel={handleCancel}>
       <Select defaultFocusValue={defaultValue} options={options} onChange={handleSelect} />
     </Dialog>
   );

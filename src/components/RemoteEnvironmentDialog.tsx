@@ -10,12 +10,13 @@ import { getSettingSourceName, type SettingSource } from '../utils/settings/cons
 import { updateSettingsForSource } from '../utils/settings/settings.js';
 import { getEnvironmentSelectionInfo } from '../utils/teleport/environmentSelection.js';
 import type { EnvironmentResource } from '../utils/teleport/environments.js';
+import { t } from '../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { Select } from './CustomSelect/select.js';
 import { Byline, Dialog, KeyboardShortcutHint, LoadingState } from '@anthropic/ink';
 
-const DIALOG_TITLE = 'Select Remote Environment';
-const SETUP_HINT = `Configure environments at: https://claude.ai/code`;
+const DIALOG_TITLE = t('remoteEnv.title');
+const SETUP_HINT = t('remoteEnv.setupHint');
 
 type Props = {
   onDone: (message?: string) => void;
@@ -82,7 +83,7 @@ export function RemoteEnvironmentDialog({ onDone }: Props): React.ReactNode {
   if (loadingState === 'loading') {
     return (
       <Dialog title={DIALOG_TITLE} onCancel={onDone} hideInputGuide>
-        <LoadingState message="Loading environments…" />
+        <LoadingState message={t('remoteEnvironment.loadingEnvironments')} />
       </Dialog>
     );
   }
@@ -100,7 +101,7 @@ export function RemoteEnvironmentDialog({ onDone }: Props): React.ReactNode {
   if (!selectedEnvironment) {
     return (
       <Dialog title={DIALOG_TITLE} subtitle={SETUP_HINT} onCancel={onDone}>
-        <Text>No remote environments available.</Text>
+        <Text>{t('remoteEnv.noEnvironments')}</Text>
       </Dialog>
     );
   }
@@ -179,7 +180,7 @@ function MultipleEnvironmentsContent({
     <Dialog title={DIALOG_TITLE} subtitle={subtitle} onCancel={onCancel} hideInputGuide>
       <Text dimColor>{SETUP_HINT}</Text>
       {loadingState === 'updating' ? (
-        <LoadingState message="Updating…" />
+        <LoadingState message={t('remoteEnvironment.updating')} />
       ) : (
         <Select
           options={environments.map(env => ({
@@ -199,7 +200,7 @@ function MultipleEnvironmentsContent({
       <Text dimColor>
         <Byline>
           <KeyboardShortcutHint shortcut="Enter" action="select" />
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
         </Byline>
       </Text>
     </Dialog>

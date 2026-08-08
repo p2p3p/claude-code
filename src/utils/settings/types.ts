@@ -564,6 +564,12 @@ export const SettingsSchema = lazySchema(() =>
         .describe(
           'Whether to render the fork built-in status line (model + ctx + 5h/7d limits + cost + cache pill). Toggled with /statusline.',
         ),
+      // Fullscreen (alternate-screen) mode toggle.
+      // Default false → no fullscreen unless user enables it.
+      fullscreenEnabled: z
+        .boolean()
+        .optional()
+        .describe('Whether to enable flicker-free fullscreen TUI mode.'),
       // Enabled plugins using marketplace-first format
       enabledPlugins: z
         .record(
@@ -649,12 +655,10 @@ export const SettingsSchema = lazySchema(() =>
         .string()
         .optional()
         .describe('Controls the output style for assistant responses'),
-      language: z
+      preferredLanguage: z
         .string()
         .optional()
-        .describe(
-          'Preferred language for Claude responses and voice dictation (e.g., "japanese", "spanish")',
-        ),
+        .describe('Preferred language — controls both AI response and UI language (auto/en/zh)'),
       skipWebFetchPreflight: z
         .boolean()
         .optional()
@@ -1142,6 +1146,12 @@ export const SettingsSchema = lazySchema(() =>
         .optional()
         .describe(
           'Whether to show cache hit rate warnings in the message flow when the rate falls below cacheThreshold. Default: true.',
+        ),
+      maxApiRetries: z
+        .union([z.number().int().min(0), z.enum(['off', 'always'])])
+        .optional()
+        .describe(
+          'Maximum number of API retry attempts on transient errors. Set to 0 to disable, "off" to disable, "always" to retry indefinitely. Default: 15.',
         ),
       pluginTrustMessage: z
         .string()

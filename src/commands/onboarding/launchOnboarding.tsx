@@ -8,6 +8,7 @@ import type { LocalJSXCommandCall } from '../../types/command.js';
 import { ThemePicker } from '../../components/ThemePicker.js';
 import { getGlobalConfig, saveCurrentProjectConfig, saveGlobalConfig } from '../../utils/config.js';
 import type { ThemeSetting } from '../../utils/theme.js';
+import { t } from '../../utils/i18n/index.js';
 
 /**
  * /onboarding [subcommand]
@@ -81,18 +82,18 @@ function StatusView({
 }): React.ReactNode {
   return (
     <Box flexDirection="column" paddingLeft={1}>
-      <Text bold>Onboarding status</Text>
+      <Text bold>{t('misc.onboardingStatus')}</Text>
       <Text>
-        - Theme: <Text bold>{theme}</Text>
+        {t('misc.themeLabel')} <Text bold>{theme}</Text>
       </Text>
       <Text>
-        - Onboarding completed:{' '}
+        {t('misc.onboardingCompleted')}{' '}
         <Text bold color={hasCompletedOnboarding ? 'success' : 'warning'}>
           {hasCompletedOnboarding ? 'yes' : 'no'}
         </Text>
       </Text>
       <Text>
-        - Last onboarding version: <Text bold>{lastOnboardingVersion}</Text>
+        {t('misc.lastOnboardingVersion')} <Text bold>{lastOnboardingVersion}</Text>
       </Text>
       <Text dimColor>
         Run /onboarding (no args) to re-run the full flow, or /onboarding theme | trust | model | mcp for a specific
@@ -107,8 +108,7 @@ export const callOnboarding: LocalJSXCommandCall = async (onDone, _context, args
   logEvent('tengu_onboarding_step', { stepId: meta(`slash_${sub}`) });
 
   if (unknownArg !== undefined) {
-    onDone(
-      `Unknown /onboarding subcommand: \`${unknownArg}\`.\n` + `Valid: full | theme | trust | model | mcp | status`,
+    onDone(t('misc.unknownSubcommand', unknownArg),
       { display: 'system' },
     );
     return null;
@@ -123,31 +123,21 @@ export const callOnboarding: LocalJSXCommandCall = async (onDone, _context, args
       ...current,
       hasTrustDialogAccepted: false,
     }));
-    onDone(
-      'Workspace trust cleared for the current project. ' + 'The trust dialog will appear on the next `claude` launch.',
+    onDone(t('misc.workspaceTrustCleared'),
       { display: 'system' },
     );
     return null;
   }
 
   if (sub === 'model') {
-    onDone(
-      'Run `/model` to pick the AI model. ' +
-        'Onboarding does not own the model picker; this entry exists for ' +
-        'discoverability only.',
+    onDone(t('misc.runModelPick'),
       { display: 'system' },
     );
     return null;
   }
 
   if (sub === 'mcp') {
-    onDone(
-      'MCP server setup:\n' +
-        '  - `/mcp` — list configured MCP servers\n' +
-        '  - `claude mcp add <name> <command>` — add a server (in your shell)\n' +
-        '  - `claude mcp remove <name>` — remove a server\n' +
-        'Servers also load from `.mcp.json` in the workspace and from ' +
-        '`~/.claude.json` globally.',
+    onDone(t('misc.mcpHelp'),
       { display: 'system' },
     );
     return null;

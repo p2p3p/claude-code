@@ -1,4 +1,5 @@
 import type { StructuredPatchHunk } from 'diff';
+import { t } from '../../utils/i18n/index.js'
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { CommandResultDisplay } from '../../commands.js';
 import { useRegisterOverlay } from '../../context/overlayContext.js';
@@ -185,16 +186,16 @@ export function DiffDialog({ messages, onDone }: Props): React.ReactNode {
   // Determine the appropriate message when no files are shown
   const emptyMessage = (() => {
     if (diffData.loading) {
-      return 'Loading diff…';
+      return t('diffDialog.loadingDiff');
     }
     if (currentTurn) {
-      return 'No file changes in this turn';
+      return t('diffDialog.noFileChanges');
     }
     // Check if we have stats but no files (too many files case)
     if (diffData.stats && diffData.stats.filesCount > 0 && diffData.files.length === 0) {
-      return 'Too many files to display details';
+      return t('diffDialog.tooManyFiles');
     }
-    return 'Working tree is clean';
+    return t('diffDialog.workingTreeClean');
   })();
 
   // Build title with header subtitle inline
@@ -226,7 +227,7 @@ export function DiffDialog({ messages, onDone }: Props): React.ReactNode {
           <Byline>
             {sources.length > 1 && <Text>←/→ source</Text>}
             <Text>↑/↓ select</Text>
-            <Text>Enter view</Text>
+            <Text>{t('diffdialog.enterView')}</Text>
             <Text>{dismissShortcut} close</Text>
           </Byline>
         ) : (

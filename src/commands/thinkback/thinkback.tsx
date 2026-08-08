@@ -14,6 +14,7 @@ import { isENOENT, toError } from '../../utils/errors.js';
 import { execFileNoThrow } from '../../utils/execFileNoThrow.js';
 import { pathExists } from '../../utils/file.js';
 import { logError } from '../../utils/log.js';
+import { t } from '../../utils/i18n/index.js';
 import { getPlatform } from '../../utils/platform.js';
 import { clearAllCaches } from '../../utils/plugins/cacheUtils.js';
 import { isPluginInstalled } from '../../utils/plugins/installedPluginsManager.js';
@@ -295,31 +296,31 @@ function ThinkbackMenu({
   const options = hasGenerated
     ? [
         {
-          label: 'Play animation',
+          label: t('commandsThinkback.playAnimation'),
           value: 'play' as const,
-          description: 'Watch your year in review',
+          description: t('commandsThinkback.playAnimationDesc'),
         },
         {
-          label: 'Edit content',
+          label: t('commandsThinkback.editContent'),
           value: 'edit' as const,
-          description: 'Modify the animation',
+          description: t('commandsThinkback.editContentDesc'),
         },
         {
-          label: 'Fix errors',
+          label: t('commandsThinkback.fixErrors'),
           value: 'fix' as const,
-          description: 'Fix validation or rendering issues',
+          description: t('commandsThinkback.fixErrorsDesc'),
         },
         {
-          label: 'Regenerate',
+          label: t('commandsThinkback.regenerate'),
           value: 'regenerate' as const,
-          description: 'Create a new animation from scratch',
+          description: t('commandsThinkback.regenerateDesc'),
         },
       ]
     : [
         {
           label: "Let's go!",
           value: 'regenerate' as const,
-          description: 'Generate your personalized animation',
+          description: t('commandsThinkback.generateDesc'),
         },
       ];
 
@@ -345,8 +346,8 @@ function ThinkbackMenu({
 
   return (
     <Dialog
-      title="Think Back on 2025 with Claude Code"
-      subtitle="Generate your 2025 Claude Code Think Back (takes a few minutes to run)"
+      title={t("cmdSystemUI.thinkbackTitle")}
+      subtitle={t('commandsThinkback.generateYour2025ClaudeCodeThinkBackTakesAFewMinutesToRun')}
       onCancel={handleCancel}
       color="claude"
     >
@@ -354,7 +355,7 @@ function ThinkbackMenu({
         {/* Description for first-time users */}
         {!hasGenerated && (
           <Box flexDirection="column">
-            <Text>Relive your year of coding with Claude.</Text>
+            <Text>{t('commandsThinkback.relive')}</Text>
             <Text dimColor>{"We'll create a personalized ASCII animation celebrating your journey."}</Text>
           </Box>
         )}
@@ -441,7 +442,7 @@ function ThinkbackFlow({
     return (
       <Box flexDirection="column">
         <Text color="error">Error: {installError}</Text>
-        <Text dimColor>Try running /plugin to manually install the think-back plugin.</Text>
+        <Text dimColor>{t('commandsThinkback.tryRunningPluginToManuallyInstallTheThinkBackPlugin')}</Text>
       </Box>
     );
   }
@@ -454,7 +455,7 @@ function ThinkbackFlow({
     return (
       <Box>
         <Spinner />
-        <Text>Loading thinkback skill…</Text>
+        <Text>{t('thinkback.loadingThinkbackSkill')}</Text>
       </Box>
     );
   }

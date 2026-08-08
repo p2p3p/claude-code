@@ -4,6 +4,7 @@ import type { z } from 'zod/v4';
 import { Text } from '@anthropic/ink';
 import { NotebookEditTool } from '@claude-code-best/builtin-tools/tools/NotebookEditTool/NotebookEditTool.js';
 import { logError } from '../../../utils/log.js';
+import { t } from '../../../utils/i18n/index.js';
 import { FilePermissionDialog } from '../FilePermissionDialog/FilePermissionDialog.js';
 import type { PermissionRequestProps } from '../PermissionRequest.js';
 import { NotebookEditToolDiff } from './NotebookEditToolDiff.js';
@@ -32,10 +33,10 @@ export function NotebookEditPermissionRequest(props: PermissionRequestProps): Re
 
   const editTypeText =
     edit_mode === 'insert'
-      ? 'insert this cell into'
+      ? t('permGeneral.insertCell')
       : edit_mode === 'delete'
-        ? 'delete this cell from'
-        : 'make this edit to';
+        ? t('permGeneral.deleteCell')
+        : t('permGeneral.replaceCell');
 
   return (
     <FilePermissionDialog
@@ -44,10 +45,10 @@ export function NotebookEditPermissionRequest(props: PermissionRequestProps): Re
       onDone={props.onDone}
       onReject={props.onReject}
       workerBadge={props.workerBadge}
-      title="Edit notebook"
+      title={t('permGeneral.editNotebook')}
       question={
         <Text>
-          Do you want to {editTypeText} <Text bold>{basename(notebook_path)}</Text>?
+          {t('permGeneral.editNotebookQuestion', editTypeText, basename(notebook_path))}
         </Text>
       }
       content={

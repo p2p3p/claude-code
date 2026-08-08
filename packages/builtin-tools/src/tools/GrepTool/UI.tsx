@@ -10,38 +10,20 @@ import type { ProgressMessage } from 'src/types/message.js';
 import { FILE_NOT_FOUND_CWD_NOTE, getDisplayPath } from 'src/utils/file.js';
 import { truncate } from 'src/utils/format.js';
 import { extractTag } from 'src/utils/messages.js';
+import { t } from 'src/utils/i18n/index.js';
 
 // Reusable component for search result summaries
 function SearchResultSummary({
-  count,
-  countLabel,
-  secondaryCount,
-  secondaryLabel,
+  primaryText,
+  secondaryText,
   content,
   verbose,
 }: {
-  count: number;
-  countLabel: string;
-  secondaryCount?: number;
-  secondaryLabel?: string;
+  primaryText: React.ReactNode;
+  secondaryText?: React.ReactNode;
   content?: string;
   verbose: boolean;
 }): React.ReactNode {
-  const primaryText = (
-    <Text>
-      Found <Text bold>{count} </Text>
-      {count === 0 || count > 1 ? countLabel : countLabel.slice(0, -1)}
-    </Text>
-  );
-
-  const secondaryText =
-    secondaryCount !== undefined && secondaryLabel ? (
-      <Text>
-        {' '}
-        across <Text bold>{secondaryCount} </Text>
-        {secondaryCount === 0 || secondaryCount > 1 ? secondaryLabel : secondaryLabel.slice(0, -1)}
-      </Text>
-    ) : null;
 
   if (verbose) {
     return (
@@ -64,7 +46,7 @@ function SearchResultSummary({
     <MessageResponse height={1}>
       <Text>
         {primaryText}
-        {secondaryText} {count > 0 && <CtrlOToExpand />}
+        {secondaryText} {content && <CtrlOToExpand />}
       </Text>
     </MessageResponse>
   );
@@ -86,13 +68,11 @@ export function renderToolUseMessage(
   if (!pattern) {
     return null;
   }
-  const parts = [`pattern: "${pattern}"`];
-
-  if (path) {
-    parts.push(`path: "${verbose ? path : getDisplayPath(path)}"`);
+  const displayPath = path ? (verbose ? path : getDisplayPath(path)) : undefined;
+  if (displayPath) {
+    return t('toolUI.grep.patternPath', pattern, displayPath);
   }
-
-  return parts.join(', ');
+  return t('toolUI.grep.pattern', pattern);
 }
 
 export function renderToolUseErrorMessage(
@@ -104,13 +84,13 @@ export function renderToolUseErrorMessage(
     if (errorMessage?.includes(FILE_NOT_FOUND_CWD_NOTE)) {
       return (
         <MessageResponse>
-          <Text color="error">File not found</Text>
+          <Text color="error">{t('toolUI.grep.fileNotFound')}</Text>
         </MessageResponse>
       );
     }
     return (
       <MessageResponse>
-        <Text color="error">Error searching files</Text>
+        <Text color="error">{t('toolUI.grep.errorSearching')}</Text>
       </MessageResponse>
     );
   }
@@ -123,16 +103,19 @@ export function renderToolResultMessage(
   { verbose }: { verbose: boolean },
 ): React.ReactNode {
   if (mode === 'content') {
-    return <SearchResultSummary count={numLines ?? 0} countLabel="lines" content={content} verbose={verbose} />;
+    return (
+      <SearchResultSummary
+        primaryText={t('toolUI.grep.foundLines', numLines ?? 0)}
+        content={content}
+        verbose={verbose}
+      />
+    );
   }
 
   if (mode === 'count') {
     return (
       <SearchResultSummary
-        count={numMatches ?? 0}
-        countLabel="matches"
-        secondaryCount={numFiles}
-        secondaryLabel="files"
+        primaryText={t('toolUI.grep.foundMatches', numMatches ?? 0, numFiles)}
         content={content}
         verbose={verbose}
       />
@@ -141,7 +124,7 @@ export function renderToolResultMessage(
 
   // files_with_matches mode
   const fileListContent = filenames.map(filename => filename).join('\n');
-  return <SearchResultSummary count={numFiles} countLabel="files" content={fileListContent} verbose={verbose} />;
+  return <SearchResultSummary primaryText={t('toolUI.grep.foundFiles', numFiles)} content={fileListContent} verbose={verbose} />;
 }
 
 export function getToolUseSummary(

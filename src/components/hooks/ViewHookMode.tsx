@@ -5,6 +5,7 @@
  * confirmation screen and directs users to settings.json or Claude for edits.
  */
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, Text } from '@anthropic/ink';
 import { hookSourceDescriptionDisplayString, type IndividualHookConfig } from '../../utils/hooks/hooksSettings.js';
 import { Dialog } from '@anthropic/ink';
@@ -17,7 +18,7 @@ type Props = {
 
 export function ViewHookMode({ selectedHook, eventSupportsMatcher, onCancel }: Props): React.ReactNode {
   return (
-    <Dialog title="Hook details" onCancel={onCancel} inputGuide={() => <Text>Esc to go back</Text>}>
+    <Dialog title={t('viewhookmode.hookDetails')} onCancel={onCancel} inputGuide={() => <Text>{t('viewhookmode.escToGoBack')}</Text>}>
       <Box flexDirection="column" gap={1}>
         <Box flexDirection="column">
           <Text>
@@ -51,7 +52,7 @@ export function ViewHookMode({ selectedHook, eventSupportsMatcher, onCancel }: P
             Status message: <Text dimColor>{selectedHook.config.statusMessage}</Text>
           </Text>
         )}
-        <Text dimColor>To modify or remove this hook, edit settings.json directly or ask Claude to help.</Text>
+        <Text dimColor>{t('viewhookmode.toModifyOrRemoveThisHookEditSettingsJsonDirectlyOrAskClaudeToHelp')}</Text>
       </Box>
     </Dialog>
   );

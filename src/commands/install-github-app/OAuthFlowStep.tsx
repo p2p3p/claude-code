@@ -11,6 +11,7 @@ import { type KeyboardEvent, setClipboard, Box, Link, Text } from '@anthropic/in
 import { OAuthService } from '../../services/oauth/index.js';
 import { saveOAuthTokensIfNeeded } from '../../utils/auth.js';
 import { logError } from '../../utils/log.js';
+import { t } from '../../utils/i18n/index.js'
 
 interface OAuthFlowStepProps {
   onSuccess: (token: string) => void;
@@ -25,7 +26,7 @@ type OAuthStatus =
   | { state: 'error'; message: string; toRetry?: OAuthStatus }
   | { state: 'about_to_retry'; nextState: OAuthStatus };
 
-const PASTE_HERE_MSG = 'Paste code here if prompted > ';
+const PASTE_HERE_MSG = t('installGithub.pasteCodeHere') + ' > ';
 
 export function OAuthFlowStep({ onSuccess, onCancel }: OAuthFlowStepProps): React.ReactNode {
   const [oauthStatus, setOAuthStatus] = useState<OAuthStatus>({
@@ -199,7 +200,7 @@ export function OAuthFlowStep({ onSuccess, onCancel }: OAuthFlowStepProps): Reac
         return (
           <Box>
             <Spinner />
-            <Text>Starting authentication…</Text>
+            <Text>{t('installGithub.startingAuth')}</Text>
           </Box>
         );
 
@@ -209,7 +210,7 @@ export function OAuthFlowStep({ onSuccess, onCancel }: OAuthFlowStepProps): Reac
             {!showPastePrompt && (
               <Box>
                 <Spinner />
-                <Text>Opening browser to sign in with your Claude account…</Text>
+                <Text>{t('installGithub.openingBrowserSignIn')}</Text>
               </Box>
             )}
 
@@ -233,26 +234,26 @@ export function OAuthFlowStep({ onSuccess, onCancel }: OAuthFlowStepProps): Reac
         return (
           <Box>
             <Spinner />
-            <Text>Processing authentication…</Text>
+            <Text>{t('installGithub.processingAuth')}</Text>
           </Box>
         );
 
       case 'success':
         return (
           <Box flexDirection="column" gap={1}>
-            <Text color="success">✓ Authentication token created successfully!</Text>
-            <Text dimColor>Using token for GitHub Actions setup…</Text>
+            <Text color="success">✓ {t('installGithub.tokenCreated')}</Text>
+            <Text dimColor>{t('installGithub.usingToken')}</Text>
           </Box>
         );
 
       case 'error':
         return (
           <Box flexDirection="column" gap={1}>
-            <Text color="error">OAuth error: {oauthStatus.message}</Text>
+            <Text color="error">{t('installGithub.oauthErrorPrefix')} {oauthStatus.message}</Text>
             {oauthStatus.toRetry ? (
-              <Text dimColor>Press Enter to try again, or any other key to cancel</Text>
+              <Text dimColor>{t('installGithub.pressEnterRetry')}</Text>
             ) : (
-              <Text dimColor>Press any key to return to API key selection</Text>
+              <Text dimColor>{t('installGithub.pressAnyKeyReturn')}</Text>
             )}
           </Box>
         );
@@ -260,7 +261,7 @@ export function OAuthFlowStep({ onSuccess, onCancel }: OAuthFlowStepProps): Reac
       case 'about_to_retry':
         return (
           <Box flexDirection="column" gap={1}>
-            <Text color="permission">Retrying…</Text>
+            <Text color="permission">{t('installGithub.retrying')}</Text>
           </Box>
         );
 
@@ -274,22 +275,22 @@ export function OAuthFlowStep({ onSuccess, onCancel }: OAuthFlowStepProps): Reac
       {/* Show header inline only for initial starting state */}
       {oauthStatus.state === 'starting' && (
         <Box flexDirection="column" gap={1} paddingBottom={1}>
-          <Text bold>Create Authentication Token</Text>
-          <Text dimColor>Creating a long-lived token for GitHub Actions</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
+          <Text dimColor>{t('installGithub.creatingLongLivedToken')}</Text>
         </Box>
       )}
       {/* Show header for non-starting states (to avoid duplicate with inline header)*/}
       {oauthStatus.state !== 'success' && oauthStatus.state !== 'starting' && oauthStatus.state !== 'processing' && (
         <Box key="header" flexDirection="column" gap={1} paddingBottom={1}>
-          <Text bold>Create Authentication Token</Text>
-          <Text dimColor>Creating a long-lived token for GitHub Actions</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
+          <Text dimColor>{t('installGithub.creatingLongLivedToken')}</Text>
         </Box>
       )}
       {/* Show URL when paste prompt is visible */}
       {oauthStatus.state === 'waiting_for_login' && showPastePrompt && (
         <Box flexDirection="column" key="urlToCopy" gap={1} paddingBottom={1}>
           <Box paddingX={1}>
-            <Text dimColor>Browser didn&apos;t open? Use the url below to sign in </Text>
+            <Text dimColor>{t('installGithub.browserDidntOpen')} </Text>
             {urlCopied ? (
               <Text color="success">(Copied!)</Text>
             ) : (

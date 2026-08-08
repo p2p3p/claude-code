@@ -25,6 +25,7 @@ import {
   validateElicitationInput,
   validateElicitationInputAsync,
 } from '../../utils/mcp/elicitationValidation.js';
+import { t } from '../../utils/i18n/index.js';
 import { plural } from '../../utils/stringUtils.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
@@ -1050,10 +1051,10 @@ function ElicitationFormDialog({
       isCancelActive={(!currentField || !!focusedButton) && !expandedAccordion}
       inputGuide={exitState =>
         exitState.pending ? (
-          <Text>Press {exitState.keyName} again to exit</Text>
+          <Text>{t('common.pressAgain', exitState.keyName)}</Text>
         ) : (
           <Byline>
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
             <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
             {currentField && <KeyboardShortcutHint shortcut="Backspace" action="unset" />}
             {currentField && currentField.schema.type === 'boolean' && (
@@ -1221,14 +1222,14 @@ function ElicitationURLDialog({
         isCancelActive
         inputGuide={exitState =>
           exitState.pending ? (
-            <Text>Press {exitState.keyName} again to exit</Text>
+            <Text>{t('common.pressAgain', exitState.keyName)}</Text>
           ) : (
             <Byline>
               <ConfigurableShortcutHint
                 action="confirm:no"
                 context="Confirmation"
                 fallback="Esc"
-                description="cancel"
+                description={t('desc.cancel')}
               />
               <KeyboardShortcutHint shortcut="\u2190\u2192" action="switch" />
             </Byline>
@@ -1245,7 +1246,7 @@ function ElicitationURLDialog({
           </Box>
           <Box marginBottom={1}>
             <Text dimColor italic>
-              Waiting for the server to confirm completion…
+              {t('elicitationDialog.waitingForConfirmation')}
             </Text>
           </Box>
           <Box>
@@ -1293,10 +1294,10 @@ function ElicitationURLDialog({
       isCancelActive
       inputGuide={exitState =>
         exitState.pending ? (
-          <Text>Press {exitState.keyName} again to exit</Text>
+          <Text>{t('common.pressAgain', exitState.keyName)}</Text>
         ) : (
           <Byline>
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
             <KeyboardShortcutHint shortcut="\u2190\u2192" action="switch" />
           </Byline>
         )

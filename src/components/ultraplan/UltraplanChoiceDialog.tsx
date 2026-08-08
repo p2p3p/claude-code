@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { join } from 'path';
 import { stat, writeFile } from 'fs/promises';
 import figures from 'figures';
@@ -183,19 +184,19 @@ export function UltraplanChoiceDialog({
   const options: Array<{ label: string; value: ChoiceValue; description: string }> = React.useMemo(
     () => [
       {
-        label: 'Implement here',
+        label: t('ultraplanChoice.labelImplementHere'),
         value: 'here' as const,
-        description: 'Inject plan into the current conversation',
+        description: t('ultraplanChoice.descInjectPlan'),
       },
       {
-        label: 'Start new session',
+        label: t('ultraplanChoice.labelStartNewSession'),
         value: 'fresh' as const,
-        description: 'Clear conversation and start with only the plan',
+        description: t('ultraplanChoice.descClearConversation'),
       },
       {
-        label: 'Cancel',
+        label: t('ultraplanChoice.labelCancel'),
         value: 'cancel' as const,
-        description: "Don't implement — save plan and return",
+        description: t('ultraplanChoice.descDontImplement'),
       },
     ],
     [],
@@ -204,8 +205,8 @@ export function UltraplanChoiceDialog({
   // ── Render ─────────────────────────────────────────────────────────
   return (
     <Dialog
-      title="Ultraplan approved"
-      subtitle="How should the plan be implemented?"
+      title={t('ultraplanchoicedialog.ultraplanApproved')}
+      subtitle={t('ultraplanchoicedialog.howShouldThePlanBeImplemented')}
       onCancel={() => {}}
       hideInputGuide
     >

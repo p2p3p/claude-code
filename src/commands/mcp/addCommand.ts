@@ -25,6 +25,7 @@ import {
   isXaaEnabled,
 } from '../../services/mcp/xaaIdpLogin.js'
 import { parseEnvVars } from '../../utils/envUtils.js'
+import { t } from '../../utils/i18n/index.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 
 /**
@@ -33,18 +34,7 @@ import { jsonStringify } from '../../utils/slowOperations.js'
 export function registerMcpAddCommand(mcp: Command): void {
   mcp
     .command('add <name> <commandOrUrl> [args...]')
-    .description(
-      'Add an MCP server to Claude Code.\n\n' +
-        'Examples:\n' +
-        '  # Add HTTP server:\n' +
-        '  claude mcp add --transport http sentry https://mcp.sentry.dev/mcp\n\n' +
-        '  # Add HTTP server with headers:\n' +
-        '  claude mcp add --transport http corridor https://app.corridor.dev/api/mcp --header "Authorization: Bearer ..."\n\n' +
-        '  # Add stdio server with environment variables:\n' +
-        '  claude mcp add -e API_KEY=xxx my-server -- npx my-mcp-server\n\n' +
-        '  # Add stdio server with subprocess flags:\n' +
-        '  claude mcp add my-server -- my-command --some-flag arg1',
-    )
+    .description(t('mcpAddCmd.addMcpServer'))
     .option(
       '-s, --scope <scope>',
       'Configuration scope (local, user, or project)',

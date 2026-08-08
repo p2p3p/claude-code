@@ -21,6 +21,7 @@ import { firstLineOf } from 'src/utils/stringUtils.js';
 import type { ThemeName } from 'src/utils/theme.js';
 import type { FileEditOutput } from './types.js';
 import { findActualString, getPatchForEdit } from './utils.js';
+import { t } from 'src/utils/i18n/index.js';
 
 export function userFacingName(
   input:
@@ -34,19 +35,19 @@ export function userFacingName(
     | undefined,
 ): string {
   if (!input) {
-    return 'Update';
+    return t('toolUI.fileEdit.nameUpdate');
   }
   if (input.file_path?.startsWith(getPlansDirectory())) {
-    return 'Updated plan';
+    return t('toolUI.fileEdit.nameUpdatedPlan');
   }
   // Hashline edits always modify an existing file (line-ref based)
   if (input.edits != null) {
-    return 'Update';
+    return t('toolUI.fileEdit.nameUpdate');
   }
   if (input.old_string === '') {
-    return 'Create';
+    return t('toolUI.fileEdit.nameCreate');
   }
-  return 'Update';
+  return t('toolUI.fileEdit.nameUpdate');
 }
 
 export function getToolUseSummary(
@@ -95,7 +96,7 @@ export function renderToolResultMessage(
       fileContent={originalFile}
       style={style}
       verbose={verbose}
-      previewHint={isPlanFile ? '/plan to preview' : undefined}
+      previewHint={isPlanFile ? t('toolUI.fileEdit.planPreview') : undefined}
     />
   );
 }
@@ -172,13 +173,13 @@ export function renderToolUseErrorMessage(
     if (errorMessage?.includes(FILE_NOT_FOUND_CWD_NOTE)) {
       return (
         <MessageResponse>
-          <Text color="error">File not found</Text>
+          <Text color="error">{t('toolUI.fileEdit.fileNotFound')}</Text>
         </MessageResponse>
       );
     }
     return (
       <MessageResponse>
-        <Text color="error">Error editing file</Text>
+        <Text color="error">{t('toolUI.fileEdit.errorEditing')}</Text>
       </MessageResponse>
     );
   }

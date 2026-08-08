@@ -3,6 +3,7 @@ import { logEvent } from '../../services/analytics/index.js'
 import { sanitizeToolNameForAnalytics } from '../../services/analytics/metadata.js'
 import type { AssistantMessage, Message } from '../../types/message.js'
 import { getGlobalConfig } from '../config.js'
+import { t } from '../i18n/index.js'
 import { logForDebugging } from '../debug.js'
 import { errorMessage } from '../errors.js'
 import { lazySchema } from '../lazySchema.js'
@@ -46,13 +47,13 @@ const SYSTEM_PROMPT = `Analyze shell commands and explain what they do, why you'
 // Tool definition for forced structured output (no beta required)
 const EXPLAIN_COMMAND_TOOL = {
   name: 'explain_command',
-  description: 'Provide an explanation of a shell command',
+  description: t('permissionExplainer.provideExplanation'),
   input_schema: {
     type: 'object' as const,
     properties: {
       explanation: {
         type: 'string',
-        description: 'What this command does (1-2 sentences)',
+        description: t('permissionExplainer.whatCommandDoes'),
       },
       reasoning: {
         type: 'string',
@@ -61,7 +62,7 @@ const EXPLAIN_COMMAND_TOOL = {
       },
       risk: {
         type: 'string',
-        description: 'What could go wrong, under 15 words',
+        description: t('permissionExplainer.whatCouldGoWrong'),
       },
       riskLevel: {
         type: 'string',

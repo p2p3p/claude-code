@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import { t } from '../utils/i18n/index.js'
 import { getKairosActive, getSessionId } from '../bootstrap/state.js'
 import type { AppState } from '../state/AppState.js'
 import { formatAgentId } from '../utils/agentId.js'
@@ -62,7 +63,7 @@ export async function initializeAssistantTeam(): Promise<
 
   const teamFile: TeamFile = {
     name: teamName,
-    description: 'Assistant mode in-process team',
+    description: t('assistant.inProcessTeam'),
     createdAt: now,
     leadAgentId,
     leadSessionId: sessionId,

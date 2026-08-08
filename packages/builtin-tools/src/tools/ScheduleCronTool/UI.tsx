@@ -5,6 +5,7 @@ import { truncate } from 'src/utils/format.js';
 import type { CreateOutput } from './CronCreateTool.js';
 import type { DeleteOutput } from './CronDeleteTool.js';
 import type { ListOutput } from './CronListTool.js';
+import { t } from 'src/utils/i18n/index.js';
 
 // --- CronCreate -------------------------------------------------------------
 
@@ -16,7 +17,7 @@ export function renderCreateResultMessage(output: CreateOutput): React.ReactNode
   return (
     <MessageResponse>
       <Text>
-        Scheduled <Text bold>{output.id}</Text> <Text dimColor>({output.humanSchedule})</Text>
+        {t('toolUI.cron.scheduled')}<Text bold>{output.id}</Text> <Text dimColor>({output.humanSchedule})</Text>
       </Text>
     </MessageResponse>
   );
@@ -32,7 +33,7 @@ export function renderDeleteResultMessage(output: DeleteOutput): React.ReactNode
   return (
     <MessageResponse>
       <Text>
-        Cancelled <Text bold>{output.id}</Text>
+        {t('toolUI.cron.cancelled')}<Text bold>{output.id}</Text>
       </Text>
     </MessageResponse>
   );
@@ -48,7 +49,7 @@ export function renderListResultMessage(output: ListOutput): React.ReactNode {
   if (output.jobs.length === 0) {
     return (
       <MessageResponse>
-        <Text dimColor>No scheduled jobs</Text>
+        <Text dimColor>{t('toolUI.cron.noJobs')}</Text>
       </MessageResponse>
     );
   }

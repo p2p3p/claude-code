@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { Box, Text, color, stringWidth } from '@anthropic/ink';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
+import { t } from '../../utils/i18n/index.js';
 import {
   getLayoutMode,
   calculateLayoutDimensions,
@@ -153,41 +154,41 @@ export function LogoV2(): React.ReactNode {
         {ChannelsNoticeModule && <ChannelsNoticeModule.ChannelsNotice />}
         {isDebugMode() && (
           <Box paddingLeft={2} flexDirection="column">
-            <Text color="warning">Debug mode enabled</Text>
-            <Text dimColor>Logging to: {isDebugToStdErr() ? 'stderr' : getDebugLogPath()}</Text>
+            <Text color="warning">{t('logoV2.debugMode')}</Text>
+            <Text dimColor>{t('logoV2.loggingTo')} {isDebugToStdErr() ? 'stderr' : getDebugLogPath()}</Text>
           </Box>
         )}
         <EmergencyTip />
         {process.env.CLAUDE_CODE_TMUX_SESSION && (
           <Box paddingLeft={2} flexDirection="column">
-            <Text dimColor>tmux session: {process.env.CLAUDE_CODE_TMUX_SESSION}</Text>
+            <Text dimColor>{t('logoV2.tmuxSession')} {process.env.CLAUDE_CODE_TMUX_SESSION}</Text>
             <Text dimColor>
               {process.env.CLAUDE_CODE_TMUX_PREFIX_CONFLICTS
-                ? `Detach: ${process.env.CLAUDE_CODE_TMUX_PREFIX} ${process.env.CLAUDE_CODE_TMUX_PREFIX} d (press prefix twice - Claude uses ${process.env.CLAUDE_CODE_TMUX_PREFIX})`
-                : `Detach: ${process.env.CLAUDE_CODE_TMUX_PREFIX} d`}
+                ? t('logoV2.detachConflict', process.env.CLAUDE_CODE_TMUX_PREFIX)
+                : `${t('logoV2.detach')} ${process.env.CLAUDE_CODE_TMUX_PREFIX} d`}
             </Text>
           </Box>
         )}
         {announcement && (
           <Box paddingLeft={2} flexDirection="column">
             {!process.env.IS_DEMO && config.oauthAccount?.organizationName && (
-              <Text dimColor>Message from {config.oauthAccount.organizationName}:</Text>
+              <Text dimColor>{t('logoV2.messageFrom', config.oauthAccount.organizationName)}</Text>
             )}
             <Text>{announcement}</Text>
           </Box>
         )}
         {process.env.USER_TYPE === 'ant' && !process.env.DEMO_VERSION && (
           <Box paddingLeft={2} flexDirection="column">
-            <Text dimColor>Use /issue to report model behavior issues</Text>
+            <Text dimColor>{t('logoV2.reportIssue')}</Text>
           </Box>
         )}
         {process.env.USER_TYPE === 'ant' && !process.env.DEMO_VERSION && (
           <Box paddingLeft={2} flexDirection="column">
-            <Text color="warning">[ANT-ONLY] Logs:</Text>
-            <Text dimColor>API calls: {getDisplayPath(getDumpPromptsPath())}</Text>
-            <Text dimColor>Debug logs: {getDisplayPath(getDebugLogPath())}</Text>
+            <Text color="warning">{t('logoV2.antLogs')}</Text>
+            <Text dimColor>{t('logoV2.apiCalls')} {getDisplayPath(getDumpPromptsPath())}</Text>
+            <Text dimColor>{t('logoV2.debugLogs')} {getDisplayPath(getDebugLogPath())}</Text>
             {isDetailedProfilingEnabled() && (
-              <Text dimColor>Startup Perf: {getDisplayPath(getStartupPerfLogPath())}</Text>
+              <Text dimColor>{t('logoV2.startupPerf')} {getDisplayPath(getStartupPerfLogPath())}</Text>
             )}
           </Box>
         )}
@@ -254,7 +255,7 @@ export function LogoV2(): React.ReactNode {
         {ChannelsNoticeModule && <ChannelsNoticeModule.ChannelsNotice />}
         {showSandboxStatus && (
           <Box marginTop={1} flexDirection="column">
-            <Text color="warning">Your bash commands will be sandboxed. Disable with /sandbox.</Text>
+            <Text color="warning">{t('logoV2.sandboxed')}</Text>
           </Box>
         )}
         {process.env.USER_TYPE === 'ant' && <GateOverridesWarning />}
@@ -353,7 +354,7 @@ export function LogoV2(): React.ReactNode {
       {ChannelsNoticeModule && <ChannelsNoticeModule.ChannelsNotice />}
       {isDebugMode() && (
         <Box paddingLeft={2} flexDirection="column">
-          <Text color="warning">Debug mode enabled</Text>
+          <Text color="warning">{t('logov2.debugModeEnabled')}</Text>
           <Text dimColor>Logging to: {isDebugToStdErr() ? 'stderr' : getDebugLogPath()}</Text>
         </Box>
       )}
@@ -371,19 +372,19 @@ export function LogoV2(): React.ReactNode {
       {announcement && (
         <Box paddingLeft={2} flexDirection="column">
           {!process.env.IS_DEMO && config.oauthAccount?.organizationName && (
-            <Text dimColor>Message from {config.oauthAccount.organizationName}:</Text>
+            <Text dimColor>{t('logoV2.messageFrom', config.oauthAccount.organizationName)}</Text>
           )}
           <Text>{announcement}</Text>
         </Box>
       )}
       {showSandboxStatus && (
         <Box paddingLeft={2} flexDirection="column">
-          <Text color="warning">Your bash commands will be sandboxed. Disable with /sandbox.</Text>
+          <Text color="warning">{t('logoV2.sandboxed')}</Text>
         </Box>
       )}
       {process.env.USER_TYPE === 'ant' && !process.env.DEMO_VERSION && (
         <Box paddingLeft={2} flexDirection="column">
-          <Text dimColor>Use /issue to report model behavior issues</Text>
+          <Text dimColor>{t('logoV2.reportIssue')}</Text>
         </Box>
       )}
       {process.env.USER_TYPE === 'ant' && !process.env.DEMO_VERSION && (

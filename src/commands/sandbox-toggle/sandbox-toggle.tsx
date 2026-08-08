@@ -7,6 +7,7 @@ import { getPlatform } from '../../utils/platform.js';
 import { addToExcludedCommands, SandboxManager } from '../../utils/sandbox/sandbox-adapter.js';
 import { getSettings_DEPRECATED, getSettingsFilePathForSource } from '../../utils/settings/settings.js';
 import type { ThemeName } from '../../utils/theme.js';
+import { t } from '../../utils/i18n/index.js'
 
 export async function call(
   onDone: (result?: string) => void,

@@ -9,13 +9,14 @@ import {
   type TcpEndpoint,
 } from '../../utils/pipeTransport.js'
 import { addSlaveClient } from '../../hooks/useMasterMonitor.js'
+import { t } from '../../utils/i18n/index.js'
 
 export const call: LocalCommandCall = async (args, context) => {
   const targetName = args.trim()
   if (!targetName) {
     return {
       type: 'text',
-      value: 'Usage: /attach <pipe-name>\nUse /pipes to list available pipes.',
+      value: t('attachCmd.usage'),
     }
   }
 
@@ -25,7 +26,7 @@ export const call: LocalCommandCall = async (args, context) => {
   if (getPipeIpc(currentState).slaves[targetName]) {
     return {
       type: 'text',
-      value: `Already attached to "${targetName}".`,
+      value: t('attachCmd.alreadyAttached', targetName),
     }
   }
 
@@ -33,8 +34,7 @@ export const call: LocalCommandCall = async (args, context) => {
   if (isPipeControlled(getPipeIpc(currentState))) {
     return {
       type: 'text',
-      value:
-        'Cannot attach: this sub is currently controlled by a master. Detach it from the master first.',
+      value: t('attachCmd.controlledByMaster'),
     }
   }
 
@@ -67,9 +67,13 @@ export const call: LocalCommandCall = async (args, context) => {
       getPipeIpc(currentState).serverName ?? `master-${process.pid}`
     client = await connectToPipe(targetName, myName, undefined, tcpEndpoint)
   } catch (err) {
+    const tcpSuffix = tcpEndpoint
+      ? t('attachCmd.tcpEndpoint', tcpEndpoint.host, tcpEndpoint.port)
+      : ''
+    const reason = err instanceof Error ? err.message : String(err)
     return {
       type: 'text',
-      value: `Failed to connect to "${targetName}"${tcpEndpoint ? ` (TCP ${tcpEndpoint.host}:${tcpEndpoint.port})` : ''}: ${err instanceof Error ? err.message : String(err)}`,
+      value: t('attachCmd.failedToConnect', targetName, tcpSuffix, reason),
     }
   }
 
@@ -79,7 +83,7 @@ export const call: LocalCommandCall = async (args, context) => {
       client.disconnect()
       resolve({
         type: 'text',
-        value: `Attach to "${targetName}" timed out (no response within 5s).`,
+        value: t('attachCmd.attachTimedOut', targetName),
       })
     }, 5000)
 
@@ -114,7 +118,7 @@ export const call: LocalCommandCall = async (args, context) => {
           Object.keys(getPipeIpc(currentState).slaves).length + 1
         resolve({
           type: 'text',
-          value: `Attached to "${targetName}" as master. Now monitoring ${slaveCount} sub session(s).\nUse /send ${targetName} <message> to send tasks.\nUse /status to see all connected subs.\nUse /detach ${targetName} to disconnect.`,
+          value: t('attachCmd.attachedAsMaster', targetName, slaveCount),
         })
       } else if (msg.type === 'attach_reject') {
         clearTimeout(timeout)
@@ -122,7 +126,11 @@ export const call: LocalCommandCall = async (args, context) => {
 
         resolve({
           type: 'text',
-          value: `Attach rejected by "${targetName}": ${msg.data ?? 'unknown reason'}`,
+          value: t(
+            'attachCmd.attachRejected',
+            targetName,
+            msg.data ?? t('attachCmd.unknownReason'),
+          ),
         })
       }
     })

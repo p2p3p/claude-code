@@ -6,21 +6,25 @@ import { MessageResponse } from 'src/components/MessageResponse.js';
 import { Box, Text } from '@anthropic/ink';
 import { getDisplayPath } from 'src/utils/file.js';
 import { extractTag } from 'src/utils/messages.js';
+import { t } from 'src/utils/i18n/index.js';
 import type { Input, Output } from './LSPTool.js';
 import { getSymbolAtPosition } from './symbolContext.js';
 
 // Lookup map for operation-specific labels
-const OPERATION_LABELS: Record<Input['operation'], { singular: string; plural: string; special?: string }> = {
-  goToDefinition: { singular: 'definition', plural: 'definitions' },
-  findReferences: { singular: 'reference', plural: 'references' },
-  documentSymbol: { singular: 'symbol', plural: 'symbols' },
-  workspaceSymbol: { singular: 'symbol', plural: 'symbols' },
-  hover: { singular: 'hover info', plural: 'hover info', special: 'available' },
-  goToImplementation: { singular: 'implementation', plural: 'implementations' },
-  prepareCallHierarchy: { singular: 'call item', plural: 'call items' },
-  incomingCalls: { singular: 'caller', plural: 'callers' },
-  outgoingCalls: { singular: 'callee', plural: 'callees' },
-};
+function getLabelConfig(operation: Input['operation']): { singular: string; plural: string; special?: string } {
+  switch (operation) {
+    case 'goToDefinition': return { singular: t('toolUI.lsp.definition'), plural: t('toolUI.lsp.definitions') };
+    case 'findReferences': return { singular: t('toolUI.lsp.reference'), plural: t('toolUI.lsp.references') };
+    case 'documentSymbol': return { singular: t('toolUI.lsp.symbol'), plural: t('toolUI.lsp.symbols') };
+    case 'workspaceSymbol': return { singular: t('toolUI.lsp.symbol'), plural: t('toolUI.lsp.symbols') };
+    case 'hover': return { singular: t('toolUI.lsp.hoverInfo'), plural: t('toolUI.lsp.hoverInfo'), special: t('toolUI.lsp.hoverAvailable') };
+    case 'goToImplementation': return { singular: t('toolUI.lsp.implementation'), plural: t('toolUI.lsp.implementations') };
+    case 'prepareCallHierarchy': return { singular: t('toolUI.lsp.callItem'), plural: t('toolUI.lsp.callItems') };
+    case 'incomingCalls': return { singular: t('toolUI.lsp.caller'), plural: t('toolUI.lsp.callers') };
+    case 'outgoingCalls': return { singular: t('toolUI.lsp.callee'), plural: t('toolUI.lsp.callees') };
+    default: return { singular: t('toolUI.lsp.result'), plural: t('toolUI.lsp.results') };
+  }
+}
 
 /**
  * Reusable component for LSP result summaries with collapsed/expanded views
@@ -39,18 +43,16 @@ function LSPResultSummary({
   verbose: boolean;
 }): React.ReactNode {
   // Get label configuration for this operation
-  const labelConfig = OPERATION_LABELS[operation] || {
-    singular: 'result',
-    plural: 'results',
-  };
+  const labelConfig = getLabelConfig(operation);
   const countLabel = resultCount === 1 ? labelConfig.singular : labelConfig.plural;
 
   const primaryText =
     operation === 'hover' && resultCount > 0 && labelConfig.special ? (
-      <Text>Hover info {labelConfig.special}</Text>
+      <Text>{labelConfig.special}</Text>
     ) : (
       <Text>
-        Found <Text bold>{resultCount} </Text>
+        {t('toolUI.lsp.found')}
+        <Text bold>{resultCount} </Text>
         {countLabel}
       </Text>
     );
@@ -58,9 +60,9 @@ function LSPResultSummary({
   const secondaryText =
     fileCount > 1 ? (
       <Text>
-        {' '}
-        across <Text bold>{fileCount} </Text>
-        files
+        {t('toolUI.lsp.across')}
+        <Text bold>{fileCount}</Text>
+        {t('toolUI.lsp.acrossSuffix')}
       </Text>
     ) : null;
 
@@ -92,7 +94,7 @@ function LSPResultSummary({
 }
 
 export function userFacingName(): string {
-  return 'LSP';
+  return t('toolUI.lsp.name');
 }
 
 export function renderToolUseMessage(input: Partial<Input>, { verbose }: { verbose: boolean }): React.ReactNode {
@@ -149,7 +151,7 @@ export function renderToolUseErrorMessage(
   if (!verbose && typeof result === 'string' && extractTag(result, 'tool_use_error')) {
     return (
       <MessageResponse>
-        <Text color="error">LSP operation failed</Text>
+        <Text color="error">{t('toolUI.lsp.operationFailed')}</Text>
       </MessageResponse>
     );
   }

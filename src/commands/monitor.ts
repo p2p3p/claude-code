@@ -16,11 +16,12 @@ import type {
   LocalJSXCommandOnDone,
 } from '../types/command.js'
 import type { ToolUseContext } from '../Tool.js'
+import { t } from '../utils/i18n/index.js'
 
 const monitor = {
   type: 'local-jsx',
   name: 'monitor',
-  description: 'Start a background shell monitor (Shift+Down to view)',
+  description: t('cmd.descMonitor'),
   isEnabled: () => {
     if (feature('MONITOR_TOOL')) {
       return true

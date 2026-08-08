@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { t } from '../utils/i18n/index.js'
 import { Text, Dialog } from '@anthropic/ink';
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js';
 import { isSupportedTerminal } from '../utils/ide.js';
@@ -31,9 +32,9 @@ export function IdeAutoConnectDialog({ onComplete }: IdeAutoConnectDialogProps):
   ];
 
   return (
-    <Dialog title="Do you wish to enable auto-connect to IDE?" color="ide" onCancel={onComplete}>
+    <Dialog title={t('ideautoconnectdialog.doYouWishToEnableAutoConnectToIDE')} color="ide" onCancel={onComplete}>
       <Select options={options} onChange={handleSelect} defaultValue={'yes'} />
-      <Text dimColor>You can also configure this in /config or with the --ide flag</Text>
+      <Text dimColor>{t('ideAutoConnectDialog.youCanAlsoConfigure')}</Text>
     </Dialog>
   );
 }
@@ -75,7 +76,7 @@ export function IdeDisableAutoConnectDialog({ onComplete }: IdeDisableAutoConnec
 
   return (
     <Dialog
-      title="Do you wish to disable auto-connect to IDE?"
+      title={t('ideautoconnectdialog.doYouWishToDisableAutoConnectToIDE')}
       subtitle="You can also configure this in /config"
       onCancel={handleCancel}
       color="ide"

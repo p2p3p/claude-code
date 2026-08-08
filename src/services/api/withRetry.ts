@@ -23,6 +23,7 @@ import {
 } from '../../utils/auth.js'
 import { isEnvTruthy } from '../../utils/envUtils.js'
 import { errorMessage } from '../../utils/errors.js'
+import { getInitialSettings } from '../../utils/settings/settings.js'
 import {
   type CooldownReason,
   handleFastModeOverageRejection,
@@ -49,7 +50,7 @@ import { extractConnectionErrorDetails } from './errorUtils.js'
 
 const abortError = () => new APIUserAbortError()
 
-const DEFAULT_MAX_RETRIES = 10
+const DEFAULT_MAX_RETRIES = 15
 const FLOOR_OUTPUT_TOKENS = 3000
 const MAX_529_RETRIES = 3
 export const BASE_DELAY_MS = 500
@@ -98,6 +99,10 @@ const PERSISTENT_RESET_CAP_MS = 6 * 60 * 60 * 1000
 const HEARTBEAT_INTERVAL_MS = 30_000
 
 function isPersistentRetryEnabled(): boolean {
+  const settings = getInitialSettings()
+  if (settings.maxApiRetries === 'always') {
+    return true
+  }
   return feature('UNATTENDED_RETRY')
     ? isEnvTruthy(process.env.CLAUDE_CODE_UNATTENDED_RETRY)
     : false
@@ -435,14 +440,18 @@ export async function* withRetry<T>(
         // Window-based limits (e.g. 5hr Max/Pro) include a reset timestamp.
         // Wait until reset rather than polling every 5 min uselessly.
         const resetDelay = getRateLimitResetDelayMs(error)
+        const baseDelay = getRetryDelay(
+          persistentAttempt,
+          retryAfter,
+          PERSISTENT_MAX_BACKOFF_MS,
+        )
+        // rpm exhausted 是每分钟限流，不管持久与否，至少等 60 秒
+        const rpmFloor =
+          error.message?.toLowerCase().includes('rpm exhausted') ? 60000 : 0
         delayMs =
           resetDelay ??
           Math.min(
-            getRetryDelay(
-              persistentAttempt,
-              retryAfter,
-              PERSISTENT_MAX_BACKOFF_MS,
-            ),
+            Math.max(baseDelay, rpmFloor),
             PERSISTENT_RESET_CAP_MS,
           )
       } else if (persistent) {
@@ -459,7 +468,12 @@ export async function* withRetry<T>(
           PERSISTENT_RESET_CAP_MS,
         )
       } else {
-        delayMs = getRetryDelay(attempt, retryAfter)
+        // rpm exhausted 是每分钟限流，默认等待太短，直接初始等待 60 秒
+        if (error instanceof APIError && error.status === 429 && error.message?.toLowerCase().includes('rpm exhausted')) {
+          delayMs = Math.max(60000, getRetryDelay(attempt, retryAfter))
+        } else {
+          delayMs = getRetryDelay(attempt, retryAfter)
+        }
       }
 
       // In persistent mode the for-loop `attempt` is clamped at maxRetries+1;
@@ -696,6 +710,12 @@ function shouldRetry(error: APIError): boolean {
     return false
   }
 
+  // rpm exhausted 是短时限流（每分钟请求数超限），等几秒就能恢复，始终重试
+  // 必须在 x-should-retry 检查之前，否则服务器可能返回 false 导致跳过
+  if (error.status === 429 && error.message?.toLowerCase().includes('rpm exhausted')) {
+    return true
+  }
+
   // Persistent mode: 429/529 always retryable, bypass subscriber gates and
   // x-should-retry header.
   if (isPersistentRetryEnabled() && isTransientCapacityError(error)) {
@@ -765,6 +785,12 @@ function shouldRetry(error: APIError): boolean {
     return !isClaudeAISubscriber() || isEnterpriseSubscriber()
   }
 
+  // Retry on 403s from third-party providers/gateways which can be transient
+  // (e.g. Cloudflare, various API gateways). First-party 403s (revoked) are handled above.
+  if (error.status === 403) {
+    return true
+  }
+
   // Clear API key cache on 401 and allow retry.
   // OAuth token handling is done in the main retry loop via handleOAuth401Error.
   if (error.status === 401) {
@@ -784,6 +810,19 @@ function shouldRetry(error: APIError): boolean {
 }
 
 export function getDefaultMaxRetries(): number {
+  const settings = getInitialSettings()
+  const maxApiRetries = settings.maxApiRetries
+
+  if (maxApiRetries === 'off') {
+    return 0
+  }
+  if (typeof maxApiRetries === 'number') {
+    return Math.max(0, maxApiRetries)
+  }
+  if (maxApiRetries === 'always') {
+    return Number.MAX_SAFE_INTEGER
+  }
+
   if (process.env.CLAUDE_CODE_MAX_RETRIES) {
     return parseInt(process.env.CLAUDE_CODE_MAX_RETRIES, 10)
   }

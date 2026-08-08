@@ -4,6 +4,7 @@ import { getAllOutputStyles, OUTPUT_STYLE_CONFIG, type OutputStyleConfig } from 
 import { Box, Text, Dialog } from '@anthropic/ink';
 import type { OutputStyle } from '../utils/config.js';
 import { getCwd } from '../utils/cwd.js';
+import { t } from '../utils/i18n/index.js';
 import type { OptionWithDescription } from './CustomSelect/select.js';
 import { Select } from './CustomSelect/select.js';
 
@@ -60,17 +61,17 @@ export function OutputStylePicker({
 
   return (
     <Dialog
-      title="Preferred output style"
+      title={t('outputStyle.title')}
       onCancel={onCancel}
       hideInputGuide={!isStandaloneCommand}
       hideBorder={!isStandaloneCommand}
     >
       <Box flexDirection="column" gap={1}>
         <Box marginTop={1}>
-          <Text dimColor>This changes how Claude Code communicates with you</Text>
+          <Text dimColor>{t('outputStyle.description')}</Text>
         </Box>
         {isLoading ? (
-          <Text dimColor>Loading output styles…</Text>
+          <Text dimColor>{t('outputStyle.loading')}</Text>
         ) : (
           <Select
             options={styleOptions}

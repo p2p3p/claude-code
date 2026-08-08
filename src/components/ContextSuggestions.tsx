@@ -1,6 +1,7 @@
 import figures from 'figures';
 import * as React from 'react';
 import { Box, Text, StatusIcon } from '@anthropic/ink';
+import { t } from '../utils/i18n/index.js';
 import type { ContextSuggestion } from '../utils/contextSuggestions.js';
 import { formatTokens } from '../utils/format.js';
 
@@ -13,7 +14,7 @@ export function ContextSuggestions({ suggestions }: Props): React.ReactNode {
 
   return (
     <Box flexDirection="column" marginTop={1}>
-      <Text bold>Suggestions</Text>
+      <Text bold>{t('contextSuggestions.title')}</Text>
       {suggestions.map((suggestion, i) => (
         <Box key={i} flexDirection="column" marginTop={i === 0 ? 0 : 1}>
           <Box>

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { t } from '../i18n/index.js'
 import { type OptionWithDescription, Select } from '../../components/CustomSelect/index.js';
 import { Pane } from '@anthropic/ink';
 import { Spinner } from '../../components/Spinner.js';
@@ -121,7 +122,7 @@ export function It2SetupPrompt({ onDone, tmuxAvailable }: Props): React.ReactNod
   function renderInitialPrompt(): React.ReactNode {
     const options: OptionWithDescription<string>[] = [
       {
-        label: 'Install it2 now',
+        label: t('it2SetupPrompt.installNow'),
         value: 'install',
         description: packageManager
           ? `Uses ${packageManager} to install the it2 CLI tool`
@@ -131,16 +132,16 @@ export function It2SetupPrompt({ onDone, tmuxAvailable }: Props): React.ReactNod
 
     if (tmuxAvailable) {
       options.push({
-        label: 'Use tmux instead',
+        label: t('it2SetupPrompt.useTmuxInstead'),
         value: 'tmux',
-        description: 'Opens teammates in a separate tmux session',
+        description: t('it2SetupPrompt.opensTeammatesTmux'),
       });
     }
 
     options.push({
-      label: 'Cancel',
+      label: t('it2SetupPrompt.cancel'),
       value: 'cancel',
-      description: 'Skip teammate spawning for now',
+      description: t('it2SetupPrompt.skipTeammate'),
     });
 
     return (
@@ -148,7 +149,7 @@ export function It2SetupPrompt({ onDone, tmuxAvailable }: Props): React.ReactNod
         <Text>
           To use native iTerm2 split panes for teammates, you need the <Text bold>it2</Text> CLI tool.
         </Text>
-        <Text dimColor>This enables teammates to appear as split panes within your current window.</Text>
+        <Text dimColor>{t('it2setupprompt.thisEnablesTeammatesToAppearAsSplitPanesWithinYourCurrentWindow')}</Text>
         <Box marginTop={1}>
           <Select
             options={options}
@@ -179,7 +180,7 @@ export function It2SetupPrompt({ onDone, tmuxAvailable }: Props): React.ReactNod
           <Spinner />
           <Text> Installing it2 using {packageManager}…</Text>
         </Box>
-        <Text dimColor>This may take a moment.</Text>
+        <Text dimColor>{t('it2setupprompt.thisMayTakeAMoment')}</Text>
       </Box>
     );
   }
@@ -187,29 +188,29 @@ export function It2SetupPrompt({ onDone, tmuxAvailable }: Props): React.ReactNod
   function renderInstallFailed(): React.ReactNode {
     const options: OptionWithDescription<string>[] = [
       {
-        label: 'Try again',
+        label: t('it2SetupPrompt.tryAgain'),
         value: 'retry',
-        description: 'Retry the installation',
+        description: t('it2SetupPrompt.retryInstallation'),
       },
     ];
 
     if (tmuxAvailable) {
       options.push({
-        label: 'Use tmux instead',
+        label: t('it2SetupPrompt.useTmuxInstead'),
         value: 'tmux',
-        description: 'Falls back to tmux for teammate panes',
+        description: t('it2SetupPrompt.fallsBackTmux'),
       });
     }
 
     options.push({
-      label: 'Cancel',
+      label: t('it2SetupPrompt.cancel'),
       value: 'cancel',
-      description: 'Skip teammate spawning for now',
+      description: t('it2SetupPrompt.skipTeammate'),
     });
 
     return (
       <Box flexDirection="column" gap={1}>
-        <Text color="error">Installation failed</Text>
+        <Text color="error">{t('it2setupprompt.installationFailed')}</Text>
         {error && <Text dimColor>{error}</Text>}
         <Text dimColor>
           You can try installing manually:{' '}
@@ -272,7 +273,7 @@ export function It2SetupPrompt({ onDone, tmuxAvailable }: Props): React.ReactNod
     return (
       <Box flexDirection="column">
         <Text color="success">✓ iTerm2 split pane support is ready</Text>
-        <Text dimColor>Teammates will now appear as split panes.</Text>
+        <Text dimColor>{t('it2setupprompt.teammatesWillNowAppearAsSplitPanes')}</Text>
       </Box>
     );
   }
@@ -280,31 +281,31 @@ export function It2SetupPrompt({ onDone, tmuxAvailable }: Props): React.ReactNod
   function renderFailed(): React.ReactNode {
     const options: OptionWithDescription<string>[] = [
       {
-        label: 'Try again',
+        label: t('it2SetupPrompt.tryAgain'),
         value: 'retry',
-        description: 'Verify the connection again',
+        description: t('it2SetupPrompt.verifyConnection'),
       },
     ];
 
     if (tmuxAvailable) {
       options.push({
-        label: 'Use tmux instead',
+        label: t('it2SetupPrompt.useTmuxInstead'),
         value: 'tmux',
-        description: 'Falls back to tmux for teammate panes',
+        description: t('it2SetupPrompt.fallsBackTmux'),
       });
     }
 
     options.push({
-      label: 'Cancel',
+      label: t('it2SetupPrompt.cancel'),
       value: 'cancel',
-      description: 'Skip teammate spawning for now',
+      description: t('it2SetupPrompt.skipTeammate'),
     });
 
     return (
       <Box flexDirection="column" gap={1}>
-        <Text color="error">Verification failed</Text>
+        <Text color="error">{t('it2setupprompt.verificationFailed')}</Text>
         {error && <Text dimColor>{error}</Text>}
-        <Text>Make sure:</Text>
+        <Text>{t('it2setupprompt.makeSure')}</Text>
         <Box flexDirection="column" paddingLeft={2}>
           <Text>· Python API is enabled in iTerm2 preferences</Text>
           <Text>· You may need to restart iTerm2 after enabling</Text>
@@ -351,7 +352,7 @@ export function It2SetupPrompt({ onDone, tmuxAvailable }: Props): React.ReactNod
         {renderContent()}
         {step !== 'installing' && step !== 'verifying' && step !== 'success' && (
           <Text dimColor italic>
-            {exitState.pending ? <>Press {exitState.keyName} again to exit</> : <>Esc to cancel</>}
+            {exitState.pending ? <>Press {exitState.keyName} again to exit</> : <>{t('it2setupprompt.escToCancel')}</>}
           </Text>
         )}
       </Box>

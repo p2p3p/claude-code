@@ -1,5 +1,6 @@
 import { getGlobalConfig } from '../../utils/config.js'
 import type { Command } from '../../types/command.js'
+import { t } from '../../utils/i18n/index.js'
 
 // Visible when a workspace API key is available from env or saved settings.
 // Use a getter so getGlobalConfig() is called lazily (after enableConfigs()
@@ -9,7 +10,7 @@ const agentsPlatform: Command = {
   type: 'local-jsx',
   name: 'agents-platform',
   aliases: ['agents', 'schedule-agent'],
-  description: 'Manage scheduled remote agents (cron-style triggers)',
+  description: t('cmd.descAgentsPlatform'),
   // REPL markdown renderer strips `<...>` as HTML tags — use uppercase.
   argumentHint: 'list | create CRON PROMPT | delete ID | run ID',
   get isHidden(): boolean {

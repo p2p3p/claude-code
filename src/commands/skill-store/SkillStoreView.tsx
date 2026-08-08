@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import type { Theme } from '@anthropic/ink';
 import type { Skill, SkillVersion } from './skillsApi.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props =
   | { mode: 'list'; skills: Skill[] }
@@ -24,15 +25,15 @@ function SkillRow({ skill }: { skill: Skill }): React.ReactNode {
         {skill.deprecated ? (
           <>
             <Text dimColor> · </Text>
-            <Text color={'warning' as keyof Theme}>deprecated</Text>
+            <Text color={'warning' as keyof Theme}>{t('skillStore.deprecated')}</Text>
           </>
         ) : null}
       </Box>
       <Text dimColor>
-        Owner: {skill.owner}
+        {t('skillStore.owner')} {skill.owner}
         {skill.owner_symbol ? ` (${skill.owner_symbol})` : ''}
       </Text>
-      <Text dimColor>Created: {createdAt}</Text>
+      <Text dimColor>{t('skillStore.created')} {createdAt}</Text>
     </Box>
   );
 }
@@ -42,14 +43,14 @@ export function SkillStoreView(props: Props): React.ReactNode {
     if (props.skills.length === 0) {
       return (
         <Box>
-          <Text dimColor>No skills found. Use /skill-store create &lt;name&gt; &lt;markdown&gt; to publish one.</Text>
+          <Text dimColor>{t('skillStore.noSkillsFound')}</Text>
         </Box>
       );
     }
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Skills ({props.skills.length})</Text>
+          <Text bold>{t('skillStore.skillsCount', props.skills.length)}</Text>
         </Box>
         {props.skills.map(skill => (
           <SkillRow key={skill.skill_id} skill={skill} />
@@ -64,23 +65,23 @@ export function SkillStoreView(props: Props): React.ReactNode {
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Skill: {skill.skill_id}</Text>
+          <Text bold>{t('skillStore.skillDetail')} {skill.skill_id}</Text>
         </Box>
-        <Text>Name: {skill.name}</Text>
+        <Text>{t('skillStore.name')} {skill.name}</Text>
         <Text>
-          Owner: {skill.owner}
+          {t('skillStore.owner')} {skill.owner}
           {skill.owner_symbol ? ` (${skill.owner_symbol})` : ''}
         </Text>
         <Text>
-          Status:{' '}
+          {t('skillStore.status')}{' '}
           <Text color={(skill.deprecated ? 'warning' : 'success') as keyof Theme}>
-            {skill.deprecated ? 'deprecated' : 'active'}
+            {skill.deprecated ? t('skillStore.deprecated') : t('skillStore.active')}
           </Text>
         </Text>
         {skill.allowed_tools && skill.allowed_tools.length > 0 ? (
-          <Text>Allowed tools: {skill.allowed_tools.join(', ')}</Text>
+          <Text>{t('skillStore.allowedTools')} {skill.allowed_tools.join(', ')}</Text>
         ) : null}
-        <Text dimColor>Created: {createdAt}</Text>
+        <Text dimColor>{t('skillStore.created')} {createdAt}</Text>
       </Box>
     );
   }
@@ -90,7 +91,7 @@ export function SkillStoreView(props: Props): React.ReactNode {
     if (versions.length === 0) {
       return (
         <Box>
-          <Text dimColor>No versions found for skill {id}.</Text>
+          <Text dimColor>{t('skillStore.noVersions', id)}</Text>
         </Box>
       );
     }
@@ -98,7 +99,7 @@ export function SkillStoreView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box marginBottom={1}>
           <Text bold>
-            Versions for {id} ({versions.length})
+            {t('skillStore.versionsFor', id, versions.length)}
           </Text>
         </Box>
         {versions.map(ver => {
@@ -106,7 +107,7 @@ export function SkillStoreView(props: Props): React.ReactNode {
           return (
             <Box key={ver.version} flexDirection="column" marginBottom={1}>
               <Text bold>{ver.version}</Text>
-              <Text dimColor>Created: {createdAt}</Text>
+              <Text dimColor>{t('skillStore.created')} {createdAt}</Text>
               <Text dimColor>{ver.body.length > 80 ? `${ver.body.slice(0, 80)}…` : ver.body}</Text>
             </Box>
           );
@@ -122,10 +123,10 @@ export function SkillStoreView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box marginBottom={1}>
           <Text bold>
-            Version: {version.version} (skill: {version.skill_id})
+            {t('skillStore.versionDetail', version.version, version.skill_id)}
           </Text>
         </Box>
-        <Text dimColor>Created: {createdAt}</Text>
+        <Text dimColor>{t('skillStore.created')} {createdAt}</Text>
         <Box marginTop={1}>
           <Text>{version.body}</Text>
         </Box>
@@ -139,11 +140,11 @@ export function SkillStoreView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'success' as keyof Theme}>
-            Skill created
+            {t('skillStore.skillCreated', t("cmdSystemUI.skillStoreTitle"))}
           </Text>
         </Box>
-        <Text>ID: {skill.skill_id}</Text>
-        <Text>Name: {skill.name}</Text>
+        <Text>{t('skillStore.id')} {skill.skill_id}</Text>
+        <Text>{t('skillStore.name')} {skill.name}</Text>
       </Box>
     );
   }
@@ -151,7 +152,7 @@ export function SkillStoreView(props: Props): React.ReactNode {
   if (props.mode === 'deleted') {
     return (
       <Box>
-        <Text color={'success' as keyof Theme}>Skill {props.id} deleted.</Text>
+        <Text color={'success' as keyof Theme}>{t('skillStore.skillDeleted', props.id)}</Text>
       </Box>
     );
   }
@@ -161,12 +162,12 @@ export function SkillStoreView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'success' as keyof Theme}>
-            Skill installed
+            {t('skillStore.skillInstalled', t("cmdSystemUI.skillStoreTitle"))}
           </Text>
         </Box>
-        <Text>Name: {props.skillName}</Text>
-        <Text dimColor>Path: {props.path}</Text>
-        <Text dimColor>Load with: /skills (bundled skills are not auto-loaded; place in {props.path})</Text>
+        <Text>{t('skillStore.name')} {props.skillName}</Text>
+        <Text dimColor>{t('skillStore.path')} {props.path}</Text>
+        <Text dimColor>{t('skillStore.loadWith', props.path)}</Text>
       </Box>
     );
   }

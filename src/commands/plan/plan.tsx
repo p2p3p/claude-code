@@ -10,6 +10,7 @@ import { prepareContextForPlanMode } from '../../utils/permissions/permissionSet
 import { getPlan, getPlanFilePath } from '../../utils/plans.js';
 import { editFileInEditor } from '../../utils/promptEditor.js';
 import { renderToString } from '../../utils/staticRender.js';
+import { t } from '../../utils/i18n/index.js'
 
 function PlanDisplay({
   planContent,
@@ -22,7 +23,7 @@ function PlanDisplay({
 }): React.ReactNode {
   return (
     <Box flexDirection="column">
-      <Text bold>Current Plan</Text>
+      <Text bold>{t("cmdSystemUI.planTitle")}</Text>
       <Text dimColor>{planPath}</Text>
       <Box marginTop={1}>
         <Text>{planContent}</Text>

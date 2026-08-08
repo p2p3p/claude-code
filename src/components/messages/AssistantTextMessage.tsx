@@ -1,4 +1,5 @@
 import type { TextBlockParam } from '@anthropic-ai/sdk/resources/index.mjs';
+import { t } from '../../utils/i18n/index.js'
 import React, { useContext } from 'react';
 import { ERROR_MESSAGE_USER_ABORT } from 'src/services/compact/compact.js';
 import { isRateLimitErrorMessage } from 'src/services/rateLimitMessages.js';
@@ -136,7 +137,7 @@ export function AssistantTextMessage({
       return (
         <MessageResponse>
           <Box flexDirection="column" gap={1}>
-            <Text color="error">We are experiencing high demand for Opus 4.</Text>
+            <Text color="error">{t('assistanttextmessage.weAreExperiencingHighDemandForOpus4')}</Text>
             <Text>
               To continue immediately, use /model to switch to {renderModelName(getDefaultSonnetModel())} and continue
               coding.

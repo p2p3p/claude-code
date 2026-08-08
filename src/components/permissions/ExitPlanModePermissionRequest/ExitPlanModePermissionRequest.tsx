@@ -1,3 +1,4 @@
+import { t } from '../../../utils/i18n/index.js';
 import { feature } from 'bun:bundle';
 import type { UUID } from 'crypto';
 import figures from 'figures';
@@ -260,7 +261,7 @@ export function ExitPlanModePermissionRequest({
   const [currentPlan, setCurrentPlan] = useState(() => {
     if (inputPlan) return inputPlan;
     const plan = getPlan();
-    return plan ?? 'No plan found. Please write your plan to the plan file first.';
+    return plan ?? t('exitPlanMode.noPlanFound');
   });
   const [showSaveMessage, setShowSaveMessage] = useState(false);
   // Track Ctrl+G local edits so updatedInput can include the plan (the tool
@@ -615,7 +616,7 @@ export function ExitPlanModePermissionRequest({
         borderBottom={false}
         paddingX={1}
       >
-        <Text dimColor>Would you like to proceed?</Text>
+        <Text dimColor>{t('exitplanmodepermissionrequest.wouldYouLikeToProceed')}</Text>
         <Box marginTop={1}>
           <Select
             options={options}
@@ -690,14 +691,14 @@ export function ExitPlanModePermissionRequest({
     }
 
     return (
-      <PermissionDialog color="planMode" title="Exit plan mode?" workerBadge={workerBadge}>
+      <PermissionDialog color="planMode" title={t('exitplanmodepermissionrequest.exitPlanMode')} workerBadge={workerBadge}>
         <Box flexDirection="column" paddingX={1} marginTop={1}>
-          <Text>Claude wants to exit plan mode</Text>
+          <Text>{t('permission.exitPlanMode')}</Text>
           <Box marginTop={1}>
             <Select
               options={[
-                { label: 'Yes', value: 'yes' as const },
-                { label: 'No', value: 'no' as const },
+                { label: t('permGeneral.yes'), value: 'yes' as const },
+                { label: t('permGeneral.no'), value: 'no' as const },
               ]}
               onChange={handleEmptyPlanResponse}
               onCancel={() => {
@@ -720,10 +721,10 @@ export function ExitPlanModePermissionRequest({
 
   return (
     <Box flexDirection="column" tabIndex={0} autoFocus onKeyDown={handleKeyDown}>
-      <PermissionDialog color="planMode" title="Ready to code?" innerPaddingX={0} workerBadge={workerBadge}>
+      <PermissionDialog color="planMode" title={t('exitplanmodepermissionrequest.readyToCode')} innerPaddingX={0} workerBadge={workerBadge}>
         <Box flexDirection="column" marginTop={1}>
           <Box paddingX={1} flexDirection="column">
-            <Text>Here is Claude&apos;s plan:</Text>
+            <Text>{t('permission.heresPlan')}</Text>
           </Box>
           <Box
             borderColor="subtle"
@@ -742,7 +743,7 @@ export function ExitPlanModePermissionRequest({
             <PermissionRuleExplanation permissionResult={toolUseConfirm.permissionResult} toolType="tool" />
             {isClassifierPermissionsEnabled() && allowedPrompts && allowedPrompts.length > 0 && (
               <Box flexDirection="column" marginBottom={1}>
-                <Text bold>Requested permissions:</Text>
+                <Text bold>{t('exitplanmodepermissionrequest.requestedPermissions')}</Text>
                 {allowedPrompts.map((p, i) => (
                   <Text key={i} dimColor>
                     {'  '}· {p.tool}({PROMPT_PREFIX} {p.prompt})
@@ -752,7 +753,7 @@ export function ExitPlanModePermissionRequest({
             )}
             {!useStickyFooter && (
               <>
-                <Text dimColor>Claude has written up a plan and is ready to execute. Would you like to proceed?</Text>
+                <Text dimColor>{t('exitplanmodepermissionrequest.claudeHasWrittenUpAPlanAndIsReadyToExecuteWouldYouLikeToProceed')}</Text>
                 <Box marginTop={1}>
                   <Select
                     options={options}
@@ -830,39 +831,39 @@ export function buildPlanApprovalOptions({
   // Slot 2: keep-context with elevated mode (same priority: auto > bypass > edits).
   if (feature('TRANSCRIPT_CLASSIFIER') && isAutoModeAvailable) {
     options.push({
-      label: 'Yes, and use auto mode',
+      label: t('exitPlanMode.yesUseAutoMode'),
       value: 'yes-resume-auto-mode',
     });
   } else if (isBypassPermissionsModeAvailable) {
     options.push({
-      label: 'Yes, and bypass permissions',
+      label: t('exitPlanMode.yesBypassPermissions'),
       value: 'yes-accept-edits-keep-context',
     });
   } else {
     options.push({
-      label: 'Yes, auto-accept edits',
+      label: t('exitPlanMode.yesAutoAcceptEditsKC'),
       value: 'yes-accept-edits-keep-context',
     });
   }
 
   options.push({
-    label: 'Yes, manually approve edits',
+    label: t('exitPlanMode.yesManuallyApprove'),
     value: 'yes-default-keep-context',
   });
 
   if (showUltraplan) {
     options.push({
-      label: 'No, refine with Ultraplan on Claude Code on the web',
+      label: t('exitPlanMode.noUltraplan'),
       value: 'ultraplan',
     });
   }
 
   options.push({
     type: 'input',
-    label: 'No, keep planning',
+    label: t('exitPlanMode.noKeepPlanning'),
     value: 'no',
-    placeholder: 'Tell Claude what to change',
-    description: 'shift+tab to approve with this feedback',
+    placeholder: t('exitPlanMode.tellClaudeChange'),
+    description: t('exitPlanMode.shiftTabApprove'),
     onChange: onFeedbackChange,
   });
 

@@ -1,4 +1,5 @@
 import { feature } from 'bun:bundle';
+import { t } from '../../utils/i18n/index.js';
 import chalk from 'chalk';
 import * as path from 'path';
 import * as React from 'react';
@@ -955,7 +956,7 @@ function PromptInput({
           key: 'stash-hint',
           jsx: (
             <Text dimColor>
-              Tip: <ConfigurableShortcutHint action="chat:stash" context="Chat" fallback="ctrl+s" description="stash" />
+              Tip: <ConfigurableShortcutHint action="chat:stash" context="Chat" fallback="ctrl+s" description={t('desc.stash')} />
             </Text>
           ),
           priority: 'immediate',
@@ -1996,7 +1997,7 @@ function PromptInput({
       const terminalName = getNativeCSIuTerminalDisplayName();
       const jsx = terminalName ? (
         <Text dimColor>
-          To enable {shortcut}, set <Text bold>Option as Meta</Text> in {terminalName} preferences (⌘,)
+          To enable {shortcut}, set <Text bold>{t('promptinput.optionAsMeta')}</Text> in {terminalName} preferences (⌘,)
         </Text>
       ) : (
         <Text dimColor>To enable {shortcut}, run /terminal-setup</Text>
@@ -2462,7 +2463,7 @@ function PromptInput({
       {!isFullscreenEnvEnabled() && <PromptInputQueuedCommands />}
       {hasSuppressedDialogs && (
         <Box marginTop={1} marginLeft={2}>
-          <Text dimColor>Waiting for permission…</Text>
+          <Text dimColor>{t('assistantToolUse.waitingForPermission')}</Text>
         </Box>
       )}
       <PromptInputStashNotice hasStash={stashedPrompt !== undefined} />

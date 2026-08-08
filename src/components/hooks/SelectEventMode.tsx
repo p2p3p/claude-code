@@ -8,6 +8,7 @@
  */
 
 import figures from 'figures';
+import { t } from '../../utils/i18n/index.js'
 import * as React from 'react';
 import type { HookEvent } from 'src/entrypoints/agentSdkTypes.js';
 import type { HookEventMetadata } from 'src/utils/hooks/hooksConfigManager.js';
@@ -33,25 +34,24 @@ export function SelectEventMode({
   onSelectEvent,
   onCancel,
 }: Props): React.ReactNode {
-  const subtitle = `${totalHooksCount} ${plural(totalHooksCount, 'hook')} configured`;
+  const subtitle = t('selecteventmode.subtitle', totalHooksCount);
 
   return (
-    <Dialog title="Hooks" subtitle={subtitle} onCancel={onCancel}>
+    <Dialog title={t('selecteventmode.hooks')} subtitle={subtitle} onCancel={onCancel}>
       <Box flexDirection="column" gap={1}>
         {restrictedByPolicy && (
           <Box flexDirection="column">
-            <Text color="suggestion">{figures.info} Hooks Restricted by Policy</Text>
+            <Text color="suggestion">{figures.info} {t('selecteventmode.hooksRestrictedByPolicy')}</Text>
             <Text dimColor>
-              Only hooks from managed settings can run. User-defined hooks from ~/.claude/settings.json,
-              .claude/settings.json, and .claude/settings.local.json are blocked.
+              {t('selecteventmode.managedSettingsOnly')}
             </Text>
           </Box>
         )}
 
         <Box flexDirection="column">
           <Text dimColor>
-            {figures.info} This menu is read-only. To add or modify hooks, edit settings.json directly or ask Claude.{' '}
-            <Link url="https://code.claude.com/docs/en/hooks">Learn more</Link>
+            {figures.info} {t('selecteventmode.readOnly')}{' '}
+            <Link url="https://code.claude.com/docs/en/hooks">{t('selecteventmode.learnMore')}</Link>
           </Text>
         </Box>
 

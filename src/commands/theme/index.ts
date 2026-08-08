@@ -1,9 +1,10 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const theme = {
   type: 'local-jsx',
   name: 'theme',
-  description: 'Change the theme',
+  description: t('cmd.descTheme'),
   load: () => import('./theme.js'),
 } satisfies Command
 

@@ -24,6 +24,7 @@ import {
 import { formatDuration } from '../../utils/format.js';
 import { formatModelPricing, getOpus46CostTier } from '../../utils/modelCost.js';
 import { updateSettingsForSource } from '../../utils/settings/settings.js';
+import { t } from '../../utils/i18n/index.js'
 
 function applyFastMode(enable: boolean, setAppState: (f: (prev: AppState) => AppState) => void): void {
   clearFastModeCooldown();
@@ -110,7 +111,7 @@ export function FastModePicker({
 
   const title = (
     <Text>
-      <FastIcon cooldown={isCooldown} /> Fast mode (research preview)
+      <FastIcon cooldown={isCooldown} /> {t("cmdSystemUI.fastTitle")} mode (research preview)
     </Text>
   );
 
@@ -124,9 +125,9 @@ export function FastModePicker({
         exitState.pending ? (
           <Text>Press {exitState.keyName} again to exit</Text>
         ) : isUnavailable ? (
-          <Text>Esc to cancel</Text>
+          <Text>{t('fast.escToCancel')}</Text>
         ) : (
-          <Text>Tab to toggle · Enter to confirm · Esc to cancel</Text>
+          <Text>{t('fastCmd.tabToToggle')}</Text>
         )
       }
     >
@@ -138,7 +139,7 @@ export function FastModePicker({
         <>
           <Box flexDirection="column" gap={0} marginLeft={2}>
             <Box flexDirection="row" gap={2}>
-              <Text bold>Fast mode</Text>
+              <Text bold>{t('fast.fastMode')}</Text>
               <Text color={enableFastMode ? 'fastMode' : undefined} bold={enableFastMode}>
                 {enableFastMode ? 'ON ' : 'OFF'}
               </Text>

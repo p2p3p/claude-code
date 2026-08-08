@@ -2,6 +2,7 @@ import figures from 'figures';
 import React, { useCallback, useState } from 'react';
 import { type KeyboardEvent, Box, Text } from '@anthropic/ink';
 import { useAppState } from '../../../state/AppState.js';
+import { t } from '../../../utils/i18n/index.js';
 import type {
   Question,
   QuestionOption,
@@ -174,7 +175,7 @@ export function QuestionView({
   const otherOption: OptionWithDescription<string> = {
     type: 'input' as const,
     value: '__other__',
-    label: 'Other',
+    label: t('questionView.other'),
     placeholder: question.multiSelect ? 'Type something' : 'Type something.',
     initialValue: questionState?.textInputValue ?? '',
     onChange: (value: string) => {

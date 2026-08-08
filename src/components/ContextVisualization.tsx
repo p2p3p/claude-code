@@ -1,4 +1,5 @@
 import { feature } from 'bun:bundle';
+import { t } from '../utils/i18n/index.js'
 import * as React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import type { ContextData } from '../utils/analyzeContext.js';
@@ -131,7 +132,7 @@ export function ContextVisualization({ data }: Props): React.ReactNode {
 
   return (
     <Box flexDirection="column" paddingLeft={1}>
-      <Text bold>Context Usage</Text>
+      <Text bold>{t('contextvisualization.contextUsage')}</Text>
       <Box flexDirection="row" gap={2}>
         {/* Fixed size grid */}
         <Box flexDirection="column" flexShrink={0}>
@@ -226,13 +227,13 @@ export function ContextVisualization({ data }: Props): React.ReactNode {
         {mcpTools.length > 0 && (
           <Box flexDirection="column" marginTop={1}>
             <Box>
-              <Text bold>MCP tools</Text>
+              <Text bold>{t('contextvisualization.mCPTools')}</Text>
               <Text dimColor> · /mcp{hasDeferredMcpTools ? ' (loaded on-demand)' : ''}</Text>
             </Box>
             {/* Show loaded tools first */}
             {mcpTools.some(t => t.isLoaded) && (
               <Box flexDirection="column" marginTop={1}>
-                <Text dimColor>Loaded</Text>
+                <Text dimColor>{t('contextvisualization.loaded')}</Text>
                 {mcpTools
                   .filter(t => t.isLoaded)
                   .map((tool, i) => (
@@ -246,7 +247,7 @@ export function ContextVisualization({ data }: Props): React.ReactNode {
             {/* Show available (deferred) tools */}
             {hasDeferredMcpTools && mcpTools.some(t => !t.isLoaded) && (
               <Box flexDirection="column" marginTop={1}>
-                <Text dimColor>Available</Text>
+                <Text dimColor>{t('contextvisualization.available')}</Text>
                 {mcpTools
                   .filter(t => !t.isLoaded)
                   .map((tool, i) => (
@@ -276,7 +277,7 @@ export function ContextVisualization({ data }: Props): React.ReactNode {
             </Box>
             {/* Always-loaded + deferred-but-loaded tools */}
             <Box flexDirection="column" marginTop={1}>
-              <Text dimColor>Loaded</Text>
+              <Text dimColor>{t('contextvisualization.loaded2')}</Text>
               {systemTools?.map((tool, i) => (
                 <Box key={`sys-${i}`}>
                   <Text>└ {tool.name}: </Text>
@@ -295,7 +296,7 @@ export function ContextVisualization({ data }: Props): React.ReactNode {
             {/* Deferred (not yet loaded) tools */}
             {hasDeferredBuiltinTools && deferredBuiltinTools.some(t => !t.isLoaded) && (
               <Box flexDirection="column" marginTop={1}>
-                <Text dimColor>Available</Text>
+                <Text dimColor>{t('contextvisualization.available2')}</Text>
                 {deferredBuiltinTools
                   .filter(t => !t.isLoaded)
                   .map((tool, i) => (
@@ -323,7 +324,7 @@ export function ContextVisualization({ data }: Props): React.ReactNode {
         {agents.length > 0 && (
           <Box flexDirection="column" marginTop={1}>
             <Box>
-              <Text bold>Custom agents</Text>
+              <Text bold>{t('contextvisualization.customAgents')}</Text>
               <Text dimColor> · /agents</Text>
             </Box>
             {Array.from(groupBySource(agents).entries()).map(([sourceDisplay, sourceAgents]) => (
@@ -343,7 +344,7 @@ export function ContextVisualization({ data }: Props): React.ReactNode {
         {memoryFiles.length > 0 && (
           <Box flexDirection="column" marginTop={1}>
             <Box>
-              <Text bold>Memory files</Text>
+              <Text bold>{t('contextvisualization.memoryFiles')}</Text>
               <Text dimColor> · /memory</Text>
             </Box>
             {memoryFiles.map((file, i) => (
@@ -358,7 +359,7 @@ export function ContextVisualization({ data }: Props): React.ReactNode {
         {skills && skills.tokens > 0 && (
           <Box flexDirection="column" marginTop={1}>
             <Box>
-              <Text bold>Skills</Text>
+              <Text bold>{t('contextvisualization.skills')}</Text>
               <Text dimColor> · /skills</Text>
             </Box>
             {Array.from(groupBySource(skills.skillFrontmatter).entries()).map(([sourceDisplay, sourceSkills]) => (
@@ -381,27 +382,27 @@ export function ContextVisualization({ data }: Props): React.ReactNode {
 
             <Box flexDirection="column" marginLeft={1}>
               <Box>
-                <Text>Tool calls: </Text>
+                <Text>{t('contextvisualization.toolCalls')} </Text>
                 <Text dimColor>{formatTokens(messageBreakdown.toolCallTokens)} tokens</Text>
               </Box>
 
               <Box>
-                <Text>Tool results: </Text>
+                <Text>{t('contextvisualization.toolResults')} </Text>
                 <Text dimColor>{formatTokens(messageBreakdown.toolResultTokens)} tokens</Text>
               </Box>
 
               <Box>
-                <Text>Attachments: </Text>
+                <Text>{t('contextvisualization.attachments')} </Text>
                 <Text dimColor>{formatTokens(messageBreakdown.attachmentTokens)} tokens</Text>
               </Box>
 
               <Box>
-                <Text>Assistant messages (non-tool): </Text>
+                <Text>{t('contextvisualization.assistantMessagesNonTool')} </Text>
                 <Text dimColor>{formatTokens(messageBreakdown.assistantMessageTokens)} tokens</Text>
               </Box>
 
               <Box>
-                <Text>User messages (non-tool-result): </Text>
+                <Text>{t('contextvisualization.userMessagesNonToolResult')} </Text>
                 <Text dimColor>{formatTokens(messageBreakdown.userMessageTokens)} tokens</Text>
               </Box>
             </Box>

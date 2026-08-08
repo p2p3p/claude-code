@@ -1,4 +1,5 @@
 import { resolve as resolvePath } from 'path';
+import { t } from '../utils/i18n/index.js'
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useRegisterOverlay } from '../context/overlayContext.js';
@@ -213,12 +214,12 @@ export function GlobalSearchDialog({ onDone, onInsert }: Props): React.ReactNode
   // Always pass a non-empty string so the line is reserved — prevents the
   // searchBox from bouncing when the count appears/disappears.
   const matchLabel =
-    matches.length > 0 ? `${matches.length}${truncated ? '+' : ''} matches${isSearching ? '…' : ''}` : ' ';
+    matches.length > 0 ? `${matches.length}${truncated ? '+' : ''} ${t('globalSearch.matches').replace('{count}', String(matches.length))}${isSearching ? '…' : ''}` : ' ';
 
   return (
     <FuzzyPicker
-      title="Global Search"
-      placeholder="Type to search…"
+      title={t('globalsearchdialog.globalSearch')}
+      placeholder={t('globalSearch.typeToSearch')}
       items={matches}
       getKey={matchKey}
       visibleCount={visibleResults}
@@ -233,9 +234,9 @@ export function GlobalSearchDialog({ onDone, onInsert }: Props): React.ReactNode
         handler: m => handleInsert(m, false),
       }}
       onCancel={onDone}
-      emptyMessage={q => (isSearching ? 'Searching…' : q ? 'No matches' : 'Type to search…')}
+      emptyMessage={q => (isSearching ? t('globalSearch.searching') : q ? t('globalSearch.noMatches') : t('globalSearch.typeToSearch'))}
       matchLabel={matchLabel}
-      selectAction="open in editor"
+      selectAction={t('globalsearchdialog.openInEditor')}
       renderItem={(m, isFocused) => (
         <Text color={isFocused ? 'suggestion' : undefined}>
           <Text dimColor>
@@ -255,7 +256,7 @@ export function GlobalSearchDialog({ onDone, onInsert }: Props): React.ReactNode
             ))}
           </>
         ) : (
-          <LoadingState message="Loading…" dimColor />
+          <LoadingState message={t('globalSearch.loading')} dimColor />
         )
       }
     />

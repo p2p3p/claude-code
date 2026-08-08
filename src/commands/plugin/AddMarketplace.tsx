@@ -15,6 +15,7 @@ import { clearAllCaches } from '../../utils/plugins/cacheUtils.js';
 import { addMarketplaceSource, saveMarketplaceToSettings } from '../../utils/plugins/marketplaceManager.js';
 import { parseMarketplaceInput } from '../../utils/plugins/parseMarketplaceInput.js';
 import type { ViewState } from './types.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props = {
   inputValue: string;
@@ -50,13 +51,13 @@ export function AddMarketplace({
   const handleAdd = async () => {
     const input = inputValue.trim();
     if (!input) {
-      setError('Please enter a marketplace source');
+      setError(t('pluginUI.pleaseEnterSource'));
       return;
     }
 
     const parsed = await parseMarketplaceInput(input);
     if (!parsed) {
-      setError('Invalid marketplace source format. Try: owner/repo, https://..., or ./path');
+      setError(t('pluginUI.invalidSourceFormat'));
       return;
     }
 
@@ -129,11 +130,11 @@ export function AddMarketplace({
     <Box flexDirection="column">
       <Box flexDirection="column" paddingX={1} borderStyle="round">
         <Box marginBottom={1}>
-          <Text bold>Add Marketplace</Text>
+          <Text bold>{t('pluginUI.addMarketplace')}</Text>
         </Box>
         <Box flexDirection="column">
-          <Text>Enter marketplace source:</Text>
-          <Text dimColor>Examples:</Text>
+          <Text>{t('pluginUI.enterMarketplaceSource')}</Text>
+          <Text dimColor>{t('pluginUI.examples')}</Text>
           <Text dimColor> · owner/repo (GitHub)</Text>
           <Text dimColor> · git@github.com:owner/repo.git (SSH)</Text>
           <Text dimColor> · https://example.com/marketplace.json</Text>
@@ -154,7 +155,7 @@ export function AddMarketplace({
         {isLoading && (
           <Box marginTop={1}>
             <Spinner />
-            <Text>{progressMessage || 'Adding marketplace to configuration…'}</Text>
+            <Text>{progressMessage || t('pluginUI.addingMarketplace')}</Text>
           </Box>
         )}
         {error && (

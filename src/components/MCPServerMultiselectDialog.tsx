@@ -3,6 +3,7 @@ import React, { useCallback } from 'react';
 import { logEvent } from 'src/services/analytics/index.js';
 import { Box, Text } from '@anthropic/ink';
 import { getSettings_DEPRECATED, updateSettingsForSource } from '../utils/settings/settings.js';
+import { t } from '../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { SelectMulti } from './CustomSelect/SelectMulti.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
@@ -63,8 +64,8 @@ export function MCPServerMultiselectDialog({ serverNames, onDone }: Props): Reac
   return (
     <>
       <Dialog
-        title={`${serverNames.length} new MCP servers found in .mcp.json`}
-        subtitle="Select any you wish to enable."
+        title={t('mcpServerDialog.title', serverNames.length)}
+        subtitle={t('mcpServerDialog.subtitle')}
         color="warning"
         onCancel={handleEscRejectAll}
         hideInputGuide
@@ -91,7 +92,7 @@ export function MCPServerMultiselectDialog({ serverNames, onDone }: Props): Reac
               action="confirm:no"
               context="Confirmation"
               fallback="Esc"
-              description="reject all"
+              description={t('mcpServerDialog.rejectAll')}
             />
           </Byline>
         </Text>

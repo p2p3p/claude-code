@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { BaseText, Box, Text, useTerminalSize } from '@anthropic/ink';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import { type EffortValue, getDisplayedEffortLevel, getEffortEnvOverride } from '../../utils/effort.js';
@@ -201,7 +202,7 @@ export function EffortPanel({ appStateEffort, onDone }: Props): React.ReactNode 
         <>
           <PlainContent cursor={cursor} segment={segment} panelWidth={panelWidth} />
           <Box marginTop={1}>
-            <Text color="subtle">←/→ adjust · Enter confirm · Esc cancel</Text>
+            <Text color="subtle">{t('effortPanel.adjustHint')}</Text>
           </Box>
         </>
       )}
@@ -223,8 +224,8 @@ function PlainContent({
   return (
     <>
       <Box marginTop={1} flexDirection="row" justifyContent="space-between">
-        <Text color="suggestion">Faster</Text>
-        <Text color="suggestion">Smarter</Text>
+        <Text color="suggestion">{t('effortpanel.faster')}</Text>
+        <Text color="suggestion">{t('effortpanel.smarter')}</Text>
       </Box>
       <Text color="subtle">{'─'.repeat(panelWidth)}</Text>
       <Box flexDirection="row">
@@ -339,7 +340,7 @@ function RippleContent({ renderRow, cursor, segment, panelWidth, time }: RippleC
       <RippleRow segments={renderRow(0, labelOverlays)} />
       <RippleRow segments={renderRow(1, [sublabelOverlay])} />
       <RippleRow segments={renderRow(2, [])} />
-      <Text color={COLOR_LABEL_DEFAULT}>←/→ adjust · Enter confirm · Esc cancel</Text>
+      <Text color={COLOR_LABEL_DEFAULT}>{t('effortPanel.adjustHint')}</Text>
     </>
   );
 }

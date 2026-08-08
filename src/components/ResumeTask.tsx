@@ -8,6 +8,7 @@ import { useShortcutDisplay } from '../keybindings/useShortcutDisplay.js';
 import { logForDebugging } from '../utils/debug.js';
 import { detectCurrentRepository } from '../utils/detectRepository.js';
 import { formatRelativeTime } from '../utils/format.js';
+import { t } from '../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { Select } from './CustomSelect/index.js';
 import { Byline, KeyboardShortcutHint } from '@anthropic/ink';
@@ -127,9 +128,9 @@ export function ResumeTask({ onSelect, onCancel, isEmbedded = false }: Props): R
       <Box flexDirection="column" padding={1}>
         <Box flexDirection="row">
           <Spinner />
-          <Text bold>Loading Claude Code sessions…</Text>
+          <Text bold>{t('resumeTask.loading')}</Text>
         </Box>
-        <Text dimColor>{retrying ? 'Retrying…' : 'Fetching your Claude Code sessions…'}</Text>
+        <Text dimColor>{retrying ? t('resumeTask.retrying') : t('resumeTask.fetching')}</Text>
       </Box>
     );
   }
@@ -144,7 +145,7 @@ export function ResumeTask({ onSelect, onCancel, isEmbedded = false }: Props): R
         {renderErrorSpecificGuidance(loadErrorType)}
 
         <Text dimColor>
-          Press <Text bold>Ctrl+R</Text> to retry · Press <Text bold>{escKey}</Text> to cancel
+          {t('resumeTask.pressCtrlR')} · {t('resumeTask.pressToCancel', escKey)}
         </Text>
       </Box>
     );
@@ -238,7 +239,7 @@ export function ResumeTask({ onSelect, onCancel, isEmbedded = false }: Props): R
           <Byline>
             <KeyboardShortcutHint shortcut="↑/↓" action="select" />
             <KeyboardShortcutHint shortcut="Enter" action="confirm" />
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
           </Byline>
         </Text>
       </Box>
@@ -284,14 +285,14 @@ function renderErrorSpecificGuidance(errorType: LoadErrorType): React.ReactNode 
     case 'network':
       return (
         <Box marginY={1} flexDirection="column">
-          <Text dimColor>Check your internet connection</Text>
+          <Text dimColor>{t('resumetask.checkYourInternetConnection')}</Text>
         </Box>
       );
 
     case 'auth':
       return (
         <Box marginY={1} flexDirection="column">
-          <Text dimColor>Teleport requires a Claude account</Text>
+          <Text dimColor>{t('resumetask.teleportRequiresAClaudeAccount')}</Text>
           <Text dimColor>
             Run <Text bold>/login</Text> and select &quot;Claude account with subscription&quot;
           </Text>
@@ -301,14 +302,14 @@ function renderErrorSpecificGuidance(errorType: LoadErrorType): React.ReactNode 
     case 'api':
       return (
         <Box marginY={1} flexDirection="column">
-          <Text dimColor>Sorry, Claude encountered an error</Text>
+          <Text dimColor>{t('resumetask.sorryClaudeEncounteredAnError')}</Text>
         </Box>
       );
 
     case 'other':
       return (
         <Box marginY={1} flexDirection="row">
-          <Text dimColor>Sorry, Claude Code encountered an error</Text>
+          <Text dimColor>{t('resumetask.sorryClaudeCodeEncounteredAnError')}</Text>
         </Box>
       );
   }

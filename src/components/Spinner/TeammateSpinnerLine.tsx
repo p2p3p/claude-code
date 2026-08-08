@@ -8,6 +8,7 @@ import { useElapsedTime } from '../../hooks/useElapsedTime.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { Box, Text, stringWidth } from '@anthropic/ink';
 import { toInkColor } from '../../utils/ink.js';
+import { t } from '../../utils/i18n/index.js';
 import type { InProcessTeammateTaskState } from '../../tasks/InProcessTeammateTask/types.js';
 import { summarizeRecentActivities } from '../../utils/collapseReadSearch.js';
 import { formatDuration, formatNumber, truncateToWidth } from '../../utils/format.js';
@@ -238,7 +239,7 @@ export function TeammateSpinnerLine({
         )}
         {/* Hints: select hint when highlighted, view hint when selected but not foregrounded */}
         {showSelectHint && <Text dimColor> · {TEAMMATE_SELECT_HINT}</Text>}
-        {showViewHint && <Text dimColor> · enter to view</Text>}
+        {showViewHint && <Text dimColor>{t('teammateSpinner.enterToView')}</Text>}
       </Box>
       {/* Preview lines */}
       {previewLines.map((line, idx) => (

@@ -1,4 +1,5 @@
 import { feature } from 'bun:bundle';
+import { t } from '../utils/i18n/index.js'
 import { type FSWatcher, watch } from 'fs';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { setMainLoopModelOverride } from '../bootstrap/state.js';
@@ -127,7 +128,7 @@ export function useReplBridge(
           key: 'bridge-failed',
           jsx: (
             <>
-              <Text color="error">Remote Control failed</Text>
+              <Text color="error">{t('usereplbridge.remoteControlFailed')}</Text>
               {detail && <Text dimColor> · {detail}</Text>}
             </>
           ),

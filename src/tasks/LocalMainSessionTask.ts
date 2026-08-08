@@ -9,6 +9,7 @@
  * This reuses the LocalAgentTask state structure since the behavior is similar.
  */
 
+import { t } from '../utils/i18n/index.js'
 import type { UUID } from 'crypto'
 import { randomBytes } from 'crypto'
 import {
@@ -216,7 +217,7 @@ export function completeMainSessionTask(
     }))
     emitTaskTerminatedSdk(taskId, success ? 'completed' : 'failed', {
       toolUseId,
-      summary: 'Background session',
+      summary: t('localMainSession.backgroundSession'),
     })
   }
 }

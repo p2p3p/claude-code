@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import type { Theme } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js'
 
 export type LocalVaultViewProps =
   | { mode: 'list'; keys: string[] }
@@ -16,14 +17,14 @@ export function LocalVaultView(props: LocalVaultViewProps): React.ReactNode {
     if (props.keys.length === 0) {
       return (
         <Box>
-          <Text dimColor>No secrets stored. Use /local-vault set &lt;key&gt; &lt;value&gt; to add one.</Text>
+          <Text dimColor>{t('localVault.noSecrets')}</Text>
         </Box>
       );
     }
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Local Vault Keys ({props.keys.length})</Text>
+          <Text bold>{t('localVault.keysCount', props.keys.length)}</Text>
         </Box>
         {props.keys.map(k => (
           <Box key={k}>
@@ -40,9 +41,9 @@ export function LocalVaultView(props: LocalVaultViewProps): React.ReactNode {
     return (
       <Box>
         <Text color={'success' as keyof Theme}>✓</Text>
-        <Text> Secret stored: </Text>
+        <Text> {t('localVault.secretStored')} </Text>
         <Text bold>{props.key}</Text>
-        <Text dimColor> = [REDACTED]</Text>
+        <Text dimColor> = {t('localVault.redacted')}</Text>
       </Box>
     );
   }
@@ -56,7 +57,7 @@ export function LocalVaultView(props: LocalVaultViewProps): React.ReactNode {
           <Text>{props.masked}</Text>
         </Box>
         <Box marginTop={1}>
-          <Text dimColor>Use /local-vault get {props.key} --reveal to see the full value.</Text>
+          <Text dimColor>{t('localVault.useReveal', props.key)}</Text>
         </Box>
       </Box>
     );
@@ -72,7 +73,7 @@ export function LocalVaultView(props: LocalVaultViewProps): React.ReactNode {
         </Box>
         <Box marginTop={1}>
           <Text dimColor color={'warning' as keyof Theme}>
-            ⚠ Secret revealed in terminal — clear scrollback if this session is shared.
+            {t('localVault.secretRevealed')}
           </Text>
         </Box>
       </Box>
@@ -82,7 +83,7 @@ export function LocalVaultView(props: LocalVaultViewProps): React.ReactNode {
   if (props.mode === 'not-found') {
     return (
       <Box>
-        <Text color={'error' as keyof Theme}>Key not found: </Text>
+        <Text color={'error' as keyof Theme}>{t('localVault.keyNotFound')} </Text>
         <Text bold>{props.key}</Text>
       </Box>
     );
@@ -92,7 +93,7 @@ export function LocalVaultView(props: LocalVaultViewProps): React.ReactNode {
     return (
       <Box>
         <Text color={'success' as keyof Theme}>✓</Text>
-        <Text> Deleted: </Text>
+        <Text> {t('localVault.deleted')} </Text>
         <Text bold>{props.key}</Text>
       </Box>
     );
@@ -101,7 +102,7 @@ export function LocalVaultView(props: LocalVaultViewProps): React.ReactNode {
   // mode === 'error'
   return (
     <Box>
-      <Text color={'error' as keyof Theme}>Error: {props.message}</Text>
+      <Text color={'error' as keyof Theme}>{t('localVault.error')} {props.message}</Text>
     </Box>
   );
 }

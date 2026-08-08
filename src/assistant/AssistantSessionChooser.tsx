@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../utils/i18n/index.js'
 import { useState } from 'react';
 import { Box, Text } from '@anthropic/ink';
 import { Dialog } from '../components/design-system/Dialog.js';
@@ -34,9 +35,9 @@ export function AssistantSessionChooser({ sessions, onSelect, onCancel }: Props)
   );
 
   return (
-    <Dialog title="Select Assistant Session" onCancel={onCancel} hideInputGuide>
+    <Dialog title={t('assistantsessionchooser.selectAssistantSession')} onCancel={onCancel} hideInputGuide>
       <Box flexDirection="column" gap={1}>
-        <Text>Multiple sessions found. Select one to attach:</Text>
+        <Text>{t('assistantsessionchooser.multipleSessionsFoundSelectOneToAttach')}</Text>
         <Box flexDirection="column">
           {sessions.map((s, i) => (
             <ListItem key={s.id} isFocused={focusIndex === i}>

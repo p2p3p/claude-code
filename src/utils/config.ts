@@ -340,8 +340,9 @@ export type GlobalConfig = {
   overageCreditUpsellSeenCount?: number // Number of times the overage credit upsell has been shown
   hasVisitedExtraUsage?: boolean // Whether the user has visited /extra-usage — hides credit upsells
 
-  // Display language preference
-  preferredLanguage?: 'auto' | 'en' | 'zh' // auto = follow system locale, en = English, zh = 中文
+  // Preferred language — controls both AI response language and UI language
+  // auto = follow system locale, en = English, zh = 中文
+  preferredLanguage?: 'auto' | 'en' | 'zh'
 
   // Voice mode notice tracking
   voiceNoticeSeenCount?: number // Number of times the voice-mode-available notice has been shown

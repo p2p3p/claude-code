@@ -10,6 +10,7 @@ import { hasClaudeAiBillingAccess } from '../../utils/billing.js'
 import { openBrowser } from '../../utils/browser.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
 import { logError } from '../../utils/log.js'
+import { t } from '../../utils/i18n/index.js'
 
 type ExtraUsageResult =
   | { type: 'message'; value: string }
@@ -44,8 +45,7 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
     if (extraUsage?.is_enabled && extraUsage.monthly_limit === null) {
       return {
         type: 'message',
-        value:
-          'Your organization already has unlimited extra usage. No request needed.',
+        value: t('extraUsage.unlimitedExtraUsage'),
       }
     }
 
@@ -54,7 +54,7 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
       if (eligibility?.is_allowed === false) {
         return {
           type: 'message',
-          value: 'Please contact your admin to manage extra usage settings.',
+          value: t('extraUsage.contactAdmin'),
         }
       }
     } catch (error) {
@@ -70,8 +70,7 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
       if (pendingOrDismissedRequests && pendingOrDismissedRequests.length > 0) {
         return {
           type: 'message',
-          value:
-            'You have already submitted a request for extra usage to your admin.',
+          value: t('extraUsage.alreadySubmitted'),
         }
       }
     } catch (error) {
@@ -87,8 +86,8 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
       return {
         type: 'message',
         value: extraUsage?.is_enabled
-          ? 'Request sent to your admin to increase extra usage.'
-          : 'Request sent to your admin to enable extra usage.',
+          ? t('extraUsage.requestSentIncrease')
+          : t('extraUsage.requestSentEnable'),
       }
     } catch (error) {
       logError(error as Error)
@@ -97,7 +96,7 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
 
     return {
       type: 'message',
-      value: 'Please contact your admin to manage extra usage settings.',
+      value: t('extraUsage.contactAdmin'),
     }
   }
 
@@ -112,7 +111,7 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
     logError(error as Error)
     return {
       type: 'message',
-      value: `Failed to open browser. Please visit ${url} to manage extra usage.`,
+      value: t('extraUsage.failedOpenBrowser', url),
     }
   }
 }

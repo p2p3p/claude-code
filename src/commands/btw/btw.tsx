@@ -7,6 +7,7 @@ import { SpinnerGlyph } from '../../components/Spinner/SpinnerGlyph.js';
 import { DOWN_ARROW, UP_ARROW } from '../../constants/figures.js';
 import { getSystemPrompt } from '../../constants/prompts.js';
 import { useModalOrTerminalSize } from '../../context/modalContext.js';
+import { t } from '../../utils/i18n/index.js';
 import { getSystemContext, getUserContext } from '../../context.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { type KeyboardEvent, type ScrollBoxHandle, ScrollBox } from '@anthropic/ink';
@@ -107,7 +108,7 @@ function BtwSideQuestion({ question, context, onDone }: BtwComponentProps): Reac
           ) : (
             <Box>
               <SpinnerGlyph frame={frame} messageColor="warning" />
-              <Text color="warning">Answering...</Text>
+              <Text color="warning">{t('btw.answering')}</Text>
             </Box>
           )}
         </ScrollBox>

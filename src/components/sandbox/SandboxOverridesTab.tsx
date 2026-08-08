@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, color, Link, Text, useTheme, useTabHeaderFocus } from '@anthropic/ink';
 import type { CommandResultDisplay } from '../../types/command.js';
 import { SandboxManager } from '../../utils/sandbox/sandbox-adapter.js';
@@ -18,7 +19,7 @@ export function SandboxOverridesTab({ onComplete }: Props): React.ReactNode {
   if (!isEnabled) {
     return (
       <Box flexDirection="column" paddingY={1}>
-        <Text color="subtle">Sandbox is not enabled. Enable sandbox to configure override settings.</Text>
+        <Text color="subtle">{t('sandboxoverridestab.sandboxIsNotEnabledEnableSandboxToConfigureOverrideSettings')}</Text>
       </Box>
     );
   }
@@ -78,7 +79,7 @@ function OverridesSelect({ onComplete, currentMode }: Props & { currentMode: Ove
   return (
     <Box flexDirection="column" paddingY={1}>
       <Box marginBottom={1}>
-        <Text bold>Configure Overrides:</Text>
+        <Text bold>{t('sandboxoverridestab.configureOverrides')}</Text>
       </Box>
       <Select
         options={options}

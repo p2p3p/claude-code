@@ -8,6 +8,7 @@ import {
 import { getModelOptions } from 'src/utils/model/modelOptions.js'
 import { validateModel } from 'src/utils/model/validateModel.js'
 import { THEME_NAMES, THEME_SETTINGS } from 'src/utils/theme.js'
+import { t } from '../../../../../src/utils/i18n/index.js'
 
 /** AppState keys that can be synced for immediate UI effect */
 type SyncableAppStateKey = 'verbose' | 'mainLoopModel' | 'thinkingEnabled'
@@ -30,67 +31,66 @@ export const SUPPORTED_SETTINGS: Record<string, SettingConfig> = {
   theme: {
     source: 'global',
     type: 'string',
-    description: 'Color theme for the UI',
+    description: t('configSetting.theme'),
     options: feature('AUTO_THEME') ? THEME_SETTINGS : THEME_NAMES,
   },
   editorMode: {
     source: 'global',
     type: 'string',
-    description: 'Key binding mode',
+    description: t('configSetting.editorMode'),
     options: EDITOR_MODES,
   },
   verbose: {
     source: 'global',
     type: 'boolean',
-    description: 'Show detailed debug output',
+    description: t('configSetting.verbose'),
     appStateKey: 'verbose',
   },
   preferredNotifChannel: {
     source: 'global',
     type: 'string',
-    description: 'Preferred notification channel',
+    description: t('configSetting.preferredNotifChannel'),
     options: NOTIFICATION_CHANNELS,
   },
   autoCompactEnabled: {
     source: 'global',
     type: 'boolean',
-    description: 'Auto-compact when context is full',
+    description: t('configSetting.autoCompactEnabled'),
   },
   autoMemoryEnabled: {
     source: 'settings',
     type: 'boolean',
-    description: 'Enable auto-memory',
+    description: t('configSetting.autoMemoryEnabled'),
   },
   autoDreamEnabled: {
     source: 'settings',
     type: 'boolean',
-    description: 'Enable background memory consolidation',
+    description: t('configSetting.autoDreamEnabled'),
   },
   fileCheckpointingEnabled: {
     source: 'global',
     type: 'boolean',
-    description: 'Enable file checkpointing for code rewind',
+    description: t('configSetting.fileCheckpointingEnabled'),
   },
   showTurnDuration: {
     source: 'global',
     type: 'boolean',
-    description:
-      'Show turn duration message after responses (e.g., "Cooked for 1m 6s")',
+    description: t('configSetting.showTurnDuration'),
   },
   terminalProgressBarEnabled: {
     source: 'global',
     type: 'boolean',
-    description: 'Show OSC 9;4 progress indicator in supported terminals',
+    description: t('configSetting.terminalProgressBarEnabled'),
   },
   todoFeatureEnabled: {
     source: 'global',
     type: 'boolean',
-    description: 'Enable todo/task tracking',
+    description: t('configSetting.todoFeatureEnabled'),
   },
   model: {
     source: 'settings',
     type: 'string',
-    description: 'Override the default model',
+    description: t('configSetting.model'),
     appStateKey: 'mainLoopModel',
     getOptions: () => {
       try {
@@ -107,13 +107,13 @@ export const SUPPORTED_SETTINGS: Record<string, SettingConfig> = {
   alwaysThinkingEnabled: {
     source: 'settings',
     type: 'boolean',
-    description: 'Enable extended thinking (false to disable)',
+    description: t('configSetting.alwaysThinkingEnabled'),
     appStateKey: 'thinkingEnabled',
   },
   'permissions.defaultMode': {
     source: 'settings',
     type: 'string',
-    description: 'Default permission mode for tool usage',
+    description: t('configSetting.permissionsDefaultMode'),
     options: feature('TRANSCRIPT_CLASSIFIER')
       ? ['default', 'plan', 'acceptEdits', 'dontAsk', 'auto']
       : ['default', 'plan', 'acceptEdits', 'dontAsk'],
@@ -121,14 +121,12 @@ export const SUPPORTED_SETTINGS: Record<string, SettingConfig> = {
   language: {
     source: 'settings',
     type: 'string',
-    description:
-      'Preferred language for Claude responses and voice dictation (e.g., "japanese", "spanish")',
+    description: t('configSetting.language'),
   },
   teammateMode: {
     source: 'global',
     type: 'string',
-    description:
-      'How to spawn teammates: "tmux" for traditional tmux, "in-process" for same process, "auto" to choose automatically',
+    description: t('configSetting.teammateMode'),
     options: TEAMMATE_MODES,
   },
   ...(process.env.USER_TYPE === 'ant'
@@ -136,8 +134,7 @@ export const SUPPORTED_SETTINGS: Record<string, SettingConfig> = {
         classifierPermissionsEnabled: {
           source: 'settings' as const,
           type: 'boolean' as const,
-          description:
-            'Enable AI-based classification for Bash(prompt:...) permission rules',
+          description: t('configSetting.classifierPermissionsEnabled'),
         },
       }
     : {}),
@@ -146,7 +143,7 @@ export const SUPPORTED_SETTINGS: Record<string, SettingConfig> = {
         voiceEnabled: {
           source: 'settings' as const,
           type: 'boolean' as const,
-          description: 'Enable voice dictation (hold-to-talk)',
+          description: t('configSetting.voiceEnabled'),
         },
       }
     : {}),
@@ -155,8 +152,7 @@ export const SUPPORTED_SETTINGS: Record<string, SettingConfig> = {
         remoteControlAtStartup: {
           source: 'global' as const,
           type: 'boolean' as const,
-          description:
-            'Enable Remote Control for all sessions (true | false | default)',
+          description: t('configSetting.remoteControlAtStartup'),
           formatOnRead: () => getRemoteControlAtStartup(),
         },
       }
@@ -166,20 +162,17 @@ export const SUPPORTED_SETTINGS: Record<string, SettingConfig> = {
         taskCompleteNotifEnabled: {
           source: 'global' as const,
           type: 'boolean' as const,
-          description:
-            'Push to your mobile device when idle after Claude finishes (requires Remote Control)',
+          description: t('configSetting.taskCompleteNotifEnabled'),
         },
         inputNeededNotifEnabled: {
           source: 'global' as const,
           type: 'boolean' as const,
-          description:
-            'Push to your mobile device when a permission prompt or question is waiting (requires Remote Control)',
+          description: t('configSetting.inputNeededNotifEnabled'),
         },
         agentPushNotifEnabled: {
           source: 'global' as const,
           type: 'boolean' as const,
-          description:
-            'Allow Claude to push to your mobile device when it deems it appropriate (requires Remote Control)',
+          description: t('configSetting.agentPushNotifEnabled'),
         },
       }
     : {}),

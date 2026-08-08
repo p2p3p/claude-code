@@ -25,6 +25,7 @@ import { checkAndRefreshOAuthTokenIfNeeded, getClaudeAIOAuthTokens } from './aut
 import { checkGithubAppInstalled } from './background/remote/preconditions.js';
 import { deserializeMessages, type TeleportRemoteResponse } from './conversationRecovery.js';
 import { getCwd } from './cwd.js';
+import { t } from './i18n/index.js';
 import { logForDebugging } from './debug.js';
 import { detectCurrentRepositoryWithHost, parseGitHubRepository, parseGitRemote } from './detectRepository.js';
 import { isEnvTruthy } from './envUtils.js';
@@ -179,7 +180,7 @@ export async function validateGitState(): Promise<void> {
   if (!isClean) {
     logEvent('tengu_teleport_error_git_not_clean', {});
     const error = new TeleportOperationError(
-      'Git working directory is not clean. Please commit or stash your changes before using --teleport.',
+      t('teleport.dirtyGitDir'),
       chalk.red(
         'Error: Git working directory is not clean. Please commit or stash your changes before using --teleport.\n',
       ),
@@ -388,8 +389,8 @@ export async function validateSessionRepository(sessionData: SessionResource): P
     // Session has no repo requirement
     logForDebugging(
       currentRepo
-        ? 'Session has no associated repository, proceeding without validation'
-        : 'Session has no repo requirement and not in git directory, proceeding',
+        ? t('teleport.noRepoServerSide')
+        : t('teleport.noRepoNotGitDir'),
     );
     return { status: 'no_repo_required' };
   }
@@ -469,7 +470,7 @@ export async function teleportResumeCodeSession(
         error_type: 'no_access_token' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       });
       throw new Error(
-        'Claude Code web sessions require authentication with a Claude.ai account. API key authentication is not sufficient. Please run /login to authenticate, or check your authentication status with /status.',
+        t('teleport.requiresAuth'),
       );
     }
 
@@ -958,7 +959,7 @@ export async function teleportToRemote(options: {
       }
 
       const requestBody = {
-        title: options.title || options.description || 'Remote task',
+        title: options.title || options.description || t('teleport.remoteTask'),
         events: [],
         session_context: {
           sources: gitSource ? [gitSource] : [],
@@ -1015,7 +1016,7 @@ export async function teleportToRemote(options: {
       sessionBranch = options.reuseOutcomeBranch;
     } else {
       const generated = await generateTitleAndBranch(
-        options.description || initialMessage || 'Background task',
+        options.description || initialMessage || t('teleport.backgroundTask'),
         signal,
       );
       sessionTitle = options.title || generated.title;
@@ -1118,7 +1119,7 @@ export async function teleportToRemote(options: {
         let msg: string;
         switch (failBundle.failReason) {
           case 'empty_repo':
-            msg = 'Repository has no commits — run `git add . && git commit -m "initial"` then retry';
+            msg = t('teleport.noCommits');
             break;
           case 'too_large':
             msg = `Repo is too large to teleport${setup}`;

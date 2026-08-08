@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import { Select } from './CustomSelect/select.js';
 import { PermissionDialog } from './permissions/PermissionDialog.js';
+import { t } from '../utils/i18n/index.js';
 
 type SearchExtraToolsHintItem = {
   name: string;
@@ -33,10 +34,10 @@ export function SearchExtraToolsHint({ tools, onSelect, onDismiss }: Props): Rea
     value: t.name,
   }));
 
-  options.push({ label: 'Dismiss', value: '__dismiss__' });
+  options.push({ label: t('searchExtraTools.dismiss'), value: '__dismiss__' });
 
   return (
-    <PermissionDialog title="Tool Recommendation">
+    <PermissionDialog title={t('searchextratoolshint.toolRecommendation')}>
       <Select
         options={options}
         onChange={value => {

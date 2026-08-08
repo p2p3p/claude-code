@@ -4,19 +4,19 @@ import {
   getAllSlaveClients,
 } from '../../hooks/useMasterMonitor.js'
 import { getPipeIpc, isPipeControlled } from '../../utils/pipeTransport.js'
+import { t } from '../../utils/i18n/index.js'
 
 export const call: LocalCommandCall = async (args, context) => {
   const currentState = context.getAppState()
 
   if (getPipeIpc(currentState).role === 'main') {
-    return { type: 'text', value: 'Not attached to any CLI.' }
+    return { type: 'text', value: t('detachCmd.notAttachedToAny') }
   }
 
   if (isPipeControlled(getPipeIpc(currentState))) {
     return {
       type: 'text',
-      value:
-        'This sub session is controlled by a master. The master must detach.',
+      value: t('detachCmd.controlledByMaster'),
     }
   }
 
@@ -29,7 +29,7 @@ export const call: LocalCommandCall = async (args, context) => {
     if (!client) {
       return {
         type: 'text',
-        value: `Not attached to "${targetName}". Use /status to see connected sub sessions.`,
+        value: t('detachCmd.notAttachedToTarget', targetName),
       }
     }
 
@@ -58,7 +58,7 @@ export const call: LocalCommandCall = async (args, context) => {
 
     return {
       type: 'text',
-      value: `Detached from "${targetName}".`,
+      value: t('detachCmd.detachedFromTarget', targetName),
     }
   }
 
@@ -90,6 +90,6 @@ export const call: LocalCommandCall = async (args, context) => {
 
   return {
     type: 'text',
-    value: `Detached from ${slaveNames.length} sub session(s): ${slaveNames.join(', ')}. Back to main mode.`,
+    value: t('detachCmd.detachedAll', slaveNames.length, slaveNames.join(', ')),
   }
 }

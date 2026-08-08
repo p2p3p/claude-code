@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import type { HookEvent } from 'src/entrypoints/agentSdkTypes.js';
 import type { buildMessageLookups } from 'src/utils/messages.js';
 import { Box, Text } from '@anthropic/ink';
@@ -47,7 +48,7 @@ export function HookProgressMessage({ hookEvent, lookups, toolUseID, isTranscrip
   return (
     <MessageResponse>
       <Box flexDirection="row">
-        <Text dimColor>Running </Text>
+        <Text dimColor>{t('hookprogressmessage.running')} </Text>
         <Text dimColor bold>
           {hookEvent}
         </Text>

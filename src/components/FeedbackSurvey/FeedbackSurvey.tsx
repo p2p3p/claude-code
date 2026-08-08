@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,
@@ -130,14 +131,14 @@ function FeedbackSurveyThanks({
 
   return (
     <Box marginTop={1} flexDirection="column">
-      <Text color="success">Thanks for the feedback!</Text>
+      <Text color="success">{t('feedbacksurvey.thanksForTheFeedback')}</Text>
       {showFollowUp ? (
         <Text dimColor>
           (Optional) Press [<Text color="ansi:cyan">1</Text>] to tell us what went well {' \u00b7 '}
           {feedbackCommand}
         </Text>
       ) : lastResponse === 'bad' ? (
-        <Text dimColor>Use /issue to report model behavior issues.</Text>
+        <Text dimColor>{t('feedbacksurvey.useIssueToReportModelBehaviorIssues')}</Text>
       ) : (
         <Text dimColor>Use {feedbackCommand} to share detailed feedback anytime.</Text>
       )}

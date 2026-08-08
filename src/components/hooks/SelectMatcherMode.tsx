@@ -5,6 +5,7 @@
  * and simply lets the user drill into each matcher to see its hooks.
  */
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import type { HookEvent } from 'src/entrypoints/agentSdkTypes.js';
 import { Box, Text } from '@anthropic/ink';
 import {
@@ -58,11 +59,11 @@ export function SelectMatcherMode({
         title={`${selectedEvent} - Matchers`}
         subtitle={eventDescription}
         onCancel={onCancel}
-        inputGuide={() => <Text>Esc to go back</Text>}
+        inputGuide={() => <Text>{t('selectmatchermode.escToGoBack')}</Text>}
       >
         <Box flexDirection="column" gap={1}>
-          <Text dimColor>No hooks configured for this event.</Text>
-          <Text dimColor>To add hooks, edit settings.json directly or ask Claude.</Text>
+          <Text dimColor>{t('selectmatchermode.noHooksConfiguredForThisEvent')}</Text>
+          <Text dimColor>{t('selectmatchermode.toAddHooksEditSettingsJsonDirectlyOrAskClaude')}</Text>
         </Box>
       </Dialog>
     );

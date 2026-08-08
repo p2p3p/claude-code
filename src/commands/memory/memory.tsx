@@ -3,6 +3,7 @@ import * as React from 'react';
 import type { CommandResultDisplay } from '../../commands.js';
 import { Dialog } from '@anthropic/ink';
 import { MemoryFileSelector } from '../../components/memory/MemoryFileSelector.js';
+import { t } from '../../utils/i18n/index.js';
 import { getRelativeMemoryPath } from '../../components/memory/MemoryUpdateNotification.js';
 import { Box, Link, Text } from '@anthropic/ink';
 import type { LocalJSXCommandCall } from '../../types/command.js';
@@ -50,8 +51,8 @@ function MemoryCommand({
       const editorInfo = editorSource !== 'default' ? `Using ${editorSource}="${editorValue}".` : '';
 
       const editorHint = editorInfo
-        ? `> ${editorInfo} To change editor, set $EDITOR or $VISUAL environment variable.`
-        : `> To use a different editor, set the $EDITOR or $VISUAL environment variable.`;
+        ? `> ${editorInfo} {t("cmdSystemUI.changeEditor")}`
+        : `> {t("cmdSystemUI.changeEditor")}`;
 
       onDone(`Opened memory file at ${getRelativeMemoryPath(memoryPath)}\n\n${editorHint}`, { display: 'system' });
     } catch (error) {
@@ -61,11 +62,11 @@ function MemoryCommand({
   };
 
   const handleCancel = () => {
-    onDone('Cancelled memory editing', { display: 'system' });
+    onDone(t('cmdSystemUI.cancelledMemory'), { display: 'system' });
   };
 
   return (
-    <Dialog title="Memory" onCancel={handleCancel} color="remember">
+    <Dialog title={t("cmdSystemUI.memoryTitle")} onCancel={handleCancel} color="remember">
       <Box flexDirection="column">
         <React.Suspense fallback={null}>
           <MemoryFileSelector onSelect={handleSelectMemoryFile} onCancel={handleCancel} />
@@ -73,7 +74,7 @@ function MemoryCommand({
 
         <Box marginTop={1}>
           <Text dimColor>
-            Learn more: <Link url="https://code.claude.com/docs/en/memory" />
+            {t("cmdSystemUI.learnMore")}<Link url="https://code.claude.com/docs/en/memory" />
           </Text>
         </Box>
       </Box>

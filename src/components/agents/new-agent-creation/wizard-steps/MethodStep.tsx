@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { Box, Byline, KeyboardShortcutHint } from '@anthropic/ink';
+import { t } from '../../../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { Select } from '../../../CustomSelect/select.js';
 import { useWizard } from '../../../wizard/index.js';
@@ -11,23 +12,23 @@ export function MethodStep(): ReactNode {
 
   const methodOptions = [
     {
-      label: 'Generate with Claude (recommended)',
+      label: t('agentMethodStep.generateWithClaude'),
       value: 'generate',
     },
     {
-      label: 'Manual configuration',
+      label: t('agentMethodStep.manualConfig'),
       value: 'manual',
     },
   ];
 
   return (
     <WizardDialogLayout
-      subtitle="Creation method"
+      subtitle={t('methodstep.creationMethod')}
       footerText={
         <Byline>
           <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
           <KeyboardShortcutHint shortcut="Enter" action="select" />
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="go back" />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.goBack')} />
         </Byline>
       }
     >

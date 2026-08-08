@@ -2,6 +2,7 @@ import { basename, relative } from 'path';
 import React from 'react';
 import { Box, Text, Pane } from '@anthropic/ink';
 import { getCwd } from '../utils/cwd.js';
+import { t } from '../utils/i18n/index.js';
 import { isSupportedVSCodeTerminal } from '../utils/ide.js';
 import { Select } from './CustomSelect/index.js';
 import type {
@@ -53,7 +54,7 @@ export function ShowInIDEPrompt<A>({
               : `Symlink target: ${symlinkTarget}`}
           </Text>
         )}
-        {isSupportedVSCodeTerminal() && <Text dimColor>Save file to continue…</Text>}
+        {isSupportedVSCodeTerminal() && <Text dimColor>{t('showInIde.saveFileToContinue')}</Text>}
         <Box flexDirection="column">
           <Text>
             Do you want to make this edit to <Text bold>{basename(filePath)}</Text>?

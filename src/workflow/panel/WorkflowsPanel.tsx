@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, Dialog, Text, useAnimationFrame } from '@anthropic/ink';
 import type { Theme } from '@anthropic/ink';
 import type { LocalJSXCommandContext, LocalJSXCommandOnDone } from '../../types/command.js';
@@ -280,7 +281,7 @@ export function WorkflowsPanel({
           onCancel={() => setConfirmKill(null)}
           color="warning"
         >
-          <Text color="subtle">Press y to confirm, or n/Esc to cancel.</Text>
+          <Text color="subtle">{t('workflowspanel.pressYToConfirmOrNEscToCancel')}</Text>
         </Dialog>
       ) : null}
     </Box>

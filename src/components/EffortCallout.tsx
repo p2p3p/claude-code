@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
+import { t } from '../utils/i18n/index.js'
 import { Box, Text } from '@anthropic/ink';
 import { isMaxSubscriber, isProSubscriber, isTeamSubscriber } from '../utils/auth.js';
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js';
@@ -64,7 +65,7 @@ export function EffortCallout({ model, onDone }: Props): React.ReactNode {
 
   const options: OptionWithDescription<EffortLevel>[] = [
     {
-      label: <EffortOptionLabel level="medium" text="Medium (recommended)" />,
+      label: <EffortOptionLabel level="medium" text={t('effortcallout.mediumRecommended')} />,
       value: 'medium',
     },
     { label: <EffortOptionLabel level="high" text="High" />, value: 'high' },

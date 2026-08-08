@@ -1,4 +1,5 @@
 import { feature } from 'bun:bundle';
+import { t } from '../../utils/i18n/index.js'
 import * as React from 'react';
 import { memo, type ReactNode, useMemo, useRef, useState } from 'react';
 import { isBridgeEnabled } from '../../bridge/bridgeEnabled.js';
@@ -237,7 +238,7 @@ function BridgeStatusIndicator({ bridgeSelected }: BridgeStatusProps): React.Rea
   return (
     <Text color={bridgeSelected ? 'background' : status.color} inverse={bridgeSelected} wrap="truncate">
       {status.label}
-      {bridgeSelected && <Text dimColor> · Enter to view</Text>}
+      {bridgeSelected && <Text dimColor>{t('promptInputFooter.enterToView')}</Text>}
     </Text>
   );
 }
@@ -369,7 +370,7 @@ function PipeStatusInline(): React.ReactNode {
         <Text bold>{pipeIpc.serverName}</Text>
         <Text dimColor>({displayRole})</Text>
         {pipeIpc.localIp && <Text dimColor>{pipeIpc.localIp}</Text>}
-        <Text color="warning">↑↓ move Space select ←/→ or m route Enter/Esc close Shift+↓ toggle</Text>
+        <Text color="warning">{t('promptInputFooter.arrowKeysHint')}</Text>
       </Box>
       <Box height={1} paddingLeft={2}>
         <Text dimColor>
@@ -401,7 +402,7 @@ function PipeStatusInline(): React.ReactNode {
       })}
       {allPipes.length === 0 && (
         <Box height={1} paddingLeft={2}>
-          <Text dimColor>No other pipes found. Start another instance.</Text>
+          <Text dimColor>{t('promptinputfooter.noOtherPipesFoundStartAnotherInstance')}</Text>
         </Box>
       )}
     </Box>

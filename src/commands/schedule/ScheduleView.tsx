@@ -3,6 +3,7 @@ import { Box, Text } from '@anthropic/ink';
 import type { Theme } from '@anthropic/ink';
 import type { Trigger } from './triggersApi.js';
 import { cronToHuman } from '../../utils/cron.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props =
   | { mode: 'list'; triggers: Trigger[] }
@@ -18,7 +19,7 @@ type Props =
 function TriggerRow({ trigger }: { trigger: Trigger }): React.ReactNode {
   const schedule = cronToHuman(trigger.cron_expression, { utc: true });
   const nextRun = trigger.next_run ? new Date(trigger.next_run).toLocaleString() : '—';
-  const enabledText = trigger.enabled ? 'enabled' : 'disabled';
+  const enabledText = trigger.enabled ? t('scheduleView.enabled') : t('scheduleView.disabled');
   return (
     <Box flexDirection="column" marginBottom={1}>
       <Box>
@@ -27,14 +28,14 @@ function TriggerRow({ trigger }: { trigger: Trigger }): React.ReactNode {
         <Text color={(trigger.enabled ? 'success' : 'warning') as keyof Theme}>{enabledText}</Text>
         {trigger.agent_id ? (
           <>
-            <Text dimColor> · agent: </Text>
+            <Text dimColor> · {t('scheduleView.agent')} </Text>
             <Text>{trigger.agent_id}</Text>
           </>
         ) : null}
       </Box>
-      <Text>Schedule: {schedule}</Text>
-      <Text dimColor>Prompt: {trigger.prompt}</Text>
-      <Text dimColor>Next run: {nextRun}</Text>
+      <Text>{t('scheduleView.schedule')} {schedule}</Text>
+      <Text dimColor>{t('scheduleView.prompt')} {trigger.prompt}</Text>
+      <Text dimColor>{t('scheduleView.nextRun')} {nextRun}</Text>
     </Box>
   );
 }
@@ -44,14 +45,14 @@ export function ScheduleView(props: Props): React.ReactNode {
     if (props.triggers.length === 0) {
       return (
         <Box>
-          <Text dimColor>No scheduled triggers. Use /schedule create &lt;cron&gt; &lt;prompt&gt; to create one.</Text>
+          <Text dimColor>{t('scheduleView.noTriggersFound')}</Text>
         </Box>
       );
     }
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Scheduled Triggers ({props.triggers.length})</Text>
+          <Text bold>{t('scheduleView.scheduledTriggers', props.triggers.length)}</Text>
         </Box>
         {props.triggers.map(trigger => (
           <TriggerRow key={trigger.trigger_id} trigger={trigger} />
@@ -68,20 +69,20 @@ export function ScheduleView(props: Props): React.ReactNode {
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Trigger: {trigger.trigger_id}</Text>
+          <Text bold>{t('scheduleView.triggerDetail')} {trigger.trigger_id}</Text>
         </Box>
         <Text>
-          Status:{' '}
+          {t('scheduleView.status')}{' '}
           <Text color={(trigger.enabled ? 'success' : 'warning') as keyof Theme}>
-            {trigger.enabled ? 'enabled' : 'disabled'}
+            {trigger.enabled ? t('scheduleView.enabled') : t('scheduleView.disabled')}
           </Text>
         </Text>
-        <Text>Schedule: {schedule}</Text>
-        {trigger.agent_id ? <Text>Agent: {trigger.agent_id}</Text> : null}
-        <Text>Next run: {nextRun}</Text>
-        <Text dimColor>Last run: {lastRun}</Text>
-        <Text dimColor>Prompt: {trigger.prompt}</Text>
-        {trigger.created_at ? <Text dimColor>Created: {new Date(trigger.created_at).toLocaleString()}</Text> : null}
+        <Text>{t('scheduleView.schedule')} {schedule}</Text>
+        {trigger.agent_id ? <Text>{t('scheduleView.agentLabel')} {trigger.agent_id}</Text> : null}
+        <Text>{t('scheduleView.nextRun')} {nextRun}</Text>
+        <Text dimColor>{t('scheduleView.lastRun')} {lastRun}</Text>
+        <Text dimColor>{t('scheduleView.prompt')} {trigger.prompt}</Text>
+        {trigger.created_at ? <Text dimColor>{t('scheduleView.created')} {new Date(trigger.created_at).toLocaleString()}</Text> : null}
       </Box>
     );
   }
@@ -93,14 +94,14 @@ export function ScheduleView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'success' as keyof Theme}>
-            Trigger created
+            {t('scheduleView.triggerCreated')}
           </Text>
         </Box>
-        <Text>ID: {trigger.trigger_id}</Text>
-        <Text>Schedule: {schedule}</Text>
-        <Text>Prompt: {trigger.prompt}</Text>
-        {trigger.agent_id ? <Text>Agent: {trigger.agent_id}</Text> : null}
-        <Text dimColor>Status: {trigger.enabled ? 'enabled' : 'disabled'}</Text>
+        <Text>{t('scheduleView.id')} {trigger.trigger_id}</Text>
+        <Text>{t('scheduleView.schedule')} {schedule}</Text>
+        <Text>{t('scheduleView.prompt')} {trigger.prompt}</Text>
+        {trigger.agent_id ? <Text>{t('scheduleView.agentLabel')} {trigger.agent_id}</Text> : null}
+        <Text dimColor>{t('scheduleView.status')} {trigger.enabled ? t('scheduleView.enabled') : t('scheduleView.disabled')}</Text>
       </Box>
     );
   }
@@ -111,11 +112,11 @@ export function ScheduleView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'success' as keyof Theme}>
-            Trigger updated
+            {t('scheduleView.triggerUpdated')}
           </Text>
         </Box>
-        <Text>ID: {trigger.trigger_id}</Text>
-        <Text dimColor>Status: {trigger.enabled ? 'enabled' : 'disabled'}</Text>
+        <Text>{t('scheduleView.id')} {trigger.trigger_id}</Text>
+        <Text dimColor>{t('scheduleView.status')} {trigger.enabled ? t('scheduleView.enabled') : t('scheduleView.disabled')}</Text>
       </Box>
     );
   }
@@ -123,7 +124,7 @@ export function ScheduleView(props: Props): React.ReactNode {
   if (props.mode === 'deleted') {
     return (
       <Box>
-        <Text color={'success' as keyof Theme}>Trigger {props.id} deleted.</Text>
+        <Text color={'success' as keyof Theme}>{t('scheduleView.triggerDeleted', props.id)}</Text>
       </Box>
     );
   }
@@ -132,9 +133,9 @@ export function ScheduleView(props: Props): React.ReactNode {
     return (
       <Box flexDirection="column">
         <Box>
-          <Text color={'success' as keyof Theme}>Trigger {props.id} fired.</Text>
+          <Text color={'success' as keyof Theme}>{t('scheduleView.triggerFired', props.id)}</Text>
         </Box>
-        <Text dimColor>Run ID: {props.runId}</Text>
+        <Text dimColor>{t('scheduleView.runId')} {props.runId}</Text>
       </Box>
     );
   }
@@ -142,7 +143,7 @@ export function ScheduleView(props: Props): React.ReactNode {
   if (props.mode === 'enabled') {
     return (
       <Box>
-        <Text color={'success' as keyof Theme}>Trigger {props.id} enabled.</Text>
+        <Text color={'success' as keyof Theme}>{t('scheduleView.triggerEnabled', props.id)}</Text>
       </Box>
     );
   }
@@ -150,7 +151,7 @@ export function ScheduleView(props: Props): React.ReactNode {
   if (props.mode === 'disabled') {
     return (
       <Box>
-        <Text color={'warning' as keyof Theme}>Trigger {props.id} disabled.</Text>
+        <Text color={'warning' as keyof Theme}>{t('scheduleView.triggerDisabled', props.id)}</Text>
       </Box>
     );
   }

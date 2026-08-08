@@ -1,4 +1,5 @@
 import { execa } from 'execa';
+import { t } from '../../utils/i18n/index.js'
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Select } from '../../components/CustomSelect/index.js';
@@ -139,24 +140,24 @@ function Web({ onDone }: { onDone: LocalJSXCommandOnDone }) {
   };
 
   if (step.name === 'checking') {
-    return <LoadingState message="Checking login status…" />;
+    return <LoadingState message={t('remoteSetup2.checkingLoginStatus')} />;
   }
 
   if (step.name === 'uploading') {
-    return <LoadingState message="Connecting GitHub to Claude…" />;
+    return <LoadingState message={t('remoteSetup2.connectingGithub')} />;
   }
 
   const token = step.token;
   return (
-    <Dialog title="Connect Claude on the web to GitHub?" onCancel={handleCancel} hideInputGuide>
+    <Dialog title={t('remoteSetup.connectClaudeOnTheWebToGitHub')} onCancel={handleCancel} hideInputGuide>
       <Box flexDirection="column">
-        <Text>Claude on the web requires connecting to your GitHub account to clone and push code on your behalf.</Text>
-        <Text dimColor>Your local credentials are used to authenticate with GitHub</Text>
+        <Text>{t('remoteSetup.claudeOnTheWebRequiresConnectingToYourGitHubAccountToCloneAndPushCodeOnYourBehalf')}</Text>
+        <Text dimColor>{t('remoteSetup.yourLocalCredentialsAreUsedToAuthenticateWithGitHub')}</Text>
       </Box>
       <Select
         options={[
-          { label: 'Continue', value: 'send' },
-          { label: 'Cancel', value: 'cancel' },
+          { label: t('remoteSetup.continue'), value: 'send' },
+          { label: t('remoteSetup.cancel'), value: 'cancel' },
         ]}
         onChange={value => {
           if (value === 'send') {

@@ -26,6 +26,7 @@ import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import { count } from '../../utils/array.js';
 import { plural } from '../../utils/stringUtils.js';
 import { Divider } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 
 type Props = {
   tools: Tools;
@@ -216,7 +217,7 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
   // Continue button
   navigableItems.push({
     id: 'continue',
-    label: 'Continue',
+    label: t('toolSelector.continue'),
     action: handleConfirm,
     isContinue: true,
   });
@@ -298,7 +299,7 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
     if (mcpServerBuckets.length > 0) {
       navigableItems.push({
         id: 'mcp-servers-header',
-        label: 'MCP Servers:',
+        label: t('toolSelector.mcpServers'),
         action: () => {}, // No action - just a header
         isHeader: true,
       });
@@ -320,7 +321,7 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
       // Add separator header before individual tools
       navigableItems.push({
         id: 'tools-header',
-        label: 'Individual Tools:',
+        label: t('toolSelector.individualTools'),
         action: () => {},
         isHeader: true,
       });

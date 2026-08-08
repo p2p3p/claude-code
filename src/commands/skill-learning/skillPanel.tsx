@@ -4,6 +4,7 @@ import { Dialog } from '@anthropic/ink';
 import { useRegisterOverlay } from '../../context/overlayContext.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { isSkillLearningEnabled } from '../../services/skillLearning/featureCheck.js';
+import { t } from '../../utils/i18n/index.js'
 
 type SkillAction = {
   label: string;
@@ -96,23 +97,23 @@ function SkillPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.ReactN
   const actions = useMemo<SkillAction[]>(
     () => [
       {
-        label: 'Status',
-        description: 'Show skill learning status for current project',
+        label: t('cmdSystemUI.skillStatus'),
+        description: t('skillLearning.statusDesc'),
         run: getStatusText,
       },
       {
-        label: 'Start',
-        description: 'Enable skill learning for this session',
+        label: t('cmdSystemUI.skillStart'),
+        description: t('skillLearning.startDesc'),
         run: startSkillLearning,
       },
       {
-        label: 'Stop',
-        description: 'Disable skill learning for this session',
+        label: t('cmdSystemUI.skillStop'),
+        description: t('skillLearning.stopDesc'),
         run: stopSkillLearning,
       },
       {
-        label: 'About',
-        description: 'Detailed description of skill learning features',
+        label: t('cmdSystemUI.skillAbout'),
+        description: t('skillLearning.aboutDesc'),
         run: () => Promise.resolve(ABOUT_TEXT),
       },
     ],
@@ -143,9 +144,9 @@ function SkillPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.ReactN
 
   return (
     <Dialog
-      title="Skill Learning"
-      subtitle={`${actions.length} actions`}
-      onCancel={() => onDone('Skill panel dismissed', { display: 'system' })}
+      title={t("cmdSystemUI.skillLearning")}
+      subtitle={t('skillLearning.actionsCount', actions.length)}
+      onCancel={() => onDone(t('cmdSystemUI.skillDismissed'), { display: 'system' })}
       color="background"
       hideInputGuide
     >
@@ -157,7 +158,7 @@ function SkillPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.ReactN
           </Box>
         ))}
         <Box marginTop={1}>
-          <Text dimColor>↑/↓ select · Enter run · Esc close</Text>
+          <Text dimColor>{t("cmdSystemUI.skillNav")}</Text>
         </Box>
       </Box>
     </Dialog>

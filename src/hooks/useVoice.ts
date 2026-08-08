@@ -26,9 +26,11 @@ import {
 } from '../services/doubaoSTT.js'
 import { logForDebugging } from '../utils/debug.js'
 import { toError } from '../utils/errors.js'
+import { t } from '../utils/i18n/index.js'
 import { getSystemLocaleLanguage } from '../utils/intl.js'
 import { logError } from '../utils/log.js'
 import { getInitialSettings } from '../utils/settings/settings.js'
+import { getGlobalConfig } from '../utils/config.js'
 import { sleep } from '../utils/sleep.js'
 
 function isDoubaoProvider(): boolean {
@@ -409,7 +411,7 @@ export function useVoice({
           const replayBuffer = fullAudioRef.current
           await sleep(250)
           if (isStale()) return
-          const stt = normalizeLanguageForSTT(getInitialSettings().language)
+          const stt = normalizeLanguageForSTT(getGlobalConfig().preferredLanguage)
           const keyterms = await getVoiceKeyterms()
           if (isStale()) return
           await new Promise<void>(resolve => {
@@ -504,15 +506,15 @@ export function useVoice({
             // WS never connected → audio never reached backend. Not a silent
             // drop; a connection failure (slow OAuth refresh, network, etc).
             onErrorRef.current?.(
-              'Voice connection failed. Check your network and try again.',
+              t('voice.connectionFailed'),
             )
           } else if (!hadAudioSignal) {
             // Distinguish silent mic (capture issue) from speech not recognized.
             onErrorRef.current?.(
-              'No audio detected from microphone. Check that the correct input device is selected and that Claude Code has microphone access.',
+              t('voice.noAudioDetected'),
             )
           } else {
-            onErrorRef.current?.('No speech detected.')
+            onErrorRef.current?.(t('voice.noSpeechDetected'))
           }
         }
 
@@ -641,7 +643,7 @@ export function useVoice({
   async function startRecordingSession(): Promise<void> {
     if (!voiceModule) {
       onErrorRef.current?.(
-        'Voice module not loaded yet. Try again in a moment.',
+        t('voice.moduleNotLoaded'),
       )
       return
     }
@@ -672,7 +674,7 @@ export function useVoice({
         `[voice] Recording not available: ${availability.reason ?? 'unknown'}`,
       )
       onErrorRef.current?.(
-        availability.reason ?? 'Audio recording is not available.',
+        availability.reason ?? t('voice.audioRecordingNotAvailable'),
       )
       cleanup()
       updateState('idle')
@@ -741,18 +743,18 @@ export function useVoice({
     if (!started) {
       logError(new Error('[voice] Recording failed — no audio tool found'))
       onErrorRef.current?.(
-        'Failed to start audio capture. Check that your microphone is accessible.',
+        t('voice.failedToStartCapture'),
       )
       cleanup()
       updateState('idle')
       setVoiceState(prev => ({
         ...prev,
-        voiceError: 'Recording failed — no audio tool found',
+        voiceError: t('voice.recordingFailedNoTool'),
       }))
       return
     }
 
-    const rawLanguage = getInitialSettings().language
+    const rawLanguage = getGlobalConfig().preferredLanguage
     const stt = normalizeLanguageForSTT(rawLanguage)
     logEvent('tengu_voice_recording_started', {
       focusTriggered: focusTriggeredRef.current,
@@ -912,7 +914,7 @@ export function useVoice({
             // (ws fires error then close 1006) is swallowed above.
             attemptGenRef.current++
             logError(new Error(`[voice] voice_stream error: ${error}`))
-            onErrorRef.current?.(`Voice stream error: ${error}`)
+            onErrorRef.current?.(t('voice.streamError', { error }))
             // Clear the audio buffer on error to avoid memory leaks
             audioBuffer.length = 0
             focusTriggeredRef.current = false
@@ -1006,7 +1008,7 @@ export function useVoice({
             '[voice] Failed to connect to voice_stream (no OAuth token?)',
           )
           onErrorRef.current?.(
-            'Voice mode requires a Claude.ai account. Please run /login to sign in.',
+            t('voice.requiresAccount'),
           )
           // Clear the audio buffer on failure
           audioBuffer.length = 0

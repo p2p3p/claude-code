@@ -1,4 +1,5 @@
 import figures from 'figures';
+import { t } from '../../utils/i18n/index.js'
 import * as React from 'react';
 import { type KeyboardEvent, Box, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
@@ -36,11 +37,11 @@ export function AgentDetail({ agent, tools, onBack }: Props): React.ReactNode {
 
   function renderToolsList(): React.ReactNode {
     if (resolvedTools.hasWildcard) {
-      return <Text>All tools</Text>;
+      return <Text>{t('agentdetail.allTools')}</Text>;
     }
 
     if (!agent.tools || agent.tools.length === 0) {
-      return <Text>None</Text>;
+      return <Text>{t('agentDetail.none')}</Text>;
     }
 
     return (
@@ -61,7 +62,7 @@ export function AgentDetail({ agent, tools, onBack }: Props): React.ReactNode {
 
       <Box flexDirection="column">
         <Text>
-          <Text bold>Description</Text> (tells Claude when to use this agent):
+          <Text bold>{t('agentdetail.description')}</Text> {t('agentDetail.tellsWhenToUse')}:
         </Text>
         <Box marginLeft={2}>
           <Text>{agent.whenToUse}</Text>
@@ -70,44 +71,44 @@ export function AgentDetail({ agent, tools, onBack }: Props): React.ReactNode {
 
       <Box>
         <Text>
-          <Text bold>Tools</Text>:{' '}
+          <Text bold>{t('agentdetail.tools')}</Text>:{' '}
         </Text>
         {renderToolsList()}
       </Box>
 
       <Text>
-        <Text bold>Model</Text>: {getAgentModelDisplay(agent.model)}
+        <Text bold>{t('agentdetail.model')}</Text>: {getAgentModelDisplay(agent.model)}
       </Text>
 
       {agent.permissionMode && (
         <Text>
-          <Text bold>Permission mode</Text>: {agent.permissionMode}
+          <Text bold>{t('agentdetail.permissionMode')}</Text>: {agent.permissionMode}
         </Text>
       )}
 
       {agent.memory && (
         <Text>
-          <Text bold>Memory</Text>: {getMemoryScopeDisplay(agent.memory)}
+          <Text bold>{t('agentdetail.memory')}</Text>: {getMemoryScopeDisplay(agent.memory)}
         </Text>
       )}
 
       {agent.hooks && Object.keys(agent.hooks).length > 0 && (
         <Text>
-          <Text bold>Hooks</Text>: {Object.keys(agent.hooks).join(', ')}
+          <Text bold>{t('agentdetail.hooks')}</Text>: {Object.keys(agent.hooks).join(', ')}
         </Text>
       )}
 
       {agent.skills && agent.skills.length > 0 && (
         <Text>
-          <Text bold>Skills</Text>:{' '}
-          {agent.skills.length > 10 ? `${agent.skills.length} skills` : agent.skills.join(', ')}
+          <Text bold>{t('agentdetail.skills')}</Text>:{' '}
+          {agent.skills.length > 10 ? `${agent.skills.length} ${t('agentDetail.nSkills')}` : agent.skills.join(', ')}
         </Text>
       )}
 
       {backgroundColor && (
         <Box>
           <Text>
-            <Text bold>Color</Text>:{' '}
+            <Text bold>{t('agentdetail.color')}</Text>:{' '}
             <Text backgroundColor={backgroundColor} color="inverseText">
               {' '}
               {agent.agentType}{' '}
@@ -120,7 +121,7 @@ export function AgentDetail({ agent, tools, onBack }: Props): React.ReactNode {
         <>
           <Box>
             <Text>
-              <Text bold>System prompt</Text>:
+              <Text bold>{t('agentdetail.systemPrompt')}</Text>:
             </Text>
           </Box>
           <Box marginLeft={2} marginRight={2}>

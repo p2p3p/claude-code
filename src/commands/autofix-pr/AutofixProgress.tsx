@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import type { Theme } from '../../utils/theme.js';
+import { t } from '../../utils/i18n/index.js'
 
 export type AutofixPhase =
   | 'detecting'
@@ -52,7 +53,7 @@ export function AutofixProgress({ phase, target, sessionUrl, errorMessage }: Aut
   return (
     <Box flexDirection="column" marginTop={1} marginBottom={1}>
       <Box>
-        <Text bold>Autofix PR </Text>
+        <Text bold>{t("cmdSystemUI.autofixTitle")} PR </Text>
         <Text color={'claude' as keyof Theme}>{target}</Text>
       </Box>
       {PHASE_ORDER.map((p, i) => {
@@ -75,7 +76,7 @@ export function AutofixProgress({ phase, target, sessionUrl, errorMessage }: Aut
       )}
       {sessionUrl && (
         <Box marginTop={1} marginLeft={2}>
-          <Text color={'subtle' as keyof Theme}>Track: </Text>
+          <Text color={'subtle' as keyof Theme}>{t('autofixprogress.track')} </Text>
           <Text color={'claude' as keyof Theme}>{sessionUrl}</Text>
         </Box>
       )}

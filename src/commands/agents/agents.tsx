@@ -3,6 +3,7 @@ import { AgentsMenu } from '../../components/agents/AgentsMenu.js';
 import type { ToolUseContext } from '../../Tool.js';
 import { getTools } from '../../tools.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
+import { t } from '../../utils/i18n/index.js'
 
 export async function call(onDone: LocalJSXCommandOnDone, context: ToolUseContext): Promise<React.ReactNode> {
   const appState = context.getAppState();

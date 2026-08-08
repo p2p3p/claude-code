@@ -3,6 +3,7 @@ import React from 'react';
 import { AgentTool } from '@claude-code-best/builtin-tools/tools/AgentTool/AgentTool.js';
 import { isInForkChild } from '@claude-code-best/builtin-tools/tools/AgentTool/forkSubagent.js';
 import { logForDebugging } from '../../utils/debug.js';
+import { t } from '../../utils/i18n/index.js';
 import type { LocalJSXCommandOnDone, LocalJSXCommandContext } from '../../types/command.js';
 
 export async function call(
@@ -48,7 +49,7 @@ export async function call(
       // description 只显示在底部 selector / BackgroundTasksDialog，保持简短标签
       // 即可；用户输入的 prompt 会作为第一条用户消息呈现在主视图里，这里不要
       // 重复显示。
-      description: 'forked from main',
+      description: t('cmd.descForkedFromMain'),
     };
 
     // Call AgentTool with proper parameters:

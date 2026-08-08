@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, Text } from '@anthropic/ink';
 import {
   isShutdownApproved,
@@ -59,7 +60,7 @@ export function ShutdownRejectedDisplay({ response }: ShutdownRejectedProps): Re
           <Text>Reason: {response.reason}</Text>
         </Box>
         <Box marginTop={1}>
-          <Text dimColor>Teammate is continuing to work. You may request shutdown again later.</Text>
+          <Text dimColor>{t('shutdownmessage.teammateIsContinuingToWorkYouMayRequestShutdownAgainLater')}</Text>
         </Box>
       </Box>
     </Box>

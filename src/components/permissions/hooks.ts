@@ -7,6 +7,7 @@ import {
 import { sanitizeToolNameForAnalytics } from 'src/services/analytics/metadata.js'
 import { BashTool } from '@claude-code-best/builtin-tools/tools/BashTool/BashTool.js'
 import { splitCommand_DEPRECATED } from 'src/utils/bash/commands.js'
+import { t } from '../../utils/i18n/index.js'
 import type {
   PermissionDecisionReason,
   PermissionResult,
@@ -62,7 +63,7 @@ function decisionReasonToString(
   decisionReason: PermissionDecisionReason | undefined,
 ): string {
   if (!decisionReason) {
-    return 'No decision reason'
+    return t('permissionDebug.noDecisionReason')
   }
   if (
     (feature('BASH_CLASSIFIER') || feature('TRANSCRIPT_CLASSIFIER')) &&

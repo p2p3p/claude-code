@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { getIsNonInteractiveSession } from '../../bootstrap/state.js'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
 import type { Command, LocalCommandResult } from '../../types/command.js'
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * Path to the TUI-mode marker file.
@@ -61,16 +62,15 @@ function enableTui(): LocalCommandResult {
   return {
     type: 'text',
     value: [
-      '## TUI mode enabled',
+      t('tui.enabledTitle'),
       '',
-      `Marker written: \`${markerPath}\``,
+      t('tui.markerWritten', markerPath),
       '',
-      'Flicker-free alternate-screen rendering will be active on the next',
-      'session start.  Add this to your shell profile to make it permanent:',
+      t('tui.flickerFreeDesc'),
       '',
       '  [ -f "$HOME/.claude/.tui-mode" ] && export CLAUDE_CODE_NO_FLICKER=1',
       '',
-      'To disable: `/tui off`',
+      t('tui.toDisable'),
     ].join('\n'),
   }
 }
@@ -80,21 +80,20 @@ function disableTui(): LocalCommandResult {
   if (!existsSync(markerPath)) {
     return {
       type: 'text',
-      value: 'TUI mode was not active.',
+      value: t('tui.wasNotActive'),
     }
   }
   unlinkSync(markerPath)
   return {
     type: 'text',
     value: [
-      '## TUI mode disabled',
+      t('tui.disabledTitle'),
       '',
-      `Marker removed: \`${markerPath}\``,
+      t('tui.markerRemoved', markerPath),
       '',
-      'Standard (non-alternate-screen) rendering will be used on the next',
-      'session start.',
+      t('tui.standardModeDesc'),
       '',
-      'To re-enable: `/tui on`',
+      t('tui.toReenable'),
     ].join('\n'),
   }
 }
@@ -109,22 +108,22 @@ export async function callTui(args: string): Promise<LocalCommandResult> {
     const envVal = process.env.CLAUDE_CODE_NO_FLICKER
     let envLine: string
     if (envVal === '1' || envVal === 'true') {
-      envLine = 'CLAUDE_CODE_NO_FLICKER=1 (forced on via env var)'
+      envLine = t('tui.envForcedOn', envVal)
     } else if (envVal === '0' || envVal === 'false') {
-      envLine = 'CLAUDE_CODE_NO_FLICKER=0 (forced off via env var)'
+      envLine = t('tui.envForcedOff', envVal)
     } else {
-      envLine = 'CLAUDE_CODE_NO_FLICKER not set'
+      envLine = t('tui.envNotSet')
     }
     return {
       type: 'text',
       value: [
-        '## TUI Mode Status',
+        t('tui.statusTitle'),
         '',
-        `  Marker file:  ${enabled ? 'present' : 'absent'} (\`${markerPath}\`)`,
-        `  Mode:         ${enabled ? 'enabled' : 'disabled'}`,
-        `  Env var:      ${envLine}`,
+        t('tui.markerFile', enabled ? t('tui.present') : t('tui.absent'), markerPath),
+        t('tui.modeLabel', enabled ? t('tui.enabled') : t('tui.disabled')),
+        t('tui.envVarLabel', envLine),
         '',
-        'Note: changes take effect on the next session start.',
+        t('tui.changesNextSession'),
       ].join('\n'),
     }
   }
@@ -147,15 +146,14 @@ export async function callTui(args: string): Promise<LocalCommandResult> {
   // ── unknown subcommand ───────────────────────────────────────────────
   return {
     type: 'text',
-    value: [`Unknown subcommand: "${sub}"`, '', USAGE_TEXT].join('\n'),
+    value: [t('tui.unknownSubcommand', sub), '', USAGE_TEXT].join('\n'),
   }
 }
 
 const tuiCommand: Command = {
   type: 'local-jsx',
   name: 'tui',
-  description:
-    'Manage flicker-free TUI mode. Open actions or run: status, on, off, toggle',
+  description: t('cmd.descTui'),
   isHidden: false,
   isEnabled: () => !getIsNonInteractiveSession(),
   argumentHint: '[status|on|off|toggle]',
@@ -170,8 +168,7 @@ const tuiCommand: Command = {
 export const tuiNonInteractive: Command = {
   type: 'local',
   name: 'tui',
-  description:
-    'Toggle flicker-free TUI mode (alternate screen buffer). Subcommands: on, off, status',
+  description: t('cmd.descTui'),
   isHidden: false,
   isEnabled: () => getIsNonInteractiveSession(),
   supportsNonInteractive: true,

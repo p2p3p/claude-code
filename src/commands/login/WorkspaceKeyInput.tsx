@@ -14,6 +14,7 @@
 
 import * as React from 'react';
 import { Box, Text, useInput } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import { saveWorkspaceKey } from '../../services/auth/saveWorkspaceKey.js';
 
 // ---------------------------------------------------------------------------
@@ -141,16 +142,16 @@ export function WorkspaceKeyInput({
   return (
     <Box flexDirection="column" marginTop={1}>
       <Box marginBottom={0}>
-        <Text bold>Enter workspace API key (sk-ant-api03-*):</Text>
+        <Text bold>{t('workspaceKey.enterKey')}</Text>
       </Box>
 
       <Box marginTop={0} marginBottom={0}>
-        <Text dimColor>{'  Obtain from: https://console.anthropic.com/settings/keys'}</Text>
+        <Text dimColor>{t('workspaceKey.obtainFrom')}</Text>
       </Box>
 
       <Box marginTop={1} marginBottom={0}>
         <Text>{'  > '}</Text>
-        {value.length > 0 ? <Text>{masked}</Text> : <Text dimColor>{'[paste key here]'}</Text>}
+        {value.length > 0 ? <Text>{masked}</Text> : <Text dimColor>{t('workspaceKey.pasteHint')}</Text>}
       </Box>
 
       {displayError !== null && (
@@ -164,15 +165,15 @@ export function WorkspaceKeyInput({
 
       {saving && (
         <Box marginTop={0}>
-          <Text dimColor>{'  Saving...'}</Text>
+          <Text dimColor>{t('workspaceKey.saving')}</Text>
         </Box>
       )}
 
       <Box marginTop={1}>
         <Text dimColor>
           {canSubmit
-            ? 'Press Enter to save · Esc to cancel'
-            : 'Esc to cancel' + (value.length === 0 ? ' · start typing your key' : '')}
+            ? t('workspaceKey.enterSave')
+            : t('workspaceKey.escCancel') + (value.length === 0 ? t('workspaceKey.startTyping') : '')}
         </Text>
       </Box>
     </Box>

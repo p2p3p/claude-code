@@ -9,6 +9,7 @@ import { Select } from '../../components/CustomSelect/select.js';
 import { Byline, KeyboardShortcutHint, Pane } from '@anthropic/ink';
 import { Box, setClipboard, Text, stringWidth, type KeyboardEvent } from '@anthropic/ink';
 import { logEvent } from '../../services/analytics/index.js';
+import { t } from '../../utils/i18n/index.js';
 import type { LocalJSXCommandCall } from '../../types/command.js';
 import type { AssistantMessage, Message } from '../../types/message.js';
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js';
@@ -119,7 +120,7 @@ function CopyPicker({ fullText, codeBlocks, messageAge, onDone }: PickerProps): 
 
   const options: OptionWithDescription<PickerSelection>[] = [
     {
-      label: 'Full response',
+      label: t('cmdUI.copyFull'),
       value: 'full' as const,
       description: `${fullText.length} chars, ${countCharInString(fullText, '\n') + 1} lines`,
     },
@@ -135,7 +136,7 @@ function CopyPicker({ fullText, codeBlocks, messageAge, onDone }: PickerProps): 
     {
       label: 'Always copy full response',
       value: 'always' as const,
-      description: 'Skip this picker in the future (revert via /config)',
+      description: t('cmdUI.copySkip'),
     },
   ];
 
@@ -205,7 +206,7 @@ function CopyPicker({ fullText, codeBlocks, messageAge, onDone }: PickerProps): 
   return (
     <Pane>
       <Box flexDirection="column" gap={1} tabIndex={0} autoFocus onKeyDown={handleKeyDown}>
-        <Text dimColor>Select content to copy:</Text>
+        <Text dimColor>{t('cmdUI.copySelect')}</Text>
         <Select<PickerSelection>
           options={options}
           hideIndexes={false}
@@ -216,14 +217,14 @@ function CopyPicker({ fullText, codeBlocks, messageAge, onDone }: PickerProps): 
             void handleSelect(selected);
           }}
           onCancel={() => {
-            onDone('Copy cancelled', { display: 'system' });
+            onDone(t('cmdUI.copyCancelled'), { display: 'system' });
           }}
         />
         <Text dimColor>
           <Byline>
-            <KeyboardShortcutHint shortcut="enter" action="copy" />
-            <KeyboardShortcutHint shortcut="w" action="write to file" />
-            <KeyboardShortcutHint shortcut="esc" action="cancel" />
+            <KeyboardShortcutHint shortcut="enter" action={t('cmdUI.copyAction')} />
+            <KeyboardShortcutHint shortcut="w" action={t('cmdUI.copyWrite')} />
+            <KeyboardShortcutHint shortcut="esc" action={t('cmdUI.copyCancel')} />
           </Byline>
         </Text>
       </Box>
@@ -235,7 +236,7 @@ export const call: LocalJSXCommandCall = async (onDone, context, args) => {
   const texts = collectRecentAssistantTexts(context.messages);
 
   if (texts.length === 0) {
-    onDone('No assistant message to copy');
+    onDone(t('cmdUI.copyNoMessage'));
     return null;
   }
 
@@ -245,7 +246,7 @@ export const call: LocalJSXCommandCall = async (onDone, context, args) => {
   if (arg) {
     const n = Number(arg);
     if (!Number.isInteger(n) || n < 1) {
-      onDone(`Usage: /copy [N] where N is 1 (latest), 2, 3, \u2026 Got: ${arg}`);
+      onDone(t('cmdUI.copyUsage', arg));
       return null;
     }
     if (n > texts.length) {

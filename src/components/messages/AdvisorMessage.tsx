@@ -1,4 +1,5 @@
 import figures from 'figures';
+import { t } from '../../utils/i18n/index.js'
 import React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import type { AdvisorBlock } from '../../utils/advisor.js';
@@ -36,7 +37,7 @@ export function AdvisorMessage({
           isUnresolved={!resolvedToolUseIDs.has(block.id)}
           isError={erroredToolUseIDs.has(block.id)}
         />
-        <Text bold>Advising</Text>
+        <Text bold>{t('advisormessage.advising')}</Text>
         {advisorModel ? <Text dimColor> using {renderModelName(advisorModel)}</Text> : null}
         {input ? <Text dimColor> · {input}</Text> : null}
       </Box>

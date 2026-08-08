@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useNotifications } from '../context/notifications.js'
 import { getShortcutDisplay } from '../keybindings/shortcutFormat.js'
+import { t } from '../utils/i18n/index.js'
 import { hasImageInClipboard } from '../utils/imagePaste.js'
 
 const NOTIFICATION_KEY = 'clipboard-image-hint'
@@ -55,7 +56,7 @@ export function useClipboardImageHint(
           lastHintTimeRef.current = now
           addNotification({
             key: NOTIFICATION_KEY,
-            text: `Image in clipboard · ${getShortcutDisplay('chat:imagePaste', 'Chat', 'ctrl+v')} to paste`,
+            text: t('notif.clipboardImage.imageInClipboard', { shortcut: getShortcutDisplay('chat:imagePaste', 'Chat', 'ctrl+v') }),
             priority: 'immediate',
             timeoutMs: 8000,
           })

@@ -494,7 +494,9 @@ export function updateSettingsForSource(
       },
     )
 
-    // Mark this as an internal write before writing the file
+    // Mark this as an internal write before writing the file so the file
+    // watcher does not re-trigger applySettingsChange (which would cause
+    // unnecessary re-renders and could interfere with dialogs like login).
     markInternalWrite(filePath)
 
     writeFileSyncAndFlush_DEPRECATED(

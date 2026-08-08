@@ -15,6 +15,7 @@ import {
   AGENT_DESCRIPTIONS_THRESHOLD,
   getAgentDescriptionsTotalTokens,
 } from './statusNoticeHelpers.js'
+import { t } from './i18n/index.js'
 import { plural } from './stringUtils.js'
 
 // Thresholds (matching status notices and existing patterns)
@@ -54,8 +55,8 @@ async function checkClaudeMdFiles(): Promise<ContextWarning | null> {
 
   const message =
     largeFiles.length === 1
-      ? `Large CLAUDE.md file detected (${largeFiles[0]!.content.length.toLocaleString()} chars > ${MAX_MEMORY_CHARACTER_COUNT.toLocaleString()})`
-      : `${largeFiles.length} large CLAUDE.md files detected (each > ${MAX_MEMORY_CHARACTER_COUNT.toLocaleString()} chars)`
+      ? t('doctorContextWarnings.largeClaudeMdFileSingle', { chars: largeFiles[0]!.content.length.toLocaleString(), maxChars: MAX_MEMORY_CHARACTER_COUNT.toLocaleString() })
+      : t('doctorContextWarnings.largeClaudeMdFiles', { count: largeFiles.length, maxChars: MAX_MEMORY_CHARACTER_COUNT.toLocaleString() })
 
   return {
     type: 'claudemd_files',
@@ -97,16 +98,16 @@ async function checkAgentDescriptions(
 
   const details = agentTokens
     .slice(0, 5)
-    .map(agent => `${agent.name}: ~${agent.tokens.toLocaleString()} tokens`)
+    .map(agent => t('doctorContextWarnings.agentTokensDetail', { name: agent.name, tokens: agent.tokens.toLocaleString() }))
 
   if (agentTokens.length > 5) {
-    details.push(`(${agentTokens.length - 5} more custom agents)`)
+    details.push(t('doctorContextWarnings.moreCustomAgents', { count: agentTokens.length - 5 }))
   }
 
   return {
     type: 'agent_descriptions',
     severity: 'warning',
-    message: `Large agent descriptions (~${totalTokens.toLocaleString()} tokens > ${AGENT_DESCRIPTIONS_THRESHOLD.toLocaleString()})`,
+    message: t('doctorContextWarnings.largeAgentDescriptions', { totalTokens: totalTokens.toLocaleString(), threshold: AGENT_DESCRIPTIONS_THRESHOLD.toLocaleString() }),
     details,
     currentValue: totalTokens,
     threshold: AGENT_DESCRIPTIONS_THRESHOLD,
@@ -167,17 +168,17 @@ async function checkMcpTools(
       .slice(0, 5)
       .map(
         ([name, info]) =>
-          `${name}: ${info.count} tools (~${info.tokens.toLocaleString()} tokens)`,
+          t('doctorContextWarnings.mcpToolsDetail', { name, count: info.count, tokens: info.tokens.toLocaleString() }),
       )
 
     if (sortedServers.length > 5) {
-      details.push(`(${sortedServers.length - 5} more servers)`)
+      details.push(t('doctorContextWarnings.moreServers', { count: sortedServers.length - 5 }))
     }
 
     return {
       type: 'mcp_tools',
       severity: 'warning',
-      message: `Large MCP tools context (~${mcpToolTokens.toLocaleString()} tokens > ${MCP_TOOLS_THRESHOLD.toLocaleString()})`,
+      message: t('doctorContextWarnings.largeMcpTools', { toolTokens: mcpToolTokens.toLocaleString(), threshold: MCP_TOOLS_THRESHOLD.toLocaleString() }),
       details,
       currentValue: mcpToolTokens,
       threshold: MCP_TOOLS_THRESHOLD,
@@ -196,9 +197,9 @@ async function checkMcpTools(
     return {
       type: 'mcp_tools',
       severity: 'warning',
-      message: `Large MCP tools context (~${estimatedTokens.toLocaleString()} tokens estimated > ${MCP_TOOLS_THRESHOLD.toLocaleString()})`,
+      message: t('doctorContextWarnings.largeMcpToolsEstimated', { toolTokens: estimatedTokens.toLocaleString(), threshold: MCP_TOOLS_THRESHOLD.toLocaleString() }),
       details: [
-        `${mcpTools.length} MCP tools detected (token count estimated)`,
+        t('doctorContextWarnings.mcpToolsDetectedEstimated', { count: mcpTools.length }),
       ],
       currentValue: estimatedTokens,
       threshold: MCP_TOOLS_THRESHOLD,
@@ -226,14 +227,14 @@ async function checkUnreachableRules(
   }
 
   const details = unreachable.flatMap(r => [
-    `${permissionRuleValueToString(r.rule.ruleValue)}: ${r.reason}`,
-    `  Fix: ${r.fix}`,
+    t('doctorContextWarnings.unreachableRuleDetail', { ruleValue: permissionRuleValueToString(r.rule.ruleValue), reason: r.reason }),
+    t('doctorContextWarnings.unreachableRuleFix', { fix: r.fix }),
   ])
 
   return {
     type: 'unreachable_rules',
     severity: 'warning',
-    message: `${unreachable.length} ${plural(unreachable.length, 'unreachable permission rule')} detected`,
+    message: t('doctorContextWarnings.unreachableRules', { count: unreachable.length }),
     details,
     currentValue: unreachable.length,
     threshold: 0,

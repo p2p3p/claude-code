@@ -4,11 +4,12 @@ import {
   isKairosCronEnabled,
 } from '@claude-code-best/builtin-tools/tools/ScheduleCronTool/prompt.js'
 import { registerBundledSkill } from '../bundledSkills.js'
+import { t } from '../../utils/i18n/index.js'
 
 export function registerCronListSkill(): void {
   registerBundledSkill({
     name: 'cron-list',
-    description: 'List all scheduled cron jobs in this session',
+    description: t('cmd.descCronList'),
     whenToUse:
       'When the user wants to see their scheduled/recurring tasks, check active cron jobs, or review what is currently looping.',
     userInvocable: true,
@@ -27,7 +28,7 @@ export function registerCronListSkill(): void {
 export function registerCronDeleteSkill(): void {
   registerBundledSkill({
     name: 'cron-delete',
-    description: 'Cancel a scheduled cron job by ID',
+    description: t('cmd.descCronDelete'),
     whenToUse:
       'When the user wants to cancel, stop, or remove a scheduled/recurring task or cron job.',
     argumentHint: '<job-id>',

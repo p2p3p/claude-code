@@ -22,6 +22,7 @@ import {
 
 import * as childProcess from 'node:child_process'
 import { promisify } from 'node:util'
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * Sanitizes an error message before surfacing it to the user:
@@ -256,8 +257,7 @@ function parseShareArgs(args: string): ShareOptions {
 const share: Command = {
   type: 'local',
   name: 'share',
-  description:
-    'Upload the current session log to GitHub Gist. Flags: --public, --private (default), --mask-secrets, --summary-only, --allow-public-fallback',
+  description: t('cmd.descShare'),
   isHidden: false,
   isEnabled: () => true,
   supportsNonInteractive: true,
@@ -268,15 +268,7 @@ const share: Command = {
       if (!opts.valid) {
         return {
           type: 'text',
-          value: [
-            'Usage: /share [--public|--private] [--mask-secrets] [--summary-only] [--allow-public-fallback]',
-            '',
-            '  --public               Create a public Gist (default: secret)',
-            '  --private              Create a secret Gist (default)',
-            '  --mask-secrets         Redact API keys, tokens, and secrets before uploading',
-            '  --summary-only         Upload a summary (first 200 chars per turn) instead of full log',
-            '  --allow-public-fallback  Fall back to 0x0.st if gh gist fails',
-          ].join('\n'),
+          value: t('shareCmd.usage'),
         }
       }
 
@@ -303,12 +295,12 @@ const share: Command = {
         return {
           type: 'text',
           value: [
-            '## Session log not found',
+            t('shareCmd.sessionLogNotFound'),
             '',
-            `Session: ${sessionId}`,
-            `Expected path: \`${logPath}\``,
+            t('shareCmd.session', sessionId),
+            t('shareCmd.expectedPath', logPath),
             '',
-            'The session log may not have been written yet. Try sending at least one message first.',
+            t('shareCmd.logNotWrittenYet'),
           ].join('\n'),
         }
       }
@@ -322,21 +314,21 @@ const share: Command = {
         return {
           type: 'text',
           value: [
-            '## Share session log',
+            t('shareCmd.shareSessionLog'),
             '',
-            `Session: ${sessionId}`,
-            `Log file: \`${logPath}\``,
+            t('shareCmd.session', sessionId),
+            t('shareCmd.logFile', logPath),
             '',
-            'To upload to GitHub Gist automatically, install the `gh` CLI:',
+            t('shareCmd.installGhCli'),
             '  https://cli.github.com/',
             '',
-            'Then run:',
-            `  \`gh gist create "${logPath}" --secret --filename claude-session.jsonl\``,
+            t('shareCmd.thenRun'),
+            t('shareCmd.runGhCommand', logPath),
             '',
-            'Or use `--allow-public-fallback` to upload to 0x0.st instead.',
+            t('shareCmd.orUseFallback'),
             '',
-            '_Privacy note: the JSONL contains everything typed in this session,_',
-            '_including tool outputs. Review before sharing._',
+            t('shareCmd.privacyNote1'),
+            t('shareCmd.privacyNote2'),
           ].join('\n'),
         }
       }
@@ -348,7 +340,7 @@ const share: Command = {
         if (!uploadContent) {
           return {
             type: 'text',
-            value: 'No conversation content found in session log.',
+            value: t('shareCmd.noConversationContent'),
           }
         }
       } else {
@@ -371,7 +363,7 @@ const share: Command = {
         const msg = sanitizeErrorMessage(
           writeErr instanceof Error ? writeErr.message : String(writeErr),
         )
-        return { type: 'text', value: `Failed to prepare share file: ${msg}` }
+        return { type: 'text', value: t('shareCmd.failedPrepare', msg) }
       }
 
       try {
@@ -404,16 +396,16 @@ const share: Command = {
         return {
           type: 'text',
           value: [
-            '## Session shared',
+            t('shareCmd.sessionShared'),
             '',
-            `URL:        ${url}`,
-            `Session:    ${sessionId}`,
-            `Visibility: ${opts.isPublic ? 'public' : 'secret'}`,
-            `Method:     ${method}`,
-            opts.summaryOnly ? 'Content:    summary only (truncated)' : '',
-            opts.maskSecrets ? 'Secrets:    masked before upload' : '',
+            t('shareCmd.urlLabel', url),
+            t('shareCmd.session', sessionId),
+            t('shareCmd.visibility', opts.isPublic ? 'public' : 'secret'),
+            t('shareCmd.method', method),
+            opts.summaryOnly ? t('shareCmd.contentSummaryOnly') : '',
+            opts.maskSecrets ? t('shareCmd.secretsMasked') : '',
             '',
-            '_Privacy note: the JSONL contains everything typed in this session._',
+            t('shareCmd.privacyNote'),
           ]
             .filter(l => l !== '')
             .join('\n'),
@@ -427,14 +419,14 @@ const share: Command = {
         return {
           type: 'text',
           value: [
-            '## Failed to share session',
+            t('shareCmd.failedShare'),
             '',
-            `Error: ${msg}`,
+            t('shareCmd.errorLabel', msg),
             '',
             hasGh
-              ? 'Make sure you are logged in: `gh auth login`'
-              : 'Install the `gh` CLI: https://cli.github.com/',
-            `Log file: \`${logPath}\``,
+              ? t('shareCmd.makeSureLoggedIn')
+              : t('shareCmd.installGhCliHint'),
+            t('shareCmd.logFile', logPath),
           ].join('\n'),
         }
       } finally {

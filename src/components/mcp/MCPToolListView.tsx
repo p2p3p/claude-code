@@ -5,6 +5,7 @@ import { filterToolsByServer } from '../../services/mcp/utils.js';
 import { useAppState } from '../../state/AppState.js';
 import type { Tool } from '../../Tool.js';
 import { plural } from '../../utils/stringUtils.js';
+import { t } from '../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Select } from '../CustomSelect/index.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
@@ -59,13 +60,13 @@ export function MCPToolListView({ server, onSelectTool, onBack }: Props): React.
           <Byline>
             <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
             <KeyboardShortcutHint shortcut="Enter" action="select" />
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.back')} />
           </Byline>
         )
       }
     >
       {serverTools.length === 0 ? (
-        <Text dimColor>No tools available</Text>
+        <Text dimColor>{t('mcptoollistview.noToolsAvailable')}</Text>
       ) : (
         <Select
           options={toolOptions}

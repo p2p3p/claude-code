@@ -9,6 +9,7 @@ import {
   updateSettingsForSource,
 } from '../../utils/settings/settings.js'
 import { isVoiceAvailable } from '../../voice/voiceModeEnabled.js'
+import { t } from '../../utils/i18n/index.js'
 
 const LANG_HINT_MAX_SHOWS = 2
 
@@ -17,7 +18,7 @@ export const call: LocalCommandCall = async args => {
   if (!isVoiceAvailable()) {
     return {
       type: 'text' as const,
-      value: 'Voice mode is not available.',
+      value: t('voiceCmd.notAvailable'),
     }
   }
 
@@ -33,15 +34,14 @@ export const call: LocalCommandCall = async args => {
     if (result.error) {
       return {
         type: 'text' as const,
-        value:
-          'Failed to update settings. Check your settings file for syntax errors.',
+        value: t('voiceCmd.updateFailed'),
       }
     }
     settingsChangeDetector.notifyChange('userSettings')
     const key = getShortcutDisplay('voice:pushToTalk', 'Chat', 'Space')
     return {
       type: 'text' as const,
-      value: `Voice mode switched to Doubao ASR. Hold ${key} to record.`,
+      value: t('voiceCmd.switchedDoubao', key),
     }
   }
 
@@ -53,15 +53,14 @@ export const call: LocalCommandCall = async args => {
     if (result.error) {
       return {
         type: 'text' as const,
-        value:
-          'Failed to update settings. Check your settings file for syntax errors.',
+        value: t('voiceCmd.updateFailed'),
       }
     }
     settingsChangeDetector.notifyChange('userSettings')
     const key = getShortcutDisplay('voice:pushToTalk', 'Chat', 'Space')
     return {
       type: 'text' as const,
-      value: `Voice mode switched to Anthropic STT. Hold ${key} to record.`,
+      value: t('voiceCmd.switchedAnthropic', key),
     }
   }
 
@@ -73,15 +72,14 @@ export const call: LocalCommandCall = async args => {
     if (result.error) {
       return {
         type: 'text' as const,
-        value:
-          'Failed to update settings. Check your settings file for syntax errors.',
+        value: t('voiceCmd.updateFailed'),
       }
     }
     settingsChangeDetector.notifyChange('userSettings')
     logEvent('tengu_voice_toggled', { enabled: false })
     return {
       type: 'text' as const,
-      value: 'Voice mode disabled.',
+      value: t('voiceCmd.disabled'),
     }
   }
 
@@ -100,7 +98,7 @@ export const call: LocalCommandCall = async args => {
     return {
       type: 'text' as const,
       value:
-        recording.reason ?? 'Voice mode is not available in this environment.',
+        recording.reason ?? t('voiceCmd.notAvailableEnv'),
     }
   }
 
@@ -109,7 +107,7 @@ export const call: LocalCommandCall = async args => {
     return {
       type: 'text' as const,
       value:
-        'Voice mode requires a Claude.ai account. Please run /login to sign in.',
+        t('voiceCmd.requiresLogin'),
     }
   }
 
@@ -120,11 +118,11 @@ export const call: LocalCommandCall = async args => {
   const deps = await checkVoiceDependencies()
   if (!deps.available) {
     const hint = deps.installCommand
-      ? `\nInstall audio recording tools? Run: ${deps.installCommand}`
-      : '\nInstall SoX manually for audio recording.'
+      ? t('voiceCmd.installHintCmd', deps.installCommand)
+      : t('voiceCmd.installSoX')
     return {
       type: 'text' as const,
-      value: `No audio recording tool found.${hint}`,
+      value: `${t('voiceCmd.noAudioTool')}${hint}`,
     }
   }
 
@@ -133,15 +131,15 @@ export const call: LocalCommandCall = async args => {
   if (!(await requestMicrophonePermission())) {
     let guidance: string
     if (process.platform === 'win32') {
-      guidance = 'Settings \u2192 Privacy \u2192 Microphone'
+      guidance = t('voiceCmd.guidanceWindows')
     } else if (process.platform === 'linux') {
-      guidance = "your system's audio settings"
+      guidance = t('voiceCmd.guidanceLinux')
     } else {
-      guidance = 'System Settings \u2192 Privacy & Security \u2192 Microphone'
+      guidance = t('voiceCmd.guidanceMac')
     }
     return {
       type: 'text' as const,
-      value: `Microphone access is denied. To enable it, go to ${guidance}, then run /voice again.`,
+      value: t('voiceCmd.micDenied', guidance),
     }
   }
 
@@ -154,7 +152,7 @@ export const call: LocalCommandCall = async args => {
     return {
       type: 'text' as const,
       value:
-        'Failed to update settings. Check your settings file for syntax errors.',
+        t('voiceCmd.updateFailed'),
     }
   }
   settingsChangeDetector.notifyChange('userSettings')
@@ -164,15 +162,15 @@ export const call: LocalCommandCall = async args => {
   const providerLabel = provider === 'doubao' ? 'Doubao ASR' : 'Anthropic'
   // Doubao backend handles all languages natively — skip language hints
   if (provider !== 'doubao') {
-    const stt = normalizeLanguageForSTT(currentSettings.language)
+    const stt = normalizeLanguageForSTT(getGlobalConfig().preferredLanguage)
     const cfg = getGlobalConfig()
     const langChanged = cfg.voiceLangHintLastLanguage !== stt.code
     const priorCount = langChanged ? 0 : (cfg.voiceLangHintShownCount ?? 0)
     const showHint = !stt.fellBackFrom && priorCount < LANG_HINT_MAX_SHOWS
     if (stt.fellBackFrom) {
-      langNote = ` Note: "${stt.fellBackFrom}" is not a supported dictation language; using English. Change it via /config.`
+      langNote = t('voiceCmd.langNoteFallback', stt.fellBackFrom)
     } else if (showHint) {
-      langNote = ` Dictation language: ${stt.code} (/config to change).`
+      langNote = t('voiceCmd.langNoteCode', stt.code)
     }
     if (langChanged || showHint) {
       saveGlobalConfig(prev => ({
@@ -184,6 +182,6 @@ export const call: LocalCommandCall = async args => {
   }
   return {
     type: 'text' as const,
-    value: `Voice mode enabled (${providerLabel}). Hold ${key} to record.${langNote}`,
+    value: `${t('voiceCmd.enabled', providerLabel, key)}${langNote}`,
   }
 }

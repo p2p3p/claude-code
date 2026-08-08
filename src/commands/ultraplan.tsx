@@ -30,6 +30,7 @@ import {
   type PromptIdentifier,
 } from '../utils/ultraplan/prompt.js';
 import { registerCleanup } from '../utils/cleanupRegistry.js';
+import { t } from '../utils/i18n/index.js';
 
 // TODO(prod-hardening): OAuth token may go stale over the 30min poll;
 // consider refresh.
@@ -361,7 +362,7 @@ async function launchDetached(opts: {
     let createFailMsg: string | undefined;
     const session = await teleportToRemote({
       initialMessage: prompt,
-      description: blurb || 'Refine local plan',
+      description: blurb || t('ultraplanCmd.refineLocalPlan'),
       permissionMode: 'plan',
       ultraplan: true,
       signal,

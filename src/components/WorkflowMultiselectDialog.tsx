@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import type { Workflow } from '../commands/install-github-app/types.js';
 import type { ExitState } from '../hooks/useExitOnCtrlCDWithKeybindings.js';
 import { Box, Link, Text, Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
+import { t } from '../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { SelectMulti } from './CustomSelect/SelectMulti.js';
 
@@ -18,24 +19,24 @@ type Props = {
 const WORKFLOWS: WorkflowOption[] = [
   {
     value: 'claude' as const,
-    label: '@Claude Code - Tag @claude in issues and PR comments',
+    label: t('workflowMultiselect.workflowClaude'),
   },
   {
     value: 'claude-review' as const,
-    label: 'Claude Code Review - Automated code review on new PRs',
+    label: t('workflowMultiselect.workflowReview'),
   },
 ];
 
 function renderInputGuide(exitState: ExitState): React.ReactNode {
   if (exitState.pending) {
-    return <Text>Press {exitState.keyName} again to exit</Text>;
+    return <Text>{t('common.pressAgain', exitState.keyName)}</Text>;
   }
   return (
     <Byline>
       <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
       <KeyboardShortcutHint shortcut="Space" action="toggle" />
       <KeyboardShortcutHint shortcut="Enter" action="confirm" />
-      <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+      <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
     </Byline>
   );
 }
@@ -66,8 +67,8 @@ export function WorkflowMultiselectDialog({ onSubmit, defaultSelections }: Props
 
   return (
     <Dialog
-      title="Select GitHub workflows to install"
-      subtitle="We'll create a workflow file in your repository for each one you select."
+      title={t('workflowmultiselectdialog.selectGitHubWorkflowsToInstall')}
+      subtitle={t('workflowmultiselectdialog.weLlCreateAWorkflowFileInYourRepositoryForEachOneYouSelect')}
       onCancel={handleCancel}
       inputGuide={renderInputGuide}
     >
@@ -94,7 +95,7 @@ export function WorkflowMultiselectDialog({ onSubmit, defaultSelections }: Props
 
       {showError && (
         <Box>
-          <Text color="error">You must select at least one workflow to continue</Text>
+          <Text color="error">{t('workflowmultiselectdialog.youMustSelectAtLeastOneWorkflowToContinue')}</Text>
         </Box>
       )}
     </Dialog>

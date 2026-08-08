@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { getMcpConfigsByScope } from 'src/services/mcp/config.js';
 import type { ConfigScope } from 'src/services/mcp/types.js';
 import { describeMcpConfigFilePath, getScopeLabel } from 'src/services/mcp/utils.js';
@@ -30,7 +31,7 @@ function McpConfigErrorSection({
         <Text>{getScopeLabel(scope)}</Text>
       </Box>
       <Box>
-        <Text dimColor>Location: </Text>
+        <Text dimColor>{t('mcpparsingwarnings.location')} </Text>
         <Text dimColor>{describeMcpConfigFilePath(scope)}</Text>
       </Box>
       <Box marginLeft={1} flexDirection="column">
@@ -40,7 +41,7 @@ function McpConfigErrorSection({
             <Box key={`error-${i}`}>
               <Text>
                 <Text dimColor>└ </Text>
-                <Text color="error">[Error]</Text>
+                <Text color="error">{t('keybindingWarnings.error')}</Text>
                 <Text dimColor>
                   {' '}
                   {serverName && `[${serverName}] `}
@@ -100,7 +101,7 @@ export function McpParsingWarnings(): React.ReactNode {
 
   return (
     <Box flexDirection="column" marginTop={1} marginBottom={1}>
-      <Text bold>MCP Config Diagnostics</Text>
+      <Text bold>{t('mcpparsingwarnings.mCPConfigDiagnostics')}</Text>
       <Box marginTop={1}>
         <Text dimColor>
           For help configuring MCP servers, see:{' '}

@@ -11,6 +11,7 @@ import { applyPermissionUpdate, persistPermissionUpdate } from '../../utils/perm
 import type { PermissionUpdateDestination } from '../../utils/permissions/PermissionUpdateSchema.js';
 import { SandboxManager } from '../../utils/sandbox/sandbox-adapter.js';
 import { addDirHelpMessage, validateDirectoryForWorkspace } from './validation.js';
+import { t } from '../../utils/i18n/index.js'
 
 function AddDirError({
   message,

@@ -8,6 +8,7 @@ import { getDisplayPath } from 'src/utils/file.js';
 import { formatFileSize } from 'src/utils/format.js';
 import { formatBriefTimestamp } from 'src/utils/formatBriefTimestamp.js';
 import type { Output } from './BriefTool.js';
+import { t } from 'src/utils/i18n/index.js';
 
 export function renderToolUseMessage(): React.ReactNode {
   return '';
@@ -50,7 +51,7 @@ export function renderToolResultMessage(
     return (
       <Box flexDirection="column" marginTop={1} paddingLeft={2}>
         <Box flexDirection="row">
-          <Text color="briefLabelClaude">Claude</Text>
+          <Text color="briefLabelClaude">{t('toolUI.brief.claude')}</Text>
           {ts ? <Text dimColor> {ts}</Text> : null}
         </Box>
         <Box flexDirection="column">
@@ -91,7 +92,7 @@ export function AttachmentList({ attachments }: AttachmentListProps): React.Reac
       {attachments.map(att => (
         <Box key={att.path} flexDirection="row">
           <Text dimColor>
-            {figures.pointerSmall} {att.isImage ? '[image]' : '[file]'}{' '}
+            {figures.pointerSmall} {att.isImage ? t('toolUI.brief.image') : t('toolUI.brief.file')}{' '}
           </Text>
           <Text>{getDisplayPath(att.path)}</Text>
           <Text dimColor> ({formatFileSize(att.size)})</Text>

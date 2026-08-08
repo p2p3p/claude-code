@@ -32,6 +32,7 @@ import {
   enqueuePendingNotification,
   hasCommandsInQueue,
 } from '../utils/messageQueueManager.js'
+import { t } from '../utils/i18n/index.js'
 import { emitTaskTerminatedSdk } from '../utils/sdkEventQueue.js'
 
 /** Time window in ms during which a second press kills all background agents. */
@@ -230,7 +231,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
     if (!hasRunningAgents) {
       addNotification({
         key: 'kill-agents-none',
-        text: 'No background agents running',
+        text: t('notif.cancelRequest.noAgentsRunning'),
         priority: 'immediate',
         timeoutMs: 2000,
       })
@@ -259,7 +260,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
     )
     addNotification({
       key: 'kill-agents-confirm',
-      text: `Press ${shortcut} again to stop background agents`,
+      text: t('notif.cancelRequest.pressAgain', { shortcut }),
       priority: 'immediate',
       timeoutMs: KILL_AGENTS_CONFIRM_WINDOW_MS,
     })

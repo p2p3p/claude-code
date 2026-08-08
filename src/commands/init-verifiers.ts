@@ -1,10 +1,10 @@
 import type { Command } from '../commands.js'
+import { t } from '../utils/i18n/index.js'
 
 const command = {
   type: 'prompt',
   name: 'init-verifiers',
-  description:
-    'Create verifier skill(s) for automated verification of code changes',
+  description: t('cmd.descInitVerifiers'),
   contentLength: 0, // Dynamic content
   progressMessage: 'analyzing your project and creating verifier skills',
   source: 'builtin',

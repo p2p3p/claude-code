@@ -6,6 +6,7 @@ import {
   type AgentMemoryScope,
   loadAgentMemoryPrompt,
 } from '@claude-code-best/builtin-tools/tools/AgentTool/agentMemory.js';
+import { t } from '../../../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { Select } from '../../../CustomSelect/select.js';
 import { useWizard } from '../../../wizard/index.js';
@@ -29,21 +30,21 @@ export function MemoryStep(): ReactNode {
   const memoryOptions: MemoryOption[] = isUserScope
     ? [
         {
-          label: 'User scope (~/.claude/agent-memory/) (Recommended)',
+          label: t('agentMemoryStep.userScopeRecommended'),
           value: 'user',
         },
-        { label: 'None (no persistent memory)', value: 'none' },
-        { label: 'Project scope (.claude/agent-memory/)', value: 'project' },
-        { label: 'Local scope (.claude/agent-memory-local/)', value: 'local' },
+        { label: t('agentMemoryStep.none'), value: 'none' },
+        { label: t('agentMemoryStep.projectScope'), value: 'project' },
+        { label: t('agentMemoryStep.localScope'), value: 'local' },
       ]
     : [
         {
-          label: 'Project scope (.claude/agent-memory/) (Recommended)',
+          label: t('agentMemoryStep.projectScopeRecommended'),
           value: 'project',
         },
-        { label: 'None (no persistent memory)', value: 'none' },
-        { label: 'User scope (~/.claude/agent-memory/)', value: 'user' },
-        { label: 'Local scope (.claude/agent-memory-local/)', value: 'local' },
+        { label: t('agentMemoryStep.none'), value: 'none' },
+        { label: t('agentMemoryStep.userScope'), value: 'user' },
+        { label: t('agentMemoryStep.localScope'), value: 'local' },
       ];
 
   const handleSelect = (value: string): void => {
@@ -69,12 +70,12 @@ export function MemoryStep(): ReactNode {
 
   return (
     <WizardDialogLayout
-      subtitle="Configure agent memory"
+      subtitle={t('memorystep.configureAgentMemory')}
       footerText={
         <Byline>
           <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
           <KeyboardShortcutHint shortcut="Enter" action="select" />
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="go back" />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.goBack')} />
         </Byline>
       }
     >

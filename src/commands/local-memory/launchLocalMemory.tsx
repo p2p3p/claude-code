@@ -15,9 +15,9 @@ import TextInput from '../../components/TextInput.js';
 import { LocalMemoryView } from './LocalMemoryView.js';
 import { parseLocalMemoryArgs } from './parseArgs.js';
 import { launchCommand } from '../_shared/launchCommand.js';
+import { t } from '../../utils/i18n/index.js'
 
-const USAGE =
-  'Usage: /local-memory list | create STORE | store STORE KEY VALUE | fetch STORE KEY | entries STORE | archive STORE';
+const USAGE = t('localMemory.usage');
 
 type LocalMemoryViewProps = React.ComponentProps<typeof LocalMemoryView>;
 
@@ -31,16 +31,16 @@ const ACTION_LABEL_COLUMN_WIDTH = 26;
 
 function formatStoreList(stores: string[]): string {
   if (stores.length === 0) {
-    return 'No memory stores found.';
+    return t('localMemory.noStoresFound');
   }
-  return ['Local Memory Stores', ...stores.map(store => `- ${store}`)].join('\n');
+  return [t('localMemory.storeListHeader'), ...stores.map(store => `- ${store}`)].join('\n');
 }
 
 function formatEntryList(store: string, keys: string[]): string {
   if (keys.length === 0) {
-    return `No entries in "${store}".`;
+    return t('localMemory.noEntriesIn', store);
   }
-  return [`Entries in "${store}"`, ...keys.map(key => `- ${key}`)].join('\n');
+  return [t('localMemory.entriesIn', store), ...keys.map(key => `- ${key}`)].join('\n');
 }
 
 // ── Interactive multi-step panel ───────────────────────────────────────────
@@ -76,36 +76,36 @@ const MENU: Array<{
   label: string;
   description: string;
 }> = [
-  { kind: 'list', label: 'List', description: 'Show all stores' },
+  { kind: 'list', label: t('localMemory.list'), description: t('localMemory.listDesc') },
   {
     kind: 'create',
-    label: 'Create',
-    description: 'Create a new memory store',
+    label: t('localMemory.create'),
+    description: t('localMemory.createDesc'),
   },
   {
     kind: 'store',
-    label: 'Store',
-    description: 'Write an entry: store name + key + value',
+    label: t('localMemory.store'),
+    description: t('localMemory.storeDesc'),
   },
   {
     kind: 'fetch',
-    label: 'Fetch',
-    description: 'Read an entry by store name + key',
+    label: t('localMemory.fetch'),
+    description: t('localMemory.fetchDesc'),
   },
   {
     kind: 'entries',
-    label: 'Entries',
-    description: 'List entry keys in a store',
+    label: t('localMemory.entries'),
+    description: t('localMemory.entriesDesc'),
   },
   {
     kind: 'archive',
-    label: 'Archive',
-    description: 'Archive a store (rename to *.archived)',
+    label: t('localMemory.archive'),
+    description: t('localMemory.archiveDesc'),
   },
   {
     kind: 'about',
-    label: 'About',
-    description: 'Show command syntax',
+    label: t('localMemory.about'),
+    description: t('localMemory.aboutDesc'),
   },
 ];
 
@@ -295,9 +295,9 @@ function LocalMemoryPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
   if (step.kind === 'menu') {
     return (
       <Dialog
-        title="Local Memory"
-        subtitle={`${MENU.length} actions`}
-        onCancel={() => closeWith('Local memory panel dismissed')}
+        title={t("cmdSystemUI.localMemoryTitle")}
+        subtitle={t('localMemory.actionsCount', MENU.length)}
+        onCancel={() => closeWith(t('cmdSystemUI.localMemoryTitle') + ' panel dismissed')}
         color="background"
         hideInputGuide
       >
@@ -309,7 +309,7 @@ function LocalMemoryPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
             </Box>
           ))}
           <Box marginTop={1}>
-            <Text dimColor>↑/↓ or 1-7 select · Enter run · Esc close</Text>
+            <Text dimColor>{t('localMemory.navHint')}</Text>
           </Box>
         </Box>
       </Dialog>
@@ -319,11 +319,11 @@ function LocalMemoryPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
   // Confirmation prompts
   if (step.kind === 'confirm-archive') {
     return (
-      <Dialog title="Confirm Archive" onCancel={() => transition({ kind: 'menu' })} color="warning" hideInputGuide>
+      <Dialog title={t("cmdSystemUI.confirmArchive")} onCancel={() => transition({ kind: 'menu' })} color="warning" hideInputGuide>
         <Box flexDirection="column">
-          <Text>Archive store "{step.store}"? This renames it to *.archived.</Text>
+          <Text>{t('localMemory.archivePrompt', step.store)}</Text>
           <Box marginTop={1}>
-            <Text dimColor>y/Enter = archive · n/Esc = cancel</Text>
+            <Text dimColor>{t('localMemory.archiveKeysHint')}</Text>
           </Box>
         </Box>
       </Dialog>
@@ -331,13 +331,13 @@ function LocalMemoryPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
   }
   if (step.kind === 'confirm-overwrite') {
     return (
-      <Dialog title="Confirm Overwrite" onCancel={() => transition({ kind: 'menu' })} color="warning" hideInputGuide>
+      <Dialog title={t("cmdSystemUI.confirmOverwrite")} onCancel={() => transition({ kind: 'menu' })} color="warning" hideInputGuide>
         <Box flexDirection="column">
           <Text>
-            Entry "{step.store}/{step.key}" already exists. Overwrite with new value ({step.value.length} chars)?
+            {t('localMemory.overwritePrompt', step.store, step.key, step.value.length)}
           </Text>
           <Box marginTop={1}>
-            <Text dimColor>y/Enter = overwrite · n/Esc = cancel</Text>
+            <Text dimColor>{t('localMemory.overwriteKeysHint')}</Text>
           </Box>
         </Box>
       </Dialog>
@@ -345,22 +345,22 @@ function LocalMemoryPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
   }
 
   // collect-* steps share the same TextInput render
-  const fieldLabel = step.kind === 'collect-store' ? 'STORE NAME' : step.kind === 'collect-key' ? 'KEY NAME' : 'VALUE';
+  const fieldLabel = step.kind === 'collect-store' ? t('localMemory.storeName') : step.kind === 'collect-key' ? t('localMemory.keyName') : t('localMemory.value');
   const placeholder =
     step.kind === 'collect-store'
-      ? 'e.g. my-notes'
+      ? t('localMemory.storePlaceholder')
       : step.kind === 'collect-key'
-        ? 'e.g. todo-2026-05-08'
-        : 'free text';
+        ? t('localMemory.keyPlaceholder')
+        : t('localMemory.valuePlaceholder');
   const validateAndAdvance = (raw: string) => {
     const trimmed = raw.trim();
     if (step.kind === 'collect-store') {
       if (!trimmed) {
-        setError('Store name required');
+        setError(t('localMemory.storeNameRequired'));
         return;
       }
       if (!isValidStoreName(trimmed)) {
-        setError('Invalid store name (no /, \\, :, null byte, or leading dot; max 255 chars)');
+        setError(t('localMemory.invalidStoreName'));
         return;
       }
       // Action-specific completion
@@ -382,11 +382,11 @@ function LocalMemoryPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
     }
     if (step.kind === 'collect-key') {
       if (!trimmed) {
-        setError('Key required');
+        setError(t('localMemory.keyRequired'));
         return;
       }
       if (!isValidKey(trimmed)) {
-        setError('Invalid key (allowed: letters/digits/._- only; no leading dot; not a Windows reserved name)');
+        setError(t('localMemory.invalidKey'));
         return;
       }
       if (step.action === 'fetch') {
@@ -410,7 +410,7 @@ function LocalMemoryPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
 
   return (
     <Dialog
-      title={`Local Memory · ${step.kind.replace('collect-', '').toUpperCase()}`}
+      title={t('localMemory.stepTitle', step.kind.replace('collect-', '').toUpperCase())}
       onCancel={() => transition({ kind: 'menu' })}
       color="background"
       hideInputGuide
@@ -441,7 +441,7 @@ function LocalMemoryPanel({ onDone }: { onDone: LocalJSXCommandOnDone }): React.
           </Box>
         )}
         <Box marginTop={1}>
-          <Text dimColor>Enter = next · Esc = back</Text>
+          <Text dimColor>{t('localMemory.nextBackHint')}</Text>
         </Box>
       </Box>
     </Dialog>

@@ -3,6 +3,7 @@ import { MessageResponse } from 'src/components/MessageResponse.js';
 import { Text, stringWidth } from '@anthropic/ink';
 import { truncateToWidthNoEllipsis } from 'src/utils/format.js';
 import type { Output } from './TaskStopTool.js';
+import { t } from 'src/utils/i18n/index.js';
 
 export function renderToolUseMessage(): React.ReactNode {
   return '';
@@ -37,7 +38,7 @@ export function renderToolResultMessage(
 
   const rawCommand = output.command ?? '';
   const command = verbose ? rawCommand : truncateCommand(rawCommand);
-  const suffix = command !== rawCommand ? '… · stopped' : ' · stopped';
+  const suffix = command !== rawCommand ? `…${t('toolUI.taskStop.stopped')}` : t('toolUI.taskStop.stopped');
 
   return (
     <MessageResponse>

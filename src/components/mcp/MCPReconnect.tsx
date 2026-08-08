@@ -4,6 +4,7 @@ import type { CommandResultDisplay } from '../../commands.js';
 import { Box, color, Text, useTheme } from '@anthropic/ink';
 import { useMcpReconnect } from '../../services/mcp/MCPConnectionManager.js';
 import { useAppStateStore } from '../../state/AppState.js';
+import { t } from '../../utils/i18n/index.js';
 import { Spinner } from '../Spinner.js';
 
 type Props = {
@@ -69,11 +70,11 @@ export function MCPReconnect({ serverName, onComplete }: Props): React.ReactNode
     return (
       <Box flexDirection="column" gap={1} padding={1}>
         <Text color="text">
-          Reconnecting to <Text bold>{serverName}</Text>
+          {t('mcpReconnect.reconnectingTo')}<Text bold>{serverName}</Text>
         </Text>
         <Box>
           <Spinner />
-          <Text> Establishing connection to MCP server</Text>
+          <Text> {t('mcpReconnect.establishingConnection')}</Text>
         </Box>
       </Box>
     );

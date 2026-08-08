@@ -8,6 +8,7 @@ import {
   getSourceDisplayName,
   type SettingSource,
 } from 'src/utils/settings/constants.js'
+import { t } from '../../../../../src/utils/i18n/index.js'
 import type { AgentDefinition } from './loadAgentsDir.js'
 
 type AgentSource = SettingSource | 'built-in' | 'plugin'
@@ -22,13 +23,13 @@ export type AgentSourceGroup = {
  * Both the CLI and interactive UI should use this to ensure consistent ordering.
  */
 export const AGENT_SOURCE_GROUPS: AgentSourceGroup[] = [
-  { label: 'User agents', source: 'userSettings' },
-  { label: 'Project agents', source: 'projectSettings' },
-  { label: 'Local agents', source: 'localSettings' },
-  { label: 'Managed agents', source: 'policySettings' },
-  { label: 'Plugin agents', source: 'plugin' },
-  { label: 'CLI arg agents', source: 'flagSettings' },
-  { label: 'Built-in agents', source: 'built-in' },
+  { label: t('agentDisplay.user'), source: 'userSettings' },
+  { label: t('agentDisplay.project'), source: 'projectSettings' },
+  { label: t('agentDisplay.local'), source: 'localSettings' },
+  { label: t('agentDisplay.managed'), source: 'policySettings' },
+  { label: t('agentDisplay.plugin'), source: 'plugin' },
+  { label: t('agentDisplay.cliArg'), source: 'flagSettings' },
+  { label: t('agentDisplay.builtin'), source: 'built-in' },
 ]
 
 export type ResolvedAgent = AgentDefinition & {
