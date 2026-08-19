@@ -5,6 +5,7 @@ import { MessageResponse } from 'src/components/MessageResponse.js';
 import { OutputLine } from 'src/components/shell/OutputLine.js';
 import { ShellTimeDisplay } from 'src/components/shell/ShellTimeDisplay.js';
 import { Box, Text } from '@anthropic/ink';
+import { t } from 'src/utils/i18n/index.js';
 import type { Out as BashOut } from './BashTool.js';
 
 type Props = {
@@ -83,7 +84,7 @@ export default function BashToolResultMessage({
   if (isImage) {
     return (
       <MessageResponse height={1}>
-        <Text dimColor>[Image data detected and sent to Claude]</Text>
+        <Text dimColor>{t('toolUI.bash.imageDetected')}</Text>
       </MessageResponse>
     );
   }
@@ -102,10 +103,11 @@ export default function BashToolResultMessage({
           <Text dimColor>
             {backgroundTaskId ? (
               <>
-                Running in the background <KeyboardShortcutHint shortcut="↓" action="manage" parens />
+                {t('toolUI.bash.runningInBackground')}
+                <KeyboardShortcutHint shortcut="↓" action="manage" parens />
               </>
             ) : (
-              returnCodeInterpretation || (noOutputExpected ? 'Done' : '(No output)')
+              returnCodeInterpretation || (noOutputExpected ? t('toolUI.bash.done') : t('toolUI.bash.noOutput'))
             )}
           </Text>
         </MessageResponse>

@@ -7,8 +7,7 @@ import { getWorktreePathsPortable } from '../utils/getWorktreePathsPortable.js'
 import { lazySchema } from '../utils/lazySchema.js'
 import {
   getProjectsDir,
-  sanitizePath,
-} from '../utils/sessionStoragePortable.js'
+  sanitizePath} from '../utils/sessionStoragePortable.js'
 import { jsonParse, jsonStringify } from '../utils/slowOperations.js'
 
 /**
@@ -43,8 +42,7 @@ const BridgePointerSchema = lazySchema(() =>
   z.object({
     sessionId: z.string(),
     environmentId: z.string(),
-    source: z.enum(['standalone', 'repl']),
-  }),
+    source: z.enum(['standalone', 'repl'])}),
 )
 
 export type BridgePointer = z.infer<ReturnType<typeof BridgePointerSchema>>
@@ -195,8 +193,7 @@ export async function clearBridgePointer(dir: string): Promise<void> {
   } catch (err: unknown) {
     if (!isENOENT(err)) {
       logForDebugging(`[bridge:pointer] clear failed: ${err}`, {
-        level: 'warn',
-      })
+        level: 'warn'})
     }
   }
 }

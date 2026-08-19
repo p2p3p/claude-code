@@ -2,10 +2,10 @@ import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
 import { useInterval } from 'usehooks-ts';
 import { useUpdateNotification } from '../hooks/useUpdateNotification.js';
+import { t } from '../utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import {
   type AutoUpdaterResult,
@@ -13,8 +13,7 @@ import {
   getMaxVersion,
   type InstallStatus,
   installGlobalPackage,
-  shouldSkipVersion,
-} from '../utils/autoUpdater.js';
+  shouldSkipVersion} from '../utils/autoUpdater.js';
 import { getGlobalConfig, isAutoUpdaterDisabled } from '../utils/config.js';
 import { logForDebugging } from '../utils/debug.js';
 import { getCurrentInstallationType } from '../utils/doctorDiagnostic.js';
@@ -38,8 +37,7 @@ export function AutoUpdater({
   onAutoUpdaterResult,
   autoUpdaterResult,
   showSuccessMessage,
-  verbose,
-}: Props): React.ReactNode {
+  verbose}: Props): React.ReactNode {
   const [versions, setVersions] = useState<{
     global?: string | null;
     latest?: string | null;
@@ -161,8 +159,7 @@ export function AutoUpdater({
           toVersion: latestVersion as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           durationMs: Date.now() - startTime,
           wasMigrated: updateMethod === 'local',
-          installationType: installationType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        });
+          installationType: installationType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       } else {
         logEvent('tengu_auto_updater_fail', {
           fromVersion: currentVersion as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -170,14 +167,12 @@ export function AutoUpdater({
           status: installStatus as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           durationMs: Date.now() - startTime,
           wasMigrated: updateMethod === 'local',
-          installationType: installationType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        });
+          installationType: installationType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       }
 
       onAutoUpdaterResult({
         version: latestVersion,
-        status: installStatus,
-      });
+        status: installStatus});
     }
     // isUpdating intentionally omitted from deps; we read isUpdatingRef
     // instead so the guard is always current without changing callback
@@ -212,7 +207,7 @@ export function AutoUpdater({
         <>
           <Box>
             <Text color="text" dimColor wrap="truncate">
-              Auto-updating…
+              {t('autoupdater.autoUpdating')}
             </Text>
           </Box>
         </>
@@ -221,13 +216,13 @@ export function AutoUpdater({
         showSuccessMessage &&
         updateSemver && (
           <Text color="success" wrap="truncate">
-            ✓ Update installed · Restart to apply
+            {t('autoupdater.updateInstalledRestartToApply')}
           </Text>
         )
       )}
       {(autoUpdaterResult?.status === 'install_failed' || autoUpdaterResult?.status === 'no_permissions') && (
         <Text color="error" wrap="truncate">
-          ✗ Auto-update failed &middot; Try <Text bold>claude doctor</Text> or{' '}
+          {t('autoupdater.updateFailedDoctor')}{' '}
           <Text bold>
             {hasLocalInstall
               ? `cd ~/.claude/local && npm update ${MACRO.PACKAGE_URL}`

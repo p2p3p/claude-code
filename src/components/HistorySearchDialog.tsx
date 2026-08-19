@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../utils/i18n/index.js'
 import { useEffect, useMemo, useState } from 'react';
 import { useRegisterOverlay } from '../context/overlayContext.js';
 import { getTimestampedHistory, type TimestampedHistoryEntry } from '../history.js';
@@ -51,8 +52,7 @@ export function HistorySearchDialog({ initialQuery, onSelect, onCancel }: Props)
           display,
           lower: display.toLowerCase(),
           firstLine: nl === -1 ? display : display.slice(0, nl),
-          age: age + ' '.repeat(Math.max(0, AGE_WIDTH - stringWidth(age))),
-        });
+          age: age + ' '.repeat(Math.max(0, AGE_WIDTH - stringWidth(age)))});
       }
       if (!cancelled) setItems(loaded);
     })();
@@ -84,8 +84,8 @@ export function HistorySearchDialog({ initialQuery, onSelect, onCancel }: Props)
 
   return (
     <FuzzyPicker
-      title="Search prompts"
-      placeholder="Filter history…"
+      title={t('historysearchdialog.searchPrompts')}
+      placeholder={t('historysearchdialog.filterHistory')}
       initialQuery={initialQuery}
       items={filtered}
       getKey={item => String(item.entry.timestamp)}
@@ -93,13 +93,12 @@ export function HistorySearchDialog({ initialQuery, onSelect, onCancel }: Props)
       onSelect={item => {
         logEvent('tengu_history_picker_select', {
           result_count: filtered.length,
-          query_length: query.length,
-        });
+          query_length: query.length});
         void item.entry.resolve().then(onSelect);
       }}
       onCancel={onCancel}
-      emptyMessage={q => (items === null ? 'Loading…' : q ? 'No matching prompts' : 'No history yet')}
-      selectAction="use"
+      emptyMessage={q => (items === null ? t('historySearch.loading') : q ? t('historySearch.noMatchingPrompts') : t('historySearch.noHistory'))}
+      selectAction={t('historysearchdialog.use')}
       direction="up"
       previewPosition={previewOnRight ? 'right' : 'bottom'}
       renderItem={(item, isFocused) => (
@@ -122,7 +121,7 @@ export function HistorySearchDialog({ initialQuery, onSelect, onCancel }: Props)
                 {row}
               </Text>
             ))}
-            {more > 0 && <Text dimColor>{`… +${more} more lines`}</Text>}
+            {more > 0 && <Text dimColor>{t('historysearchdialog.moreLines', more)}</Text>}
           </Box>
         );
       }}

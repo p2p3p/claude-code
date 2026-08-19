@@ -10,8 +10,7 @@ import {
   getMockHeaderless429Message,
   getMockHeaders,
   isMockFastModeRateLimitScenario,
-  shouldProcessMockLimits,
-} from './mockRateLimits.js'
+  shouldProcessMockLimits} from './mockRateLimits.js'
 
 /**
  * Process headers, applying mocks if /mock-limits command is active

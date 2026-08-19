@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { getSlowOperations } from '../bootstrap/state.js';
 import { Text, useInterval } from '@anthropic/ink';
+import { t } from '../utils/i18n/index.js';
 
 // Show DevBar for dev builds or all ants
 function shouldShowDevBar(): boolean {
@@ -38,7 +39,8 @@ export function DevBar(): React.ReactNode {
 
   return (
     <Text wrap="truncate-end" color="warning">
-      [ANT-ONLY] slow sync: {recentOps}
+      [ANT-ONLY] {t('devBar.slowSync')}
+      {recentOps}
     </Text>
   );
 }

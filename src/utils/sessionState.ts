@@ -129,8 +129,7 @@ function normalizeAutomationState(
     next_tick_at:
       typeof state.next_tick_at === 'number' ? state.next_tick_at : null,
     sleep_until:
-      typeof state.sleep_until === 'number' ? state.sleep_until : null,
-  }
+      typeof state.sleep_until === 'number' ? state.sleep_until : null}
 }
 
 function automationStateKey(state: AutomationStateMetadata | null): string {
@@ -179,8 +178,7 @@ export function notifySessionStateChanged(
   if (state === 'requires_action' && details) {
     hasPendingAction = true
     notifySessionMetadataChanged({
-      pending_action: details,
-    })
+      pending_action: details})
   } else if (hasPendingAction) {
     hasPendingAction = false
     notifySessionMetadataChanged({ pending_action: null })
@@ -199,8 +197,7 @@ export function notifySessionStateChanged(
             enabled: true,
             phase: null,
             next_tick_at: null,
-            sleep_until: null,
-          }
+            sleep_until: null}
         : null,
     )
   }
@@ -218,8 +215,7 @@ export function notifySessionStateChanged(
     enqueueSdkEvent({
       type: 'system',
       subtype: 'session_state_changed',
-      state,
-    })
+      state})
   }
 }
 

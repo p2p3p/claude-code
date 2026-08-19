@@ -4,8 +4,7 @@ import { Box, Text } from '@anthropic/ink';
 import {
   AGENT_COLOR_TO_THEME_COLOR,
   AGENT_COLORS,
-  type AgentColorName,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js';
+  type AgentColorName} from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js';
 import type { PromptInputMode } from 'src/types/textInputTypes.js';
 import { getTeammateColor } from 'src/utils/teammate.js';
 import type { Theme } from 'src/utils/theme.js';
@@ -63,8 +62,7 @@ export function PromptInputModeIndicator({
   mode,
   isLoading,
   viewingAgentName,
-  viewingAgentColor,
-}: Props): React.ReactNode {
+  viewingAgentColor}: Props): React.ReactNode {
   const teammateColor = getTeammateThemeColor();
 
   // Convert viewed teammate's color to theme color

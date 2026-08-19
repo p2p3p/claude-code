@@ -86,8 +86,7 @@ function computeTurnStats(turn: TurnDiff): void {
   turn.stats = {
     filesChanged: turn.files.size,
     linesAdded: totalAdded,
-    linesRemoved: totalRemoved,
-  }
+    linesRemoved: totalRemoved}
 }
 
 /**
@@ -102,8 +101,7 @@ export function useTurnDiffs(messages: Message[]): TurnDiff[] {
     completedTurns: [],
     currentTurn: null,
     lastProcessedIndex: 0,
-    lastTurnIndex: 0,
-  })
+    lastTurnIndex: 0})
 
   return useMemo(() => {
     const c = cache.current
@@ -140,8 +138,7 @@ export function useTurnDiffs(messages: Message[]): TurnDiff[] {
           userPromptPreview: getUserPromptPreview(message),
           timestamp: message.timestamp as string,
           files: new Map(),
-          stats: { filesChanged: 0, linesAdded: 0, linesRemoved: 0 },
-        }
+          stats: { filesChanged: 0, linesAdded: 0, linesRemoved: 0 }}
       } else if (c.currentTurn && message.toolUseResult) {
         // Collect file edits from tool results
         const result = message.toolUseResult
@@ -157,8 +154,7 @@ export function useTurnDiffs(messages: Message[]): TurnDiff[] {
               hunks: [],
               isNewFile,
               linesAdded: 0,
-              linesRemoved: 0,
-            }
+              linesRemoved: 0}
             c.currentTurn.files.set(filePath, fileEntry)
           }
 
@@ -175,8 +171,7 @@ export function useTurnDiffs(messages: Message[]): TurnDiff[] {
               oldLines: 0,
               newStart: 1,
               newLines: lines.length,
-              lines: lines.map(l => '+' + l),
-            }
+              lines: lines.map(l => '+' + l)}
             fileEntry.hunks.push(syntheticHunk)
             fileEntry.linesAdded += lines.length
           } else {

@@ -76,8 +76,7 @@ function parseOscRgb(data: string): Rgb | undefined {
     return {
       r: hexComponent(rgbMatch[1]!),
       g: hexComponent(rgbMatch[2]!),
-      b: hexComponent(rgbMatch[3]!),
-    }
+      b: hexComponent(rgbMatch[3]!)}
   }
   // #RRGGBB or #RRRRGGGGBBBB — split into three equal hex runs.
   const hashMatch = /^#([0-9a-f]+)$/i.exec(data)
@@ -87,8 +86,7 @@ function parseOscRgb(data: string): Rgb | undefined {
     return {
       r: hexComponent(hex.slice(0, n)),
       g: hexComponent(hex.slice(n, 2 * n)),
-      b: hexComponent(hex.slice(2 * n)),
-    }
+      b: hexComponent(hex.slice(2 * n))}
   }
   return undefined
 }

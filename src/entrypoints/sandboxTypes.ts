@@ -36,8 +36,7 @@ export const SandboxNetworkConfigSchema = lazySchema(() =>
         ),
       allowLocalBinding: z.boolean().optional(),
       httpProxyPort: z.number().optional(),
-      socksProxyPort: z.number().optional(),
-    })
+      socksProxyPort: z.number().optional()})
     .optional(),
 )
 
@@ -80,8 +79,7 @@ export const SandboxFilesystemConfigSchema = lazySchema(() =>
         .optional()
         .describe(
           'When true (set in managed settings), only allowRead paths from policySettings are used.',
-        ),
-    })
+        )})
     .optional(),
 )
 
@@ -135,11 +133,9 @@ export const SandboxSettingsSchema = lazySchema(() =>
       ripgrep: z
         .object({
           command: z.string(),
-          args: z.array(z.string()).optional(),
-        })
+          args: z.array(z.string()).optional()})
         .optional()
-        .describe('Custom ripgrep configuration for bundled ripgrep support'),
-    })
+        .describe('Custom ripgrep configuration for bundled ripgrep support')})
     .passthrough(),
 )
 

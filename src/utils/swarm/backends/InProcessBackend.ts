@@ -1,26 +1,22 @@
 import type { ToolUseContext } from '../../../Tool.js'
 import {
   findTeammateTaskByAgentId,
-  requestTeammateShutdown,
-} from '../../../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
+  requestTeammateShutdown} from '../../../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
 import { parseAgentId } from '../../../utils/agentId.js'
 import { logForDebugging } from '../../../utils/debug.js'
 import { jsonStringify } from '../../../utils/slowOperations.js'
 import {
   createShutdownRequestMessage,
-  writeToMailbox,
-} from '../../../utils/teammateMailbox.js'
+  writeToMailbox} from '../../../utils/teammateMailbox.js'
 import { startInProcessTeammate } from '../inProcessRunner.js'
 import {
   killInProcessTeammate,
-  spawnInProcessTeammate,
-} from '../spawnInProcess.js'
+  spawnInProcessTeammate} from '../spawnInProcess.js'
 import type {
   TeammateExecutor,
   TeammateMessage,
   TeammateSpawnConfig,
-  TeammateSpawnResult,
-} from './types.js'
+  TeammateSpawnResult} from './types.js'
 
 /**
  * InProcessBackend implements TeammateExecutor for in-process teammates.
@@ -78,8 +74,7 @@ export class InProcessBackend implements TeammateExecutor {
         success: false,
         agentId: `${config.name}@${config.teamName}`,
         error:
-          'InProcessBackend not initialized. Call setContext() before spawn().',
-      }
+          'InProcessBackend not initialized. Call setContext() before spawn().'}
     }
 
     logForDebugging(`[InProcessBackend] spawn() called for ${config.name}`)
@@ -91,8 +86,7 @@ export class InProcessBackend implements TeammateExecutor {
         prompt: config.prompt,
         color: config.color,
         planModeRequired: config.planModeRequired ?? false,
-        model: config.model,
-      },
+        model: config.model},
       this.context,
     )
 
@@ -112,8 +106,7 @@ export class InProcessBackend implements TeammateExecutor {
           teamName: config.teamName,
           color: config.color,
           planModeRequired: config.planModeRequired ?? false,
-          parentSessionId: result.teammateContext.parentSessionId,
-        },
+          parentSessionId: result.teammateContext.parentSessionId},
         taskId: result.taskId,
         prompt: config.prompt,
         description: config.description,
@@ -129,8 +122,7 @@ export class InProcessBackend implements TeammateExecutor {
         systemPromptMode: config.systemPromptMode,
         allowedTools: config.permissions,
         allowPermissionPrompts: config.allowPermissionPrompts,
-        invokingRequestId: config.invokingRequestId,
-      })
+        invokingRequestId: config.invokingRequestId})
 
       logForDebugging(
         `[InProcessBackend] Started agent execution for ${result.agentId}`,
@@ -144,8 +136,7 @@ export class InProcessBackend implements TeammateExecutor {
       abortController: result.abortController,
       backendType: this.type,
       color: config.color,
-      error: result.error,
-    }
+      error: result.error}
   }
 
   /**
@@ -177,8 +168,7 @@ export class InProcessBackend implements TeammateExecutor {
         text: message.text,
         from: message.from,
         color: message.color,
-        timestamp: message.timestamp ?? new Date().toISOString(),
-      },
+        timestamp: message.timestamp ?? new Date().toISOString()},
       teamName,
     )
 
@@ -233,8 +223,7 @@ export class InProcessBackend implements TeammateExecutor {
     const shutdownRequest = createShutdownRequestMessage({
       requestId,
       from: 'team-lead', // Terminate is always called by the leader
-      reason,
-    })
+      reason})
 
     // Send to teammate's mailbox
     const teammateAgentName = task.identity.agentName
@@ -243,8 +232,7 @@ export class InProcessBackend implements TeammateExecutor {
       {
         from: 'team-lead',
         text: jsonStringify(shutdownRequest),
-        timestamp: new Date().toISOString(),
-      },
+        timestamp: new Date().toISOString()},
       task.identity.teamName,
     )
 

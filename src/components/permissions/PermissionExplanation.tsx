@@ -3,24 +3,23 @@ import { Box, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import { logEvent } from '../../services/analytics/index.js';
 import type { Message } from '../../types/message.js';
+import { t } from '../../utils/i18n/index.js';
 import {
   generatePermissionExplanation,
   isPermissionExplainerEnabled,
   type PermissionExplanation as PermissionExplanationType,
-  type RiskLevel,
-} from '../../utils/permissions/permissionExplainer.js';
+  type RiskLevel} from '../../utils/permissions/permissionExplainer.js';
 import { ShimmerChar } from '../Spinner/ShimmerChar.js';
 import { useShimmerAnimation } from '../Spinner/useShimmerAnimation.js';
 
-const LOADING_MESSAGE = 'Loading explanation…';
-
 function ShimmerLoadingText(): React.ReactNode {
-  const [ref, glimmerIndex] = useShimmerAnimation('responding', LOADING_MESSAGE, false);
+  const loadingMessage = t('permissions.loadingExplanation');
+  const [ref, glimmerIndex] = useShimmerAnimation('responding', loadingMessage, false);
 
   return (
     <Box ref={ref}>
       <Text>
-        {LOADING_MESSAGE.split('').map((char, index) => (
+        {loadingMessage.split('').map((char, index) => (
           <ShimmerChar
             key={index}
             char={char}
@@ -49,11 +48,11 @@ function getRiskColor(riskLevel: RiskLevel): 'success' | 'warning' | 'error' {
 function getRiskLabel(riskLevel: RiskLevel): string {
   switch (riskLevel) {
     case 'LOW':
-      return 'Low risk';
+      return t('permissions.lowRisk');
     case 'MEDIUM':
-      return 'Med risk';
+      return t('permissions.medRisk');
     case 'HIGH':
-      return 'High risk';
+      return t('permissions.highRisk');
   }
 }
 
@@ -123,7 +122,7 @@ function ExplanationResult({ promise }: { promise: Promise<PermissionExplanation
   if (!explanation) {
     return (
       <Box marginTop={1}>
-        <Text dimColor>Explanation unavailable</Text>
+        <Text dimColor>{t('permissions.explanationUnavailable')}</Text>
       </Box>
     );
   }
@@ -149,8 +148,7 @@ function ExplanationResult({ promise }: { promise: Promise<PermissionExplanation
  */
 export function PermissionExplainerContent({
   visible,
-  promise,
-}: {
+  promise}: {
   visible: boolean;
   promise: Promise<PermissionExplanationType | null> | null;
 }): React.ReactNode {

@@ -4,12 +4,11 @@ import type { Message } from '../types/message.js'
 import { logForDebugging } from '../utils/debug.js'
 import {
   createUserMessage,
-  getAssistantMessageText,
-} from '../utils/messages.js'
+  getAssistantMessageText} from '../utils/messages.js'
 import { getSmallFastModel } from '../utils/model/model.js'
 import { asSystemPrompt } from '../utils/systemPromptType.js'
 import { getResolvedLanguage } from '../utils/language.js'
-import { queryModelWithoutStreaming } from './api/claude.js'
+import { queryModelWithoutStreaming } from './api/anthropic/index.js'
 import { createTrace, endTrace, isLangfuseEnabled } from './langfuse/index.js'
 import { getSessionId } from '../bootstrap/state.js'
 import { getAPIProvider } from '../utils/model/providers.js'
@@ -51,8 +50,7 @@ export async function generateAwaySummary(
         sessionId: getSessionId(),
         model,
         provider: getAPIProvider(),
-        name: 'away-summary',
-      })
+        name: 'away-summary'})
     : null
 
   try {
@@ -75,9 +73,7 @@ export async function generateAwaySummary(
         querySource: 'away_summary',
         mcpTools: [],
         skipCacheWrite: true,
-        langfuseTrace,
-      },
-    })
+        langfuseTrace}})
 
     if (response.isApiErrorMessage) {
       logForDebugging(

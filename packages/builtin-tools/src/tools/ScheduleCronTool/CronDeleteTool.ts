@@ -1,6 +1,7 @@
 import { z } from 'zod/v4'
 import type { ValidationResult } from 'src/Tool.js'
 import { buildTool, type ToolDef } from 'src/Tool.js'
+import { t } from 'src/utils/i18n/index.js'
 import {
   getCronFilePath,
   listAllCronTasks,
@@ -64,7 +65,7 @@ export const CronDeleteTool = buildTool({
     if (!task) {
       return {
         result: false,
-        message: `No scheduled job with id '${input.id}'`,
+        message: t('toolUI.cronDelete.noJob', { id: input.id }),
         errorCode: 1,
       }
     }
@@ -73,7 +74,7 @@ export const CronDeleteTool = buildTool({
     if (ctx && task.agentId !== ctx.agentId) {
       return {
         result: false,
-        message: `Cannot delete cron job '${input.id}': owned by another agent`,
+        message: t('toolUI.cronDelete.ownedByAnother', { id: input.id }),
         errorCode: 2,
       }
     }

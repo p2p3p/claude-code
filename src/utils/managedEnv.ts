@@ -4,15 +4,25 @@ import { getGlobalConfig } from './config.js'
 import { isEnvTruthy } from './envUtils.js'
 import {
   isProviderManagedEnvVar,
-  SAFE_ENV_VARS,
-} from './managedEnvConstants.js'
+  SAFE_ENV_VARS} from './managedEnvConstants.js'
 import { clearMTLSCache } from './mtls.js'
 import { clearProxyCache, configureGlobalAgents } from './proxy.js'
 import { isSettingSourceEnabled } from './settings/constants.js'
 import {
   getSettings_DEPRECATED,
-  getSettingsForSource,
-} from './settings/settings.js'
+  getSettingsForSource} from './settings/settings.js'
+import {
+  ensureApiKeyGroupEnv,
+  getCurrentActive,
+  registerAccountEffects,
+  restore,
+  toKeyGroupProviderKey,
+  type EnvProviderKey} from '../accounts/index.js'
+import { getAPIProvider } from './model/providers.js'
+import { clearOpenAIClientCache } from '../services/api/openai/client.js'
+import { clearGrokClientCache } from '../services/api/grok/client.js'
+import { clearApiKeyHelperCache } from './auth.js'
+import { setMainLoopModelOverride } from '../bootstrap/state.js'
 
 /**
  * `claude ssh` remote: ANTHROPIC_UNIX_SOCKET routes auth through a -R forwarded
@@ -26,7 +36,7 @@ function withoutSSHTunnelVars(
   if (!env || !process.env.ANTHROPIC_UNIX_SOCKET) return env || {}
   const {
     ANTHROPIC_UNIX_SOCKET: _1,
-    ANTHROPIC_BASE_URL: _2,
+    BASE_URL: _2,
     ANTHROPIC_API_KEY: _3,
     ANTHROPIC_AUTH_TOKEN: _4,
     CLAUDE_CODE_OAUTH_TOKEN: _5,
@@ -100,7 +110,7 @@ function filterSettingsEnv(
  *
  * Project-scoped sources (projectSettings, localSettings) are excluded because they live
  * inside the project directory and could be committed by a malicious actor to redirect
- * traffic (e.g., ANTHROPIC_BASE_URL) to an attacker-controlled server.
+ * traffic (e.g., BASE_URL) to an attacker-controlled server.
  */
 const TRUSTED_SETTING_SOURCES = [
   'userSettings',
@@ -111,10 +121,10 @@ const TRUSTED_SETTING_SOURCES = [
 /**
  * Apply environment variables from trusted sources to process.env.
  * Called before the trust dialog so that user/enterprise env vars like
- * ANTHROPIC_BASE_URL take effect during first-run/onboarding.
+ * BASE_URL take effect during first-run/onboarding.
  *
  * For trusted sources (user settings, managed settings, CLI flags), ALL env vars
- * are applied — including ones like ANTHROPIC_BASE_URL that would be dangerous
+ * are applied — including ones like BASE_URL that would be dangerous
  * from project-scoped settings.
  *
  * For project-scoped sources (projectSettings, localSettings), only safe env vars
@@ -150,7 +160,7 @@ export function applySafeConfigEnvironmentVariables(): void {
 
   // Compute remote-managed-settings eligibility now, with userSettings and
   // flagSettings env applied. Eligibility reads CLAUDE_CODE_USE_BEDROCK,
-  // ANTHROPIC_BASE_URL — both settable via settings.env.
+  // BASE_URL — both settable via settings.env.
   // getSettingsForSource('policySettings') below consults the remote cache,
   // which guards on this. The two-phase structure makes the ordering
   // dependency visible: non-policy env → eligibility → policy env.
@@ -169,10 +179,15 @@ export function applySafeConfigEnvironmentVariables(): void {
   // unchanged (it has the highest merge priority in both loops) — except
   // provider-routing vars, which filterSettingsEnv strips from every source
   // when CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST is set.
-  const settingsEnv = filterSettingsEnv(getSettings_DEPRECATED()?.env)
-  for (const [key, value] of Object.entries(settingsEnv)) {
-    if (SAFE_ENV_VARS.has(key.toUpperCase())) {
-      process.env[key] = value
+  // settings.env is the account registry ({... , current}); its runtime env is
+  // injected by ensureApiKeyGroupEnv, not flat-scanned here.
+  const userEnv = getSettings_DEPRECATED()?.env
+  if (!getCurrentActive()) {
+    const settingsEnv = filterSettingsEnv(userEnv)
+    for (const [key, value] of Object.entries(settingsEnv)) {
+      if (SAFE_ENV_VARS.has(key.toUpperCase())) {
+        process.env[key] = value
+      }
     }
   }
 }
@@ -185,9 +200,41 @@ export function applySafeConfigEnvironmentVariables(): void {
  * dangerous environment variables such as LD_PRELOAD, PATH, etc.
  */
 export function applyConfigEnvironmentVariables(): void {
+  // Host-side wiring for account effects: this runs after trust is established
+  // on every entry path (CLI / TUI / ACP), so it's the stable mount point.
+  registerAccountEffects({
+    onEnvChanged(provider) {
+      switch (provider) {
+        case 'openai':
+          clearOpenAIClientCache()
+          break
+        case 'grok':
+          clearGrokClientCache()
+          break
+        case 'anthropic':
+          clearApiKeyHelperCache()
+          break
+        case 'gemini':
+          // Stateless fetch — reads env on every request, nothing to clear.
+          break
+      }
+    },
+    onModelOverride(model) {
+      setMainLoopModelOverride(model)
+    }})
+
   Object.assign(process.env, filterSettingsEnv(getGlobalConfig().env))
 
-  Object.assign(process.env, filterSettingsEnv(getSettings_DEPRECATED()?.env))
+  // Restore + repair the session's account before injecting its env.
+  restore()
+
+  // settings.env is the structured account registry ({openai: [...], current: {...}}).
+  // Inject the active platform's runtime env from the session-scoped current —
+  // the sole authority. No legacy flat-env block exists anymore.
+  if (getCurrentActive()) {
+    const provider = toKeyGroupProviderKey(getAPIProvider())
+    if (provider) ensureApiKeyGroupEnv(provider)
+  }
 
   // Clear caches so agents are rebuilt with the new env vars
   clearCACertsCache()

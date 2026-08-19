@@ -80,8 +80,7 @@ export function SelectMulti<T>({
   hideIndexes = false,
   onImagePaste,
   pastedContents,
-  onRemoveImage,
-}: SelectMultiProps<T>): React.ReactNode {
+  onRemoveImage}: SelectMultiProps<T>): React.ReactNode {
   const state = useMultiSelectState<T>({
     isDisabled,
     visibleOptionCount,
@@ -96,8 +95,7 @@ export function SelectMulti<T>({
     onDownFromLastItem,
     onUpFromFirstItem,
     initialFocusLast,
-    hideIndexes,
-  });
+    hideIndexes});
 
   const maxIndexWidth = options.length.toString().length;
 

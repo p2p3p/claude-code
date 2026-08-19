@@ -13,13 +13,11 @@ import type {
   SandboxAskCallback,
   SandboxDependencyCheck,
   SandboxRuntimeConfig,
-  SandboxViolationEvent,
-} from '@anthropic-ai/sandbox-runtime'
+  SandboxViolationEvent} from '@anthropic-ai/sandbox-runtime'
 import {
   SandboxManager as BaseSandboxManager,
   SandboxRuntimeConfigSchema,
-  SandboxViolationStore,
-} from '@anthropic-ai/sandbox-runtime'
+  SandboxViolationStore} from '@anthropic-ai/sandbox-runtime'
 import { rmSync, statSync } from 'fs'
 import { readFile } from 'fs/promises'
 import { memoize } from 'lodash-es'
@@ -27,8 +25,7 @@ import { join, resolve, sep } from 'path'
 import {
   getAdditionalDirectoriesForClaudeMd,
   getCwdState,
-  getOriginalCwd,
-} from '../../bootstrap/state.js'
+  getOriginalCwd} from '../../bootstrap/state.js'
 import { logForDebugging } from '../debug.js'
 import { expandPath } from '../path.js'
 import { getPlatform, type Platform } from '../platform.js'
@@ -41,8 +38,7 @@ import {
   getSettingsFilePathForSource,
   getSettingsForSource,
   getSettingsRootPathForSource,
-  updateSettingsForSource,
-} from '../settings/settings.js'
+  updateSettingsForSource} from '../settings/settings.js'
 import type { SettingsJson } from '../settings/types.js'
 
 // ============================================================================
@@ -353,8 +349,7 @@ export function convertToSandboxRuntimeConfig(
   const ripgrepConfig = settings.sandbox?.ripgrep ?? {
     command: rgPath,
     args: rgArgs,
-    argv0,
-  }
+    argv0}
 
   return {
     network: {
@@ -364,20 +359,17 @@ export function convertToSandboxRuntimeConfig(
       allowAllUnixSockets: settings.sandbox?.network?.allowAllUnixSockets,
       allowLocalBinding: settings.sandbox?.network?.allowLocalBinding,
       httpProxyPort: settings.sandbox?.network?.httpProxyPort,
-      socksProxyPort: settings.sandbox?.network?.socksProxyPort,
-    },
+      socksProxyPort: settings.sandbox?.network?.socksProxyPort},
     filesystem: {
       denyRead,
       allowRead,
       allowWrite,
-      denyWrite,
-    },
+      denyWrite},
     ignoreViolations: settings.sandbox?.ignoreViolations,
     enableWeakerNestedSandbox: settings.sandbox?.enableWeakerNestedSandbox,
     enableWeakerNetworkIsolation:
       settings.sandbox?.enableWeakerNetworkIsolation,
-    ripgrep: ripgrepConfig,
-  }
+    ripgrep: ripgrepConfig}
 }
 
 // ============================================================================
@@ -452,8 +444,7 @@ const checkDependencies = memoize((): SandboxDependencyCheck => {
   const { rgPath, rgArgs } = ripgrepCommand()
   return BaseSandboxManager.checkDependencies({
     command: rgPath,
-    args: rgArgs,
-  })
+    args: rgArgs})
 })
 
 function getSandboxEnabledSetting(): boolean {
@@ -681,13 +672,9 @@ async function setSandboxSettings(options: {
       ...existingSettings?.sandbox,
       ...(options.enabled !== undefined && { enabled: options.enabled }),
       ...(options.autoAllowBashIfSandboxed !== undefined && {
-        autoAllowBashIfSandboxed: options.autoAllowBashIfSandboxed,
-      }),
+        autoAllowBashIfSandboxed: options.autoAllowBashIfSandboxed}),
       ...(options.allowUnsandboxedCommands !== undefined && {
-        allowUnsandboxedCommands: options.allowUnsandboxedCommands,
-      }),
-    },
-  })
+        allowUnsandboxedCommands: options.allowUnsandboxedCommands})}})
 }
 
 /**
@@ -865,9 +852,7 @@ export function addToExcludedCommands(
     updateSettingsForSource('localSettings', {
       sandbox: {
         ...existingSettings?.sandbox,
-        excludedCommands: [...existingExcludedCommands, commandPattern],
-      },
-    })
+        excludedCommands: [...existingExcludedCommands, commandPattern]}})
   }
 
   return commandPattern
@@ -963,8 +948,7 @@ export const SandboxManager: ISandboxManager = {
   cleanupAfterCommand: (): void => {
     BaseSandboxManager.cleanupAfterCommand()
     scrubBareGitRepoFiles()
-  },
-}
+  }}
 
 // ============================================================================
 // Re-export types from sandbox-runtime
@@ -979,7 +963,6 @@ export type {
   NetworkHostPattern,
   SandboxViolationEvent,
   SandboxRuntimeConfig,
-  IgnoreViolationsConfig,
-}
+  IgnoreViolationsConfig}
 
 export { SandboxViolationStore, SandboxRuntimeConfigSchema }

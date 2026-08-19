@@ -1,8 +1,7 @@
 import { isEnvTruthy } from '../../utils/envUtils.js'
 import {
   isMediaSizeErrorMessage,
-  isPromptTooLongMessage,
-} from '../api/errors.js'
+  isPromptTooLongMessage} from '../api/errors.js'
 import type { AssistantMessage, Message } from '../../types/message.js'
 import { type CompactionResult, compactConversation } from './compact.js'
 import { logError } from '../../utils/log.js'
@@ -30,8 +29,7 @@ export const reactiveCompactOnPromptTooLong: (
           isRecompactionInChain: false,
           turnsSincePreviousCompact: 0,
           autoCompactThreshold: 0,
-          querySource: 'compact',
-        },
+          querySource: 'compact'},
       )
       return { ok: true, result }
     } catch (error) {
@@ -67,8 +65,7 @@ export const tryReactiveCompact: (params: {
   hasAttempted,
   aborted,
   messages,
-  cacheSafeParams,
-}) => {
+  cacheSafeParams}) => {
   if (hasAttempted || aborted) return null
   const params = cacheSafeParams as unknown as CacheSafeParams
   try {
@@ -82,8 +79,7 @@ export const tryReactiveCompact: (params: {
       {
         isRecompactionInChain: false,
         turnsSincePreviousCompact: 0,
-        autoCompactThreshold: 0,
-      },
+        autoCompactThreshold: 0},
     )
     return result
   } catch (error) {

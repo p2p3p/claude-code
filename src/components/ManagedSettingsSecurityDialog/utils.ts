@@ -1,7 +1,6 @@
 import {
   DANGEROUS_SHELL_SETTINGS,
-  SAFE_ENV_VARS,
-} from '../../utils/managedEnvConstants.js'
+  SAFE_ENV_VARS} from '../../utils/managedEnvConstants.js'
 import type { SettingsJson } from '../../utils/settings/types.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 
@@ -28,8 +27,7 @@ export function extractDangerousSettings(
     return {
       shellSettings: {},
       envVars: {},
-      hasHooks: false,
-    }
+      hasHooks: false}
   }
 
   // Extract dangerous shell settings
@@ -65,8 +63,7 @@ export function extractDangerousSettings(
     shellSettings,
     envVars,
     hasHooks,
-    hooks: hasHooks ? settings.hooks : undefined,
-  }
+    hooks: hasHooks ? settings.hooks : undefined}
 }
 
 /**
@@ -105,13 +102,11 @@ export function hasDangerousSettingsChanged(
   const oldJson = jsonStringify({
     shellSettings: oldDangerous.shellSettings,
     envVars: oldDangerous.envVars,
-    hooks: oldDangerous.hooks,
-  })
+    hooks: oldDangerous.hooks})
   const newJson = jsonStringify({
     shellSettings: newDangerous.shellSettings,
     envVars: newDangerous.envVars,
-    hooks: newDangerous.hooks,
-  })
+    hooks: newDangerous.hooks})
 
   return oldJson !== newJson
 }

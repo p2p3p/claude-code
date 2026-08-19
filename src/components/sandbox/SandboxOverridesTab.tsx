@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, color, Link, Text, useTheme, useTabHeaderFocus } from '@anthropic/ink';
 import type { CommandResultDisplay } from '../../types/command.js';
 import { SandboxManager } from '../../utils/sandbox/sandbox-adapter.js';
@@ -18,7 +19,7 @@ export function SandboxOverridesTab({ onComplete }: Props): React.ReactNode {
   if (!isEnabled) {
     return (
       <Box flexDirection="column" paddingY={1}>
-        <Text color="subtle">Sandbox is not enabled. Enable sandbox to configure override settings.</Text>
+        <Text color="subtle">{t('sandboxoverridestab.sandboxIsNotEnabledEnableSandboxToConfigureOverrideSettings')}</Text>
       </Box>
     );
   }
@@ -27,11 +28,11 @@ export function SandboxOverridesTab({ onComplete }: Props): React.ReactNode {
     return (
       <Box flexDirection="column" paddingY={1}>
         <Text color="subtle">
-          Override settings are managed by a higher-priority configuration and cannot be changed locally.
+          {t('sandboxoverridestab.overrideSettingsManaged')}
         </Text>
         <Box marginTop={1}>
           <Text dimColor>
-            Current setting: {currentAllowUnsandboxed ? 'Allow unsandboxed fallback' : 'Strict sandbox mode'}
+            {t('sandboxoverridestab.currentSetting')} {currentAllowUnsandboxed ? t('sandboxoverridestab.allowUnsandboxedFallback') : t('sandboxoverridestab.strictSandboxMode')}
           </Text>
         </Box>
       </Box>
@@ -51,26 +52,23 @@ function OverridesSelect({ onComplete, currentMode }: Props & { currentMode: Ove
 
   const options = [
     {
-      label: currentMode === 'open' ? `Allow unsandboxed fallback ${currentIndicator}` : 'Allow unsandboxed fallback',
-      value: 'open',
-    },
+      label: currentMode === 'open' ? `${t('sandboxoverridestab.allowUnsandboxedFallback')} ${currentIndicator}` : t('sandboxoverridestab.allowUnsandboxedFallback'),
+      value: 'open'},
     {
-      label: currentMode === 'closed' ? `Strict sandbox mode ${currentIndicator}` : 'Strict sandbox mode',
-      value: 'closed',
-    },
+      label: currentMode === 'closed' ? `${t('sandboxoverridestab.strictSandboxMode')} ${currentIndicator}` : t('sandboxoverridestab.strictSandboxMode'),
+      value: 'closed'},
   ];
 
   async function handleSelect(value: string) {
     const mode = value as OverrideMode;
 
     await SandboxManager.setSandboxSettings({
-      allowUnsandboxedCommands: mode === 'open',
-    });
+      allowUnsandboxedCommands: mode === 'open'});
 
     const message =
       mode === 'open'
-        ? '✓ Unsandboxed fallback allowed - commands can run outside sandbox when necessary'
-        : '✓ Strict sandbox mode - all commands must run in sandbox or be excluded via the `excludedCommands` option';
+        ? t('sandboxoverridestab.unsandboxedFallbackAllowed')
+        : t('sandboxoverridestab.strictSandboxModeDesc');
 
     onComplete(message);
   }
@@ -78,7 +76,7 @@ function OverridesSelect({ onComplete, currentMode }: Props & { currentMode: Ove
   return (
     <Box flexDirection="column" paddingY={1}>
       <Box marginBottom={1}>
-        <Text bold>Configure Overrides:</Text>
+        <Text bold>{t('sandboxoverridestab.configureOverrides')}</Text>
       </Box>
       <Select
         options={options}
@@ -90,10 +88,9 @@ function OverridesSelect({ onComplete, currentMode }: Props & { currentMode: Ove
       <Box flexDirection="column" marginTop={1} gap={1}>
         <Text dimColor>
           <Text bold dimColor>
-            Allow unsandboxed fallback:
+            {t('sandboxoverridestab.allowUnsandboxedFallbackLabel')}
           </Text>{' '}
-          When a command fails due to sandbox restrictions, Claude can retry with dangerouslyDisableSandbox to run
-          outside the sandbox (falling back to default permissions).
+          {t('sandboxoverridestab.whenCommandFailsDueToSandbox')}
         </Text>
         <Text dimColor>
           <Text bold dimColor>

@@ -9,8 +9,7 @@ import { isAgentMemoryPath } from '@claude-code-best/builtin-tools/tools/AgentTo
 import {
   CLAUDE_FOLDER_PERMISSION_PATTERN,
   FILE_EDIT_TOOL_NAME,
-  GLOBAL_CLAUDE_FOLDER_PERMISSION_PATTERN,
-} from '@claude-code-best/builtin-tools/tools/FileEditTool/constants.js'
+  GLOBAL_CLAUDE_FOLDER_PERMISSION_PATTERN} from '@claude-code-best/builtin-tools/tools/FileEditTool/constants.js'
 import type { z } from 'zod/v4'
 import { getOriginalCwd, getSessionId } from '../../bootstrap/state.js'
 import { checkStatsigFeatureGate_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
@@ -20,29 +19,25 @@ import { getCwd } from '../cwd.js'
 import { getClaudeConfigHomeDir } from '../envUtils.js'
 import {
   getFsImplementation,
-  getPathsForPermissionCheck,
-} from '../fsOperations.js'
+  getPathsForPermissionCheck} from '../fsOperations.js'
 import {
   containsPathTraversal,
   expandPath,
   getDirectoryForPath,
-  sanitizePath,
-} from '../path.js'
+  sanitizePath} from '../path.js'
 import { getPlanSlug, getPlansDirectory } from '../plans.js'
 import { getPlatform } from '../platform.js'
 import { getProjectDir } from '../sessionStorage.js'
 import { SETTING_SOURCES } from '../settings/constants.js'
 import {
   getSettingsFilePathForSource,
-  getSettingsRootPathForSource,
-} from '../settings/settings.js'
+  getSettingsRootPathForSource} from '../settings/settings.js'
 import { containsVulnerableUncPath } from '../shell/readOnlyCommandValidation.js'
 import { getToolResultsDir } from '../toolResultStorage.js'
 import { windowsPathToPosixPath } from '../windowsPaths.js'
 import type {
   PermissionDecision,
-  PermissionResult,
-} from './PermissionResult.js'
+  PermissionResult} from './PermissionResult.js'
 import type { PermissionRule, PermissionRuleSource } from './PermissionRule.js'
 import { createReadRuleSuggestion } from './PermissionUpdate.js'
 import type { PermissionUpdate } from './PermissionUpdateSchema.js'
@@ -107,12 +102,10 @@ export function getClaudeSkillScope(
   const bases = [
     {
       dir: expandPath(join(getOriginalCwd(), '.claude', 'skills')),
-      prefix: '/.claude/skills/',
-    },
+      prefix: '/.claude/skills/'},
     {
       dir: expandPath(join(homedir(), '.claude', 'skills')),
-      prefix: '~/.claude/skills/',
-    },
+      prefix: '~/.claude/skills/'},
   ]
 
   for (const { dir, prefix } of bases) {
@@ -587,7 +580,7 @@ function hasSuspiciousWindowsPathPattern(path: string): boolean {
   // Examples: .../file.txt, path/.../file
   // Only block when dots are preceded AND followed by path separators (/ or \)
   // This allows legitimate uses like Next.js catch-all routes [...]name]
-  if (/(^|\/|\\)\.{3,}(\/|\\|$)/.test(path)) {
+  if (/(^|\/|\\)\.{3}(\/|\\|$)/.test(path)) {
     return true
   }
 
@@ -633,8 +626,7 @@ export function checkPathSafetyForAutoEdit(
       return {
         safe: false,
         message: `Claude requested permissions to write to ${path}, which contains a suspicious Windows path pattern that requires manual approval.`,
-        classifierApprovable: false,
-      }
+        classifierApprovable: false}
     }
   }
 
@@ -644,8 +636,7 @@ export function checkPathSafetyForAutoEdit(
       return {
         safe: false,
         message: `Claude requested permissions to write to ${path}, but you haven't granted it yet.`,
-        classifierApprovable: true,
-      }
+        classifierApprovable: true}
     }
   }
 
@@ -655,8 +646,7 @@ export function checkPathSafetyForAutoEdit(
       return {
         safe: false,
         message: `Claude requested permissions to edit ${path} which is a sensitive file.`,
-        classifierApprovable: true,
-      }
+        classifierApprovable: true}
     }
   }
 
@@ -765,8 +755,7 @@ function prependDirSep(path: string): string {
 function normalizePatternToPath({
   patternRoot,
   pattern,
-  rootPath,
-}: {
+  rootPath}: {
   patternRoot: string
   pattern: string
   rootPath: string
@@ -815,8 +804,7 @@ export function normalizePatternsToPath(
       const normalizedPattern = normalizePatternToPath({
         patternRoot,
         pattern,
-        rootPath: root,
-      })
+        rootPath: root})
       if (normalizedPattern) {
         result.add(normalizedPattern)
       }
@@ -882,26 +870,22 @@ function patternWithRoot(
 
       return {
         relativePattern: relativeFromDrive,
-        root: driveRoot,
-      }
+        root: driveRoot}
     }
 
     return {
       relativePattern: patternWithoutDoubleSlash,
-      root: DIR_SEP,
-    }
+      root: DIR_SEP}
   } else if (pattern.startsWith(`~${DIR_SEP}`)) {
     // Patterns starting with ~/ resolve relative to homedir
     return {
       relativePattern: pattern.slice(1),
-      root: homedir().normalize('NFC'),
-    }
+      root: homedir().normalize('NFC')}
   } else if (pattern.startsWith(DIR_SEP)) {
     // Patterns starting with / resolve relative to the directory where settings are stored (without .claude/)
     return {
       relativePattern: pattern,
-      root: rootPathForSource(source),
-    }
+      root: rootPathForSource(source)}
   }
   // No root specified, put it with all the other patterns
   // Normalize patterns that start with "./" to remove the prefix
@@ -912,8 +896,7 @@ function patternWithRoot(
   }
   return {
     relativePattern: normalizedPattern,
-    root: null,
-  }
+    root: null}
 }
 
 function getPatternsByRoot(
@@ -1035,8 +1018,7 @@ export function checkReadPermissionForTool(
   if (typeof tool.getPath !== 'function') {
     return {
       behavior: 'ask',
-      message: `Claude requested permissions to use ${tool.name}, but you haven't granted it yet.`,
-    }
+      message: `Claude requested permissions to use ${tool.name}, but you haven't granted it yet.`}
   }
   const path = tool.getPath(input)
 
@@ -1057,9 +1039,7 @@ export function checkReadPermissionForTool(
         message: `Claude requested permissions to read from ${path}, which appears to be a UNC path that could access network resources.`,
         decisionReason: {
           type: 'other',
-          reason: 'UNC path detected (defense-in-depth check)',
-        },
-      }
+          reason: 'UNC path detected (defense-in-depth check)'}}
     }
   }
 
@@ -1072,9 +1052,7 @@ export function checkReadPermissionForTool(
         decisionReason: {
           type: 'other',
           reason:
-            'Path contains suspicious Windows-specific patterns (alternate data streams, short names, long path prefixes, or three or more consecutive dots) that require manual verification',
-        },
-      }
+            'Path contains suspicious Windows-specific patterns (alternate data streams, short names, long path prefixes, or three or more consecutive dots) that require manual verification'}}
     }
   }
 
@@ -1094,9 +1072,7 @@ export function checkReadPermissionForTool(
         message: `Permission to read ${path} has been denied.`,
         decisionReason: {
           type: 'rule',
-          rule: denyRule,
-        },
-      }
+          rule: denyRule}}
     }
   }
 
@@ -1115,9 +1091,7 @@ export function checkReadPermissionForTool(
         message: `Claude requested permissions to read from ${path}, but you haven't granted it yet.`,
         decisionReason: {
           type: 'rule',
-          rule: askRule,
-        },
-      }
+          rule: askRule}}
     }
   }
 
@@ -1145,9 +1119,7 @@ export function checkReadPermissionForTool(
       updatedInput: input,
       decisionReason: {
         type: 'mode',
-        mode: 'default',
-      },
-    }
+        mode: 'default'}}
   }
 
   // 7. Allow reads from internal harness paths (session-memory, plans, tool-results)
@@ -1170,9 +1142,7 @@ export function checkReadPermissionForTool(
       updatedInput: input,
       decisionReason: {
         type: 'rule',
-        rule: allowRule,
-      },
-    }
+        rule: allowRule}}
   }
 
   // 12. Default to asking for permission
@@ -1188,9 +1158,7 @@ export function checkReadPermissionForTool(
     ),
     decisionReason: {
       type: 'workingDir',
-      reason: 'Path is outside allowed working directories',
-    },
-  }
+      reason: 'Path is outside allowed working directories'}}
 }
 
 /**
@@ -1211,8 +1179,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
   if (typeof tool.getPath !== 'function') {
     return {
       behavior: 'ask',
-      message: `Claude requested permissions to use ${tool.name}, but you haven't granted it yet.`,
-    }
+      message: `Claude requested permissions to use ${tool.name}, but you haven't granted it yet.`}
   }
   const path = tool.getPath(input)
 
@@ -1232,9 +1199,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
         message: `Permission to edit ${path} has been denied.`,
         decisionReason: {
           type: 'rule',
-          rule: denyRule,
-        },
-      }
+          rule: denyRule}}
     }
   }
 
@@ -1264,9 +1229,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
     {
       ...toolPermissionContext,
       alwaysAllowRules: {
-        session: toolPermissionContext.alwaysAllowRules.session ?? [],
-      },
-    },
+        session: toolPermissionContext.alwaysAllowRules.session ?? []}},
     'edit',
     'allow',
   )
@@ -1293,9 +1256,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
         updatedInput: input,
         decisionReason: {
           type: 'rule',
-          rule: claudeFolderAllowRule,
-        },
-      }
+          rule: claudeFolderAllowRule}}
     }
   }
 
@@ -1317,12 +1278,10 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
             rules: [
               {
                 toolName: FILE_EDIT_TOOL_NAME,
-                ruleContent: skillScope.pattern,
-              },
+                ruleContent: skillScope.pattern},
             ],
             behavior: 'allow',
-            destination: 'session',
-          },
+            destination: 'session'},
         ]
       : generateSuggestions(path, 'write', toolPermissionContext, pathsToCheck)
     const failedCheck = safetyCheck as {
@@ -1337,9 +1296,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
       decisionReason: {
         type: 'safetyCheck',
         reason: failedCheck.message,
-        classifierApprovable: failedCheck.classifierApprovable,
-      },
-    }
+        classifierApprovable: failedCheck.classifierApprovable}}
   }
 
   // 2. Check for ask rules - check both the original path and resolved symlink path
@@ -1356,9 +1313,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
         message: `Claude requested permissions to write to ${path}, but you haven't granted it yet.`,
         decisionReason: {
           type: 'rule',
-          rule: askRule,
-        },
-      }
+          rule: askRule}}
     }
   }
 
@@ -1374,9 +1329,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
       updatedInput: input,
       decisionReason: {
         type: 'mode',
-        mode: toolPermissionContext.mode,
-      },
-    }
+        mode: toolPermissionContext.mode}}
   }
 
   // 4. Check for allow rules
@@ -1392,9 +1345,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
       updatedInput: input,
       decisionReason: {
         type: 'rule',
-        rule: allowRule,
-      },
-    }
+        rule: allowRule}}
   }
 
   // 5. Default to asking for permission
@@ -1410,10 +1361,8 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
     decisionReason: !isInWorkingDir
       ? {
           type: 'workingDir',
-          reason: 'Path is outside allowed working directories',
-        }
-      : undefined,
-  }
+          reason: 'Path is outside allowed working directories'}
+      : undefined}
 }
 
 export function generateSuggestions(
@@ -1464,8 +1413,7 @@ export function generateSuggestions(
       updates.push({
         type: 'addDirectories',
         directories: dirsToAdd,
-        destination: 'session',
-      })
+        destination: 'session'})
     }
 
     return updates
@@ -1496,9 +1444,7 @@ export function checkEditableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Plan files for current session are allowed for writing',
-      },
-    }
+        reason: 'Plan files for current session are allowed for writing'}}
   }
 
   // Scratchpad directory for current session
@@ -1508,9 +1454,7 @@ export function checkEditableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Scratchpad files for current session are allowed for writing',
-      },
-    }
+        reason: 'Scratchpad files for current session are allowed for writing'}}
   }
 
   // Template job's own directory. Env key hardcoded (vs importing JOB_ENV_KEY
@@ -1547,9 +1491,7 @@ export function checkEditableInternalPath(
             decisionReason: {
               type: 'other',
               reason:
-                'Job directory files for current job are allowed for writing',
-            },
-          }
+                'Job directory files for current job are allowed for writing'}}
         }
       }
     }
@@ -1562,9 +1504,7 @@ export function checkEditableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Agent memory files are allowed for writing',
-      },
-    }
+        reason: 'Agent memory files are allowed for writing'}}
   }
 
   // Memdir directory (persistent memory for cross-session learning)
@@ -1580,9 +1520,7 @@ export function checkEditableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'auto memory files are allowed for writing',
-      },
-    }
+        reason: 'auto memory files are allowed for writing'}}
   }
 
   // .claude/launch.json — desktop preview config (dev server command + port).
@@ -1601,9 +1539,7 @@ export function checkEditableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Preview launch config is allowed for writing',
-      },
-    }
+        reason: 'Preview launch config is allowed for writing'}}
   }
 
   return { behavior: 'passthrough', message: '' }
@@ -1628,9 +1564,7 @@ export function checkReadableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Session memory files are allowed for reading',
-      },
-    }
+        reason: 'Session memory files are allowed for reading'}}
   }
 
   // Project directory (for reading past session memories)
@@ -1641,9 +1575,7 @@ export function checkReadableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Project directory files are allowed for reading',
-      },
-    }
+        reason: 'Project directory files are allowed for reading'}}
   }
 
   // Plan files for current session
@@ -1653,9 +1585,7 @@ export function checkReadableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Plan files for current session are allowed for reading',
-      },
-    }
+        reason: 'Plan files for current session are allowed for reading'}}
   }
 
   // Tool results directory (persisted large outputs)
@@ -1673,9 +1603,7 @@ export function checkReadableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Tool result files are allowed for reading',
-      },
-    }
+        reason: 'Tool result files are allowed for reading'}}
   }
 
   // Scratchpad directory for current session
@@ -1685,9 +1613,7 @@ export function checkReadableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Scratchpad files for current session are allowed for reading',
-      },
-    }
+        reason: 'Scratchpad files for current session are allowed for reading'}}
   }
 
   // Project temp directory (/tmp/claude/{sanitized-cwd}/)
@@ -1700,9 +1626,7 @@ export function checkReadableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Project temp directory files are allowed for reading',
-      },
-    }
+        reason: 'Project temp directory files are allowed for reading'}}
   }
 
   // Agent memory directory (for self-improving agents)
@@ -1712,9 +1636,7 @@ export function checkReadableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Agent memory files are allowed for reading',
-      },
-    }
+        reason: 'Agent memory files are allowed for reading'}}
   }
 
   // Memdir directory (persistent memory for cross-session learning)
@@ -1724,9 +1646,7 @@ export function checkReadableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'auto memory files are allowed for reading',
-      },
-    }
+        reason: 'auto memory files are allowed for reading'}}
   }
 
   // Tasks directory (~/.claude/tasks/) for swarm task coordination
@@ -1740,9 +1660,7 @@ export function checkReadableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Task files are allowed for reading',
-      },
-    }
+        reason: 'Task files are allowed for reading'}}
   }
 
   // Teams directory (~/.claude/teams/) for swarm coordination
@@ -1756,9 +1674,7 @@ export function checkReadableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Team files are allowed for reading',
-      },
-    }
+        reason: 'Team files are allowed for reading'}}
   }
 
   // Bundled skill reference files extracted on first invocation.
@@ -1773,9 +1689,7 @@ export function checkReadableInternalPath(
       updatedInput: input,
       decisionReason: {
         type: 'other',
-        reason: 'Bundled skill reference files are allowed for reading',
-      },
-    }
+        reason: 'Bundled skill reference files are allowed for reading'}}
   }
 
   return { behavior: 'passthrough', message: '' }

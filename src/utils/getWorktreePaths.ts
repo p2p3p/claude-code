@@ -23,8 +23,7 @@ export async function getWorktreePaths(cwd: string): Promise<string[]> {
     ['worktree', 'list', '--porcelain'],
     {
       cwd,
-      preserveOutputOnError: false,
-    },
+      preserveOutputOnError: false},
   )
 
   const durationMs = Date.now() - startTime
@@ -33,8 +32,7 @@ export async function getWorktreePaths(cwd: string): Promise<string[]> {
     logEvent('tengu_worktree_detection', {
       duration_ms: durationMs,
       worktree_count: 0,
-      success: false,
-    })
+      success: false})
     return []
   }
 
@@ -55,8 +53,7 @@ export async function getWorktreePaths(cwd: string): Promise<string[]> {
   logEvent('tengu_worktree_detection', {
     duration_ms: durationMs,
     worktree_count: worktreePaths.length,
-    success: true,
-  })
+    success: true})
 
   // Sort worktrees: current worktree first, then alphabetically
   const currentWorktree = worktreePaths.find(

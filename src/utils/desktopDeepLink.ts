@@ -216,8 +216,7 @@ export async function openCurrentSessionInDesktop(): Promise<{
     return {
       success: false,
       error:
-        'Claude Desktop is not installed. Install it from https://claude.ai/download',
-    }
+        'Claude Desktop is not installed. Install it from https://claude.ai/download'}
   }
 
   // Build and open the deep link
@@ -228,8 +227,7 @@ export async function openCurrentSessionInDesktop(): Promise<{
     return {
       success: false,
       error: 'Failed to open Claude Desktop. Please try opening it manually.',
-      deepLinkUrl,
-    }
+      deepLinkUrl}
   }
 
   return { success: true, deepLinkUrl }

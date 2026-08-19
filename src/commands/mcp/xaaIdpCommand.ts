@@ -16,21 +16,19 @@ import {
   getXaaIdpSettings,
   issuerKey,
   saveIdpClientSecret,
-  saveIdpIdTokenFromJwt,
-} from '../../services/mcp/xaaIdpLogin.js'
+  saveIdpIdTokenFromJwt} from '../../services/mcp/xaaIdpLogin.js'
 import { errorMessage } from '../../utils/errors.js'
 import { updateSettingsForSource } from '../../utils/settings/settings.js'
+import { t } from '../../utils/i18n/index.js'
 
 export function registerMcpXaaIdpCommand(mcp: Command): void {
   const xaaIdp = mcp
     .command('xaa')
-    .description('Manage the XAA (SEP-990) IdP connection')
+    .description(t('xaaIdp.manageIdp'))
 
   xaaIdp
     .command('setup')
-    .description(
-      'Configure the IdP connection (one-time setup for all XAA-enabled servers)',
-    )
+    .description(t('xaaIdp.setupIdp'))
     .requiredOption('--issuer <url>', 'IdP issuer URL (OIDC discovery)')
     .requiredOption('--client-id <id>', "Claude Code's client_id at the IdP")
     .option(
@@ -107,9 +105,7 @@ export function registerMcpXaaIdpCommand(mcp: Command): void {
         xaaIdp: {
           issuer: options.issuer,
           clientId: options.clientId,
-          callbackPort,
-        },
-      })
+          callbackPort}})
       if (error) {
         return cliError(`Error writing settings: ${error.message}`)
       }
@@ -190,12 +186,10 @@ export function registerMcpXaaIdpCommand(mcp: Command): void {
 
       const wasCached = getCachedIdpIdToken(idp.issuer) !== undefined
       if (wasCached) {
-        return cliOk(
-          `Already logged in to ${idp.issuer} (cached id_token still valid). Use --force to re-login.`,
-        )
+        return cliOk(t('xaaIdp.alreadyLoggedIn', idp.issuer))
       }
 
-      process.stdout.write(`Opening browser for IdP login at ${idp.issuer}…\n`)
+      process.stdout.write(t('xaaIdp.openingBrowser', idp.issuer) + '\n')
       try {
         await acquireIdpIdToken({
           idpIssuer: idp.issuer,
@@ -203,54 +197,48 @@ export function registerMcpXaaIdpCommand(mcp: Command): void {
           idpClientSecret: getIdpClientSecret(idp.issuer),
           callbackPort: idp.callbackPort,
           onAuthorizationUrl: url => {
-            process.stdout.write(
-              `If the browser did not open, visit:\n  ${url}\n`,
-            )
-          },
-        })
-        cliOk(
-          `Logged in. MCP servers with --xaa will now authenticate silently.`,
-        )
+            process.stdout.write(t('xaaIdp.browserDidntOpen', url))
+          }})
+        cliOk(t('xaaIdp.loggedIn'))
       } catch (e) {
-        cliError(`IdP login failed: ${errorMessage(e)}`)
+        cliError(t('xaaIdp.loginFailed', errorMessage(e)))
       }
     })
 
   xaaIdp
     .command('show')
-    .description('Show the current IdP connection config')
+    .description(t('xaaIdp.showIdpConfig'))
     .action(() => {
       const idp = getXaaIdpSettings()
       if (!idp) {
-        return cliOk('No XAA IdP connection configured.')
+        return cliOk(t('xaaIdp.noIdpConfigured'))
       }
       const hasSecret = getIdpClientSecret(idp.issuer) !== undefined
       const hasIdToken = getCachedIdpIdToken(idp.issuer) !== undefined
-      process.stdout.write(`Issuer:        ${idp.issuer}\n`)
-      process.stdout.write(`Client ID:     ${idp.clientId}\n`)
+      process.stdout.write(t('xaaIdp.issuerLabel', idp.issuer) + '\n')
+      process.stdout.write(t('xaaIdp.clientIdLabel', idp.clientId) + '\n')
       if (idp.callbackPort !== undefined) {
-        process.stdout.write(`Callback port: ${idp.callbackPort}\n`)
+        process.stdout.write(t('xaaIdp.callbackPortLabel', String(idp.callbackPort)) + '\n')
       }
       process.stdout.write(
-        `Client secret: ${hasSecret ? '(stored in keychain)' : '(not set — PKCE-only)'}\n`,
+        t('xaaIdp.clientSecretLabel', hasSecret ? t('xaaIdp.storedInKeychain') : t('xaaIdp.notSetPkceOnly')) + '\n',
       )
       process.stdout.write(
-        `Logged in:     ${hasIdToken ? 'yes (id_token cached)' : "no — run 'claude mcp xaa login'"}\n`,
+        t('xaaIdp.loggedInLabel', hasIdToken ? t('xaaIdp.idTokenCached') : t('xaaIdp.notLoggedIn')) + '\n',
       )
       cliOk()
     })
 
   xaaIdp
     .command('clear')
-    .description('Clear the IdP connection config and cached id_token')
+    .description(t('xaaIdp.clearIdp'))
     .action(() => {
       // Read issuer first so we can clear the right keychain slots.
       const idp = getXaaIdpSettings()
       // updateSettingsForSource uses mergeWith: set to undefined (not delete)
       // to signal key removal.
       const { error } = updateSettingsForSource('userSettings', {
-        xaaIdp: undefined,
-      })
+        xaaIdp: undefined})
       if (error) {
         return cliError(`Error writing settings: ${error.message}`)
       }

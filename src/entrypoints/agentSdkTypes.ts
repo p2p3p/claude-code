@@ -11,15 +11,13 @@
 
 import type {
   CallToolResult,
-  ToolAnnotations,
-} from '@modelcontextprotocol/sdk/types.js'
+  ToolAnnotations} from '@modelcontextprotocol/sdk/types.js'
 
 // Control protocol types for SDK builders (bridge subpath consumers)
 /** @alpha */
 export type {
   SDKControlRequest,
-  SDKControlResponse,
-} from './sdk/controlTypes.js'
+  SDKControlResponse} from './sdk/controlTypes.js'
 // Re-export core types (common serializable types)
 export * from './sdk/coreTypes.js'
 // Re-export runtime types (callbacks, interfaces with methods)
@@ -37,8 +35,7 @@ export * from './sdk/toolTypes.js'
 import type {
   SDKResultMessage,
   SDKSessionInfo,
-  SDKUserMessage,
-} from './sdk/coreTypes.js'
+  SDKUserMessage} from './sdk/coreTypes.js'
 // Import types needed for function signatures
 import type {
   AnyZodRawShape,
@@ -57,8 +54,7 @@ import type {
   SDKSessionOptions,
   SdkMcpToolDefinition,
   SessionMessage,
-  SessionMutationOptions,
-} from './sdk/runtimeTypes.js'
+  SessionMutationOptions} from './sdk/runtimeTypes.js'
 // 与 settings / hooks schema 共用的钩子事件与 SessionEnd 退出原因字面量表
 import { EXIT_REASONS, HOOK_EVENTS } from './sdk/coreSchemas.js'
 
@@ -68,8 +64,7 @@ export type {
   SessionMutationOptions,
   ForkSessionOptions,
   ForkSessionResult,
-  SDKSessionInfo,
-}
+  SDKSessionInfo}
 
 // ============================================================================
 // Assistant daemon primitives (internal)

@@ -28,8 +28,7 @@ export async function* runTools(
     toolUseMessages.length > 0
       ? createToolBatchSpan(toolUseContext.langfuseTrace ?? null, {
           toolNames: toolUseMessages.map(b => b.name),
-          batchIndex: 0,
-        })
+          batchIndex: 0})
       : null
   const contextWithTurn = turnSpan
     ? { ...toolUseContext, langfuseBatchSpan: turnSpan }
@@ -61,8 +60,7 @@ export async function* runTools(
         }
         yield {
           message: update.message,
-          newContext: currentContext,
-        }
+          newContext: currentContext}
       }
       for (const block of blocks) {
         const modifiers = queuedContextModifiers[block.id]
@@ -87,8 +85,7 @@ export async function* runTools(
         }
         yield {
           message: update.message,
-          newContext: currentContext,
-        }
+          newContext: currentContext}
       }
     }
   }
@@ -159,8 +156,7 @@ async function* runToolsSerially(
       }
       yield {
         message: update.message,
-        newContext: currentContext,
-      }
+        newContext: currentContext}
     }
     markToolUseAsComplete(toolUseContext, toolUse.id)
   }

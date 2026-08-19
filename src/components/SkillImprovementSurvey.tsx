@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { t } from '../utils/i18n/index.js';
 import { BLACK_CIRCLE, BULLET_OPERATOR } from '../constants/figures.js';
 import { Box, Text } from '@anthropic/ink';
 import type { SkillUpdate } from '../utils/hooks/skillImprovement.js';
@@ -21,8 +22,7 @@ export function SkillImprovementSurvey({
   updates,
   handleSelect,
   inputValue,
-  setInputValue,
-}: Props): React.ReactNode {
+  setInputValue}: Props): React.ReactNode {
   if (!isOpen) {
     return null;
   }
@@ -63,8 +63,7 @@ function SkillImprovementSurveyView({
   updates,
   onSelect,
   inputValue,
-  setInputValue,
-}: ViewProps): React.ReactNode {
+  setInputValue}: ViewProps): React.ReactNode {
   const initialInputValue = useRef(inputValue);
 
   useEffect(() => {
@@ -82,7 +81,7 @@ function SkillImprovementSurveyView({
     <Box flexDirection="column" marginTop={1}>
       <Box>
         <Text color="ansi:cyan">{BLACK_CIRCLE} </Text>
-        <Text bold>Skill improvement suggested for &quot;{skillName}&quot;</Text>
+        <Text bold>{t('ui.skillImprovementSuggested', skillName)}</Text>
       </Box>
 
       <Box flexDirection="column" marginLeft={2}>
@@ -96,12 +95,12 @@ function SkillImprovementSurveyView({
       <Box marginLeft={2} marginTop={1}>
         <Box width={12}>
           <Text>
-            <Text color="ansi:cyan">1</Text>: Apply
+            <Text color="ansi:cyan">1</Text>: {t('ui.apply')}
           </Text>
         </Box>
         <Box width={14}>
           <Text>
-            <Text color="ansi:cyan">0</Text>: Dismiss
+            <Text color="ansi:cyan">0</Text>: {t('ui.dismiss')}
           </Text>
         </Box>
       </Box>

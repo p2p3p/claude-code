@@ -12,14 +12,12 @@ import type {
   AgentSideConnection,
   PermissionOption,
   ToolCallUpdate,
-  ClientCapabilities,
-} from '@agentclientprotocol/sdk'
+  ClientCapabilities} from '@agentclientprotocol/sdk'
 import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import type {
   PermissionAllowDecision,
   PermissionAskDecision,
-  PermissionDenyDecision,
-} from '../../types/permissions.js'
+  PermissionDenyDecision} from '../../types/permissions.js'
 import type { Tool as ToolType, ToolUseContext } from '../../Tool.js'
 import type { AssistantMessage } from '../../types/message.js'
 import { hasPermissionsToUseTool } from '../../utils/permissions/permissions.js'
@@ -109,10 +107,8 @@ export function createAcpCanUseTool(
         message: 'Permission pipeline failed',
         decisionReason: {
           type: 'other',
-          reason: 'Permission pipeline failed',
-        },
-        toolUseID,
-      }
+          reason: 'Permission pipeline failed'},
+        toolUseID}
     }
 
     // ── Delegate to ACP client for interactive permission decision ──
@@ -127,8 +123,7 @@ export function createAcpCanUseTool(
       title: info.title,
       kind: info.kind,
       status: 'pending',
-      rawInput: input,
-    }
+      rawInput: input}
 
     const options: Array<PermissionOption> = [
       { kind: 'allow_always', name: 'Always Allow', optionId: 'allow_always' },
@@ -137,16 +132,14 @@ export function createAcpCanUseTool(
       {
         kind: 'reject_always',
         name: 'Always Reject',
-        optionId: 'reject_always',
-      },
+        optionId: 'reject_always'},
     ]
 
     try {
       const response = await conn.requestPermission({
         sessionId,
         toolCall,
-        options,
-      })
+        options})
 
       if (response.outcome.outcome === 'cancelled') {
         // Per schema.json:629, a cancelled permission outcome means the prompt
@@ -157,8 +150,7 @@ export function createAcpCanUseTool(
           behavior: 'deny',
           message: 'Permission request cancelled by client',
           decisionReason: { type: 'mode', mode: 'default' },
-          toolUseID,
-        }
+          toolUseID}
       }
 
       if (
@@ -170,8 +162,7 @@ export function createAcpCanUseTool(
         if (optionId === 'allow' || optionId === 'allow_always') {
           return {
             behavior: 'allow',
-            updatedInput: input,
-          }
+            updatedInput: input}
         }
       }
 
@@ -179,15 +170,13 @@ export function createAcpCanUseTool(
       return {
         behavior: 'deny',
         message: 'Permission denied by client',
-        decisionReason: { type: 'mode', mode: 'default' },
-      }
+        decisionReason: { type: 'mode', mode: 'default' }}
     } catch (err) {
       console.error('[ACP Permissions] Client request error:', err)
       return {
         behavior: 'deny',
         message: 'Permission request failed',
-        decisionReason: { type: 'mode', mode: 'default' },
-      }
+        decisionReason: { type: 'mode', mode: 'default' }}
     }
   }
 }
@@ -207,26 +196,22 @@ async function handleExitPlanMode(
     {
       kind: 'allow_always',
       name: 'Yes, and use "auto" mode',
-      optionId: 'auto',
-    },
+      optionId: 'auto'},
     {
       kind: 'allow_always',
       name: 'Yes, and auto-accept edits',
-      optionId: 'acceptEdits',
-    },
+      optionId: 'acceptEdits'},
     {
       kind: 'allow_once',
       name: 'Yes, and manually approve edits',
-      optionId: 'default',
-    },
+      optionId: 'default'},
     { kind: 'reject_once', name: 'No, keep planning', optionId: 'plan' },
   ]
   if (isBypassModeAvailable?.() === true) {
     options.unshift({
       kind: 'allow_always',
       name: 'Yes, and bypass permissions',
-      optionId: 'bypassPermissions',
-    })
+      optionId: 'bypassPermissions'})
   }
 
   const info = toolInfoFromToolUse(
@@ -240,14 +225,12 @@ async function handleExitPlanMode(
     title: info.title,
     kind: info.kind,
     status: 'pending',
-    rawInput: input,
-  }
+    rawInput: input}
 
   const response = await conn.requestPermission({
     sessionId,
     toolCall,
-    options,
-  })
+    options})
 
   if (response.outcome.outcome === 'cancelled') {
     // Propagate cancellation so prompt() resolves with StopReason::Cancelled.
@@ -255,8 +238,7 @@ async function handleExitPlanMode(
     return {
       behavior: 'deny',
       message: 'Tool use aborted',
-      decisionReason: { type: 'mode', mode: 'default' },
-    }
+      decisionReason: { type: 'mode', mode: 'default' }}
   }
 
   if (
@@ -282,22 +264,18 @@ async function handleExitPlanMode(
         sessionId,
         update: {
           sessionUpdate: 'current_mode_update',
-          currentModeId: selectedOption,
-        },
-      })
+          currentModeId: selectedOption}})
 
       return {
         behavior: 'allow',
-        updatedInput: input,
-      }
+        updatedInput: input}
     }
   }
 
   return {
     behavior: 'deny',
     message: 'User rejected request to exit plan mode.',
-    decisionReason: { type: 'mode', mode: 'plan' },
-  }
+    decisionReason: { type: 'mode', mode: 'plan' }}
 }
 
 function checkTerminalOutput(clientCapabilities?: ClientCapabilities): boolean {

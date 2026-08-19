@@ -1,5 +1,6 @@
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import React, { useMemo } from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Ansi, Box, Text } from '@anthropic/ink';
 import { FilePathLink } from '../FilePathLink.js';
 import { toInkColor } from '../../utils/ink.js';
@@ -17,7 +18,6 @@ import type { Theme } from 'src/utils/theme.js';
 import { UserImageMessage } from './UserImageMessage.js';
 
 import { jsonParse } from '../../utils/slowOperations.js';
-import { plural } from '../../utils/stringUtils.js';
 import { isEnvTruthy } from '../../utils/envUtils.js';
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js';
 import { tryRenderPlanApprovalMessage, formatTeammateMessageContent } from './PlanApprovalMessage.js';
@@ -80,10 +80,10 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
             return (
               <Box key={idx} paddingLeft={2}>
                 <Text>{BLACK_CIRCLE} </Text>
-                <Text>Task assigned: </Text>
+                <Text>{t('attachmentmessage.taskAssigned')} </Text>
                 <Text bold>#{parsedMsg.taskId}</Text>
                 <Text> - {parsedMsg.subject}</Text>
-                <Text dimColor> (from {parsedMsg.assignedBy || msg.from})</Text>
+                <Text dimColor> {t('attachmentmessage.from', parsedMsg.assignedBy || msg.from)}</Text>
               </Box>
             );
           }
@@ -131,7 +131,7 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
           : '';
       return (
         <Line>
-          <Text bold>{attachment.skills.length}</Text> relevant {plural(attachment.skills.length, 'skill')}: {names}
+          <Text bold>{attachment.skills.length}</Text> relevant {t('singularPlural.skill', attachment.skills.length)}: {names}
           {hint && <Text dimColor>{hint}</Text>}
         </Line>
       );
@@ -146,7 +146,7 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
       const names = attachment.tools.map(t => t.name).join(', ');
       return (
         <Line>
-          <Text dimColor>Discovered tools: </Text>
+          <Text dimColor>{t('attachmentmessage.discoveredTools')} </Text>
           <Text>{names}</Text>
         </Line>
       );
@@ -179,9 +179,9 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
       }
       return (
         <Line>
-          Read <Text bold>{attachment.displayPath}</Text> (
+          {t('attachmentMessage.read')} <Text bold>{attachment.displayPath}</Text> (
           {attachment.content.type === 'text'
-            ? `${attachment.content.file.numLines}${attachment.truncated ? '+' : ''} lines`
+            ? `${attachment.content.file.numLines}${attachment.truncated ? '+' : ''} ${t('singularPlural.line', attachment.content.file.numLines)}`
             : formatFileSize(attachment.content.file.originalSize)}
           )
         </Line>
@@ -201,8 +201,9 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
     case 'selected_lines_in_ide':
       return (
         <Line>
-          ⧉ Selected <Text bold>{attachment.lineEnd - attachment.lineStart + 1}</Text> lines from{' '}
-          <Text bold>{attachment.displayPath}</Text> in {attachment.ideName}
+          ⧉ {t('attachmentMessage.selectedLinesFrom', attachment.lineEnd - attachment.lineStart + 1)}{' '}
+          <Text bold>{attachment.displayPath}</Text>
+          {t('attachmentMessage.inApp', attachment.ideName)}
         </Line>
       );
     case 'nested_memory':
@@ -222,7 +223,7 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
             <Box minWidth={2} />
             <Text dimColor>
               Recalled <Text bold>{attachment.memories.length}</Text>{' '}
-              {attachment.memories.length === 1 ? 'memory' : 'memories'}
+              {t('singularPlural.memory', attachment.memories.length)}
               {!isTranscriptMode && (
                 <>
                   {' '}
@@ -254,9 +255,9 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
       const skillCount = attachment.skillNames.length;
       return (
         <Line>
-          Loaded{' '}
+          {t('attachmentMessage.loaded')}{' '}
           <Text bold>
-            {skillCount} {plural(skillCount, 'skill')}
+            {skillCount} {t('singularPlural.skill', skillCount)}
           </Text>{' '}
           from <Text bold>{attachment.displayPath}</Text>
         </Line>
@@ -268,7 +269,7 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
       }
       return (
         <Line>
-          <Text bold>{attachment.skillCount}</Text> {plural(attachment.skillCount, 'skill')} available
+          <Text bold>{attachment.skillCount}</Text> {t('singularPlural.skill', attachment.skillCount)} available
         </Line>
       );
     }
@@ -279,7 +280,7 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
       const count = attachment.addedTypes.length;
       return (
         <Line>
-          <Text bold>{count}</Text> agent {plural(count, 'type')} available
+          <Text bold>{count}</Text> agent {t('singularPlural.type', count)} available
         </Line>
       );
     }
@@ -312,7 +313,7 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
     case 'mcp_resource':
       return (
         <Line>
-          Read MCP resource <Text bold>{attachment.name}</Text> from {attachment.server}
+          {t('attachmentmessage.readMcpResourcePrefix')} <Text bold>{attachment.name}</Text> {t('attachmentmessage.readMcpResourceSuffix', attachment.server)}
         </Line>
       );
     case 'command_permissions':
@@ -397,7 +398,7 @@ export function AttachmentMessage({ attachment, addMargin, verbose, isTranscript
         <Box flexDirection="row" width="100%" marginTop={1} backgroundColor={bg}>
           <Text dimColor>{BLACK_CIRCLE} </Text>
           <Text dimColor>
-            {attachment.count} {plural(attachment.count, 'teammate')} shut down gracefully
+            {t('attachmentmessage.shutDownGracefully', attachment.count, t('singularPlural.teammate', attachment.count))}
           </Text>
         </Box>
       );
@@ -469,7 +470,7 @@ function TeammateTaskStatus({ attachment }: { attachment: TaskStatusAttachment }
     return <GenericTaskStatus attachment={attachment} />;
   }
   const agentColor = toInkColor(task.identity.color);
-  const statusText = attachment.status === 'completed' ? 'shut down gracefully' : attachment.status;
+  const statusText = attachment.status === 'completed' ? t('attachmentmessage.shutDownGracefullySingular') : attachment.status;
   return (
     <Box flexDirection="row" width="100%" marginTop={1} backgroundColor={bg}>
       <Text dimColor>{BLACK_CIRCLE} </Text>
@@ -488,8 +489,7 @@ function TeammateTaskStatus({ attachment }: { attachment: TaskStatusAttachment }
 function Line({
   dimColor = true,
   children,
-  color,
-}: {
+  color}: {
   dimColor?: boolean;
   children: React.ReactNode;
   color?: keyof Theme;

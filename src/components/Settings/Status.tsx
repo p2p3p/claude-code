@@ -1,6 +1,7 @@
 import figures from 'figures';
 import * as React from 'react';
 import { Suspense, use } from 'react';
+import { t } from '../../utils/i18n/index.js';
 import { getSessionId } from '../../bootstrap/state.js';
 import type { LocalJSXCommandContext } from '../../commands.js';
 import { useIsInsideModal } from '../../context/modalContext.js';
@@ -20,8 +21,7 @@ import {
   buildSettingSourcesProperties,
   type Diagnostic,
   getModelDisplayLabel,
-  type Property,
-} from '../../utils/status.js';
+  type Property} from '../../utils/status.js';
 import type { ThemeName } from '../../utils/theme.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 
@@ -33,12 +33,12 @@ type Props = {
 function buildPrimarySection(): Property[] {
   const sessionId = getSessionId();
   const customTitle = getCurrentSessionTitle(sessionId);
-  const nameValue = customTitle ?? <Text dimColor>/rename to add a name</Text>;
+  const nameValue = customTitle ?? <Text dimColor>{t('statusSession.renameToAddName')}</Text>;
 
   return [
-    { label: 'Version', value: MACRO.VERSION },
-    { label: 'Session name', value: nameValue },
-    { label: 'Session ID', value: sessionId },
+    { label: t('settingsStatus.version'), value: MACRO.VERSION },
+    { label: t('settingsStatus.sessionName'), value: nameValue },
+    { label: t('settingsStatus.sessionId'), value: sessionId },
     { label: 'cwd', value: getCwd() },
     ...buildAccountProperties(),
     ...buildAPIProviderProperties(),
@@ -49,8 +49,7 @@ function buildSecondarySection({
   mainLoopModel,
   mcp,
   theme,
-  context,
-}: {
+  context}: {
   mainLoopModel: AppState['mainLoopModel'];
   mcp: AppState['mcp'];
   theme: ThemeName;
@@ -59,7 +58,7 @@ function buildSecondarySection({
   const modelLabel = getModelDisplayLabel(mainLoopModel);
 
   return [
-    { label: 'Model', value: modelLabel },
+    { label: t('settingsStatus.model'), value: modelLabel },
     ...buildIDEProperties(mcp.clients, context.options.ideInstallationStatus, theme),
     ...buildMcpProperties(mcp.clients, theme),
     ...buildSandboxProperties(),
@@ -142,7 +141,7 @@ export function Status({ context, diagnosticsPromise }: Props): React.ReactNode 
         </Suspense>
       </Box>
       <Text dimColor>
-        <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="cancel" />
+        <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.cancel')} />
       </Text>
     </Box>
   );
@@ -153,7 +152,7 @@ function Diagnostics({ promise }: { promise: Promise<Diagnostic[]> }): React.Rea
   if (diagnostics.length === 0) return null;
   return (
     <Box flexDirection="column" paddingBottom={1}>
-      <Text bold>System Diagnostics</Text>
+      <Text bold>{t('statusComponent.systemDiagnostics')}</Text>
       {diagnostics.map((diagnostic, i) => (
         <Box key={i} flexDirection="row" gap={1} paddingX={1}>
           <Text color="error">{figures.warning}</Text>

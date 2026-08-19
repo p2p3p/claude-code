@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { getMcpConfigsByScope } from 'src/services/mcp/config.js';
 import type { ConfigScope } from 'src/services/mcp/types.js';
 import { describeMcpConfigFilePath, getScopeLabel } from 'src/services/mcp/utils.js';
@@ -8,8 +9,7 @@ import { Box, Link, Text } from '@anthropic/ink';
 function McpConfigErrorSection({
   scope,
   parsingErrors,
-  warnings,
-}: {
+  warnings}: {
   scope: ConfigScope;
   parsingErrors: ValidationError[];
   warnings: ValidationError[];
@@ -25,12 +25,12 @@ function McpConfigErrorSection({
     <Box flexDirection="column" marginTop={1}>
       <Box>
         {(hasErrors || hasWarnings) && (
-          <Text color={hasErrors ? 'error' : 'warning'}>[{hasErrors ? 'Failed to parse' : 'Contains warnings'}] </Text>
+          <Text color={hasErrors ? 'error' : 'warning'}>[{hasErrors ? t('ui.failedToParse') : t('ui.containsWarnings')}] </Text>
         )}
         <Text>{getScopeLabel(scope)}</Text>
       </Box>
       <Box>
-        <Text dimColor>Location: </Text>
+        <Text dimColor>{t('mcpparsingwarnings.location')} </Text>
         <Text dimColor>{describeMcpConfigFilePath(scope)}</Text>
       </Box>
       <Box marginLeft={1} flexDirection="column">
@@ -40,7 +40,7 @@ function McpConfigErrorSection({
             <Box key={`error-${i}`}>
               <Text>
                 <Text dimColor>└ </Text>
-                <Text color="error">[Error]</Text>
+                <Text color="error">{t('keybindingWarnings.error')}</Text>
                 <Text dimColor>
                   {' '}
                   {serverName && `[${serverName}] `}
@@ -58,7 +58,7 @@ function McpConfigErrorSection({
             <Box key={`warning-${i}`}>
               <Text>
                 <Text dimColor>└ </Text>
-                <Text color="warning">[Warning]</Text>
+                <Text color="warning">{t('mcpparsingwarnings.warning')}</Text>
                 <Text dimColor>
                   {' '}
                   {serverName && `[${serverName}] `}
@@ -100,10 +100,10 @@ export function McpParsingWarnings(): React.ReactNode {
 
   return (
     <Box flexDirection="column" marginTop={1} marginBottom={1}>
-      <Text bold>MCP Config Diagnostics</Text>
+      <Text bold>{t('mcpparsingwarnings.mCPConfigDiagnostics')}</Text>
       <Box marginTop={1}>
         <Text dimColor>
-          For help configuring MCP servers, see:{' '}
+          {t('mcpparsingwarnings.mcpHelpLink')}{' '}
           <Link url="https://code.claude.com/docs/en/mcp">https://code.claude.com/docs/en/mcp</Link>
         </Text>
       </Box>

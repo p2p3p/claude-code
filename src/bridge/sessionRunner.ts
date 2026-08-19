@@ -3,6 +3,7 @@ import { createWriteStream, type WriteStream } from 'fs'
 import { tmpdir } from 'os'
 import { dirname, join } from 'path'
 import { createInterface } from 'readline'
+import { t } from '../utils/i18n/index.js'
 import { jsonParse, jsonStringify } from '../utils/slowOperations.js'
 import { debugTruncate } from './debugUtils.js'
 import type {
@@ -10,8 +11,7 @@ import type {
   SessionDoneStatus,
   SessionHandle,
   SessionSpawner,
-  SessionSpawnOpts,
-} from './types.js'
+  SessionSpawnOpts} from './types.js'
 
 const MAX_ACTIVITIES = 10
 const MAX_STDERR_LINES = 10
@@ -85,8 +85,7 @@ const TOOL_VERBS: Record<string, string> = {
   GrepTool: 'Searching',
   BashTool: 'Running',
   NotebookEditTool: 'Editing notebook',
-  LSP: 'LSP',
-}
+  LSP: 'LSP'}
 
 function toolSummary(name: string, input: Record<string, unknown>): string {
   const verb = TOOL_VERBS[name] ?? name
@@ -142,8 +141,7 @@ function extractActivities(
           activities.push({
             type: 'tool_start',
             summary,
-            timestamp: now,
-          })
+            timestamp: now})
           onDebug(
             `[bridge:activity] sessionId=${sessionId} tool_use name=${name} ${inputPreview(input)}`,
           )
@@ -153,8 +151,7 @@ function extractActivities(
             activities.push({
               type: 'text',
               summary: text.slice(0, 80),
-              timestamp: now,
-            })
+              timestamp: now})
             onDebug(
               `[bridge:activity] sessionId=${sessionId} text "${text.slice(0, 100)}"`,
             )
@@ -168,9 +165,8 @@ function extractActivities(
       if (subtype === 'success') {
         activities.push({
           type: 'result',
-          summary: 'Session completed',
-          timestamp: now,
-        })
+          summary: t('sessionRunner.sessionCompleted'),
+          timestamp: now})
         onDebug(
           `[bridge:activity] sessionId=${sessionId} result subtype=success`,
         )
@@ -180,8 +176,7 @@ function extractActivities(
         activities.push({
           type: 'error',
           summary: errorSummary,
-          timestamp: now,
-        })
+          timestamp: now})
         onDebug(
           `[bridge:activity] sessionId=${sessionId} result subtype=${subtype} error="${errorSummary}"`,
         )
@@ -318,9 +313,7 @@ export function createSessionSpawner(deps: SessionSpawnerDeps): SessionSpawner {
         // Same env vars environment-manager sets in the container path.
         ...(opts.useCcrV2 && {
           CLAUDE_CODE_USE_CCR_V2: '1',
-          CLAUDE_CODE_WORKER_EPOCH: String(opts.workerEpoch),
-        }),
-      }
+          CLAUDE_CODE_WORKER_EPOCH: String(opts.workerEpoch)})}
 
       deps.onDebug(
         `[bridge:session] Spawning sessionId=${opts.sessionId} sdkUrl=${opts.sdkUrl} accessToken=${opts.accessToken ? 'present' : 'MISSING'}`,
@@ -336,8 +329,7 @@ export function createSessionSpawner(deps: SessionSpawnerDeps): SessionSpawner {
         cwd: dir,
         stdio: ['pipe', 'pipe', 'pipe'],
         env,
-        windowsHide: true,
-      })
+        windowsHide: true})
 
       deps.onDebug(
         `[bridge:session] sessionId=${opts.sessionId} pid=${child.pid}`,
@@ -533,18 +525,15 @@ export function createSessionSpawner(deps: SessionSpawnerDeps): SessionSpawner {
           handle.writeStdin(
             jsonStringify({
               type: 'update_environment_variables',
-              variables: { CLAUDE_CODE_SESSION_ACCESS_TOKEN: token },
-            }) + '\n',
+              variables: { CLAUDE_CODE_SESSION_ACCESS_TOKEN: token }}) + '\n',
           )
           deps.onDebug(
             `[bridge:session] Sent token refresh via stdin for sessionId=${opts.sessionId}`,
           )
-        },
-      }
+        }}
 
       return handle
-    },
-  }
+    }}
 }
 
 export { extractActivities as _extractActivitiesForTesting }

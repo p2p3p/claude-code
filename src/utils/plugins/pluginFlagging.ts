@@ -58,8 +58,7 @@ function parsePluginsData(content: string): Record<string, FlaggedPlugin> {
       typeof (entry as { flaggedAt: unknown }).flaggedAt === 'string'
     ) {
       const parsed: FlaggedPlugin = {
-        flaggedAt: (entry as { flaggedAt: string }).flaggedAt,
-      }
+        flaggedAt: (entry as { flaggedAt: string }).flaggedAt}
       if (
         'seenAt' in entry &&
         typeof (entry as { seenAt: unknown }).seenAt === 'string'
@@ -75,8 +74,7 @@ function parsePluginsData(content: string): Record<string, FlaggedPlugin> {
 async function readFromDisk(): Promise<Record<string, FlaggedPlugin>> {
   try {
     const content = await readFile(getFlaggedPluginsPath(), {
-      encoding: 'utf-8',
-    })
+      encoding: 'utf-8'})
     return parsePluginsData(content)
   } catch {
     return {}
@@ -95,8 +93,7 @@ async function writeToDisk(
     const content = jsonStringify({ plugins }, null, 2)
     await writeFile(tempPath, content, {
       encoding: 'utf-8',
-      mode: 0o600,
-    })
+      mode: 0o600})
     await rename(tempPath, filePath)
     cache = plugins
   } catch (error) {
@@ -156,9 +153,7 @@ export async function addFlaggedPlugin(pluginId: string): Promise<void> {
   const updated = {
     ...cache,
     [pluginId]: {
-      flaggedAt: new Date().toISOString(),
-    },
-  }
+      flaggedAt: new Date().toISOString()}}
 
   await writeToDisk(updated)
   logForDebugging(`Flagged plugin: ${pluginId}`)

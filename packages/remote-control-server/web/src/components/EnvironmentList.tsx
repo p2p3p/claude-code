@@ -1,6 +1,7 @@
 import type { Environment } from '../types';
 import { StatusBadge } from './Navbar';
 import { esc, formatTime } from '../lib/utils';
+import { t } from '../../../../../src/utils/i18n/index.js';
 
 interface EnvironmentListProps {
   environments: Environment[];
@@ -11,7 +12,7 @@ export function EnvironmentList({ environments, onSelectEnvironment }: Environme
   if (!environments || environments.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-surface-1 p-8 text-center text-text-muted">
-        No active environments
+        {t('rcs.noActiveEnvironments')}
       </div>
     );
   }
@@ -20,7 +21,7 @@ export function EnvironmentList({ environments, onSelectEnvironment }: Environme
     <div className="space-y-2">
       {environments.map(env => {
         const isAcp = env.worker_type === 'acp';
-        const typeLabel = isAcp ? 'ACP Agent' : 'Claude Code';
+        const typeLabel = isAcp ? t('rcs.acpAgent') : t('rcs.claudeCode');
         const typeColor = isAcp ? 'bg-brand/15 text-brand' : 'bg-status-running/15 text-status-running';
 
         return (

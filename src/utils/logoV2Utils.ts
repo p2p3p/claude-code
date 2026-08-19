@@ -4,11 +4,11 @@ import type { LogOption } from '../types/logs.js'
 import { getSubscriptionName, isClaudeAISubscriber } from './auth.js'
 import { getCwd } from './cwd.js'
 import { getDisplayPath } from './file.js'
+import { t } from './i18n/index.js'
 import {
   truncate,
   truncateToWidth,
-  truncateToWidthNoEllipsis,
-} from './format.js'
+  truncateToWidthNoEllipsis} from './format.js'
 import { getStoredChangelogFromMemory, parseChangelog } from './releaseNotes.js'
 import { gt } from './semver.js'
 import { loadMessageLogs } from './sessionStorage.js'
@@ -70,8 +70,7 @@ export function calculateLayoutDimensions(
   return {
     leftWidth: totalWidth,
     rightWidth: totalWidth,
-    totalWidth,
-  }
+    totalWidth}
 }
 
 /**
@@ -96,9 +95,9 @@ export function calculateOptimalLeftWidth(
  */
 export function formatWelcomeMessage(username: string | null): string {
   if (!username || username.length > MAX_USERNAME_LENGTH) {
-    return 'Welcome back!'
+    return t('home.welcomeBack')
   }
-  return `Welcome back ${username}!`
+  return t('home.welcomeBackUser', username)
 }
 
 /**
@@ -262,8 +261,7 @@ export function getLogoDisplayData(): {
     version,
     cwd,
     billingType,
-    agentName,
-  }
+    agentName}
 }
 
 /**
@@ -287,8 +285,7 @@ export function formatModelAndBilling(
     return {
       shouldSplit: true,
       truncatedModel: truncate(modelName, availableWidth),
-      truncatedBilling: truncate(billingType, availableWidth),
-    }
+      truncatedBilling: truncate(billingType, availableWidth)}
   }
 
   return {
@@ -300,8 +297,7 @@ export function formatModelAndBilling(
         10,
       ),
     ),
-    truncatedBilling: billingType,
-  }
+    truncatedBilling: billingType}
 }
 
 /**

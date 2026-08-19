@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Link, Text } from '@anthropic/ink';
+import { t } from '../utils/i18n/index.js';
 import { type AwsAuthStatus, AwsAuthStatusManager } from '../utils/awsAuthStatusManager.js';
 
 const URL_RE = /https?:\/\/\S+/;
@@ -26,7 +27,7 @@ export function AwsAuthStatusBox(): React.ReactNode {
   return (
     <Box flexDirection="column" borderStyle="round" borderColor="permission" paddingX={1} marginY={1}>
       <Text bold color="permission">
-        Cloud Authentication
+        {t('awsAuthStatusBox.cloudAuthentication')}
       </Text>
 
       {status.output.length > 0 && (

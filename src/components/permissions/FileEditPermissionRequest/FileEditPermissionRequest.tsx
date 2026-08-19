@@ -9,9 +9,9 @@ import { FilePermissionDialog } from '../FilePermissionDialog/FilePermissionDial
 import {
   createSingleEditDiffConfig,
   type FileEdit,
-  type IDEDiffSupport,
-} from '../FilePermissionDialog/ideDiffConfig.js';
+  type IDEDiffSupport} from '../FilePermissionDialog/ideDiffConfig.js';
 import type { PermissionRequestProps } from '../PermissionRequest.js';
+import { t } from '../../../utils/i18n/index.js';
 
 type FileEditInput = z.infer<typeof FileEditTool.inputSchema>;
 
@@ -25,12 +25,10 @@ const ideDiffSupport: IDEDiffSupport<FileEditInput> = {
         ...input,
         old_string: firstEdit.old_string,
         new_string: firstEdit.new_string,
-        replace_all: firstEdit.replace_all,
-      };
+        replace_all: firstEdit.replace_all};
     }
     return input;
-  },
-};
+  }};
 
 export function FileEditPermissionRequest(props: PermissionRequestProps): React.ReactNode {
   const parseInput = (input: unknown): FileEditInput => {
@@ -47,11 +45,11 @@ export function FileEditPermissionRequest(props: PermissionRequestProps): React.
       onDone={props.onDone}
       onReject={props.onReject}
       workerBadge={props.workerBadge}
-      title="Edit file"
+      title={t('permGeneral.editFile')}
       subtitle={relative(getCwd(), file_path)}
       question={
         <Text>
-          Do you want to make this edit to <Text bold>{basename(file_path)}</Text>?
+          {t('permGeneral.editQuestion', basename(file_path))}
         </Text>
       }
       content={

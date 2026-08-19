@@ -1,13 +1,12 @@
 /* eslint-disable custom-rules/no-process-exit -- CLI subcommand handler intentionally exits */
 
+import { t } from '../../utils/i18n/index.js'
 import {
   clearAuthRelatedCaches,
-  performLogout,
-} from '../../commands/logout/logout.js'
+  performLogout} from '../../commands/logout/logout.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import { getSSLErrorHint } from '@ant/model-provider'
 import { fetchAndStoreClaudeCodeFirstTokenDate } from '../../services/api/firstTokenDate.js'
 import {
@@ -15,8 +14,7 @@ import {
   fetchAndStoreUserRoles,
   refreshOAuthToken,
   shouldUseClaudeAIAuth,
-  storeOAuthAccountInfo,
-} from '../../services/oauth/client.js'
+  storeOAuthAccountInfo} from '../../services/oauth/client.js'
 import { getOauthProfileFromOauthToken } from '../../services/oauth/getOauthProfile.js'
 import { OAuthService } from '../../services/oauth/index.js'
 import type { OAuthTokens } from '../../services/oauth/types.js'
@@ -27,23 +25,19 @@ import {
   getOauthAccountInfo,
   getSubscriptionType,
   saveOAuthTokensIfNeeded,
-  validateForceLoginOrg,
-} from '../../utils/auth.js'
+  validateForceLoginOrg} from '../../utils/auth.js'
 import { saveGlobalConfig } from '../../utils/config.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { isRunningOnHomespace } from '../../utils/envUtils.js'
 import { errorMessage } from '../../utils/errors.js'
 import { logError } from '../../utils/log.js'
 import {
-  getAPIProvider,
-  isThirdPartyAPIProvider,
-} from '../../utils/model/providers.js'
+  getAPIProvider} from '../../utils/model/providers.js'
 import { getInitialSettings } from '../../utils/settings/settings.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import {
   buildAccountProperties,
-  buildAPIProviderProperties,
-} from '../../utils/status.js'
+  buildAPIProviderProperties} from '../../utils/status.js'
 
 /**
  * Shared post-token-acquisition logic. Saves tokens, fetches profile/roles,
@@ -67,15 +61,13 @@ export async function installOAuthTokens(tokens: OAuthTokens): Promise<void> {
       billingType: profile.organization.billing_type ?? undefined,
       subscriptionCreatedAt:
         profile.organization.subscription_created_at ?? undefined,
-      accountCreatedAt: profile.account.created_at,
-    })
+      accountCreatedAt: profile.account.created_at})
   } else if (tokens.tokenAccount) {
     // Fallback to token exchange account data when profile endpoint fails
     storeOAuthAccountInfo({
       accountUuid: tokens.tokenAccount.uuid,
       emailAddress: tokens.tokenAccount.emailAddress,
-      organizationUuid: tokens.tokenAccount.organizationUuid,
-    })
+      organizationUuid: tokens.tokenAccount.organizationUuid})
   }
 
   const storageResult = saveOAuthTokensIfNeeded(tokens)
@@ -84,8 +76,7 @@ export async function installOAuthTokens(tokens: OAuthTokens): Promise<void> {
   if (storageResult.warning) {
     logEvent('tengu_oauth_storage_warning', {
       warning:
-        storageResult.warning as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        storageResult.warning as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
   }
 
   // Roles and first-token-date may fail for limited-scope tokens (e.g.
@@ -114,27 +105,16 @@ export async function installOAuthTokens(tokens: OAuthTokens): Promise<void> {
 export async function authLogin({
   email,
   sso,
-  console: useConsole,
-  claudeai,
-}: {
+  claudeai}: {
   email?: string
   sso?: boolean
-  console?: boolean
   claudeai?: boolean
 }): Promise<void> {
-  if (useConsole && claudeai) {
-    process.stderr.write(
-      'Error: --console and --claudeai cannot be used together.\n',
-    )
-    process.exit(1)
-  }
-
   const settings = getInitialSettings()
-  // forceLoginMethod is a hard constraint (enterprise setting) — matches ConsoleOAuthFlow behavior.
-  // Without it, --console selects Console; --claudeai (or no flag) selects claude.ai.
+  // forceLoginMethod is a hard constraint (enterprise setting).
   const loginWithClaudeAi = settings.forceLoginMethod
     ? settings.forceLoginMethod === 'claudeai'
-    : !useConsole
+    : true
   const orgUUID = settings.forceLoginOrgUUID
 
   // Fast path: if a refresh token is provided via env var, skip the browser
@@ -143,11 +123,7 @@ export async function authLogin({
   if (envRefreshToken) {
     const envScopes = process.env.CLAUDE_CODE_OAUTH_SCOPES
     if (!envScopes) {
-      process.stderr.write(
-        'CLAUDE_CODE_OAUTH_SCOPES is required when using CLAUDE_CODE_OAUTH_REFRESH_TOKEN.\n' +
-          'Set it to the space-separated scopes the refresh token was issued with\n' +
-          '(e.g. "user:inference" or "user:profile user:inference user:sessions:claude_code user:mcp_servers").\n',
-      )
+      process.stderr.write(t('cli.oauthScopesRequired') + '\n')
       process.exit(1)
     }
 
@@ -175,15 +151,14 @@ export async function authLogin({
       })
 
       logEvent('tengu_oauth_success', {
-        loginWithClaudeAi: shouldUseClaudeAIAuth(tokens.scopes),
-      })
-      process.stdout.write('Login successful.\n')
+        loginWithClaudeAi: shouldUseClaudeAIAuth(tokens.scopes)})
+      process.stdout.write(t('cli.loginSuccessful') + '\n')
       process.exit(0)
     } catch (err) {
       logError(err)
       const sslHint = getSSLErrorHint(err)
       process.stderr.write(
-        `Login failed: ${errorMessage(err)}\n${sslHint ? sslHint + '\n' : ''}`,
+        t('cli.loginFailed', errorMessage(err)) + '\n' + (sslHint ? sslHint + '\n' : ''),
       )
       process.exit(1)
     }
@@ -198,15 +173,14 @@ export async function authLogin({
 
     const result = await oauthService.startOAuthFlow(
       async url => {
-        process.stdout.write('Opening browser to sign in…\n')
-        process.stdout.write(`If the browser didn't open, visit: ${url}\n`)
+        process.stdout.write(t('cli.openingBrowser') + '\n')
+        process.stdout.write(t('cli.ifBrowserDidNotOpen', url) + '\n')
       },
       {
         loginWithClaudeAi,
         loginHint: email,
         loginMethod: resolvedLoginMethod,
-        orgUUID,
-      },
+        orgUUID},
     )
 
     await installOAuthTokens(result)
@@ -221,13 +195,13 @@ export async function authLogin({
 
     logEvent('tengu_oauth_success', { loginWithClaudeAi })
 
-    process.stdout.write('Login successful.\n')
+    process.stdout.write(t('cli.loginSuccessful') + '\n')
     process.exit(0)
   } catch (err) {
     logError(err)
     const sslHint = getSSLErrorHint(err)
     process.stderr.write(
-      `Login failed: ${errorMessage(err)}\n${sslHint ? sslHint + '\n' : ''}`,
+      t('cli.loginFailed', errorMessage(err)) + '\n' + (sslHint ? sslHint + '\n' : ''),
     )
     process.exit(1)
   } finally {
@@ -245,7 +219,7 @@ export async function authStatus(opts: {
     !!process.env.ANTHROPIC_API_KEY && !isRunningOnHomespace()
   const oauthAccount = getOauthAccountInfo()
   const subscriptionType = getSubscriptionType()
-  const using3P = isThirdPartyAPIProvider(getAPIProvider())
+  const using3P = getAPIProvider() !== 'anthropic'
   const loggedIn =
     hasToken || apiKeySource !== 'none' || hasApiKeyEnvVar || using3P
 
@@ -289,12 +263,10 @@ export async function authStatus(opts: {
       }
     }
     if (!hasAuthProperty && hasApiKeyEnvVar) {
-      process.stdout.write('API key: ANTHROPIC_API_KEY\n')
+      process.stdout.write(t('cli.apiKeyEnvVar') + '\n')
     }
     if (!loggedIn) {
-      process.stdout.write(
-        'Not logged in. Run claude auth login to authenticate.\n',
-      )
+      process.stdout.write(t('cli.notLoggedIn') + '\n')
     }
   } else {
     const apiProvider = getAPIProvider()
@@ -307,8 +279,7 @@ export async function authStatus(opts: {
     const output: Record<string, string | boolean | null> = {
       loggedIn,
       authMethod,
-      apiProvider,
-    }
+      apiProvider}
     if (resolvedApiKeySource) {
       output.apiKeySource = resolvedApiKeySource
     }
@@ -328,9 +299,9 @@ export async function authLogout(): Promise<void> {
   try {
     await performLogout({ clearOnboarding: false })
   } catch {
-    process.stderr.write('Failed to log out.\n')
+    process.stderr.write(t('cli.failedToLogout') + '\n')
     process.exit(1)
   }
-  process.stdout.write('Successfully logged out from your Anthropic account.\n')
+  process.stdout.write(t('cli.successfullyLoggedOut') + '\n')
   process.exit(0)
 }

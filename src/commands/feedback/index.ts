@@ -2,12 +2,13 @@ import type { Command } from '../../commands.js'
 import { isPolicyAllowed } from '../../services/policyLimits/index.js'
 import { isEnvTruthy } from '../../utils/envUtils.js'
 import { isEssentialTrafficOnly } from '../../utils/privacyLevel.js'
+import { t } from '../../utils/i18n/index.js'
 
 const feedback = {
   aliases: ['bug'],
   type: 'local-jsx',
   name: 'feedback',
-  description: `Submit feedback about Claude Code`,
+  description: t('cmd.descFeedback'),
   argumentHint: '[report]',
   isEnabled: () =>
     !(
@@ -20,7 +21,6 @@ const feedback = {
       process.env.USER_TYPE === 'ant' ||
       !isPolicyAllowed('allow_product_feedback')
     ),
-  load: () => import('./feedback.js'),
-} satisfies Command
+  load: () => import('./feedback.js')} satisfies Command
 
 export default feedback

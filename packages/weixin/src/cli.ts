@@ -8,17 +8,18 @@ import { startLogin, waitForLogin } from './login.js'
 import { confirmPairing } from './pairing.js'
 import { runWeixinMcpServer } from './server.js'
 import type { WeixinServerDeps } from './server.js'
+import { t } from '../../../src/utils/i18n/index.js'
 
 function printUsage(): void {
   process.stdout.write(
     [
-      'Usage:',
+      t('weixin.usage'),
       '  ccb weixin serve',
       '  ccb weixin login',
       '  ccb weixin login clear',
       '  ccb weixin access pair <code>',
       '',
-      'Session enablement:',
+      t('weixin.sessionEnablement'),
       '  ccb --channels plugin:weixin@builtin',
     ].join('\n') + '\n',
   )
@@ -27,7 +28,7 @@ function printUsage(): void {
 async function runLogin(clear = false): Promise<void> {
   if (clear) {
     clearAccount()
-    process.stdout.write('WeChat account cleared.\n')
+    process.stdout.write(t('weixin.accountCleared') + '\n')
     return
   }
 
@@ -35,22 +36,22 @@ async function runLogin(clear = false): Promise<void> {
   if (existing) {
     process.stdout.write(
       [
-        'Already connected:',
-        `  User ID: ${existing.userId || 'unknown'}`,
-        `  Connected since: ${existing.savedAt}`,
+        t('weixin.alreadyConnected'),
+        t('weixin.userId', existing.userId || 'unknown'),
+        t('weixin.connectedSince', existing.savedAt),
         '',
-        'Run `ccb weixin login clear` to disconnect.',
-        'Restart Claude Code with:',
+        t('weixin.disconnectHint'),
+        t('weixin.restartHint'),
         '  ccb --channels plugin:weixin@builtin',
       ].join('\n') + '\n',
     )
     return
   }
 
-  process.stdout.write('Starting WeChat QR login...\n\n')
+  process.stdout.write(t('weixin.startingLogin') + '\n\n')
   const qr = await startLogin(DEFAULT_BASE_URL)
   process.stdout.write(
-    `\nScan the QR code above with WeChat, or open this URL:\n${qr.qrcodeUrl || ''}\n\n`,
+    t('weixin.scanQr', qr.qrcodeUrl || '') + '\n\n',
   )
 
   const result = await waitForLogin({
@@ -59,7 +60,7 @@ async function runLogin(clear = false): Promise<void> {
   })
 
   if (!result.connected || !result.token) {
-    process.stderr.write(`Login failed: ${result.message}\n`)
+    process.stderr.write(t('weixin.loginFailed', result.message) + '\n')
     process.exit(1)
   }
 
@@ -72,11 +73,11 @@ async function runLogin(clear = false): Promise<void> {
 
   process.stdout.write(
     [
-      'Connected successfully!',
-      `  User ID: ${result.userId || 'unknown'}`,
-      `  Base URL: ${result.baseUrl || DEFAULT_BASE_URL}`,
+      t('weixin.connectedSuccess'),
+      t('weixin.userId', result.userId || 'unknown'),
+      t('weixin.baseUrl', result.baseUrl || DEFAULT_BASE_URL),
       '',
-      'Restart Claude Code with:',
+      t('weixin.restartHint'),
       '  ccb --channels plugin:weixin@builtin',
     ].join('\n') + '\n',
   )
@@ -90,11 +91,11 @@ function runAccess(args: string[]): void {
 
   const userId = confirmPairing(args[1])
   if (!userId) {
-    process.stderr.write('Invalid or expired pairing code.\n')
+    process.stderr.write(t('weixin.invalidPairingCode') + '\n')
     process.exit(1)
   }
 
-  process.stdout.write(`Paired successfully: ${userId}\n`)
+  process.stdout.write(t('weixin.pairedSuccess', userId) + '\n')
 }
 
 export async function handleWeixinCli(
@@ -107,9 +108,7 @@ export async function handleWeixinCli(
   switch (subcommand) {
     case 'serve':
       if (!serverDeps) {
-        process.stderr.write(
-          '[weixin] serve handler not available in this context.\n',
-        )
+        process.stderr.write(t('weixin.serveUnavailable') + '\n')
         process.exit(1)
       }
       await runWeixinMcpServer(version ?? '0.0.0', serverDeps)

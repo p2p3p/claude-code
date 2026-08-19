@@ -19,8 +19,7 @@ import {
   type MessageActionsState,
   type NavigableMessage,
   stripSystemReminders,
-  toolCallOf,
-} from './messageActions.js';
+  toolCallOf} from './messageActions.js';
 
 // Fallback extractor: lower + cache here for callers without the
 // Messages.tsx tool-lookup path (tests, static contexts). Messages.tsx
@@ -224,8 +223,7 @@ function VirtualItem({
   onClickK,
   onEnterK,
   onLeaveK,
-  renderItem,
-}: VirtualItemProps): React.ReactNode {
+  renderItem}: VirtualItemProps): React.ReactNode {
   return (
     <Box
       ref={measureRef(k)}
@@ -263,8 +261,7 @@ export function VirtualMessageList({
   jumpRef,
   onSearchMatchesChange,
   scanElement,
-  setPositions,
-}: Props): React.ReactNode {
+  setPositions}: Props): React.ReactNode {
   // Incremental key array. Streaming appends one message at a time; rebuilding
   // the full string array on every commit allocates O(n) per message (~1MB
   // churn at 27k messages). Append-only delta push when the prefix matches;
@@ -296,8 +293,7 @@ export function VirtualMessageList({
     getItemTop,
     getItemElement,
     getItemHeight,
-    scrollToIndex,
-  } = useVirtualScroll(scrollRef, keys, columns);
+    scrollToIndex} = useVirtualScroll(scrollRef, keys, columns);
   const [start, end] = range;
 
   // Unmeasured (undefined height) falls through — assume visible.
@@ -315,8 +311,7 @@ export function VirtualMessageList({
         uuid: m.uuid,
         msgType: m.type as import('./messageActions.js').NavigableType,
         expanded: false,
-        toolName: toolCallOf(m)?.name,
-      });
+        toolName: toolCallOf(m)?.name});
     const selIdx = selectedIndex ?? -1;
     const scan = (from: number, dir: 1 | -1, pred: (i: number) => boolean = isVisible) => {
       for (let i = from; i >= 0 && i < messages.length; i += dir) {
@@ -344,8 +339,7 @@ export function VirtualMessageList({
       navigateNextUser: () => scan(selIdx + 1, 1, isUser),
       navigateTop: () => scan(0, 1),
       navigateBottom: () => scan(messages.length - 1, -1),
-      getSelected: () => (selIdx >= 0 ? (messages[selIdx] ?? null) : null),
-    };
+      getSelected: () => (selIdx >= 0 ? (messages[selIdx] ?? null) : null)};
   }, [messages, selectedIndex, setCursor, isVisible]);
   // Two-phase jump + search engine. Read-through-ref so the handle stays
   // stable across renders — offsets/messages identity changes every render,
@@ -356,16 +350,14 @@ export function VirtualMessageList({
     getItemElement,
     getItemTop,
     messages,
-    scrollToIndex,
-  });
+    scrollToIndex});
   jumpState.current = {
     offsets,
     start,
     getItemElement,
     getItemTop,
     messages,
-    scrollToIndex,
-  };
+    scrollToIndex};
 
   // Keep cursor-selected message visible. offsets rebuilds every render
   // — as a bare dep this re-pinned on every mousewheel tick. Read through
@@ -420,8 +412,7 @@ export function VirtualMessageList({
     // Engine-counted (indexOf on extractSearchText), not render-counted —
     // close enough for the badge; exact counts would need scanElement on
     // every matched message (~1-3ms × N). total = prefixSum[matches.length].
-    prefixSum: [] as number[],
-  });
+    prefixSum: [] as number[]});
   // scrollTop at the moment / was pressed. Incsearch preview-jumps snap
   // back here when matches drop to 0. -1 = no anchor (before first /).
   const searchAnchor = useRef(-1);
@@ -742,8 +733,7 @@ export function VirtualMessageList({
         );
         indexWarmed.current = true;
         return Math.round(workMs);
-      },
-    }),
+      }}),
     // Closures over refs + callbacks. scrollRef stable; others are
     // useCallback([]) or prop-drilled from REPL (stable).
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -849,8 +839,7 @@ function StickyTracker({
   offsets,
   getItemTop,
   getItemElement,
-  scrollRef,
-}: {
+  scrollRef}: {
   messages: RenderableMessage[];
   start: number;
   end: number;
@@ -1002,8 +991,7 @@ function StickyTracker({
           scrollRef.current?.scrollTo(capturedEstimate);
           pending.current = { idx: capturedIdx, tries: 0 };
         }
-      },
-    });
+      }});
     // No deps — must run every render. Suppression state lives in a ref
     // (not idx/estimate), so a deps-gated effect would never see it tick.
     // Body's own guards short-circuit when nothing changed.

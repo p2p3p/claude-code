@@ -24,8 +24,7 @@ import { getMainLoopModel } from './model/model.js'
 import { asSystemPrompt } from './systemPromptType.js'
 import {
   shouldEnableThinkingByDefault,
-  type ThinkingConfig,
-} from './thinking.js'
+  type ThinkingConfig} from './thinking.js'
 
 /**
  * Fetch the three context pieces that form the API cache-key prefix:
@@ -46,8 +45,7 @@ export async function fetchSystemPromptParts({
   mainLoopModel,
   additionalWorkingDirectories,
   mcpClients,
-  customSystemPrompt,
-}: {
+  customSystemPrompt}: {
   tools: Tools
   mainLoopModel: string
   additionalWorkingDirectories: string[]
@@ -96,8 +94,7 @@ export async function buildSideQuestionFallbackParams({
   customSystemPrompt,
   appendSystemPrompt,
   thinkingConfig,
-  agents,
-}: {
+  agents}: {
   tools: Tools
   commands: Command[]
   mcpClients: MCPServerConnection[]
@@ -121,8 +118,7 @@ export async function buildSideQuestionFallbackParams({
         appState.toolPermissionContext.additionalWorkingDirectories.keys(),
       ),
       mcpClients,
-      customSystemPrompt,
-    })
+      customSystemPrompt})
 
   const systemPrompt = asSystemPrompt([
     ...(customSystemPrompt !== undefined
@@ -156,8 +152,7 @@ export async function buildSideQuestionFallbackParams({
       isNonInteractiveSession: true,
       agentDefinitions: { activeAgents: agents, allAgents: [] },
       customSystemPrompt,
-      appendSystemPrompt,
-    },
+      appendSystemPrompt},
     abortController: createAbortController(),
     readFileState,
     getAppState,
@@ -166,14 +161,12 @@ export async function buildSideQuestionFallbackParams({
     setInProgressToolUseIDs: () => {},
     setResponseLength: () => {},
     updateFileHistoryState: () => {},
-    updateAttributionState: () => {},
-  }
+    updateAttributionState: () => {}}
 
   return {
     systemPrompt,
     userContext,
     systemContext,
     toolUseContext,
-    forkContextMessages,
-  }
+    forkContextMessages}
 }

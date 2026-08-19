@@ -31,8 +31,7 @@ import type {
   InstalledApp,
   ResolvePrepareCaptureResult,
   RunningApp,
-  ScreenshotResult,
-} from '@ant/computer-use-mcp'
+  ScreenshotResult} from '@ant/computer-use-mcp'
 
 import { logForDebugging } from '../debug.js'
 import { sleep } from '../sleep.js'
@@ -106,8 +105,7 @@ $pt.X = 0; $pt.Y = 0
 `,
       ],
       stdout: 'pipe',
-      stderr: 'pipe',
-    })
+      stderr: 'pipe'})
     const out = new TextDecoder().decode(result.stdout).trim()
     const [dxStr, dyStr] = out.split(',')
     const dx = Number(dxStr) || 0
@@ -178,8 +176,7 @@ function augmentScreenshot(
       displayHeight: raw.height,
       originX: 0,
       originY: 0,
-      accessibilityText,
-    }
+      accessibilityText}
   }
   return {
     base64: raw.base64,
@@ -188,8 +185,7 @@ function augmentScreenshot(
     displayWidth: display.width,
     displayHeight: display.height,
     originX: 0,
-    originY: 0,
-  }
+    originY: 0}
 }
 
 // ---------------------------------------------------------------------------
@@ -209,8 +205,7 @@ export function createCrossPlatformExecutor(_opts: {
   return {
     capabilities: {
       ...CLI_CU_CAPABILITIES,
-      hostBundleId: CLI_HOST_BUNDLE_ID,
-    },
+      hostBundleId: CLI_HOST_BUNDLE_ID},
 
     // ── Pre-action (no-op on non-macOS) ──────────────────────────────────
 
@@ -233,8 +228,7 @@ export function createCrossPlatformExecutor(_opts: {
         scaleFactor: d.scaleFactor ?? 1,
         displayId: d.displayId ?? 0,
         originX: 0,
-        originY: 0,
-      }
+        originY: 0}
     },
 
     async listDisplays(): Promise<DisplayGeometry[]> {
@@ -265,8 +259,7 @@ export function createCrossPlatformExecutor(_opts: {
       return {
         ...shot,
         hidden: [],
-        displayId: opts.preferredDisplayId ?? d.displayId ?? 0,
-      }
+        displayId: opts.preferredDisplayId ?? d.displayId ?? 0}
     },
 
     async screenshot(opts: {
@@ -320,15 +313,13 @@ export function createCrossPlatformExecutor(_opts: {
       if (process.platform === 'win32') {
         const result = Bun.spawnSync({
           cmd: ['powershell', '-NoProfile', '-Command', 'Get-Clipboard'],
-          stdout: 'pipe',
-        })
+          stdout: 'pipe'})
         return new TextDecoder().decode(result.stdout).trim()
       }
       // Linux
       const result = Bun.spawnSync({
         cmd: ['xclip', '-selection', 'clipboard', '-o'],
-        stdout: 'pipe',
-      })
+        stdout: 'pipe'})
       return new TextDecoder().decode(result.stdout).trim()
     },
 
@@ -341,14 +332,12 @@ export function createCrossPlatformExecutor(_opts: {
             '-NoProfile',
             '-Command',
             `Set-Clipboard -Value '${escaped}'`,
-          ],
-        })
+          ]})
         return
       }
       // Linux
       const proc = Bun.spawn(['xclip', '-selection', 'clipboard'], {
-        stdin: 'pipe',
-      })
+        stdin: 'pipe'})
       proc.stdin.write(text)
       proc.stdin.end()
       await proc.exited
@@ -414,8 +403,7 @@ public class MDown { [StructLayout(LayoutKind.Sequential)] public struct MOUSEIN
 [DllImport("user32.dll",SetLastError=true)] public static extern uint SendInput(uint n, INPUT[] i, int cb); }
 '@
 $i = New-Object MDown+INPUT; $i.type=0; $i.mi.dwFlags=0x0002; [MDown]::SendInput(1, @($i), [Runtime.InteropServices.Marshal]::SizeOf($i)) | Out-Null`,
-          ],
-        })
+          ]})
         return
       }
     },
@@ -448,8 +436,7 @@ public class MUp { [StructLayout(LayoutKind.Sequential)] public struct MOUSEINPU
 [DllImport("user32.dll",SetLastError=true)] public static extern uint SendInput(uint n, INPUT[] i, int cb); }
 '@
 $i = New-Object MUp+INPUT; $i.type=0; $i.mi.dwFlags=0x0004; [MUp]::SendInput(1, @($i), [Runtime.InteropServices.Marshal]::SizeOf($i)) | Out-Null`,
-          ],
-        })
+          ]})
         return
       }
     },
@@ -532,8 +519,7 @@ $i = New-Object MUp+INPUT; $i.type=0; $i.mi.dwFlags=0x0004; [MUp]::SendInput(1, 
       return (await platform.apps.listInstalled()).map(a => ({
         bundleId: a.id,
         displayName: a.displayName,
-        path: a.path,
-      }))
+        path: a.path}))
     },
 
     async getAppIcon(_path: string): Promise<string | undefined> {
@@ -543,8 +529,7 @@ $i = New-Object MUp+INPUT; $i.type=0; $i.mi.dwFlags=0x0004; [MUp]::SendInput(1, 
     async listRunningApps(): Promise<RunningApp[]> {
       return platform.apps.listRunning().map(w => ({
         bundleId: w.id,
-        displayName: w.title,
-      }))
+        displayName: w.title}))
     },
 
     async openApp(bundleId: string): Promise<void> {
@@ -592,8 +577,7 @@ $i = New-Object MUp+INPUT; $i.type=0; $i.mi.dwFlags=0x0004; [MUp]::SendInput(1, 
           claude: 'claude',
           codex: 'codex',
           gemini: 'gemini',
-          custom: opts.command ?? '',
-        }
+          custom: opts.command ?? ''}
         const cmd = agentCmd[opts.agent]
         if (!cmd) return null
 
@@ -610,8 +594,7 @@ $i = New-Object MUp+INPUT; $i.type=0; $i.mi.dwFlags=0x0004; [MUp]::SendInput(1, 
             `Start-Process powershell -ArgumentList '-NoExit','-Command','cd ''${escapedCwd}''; ${cmd}'`,
           ],
           stdout: 'ignore',
-          stderr: 'ignore',
-        })
+          stderr: 'ignore'})
 
         // Poll for new terminal window (up to 5s)
         let newHwnd: string | null = null
@@ -706,8 +689,7 @@ $i = New-Object MUp+INPUT; $i.type=0; $i.mi.dwFlags=0x0004; [MUp]::SendInput(1, 
         hwnd,
         title: win?.title,
         pid: win?.pid,
-        rect: rect ?? undefined,
-      }
+        rect: rect ?? undefined}
     },
 
     async listVisibleWindows() {
@@ -919,8 +901,7 @@ $i = New-Object MUp+INPUT; $i.type=0; $i.mi.dwFlags=0x0004; [MUp]::SendInput(1, 
             x: Math.round(x),
             y: Math.round(y),
             delta,
-            horizontal: horizontal ?? false,
-          })
+            horizontal: horizontal ?? false})
           if (result !== null) return true
         } catch {}
         // Fallback: windowMessage.ts (PowerShell)
@@ -1140,8 +1121,7 @@ $i = New-Object MUp+INPUT; $i.type=0; $i.mi.dwFlags=0x0004; [MUp]::SendInput(1, 
       } catch {
         return false
       }
-    },
-  }
+    }}
 }
 
 /**

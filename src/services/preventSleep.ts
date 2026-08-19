@@ -126,8 +126,7 @@ function spawnCaffeinate(): void {
       'caffeinate',
       ['-i', '-t', String(CAFFEINATE_TIMEOUT_SECONDS)],
       {
-        stdio: 'ignore',
-      },
+        stdio: 'ignore'},
     )
 
     // Don't let caffeinate keep the Node process alive

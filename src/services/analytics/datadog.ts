@@ -115,10 +115,8 @@ async function flushLogs(): Promise<void> {
     await axios.post(DATADOG_LOGS_ENDPOINT, logsToSend, {
       headers: {
         'Content-Type': 'application/json',
-        'DD-API-KEY': DATADOG_CLIENT_TOKEN,
-      },
-      timeout: NETWORK_TIMEOUT_MS,
-    })
+        'DD-API-KEY': DATADOG_CLIENT_TOKEN},
+      timeout: NETWORK_TIMEOUT_MS})
   } catch (error) {
     logError(error)
   }
@@ -178,7 +176,7 @@ export async function trackDatadogEvent(
   }
 
   // Don't send events for 3P providers (Bedrock, Vertex, Foundry)
-  if (getAPIProvider() !== 'firstParty') {
+  if (getAPIProvider() !== 'anthropic') {
     return
   }
 
@@ -194,16 +192,14 @@ export async function trackDatadogEvent(
   try {
     const metadata = await getEventMetadata({
       model: properties.model,
-      betas: properties.betas,
-    })
+      betas: properties.betas})
     // Destructure to avoid duplicate envContext (once nested, once flattened)
     const { envContext, ...restMetadata } = metadata
     const allData: Record<string, unknown> = {
       ...restMetadata,
       ...envContext,
       ...properties,
-      userBucket: getUserBucket(),
-    }
+      userBucket: getUserBucket()}
 
     // Normalize MCP tool names to "mcp" for cardinality reduction
     if (
@@ -263,8 +259,7 @@ export async function trackDatadogEvent(
       message: eventName,
       service: 'claude-code',
       hostname: 'claude-code',
-      env: process.env.USER_TYPE,
-    }
+      env: process.env.USER_TYPE}
 
     // Add all fields as searchable attributes (not duplicated in tags)
     for (const [key, value] of Object.entries(allData)) {

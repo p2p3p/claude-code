@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
+import { t } from '../utils/i18n/index.js'
 import { Box, Text } from '@anthropic/ink';
 import { isMaxSubscriber, isProSubscriber, isTeamSubscriber } from '../utils/auth.js';
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js';
@@ -7,8 +8,7 @@ import {
   convertEffortValueToLevel,
   getDefaultEffortForModel,
   getOpusDefaultEffortConfig,
-  toPersistableEffort,
-} from '../utils/effort.js';
+  toPersistableEffort} from '../utils/effort.js';
 import { parseUserSpecifiedModel } from '../utils/model/model.js';
 import { updateSettingsForSource } from '../utils/settings/settings.js';
 import type { OptionWithDescription } from './CustomSelect/select.js';
@@ -55,8 +55,7 @@ export function EffortCallout({ model, onDone }: Props): React.ReactNode {
     (value: EffortLevel): void => {
       const effortLevel = value === defaultLevel ? undefined : value;
       updateSettingsForSource('userSettings', {
-        effortLevel: toPersistableEffort(effortLevel),
-      });
+        effortLevel: toPersistableEffort(effortLevel)});
       onDoneRef.current(value);
     },
     [defaultLevel],
@@ -64,11 +63,10 @@ export function EffortCallout({ model, onDone }: Props): React.ReactNode {
 
   const options: OptionWithDescription<EffortLevel>[] = [
     {
-      label: <EffortOptionLabel level="medium" text="Medium (recommended)" />,
-      value: 'medium',
-    },
-    { label: <EffortOptionLabel level="high" text="High" />, value: 'high' },
-    { label: <EffortOptionLabel level="low" text="Low" />, value: 'low' },
+      label: <EffortOptionLabel level="medium" text={t('effortcallout.mediumRecommended')} />,
+      value: 'medium'},
+    { label: <EffortOptionLabel level="high" text={t('effortcallout.high')} />, value: 'high' },
+    { label: <EffortOptionLabel level="low" text={t('effortcallout.low')} />, value: 'low' },
   ];
 
   return (
@@ -79,8 +77,8 @@ export function EffortCallout({ model, onDone }: Props): React.ReactNode {
         </Box>
         <Box marginBottom={1}>
           <Text dimColor>
-            <EffortIndicatorSymbol level="low" /> low {'·'} <EffortIndicatorSymbol level="medium" /> medium {'·'}{' '}
-            <EffortIndicatorSymbol level="high" /> high
+            <EffortIndicatorSymbol level="low" /> {t('effortcallout.low')} {'·'} <EffortIndicatorSymbol level="medium" /> {t('effortcallout.medium')} {'·'}{' '}
+            <EffortIndicatorSymbol level="high" /> {t('effortcallout.high')}
           </Text>
         </Box>
         <Select options={options} onChange={handleSelect} onCancel={handleCancel} />

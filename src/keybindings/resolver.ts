@@ -5,5 +5,4 @@ export {
   getBindingDisplayText,
   keystrokesEqual,
   type ResolveResult,
-  type ChordResolveResult,
-} from '@anthropic/ink'
+  type ChordResolveResult} from '@anthropic/ink'

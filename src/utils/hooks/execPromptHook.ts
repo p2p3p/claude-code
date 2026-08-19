@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { HookEvent } from 'src/entrypoints/agentSdkTypes.js'
-import { queryModelWithoutStreaming } from '../../services/api/claude.js'
+import { queryModelWithoutStreaming } from '../../services/api/anthropic/index.js'
 import type { ToolUseContext } from '../../Tool.js'
 import type { Message } from '../../types/message.js'
 import { createAttachmentMessage } from '../attachments.js'
@@ -91,14 +91,9 @@ Your response must be a JSON object matching one of the following schemas:
               type: 'object',
               properties: {
                 ok: { type: 'boolean' },
-                reason: { type: 'string' },
-              },
+                reason: { type: 'string' }},
               required: ['ok'],
-              additionalProperties: false,
-            },
-          },
-        },
-      })
+              additionalProperties: false}}}})
 
       cleanupSignal()
 
@@ -128,9 +123,7 @@ Your response must be a JSON object matching one of the following schemas:
             hookEvent,
             stderr: 'JSON validation failed',
             stdout: fullResponse,
-            exitCode: 1,
-          }),
-        }
+            exitCode: 1})}
       }
 
       const parsed = hookResponseSchema().safeParse(json)
@@ -148,9 +141,7 @@ Your response must be a JSON object matching one of the following schemas:
             hookEvent,
             stderr: `Schema validation failed: ${parsed.error.message}`,
             stdout: fullResponse,
-            exitCode: 1,
-          }),
-        }
+            exitCode: 1})}
       }
 
       // Failed to meet condition
@@ -163,11 +154,9 @@ Your response must be a JSON object matching one of the following schemas:
           outcome: 'blocking',
           blockingError: {
             blockingError: `Prompt hook condition was not met: ${parsed.data.reason}`,
-            command: hook.prompt,
-          },
+            command: hook.prompt},
           preventContinuation: true,
-          stopReason: parsed.data.reason,
-        }
+          stopReason: parsed.data.reason}
       }
 
       // Condition was met
@@ -180,17 +169,14 @@ Your response must be a JSON object matching one of the following schemas:
           hookName,
           toolUseID: effectiveToolUseID,
           hookEvent,
-          content: '',
-        }),
-      }
+          content: ''})}
     } catch (error) {
       cleanupSignal()
 
       if (combinedSignal.aborted) {
         return {
           hook,
-          outcome: 'cancelled',
-        }
+          outcome: 'cancelled'}
       }
       throw error
     }
@@ -207,8 +193,6 @@ Your response must be a JSON object matching one of the following schemas:
         hookEvent,
         stderr: `Error executing prompt hook: ${errorMsg}`,
         stdout: '',
-        exitCode: 1,
-      }),
-    }
+        exitCode: 1})}
   }
 }

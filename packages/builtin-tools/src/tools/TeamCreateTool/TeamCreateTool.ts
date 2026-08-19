@@ -7,6 +7,7 @@ import { buildTool, type ToolDef } from 'src/Tool.js'
 import { formatAgentId } from 'src/utils/agentId.js'
 import { isAgentSwarmsEnabled } from 'src/utils/agentSwarmsEnabled.js'
 import { getCwd } from 'src/utils/cwd.js'
+import { t } from 'src/utils/i18n/index.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import {
   getDefaultMainLoopModel,
@@ -73,8 +74,7 @@ function generateUniqueTeamName(providedName: string): string {
 
 export const TeamCreateTool: Tool<InputSchema, Output> = buildTool({
   name: TEAM_CREATE_TOOL_NAME,
-  searchHint:
-    'create multi-agent swarm team, collaborate, parallel agents, task distribution, agent coordination, team management',
+  searchHint: t('toolUI.teamCreate.searchHint'),
   maxResultSizeChars: 100_000,
   shouldDefer: true,
 
@@ -98,7 +98,7 @@ export const TeamCreateTool: Tool<InputSchema, Output> = buildTool({
     if (!input.team_name || input.team_name.trim().length === 0) {
       return {
         result: false,
-        message: 'team_name is required for TeamCreate',
+        message: t('toolUI.teamCreate.teamNameRequired'),
         errorCode: 9,
       }
     }
@@ -106,7 +106,7 @@ export const TeamCreateTool: Tool<InputSchema, Output> = buildTool({
   },
 
   async description() {
-    return 'Create a new team for coordinating multiple agents'
+    return t('toolUI.teamCreate.description')
   },
 
   async prompt() {
@@ -142,7 +142,7 @@ export const TeamCreateTool: Tool<InputSchema, Output> = buildTool({
 
     if (existingTeam) {
       throw new Error(
-        `Already leading team "${existingTeam}". A leader can only manage one team at a time. Use TeamDelete to end the current team before creating a new one.`,
+        t('toolUI.teamCreate.alreadyLeadingTeam', { existingTeam }),
       )
     }
 

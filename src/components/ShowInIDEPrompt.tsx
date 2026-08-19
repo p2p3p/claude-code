@@ -2,12 +2,12 @@ import { basename, relative } from 'path';
 import React from 'react';
 import { Box, Text, Pane } from '@anthropic/ink';
 import { getCwd } from '../utils/cwd.js';
+import { t } from '../utils/i18n/index.js';
 import { isSupportedVSCodeTerminal } from '../utils/ide.js';
 import { Select } from './CustomSelect/index.js';
 import type {
   PermissionOption,
-  PermissionOptionWithLabel,
-} from './permissions/FilePermissionDialog/permissionOptions.js';
+  PermissionOptionWithLabel} from './permissions/FilePermissionDialog/permissionOptions.js';
 
 type Props<A> = {
   filePath: string;
@@ -38,25 +38,24 @@ export function ShowInIDEPrompt<A>({
   onInputModeToggle,
   focusedOption,
   yesInputMode,
-  noInputMode,
-}: Props<A>): React.ReactNode {
+  noInputMode}: Props<A>): React.ReactNode {
   return (
     <Pane color="permission">
       <Box flexDirection="column" gap={1}>
         <Text bold color="permission">
-          Opened changes in {ideName} ⧉
+          {t('showInIde.openedChanges', ideName)}
         </Text>
         {symlinkTarget && (
           <Text color="warning">
             {relative(getCwd(), symlinkTarget).startsWith('..')
-              ? `This will modify ${symlinkTarget} (outside working directory) via a symlink`
-              : `Symlink target: ${symlinkTarget}`}
+              ? t('showInIde.willModifyOutside', symlinkTarget)
+              : t('showInIde.symlinkTarget', symlinkTarget)}
           </Text>
         )}
-        {isSupportedVSCodeTerminal() && <Text dimColor>Save file to continue…</Text>}
+        {isSupportedVSCodeTerminal() && <Text dimColor>{t('showInIde.saveFileToContinue')}</Text>}
         <Box flexDirection="column">
           <Text>
-            Do you want to make this edit to <Text bold>{basename(filePath)}</Text>?
+            {t('showInIde.makeEditTo', basename(filePath))}
           </Text>
           <Select
             options={options}
@@ -86,9 +85,9 @@ export function ShowInIDEPrompt<A>({
         </Box>
         <Box marginTop={1}>
           <Text dimColor>
-            Esc to cancel
+            {t('showInIde.escToCancel')}
             {((focusedOption === 'yes' && !yesInputMode) || (focusedOption === 'no' && !noInputMode)) &&
-              ' · Tab to amend'}
+              t('showInIde.tabToAmend')}
           </Text>
         </Box>
       </Box>

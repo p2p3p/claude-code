@@ -1,7 +1,6 @@
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { sanitizeToolNameForAnalytics } from 'src/services/analytics/metadata.js'
 import type z from 'zod/v4'
 import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
@@ -10,8 +9,7 @@ import type { HookProgress } from '../../types/hooks.js'
 import type {
   AssistantMessage,
   AttachmentMessage,
-  ProgressMessage,
-} from '../../types/message.js'
+  ProgressMessage} from '../../types/message.js'
 import type { PermissionDecision } from '../../types/permissions.js'
 import { createAttachmentMessage } from '../../utils/attachments.js'
 import { logForDebugging } from '../../utils/debug.js'
@@ -19,14 +17,12 @@ import {
   executePostToolHooks,
   executePostToolUseFailureHooks,
   executePreToolHooks,
-  getPreToolHookBlockingMessage,
-} from '../../utils/hooks.js'
+  getPreToolHookBlockingMessage} from '../../utils/hooks.js'
 import { logError } from '../../utils/log.js'
 import {
   getRuleBehaviorDescription,
   type PermissionDecisionReason,
-  type PermissionResult,
-} from '../../utils/permissions/PermissionResult.js'
+  type PermissionResult} from '../../utils/permissions/PermissionResult.js'
 import { checkRuleBasedPermissions } from '../../utils/permissions/permissions.js'
 import { formatError } from '../../utils/toolErrors.js'
 import { isMcpTool } from '../mcp/utils.js'
@@ -74,16 +70,13 @@ export async function* runPostToolUseHooks<Input extends AnyObject, Output>(
 
             queryChainId: toolUseContext.queryTracking
               ?.chainId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            queryDepth: toolUseContext.queryTracking?.depth,
-          })
+            queryDepth: toolUseContext.queryTracking?.depth})
           yield {
             message: createAttachmentMessage({
               type: 'hook_cancelled',
               hookName: `PostToolUse:${tool.name}`,
               toolUseID,
-              hookEvent: 'PostToolUse',
-            }),
-          }
+              hookEvent: 'PostToolUse'})}
           continue
         }
 
@@ -102,8 +95,7 @@ export async function* runPostToolUseHooks<Input extends AnyObject, Output>(
           yield {
             message: result.message as
               | AttachmentMessage
-              | ProgressMessage<HookProgress>,
-          }
+              | ProgressMessage<HookProgress>}
         }
 
         if (result.blockingError) {
@@ -113,9 +105,7 @@ export async function* runPostToolUseHooks<Input extends AnyObject, Output>(
               hookName: `PostToolUse:${tool.name}`,
               toolUseID: toolUseID,
               hookEvent: 'PostToolUse',
-              blockingError: result.blockingError,
-            }),
-          }
+              blockingError: result.blockingError})}
         }
 
         // If hook indicated to prevent continuation, yield a stop reason message
@@ -127,9 +117,7 @@ export async function* runPostToolUseHooks<Input extends AnyObject, Output>(
                 result.stopReason || 'Execution stopped by PostToolUse hook',
               hookName: `PostToolUse:${tool.name}`,
               toolUseID: toolUseID,
-              hookEvent: 'PostToolUse',
-            }),
-          }
+              hookEvent: 'PostToolUse'})}
           return
         }
 
@@ -141,17 +129,14 @@ export async function* runPostToolUseHooks<Input extends AnyObject, Output>(
               content: result.additionalContexts,
               hookName: `PostToolUse:${tool.name}`,
               toolUseID: toolUseID,
-              hookEvent: 'PostToolUse',
-            }),
-          }
+              hookEvent: 'PostToolUse'})}
         }
 
         // If hooks provided updatedMCPToolOutput, yield it if this is an MCP tool
         if (result.updatedMCPToolOutput && isMcpTool(tool)) {
           toolOutput = result.updatedMCPToolOutput as Output
           yield {
-            updatedMCPToolOutput: toolOutput,
-          }
+            updatedMCPToolOutput: toolOutput}
         }
       } catch (error) {
         const postToolDurationMs = Date.now() - postToolStartTime
@@ -168,25 +153,20 @@ export async function* runPostToolUseHooks<Input extends AnyObject, Output>(
           ...(mcpServerType
             ? {
                 mcpServerType:
-                  mcpServerType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-              }
+                  mcpServerType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
             : {}),
           ...(requestId
             ? {
                 requestId:
-                  requestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-              }
-            : {}),
-        })
+                  requestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
+            : {})})
         yield {
           message: createAttachmentMessage({
             type: 'hook_error_during_execution',
             content: formatError(error),
             hookName: `PostToolUse:${tool.name}`,
             toolUseID: toolUseID,
-            hookEvent: 'PostToolUse',
-          }),
-        }
+            hookEvent: 'PostToolUse'})}
       }
     }
   } catch (error) {
@@ -233,16 +213,13 @@ export async function* runPostToolUseFailureHooks<Input extends AnyObject>(
             toolName: sanitizeToolNameForAnalytics(tool.name),
             queryChainId: toolUseContext.queryTracking
               ?.chainId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            queryDepth: toolUseContext.queryTracking?.depth,
-          })
+            queryDepth: toolUseContext.queryTracking?.depth})
           yield {
             message: createAttachmentMessage({
               type: 'hook_cancelled',
               hookName: `PostToolUseFailure:${tool.name}`,
               toolUseID,
-              hookEvent: 'PostToolUseFailure',
-            }),
-          }
+              hookEvent: 'PostToolUseFailure'})}
           continue
         }
 
@@ -258,8 +235,7 @@ export async function* runPostToolUseFailureHooks<Input extends AnyObject>(
           yield {
             message: result.message as
               | AttachmentMessage
-              | ProgressMessage<HookProgress>,
-          }
+              | ProgressMessage<HookProgress>}
         }
 
         if (result.blockingError) {
@@ -269,9 +245,7 @@ export async function* runPostToolUseFailureHooks<Input extends AnyObject>(
               hookName: `PostToolUseFailure:${tool.name}`,
               toolUseID: toolUseID,
               hookEvent: 'PostToolUseFailure',
-              blockingError: result.blockingError,
-            }),
-          }
+              blockingError: result.blockingError})}
         }
 
         // If hooks provided additional context, add it as a message
@@ -282,9 +256,7 @@ export async function* runPostToolUseFailureHooks<Input extends AnyObject>(
               content: result.additionalContexts,
               hookName: `PostToolUseFailure:${tool.name}`,
               toolUseID: toolUseID,
-              hookEvent: 'PostToolUseFailure',
-            }),
-          }
+              hookEvent: 'PostToolUseFailure'})}
         }
       } catch (hookError) {
         const postToolDurationMs = Date.now() - postToolStartTime
@@ -300,25 +272,20 @@ export async function* runPostToolUseFailureHooks<Input extends AnyObject>(
           ...(mcpServerType
             ? {
                 mcpServerType:
-                  mcpServerType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-              }
+                  mcpServerType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
             : {}),
           ...(requestId
             ? {
                 requestId:
-                  requestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-              }
-            : {}),
-        })
+                  requestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
+            : {})})
         yield {
           message: createAttachmentMessage({
             type: 'hook_error_during_execution',
             content: formatError(hookError),
             hookName: `PostToolUseFailure:${tool.name}`,
             toolUseID: toolUseID,
-            hookEvent: 'PostToolUseFailure',
-          }),
-        }
+            hookEvent: 'PostToolUseFailure'})}
       }
     }
   } catch (outerError) {
@@ -373,8 +340,7 @@ export async function resolveHookPermissionDecision(
           assistantMessage,
           toolUseID,
         ),
-        input: hookInput,
-      }
+        input: hookInput}
     }
 
     // Hook allow skips the interactive prompt, but deny/ask rules still apply.
@@ -409,8 +375,7 @@ export async function resolveHookPermissionDecision(
         assistantMessage,
         toolUseID,
       ),
-      input: hookInput,
-    }
+      input: hookInput}
   }
 
   if (hookPermissionResult?.behavior === 'deny') {
@@ -436,8 +401,7 @@ export async function resolveHookPermissionDecision(
       toolUseID,
       forceDecision,
     ),
-    input: askInput,
-  }
+    input: askInput}
 }
 
 export async function* runPreToolUseHooks(
@@ -489,9 +453,7 @@ export async function* runPreToolUseHooks(
             message: {
               message: result.message as
                 | AttachmentMessage
-                | ProgressMessage<HookProgress>,
-            },
-          }
+                | ProgressMessage<HookProgress>}}
         }
         if (result.blockingError) {
           const denialMessage = getPreToolHookBlockingMessage(
@@ -506,17 +468,13 @@ export async function* runPreToolUseHooks(
               decisionReason: {
                 type: 'hook',
                 hookName: `PreToolUse:${tool.name}`,
-                reason: denialMessage,
-              },
-            },
-          }
+                reason: denialMessage}}}
         }
         // Check if hook wants to prevent continuation
         if (result.preventContinuation) {
           yield {
             type: 'preventContinuation',
-            shouldPreventContinuation: true,
-          }
+            shouldPreventContinuation: true}
           if (result.stopReason) {
             yield { type: 'stopReason', stopReason: result.stopReason }
           }
@@ -530,17 +488,14 @@ export async function* runPreToolUseHooks(
             type: 'hook',
             hookName: `PreToolUse:${tool.name}`,
             hookSource: result.hookSource,
-            reason: result.hookPermissionDecisionReason,
-          }
+            reason: result.hookPermissionDecisionReason}
           if (result.permissionBehavior === 'allow') {
             yield {
               type: 'hookPermissionResult',
               hookPermissionResult: {
                 behavior: 'allow',
                 updatedInput: result.updatedInput,
-                decisionReason,
-              },
-            }
+                decisionReason}}
           } else if (result.permissionBehavior === 'ask') {
             yield {
               type: 'hookPermissionResult',
@@ -550,9 +505,7 @@ export async function* runPreToolUseHooks(
                 message:
                   result.hookPermissionDecisionReason ||
                   `Hook PreToolUse:${tool.name} ${getRuleBehaviorDescription(result.permissionBehavior)} this tool`,
-                decisionReason,
-              },
-            }
+                decisionReason}}
           } else {
             // deny - updatedInput is irrelevant since tool won't run
             yield {
@@ -562,9 +515,7 @@ export async function* runPreToolUseHooks(
                 message:
                   result.hookPermissionDecisionReason ||
                   `Hook PreToolUse:${tool.name} ${getRuleBehaviorDescription(result.permissionBehavior)} this tool`,
-                decisionReason,
-              },
-            }
+                decisionReason}}
           }
         }
 
@@ -573,8 +524,7 @@ export async function* runPreToolUseHooks(
         if (result.updatedInput && result.permissionBehavior === undefined) {
           yield {
             type: 'hookUpdatedInput',
-            updatedInput: result.updatedInput,
-          }
+            updatedInput: result.updatedInput}
         }
 
         // If hooks provided additional context, add it as a message
@@ -587,10 +537,7 @@ export async function* runPreToolUseHooks(
                 content: result.additionalContexts,
                 hookName: `PreToolUse:${tool.name}`,
                 toolUseID,
-                hookEvent: 'PreToolUse',
-              }),
-            },
-          }
+                hookEvent: 'PreToolUse'})}}
         }
 
         // Check if we were aborted during hook execution
@@ -600,8 +547,7 @@ export async function* runPreToolUseHooks(
 
             queryChainId: toolUseContext.queryTracking
               ?.chainId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            queryDepth: toolUseContext.queryTracking?.depth,
-          })
+            queryDepth: toolUseContext.queryTracking?.depth})
           yield {
             type: 'message',
             message: {
@@ -609,10 +555,7 @@ export async function* runPreToolUseHooks(
                 type: 'hook_cancelled',
                 hookName: `PreToolUse:${tool.name}`,
                 toolUseID,
-                hookEvent: 'PreToolUse',
-              }),
-            },
-          }
+                hookEvent: 'PreToolUse'})}}
           yield { type: 'stop' }
           return
         }
@@ -632,16 +575,13 @@ export async function* runPreToolUseHooks(
           ...(mcpServerType
             ? {
                 mcpServerType:
-                  mcpServerType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-              }
+                  mcpServerType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
             : {}),
           ...(requestId
             ? {
                 requestId:
-                  requestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-              }
-            : {}),
-        })
+                  requestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
+            : {})})
         yield {
           type: 'message',
           message: {
@@ -650,10 +590,7 @@ export async function* runPreToolUseHooks(
               content: formatError(error),
               hookName: `PreToolUse:${tool.name}`,
               toolUseID: toolUseID,
-              hookEvent: 'PreToolUse',
-            }),
-          },
-        }
+              hookEvent: 'PreToolUse'})}}
         yield { type: 'stop' }
       }
     }

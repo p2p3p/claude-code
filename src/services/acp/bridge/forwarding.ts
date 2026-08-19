@@ -9,15 +9,13 @@ import { randomUUID } from 'node:crypto'
 import type {
   AgentSideConnection,
   ClientCapabilities,
-  StopReason,
-} from '@agentclientprotocol/sdk'
+  StopReason} from '@agentclientprotocol/sdk'
 import type { SDKMessage } from '../../../entrypoints/sdk/coreTypes.generated.js'
 import type { BridgeSDKMessage, SessionUsage, ToolUseCache } from './types.js'
 import {
   assistantMessageToAcpNotifications,
   streamEventToAcpNotifications,
-  toAcpNotifications,
-} from './notifications.js'
+  toAcpNotifications} from './notifications.js'
 import { getMatchingModelUsage } from './modelUsage.js'
 
 // Top-level const alias retained from the original module. Only the
@@ -67,8 +65,7 @@ export async function forwardSessionUpdates(
     inputTokens: 0,
     outputTokens: 0,
     cachedReadTokens: 0,
-    cachedWriteTokens: 0,
-  }
+    cachedWriteTokens: 0}
 
   // Track last assistant usage/model for context window size computation
   let lastAssistantTotalUsage: number | null = null
@@ -111,9 +108,7 @@ export async function forwardSessionUpdates(
               sessionId,
               update: {
                 sessionUpdate: 'agent_message_chunk',
-                content: { type: 'text', text: '\n\nCompacting completed.' },
-              },
-            })
+                content: { type: 'text', text: '\n\nCompacting completed.' }}})
           }
           // api_retry, local_command_output — skip for now
           break
@@ -154,9 +149,7 @@ export async function forwardSessionUpdates(
               update: {
                 sessionUpdate: 'usage_update',
                 used: lastAssistantTotalUsage,
-                size: lastContextWindowSize,
-              },
-            })
+                size: lastContextWindowSize}})
           }
 
           // Determine stop reason
@@ -229,8 +222,7 @@ export async function forwardSessionUpdates(
             {
               clientCapabilities,
               cwd,
-              messageId: streamMessageId,
-            },
+              messageId: streamMessageId},
           )
           for (const notification of notifications) {
             await conn.sessionUpdate(notification)
@@ -292,8 +284,7 @@ export async function forwardSessionUpdates(
               cwd,
               parentToolUseId,
               streamingActive,
-              messageId: assistantMessageId,
-            },
+              messageId: assistantMessageId},
           )
           for (const notification of notifications) {
             await conn.sessionUpdate(notification)
@@ -337,9 +328,7 @@ export async function forwardSessionUpdates(
                       sessionId,
                       update: {
                         sessionUpdate: 'agent_message_chunk',
-                        content: { type: 'text', text: block.text as string },
-                      },
-                    })
+                        content: { type: 'text', text: block.text as string }}})
                   }
                 }
               }
@@ -369,9 +358,7 @@ export async function forwardSessionUpdates(
             sessionId,
             update: {
               sessionUpdate: 'agent_message_chunk',
-              content: { type: 'text', text: '\n\nCompacting completed.' },
-            },
-          })
+              content: { type: 'text', text: '\n\nCompacting completed.' }}})
           break
         }
 
@@ -438,9 +425,7 @@ export async function replayHistoryMessages(
           sessionUpdate:
             role === 'assistant' ? 'agent_message_chunk' : 'user_message_chunk',
           ...(replayMessageId ? { messageId: replayMessageId } : {}),
-          content: { type: 'text', text: content },
-        },
-      })
+          content: { type: 'text', text: content }}})
       continue
     }
 

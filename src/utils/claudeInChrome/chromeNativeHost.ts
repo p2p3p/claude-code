@@ -13,8 +13,7 @@ import {
   readdir,
   rmdir,
   stat,
-  unlink,
-} from 'fs/promises'
+  unlink} from 'fs/promises'
 import { createServer, type Server, type Socket } from 'net'
 import { homedir, platform } from 'os'
 import { join } from 'path'
@@ -84,8 +83,7 @@ export async function runChromeNativeHost(): Promise<void> {
 const messageSchema = lazySchema(() =>
   z
     .object({
-      type: z.string(),
-    })
+      type: z.string()})
     .passthrough(),
 )
 
@@ -251,8 +249,7 @@ class ChromeNativeHost {
       sendChromeMessage(
         jsonStringify({
           type: 'error',
-          error: 'Invalid message format',
-        }),
+          error: 'Invalid message format'}),
       )
       return
     }
@@ -262,8 +259,7 @@ class ChromeNativeHost {
       sendChromeMessage(
         jsonStringify({
           type: 'error',
-          error: 'Invalid message format',
-        }),
+          error: 'Invalid message format'}),
       )
       return
     }
@@ -278,8 +274,7 @@ class ChromeNativeHost {
         sendChromeMessage(
           jsonStringify({
             type: 'pong',
-            timestamp: Date.now(),
-          }),
+            timestamp: Date.now()}),
         )
         break
 
@@ -287,8 +282,7 @@ class ChromeNativeHost {
         sendChromeMessage(
           jsonStringify({
             type: 'status_response',
-            native_host_version: VERSION,
-          }),
+            native_host_version: VERSION}),
         )
         break
 
@@ -345,8 +339,7 @@ class ChromeNativeHost {
         sendChromeMessage(
           jsonStringify({
             type: 'error',
-            error: `Unknown message type: ${message.type}`,
-          }),
+            error: `Unknown message type: ${message.type}`}),
         )
     }
   }
@@ -356,8 +349,7 @@ class ChromeNativeHost {
     const client: McpClient = {
       id: clientId,
       socket,
-      buffer: Buffer.alloc(0),
-    }
+      buffer: Buffer.alloc(0)}
 
     this.mcpClients.set(clientId, client)
     log(
@@ -367,8 +359,7 @@ class ChromeNativeHost {
     // Notify Chrome of connection
     sendChromeMessage(
       jsonStringify({
-        type: 'mcp_connected',
-      }),
+        type: 'mcp_connected'}),
     )
 
     socket.on('data', (data: Buffer) => {
@@ -404,8 +395,7 @@ class ChromeNativeHost {
             jsonStringify({
               type: 'tool_request',
               method: request.method,
-              params: request.params,
-            }),
+              params: request.params}),
           )
         } catch (e) {
           log(`Failed to parse tool request from MCP client ${clientId}:`, e)
@@ -426,8 +416,7 @@ class ChromeNativeHost {
       // Notify Chrome of disconnection
       sendChromeMessage(
         jsonStringify({
-          type: 'mcp_disconnected',
-        }),
+          type: 'mcp_disconnected'}),
       )
     })
   }

@@ -102,23 +102,20 @@ export function transformLinesToObjects(lines: string[]): LineObject[] {
         code: code.slice(1),
         i: 0,
         type: 'add',
-        originalCode: code.slice(1),
-      };
+        originalCode: code.slice(1)};
     }
     if (code.startsWith('-')) {
       return {
         code: code.slice(1),
         i: 0,
         type: 'remove',
-        originalCode: code.slice(1),
-      };
+        originalCode: code.slice(1)};
     }
     return {
       code: code.slice(1),
       i: 0,
       type: 'nochange',
-      originalCode: code.slice(1),
-    };
+      originalCode: code.slice(1)};
   });
 }
 
@@ -284,8 +281,7 @@ function generateWordDiffElements(
         if (currentLine.length > 0) {
           wrappedLines.push({
             content: [...currentLine],
-            contentWidth: currentLineWidth,
-          });
+            contentWidth: currentLineWidth});
           currentLine = [];
           currentLineWidth = 0;
         }
@@ -437,8 +433,7 @@ export function numberDiffLines(diff: LineObject[], startLine: number): DiffLine
       i,
       originalCode,
       wordDiff,
-      matchedLine,
-    };
+      matchedLine};
 
     // Update counters based on change type
     switch (type) {
@@ -463,8 +458,7 @@ export function numberDiffLines(diff: LineObject[], startLine: number): DiffLine
             i,
             originalCode,
             wordDiff,
-            matchedLine,
-          };
+            matchedLine};
           result.push(line);
           numRemoved++;
         }

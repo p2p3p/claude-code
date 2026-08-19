@@ -125,8 +125,7 @@ export type RecordedChange =
 export const OPERATORS = {
   d: 'delete',
   c: 'change',
-  y: 'yank',
-} as const satisfies Record<string, Operator>
+  y: 'yank'} as const satisfies Record<string, Operator>
 
 export function isOperatorKey(key: string): key is keyof typeof OPERATORS {
   return key in OPERATORS
@@ -152,8 +151,7 @@ export const FIND_KEYS = new Set(['f', 'F', 't', 'T'])
 
 export const TEXT_OBJ_SCOPES = {
   i: 'inner',
-  a: 'around',
-} as const satisfies Record<string, TextObjScope>
+  a: 'around'} as const satisfies Record<string, TextObjScope>
 
 export function isTextObjScopeKey(
   key: string,
@@ -194,6 +192,5 @@ export function createInitialPersistentState(): PersistentState {
     lastChange: null,
     lastFind: null,
     register: '',
-    registerIsLinewise: false,
-  }
+    registerIsLinewise: false}
 }

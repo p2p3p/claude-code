@@ -108,8 +108,7 @@ export function addFunctionHook(
     id,
     timeout: options?.timeout || 5000,
     callback,
-    errorMessage,
-  }
+    errorMessage}
   addHookToSession(setAppState, sessionId, event, matcher, hook)
   return id
 }
@@ -190,8 +189,7 @@ function addHookToSession(
       updatedMatchers[existingMatcherIndex] = {
         matcher: existingMatcher.matcher,
         skillRoot: existingMatcher.skillRoot,
-        hooks: [...existingMatcher.hooks, { hook, onHookSuccess }],
-      }
+        hooks: [...existingMatcher.hooks, { hook, onHookSuccess }]}
     } else {
       // Create new matcher
       updatedMatchers = [
@@ -199,8 +197,7 @@ function addHookToSession(
         {
           matcher,
           skillRoot,
-          hooks: [{ hook, onHookSuccess }],
-        },
+          hooks: [{ hook, onHookSuccess }]},
       ]
     }
 
@@ -288,8 +285,7 @@ function convertToHookMatchers(
     // Filter out function hooks - they can't be persisted to HookMatcher format
     hooks: sm.hooks
       .map(h => h.hook)
-      .filter((h): h is HookCommand => h.type !== 'function'),
-  }))
+      .filter((h): h is HookCommand => h.type !== 'function')}))
 }
 
 /**
@@ -362,8 +358,7 @@ export function getSessionFunctionHooks(
         matcher: sm.matcher,
         hooks: sm.hooks
           .map(h => h.hook)
-          .filter((h): h is FunctionHook => h.type === 'function'),
-      }))
+          .filter((h): h is FunctionHook => h.type === 'function')}))
       .filter(m => m.hooks.length > 0)
   }
 

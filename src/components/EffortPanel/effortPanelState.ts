@@ -1,3 +1,4 @@
+import { t } from '../../utils/i18n/index.js'
 import type { EffortValue } from '../../utils/effort.js'
 
 /**
@@ -105,10 +106,9 @@ export type ApplyFn = (cursor: PanelPosition) => {
   effortUpdate?: { value: EffortValue | undefined }
 }
 
-export const ULTRACODE_HINT =
-  'ultracode is not an effort level. Use /ultracode <context> to start a multi-agent workflow.'
+export const ULTRACODE_HINT = t('effortPanel.ultracodeHint')
 
-export const CANCEL_MESSAGE = 'Effort unchanged.'
+export const CANCEL_MESSAGE = t('effortPanel.effortUnchanged')
 
 export function computeConfirmOutcome(
   cursor: PanelPosition,
@@ -121,6 +121,5 @@ export function computeConfirmOutcome(
   return {
     kind: 'apply',
     message: result.message,
-    effortUpdate: result.effortUpdate,
-  }
+    effortUpdate: result.effortUpdate}
 }

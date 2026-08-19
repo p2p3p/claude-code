@@ -6,8 +6,7 @@ import {
   getInstinctsDir,
   loadInstincts,
   saveInstinct,
-  type InstinctStoreOptions,
-} from './instinctStore.js'
+  type InstinctStoreOptions} from './instinctStore.js'
 import { getSkillLearningRoot } from './observationStore.js'
 import type { SkillLearningProjectContext } from './types.js'
 
@@ -79,8 +78,7 @@ export function findPromotionCandidates(
         {
           instinctId,
           projectIds,
-          averageConfidence: Number(averageConfidence.toFixed(2)),
-        },
+          averageConfidence: Number(averageConfidence.toFixed(2))},
       ]
     }
     return []
@@ -115,14 +113,12 @@ export async function checkPromotion(
       projectId: undefined,
       projectName: undefined,
       confidence: candidate.averageConfidence,
-      updatedAt: new Date().toISOString(),
-    }
+      updatedAt: new Date().toISOString()}
 
     const globalOptions: InstinctStoreOptions = {
       rootDir: options.rootDir,
       scope: 'global',
-      project: globalProjectContext(options.rootDir),
-    }
+      project: globalProjectContext(options.rootDir)}
     await saveInstinct(globalInstinct, globalOptions)
 
     recordSessionPromoted(candidate.instinctId)
@@ -149,13 +145,11 @@ async function loadAllProjectInstincts(
       scope: 'project',
       source: 'git_root',
       cwd: projectsRoot,
-      storageDir: join(projectsRoot, entry.name),
-    }
+      storageDir: join(projectsRoot, entry.name)}
     const projectInstincts = await loadInstincts({
       rootDir,
       project,
-      scope: 'project',
-    })
+      scope: 'project'})
     instincts.push(...projectInstincts)
   }
   return instincts
@@ -169,8 +163,7 @@ function globalProjectContext(rootDir?: string): SkillLearningProjectContext {
     scope: 'global',
     source: 'global',
     cwd: root,
-    storageDir: join(root, 'global'),
-  }
+    storageDir: join(root, 'global')}
 }
 
 // Re-export for consumers that need to inspect the global instincts directory.
@@ -178,6 +171,5 @@ export function getGlobalInstinctsDir(rootDir?: string): string {
   return getInstinctsDir({
     rootDir,
     scope: 'global',
-    project: globalProjectContext(rootDir),
-  })
+    project: globalProjectContext(rootDir)})
 }

@@ -3,14 +3,12 @@ import ignore from 'ignore'
 import * as path from 'path'
 import {
   CLAUDE_CONFIG_DIRECTORIES,
-  loadMarkdownFilesForSubdir,
-} from 'src/utils/markdownConfigLoader.js'
+  loadMarkdownFilesForSubdir} from 'src/utils/markdownConfigLoader.js'
 import type { SuggestionItem } from '../components/PromptInput/PromptInputFooterSuggestions.js'
 import {
   CHUNK_MS,
   FileIndex,
-  yieldToEventLoop,
-} from '../native-ts/file-index/index.js'
+  yieldToEventLoop} from '../native-ts/file-index/index.js'
 import { logEvent } from '../services/analytics/index.js'
 import type { FileSuggestionCommandInput } from '../types/fileSuggestion.js'
 import { getGlobalConfig } from '../utils/config.js'
@@ -22,8 +20,7 @@ import { getFsImplementation } from '../utils/fsOperations.js'
 import { findGitRoot, gitExe } from '../utils/git.js'
 import {
   createBaseHookInput,
-  executeFileSuggestionCommand,
-} from '../utils/hooks.js'
+  executeFileSuggestionCommand} from '../utils/hooks.js'
 import { logError } from '../utils/log.js'
 import { expandPath } from '../utils/path.js'
 import { ripGrep } from '../utils/ripgrep.js'
@@ -307,8 +304,7 @@ async function getFilesUsingGit(
       file_count: normalizedTracked.length,
       tracked_count: normalizedTracked.length,
       untracked_count: 0,
-      duration_ms: duration,
-    })
+      duration_ms: duration})
 
     // Start background fetch for untracked files (don't await)
     if (!untrackedFetchPromise) {
@@ -325,8 +321,7 @@ async function getFilesUsingGit(
       const generation = cacheGeneration
       untrackedFetchPromise = execFileNoThrowWithCwd(gitExe(), untrackedArgs, {
         timeout: 10000,
-        cwd: repoRoot,
-      })
+        cwd: repoRoot})
         .then(async untrackedResult => {
           if (generation !== cacheGeneration) {
             return // Cache was cleared; don't merge stale untracked files
@@ -502,8 +497,7 @@ async function getProjectFiles(
 
   logEvent('tengu_file_suggestions_ripgrep', {
     file_count: relativePaths.length,
-    duration_ms: duration,
-  })
+    duration_ms: duration})
 
   return relativePaths
 }
@@ -600,8 +594,7 @@ function createFileSuggestionItem(
   return {
     id: `file-${filePath}`,
     displayText: filePath,
-    metadata: score !== undefined ? { score } : undefined,
-  }
+    metadata: score !== undefined ? { score } : undefined}
 }
 
 /**
@@ -721,8 +714,7 @@ export async function generateFileSuggestions(
   if (getInitialSettings().fileSuggestion?.type === 'command') {
     const input: FileSuggestionCommandInput = {
       ...createBaseHookInput(),
-      query: partialPath,
-    }
+      query: partialPath}
     const results = await executeFileSuggestionCommand(input)
     return results.slice(0, MAX_SUGGESTIONS).map(createFileSuggestionItem)
   }
@@ -768,8 +760,7 @@ export async function generateFileSuggestions(
       duration_ms: duration,
       cache_hit: !wasBuilding,
       result_count: matches.length,
-      query_length: partialPath.length,
-    })
+      query_length: partialPath.length})
 
     return matches
   } catch (error) {

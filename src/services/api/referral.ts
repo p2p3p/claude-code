@@ -3,8 +3,7 @@ import { getOauthConfig } from '../../constants/oauth.js'
 import {
   getOauthAccountInfo,
   getSubscriptionType,
-  isClaudeAISubscriber,
-} from '../../utils/auth.js'
+  isClaudeAISubscriber} from '../../utils/auth.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { logError } from '../../utils/log.js'
@@ -14,8 +13,7 @@ import type {
   ReferralCampaign,
   ReferralEligibilityResponse,
   ReferralRedemptionsResponse,
-  ReferrerRewardInfo,
-} from '../oauth/types.js'
+  ReferrerRewardInfo} from '../oauth/types.js'
 
 // Cache expiration time: 24 hours (eligibility changes only on subscription/experiment changes)
 const CACHE_EXPIRATION_MS = 24 * 60 * 60 * 1000
@@ -30,8 +28,7 @@ export async function fetchReferralEligibility(
 
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   const url = `${getOauthConfig().BASE_API_URL}/api/oauth/organizations/${orgUUID}/referral/eligibility`
 
@@ -51,8 +48,7 @@ export async function fetchReferralRedemptions(
 
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   const url = `${getOauthConfig().BASE_API_URL}/api/oauth/organizations/${orgUUID}/referral/redemptions`
 
@@ -89,8 +85,7 @@ export function checkCachedPassesEligibility(): {
     return {
       eligible: false,
       needsRefresh: false,
-      hasCache: false,
-    }
+      hasCache: false}
   }
 
   const orgId = getOauthAccountInfo()?.organizationUuid
@@ -98,8 +93,7 @@ export function checkCachedPassesEligibility(): {
     return {
       eligible: false,
       needsRefresh: false,
-      hasCache: false,
-    }
+      hasCache: false}
   }
 
   const config = getGlobalConfig()
@@ -110,8 +104,7 @@ export function checkCachedPassesEligibility(): {
     return {
       eligible: false,
       needsRefresh: true,
-      hasCache: false,
-    }
+      hasCache: false}
   }
 
   const { eligible, timestamp } = cachedEntry
@@ -121,8 +114,7 @@ export function checkCachedPassesEligibility(): {
   return {
     eligible,
     needsRefresh,
-    hasCache: true,
-  }
+    hasCache: true}
 }
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -133,8 +125,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   CAD: 'CA$',
   AUD: 'A$',
   NZD: 'NZ$',
-  SGD: 'S$',
-}
+  SGD: 'S$'}
 
 export function formatCreditAmount(reward: ReferrerRewardInfo): string {
   const symbol = CURRENCY_SYMBOLS[reward.currency] ?? `${reward.currency} `
@@ -191,16 +182,13 @@ export async function fetchAndStorePassesEligibility(): Promise<ReferralEligibil
 
       const cacheEntry = {
         ...response,
-        timestamp: Date.now(),
-      }
+        timestamp: Date.now()}
 
       saveGlobalConfig(current => ({
         ...current,
         passesEligibilityCache: {
           ...current.passesEligibilityCache,
-          [orgId]: cacheEntry,
-        },
-      }))
+          [orgId]: cacheEntry}}))
 
       logForDebugging(
         `Passes eligibility cached for org ${orgId}: ${response.eligible}`,

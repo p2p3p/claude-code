@@ -27,24 +27,20 @@ import { safeParseJSON } from '../../json.js'
 import { profileCheckpoint } from '../../startupProfiler.js'
 import {
   getManagedFilePath,
-  getManagedSettingsDropInDir,
-} from '../managedPath.js'
+  getManagedSettingsDropInDir} from '../managedPath.js'
 import { type SettingsJson, SettingsSchema } from '../types.js'
 import {
   filterInvalidPermissionRules,
   formatZodError,
-  type ValidationError,
-} from '../validation.js'
+  type ValidationError} from '../validation.js'
 import {
   WINDOWS_REGISTRY_KEY_PATH_HKCU,
   WINDOWS_REGISTRY_KEY_PATH_HKLM,
-  WINDOWS_REGISTRY_VALUE_NAME,
-} from './constants.js'
+  WINDOWS_REGISTRY_VALUE_NAME} from './constants.js'
 import {
   fireRawRead,
   getMdmRawReadPromise,
-  type RawReadResult,
-} from './rawRead.js'
+  type RawReadResult} from './rawRead.js'
 
 // ---------------------------------------------------------------------------
 // Types and cache
@@ -88,8 +84,7 @@ export function startMdmSettingsLoad(): void {
         logForDiagnosticsNoPII('info', 'mdm_settings_loaded', {
           duration_ms: duration,
           key_count: Object.keys(mdm.settings).length,
-          error_count: mdm.errors.length,
-        })
+          error_count: mdm.errors.length})
       } catch {
         // Diagnostic logging is best-effort
       }

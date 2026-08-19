@@ -23,8 +23,7 @@ export function AutoUpdaterWrapper({
   onAutoUpdaterResult,
   autoUpdaterResult,
   showSuccessMessage,
-  verbose,
-}: Props): React.ReactNode {
+  verbose}: Props): React.ReactNode {
   const [useNativeInstaller, setUseNativeInstaller] = React.useState<boolean | null>(null);
   const [isPackageManager, setIsPackageManager] = React.useState<boolean | null>(null);
 

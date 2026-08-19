@@ -2,27 +2,23 @@ import * as React from 'react'
 import { useAppState, useAppStateStore } from '../../state/AppState.js'
 import {
   getActiveAgentForInput,
-  getViewedTeammateTask,
-} from '../../state/selectors.js'
+  getViewedTeammateTask} from '../../state/selectors.js'
 import {
   AGENT_COLOR_TO_THEME_COLOR,
   AGENT_COLORS,
   type AgentColorName,
-  getAgentColor,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js'
+  getAgentColor} from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js'
 import { getStandaloneAgentName } from '../../utils/standaloneAgent.js'
 import { isInsideTmux } from '../../utils/swarm/backends/detection.js'
 import {
   getCachedDetectionResult,
-  isInProcessEnabled,
-} from '../../utils/swarm/backends/registry.js'
+  isInProcessEnabled} from '../../utils/swarm/backends/registry.js'
 import { getSwarmSocketName } from '../../utils/swarm/constants.js'
 import {
   getAgentName,
   getTeammateColor,
   getTeamName,
-  isTeammate,
-} from '../../utils/teammate.js'
+  isTeammate} from '../../utils/teammate.js'
 import { isInProcessTeammate } from '../../utils/teammateContext.js'
 import type { Theme } from '../../utils/theme.js'
 
@@ -66,8 +62,7 @@ export function useSwarmBanner(): SwarmBannerInfo {
         text: `@${agentName}`,
         bgColor: toThemeColor(
           teamContext?.selfAgentColor ?? getTeammateColor(),
-        ),
-      }
+        )}
     }
   }
 
@@ -92,8 +87,7 @@ export function useSwarmBanner(): SwarmBannerInfo {
           : `View teammates: \`tmux -L ${getSwarmSocketName()} a\``
       return {
         text: hint,
-        bgColor: viewedColor,
-      }
+        bgColor: viewedColor}
     }
     if (
       (insideTmux === true || inProcessMode || nativePanes) &&
@@ -101,8 +95,7 @@ export function useSwarmBanner(): SwarmBannerInfo {
     ) {
       return {
         text: `@${viewedTeammate.identity.agentName}`,
-        bgColor: viewedColor,
-      }
+        bgColor: viewedColor}
     }
     // insideTmux === null: still loading — fall through.
     // Not viewing a teammate: fall through so /rename and /color are honored.
@@ -123,8 +116,7 @@ export function useSwarmBanner(): SwarmBannerInfo {
     }
     return {
       text: name ? `@${name}` : task.description,
-      bgColor: getAgentColor(task.agentType) ?? 'cyan_FOR_SUBAGENTS_ONLY',
-    }
+      bgColor: getAgentColor(task.agentType) ?? 'cyan_FOR_SUBAGENTS_ONLY'}
   }
 
   // Standalone agent (/rename, /color): name and/or custom color, no @team.
@@ -133,8 +125,7 @@ export function useSwarmBanner(): SwarmBannerInfo {
   if (standaloneName || standaloneColor) {
     return {
       text: standaloneName ?? '',
-      bgColor: toThemeColor(standaloneColor),
-    }
+      bgColor: toThemeColor(standaloneColor)}
   }
 
   // --agent CLI flag (when not handled above).
@@ -144,8 +135,7 @@ export function useSwarmBanner(): SwarmBannerInfo {
     )
     return {
       text: agent,
-      bgColor: toThemeColor(agentDef?.color, 'promptBorder'),
-    }
+      bgColor: toThemeColor(agentDef?.color, 'promptBorder')}
   }
 
   return null

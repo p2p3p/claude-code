@@ -5,8 +5,7 @@ import type { Command } from '../../types/command.js'
 import { getPluginErrorMessage } from '../../types/plugin.js'
 import {
   parseArgumentNames,
-  substituteArguments,
-} from '../argumentSubstitution.js'
+  substituteArguments} from '../argumentSubstitution.js'
 import { logForDebugging } from '../debug.js'
 import { EFFORT_LEVELS, parseEffortValue } from '../effort.js'
 import { isBareMode } from '../envUtils.js'
@@ -16,21 +15,18 @@ import {
   type FrontmatterData,
   parseBooleanFrontmatter,
   parseFrontmatter,
-  parseShellFrontmatter,
-} from '../frontmatterParser.js'
+  parseShellFrontmatter} from '../frontmatterParser.js'
 import { getFsImplementation, isDuplicatePath } from '../fsOperations.js'
 import {
   extractDescriptionFromMarkdown,
-  parseSlashCommandToolsFromFrontmatter,
-} from '../markdownConfigLoader.js'
+  parseSlashCommandToolsFromFrontmatter} from '../markdownConfigLoader.js'
 import { parseUserSpecifiedModel } from '../model/model.js'
 import { executeShellCommandsInPrompt } from '../promptShellExecution.js'
 import { loadAllPluginsCacheOnly } from './pluginLoader.js'
 import {
   loadPluginOptions,
   substitutePluginVariables,
-  substituteUserConfigInContent,
-} from './pluginOptionsStorage.js'
+  substituteUserConfigInContent} from './pluginOptionsStorage.js'
 import type { CommandMetadata, PluginManifest } from './schemas.js'
 import { walkPluginMarkdown } from './walkPluginMarkdown.js'
 
@@ -120,8 +116,7 @@ async function collectMarkdownFiles(
         filePath: fullPath,
         baseDir,
         frontmatter,
-        content: markdownContent,
-      })
+        content: markdownContent})
     },
     { stopAtSkillDir: true, logLabel: 'commands' },
   )
@@ -244,15 +239,13 @@ function createPluginCommand(
       typeof rawAllowedTools === 'string'
         ? substitutePluginVariables(rawAllowedTools, {
             path: pluginPath,
-            source: sourceName,
-          })
+            source: sourceName})
         : Array.isArray(rawAllowedTools)
           ? rawAllowedTools.map(tool =>
               typeof tool === 'string'
                 ? substitutePluginVariables(tool, {
                     path: pluginPath,
-                    source: sourceName,
-                  })
+                    source: sourceName})
                 : tool,
             )
           : rawAllowedTools
@@ -316,8 +309,7 @@ function createPluginCommand(
       loadedFrom: isSkill || config.isSkillMode ? 'plugin' : undefined,
       pluginInfo: {
         pluginManifest,
-        repository: sourceName,
-      },
+        repository: sourceName},
       isHidden: !userInvocable,
       progressMessage: isSkill || config.isSkillMode ? 'loading' : 'running',
       userFacingName(): string {
@@ -339,8 +331,7 @@ function createPluginCommand(
         // Replace ${CLAUDE_PLUGIN_ROOT} and ${CLAUDE_PLUGIN_DATA} with their paths
         finalContent = substitutePluginVariables(finalContent, {
           path: pluginPath,
-          source: sourceName,
-        })
+          source: sourceName})
 
         // Replace ${user_config.X} with saved option values. Sensitive keys
         // resolve to a descriptive placeholder instead — skill content goes to
@@ -387,25 +378,19 @@ function createPluginCommand(
                   ...appState.toolPermissionContext,
                   alwaysAllowRules: {
                     ...appState.toolPermissionContext.alwaysAllowRules,
-                    command: allowedTools,
-                  },
-                },
-              }
-            },
-          },
+                    command: allowedTools}}}
+            }},
           `/${commandName}`,
           shell,
         )
 
         return [{ type: 'text', text: finalContent }]
-      },
-    } satisfies Command
+      }} satisfies Command
   } catch (error) {
     logForDebugging(
       `Failed to create command from ${file.filePath}: ${error}`,
       {
-        level: 'error',
-      },
+        level: 'error'},
     )
     return null
   }
@@ -508,8 +493,7 @@ export const getPluginCommands = memoize(async (): Promise<Command[]> => {
 
                 // Load single command file
                 const content = await fs.readFile(commandPath, {
-                  encoding: 'utf-8',
-                })
+                  encoding: 'utf-8'})
                 const { frontmatter, content: markdownContent } =
                   parseFrontmatter(content, commandPath)
 
@@ -547,27 +531,21 @@ export const getPluginCommands = memoize(async (): Promise<Command[]> => {
                   ? {
                       ...frontmatter,
                       ...(metadataOverride.description && {
-                        description: metadataOverride.description,
-                      }),
+                        description: metadataOverride.description}),
                       ...(metadataOverride.argumentHint && {
-                        'argument-hint': metadataOverride.argumentHint,
-                      }),
+                        'argument-hint': metadataOverride.argumentHint}),
                       ...(metadataOverride.model && {
-                        model: metadataOverride.model,
-                      }),
+                        model: metadataOverride.model}),
                       ...(metadataOverride.allowedTools && {
                         'allowed-tools':
-                          metadataOverride.allowedTools.join(','),
-                      }),
-                    }
+                          metadataOverride.allowedTools.join(',')})}
                   : frontmatter
 
                 const file: PluginMarkdownFile = {
                   filePath: commandPath,
                   baseDir: dirname(commandPath),
                   frontmatter: finalFrontmatter,
-                  content: markdownContent,
-                }
+                  content: markdownContent}
 
                 const command = createPluginCommand(
                   commandName,
@@ -622,26 +600,20 @@ export const getPluginCommands = memoize(async (): Promise<Command[]> => {
               const finalFrontmatter: FrontmatterData = {
                 ...frontmatter,
                 ...(metadata.description && {
-                  description: metadata.description,
-                }),
+                  description: metadata.description}),
                 ...(metadata.argumentHint && {
-                  'argument-hint': metadata.argumentHint,
-                }),
+                  'argument-hint': metadata.argumentHint}),
                 ...(metadata.model && {
-                  model: metadata.model,
-                }),
+                  model: metadata.model}),
                 ...(metadata.allowedTools && {
-                  'allowed-tools': metadata.allowedTools.join(','),
-                }),
-              }
+                  'allowed-tools': metadata.allowedTools.join(',')})}
 
               const commandName = `${plugin.name}:${name}`
               const file: PluginMarkdownFile = {
                 filePath: `<inline:${commandName}>`, // Virtual path for inline content
                 baseDir: plugin.path, // Use plugin root as base directory
                 frontmatter: finalFrontmatter,
-                content: markdownContent,
-              }
+                content: markdownContent}
 
               const command = createPluginCommand(
                 commandName,
@@ -700,13 +672,11 @@ async function loadSkillsFromDirectory(
   let directSkillContent: string | null = null
   try {
     directSkillContent = await fs.readFile(directSkillPath, {
-      encoding: 'utf-8',
-    })
+      encoding: 'utf-8'})
   } catch (e: unknown) {
     if (!isENOENT(e)) {
       logForDebugging(`Failed to load skill from ${directSkillPath}: ${e}`, {
-        level: 'error',
-      })
+        level: 'error'})
       return skills
     }
     // ENOENT: no direct SKILL.md, fall through to scan subdirectories
@@ -729,8 +699,7 @@ async function loadSkillsFromDirectory(
         filePath: directSkillPath,
         baseDir: dirname(directSkillPath),
         frontmatter,
-        content: markdownContent,
-      }
+        content: markdownContent}
 
       const skill = createPluginCommand(
         skillName,
@@ -749,8 +718,7 @@ async function loadSkillsFromDirectory(
       logForDebugging(
         `Failed to load skill from ${directSkillPath}: ${error}`,
         {
-          level: 'error',
-        },
+          level: 'error'},
       )
     }
     return skills
@@ -787,8 +755,7 @@ async function loadSkillsFromDirectory(
       } catch (e: unknown) {
         if (!isENOENT(e)) {
           logForDebugging(`Failed to load skill from ${skillFilePath}: ${e}`, {
-            level: 'error',
-          })
+            level: 'error'})
         }
         return
       }
@@ -809,8 +776,7 @@ async function loadSkillsFromDirectory(
           filePath: skillFilePath,
           baseDir: dirname(skillFilePath),
           frontmatter,
-          content: markdownContent,
-        }
+          content: markdownContent}
 
         const skill = createPluginCommand(
           skillName,

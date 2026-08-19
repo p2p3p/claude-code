@@ -6,8 +6,7 @@ import { join } from 'path'
 import { getDynamicConfig_BLOCKS_ON_INIT } from 'src/services/analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { type ReleaseChannel, saveGlobalConfig } from './config.js'
 import { logForDebugging } from './debug.js'
 import { env } from './env.js'
@@ -23,8 +22,7 @@ import {
   filterClaudeAliases,
   getShellConfigPaths,
   readFileLines,
-  writeFileLines,
-} from './shellConfig.js'
+  writeFileLines} from './shellConfig.js'
 import { jsonParse } from './slowOperations.js'
 
 const GCS_BUCKET_URL =
@@ -215,8 +213,7 @@ async function acquireLock(): Promise<boolean> {
   try {
     await writeFile(lockPath, `${process.pid}`, {
       encoding: 'utf8',
-      flag: 'wx',
-    })
+      flag: 'wx'})
     return true
   } catch (err) {
     const code = getErrnoCode(err)
@@ -231,8 +228,7 @@ async function acquireLock(): Promise<boolean> {
         await fs.mkdir(getClaudeConfigHomeDir())
         await writeFile(lockPath, `${process.pid}`, {
           encoding: 'utf8',
-          flag: 'wx',
-        })
+          flag: 'wx'})
         return true
       } catch (mkdirErr) {
         if (getErrnoCode(mkdirErr) === 'EEXIST') {
@@ -272,8 +268,7 @@ async function getInstallationPrefix(): Promise<string | null> {
   let prefixResult = null
   if (isBun) {
     prefixResult = await execFileNoThrowWithCwd('bun', ['pm', 'bin', '-g'], {
-      cwd: homedir(),
-    })
+      cwd: homedir()})
   } else {
     prefixResult = await execFileNoThrowWithCwd(
       'npm',
@@ -368,8 +363,7 @@ export async function getNpmDistTags(): Promise<NpmDistTags> {
     const parsed = jsonParse(result.stdout.trim()) as Record<string, unknown>
     return {
       latest: typeof parsed.latest === 'string' ? parsed.latest : null,
-      stable: typeof parsed.stable === 'string' ? parsed.stable : null,
-    }
+      stable: typeof parsed.stable === 'string' ? parsed.stable : null}
   } catch (error) {
     logForDebugging(`Failed to parse dist-tags: ${error}`)
     return { latest: null, stable: null }
@@ -386,8 +380,7 @@ export async function getLatestVersionFromGcs(
   try {
     const response = await axios.get(`${GCS_BUCKET_URL}/${channel}`, {
       timeout: 5000,
-      responseType: 'text',
-    })
+      responseType: 'text'})
     return response.data.trim()
   } catch (error) {
     logForDebugging(`Failed to fetch ${channel} from GCS: ${error}`)
@@ -463,8 +456,7 @@ export async function installGlobalPackage(
     logEvent('tengu_auto_updater_lock_contention', {
       pid: process.pid,
       currentVersion:
-        MACRO.VERSION as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        MACRO.VERSION as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return 'in_progress'
   }
 
@@ -475,8 +467,7 @@ export async function installGlobalPackage(
       logError(new Error('Windows NPM detected in WSL environment'))
       logEvent('tengu_auto_updater_windows_npm_in_wsl', {
         currentVersion:
-          MACRO.VERSION as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          MACRO.VERSION as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       console.error(`
 Error: Windows NPM detected in WSL
 
@@ -520,8 +511,7 @@ To fix this issue:
     // Set installMethod to 'global' to track npm global installations
     saveGlobalConfig(current => ({
       ...current,
-      installMethod: 'global',
-    }))
+      installMethod: 'global'}))
 
     return 'success'
   } finally {
@@ -552,8 +542,7 @@ async function removeClaudeAliasesFromShellConfigs(): Promise<void> {
     } catch (error) {
       // Don't fail the whole operation if one file can't be processed
       logForDebugging(`Failed to remove alias from ${configFile}: ${error}`, {
-        level: 'error',
-      })
+        level: 'error'})
     }
   }
 }

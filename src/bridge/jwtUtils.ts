@@ -73,8 +73,7 @@ export function createTokenRefreshScheduler({
   getAccessToken,
   onRefresh,
   label,
-  refreshBufferMs = TOKEN_REFRESH_BUFFER_MS,
-}: {
+  refreshBufferMs = TOKEN_REFRESH_BUFFER_MS}: {
   getAccessToken: () => string | undefined | Promise<string | undefined>
   onRefresh: (sessionId: string, oauthToken: string) => void
   label: string

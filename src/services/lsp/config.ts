@@ -74,6 +74,5 @@ export async function getAllLspServers(): Promise<{
   }
 
   return {
-    servers: allServers,
-  }
+    servers: allServers}
 }

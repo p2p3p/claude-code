@@ -1,15 +1,13 @@
 import type {
   ProviderBalance,
   ProviderUsage,
-  ProviderUsageBucket,
-} from './types.js'
+  ProviderUsageBucket} from './types.js'
 
 type Listener = (snapshot: ProviderUsage) => void
 
 let current: ProviderUsage = {
   providerId: 'unknown',
-  buckets: [],
-}
+  buckets: []}
 
 const listeners: Set<Listener> = new Set()
 
@@ -28,8 +26,7 @@ export function updateProviderBuckets(
   current = {
     ...current,
     providerId,
-    buckets,
-  }
+    buckets}
   emit()
 }
 
@@ -40,8 +37,7 @@ export function setProviderBalance(
   current = {
     ...current,
     providerId,
-    ...(balance === null ? { balance: undefined } : { balance }),
-  }
+    ...(balance === null ? { balance: undefined } : { balance })}
   emit()
 }
 

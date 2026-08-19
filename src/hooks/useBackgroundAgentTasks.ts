@@ -2,8 +2,7 @@ import { useMemo } from 'react'
 import { useAppState } from '../state/AppState.js'
 import {
   isLocalAgentTask,
-  type LocalAgentTaskState,
-} from '../tasks/LocalAgentTask/LocalAgentTask.js'
+  type LocalAgentTaskState} from '../tasks/LocalAgentTask/LocalAgentTask.js'
 
 export function useBackgroundAgentTasks(): LocalAgentTaskState[] {
   const tasks = useAppState(s => s.tasks)

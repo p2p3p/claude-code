@@ -2,6 +2,7 @@ import * as React from 'react';
 import { DIAMOND_FILLED, DIAMOND_OPEN } from '../../constants/figures.js';
 import { NO_CONTENT_MESSAGE } from '../../constants/messages.js';
 import { Box, Text } from '@anthropic/ink';
+import { t } from 'src/utils/i18n/index.js';
 import { extractTag } from '../../utils/messages.js';
 import { Markdown } from '../Markdown.js';
 import { MessageResponse } from '../MessageResponse.js';
@@ -16,14 +17,18 @@ export function UserLocalCommandOutputMessage({ content }: Props): React.ReactNo
   if (!stdout && !stderr) {
     return (
       <MessageResponse>
-        <Text dimColor>{NO_CONTENT_MESSAGE}</Text>
+        <Text dimColor>{t('localCommandOutput.noContent')}</Text>
       </MessageResponse>
     );
   }
 
   const lines: React.ReactNode[] = [];
   if (stdout?.trim()) {
-    lines.push(<IndentedContent key="stdout">{stdout.trim()}</IndentedContent>);
+    lines.push(
+      <IndentedContent key="stdout">
+        {stdout.trim() === NO_CONTENT_MESSAGE ? t('localCommandOutput.noContent') : stdout.trim()}
+      </IndentedContent>,
+    );
   }
   if (stderr?.trim()) {
     lines.push(<IndentedContent key="stderr">{stderr.trim()}</IndentedContent>);

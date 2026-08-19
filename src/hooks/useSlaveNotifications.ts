@@ -23,8 +23,7 @@ function foldSlaveNotif(
   return {
     ...acc,
     text: `${base} (${count})`,
-    fold: foldSlaveNotif,
-  }
+    fold: foldSlaveNotif}
 }
 
 function truncate(s: string, max: number): string {
@@ -76,8 +75,7 @@ function makeNotification(
         text: `[${shortName}] ✓ 已接收任务`,
         priority: 'low',
         timeoutMs: 2500,
-        fold: foldSlaveNotif,
-      }
+        fold: foldSlaveNotif}
 
     case 'done':
       return {
@@ -85,8 +83,7 @@ function makeNotification(
         text: `[${shortName}] ✓ 任务完成`,
         priority: 'medium',
         timeoutMs: 5000,
-        fold: foldSlaveNotif,
-      }
+        fold: foldSlaveNotif}
 
     case 'error':
       return {
@@ -94,8 +91,7 @@ function makeNotification(
         text: `[${shortName}] ✗ 错误: ${truncate(entry.content, 60)}`,
         color: 'error',
         priority: 'high',
-        timeoutMs: 8000,
-      }
+        timeoutMs: 8000}
 
     case 'tool_start':
       return {
@@ -103,16 +99,14 @@ function makeNotification(
         text: `[${shortName}] 工具: ${truncate(entry.content, 40)}`,
         priority: 'low',
         timeoutMs: 3000,
-        fold: foldSlaveNotif,
-      }
+        fold: foldSlaveNotif}
 
     case 'prompt':
       return {
         key: `slave-prompt-${slaveName}`,
         text: `[${shortName}] ▶ 开始处理: ${truncate(entry.content, 50)}`,
         priority: 'medium',
-        timeoutMs: 4000,
-      }
+        timeoutMs: 4000}
 
     case 'stream':
     case 'tool_result':

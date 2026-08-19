@@ -67,8 +67,7 @@ function normalizeWorkflowStep(value: unknown): WorkflowRunStepRecord | null {
       : {}),
     ...(typeof value.completedAt === 'number'
       ? { completedAt: value.completedAt }
-      : {}),
-  }
+      : {})}
 }
 
 function normalizeWorkflowRun(value: unknown): WorkflowRunRecord | null {
@@ -92,8 +91,7 @@ function normalizeWorkflowRun(value: unknown): WorkflowRunRecord | null {
     createdAt: value.createdAt,
     updatedAt: value.updatedAt,
     currentStepIndex: value.currentStepIndex,
-    steps,
-  }
+    steps}
 }
 
 async function readWorkflowRun(

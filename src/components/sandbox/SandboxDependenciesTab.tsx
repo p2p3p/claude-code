@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import { getPlatform } from '../../utils/platform.js';
 import type { SandboxDependencyCheck } from '../../utils/sandbox/sandbox-adapter.js';
 
@@ -43,7 +44,7 @@ export function SandboxDependenciesTab({ depCheck }: Props): React.ReactNode {
 
       <Box flexDirection="column">
         <Text>
-          ripgrep (rg): {rgMissing ? <Text color="error">not found</Text> : <Text color="success">found</Text>}
+          ripgrep (rg): {rgMissing ? <Text color="error">{t('sandbox.notFound')}</Text> : <Text color="success">{t('sandbox.found')}</Text>}
         </Text>
         {rgMissing && (
           <Text dimColor>
@@ -57,14 +58,14 @@ export function SandboxDependenciesTab({ depCheck }: Props): React.ReactNode {
           <Box flexDirection="column">
             <Text>
               bubblewrap (bwrap):{' '}
-              {bwrapMissing ? <Text color="error">not installed</Text> : <Text color="success">installed</Text>}
+              {bwrapMissing ? <Text color="error">{t('sandbox.notInstalled')}</Text> : <Text color="success">{t('sandbox.installed')}</Text>}
             </Text>
             {bwrapMissing && <Text dimColor>{'  '}· apt install bubblewrap</Text>}
           </Box>
 
           <Box flexDirection="column">
             <Text>
-              socat: {socatMissing ? <Text color="error">not installed</Text> : <Text color="success">installed</Text>}
+              socat: {socatMissing ? <Text color="error">{t('sandbox.notInstalled')}</Text> : <Text color="success">{t('sandbox.installed')}</Text>}
             </Text>
             {socatMissing && <Text dimColor>{'  '}· apt install socat</Text>}
           </Box>
@@ -72,7 +73,7 @@ export function SandboxDependenciesTab({ depCheck }: Props): React.ReactNode {
           <Box flexDirection="column">
             <Text>
               seccomp filter:{' '}
-              {seccompMissing ? <Text color="warning">not installed</Text> : <Text color="success">installed</Text>}
+              {seccompMissing ? <Text color="warning">{t('sandbox.notInstalled')}</Text> : <Text color="success">{t('sandbox.installed')}</Text>}
               {seccompMissing && <Text dimColor> (required to block unix domain sockets)</Text>}
             </Text>
             {seccompMissing && (

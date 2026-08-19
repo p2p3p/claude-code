@@ -15,8 +15,7 @@ export function useMaybeTruncateInput({
   pastedContents,
   onInputChange,
   setCursorOffset,
-  setPastedContents,
-}: Props) {
+  setPastedContents}: Props) {
   // Track if we've initialized this specific input value
   const [hasAppliedTruncationToInput, setHasAppliedTruncationToInput] =
     useState(false)

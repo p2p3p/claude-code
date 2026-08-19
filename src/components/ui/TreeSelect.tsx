@@ -123,8 +123,7 @@ export function TreeSelect<T>({
   onCollapse,
   getParentPrefix,
   getChildPrefix,
-  onUpFromFirstItem,
-}: TreeSelectProps<T>): React.ReactNode {
+  onUpFromFirstItem}: TreeSelectProps<T>): React.ReactNode {
   // Track which nodes are expanded (internal state if not controlled externally)
   const [internalExpandedIds, setInternalExpandedIds] = React.useState<Set<string | number>>(new Set());
 
@@ -158,8 +157,7 @@ export function TreeSelect<T>({
         depth,
         isExpanded: nodeIsExpanded,
         hasChildren,
-        parentId,
-      });
+        parentId});
 
       // Only traverse children if this node is expanded
       if (hasChildren && nodeIsExpanded && node.children) {
@@ -207,8 +205,7 @@ export function TreeSelect<T>({
       label: buildLabel(flatNode),
       description: flatNode.node.description,
       dimDescription: flatNode.node.dimDescription ?? true,
-      value: flatNode.node.id,
-    }));
+      value: flatNode.node.id}));
   }, [flattenedNodes, buildLabel]);
 
   // Map from node ID to the actual node for quick lookup

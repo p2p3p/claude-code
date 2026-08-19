@@ -37,15 +37,13 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         currentQuestionIndex: state.currentQuestionIndex + 1,
-        isInTextInput: false,
-      }
+        isInTextInput: false}
 
     case 'prev-question':
       return {
         ...state,
         currentQuestionIndex: Math.max(0, state.currentQuestionIndex - 1),
-        isInTextInput: false,
-      }
+        isInTextInput: false}
 
     case 'update-question-state': {
       const existing = state.questionStates[action.questionText]
@@ -55,16 +53,13 @@ function reducer(state: State, action: Action): State {
           existing?.selectedValue ??
           (action.isMultiSelect ? [] : undefined),
         textInputValue:
-          action.updates.textInputValue ?? existing?.textInputValue ?? '',
-      }
+          action.updates.textInputValue ?? existing?.textInputValue ?? ''}
 
       return {
         ...state,
         questionStates: {
           ...state.questionStates,
-          [action.questionText]: newState,
-        },
-      }
+          [action.questionText]: newState}}
     }
 
     case 'set-answer': {
@@ -72,16 +67,13 @@ function reducer(state: State, action: Action): State {
         ...state,
         answers: {
           ...state.answers,
-          [action.questionText]: action.answer,
-        },
-      }
+          [action.questionText]: action.answer}}
 
       if (action.shouldAdvance) {
         return {
           ...newState,
           currentQuestionIndex: newState.currentQuestionIndex + 1,
-          isInTextInput: false,
-        }
+          isInTextInput: false}
       }
 
       return newState
@@ -90,8 +82,7 @@ function reducer(state: State, action: Action): State {
     case 'set-text-input-mode':
       return {
         ...state,
-        isInTextInput: action.isInInput,
-      }
+        isInTextInput: action.isInInput}
   }
 }
 
@@ -99,8 +90,7 @@ const INITIAL_STATE: State = {
   currentQuestionIndex: 0,
   answers: {},
   questionStates: {},
-  isInTextInput: false,
-}
+  isInTextInput: false}
 
 export type MultipleChoiceState = {
   currentQuestionIndex: number
@@ -143,8 +133,7 @@ export function useMultipleChoiceState(): MultipleChoiceState {
         type: 'update-question-state',
         questionText,
         updates,
-        isMultiSelect,
-      })
+        isMultiSelect})
     },
     [],
   )
@@ -155,8 +144,7 @@ export function useMultipleChoiceState(): MultipleChoiceState {
         type: 'set-answer',
         questionText,
         answer,
-        shouldAdvance,
-      })
+        shouldAdvance})
     },
     [],
   )
@@ -174,6 +162,5 @@ export function useMultipleChoiceState(): MultipleChoiceState {
     prevQuestion,
     updateQuestionState,
     setAnswer,
-    setTextInputMode,
-  }
+    setTextInputMode}
 }

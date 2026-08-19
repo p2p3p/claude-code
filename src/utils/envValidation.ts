@@ -20,8 +20,7 @@ export function validateBoundedIntEnvVar(
     const result: EnvVarValidationResult = {
       effective: defaultValue,
       status: 'invalid',
-      message: `Invalid value "${value}" (using default: ${defaultValue})`,
-    }
+      message: `Invalid value "${value}" (using default: ${defaultValue})`}
     logForDebugging(`${name} ${result.message}`)
     return result
   }
@@ -29,8 +28,7 @@ export function validateBoundedIntEnvVar(
     const result: EnvVarValidationResult = {
       effective: upperLimit,
       status: 'capped',
-      message: `Capped from ${parsed} to ${upperLimit}`,
-    }
+      message: `Capped from ${parsed} to ${upperLimit}`}
     logForDebugging(`${name} ${result.message}`)
     return result
   }

@@ -17,8 +17,7 @@ import {
   getIsInteractive,
   getKairosActive,
   getClientType,
-  getParentSessionId as getParentSessionIdFromState,
-} from '../../bootstrap/state.js'
+  getParentSessionId as getParentSessionIdFromState} from '../../bootstrap/state.js'
 import { isEnvTruthy } from '../../utils/envUtils.js'
 import { isOfficialMcpUrl } from '../mcp/officialRegistry.js'
 import { isClaudeAISubscriber, getSubscriptionType } from '../../utils/auth.js'
@@ -26,8 +25,7 @@ import { getRepoRemoteHash } from '../../utils/git.js'
 import {
   getWslVersion,
   getLinuxDistroInfo,
-  detectVcs,
-} from '../../utils/platform.js'
+  detectVcs} from '../../utils/platform.js'
 import type { CoreUserData } from 'src/utils/user.js'
 import { getAgentContext } from '../../utils/agentContext.js'
 import type { EnvironmentMetadata } from '../../types/generated/events_mono/claude_code/v1/claude_code_internal_event.js'
@@ -37,8 +35,7 @@ import {
   getAgentId,
   getParentSessionId as getTeammateParentSessionId,
   getTeamName,
-  isTeammate,
-} from '../../utils/teammate.js'
+  isTeammate} from '../../utils/teammate.js'
 import { feature } from 'bun:bundle'
 
 /**
@@ -162,8 +159,7 @@ export function mcpToolDetailsForAnalytics(
   }
   return {
     mcpServerName: details.serverName,
-    mcpToolName: details.mcpToolName,
-  }
+    mcpToolName: details.mcpToolName}
 }
 
 /**
@@ -201,8 +197,7 @@ export function extractMcpToolDetails(toolName: string):
     serverName:
       serverName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     mcpToolName:
-      mcpToolName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  }
+      mcpToolName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
 }
 
 /**
@@ -523,8 +518,7 @@ function getAgentIdentification(): {
     const result: ReturnType<typeof getAgentIdentification> = {
       agentId: agentContext.agentId,
       parentSessionId: agentContext.parentSessionId,
-      agentType: agentContext.agentType,
-    }
+      agentType: agentContext.agentType}
     if (agentContext.agentType === 'teammate') {
       result.teamName = agentContext.teamName
     }
@@ -547,8 +541,7 @@ function getAgentIdentification(): {
       ...(agentId ? { agentId } : {}),
       ...(agentType ? { agentType } : {}),
       ...(parentSessionId ? { parentSessionId } : {}),
-      ...(teamName ? { teamName } : {}),
-    }
+      ...(teamName ? { teamName } : {})}
   }
 
   // Check bootstrap state for parent session ID (e.g., plan mode -> implementation)
@@ -597,8 +590,7 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
     isLocalAgentMode: process.env.CLAUDE_CODE_ENTRYPOINT === 'local-agent',
     isConductor: env.isConductor(),
     ...(process.env.CLAUDE_CODE_REMOTE_ENVIRONMENT_TYPE && {
-      remoteEnvironmentType: process.env.CLAUDE_CODE_REMOTE_ENVIRONMENT_TYPE,
-    }),
+      remoteEnvironmentType: process.env.CLAUDE_CODE_REMOTE_ENVIRONMENT_TYPE}),
     // Gated by feature flag to prevent leaking "coworkerType" string in external builds
     ...(feature('COWORKER_TYPE_TELEMETRY')
       ? process.env.CLAUDE_CODE_COWORKER_TYPE
@@ -606,14 +598,11 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
         : {}
       : {}),
     ...(process.env.CLAUDE_CODE_CONTAINER_ID && {
-      claudeCodeContainerId: process.env.CLAUDE_CODE_CONTAINER_ID,
-    }),
+      claudeCodeContainerId: process.env.CLAUDE_CODE_CONTAINER_ID}),
     ...(process.env.CLAUDE_CODE_REMOTE_SESSION_ID && {
-      claudeCodeRemoteSessionId: process.env.CLAUDE_CODE_REMOTE_SESSION_ID,
-    }),
+      claudeCodeRemoteSessionId: process.env.CLAUDE_CODE_REMOTE_SESSION_ID}),
     ...(process.env.CLAUDE_CODE_TAGS && {
-      tags: process.env.CLAUDE_CODE_TAGS,
-    }),
+      tags: process.env.CLAUDE_CODE_TAGS}),
     isGithubAction: isEnvTruthy(process.env.GITHUB_ACTIONS),
     isClaudeCodeAction: isEnvTruthy(process.env.CLAUDE_CODE_ACTION),
     isClaudeAiAuth: isClaudeAISubscriber(),
@@ -629,12 +618,10 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
         'claude-code-action/',
       )
         ? process.env.GITHUB_ACTION_PATH.split('claude-code-action/')[1]
-        : undefined,
-    }),
+        : undefined}),
     ...(getWslVersion() && { wslVersion: getWslVersion() }),
     ...(linuxDistroInfo ?? {}),
-    ...(vcs.length > 0 ? { vcs: vcs.join(',') } : {}),
-  }
+    ...(vcs.length > 0 ? { vcs: vcs.join(',') } : {})}
 })
 
 // --
@@ -674,8 +661,7 @@ function buildProcessMetrics(): ProcessMetrics | undefined {
       // eslint-disable-next-line eslint-plugin-n/no-unsupported-features/node-builtins
       constrainedMemory: process.constrainedMemory(),
       cpuUsage: cpu,
-      cpuPercent,
-    }
+      cpuPercent}
   } catch {
     return undefined
   }
@@ -711,11 +697,9 @@ export async function getEventMetadata(
     ...(betas.length > 0 ? { betas: betas } : {}),
     envContext,
     ...(process.env.CLAUDE_CODE_ENTRYPOINT && {
-      entrypoint: process.env.CLAUDE_CODE_ENTRYPOINT,
-    }),
+      entrypoint: process.env.CLAUDE_CODE_ENTRYPOINT}),
     ...(process.env.CLAUDE_AGENT_SDK_VERSION && {
-      agentSdkVersion: process.env.CLAUDE_AGENT_SDK_VERSION,
-    }),
+      agentSdkVersion: process.env.CLAUDE_AGENT_SDK_VERSION}),
     isInteractive: String(getIsInteractive()),
     clientType: getClientType(),
     ...(processMetrics && { processMetrics }),
@@ -727,8 +711,7 @@ export async function getEventMetadata(
     ...getAgentIdentification(),
     // Subscription tier for DAU-by-tier analytics
     ...(getSubscriptionType() && {
-      subscriptionType: getSubscriptionType()!,
-    }),
+      subscriptionType: getSubscriptionType()!}),
     // Assistant mode tag — lives outside memoized buildEnvContext() because
     // setKairosActive() runs at main.tsx:~1648, after the first event may
     // have already fired and memoized the env. Read fresh per-event instead.
@@ -736,8 +719,7 @@ export async function getEventMetadata(
       ? { kairosActive: true as const }
       : {}),
     // Repo remote hash for joining with server-side repo bundle data
-    ...(repoRemoteHash && { rh: repoRemoteHash }),
-  }
+    ...(repoRemoteHash && { rh: repoRemoteHash })}
 
   return metadata
 }
@@ -835,8 +817,7 @@ export function to1PEventFormat(
     is_claude_ai_auth: envContext.isClaudeAiAuth,
     version: envContext.version,
     build_time: envContext.buildTime,
-    deployment_environment: envContext.deploymentEnvironment,
-  }
+    deployment_environment: envContext.deploymentEnvironment}
 
   // Add optional env fields
   if (envContext.remoteEnvironmentType) {
@@ -895,8 +876,7 @@ export function to1PEventFormat(
     model: coreFields.model,
     user_type: coreFields.userType,
     is_interactive: coreFields.isInteractive === 'true',
-    client_type: coreFields.clientType,
-  }
+    client_type: coreFields.clientType}
 
   // Add other core fields
   if (coreFields.betas) {
@@ -942,23 +922,20 @@ export function to1PEventFormat(
     env.github_actions_metadata = {
       actor_id: ghMeta.actorId,
       repository_id: ghMeta.repositoryId,
-      repository_owner_id: ghMeta.repositoryOwnerId,
-    }
+      repository_owner_id: ghMeta.repositoryOwnerId}
   }
 
   let auth: PublicApiAuth | undefined
   if (userMetadata.accountUuid || userMetadata.organizationUuid) {
     auth = {
       account_uuid: userMetadata.accountUuid,
-      organization_uuid: userMetadata.organizationUuid,
-    }
+      organization_uuid: userMetadata.organizationUuid}
   }
 
   return {
     env,
     ...(processMetrics && {
-      process: Buffer.from(jsonStringify(processMetrics)).toString('base64'),
-    }),
+      process: Buffer.from(jsonStringify(processMetrics)).toString('base64')}),
     ...(auth && { auth }),
     core,
     additional: {
@@ -966,7 +943,5 @@ export function to1PEventFormat(
       ...(kairosActive && { is_assistant_mode: true }),
       ...(skillMode && { skill_mode: skillMode }),
       ...(observerMode && { observer_mode: observerMode }),
-      ...additionalMetadata,
-    },
-  }
+      ...additionalMetadata}}
 }

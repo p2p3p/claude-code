@@ -10,8 +10,7 @@ import {
   BYTES_PER_TOKEN,
   DEFAULT_MAX_RESULT_SIZE_CHARS,
   MAX_TOOL_RESULT_BYTES,
-  MAX_TOOL_RESULTS_PER_MESSAGE_CHARS,
-} from '../constants/toolLimits.js'
+  MAX_TOOL_RESULTS_PER_MESSAGE_CHARS} from '../constants/toolLimits.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { logEvent } from '../services/analytics/index.js'
 import { sanitizeToolNameForAnalytics } from '../services/analytics/metadata.js'
@@ -145,8 +144,7 @@ export async function persistToolResult(
     const hasNonTextContent = content.some(block => block.type !== 'text')
     if (hasNonTextContent) {
       return {
-        error: 'Cannot persist tool results containing non-text content',
-      }
+        error: 'Cannot persist tool results containing non-text content'}
     }
   }
 
@@ -179,8 +177,7 @@ export async function persistToolResult(
     originalSize: contentStr.length,
     isJson,
     preview,
-    hasMore,
-  }
+    hasMore}
 }
 
 /**
@@ -286,12 +283,10 @@ async function maybePersistLargeToolResult(
   // Inject a short marker so the model always has something to react to.
   if (isToolResultContentEmpty(content)) {
     logEvent('tengu_tool_empty_result', {
-      toolName: sanitizeToolNameForAnalytics(toolName),
-    })
+      toolName: sanitizeToolNameForAnalytics(toolName)})
     return {
       ...toolResultBlock,
-      content: `(${toolName} completed with no output)`,
-    }
+      content: `(${toolName} completed with no output)`}
   }
   // Narrow after the emptiness guard — content is non-nullish past this point.
   if (!content) {
@@ -327,8 +322,7 @@ async function maybePersistLargeToolResult(
     persistedSizeBytes: message.length,
     estimatedOriginalTokens: Math.ceil(result.originalSize / BYTES_PER_TOKEN),
     estimatedPersistedTokens: Math.ceil(message.length / BYTES_PER_TOKEN),
-    thresholdUsed: threshold,
-  })
+    thresholdUsed: threshold})
 
   return { ...toolResultBlock, content: message }
 }
@@ -407,8 +401,7 @@ export function cloneContentReplacementState(
 ): ContentReplacementState {
   return {
     seenIds: new Set(source.seenIds),
-    replacements: new Map(source.replacements),
-  }
+    replacements: new Map(source.replacements)}
 }
 
 /**
@@ -566,8 +559,7 @@ function collectCandidatesFromMessage(message: Message): ToolResultCandidate[] {
       {
         toolUseId: block.tool_use_id,
         content: block.content,
-        size: contentSize(block.content),
-      },
+        size: contentSize(block.content)},
     ]
   })
 }
@@ -719,9 +711,7 @@ function replaceToolResultContents(
           return replacement === undefined
             ? block
             : { ...block, content: replacement }
-        }),
-      },
-    }
+        })}}
   })
 }
 
@@ -732,8 +722,7 @@ async function buildReplacement(
   if (isPersistError(result)) return null
   return {
     content: buildLargeToolResultMessage(result),
-    originalSize: result.originalSize,
-  }
+    originalSize: result.originalSize}
 }
 
 /**
@@ -871,8 +860,7 @@ export async function enforceToolResultBudget(
     newlyReplaced.push({
       kind: 'tool-result',
       toolUseId: candidate.toolUseId,
-      replacement: replacement.content,
-    })
+      replacement: replacement.content})
     logEvent('tengu_tool_result_persisted_message_budget', {
       originalSizeBytes: replacement.originalSize,
       persistedSizeBytes: replacement.content.length,
@@ -881,8 +869,7 @@ export async function enforceToolResultBudget(
       ),
       estimatedPersistedTokens: Math.ceil(
         replacement.content.length / BYTES_PER_TOKEN,
-      ),
-    })
+      )})
   }
 
   if (replacementMap.size === 0) {
@@ -899,14 +886,12 @@ export async function enforceToolResultBudget(
       resultsPersisted: newlyReplaced.length,
       messagesOverBudget,
       replacedSizeBytes: replacedSize,
-      reapplied: reappliedCount,
-    })
+      reapplied: reappliedCount})
   }
 
   return {
     messages: replaceToolResultContents(messages, replacementMap),
-    newlyReplaced,
-  }
+    newlyReplaced}
 }
 
 /**

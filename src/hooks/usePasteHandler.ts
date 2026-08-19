@@ -7,8 +7,7 @@ import {
   getImageFromClipboard,
   isImageFilePath,
   PASTE_THRESHOLD,
-  tryReadImageFromPath,
-} from '../utils/imagePaste.js'
+  tryReadImageFromPath} from '../utils/imagePaste.js'
 import type { ImageDimensions } from '../utils/imageResizer.js'
 import { getPlatform } from '../utils/platform.js'
 
@@ -30,8 +29,7 @@ type PasteHandlerProps = {
 export function usePasteHandler({
   onPaste,
   onInput,
-  onImagePaste,
-}: PasteHandlerProps): {
+  onImagePaste}: PasteHandlerProps): {
   wrappedOnInput: (input: string, key: Key, event: InputEvent) => void
   pasteState: {
     chunks: string[]
@@ -270,8 +268,7 @@ export function usePasteHandler({
       setPasteState(({ chunks, timeoutId }) => {
         return {
           chunks: [...chunks, input],
-          timeoutId: resetPasteTimeout(timeoutId),
-        }
+          timeoutId: resetPasteTimeout(timeoutId)}
       })
       return
     }
@@ -288,6 +285,5 @@ export function usePasteHandler({
   return {
     wrappedOnInput,
     pasteState,
-    isPasting,
-  }
+    isPasting}
 }

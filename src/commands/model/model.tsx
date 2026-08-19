@@ -5,8 +5,7 @@ import { ModelPicker } from '../../components/ModelPicker.js';
 import { COMMON_HELP_ARGS, COMMON_INFO_ARGS } from '../../constants/xml.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js';
+  logEvent} from '../../services/analytics/index.js';
 import { useAppState, useSetAppState } from '../../state/AppState.js';
 import type { LocalJSXCommandCall } from '../../types/command.js';
 import type { EffortLevel } from '../../utils/effort.js';
@@ -15,21 +14,19 @@ import {
   clearFastModeCooldown,
   isFastModeAvailable,
   isFastModeEnabled,
-  isFastModeSupportedByModel,
-} from '../../utils/fastMode.js';
+  isFastModeSupportedByModel} from '../../utils/fastMode.js';
 import { MODEL_ALIASES } from '../../utils/model/aliases.js';
 import { checkOpus1mAccess, checkSonnet1mAccess } from '../../utils/model/check1mAccess.js';
 import {
   getDefaultMainLoopModelSetting,
   isOpus1mMergeEnabled,
-  renderDefaultModelSetting,
-} from '../../utils/model/model.js';
+  renderDefaultModelSetting} from '../../utils/model/model.js';
 import { isModelAllowed } from '../../utils/model/modelAllowlist.js';
 import { validateModel } from '../../utils/model/validateModel.js';
+import { t } from '../../utils/i18n/index.js';
 
 function ModelPickerWrapper({
-  onDone,
-}: {
+  onDone}: {
   onDone: (result?: string, options?: { display?: CommandResultDisplay }) => void;
 }): React.ReactNode {
   const mainLoopModel = useAppState(s => s.mainLoopModel);
@@ -39,29 +36,25 @@ function ModelPickerWrapper({
 
   function handleCancel(): void {
     logEvent('tengu_model_command_menu', {
-      action: 'cancel' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      action: 'cancel' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     const displayModel = renderModelLabel(mainLoopModel);
-    onDone(`Kept model as ${chalk.bold(displayModel)}`, {
-      display: 'system',
-    });
+    onDone(t('modelCmd.keptModel', chalk.bold(displayModel)), {
+      display: 'system'});
   }
 
   function handleSelect(model: string | null, effort: EffortLevel | undefined): void {
     logEvent('tengu_model_command_menu', {
       action: model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       from_model: mainLoopModel as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      to_model: model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      to_model: model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     setAppState(prev => ({
       ...prev,
       mainLoopModel: model,
-      mainLoopModelForSession: null,
-    }));
+      mainLoopModelForSession: null}));
 
-    let message = `Set model to ${chalk.bold(renderModelLabel(model))}`;
+    let message = t('modelCmd.setModel', chalk.bold(renderModelLabel(model)));
     if (effort !== undefined) {
-      message += ` with ${chalk.bold(effort)} effort`;
+      message += t('modelCmd.withEffort', chalk.bold(effort));
     }
 
     // Turn off fast mode if switching to unsupported model
@@ -71,23 +64,22 @@ function ModelPickerWrapper({
       if (!isFastModeSupportedByModel(model) && isFastMode) {
         setAppState(prev => ({
           ...prev,
-          fastMode: false,
-        }));
+          fastMode: false}));
         wasFastModeToggledOn = false;
         // Do not update fast mode in settings since this is an automatic downgrade
       } else if (isFastModeSupportedByModel(model) && isFastModeAvailable() && isFastMode) {
-        message += ` · Fast mode ON`;
+        message += t('modelCmd.fastModeOn');
         wasFastModeToggledOn = true;
       }
     }
 
     if (isBilledAsExtraUsage(model, wasFastModeToggledOn === true, isOpus1mMergeEnabled())) {
-      message += ` · Billed as extra usage`;
+      message += t('modelCmd.billedExtraUsage');
     }
 
     if (wasFastModeToggledOn === false) {
       // Fast mode was toggled off, show suffix after extra usage billing
-      message += ` · Fast mode OFF`;
+      message += t('modelCmd.fastModeOff');
     }
 
     onDone(message);
@@ -109,8 +101,7 @@ function ModelPickerWrapper({
 
 function SetModelAndClose({
   args,
-  onDone,
-}: {
+  onDone}: {
   args: string;
   onDone: (result?: string, options?: { display?: CommandResultDisplay }) => void;
 }): React.ReactNode {
@@ -121,16 +112,15 @@ function SetModelAndClose({
   React.useEffect(() => {
     async function handleModelChange(): Promise<void> {
       if (model && !isModelAllowed(model)) {
-        onDone(`Model '${model}' is not available. Your organization restricts model selection.`, {
-          display: 'system',
-        });
+        onDone(t('modelCmd.orgRestricts', model), {
+          display: 'system'});
         return;
       }
 
       // @[MODEL LAUNCH]: Update check for 1M access.
       if (model && isOpus1mUnavailable(model)) {
         onDone(
-          `Opus 4.7 with 1M context is not available for your account. Learn more: https://code.claude.com/docs/en/model-config#extended-context-with-1m`,
+          t('modelCmd.opus1mUnavailable'),
           { display: 'system' },
         );
         return;
@@ -138,7 +128,7 @@ function SetModelAndClose({
 
       if (model && isSonnet1mUnavailable(model)) {
         onDone(
-          `Sonnet 4.6 with 1M context is not available for your account. Learn more: https://code.claude.com/docs/en/model-config#extended-context-with-1m`,
+          t('modelCmd.sonnet1mUnavailable'),
           { display: 'system' },
         );
         return;
@@ -165,14 +155,12 @@ function SetModelAndClose({
         if (valid) {
           setModel(model);
         } else {
-          onDone(error || `Model '${model}' not found`, {
-            display: 'system',
-          });
+          onDone(error || t('modelCmd.modelNotFound', model), {
+            display: 'system'});
         }
       } catch (error) {
-        onDone(`Failed to validate model: ${(error as Error).message}`, {
-          display: 'system',
-        });
+        onDone(t('modelCmd.failedToValidate', (error as Error).message), {
+          display: 'system'});
       }
     }
 
@@ -180,9 +168,8 @@ function SetModelAndClose({
       setAppState(prev => ({
         ...prev,
         mainLoopModel: modelValue,
-        mainLoopModelForSession: null,
-      }));
-      let message = `Set model to ${chalk.bold(renderModelLabel(modelValue))}`;
+        mainLoopModelForSession: null}));
+      let message = t('modelCmd.setModel', chalk.bold(renderModelLabel(modelValue)));
 
       let wasFastModeToggledOn;
       if (isFastModeEnabled()) {
@@ -190,23 +177,22 @@ function SetModelAndClose({
         if (!isFastModeSupportedByModel(modelValue) && isFastMode) {
           setAppState(prev => ({
             ...prev,
-            fastMode: false,
-          }));
+            fastMode: false}));
           wasFastModeToggledOn = false;
           // Do not update fast mode in settings since this is an automatic downgrade
         } else if (isFastModeSupportedByModel(modelValue) && isFastMode) {
-          message += ` · Fast mode ON`;
+          message += t('modelCmd.fastModeOn');
           wasFastModeToggledOn = true;
         }
       }
 
       if (isBilledAsExtraUsage(modelValue, wasFastModeToggledOn === true, isOpus1mMergeEnabled())) {
-        message += ` · Billed as extra usage`;
+        message += t('modelCmd.billedExtraUsage');
       }
 
       if (wasFastModeToggledOn === false) {
         // Fast mode was toggled off, show suffix after extra usage billing
-        message += ` · Fast mode OFF`;
+        message += t('modelCmd.fastModeOff');
       }
 
       onDone(message);
@@ -239,14 +225,14 @@ function ShowModelAndClose({ onDone }: { onDone: (result?: string) => void }): R
   const mainLoopModelForSession = useAppState(s => s.mainLoopModelForSession);
   const effortValue = useAppState(s => s.effortValue);
   const displayModel = renderModelLabel(mainLoopModel);
-  const effortInfo = effortValue !== undefined ? ` (effort: ${effortValue})` : '';
+  const effortInfo = effortValue !== undefined ? t('modelCmd.effortInfo', String(effortValue)) : '';
 
   if (mainLoopModelForSession) {
     onDone(
-      `Current model: ${chalk.bold(renderModelLabel(mainLoopModelForSession))} (session override from plan mode)\nBase model: ${displayModel}${effortInfo}`,
+      t('modelCmd.currentModelSession', chalk.bold(renderModelLabel(mainLoopModelForSession)), `${displayModel}${effortInfo}`),
     );
   } else {
-    onDone(`Current model: ${displayModel}${effortInfo}`);
+    onDone(t('modelCmd.currentModel', `${displayModel}${effortInfo}`));
   }
 
   return null;
@@ -256,21 +242,18 @@ export const call: LocalJSXCommandCall = async (onDone, _context, args) => {
   args = args?.trim() || '';
   if (COMMON_INFO_ARGS.includes(args)) {
     logEvent('tengu_model_command_inline_help', {
-      args: args as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      args: args as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     return <ShowModelAndClose onDone={onDone} />;
   }
   if (COMMON_HELP_ARGS.includes(args)) {
-    onDone('Run /model to open the model selection menu, or /model [modelName] to set the model.', {
-      display: 'system',
-    });
+    onDone(t('modelCmd.inlineHelp'), {
+      display: 'system'});
     return;
   }
 
   if (args) {
     logEvent('tengu_model_command_inline', {
-      args: args as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      args: args as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     return <SetModelAndClose args={args} onDone={onDone} />;
   }
 

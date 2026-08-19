@@ -3,6 +3,7 @@ import { logEvent } from '../../services/analytics/index.js'
 import { sanitizeToolNameForAnalytics } from '../../services/analytics/metadata.js'
 import type { AssistantMessage, Message } from '../../types/message.js'
 import { getGlobalConfig } from '../config.js'
+import { t } from '../i18n/index.js'
 import { logForDebugging } from '../debug.js'
 import { errorMessage } from '../errors.js'
 import { lazySchema } from '../lazySchema.js'
@@ -18,8 +19,7 @@ export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH'
 const RISK_LEVEL_NUMERIC: Record<RiskLevel, number> = {
   LOW: 1,
   MEDIUM: 2,
-  HIGH: 3,
-}
+  HIGH: 3}
 
 // Error type codes for analytics
 const ERROR_TYPE_PARSE = 1
@@ -46,33 +46,26 @@ const SYSTEM_PROMPT = `Analyze shell commands and explain what they do, why you'
 // Tool definition for forced structured output (no beta required)
 const EXPLAIN_COMMAND_TOOL = {
   name: 'explain_command',
-  description: 'Provide an explanation of a shell command',
+  description: t('permissionExplainer.provideExplanation'),
   input_schema: {
     type: 'object' as const,
     properties: {
       explanation: {
         type: 'string',
-        description: 'What this command does (1-2 sentences)',
-      },
+        description: t('permissionExplainer.whatCommandDoes')},
       reasoning: {
         type: 'string',
         description:
-          'Why YOU are running this command. Start with "I" - e.g. "I need to check the file contents"',
-      },
+          'Why YOU are running this command. Start with "I" - e.g. "I need to check the file contents"'},
       risk: {
         type: 'string',
-        description: 'What could go wrong, under 15 words',
-      },
+        description: t('permissionExplainer.whatCouldGoWrong')},
       riskLevel: {
         type: 'string',
         enum: ['LOW', 'MEDIUM', 'HIGH'],
         description:
-          'LOW (safe dev workflows), MEDIUM (recoverable changes), HIGH (dangerous/irreversible)',
-      },
-    },
-    required: ['explanation', 'reasoning', 'risk', 'riskLevel'],
-  },
-}
+          'LOW (safe dev workflows), MEDIUM (recoverable changes), HIGH (dangerous/irreversible)'}},
+    required: ['explanation', 'reasoning', 'risk', 'riskLevel']}}
 
 // Zod schema for parsing and validating the response
 const RiskAssessmentSchema = lazySchema(() =>
@@ -80,8 +73,7 @@ const RiskAssessmentSchema = lazySchema(() =>
     riskLevel: z.enum(['LOW', 'MEDIUM', 'HIGH']),
     explanation: z.string(),
     reasoning: z.string(),
-    risk: z.string(),
-  }),
+    risk: z.string()}),
 )
 
 function formatToolInput(input: unknown): string {
@@ -152,8 +144,7 @@ export async function generatePermissionExplanation({
   toolInput,
   toolDescription,
   messages,
-  signal,
-}: GenerateExplanationParams): Promise<PermissionExplanation | null> {
+  signal}: GenerateExplanationParams): Promise<PermissionExplanation | null> {
   // Check if feature is enabled
   if (!isPermissionExplainerEnabled()) {
     return null
@@ -185,8 +176,7 @@ Explain this command in context.`
       tools: [EXPLAIN_COMMAND_TOOL],
       tool_choice: { type: 'tool', name: 'explain_command' },
       signal,
-      querySource: 'permission_explainer',
-    })
+      querySource: 'permission_explainer'})
 
     const latencyMs = Date.now() - startTime
     logForDebugging(
@@ -206,14 +196,12 @@ Explain this command in context.`
           riskLevel: result.data.riskLevel,
           explanation: result.data.explanation,
           reasoning: result.data.reasoning,
-          risk: result.data.risk,
-        }
+          risk: result.data.risk}
 
         logEvent('tengu_permission_explainer_generated', {
           tool_name: sanitizeToolNameForAnalytics(toolName),
           risk_level: RISK_LEVEL_NUMERIC[explanation.riskLevel],
-          latency_ms: latencyMs,
-        })
+          latency_ms: latencyMs})
         logForDebugging(
           `Permission explainer: ${explanation.riskLevel} risk for ${toolName} (${latencyMs}ms)`,
         )
@@ -225,8 +213,7 @@ Explain this command in context.`
     logEvent('tengu_permission_explainer_error', {
       tool_name: sanitizeToolNameForAnalytics(toolName),
       error_type: ERROR_TYPE_PARSE,
-      latency_ms: latencyMs,
-    })
+      latency_ms: latencyMs})
     logForDebugging(`Permission explainer: no parsed output in response`)
     return null
   } catch (error) {
@@ -246,8 +233,7 @@ Explain this command in context.`
         error instanceof Error && error.name === 'AbortError'
           ? ERROR_TYPE_NETWORK
           : ERROR_TYPE_UNKNOWN,
-      latency_ms: latencyMs,
-    })
+      latency_ms: latencyMs})
     return null
   }
 }

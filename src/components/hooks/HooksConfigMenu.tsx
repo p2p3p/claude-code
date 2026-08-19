@@ -23,12 +23,11 @@ import {
   getHooksForMatcher,
   getMatcherMetadata,
   getSortedMatchersForEvent,
-  groupHooksByEventAndMatcher,
-} from '../../utils/hooks/hooksConfigManager.js';
+  groupHooksByEventAndMatcher} from '../../utils/hooks/hooksConfigManager.js';
 import type { IndividualHookConfig } from '../../utils/hooks/hooksSettings.js';
 import { getSettings_DEPRECATED, getSettingsForSource } from '../../utils/settings/settings.js';
-import { plural } from '../../utils/stringUtils.js';
 import { Dialog } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import { SelectEventMode } from './SelectEventMode.js';
 import { SelectHookMode } from './SelectHookMode.js';
 import { SelectMatcherMode } from './SelectMatcherMode.js';
@@ -47,8 +46,7 @@ type ModeState =
 
 export function HooksConfigMenu({ toolNames, onExit }: Props): React.ReactNode {
   const [modeState, setModeState] = useState<ModeState>({
-    mode: 'select-event',
-  });
+    mode: 'select-event'});
   // Cache whether hooks are disabled by policy settings.
   // getSettingsForSource() is expensive (file read + JSON parse + validation),
   // so we compute it once on mount and only re-compute when policy settings change.
@@ -106,8 +104,7 @@ export function HooksConfigMenu({ toolNames, onExit }: Props): React.ReactNode {
   // Escape handling for select-event mode - exit the menu
   useKeybinding('confirm:no', handleExit, {
     context: 'Confirmation',
-    isActive: mode === 'select-event',
-  });
+    isActive: mode === 'select-event'});
 
   // Escape handling for select-matcher mode - go to select-event
   useKeybinding(
@@ -117,8 +114,7 @@ export function HooksConfigMenu({ toolNames, onExit }: Props): React.ReactNode {
     },
     {
       context: 'Confirmation',
-      isActive: mode === 'select-matcher',
-    },
+      isActive: mode === 'select-matcher'},
   );
 
   // Escape handling for select-hook mode - go to select-matcher or select-event
@@ -135,8 +131,7 @@ export function HooksConfigMenu({ toolNames, onExit }: Props): React.ReactNode {
     },
     {
       context: 'Confirmation',
-      isActive: mode === 'select-hook',
-    },
+      isActive: mode === 'select-hook'},
   );
 
   // Escape handling for view-hook mode - go to select-hook
@@ -148,14 +143,12 @@ export function HooksConfigMenu({ toolNames, onExit }: Props): React.ReactNode {
         setModeState({
           mode: 'select-hook',
           event,
-          matcher: hook.matcher || '',
-        });
+          matcher: hook.matcher || ''});
       }
     },
     {
       context: 'Confirmation',
-      isActive: mode === 'view-hook',
-    },
+      isActive: mode === 'view-hook'},
   );
 
   const hookEventMetadata = getHookEventMetadata(combinedToolNames);
@@ -181,24 +174,24 @@ export function HooksConfigMenu({ toolNames, onExit }: Props): React.ReactNode {
   // users can edit settings.json or ask Claude instead.
   if (hooksDisabled) {
     return (
-      <Dialog title="Hook Configuration - Disabled" onCancel={handleExit} inputGuide={() => <Text>Esc to close</Text>}>
+      <Dialog title={t('hooks.disabledTitle')} onCancel={handleExit} inputGuide={() => <Text>{t('hooks.escToClose')}</Text>}>
         <Box flexDirection="column" gap={1}>
           <Box flexDirection="column">
             <Text>
-              All hooks are currently <Text bold>disabled</Text>
-              {disabledByPolicy && ' by a managed settings file'}. You have <Text bold>{totalHooksCount}</Text>{' '}
-              configured {plural(totalHooksCount, 'hook')} that {plural(totalHooksCount, 'is', 'are')} not running.
+              {t('hooks.allDisabled')} <Text bold>{t('hooks.disabledBold')}</Text>
+              {disabledByPolicy && ` ${t('hooks.byManagedSettings')}`}. {t('hooks.youHaveCount', totalHooksCount)}{' '}
+              {t('hooks.hooksNotRunning', totalHooksCount)}.
             </Text>
             <Box marginTop={1}>
-              <Text dimColor>When hooks are disabled:</Text>
+              <Text dimColor>{t('hooks.whenDisabled')}</Text>
             </Box>
-            <Text dimColor>· No hook commands will execute</Text>
-            <Text dimColor>· StatusLine will not be displayed</Text>
-            <Text dimColor>· Tool operations will proceed without hook validation</Text>
+            <Text dimColor>{t('hooks.noCommands')}</Text>
+            <Text dimColor>{t('hooks.noStatusLine')}</Text>
+            <Text dimColor>{t('hooks.noValidation')}</Text>
           </Box>
           {!disabledByPolicy && (
             <Text dimColor>
-              To re-enable hooks, remove &quot;disableAllHooks&quot; from settings.json or ask Claude.
+              {t('hooks.reEnableHint')}
             </Text>
           )}
         </Box>
@@ -235,8 +228,7 @@ export function HooksConfigMenu({ toolNames, onExit }: Props): React.ReactNode {
             setModeState({
               mode: 'select-hook',
               event: modeState.event,
-              matcher,
-            });
+              matcher});
           }}
           onCancel={() => {
             setModeState({ mode: 'select-event' });
@@ -254,16 +246,14 @@ export function HooksConfigMenu({ toolNames, onExit }: Props): React.ReactNode {
             setModeState({
               mode: 'view-hook',
               event: modeState.event,
-              hook,
-            });
+              hook});
           }}
           onCancel={() => {
             // Go back to matcher selection or event selection
             if (getMatcherMetadata(modeState.event, combinedToolNames) !== undefined) {
               setModeState({
                 mode: 'select-matcher',
-                event: modeState.event,
-              });
+                event: modeState.event});
             } else {
               setModeState({ mode: 'select-event' });
             }
@@ -280,8 +270,7 @@ export function HooksConfigMenu({ toolNames, onExit }: Props): React.ReactNode {
             setModeState({
               mode: 'select-hook',
               event,
-              matcher: hook.matcher || '',
-            });
+              matcher: hook.matcher || ''});
           }}
         />
       );

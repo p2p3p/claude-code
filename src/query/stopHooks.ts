@@ -3,8 +3,7 @@ import { getShortcutDisplay } from '../keybindings/shortcutFormat.js'
 import { isExtractModeActive } from '../memdir/paths.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import type { ToolUseContext } from '../Tool.js'
 import type { HookProgress } from '../types/hooks.js'
 import type {
@@ -14,8 +13,7 @@ import type {
   StopHookInfo,
   StreamEvent,
   TombstoneMessage,
-  ToolUseSummaryMessage,
-} from '../types/message.js'
+  ToolUseSummaryMessage} from '../types/message.js'
 import { createAttachmentMessage } from '../utils/attachments.js'
 import { logForDebugging } from '../utils/debug.js'
 import { errorMessage } from '../utils/errors.js'
@@ -26,14 +24,12 @@ import {
   executeTeammateIdleHooks,
   getStopHookMessage,
   getTaskCompletedHookMessage,
-  getTeammateIdleHookMessage,
-} from '../utils/hooks.js'
+  getTeammateIdleHookMessage} from '../utils/hooks.js'
 import {
   createStopHookSummaryMessage,
   createSystemMessage,
   createUserInterruptionMessage,
-  createUserMessage,
-} from '../utils/messages.js'
+  createUserMessage} from '../utils/messages.js'
 import type { SystemPrompt } from '../utils/systemPromptType.js'
 import { getTaskListId, listTasks } from '../utils/tasks.js'
 import { getAgentName, getTeamName, isTeammate } from '../utils/teammate.js'
@@ -82,8 +78,7 @@ export async function* handleStopHooks(
     userContext,
     systemContext,
     toolUseContext,
-    querySource,
-  }
+    querySource}
   // Only save params for main session queries — subagents must not overwrite.
   // Outside the prompt-suggestion gate: the REPL /btw command and the
   // side_question SDK control_request both read this snapshot, and neither
@@ -116,8 +111,7 @@ export async function* handleStopHooks(
       .classifyAndWriteState(process.env.CLAUDE_JOB_DIR, turnAssistantMessages)
       .catch(err => {
         logForDebugging(`[job] classifier error: ${errorMessage(err)}`, {
-          level: 'error',
-        })
+          level: 'error'})
       })
     await Promise.race([
       p,
@@ -218,8 +212,7 @@ export async function* handleStopHooks(
           if (progressData.command) {
             hookInfos.push({
               command: progressData.command,
-              promptText: progressData.promptText,
-            })
+              promptText: progressData.promptText})
           }
         }
         // Track errors and output from attachments
@@ -285,8 +278,7 @@ export async function* handleStopHooks(
           message: stopReason,
           hookName: 'Stop',
           toolUseID: stopHookToolUseID,
-          hookEvent: 'Stop',
-        })
+          hookEvent: 'Stop'})
       }
 
       // Check if we were aborted during hook execution
@@ -295,11 +287,9 @@ export async function* handleStopHooks(
           queryChainId: toolUseContext.queryTracking
             ?.chainId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
 
-          queryDepth: toolUseContext.queryTracking?.depth,
-        })
+          queryDepth: toolUseContext.queryTracking?.depth})
         yield createUserInterruptionMessage({
-          toolUse: false,
-        })
+          toolUse: false})
         return { blockingErrors: [], preventContinuation: true }
       }
     }
@@ -327,8 +317,7 @@ export async function* handleStopHooks(
         toolUseContext.addNotification?.({
           key: 'stop-hook-error',
           text: `Stop hook error occurred \u00b7 ${expandShortcut} to see`,
-          priority: 'immediate',
-        })
+          priority: 'immediate'})
       }
     }
 
@@ -385,8 +374,7 @@ export async function* handleStopHooks(
           if (result.blockingError) {
             const userMessage = createUserMessage({
               content: getTaskCompletedHookMessage(result.blockingError),
-              isMeta: true,
-            })
+              isMeta: true})
             teammateBlockingErrors.push(userMessage)
             yield userMessage
           }
@@ -400,8 +388,7 @@ export async function* handleStopHooks(
               message: teammateStopReason,
               hookName: 'TaskCompleted',
               toolUseID: teammateHookToolUseID,
-              hookEvent: 'TaskCompleted',
-            })
+              hookEvent: 'TaskCompleted'})
           }
           if (toolUseContext.abortController.signal.aborted) {
             return { blockingErrors: [], preventContinuation: true }
@@ -427,8 +414,7 @@ export async function* handleStopHooks(
         if (result.blockingError) {
           const userMessage = createUserMessage({
             content: getTeammateIdleHookMessage(result.blockingError),
-            isMeta: true,
-          })
+            isMeta: true})
           teammateBlockingErrors.push(userMessage)
           yield userMessage
         }
@@ -442,8 +428,7 @@ export async function* handleStopHooks(
             message: teammateStopReason,
             hookName: 'TeammateIdle',
             toolUseID: teammateHookToolUseID,
-            hookEvent: 'TeammateIdle',
-          })
+            hookEvent: 'TeammateIdle'})
         }
         if (toolUseContext.abortController.signal.aborted) {
           return { blockingErrors: [], preventContinuation: true }
@@ -457,8 +442,7 @@ export async function* handleStopHooks(
       if (teammateBlockingErrors.length > 0) {
         return {
           blockingErrors: teammateBlockingErrors,
-          preventContinuation: false,
-        }
+          preventContinuation: false}
       }
     }
 
@@ -470,8 +454,7 @@ export async function* handleStopHooks(
 
       queryChainId: toolUseContext.queryTracking
         ?.chainId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      queryDepth: toolUseContext.queryTracking?.depth,
-    })
+      queryDepth: toolUseContext.queryTracking?.depth})
     // Yield a system message that is not visible to the model for the user
     // to debug their hook.
     yield createSystemMessage(

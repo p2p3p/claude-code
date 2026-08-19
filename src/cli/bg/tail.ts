@@ -5,9 +5,9 @@ import {
   statSync,
   watchFile,
   unwatchFile,
-  createReadStream,
-} from 'fs'
+  createReadStream} from 'fs'
 import { createInterface } from 'readline'
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * Cross-platform real-time log output. Ctrl+C exits tail without killing
@@ -37,13 +37,13 @@ export async function tailLog(logPath: string): Promise<void> {
     // File may not exist yet — that's fine
   }
 
-  console.log('\n[tail] Watching for new output... (Ctrl+C to detach)\n')
+  console.log(t('tail.watching'))
 
   return new Promise<void>(resolve => {
     const onSignal = (): void => {
       unwatchFile(logPath)
       process.removeListener('SIGINT', onSignal)
-      console.log('\n[tail] Detached from session.')
+      console.log(t('tail.detached'))
       resolve()
     }
     process.on('SIGINT', onSignal)

@@ -5,8 +5,7 @@ import {
   mkdirSync,
   readFileSync,
   realpathSync,
-  writeFileSync,
-} from 'fs'
+  writeFileSync} from 'fs'
 import { basename, join, resolve } from 'path'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
 import type {
@@ -14,8 +13,7 @@ import type {
   SkillLearningProjectContext,
   SkillLearningProjectRecord,
   SkillLearningProjectsRegistry,
-  SkillLearningScope,
-} from './types.js'
+  SkillLearningScope} from './types.js'
 
 const REGISTRY_VERSION = 1
 const GLOBAL_PROJECT_ID = 'global'
@@ -117,8 +115,7 @@ function resolveContext(cwd: string): SkillLearningProjectContext {
       cwd,
       projectRoot,
       identity: `claude-project-dir:${projectRoot}`,
-      projectName: basename(projectRoot) || 'project',
-    })
+      projectName: basename(projectRoot) || 'project'})
   }
 
   const gitRemote = git(['remote', 'get-url', 'origin'], cwd)
@@ -134,8 +131,7 @@ function resolveContext(cwd: string): SkillLearningProjectContext {
         : normalizePath(cwd),
       gitRemote: normalizedRemote,
       identity: `git-remote:${normalizedRemote}`,
-      projectName: projectNameFromRemote(normalizedRemote),
-    })
+      projectName: projectNameFromRemote(normalizedRemote)})
   }
 
   const gitRoot = git(['rev-parse', '--show-toplevel'], cwd)
@@ -147,8 +143,7 @@ function resolveContext(cwd: string): SkillLearningProjectContext {
       cwd,
       projectRoot,
       identity: `git-root:${projectRoot}`,
-      projectName: basename(projectRoot) || 'project',
-    })
+      projectName: basename(projectRoot) || 'project'})
   }
 
   return buildContext({
@@ -157,8 +152,7 @@ function resolveContext(cwd: string): SkillLearningProjectContext {
     cwd,
     projectRoot: undefined,
     identity: 'global',
-    projectName: GLOBAL_PROJECT_NAME,
-  })
+    projectName: GLOBAL_PROJECT_NAME})
 }
 
 function buildContext(input: {
@@ -182,8 +176,7 @@ function buildContext(input: {
     cwd: normalizePath(input.cwd),
     projectRoot: input.projectRoot,
     gitRemote: input.gitRemote,
-    storageDir: getProjectStorageDir(projectId),
-  }
+    storageDir: getProjectStorageDir(projectId)}
 }
 
 function persistProjectContext(context: SkillLearningProjectContext): void {
@@ -194,8 +187,7 @@ function persistProjectContext(context: SkillLearningProjectContext): void {
   const record: SkillLearningProjectRecord = {
     ...context,
     firstSeenAt: existing?.firstSeenAt ?? now,
-    lastSeenAt: now,
-  }
+    lastSeenAt: now}
 
   registry.projects[context.projectId] = record
   registry.updatedAt = now
@@ -211,8 +203,7 @@ function readProjectsRegistry(path: string): SkillLearningProjectsRegistry {
     return {
       version: REGISTRY_VERSION,
       updatedAt: new Date(0).toISOString(),
-      projects: {},
-    }
+      projects: {}}
   }
 
   try {
@@ -230,8 +221,7 @@ function readProjectsRegistry(path: string): SkillLearningProjectsRegistry {
           typeof parsed.updatedAt === 'string'
             ? parsed.updatedAt
             : new Date(0).toISOString(),
-        projects: parsed.projects as Record<string, SkillLearningProjectRecord>,
-      }
+        projects: parsed.projects as Record<string, SkillLearningProjectRecord>}
     }
   } catch {
     // Fall through to a fresh registry. Corrupt state should not block startup.
@@ -240,8 +230,7 @@ function readProjectsRegistry(path: string): SkillLearningProjectsRegistry {
   return {
     version: REGISTRY_VERSION,
     updatedAt: new Date(0).toISOString(),
-    projects: {},
-  }
+    projects: {}}
 }
 
 function writeJson(path: string, value: unknown): void {
@@ -252,8 +241,7 @@ function git(args: string[], cwd: string): string | null {
   try {
     const output = execFileSync('git', ['-C', cwd, ...args], {
       encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    })
+      stdio: ['ignore', 'pipe', 'ignore']})
     const trimmed = output.trim()
     return trimmed ? trimmed : null
   } catch {

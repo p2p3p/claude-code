@@ -10,8 +10,7 @@ import type {
   McpHTTPServerConfig,
   McpSSEServerConfig,
   McpWebSocketServerConfig,
-  ScopedMcpServerConfig,
-} from './types.js'
+  ScopedMcpServerConfig} from './types.js'
 
 /**
  * Check if the MCP server config comes from project settings (projectSettings or localSettings)
@@ -66,9 +65,7 @@ export async function getMcpHeadersFromHelper(
       env: {
         ...process.env,
         CLAUDE_CODE_MCP_SERVER_NAME: serverName,
-        CLAUDE_CODE_MCP_SERVER_URL: config.url,
-      },
-    })
+        CLAUDE_CODE_MCP_SERVER_URL: config.url}})
     if (execResult.code !== 0 || !execResult.stdout) {
       throw new Error(
         `headersHelper for MCP server '${serverName}' did not return a valid value`,
@@ -133,6 +130,5 @@ export async function getMcpServerHeaders(
   // Dynamic headers override static headers if both are present
   return {
     ...staticHeaders,
-    ...dynamicHeaders,
-  }
+    ...dynamicHeaders}
 }

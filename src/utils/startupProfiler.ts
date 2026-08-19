@@ -13,8 +13,7 @@ import { dirname, join } from 'path'
 import { getSessionId } from 'src/bootstrap/state.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import { logForDebugging } from './debug.js'
 import { getClaudeConfigHomeDir, isEnvTruthy } from './envUtils.js'
 import { getFsImplementation } from './fsOperations.js'
@@ -50,8 +49,7 @@ const PHASE_DEFINITIONS = {
   import_time: ['cli_entry', 'main_tsx_imports_loaded'],
   init_time: ['init_function_start', 'init_function_end'],
   settings_time: ['eagerLoadSettings_start', 'eagerLoadSettings_end'],
-  total_time: ['cli_entry', 'main_after_run'],
-} as const
+  total_time: ['cli_entry', 'main_after_run']} as const
 
 // Record initial checkpoint if profiling is enabled
 if (SHOULD_PROFILE) {
@@ -136,8 +134,7 @@ export function profileReport(): void {
     fs.mkdirSync(dir)
     writeFileSync_DEPRECATED(path, getReport(), {
       encoding: 'utf8',
-      flush: true,
-    })
+      flush: true})
 
     logForDebugging('Startup profiling report:')
     logForDebugging(getReport())

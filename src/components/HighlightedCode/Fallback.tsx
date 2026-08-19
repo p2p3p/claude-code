@@ -35,8 +35,7 @@ export function HighlightedCodeFallback({
   code,
   filePath,
   dim = false,
-  skipColoring = false,
-}: Props): React.ReactElement {
+  skipColoring = false}: Props): React.ReactElement {
   const codeWithSpaces = convertLeadingTabsToSpaces(code);
   if (skipColoring) {
     return (

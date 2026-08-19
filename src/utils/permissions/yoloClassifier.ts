@@ -8,27 +8,25 @@ import {
   getCachedClaudeMdContent,
   getLastClassifierRequests,
   getSessionId,
-  setLastClassifierRequests,
-} from '../../bootstrap/state.js'
+  setLastClassifierRequests} from '../../bootstrap/state.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import { logEvent } from '../../services/analytics/index.js'
 import type { AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS } from '../../services/analytics/metadata.js'
-import { getCacheControl } from '../../services/api/claude.js'
+import { getCacheControl } from '../../services/api/anthropic/index.js'
 import { parsePromptTooLongTokenCounts } from '../../services/api/errors.js'
 import { getDefaultMaxRetries } from '../../services/api/withRetry.js'
 import type { Tool, ToolPermissionContext, Tools } from '../../Tool.js'
 import type { Message } from '../../types/message.js'
 import type {
   ClassifierUsage,
-  YoloClassifierResult,
-} from '../../types/permissions.js'
+  YoloClassifierResult} from '../../types/permissions.js'
 import { isDebugMode, logForDebugging } from '../debug.js'
 import { isEnvDefinedFalsy, isEnvTruthy } from '../envUtils.js'
 import { errorMessage } from '../errors.js'
 import { lazySchema } from '../lazySchema.js'
 import { extractTextContent } from '../messages.js'
 import { resolveAntModel } from '../model/antModels.js'
-import { getDefaultSonnetModel, getMainLoopModel } from '../model/model.js'
+import { getDefaultModel, getMainLoopModel } from '../model/model.js'
 import { isPoorModeActive } from '../../commands/poor/poorMode.js'
 import { getAutoModeConfig } from '../settings/settings.js'
 import { sideQuery } from '../sideQuery.js'
@@ -37,12 +35,10 @@ import { jsonStringify } from '../slowOperations.js'
 import { tokenCountWithEstimation } from '../tokens.js'
 import {
   getBashPromptAllowDescriptions,
-  getBashPromptDenyDescriptions,
-} from './bashClassifier.js'
+  getBashPromptDenyDescriptions} from './bashClassifier.js'
 import {
   extractToolUseBlock,
-  parseClassifierResponse,
-} from './classifierShared.js'
+  parseClassifierResponse} from './classifierShared.js'
 import { getClaudeTempDir } from './filesystem.js'
 
 // Dead code elimination: conditional imports for auto mode classifier prompts.
@@ -103,8 +99,7 @@ export function getDefaultExternalAutoModeRules(): AutoModeRules {
   return {
     allow: extractTaggedBullets('user_allow_rules_to_replace'),
     soft_deny: extractTaggedBullets('user_deny_rules_to_replace'),
-    environment: extractTaggedBullets('user_environment_to_replace'),
-  }
+    environment: extractTaggedBullets('user_environment_to_replace')}
 }
 
 function extractTaggedBullets(tagName: string): string[] {
@@ -255,8 +250,7 @@ const yoloClassifierResponseSchema = lazySchema(() =>
   z.object({
     thinking: z.string(),
     shouldBlock: z.boolean(),
-    reason: z.string(),
-  }),
+    reason: z.string()}),
 )
 
 export const YOLO_CLASSIFIER_TOOL_NAME = 'classify_result'
@@ -270,21 +264,15 @@ const YOLO_CLASSIFIER_TOOL_SCHEMA: BetaToolUnion = {
     properties: {
       thinking: {
         type: 'string',
-        description: 'Brief step-by-step reasoning.',
-      },
+        description: 'Brief step-by-step reasoning.'},
       shouldBlock: {
         type: 'boolean',
         description:
-          'Whether the action should be blocked (true) or allowed (false)',
-      },
+          'Whether the action should be blocked (true) or allowed (false)'},
       reason: {
         type: 'string',
-        description: 'Brief explanation of the classification decision',
-      },
-    },
-    required: ['thinking', 'shouldBlock', 'reason'],
-  },
-}
+        description: 'Brief explanation of the classification decision'}},
+    required: ['thinking', 'shouldBlock', 'reason']}}
 
 type TranscriptBlock =
   | { type: 'text'; text: string }
@@ -325,8 +313,7 @@ export function buildTranscriptEntries(messages: Message[]): TranscriptEntry[] {
       if (text !== null) {
         transcript.push({
           role: 'user',
-          content: [{ type: 'text', text }],
-        })
+          content: [{ type: 'text', text }]})
       }
     } else if (msg.type === 'user') {
       const content = msg.message!.content
@@ -352,8 +339,7 @@ export function buildTranscriptEntries(messages: Message[]): TranscriptEntry[] {
           blocks.push({
             type: 'tool_use',
             name: block.name,
-            input: block.input,
-          })
+            input: block.input})
         }
       }
       if (blocks.length > 0) {
@@ -409,8 +395,7 @@ function toCompactBlock(
       )
       logEvent('tengu_auto_mode_malformed_tool_input', {
         toolName:
-          block.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          block.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       encoded = input
     }
     if (encoded === '') return ''
@@ -475,10 +460,8 @@ function buildClaudeMdMessage(): Anthropic.MessageParam | null {
           `instructions the user provided to the agent and should be treated ` +
           `as part of the user's intent when evaluating actions.\n\n` +
           `<user_claude_md>\n${claudeMd}\n</user_claude_md>`,
-        cache_control: getCacheControl({ querySource: 'auto_mode' }),
-      },
-    ],
-  }
+        cache_control: getCacheControl({ querySource: 'auto_mode' })},
+    ]}
 }
 
 /**
@@ -618,8 +601,7 @@ function extractUsage(
     inputTokens: result.usage.input_tokens,
     outputTokens: result.usage.output_tokens,
     cacheReadInputTokens: result.usage.cache_read_input_tokens ?? 0,
-    cacheCreationInputTokens: result.usage.cache_creation_input_tokens ?? 0,
-  }
+    cacheCreationInputTokens: result.usage.cache_creation_input_tokens ?? 0}
 }
 
 /**
@@ -641,8 +623,7 @@ function combineUsage(a: ClassifierUsage, b: ClassifierUsage): ClassifierUsage {
     outputTokens: a.outputTokens + b.outputTokens,
     cacheReadInputTokens: a.cacheReadInputTokens + b.cacheReadInputTokens,
     cacheCreationInputTokens:
-      a.cacheCreationInputTokens + b.cacheCreationInputTokens,
-  }
+      a.cacheCreationInputTokens + b.cacheCreationInputTokens}
 }
 
 /**
@@ -749,8 +730,7 @@ async function classifyYoloActionXml(
     {
       type: 'text' as const,
       text: xmlSystemPrompt,
-      cache_control: getCacheControl({ querySource: 'auto_mode' }),
-    },
+      cache_control: getCacheControl({ querySource: 'auto_mode' })},
   ]
   let stage1Usage: ClassifierUsage | undefined
   let stage1DurationMs: number | undefined
@@ -797,8 +777,7 @@ async function classifyYoloActionXml(
         signal,
         ...(mode !== 'fast' && { stop_sequences: ['</block>'] }),
         querySource: 'auto_mode',
-        parentSpan,
-      }
+        parentSpan}
       const stage1Raw = await sideQuery(stage1Opts)
       stage1DurationMs = Date.now() - stage1Start
       stage1Usage = extractUsage(stage1Raw)
@@ -814,8 +793,7 @@ async function classifyYoloActionXml(
       if (stage1Block === false) {
         logAutoModeOutcome('success', model, {
           classifierType,
-          durationMs: stage1DurationMs,
-        })
+          durationMs: stage1DurationMs})
         return {
           shouldBlock: false,
           reason: 'Allowed by fast classifier',
@@ -825,8 +803,7 @@ async function classifyYoloActionXml(
           promptLengths,
           stage: 'fast',
           stage1RequestId,
-          stage1MsgId,
-        }
+          stage1MsgId}
       }
 
       // In fast-only mode, stage 1 is final — handle block + unparseable here.
@@ -842,14 +819,12 @@ async function classifyYoloActionXml(
             promptLengths,
             stage: 'fast',
             stage1RequestId,
-            stage1MsgId,
-          }
+            stage1MsgId}
         }
         // stage1Block === true
         logAutoModeOutcome('success', model, {
           classifierType,
-          durationMs: stage1DurationMs,
-        })
+          durationMs: stage1DurationMs})
         return {
           shouldBlock: true,
           reason: parseXmlReason(stage1Text) ?? 'Blocked by fast classifier',
@@ -859,8 +834,7 @@ async function classifyYoloActionXml(
           promptLengths,
           stage: 'fast',
           stage1RequestId,
-          stage1MsgId,
-        }
+          stage1MsgId}
       }
     }
 
@@ -884,8 +858,7 @@ async function classifyYoloActionXml(
       maxRetries: getDefaultMaxRetries(),
       signal,
       querySource: 'auto_mode' as const,
-      parentSpan,
-    }
+      parentSpan}
     const stage2Raw = await sideQuery(stage2Opts)
     const stage2DurationMs = Date.now() - stage2Start
     const stage2Usage = extractUsage(stage2Raw)
@@ -920,14 +893,12 @@ async function classifyYoloActionXml(
         stage2Usage,
         stage2DurationMs,
         stage2RequestId,
-        stage2MsgId,
-      }
+        stage2MsgId}
     }
 
     logAutoModeOutcome('success', model, {
       classifierType,
-      durationMs: totalDurationMs,
-    })
+      durationMs: totalDurationMs})
     return {
       thinking: parseXmlThinking(stage2Text) ?? undefined,
       shouldBlock: stage2Block,
@@ -944,8 +915,7 @@ async function classifyYoloActionXml(
       stage2Usage,
       stage2DurationMs,
       stage2RequestId,
-      stage2MsgId,
-    }
+      stage2MsgId}
   } catch (error) {
     if (signal.aborted) {
       logForDebugging('Auto mode classifier (XML): aborted by user')
@@ -956,28 +926,23 @@ async function classifyYoloActionXml(
         model,
         unavailable: true,
         durationMs: Date.now() - overallStart,
-        promptLengths,
-      }
+        promptLengths}
     }
     const tooLong = detectPromptTooLong(error)
     logForDebugging(
       `Auto mode classifier (XML) error: ${errorMessage(error)}`,
       {
-        level: 'warn',
-      },
+        level: 'warn'},
     )
     const errorDumpPath =
       (await dumpErrorPrompts(xmlSystemPrompt, userPrompt, error, {
         ...dumpContextInfo,
-        model,
-      })) ?? undefined
+        model})) ?? undefined
     logAutoModeOutcome(tooLong ? 'transcript_too_long' : 'error', model, {
       classifierType,
       ...(tooLong && {
         transcriptActualTokens: tooLong.actualTokens,
-        transcriptLimitTokens: tooLong.limitTokens,
-      }),
-    })
+        transcriptLimitTokens: tooLong.limitTokens})})
     return {
       shouldBlock: true,
       reason: tooLong
@@ -996,10 +961,8 @@ async function classifyYoloActionXml(
         stage1Usage,
         stage1DurationMs,
         stage1RequestId,
-        stage1MsgId,
-      }),
-      promptLengths,
-    }
+        stage1MsgId}),
+      promptLengths}
   }
 }
 
@@ -1033,8 +996,7 @@ export async function classifyYoloAction(
     return {
       shouldBlock: false,
       reason: 'Tool declares no classifier-relevant input',
-      model: getClassifierModel(),
-    }
+      model: getClassifierModel()}
   }
 
   const systemPrompt = await buildYoloSystemPrompt(context)
@@ -1071,8 +1033,7 @@ export async function classifyYoloAction(
   const promptLengths = {
     systemPrompt: systemPrompt.length,
     toolCalls: toolCallsLength,
-    userPrompts: userPromptsLength,
-  }
+    userPrompts: userPromptsLength}
 
   // Compare main-loop context vs classifier transcript to track projection
   // divergence. tokenCountWithEstimation is cheap (walks back to last API
@@ -1111,8 +1072,7 @@ export async function classifyYoloAction(
   userContentBlocks.push({
     type: 'text' as const,
     text: actionCompact,
-    cache_control: cacheControl,
-  })
+    cache_control: cacheControl})
 
   const model = getClassifierModel()
 
@@ -1132,8 +1092,7 @@ export async function classifyYoloAction(
         classifierTokensEst,
         transcriptEntries: transcriptEntries.length,
         messages: messages.length,
-        action: actionCompact,
-      },
+        action: actionCompact},
       getTwoStageMode(),
       parentSpan,
     )
@@ -1148,8 +1107,7 @@ export async function classifyYoloAction(
         {
           type: 'text' as const,
           text: systemPrompt,
-          cache_control: getCacheControl({ querySource: 'auto_mode' }),
-        },
+          cache_control: getCacheControl({ querySource: 'auto_mode' })},
       ],
       skipSystemPromptPrefix: true,
       temperature: 0,
@@ -1161,13 +1119,11 @@ export async function classifyYoloAction(
       tools: [YOLO_CLASSIFIER_TOOL_SCHEMA],
       tool_choice: {
         type: 'tool' as const,
-        name: YOLO_CLASSIFIER_TOOL_NAME,
-      },
+        name: YOLO_CLASSIFIER_TOOL_NAME},
       maxRetries: getDefaultMaxRetries(),
       signal,
       querySource: 'auto_mode' as const,
-      parentSpan,
-    }
+      parentSpan}
     const result = await sideQuery(sideQueryOpts)
     void maybeDumpAutoMode(sideQueryOpts, result, start)
     setLastClassifierRequests([sideQueryOpts])
@@ -1180,8 +1136,7 @@ export async function classifyYoloAction(
       inputTokens: result.usage.input_tokens,
       outputTokens: result.usage.output_tokens,
       cacheReadInputTokens: result.usage.cache_read_input_tokens ?? 0,
-      cacheCreationInputTokens: result.usage.cache_creation_input_tokens ?? 0,
-    }
+      cacheCreationInputTokens: result.usage.cache_creation_input_tokens ?? 0}
     // Actual total input tokens the classifier API consumed (uncached + cache)
     const classifierInputTokens =
       usage.inputTokens +
@@ -1208,8 +1163,7 @@ export async function classifyYoloAction(
 
     if (!toolUseBlock) {
       logForDebugging('Auto mode classifier: No tool use block found', {
-        level: 'warn',
-      })
+        level: 'warn'})
       logAutoModeOutcome('parse_failure', model, { failureKind: 'no_tool_use' })
       return {
         shouldBlock: true,
@@ -1219,8 +1173,7 @@ export async function classifyYoloAction(
         durationMs,
         promptLengths,
         stage1RequestId,
-        stage1MsgId,
-      }
+        stage1MsgId}
     }
 
     // Parse response using shared utility
@@ -1230,11 +1183,9 @@ export async function classifyYoloAction(
     )
     if (!parsed) {
       logForDebugging('Auto mode classifier: Invalid response schema', {
-        level: 'warn',
-      })
+        level: 'warn'})
       logAutoModeOutcome('parse_failure', model, {
-        failureKind: 'invalid_schema',
-      })
+        failureKind: 'invalid_schema'})
       return {
         shouldBlock: true,
         reason: 'Invalid classifier response - blocking for safety',
@@ -1243,8 +1194,7 @@ export async function classifyYoloAction(
         durationMs,
         promptLengths,
         stage1RequestId,
-        stage1MsgId,
-      }
+        stage1MsgId}
     }
 
     const classifierResult = {
@@ -1256,8 +1206,7 @@ export async function classifyYoloAction(
       durationMs,
       promptLengths,
       stage1RequestId,
-      stage1MsgId,
-    }
+      stage1MsgId}
     // Context-delta telemetry: chart classifierInputTokens / mainLoopTokens
     // in Datadog. Expect ~0.6-0.8 steady state; alert on p95 > 1.0 (means
     // classifier is bigger than main loop — auto-compact won't save us).
@@ -1265,8 +1214,7 @@ export async function classifyYoloAction(
       durationMs,
       mainLoopTokens,
       classifierInputTokens,
-      classifierTokensEst,
-    })
+      classifierTokensEst})
     return classifierResult
   } catch (error) {
     if (signal.aborted) {
@@ -1276,13 +1224,11 @@ export async function classifyYoloAction(
         shouldBlock: true,
         reason: 'Classifier request aborted',
         model,
-        unavailable: true,
-      }
+        unavailable: true}
     }
     const tooLong = detectPromptTooLong(error)
     logForDebugging(`Auto mode classifier error: ${errorMessage(error)}`, {
-      level: 'warn',
-    })
+      level: 'warn'})
     const errorDumpPath =
       (await dumpErrorPrompts(systemPrompt, userPrompt, error, {
         mainLoopTokens,
@@ -1291,8 +1237,7 @@ export async function classifyYoloAction(
         transcriptEntries: transcriptEntries.length,
         messages: messages.length,
         action: actionCompact,
-        model,
-      })) ?? undefined
+        model})) ?? undefined
     // No API usage on error — use classifierTokensEst / mainLoopTokens
     // for the ratio. Overflow errors are the critical divergence signal.
     logAutoModeOutcome(tooLong ? 'transcript_too_long' : 'error', model, {
@@ -1300,9 +1245,7 @@ export async function classifyYoloAction(
       classifierTokensEst,
       ...(tooLong && {
         transcriptActualTokens: tooLong.actualTokens,
-        transcriptLimitTokens: tooLong.limitTokens,
-      }),
-    })
+        transcriptLimitTokens: tooLong.limitTokens})})
     return {
       shouldBlock: true,
       reason: tooLong
@@ -1311,8 +1254,7 @@ export async function classifyYoloAction(
       model,
       unavailable: true,
       transcriptTooLong: Boolean(tooLong),
-      errorDumpPath,
-    }
+      errorDumpPath}
   }
 }
 
@@ -1356,7 +1298,7 @@ function getClassifierModel(): string {
   }
   // Poor mode: downgrade classifier to Sonnet to reduce cost
   if (isPoorModeActive()) {
-    return getDefaultSonnetModel()
+    return getDefaultModel()
   }
   return getMainLoopModel()
 }
@@ -1459,14 +1401,11 @@ function logAutoModeOutcome(
       model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     ...(classifierType !== undefined && {
       classifierType:
-        classifierType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    }),
+        classifierType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
     ...(failureKind !== undefined && {
       failureKind:
-        failureKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    }),
-    ...rest,
-  })
+        failureKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
+    ...rest})
 }
 
 /**
@@ -1505,6 +1444,5 @@ export function formatActionForClassifier(
 ): TranscriptEntry {
   return {
     role: 'assistant',
-    content: [{ type: 'tool_use', name: toolName, input: toolInput }],
-  }
+    content: [{ type: 'tool_use', name: toolName, input: toolInput }]}
 }

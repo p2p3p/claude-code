@@ -10,15 +10,13 @@ import { countCharInString } from '../utils/stringUtils.js'
 import {
   isInclusiveMotion,
   isLinewiseMotion,
-  resolveMotion,
-} from './motions.js'
+  resolveMotion} from './motions.js'
 import { findTextObject } from './textObjects.js'
 import type {
   FindType,
   Operator,
   RecordedChange,
-  TextObjScope,
-} from './types.js'
+  TextObjScope} from './types.js'
 
 /**
  * Context for operator execution.

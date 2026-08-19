@@ -5,6 +5,7 @@ import {
 import { z } from 'zod/v4'
 import { ensureConnectedClient } from 'src/services/mcp/client.js'
 import { buildTool, type ToolDef } from 'src/Tool.js'
+import { t } from 'src/utils/i18n/index.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import {
   getBinaryBlobSavedMessage,
@@ -79,16 +80,19 @@ export const ReadMcpResourceTool = buildTool({
 
     if (!client) {
       throw new Error(
-        `Server "${serverName}" not found. Available servers: ${mcpClients.map(c => c.name).join(', ')}`,
+        t('toolUI.readMcpResource.serverNotFound', {
+          server: serverName,
+          available: mcpClients.map(c => c.name).join(', '),
+        }),
       )
     }
 
     if (client.type !== 'connected') {
-      throw new Error(`Server "${serverName}" is not connected`)
+      throw new Error(t('toolUI.readMcpResource.serverNotConnected', { server: serverName }))
     }
 
     if (!client.capabilities?.resources) {
-      throw new Error(`Server "${serverName}" does not support resources`)
+      throw new Error(t('toolUI.readMcpResource.noResources', { server: serverName }))
     }
 
     const connectedClient = await ensureConnectedClient(client)

@@ -29,6 +29,5 @@ export function createStore<T>(
     subscribe: (listener: Listener) => {
       listeners.add(listener)
       return () => listeners.delete(listener)
-    },
-  }
+    }}
 }

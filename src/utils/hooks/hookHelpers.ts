@@ -2,8 +2,7 @@ import { z } from 'zod/v4'
 import type { Tool } from '../../Tool.js'
 import {
   SYNTHETIC_OUTPUT_TOOL_NAME,
-  SyntheticOutputTool,
-} from '@claude-code-best/builtin-tools/tools/SyntheticOutputTool/SyntheticOutputTool.js'
+  SyntheticOutputTool} from '@claude-code-best/builtin-tools/tools/SyntheticOutputTool/SyntheticOutputTool.js'
 import { substituteArguments } from '../argumentSubstitution.js'
 import { lazySchema } from '../lazySchema.js'
 import type { SetAppState } from '../messageQueueManager.js'
@@ -19,8 +18,7 @@ export const hookResponseSchema = lazySchema(() =>
     reason: z
       .string()
       .describe('Reason, if the condition was not met')
-      .optional(),
-  }),
+      .optional()}),
 )
 
 /**
@@ -47,20 +45,15 @@ export function createStructuredOutputTool(): Tool {
       properties: {
         ok: {
           type: 'boolean',
-          description: 'Whether the condition was met',
-        },
+          description: 'Whether the condition was met'},
         reason: {
           type: 'string',
-          description: 'Reason, if the condition was not met',
-        },
-      },
+          description: 'Reason, if the condition was not met'}},
       required: ['ok'],
-      additionalProperties: false,
-    },
+      additionalProperties: false},
     async prompt(): Promise<string> {
       return `Use this tool to return your verification result. You MUST call this tool exactly once at the end of your response.`
-    },
-  }
+    }}
 }
 
 /**

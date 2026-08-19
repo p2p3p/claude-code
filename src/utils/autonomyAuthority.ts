@@ -4,8 +4,7 @@ import {
   isAbsolute,
   join,
   relative,
-  resolve,
-} from 'node:path'
+  resolve} from 'node:path'
 import { getProjectRoot } from '../bootstrap/state.js'
 import { getCwd } from './cwd.js'
 import { getFsImplementation } from './fsOperations.js'
@@ -105,8 +104,7 @@ async function readAuthorityFile(
 ): Promise<AutonomyAuthorityFile | null> {
   try {
     const content = (await getFsImplementation().readFile(filePath, {
-      encoding: 'utf-8',
-    })) as string
+      encoding: 'utf-8'})) as string
     const trimmed = content.trim()
     if (!trimmed) {
       return null
@@ -116,8 +114,7 @@ async function readAuthorityFile(
       relativePath:
         normalizePathForConfigKey(relative(rootDir, filePath)) ||
         basename(filePath),
-      content: trimmed,
-    }
+      content: trimmed}
   } catch {
     return null
   }
@@ -146,7 +143,7 @@ function maskCodeFencedLines(lines: string[]): string[] {
   let activeFenceLen = 0
   for (let i = 0; i < masked.length; i++) {
     const trimmed = masked[i]!.trim()
-    const fenceMatch = trimmed.match(/^([`~])\1{2,}/)
+    const fenceMatch = trimmed.match(/^([`~])\1{2}/)
     if (fenceMatch) {
       const fenceChar = fenceMatch[1]! as '`' | '~'
       const fenceLen = fenceMatch[0]!.length
@@ -244,8 +241,7 @@ export function parseHeartbeatAuthorityTasks(
         steps.push({
           name,
           prompt,
-          ...(waitFor ? { waitFor } : {}),
-        })
+          ...(waitFor ? { waitFor } : {})})
       }
     }
 
@@ -335,8 +331,7 @@ export function parseHeartbeatAuthorityTasks(
         name,
         interval,
         prompt,
-        steps,
-      })
+        steps})
     }
   }
 
@@ -457,8 +452,7 @@ export async function loadAutonomyAuthority(
     heartbeatContent: heartbeatFile?.content ?? null,
     heartbeatTasks: heartbeatFile
       ? parseHeartbeatAuthorityTasks(heartbeatFile.content)
-      : [],
-  }
+      : []}
 }
 
 export async function buildAutonomyTurnPrompt(params: {
@@ -482,8 +476,7 @@ export async function prepareAutonomyTurnPrompt(params: {
 }): Promise<PreparedAutonomyTurn> {
   const snapshot = await loadAutonomyAuthority({
     rootDir: params.rootDir,
-    currentDir: params.currentDir,
-  })
+    currentDir: params.currentDir})
   const nowMs = params.nowMs ?? Date.now()
   const dueHeartbeatTasks =
     params.trigger === 'proactive-tick'
@@ -522,8 +515,7 @@ export async function prepareAutonomyTurnPrompt(params: {
       trigger: params.trigger,
       prompt: params.basePrompt,
       dueHeartbeatTasks,
-      nowMs,
-    }
+      nowMs}
   }
 
   const prelude =
@@ -543,8 +535,7 @@ export async function prepareAutonomyTurnPrompt(params: {
       params.basePrompt,
     ].join('\n\n'),
     dueHeartbeatTasks,
-    nowMs,
-  }
+    nowMs}
 }
 
 export function commitPreparedAutonomyTurn(
@@ -563,8 +554,7 @@ export function commitPreparedAutonomyTurn(
     agentsContent: null,
     heartbeatFile: null,
     heartbeatContent: null,
-    heartbeatTasks: prepared.dueHeartbeatTasks,
-  }
+    heartbeatTasks: prepared.dueHeartbeatTasks}
   markHeartbeatTasksConsumed(
     snapshot,
     prepared.dueHeartbeatTasks,

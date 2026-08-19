@@ -24,8 +24,7 @@ import {
   type AnsiColor,
   DEFAULT_BG,
   type ParsedLine,
-  parseAnsi,
-} from './ansiToSvg.js'
+  parseAnsi} from './ansiToSvg.js'
 
 // Glyph cell size — rasterized at output resolution so the default scale=1
 // is crisp (no nearest-neighbor upscaling artifacts).
@@ -97,8 +96,7 @@ export function ansiToPng(
     paddingX = 48,
     paddingY = 48,
     borderRadius = 16,
-    background = DEFAULT_BG,
-  } = options
+    background = DEFAULT_BG} = options
 
   const lines = parseAnsi(ansiText)
   // Trim trailing blank lines (same behavior as ansiToSvg).

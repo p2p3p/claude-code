@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
 import { getInitialSettings } from './settings/settings.js'
+import { t } from './i18n/index.js'
 import type { Message } from '../types/message.js'
 
 // Usage 类型（从 API 响应中提取）
@@ -135,12 +136,12 @@ export function shouldShowCacheWarning(
 export function createCacheWarningMessage(info: CacheHitRateInfo): Message {
   const { hitRate, threshold, trend } = info
 
-  let content = `Cache hit rate ${hitRate.toFixed(0)}%, below ${threshold}% threshold`
+  let content = t('cacheWarning.main', hitRate.toFixed(0), threshold)
 
   if (trend !== null && Math.abs(trend) > 0.1) {
     const trendIcon = trend > 0 ? '^' : 'v'
     const trendPercent = Math.abs(trend).toFixed(0)
-    content += ` (${trendIcon}${trendPercent}%)`
+    content += t('cacheWarning.trend', trendIcon, trendPercent)
   }
 
   return {
@@ -150,8 +151,7 @@ export function createCacheWarningMessage(info: CacheHitRateInfo): Message {
     content,
     timestamp: new Date().toISOString(),
     uuid: randomUUID(),
-    isMeta: false,
-  } as Message
+    isMeta: false} as Message
 }
 
 /**

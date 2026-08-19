@@ -1,3 +1,4 @@
+import { t } from '../utils/i18n/index.js'
 import { logForDebugging } from 'src/utils/debug.js'
 
 const PROBE_TIMEOUT_MS = 15_000
@@ -44,7 +45,7 @@ export async function probeRemote(
         () =>
           reject(
             new SSHProbeError(
-              `SSH probe timed out after ${PROBE_TIMEOUT_MS / 1000}s`,
+              t('sshProbe.timedOut', String(PROBE_TIMEOUT_MS / 1000)),
             ),
           ),
         PROBE_TIMEOUT_MS,
@@ -57,7 +58,7 @@ export async function probeRemote(
 
   if (result !== 0) {
     const detail = stderr.trim() || `exit code ${result}`
-    throw new SSHProbeError(`SSH probe failed: ${detail}`)
+    throw new SSHProbeError(t('sshProbe.failed', detail))
   }
 
   const lines = stdout
@@ -68,9 +69,7 @@ export async function probeRemote(
 
   const unameIdx = lines.findIndex(l => /^(Linux|Darwin)\s/.test(l))
   if (unameIdx === -1) {
-    throw new SSHProbeError(
-      'Could not detect remote platform (uname output missing)',
-    )
+    throw new SSHProbeError(t('sshProbe.cannotDetectPlatform'))
   }
 
   const binaryPath = unameIdx >= 2 ? lines[unameIdx - 2] || null : null
@@ -94,6 +93,5 @@ export async function probeRemote(
     remotePlatform,
     remoteArch,
     defaultCwd,
-    binaryPath: hasBinary ? binaryPath : null,
-  }
+    binaryPath: hasBinary ? binaryPath : null}
 }

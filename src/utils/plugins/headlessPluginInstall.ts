@@ -18,8 +18,7 @@ import { logError } from '../log.js'
 import {
   clearMarketplacesCache,
   getDeclaredMarketplaces,
-  registerSeedMarketplaces,
-} from './marketplaceManager.js'
+  registerSeedMarketplaces} from './marketplaceManager.js'
 import { detectAndUninstallDelistedPlugins } from './pluginBlocklist.js'
 import { clearPluginCache } from './pluginLoader.js'
 import { reconcileMarketplaces } from './reconciler.js'
@@ -28,8 +27,7 @@ import {
   getZipCacheMarketplacesDir,
   getZipCachePluginsDir,
   isMarketplaceSourceSupportedByZipCache,
-  isPluginZipCacheEnabled,
-} from './zipCache.js'
+  isPluginZipCacheEnabled} from './zipCache.js'
 import { syncMarketplacesToZipCache } from './zipCacheAdapters.js'
 
 /**
@@ -76,8 +74,7 @@ export async function installPluginsForHeadless(): Promise<boolean> {
 
   const metrics = {
     marketplaces_installed: 0,
-    delisted_count: 0,
-  }
+    delisted_count: 0}
 
   // Initialize from seedChanged so the caller (print.ts) calls
   // refreshPluginState() → clearCommandsCache/clearAgentDefinitionsCache
@@ -109,14 +106,12 @@ export async function installPluginsForHeadless(): Promise<boolean> {
                   `installPluginsForHeadless: failed to install marketplace ${event.name}: ${event.error}`,
                 )
               }
-            },
-          }),
+            }}),
         r => ({
           installed_count: r.installed.length,
           updated_count: r.updated.length,
           failed_count: r.failed.length,
-          skipped_count: r.skipped.length,
-        }),
+          skipped_count: r.skipped.length}),
       )
 
       if (reconcileResult.skipped.length > 0) {

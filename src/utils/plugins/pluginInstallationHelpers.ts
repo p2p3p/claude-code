@@ -11,52 +11,45 @@ import { dirname, join, resolve, sep } from 'path'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import { getCwd } from '../cwd.js'
 import { toError } from '../errors.js'
 import { getFsImplementation } from '../fsOperations.js'
+import { t } from '../i18n/index.js'
 import { logError } from '../log.js'
 import {
   getSettingsForSource,
-  updateSettingsForSource,
-} from '../settings/settings.js'
+  updateSettingsForSource} from '../settings/settings.js'
 import { buildPluginTelemetryFields } from '../telemetry/pluginTelemetry.js'
 import { clearAllCaches } from './cacheUtils.js'
 import {
   formatDependencyCountSuffix,
   getEnabledPluginIdsForScope,
   type ResolutionResult,
-  resolveDependencyClosure,
-} from './dependencyResolver.js'
+  resolveDependencyClosure} from './dependencyResolver.js'
 import {
   addInstalledPlugin,
-  getGitCommitSha,
-} from './installedPluginsManager.js'
+  getGitCommitSha} from './installedPluginsManager.js'
 import { getManagedPluginNames } from './managedPlugins.js'
 import { getMarketplaceCacheOnly, getPluginById } from './marketplaceManager.js'
 import {
   isOfficialMarketplaceName,
   parsePluginIdentifier,
-  scopeToSettingSource,
-} from './pluginIdentifier.js'
+  scopeToSettingSource} from './pluginIdentifier.js'
 import {
   cachePlugin,
   getVersionedCachePath,
-  getVersionedZipCachePath,
-} from './pluginLoader.js'
+  getVersionedZipCachePath} from './pluginLoader.js'
 import { isPluginBlockedByPolicy } from './pluginPolicy.js'
 import { calculatePluginVersion } from './pluginVersioning.js'
 import {
   isLocalPluginSource,
   type PluginMarketplaceEntry,
   type PluginScope,
-  type PluginSource,
-} from './schemas.js'
+  type PluginSource} from './schemas.js'
 import {
   convertDirectoryToZipInPlace,
-  isPluginZipCacheEnabled,
-} from './zipCache.js'
+  isPluginZipCacheEnabled} from './zipCache.js'
 
 /**
  * Plugin installation metadata for installed_plugins.json
@@ -140,8 +133,7 @@ export async function cacheAndRegisterPlugin(
       : entry.source
 
   const cacheResult = await cachePlugin(source, {
-    manifest: entry as PluginMarketplaceEntry,
-  })
+    manifest: entry as PluginMarketplaceEntry})
 
   // For local plugins, use the original source path for Git SHA calculation
   // because the cached temp directory doesn't have .git (it's copied from a
@@ -216,8 +208,7 @@ export async function cacheAndRegisterPlugin(
       installedAt: now,
       lastUpdated: now,
       installPath: finalPath,
-      gitCommitSha,
-    },
+      gitCommitSha},
     scope,
     projectPath,
   )
@@ -248,8 +239,7 @@ export function registerPluginInstallation(
       version: info.version || 'unknown',
       installedAt: now,
       lastUpdated: now,
-      installPath: info.installPath,
-    },
+      installPath: info.installPath},
     scope,
     projectPath,
   )
@@ -271,8 +261,7 @@ export function parsePluginId(
 
   return {
     name: parts[0],
-    marketplace: parts[1],
-  }
+    marketplace: parts[1]}
 }
 
 /**
@@ -306,22 +295,22 @@ export function formatResolutionError(
 ): string {
   switch (r.reason) {
     case 'cycle':
-      return `Dependency cycle: ${r.chain.join(' → ')}`
+      return t('pluginResolutionErrors.cycle', r.chain.join(' → '))
     case 'cross-marketplace': {
       const depMkt = parsePluginIdentifier(r.dependency).marketplace
       const where = depMkt
-        ? `marketplace "${depMkt}"`
-        : 'a different marketplace'
+        ? t('pluginResolutionErrors.marketplaceRef', depMkt)
+        : t('pluginResolutionErrors.differentMarketplace')
       const hint = depMkt
-        ? ` Add "${depMkt}" to allowCrossMarketplaceDependenciesOn in the ROOT marketplace's marketplace.json (the marketplace of the plugin you're installing — only its allowlist applies; no transitive trust).`
+        ? t('pluginResolutionErrors.marketHint', depMkt)
         : ''
-      return `Dependency "${r.dependency}" (required by ${r.requiredBy}) is in ${where}, which is not in the allowlist — cross-marketplace dependencies are blocked by default. Install it manually first.${hint}`
+      return t('pluginResolutionErrors.crossMarketplace', r.dependency, r.requiredBy, where, hint)
     }
     case 'not-found': {
       const { marketplace: depMkt } = parsePluginIdentifier(r.missing)
       return depMkt
-        ? `Dependency "${r.missing}" (required by ${r.requiredBy}) not found. Is the "${depMkt}" marketplace added?`
-        : `Dependency "${r.missing}" (required by ${r.requiredBy}) not found in any configured marketplace`
+        ? t('pluginResolutionErrors.notFoundInMarketplace', r.missing, r.requiredBy, depMkt)
+        : t('pluginResolutionErrors.notFoundAnyMarketplace', r.missing, r.requiredBy)
     }
   }
 }
@@ -349,8 +338,7 @@ export async function installResolvedPlugin({
   pluginId,
   entry,
   scope,
-  marketplaceInstallLocation,
-}: {
+  marketplaceInstallLocation}: {
   pluginId: string
   entry: PluginMarketplaceEntry
   scope: 'user' | 'project' | 'local'
@@ -381,8 +369,7 @@ export async function installResolvedPlugin({
     return {
       ok: false,
       reason: 'local-source-no-location',
-      pluginName: entry.name,
-    }
+      pluginName: entry.name}
   }
   if (marketplaceInstallLocation) {
     depInfo.set(pluginId, { entry, marketplaceInstallLocation })
@@ -411,8 +398,7 @@ export async function installResolvedPlugin({
     return {
       ok: false,
       reason: 'resolution-failed',
-      resolution: resolution as ResolutionResult & { ok: false },
-    }
+      resolution: resolution as ResolutionResult & { ok: false }}
   }
 
   // ── Policy guard for transitive dependencies ──
@@ -425,8 +411,7 @@ export async function installResolvedPlugin({
         ok: false,
         reason: 'dependency-blocked-by-policy',
         pluginName: entry.name,
-        blockedDependency: id,
-      }
+        blockedDependency: id}
     }
   }
 
@@ -436,15 +421,12 @@ export async function installResolvedPlugin({
   const { error } = updateSettingsForSource(settingSource, {
     enabledPlugins: {
       ...getSettingsForSource(settingSource)?.enabledPlugins,
-      ...closureEnabled,
-    },
-  })
+      ...closureEnabled}})
   if (error) {
     return {
       ok: false,
       reason: 'settings-write-failed',
-      message: error.message,
-    }
+      message: error.message}
   }
 
   // ── Materialize: cache each closure member ──
@@ -512,8 +494,7 @@ export async function installPluginFromMarketplace({
   entry,
   marketplaceName,
   scope = 'user',
-  trigger = 'user',
-}: InstallPluginParams): Promise<InstallPluginResult> {
+  trigger = 'user'}: InstallPluginParams): Promise<InstallPluginResult> {
   try {
     // Look up the marketplace install location for local-source plugins.
     // Without this, plugins with relative-path sources fail from the
@@ -525,8 +506,7 @@ export async function installPluginFromMarketplace({
       pluginId,
       entry,
       scope,
-      marketplaceInstallLocation,
-    })
+      marketplaceInstallLocation})
 
     if (!result.ok) {
       const failedResult = result as Exclude<InstallCoreResult, { ok: true }>
@@ -534,28 +514,27 @@ export async function installPluginFromMarketplace({
         case 'local-source-no-location':
           return {
             success: false,
-            error: `Cannot install local plugin "${failedResult.pluginName}" without marketplace install location`,
-          }
+            error: t('pluginOperations.localSourceNoLocation', failedResult.pluginName)}
         case 'settings-write-failed':
           return {
             success: false,
-            error: `Failed to update settings: ${failedResult.message}`,
-          }
+            error: t('pluginOperations.settingsWriteFailed', failedResult.message)}
         case 'resolution-failed':
           return {
             success: false,
-            error: formatResolutionError(failedResult.resolution),
-          }
+            error: formatResolutionError(failedResult.resolution)}
         case 'blocked-by-policy':
           return {
             success: false,
-            error: `Plugin "${failedResult.pluginName}" is blocked by your organization's policy and cannot be installed`,
-          }
+            error: t('pluginOperations.blockedByPolicyInstall', failedResult.pluginName)}
         case 'dependency-blocked-by-policy':
           return {
             success: false,
-            error: `Cannot install "${failedResult.pluginName}": dependency "${failedResult.blockedDependency}" is blocked by your organization's policy`,
-          }
+            error: t(
+              'pluginOperations.dependencyBlockedInstall',
+              failedResult.pluginName,
+              failedResult.blockedDependency,
+            )}
       }
     }
 
@@ -584,17 +563,18 @@ export async function installPluginFromMarketplace({
       ),
       ...(entry.version && {
         version:
-          entry.version as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      }),
-    })
+          entry.version as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})})
 
     return {
       success: true,
-      message: `✓ Installed ${entry.name}${(result as Extract<InstallCoreResult, { ok: true }>).depNote}. Run /reload-plugins to activate.`,
-    }
+      message: t(
+        'pluginOperations.installedRunReload',
+        entry.name,
+        (result as Extract<InstallCoreResult, { ok: true }>).depNote,
+      )}
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err)
     logError(toError(err))
-    return { success: false, error: `Failed to install: ${errorMessage}` }
+    return { success: false, error: t('pluginOperations.failedToInstall', errorMessage) }
   }
 }

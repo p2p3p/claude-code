@@ -4,18 +4,16 @@ import { randomUUID } from 'crypto'
 import last from 'lodash-es/last.js'
 import {
   getSessionId,
-  isSessionPersistenceDisabled,
-} from 'src/bootstrap/state.js'
+  isSessionPersistenceDisabled} from 'src/bootstrap/state.js'
 import type {
   PermissionMode,
   SDKCompactBoundaryMessage,
   SDKMessage,
   SDKPermissionDenial,
   SDKStatus,
-  SDKUserMessageReplay,
-} from 'src/entrypoints/agentSdkTypes.js'
+  SDKUserMessageReplay} from 'src/entrypoints/agentSdkTypes.js'
 import type { BetaMessageDeltaUsage } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
-import { accumulateUsage, updateUsage } from 'src/services/api/claude.js'
+import { accumulateUsage, updateUsage } from 'src/services/api/anthropic/index.js'
 import type { NonNullableUsage } from '@ant/model-provider'
 import { EMPTY_USAGE } from '@ant/model-provider'
 import stripAnsi from 'strip-ansi'
@@ -23,13 +21,11 @@ import type { Command } from './commands.js'
 import { getSlashCommandToolSkills } from './commands.js'
 import {
   LOCAL_COMMAND_STDERR_TAG,
-  LOCAL_COMMAND_STDOUT_TAG,
-} from './constants/xml.js'
+  LOCAL_COMMAND_STDOUT_TAG} from './constants/xml.js'
 import {
   getModelUsage,
   getTotalAPIDuration,
-  getTotalCost,
-} from './cost-tracker.js'
+  getTotalCost} from './cost-tracker.js'
 import type { CanUseToolFn } from './hooks/useCanUseTool.js'
 import { loadMemoryPrompt } from './memdir/memdir.js'
 import { hasAutoMemPathOverride } from './memdir/paths.js'
@@ -52,37 +48,31 @@ import { getFastModeState } from './utils/fastMode.js'
 import {
   type FileHistoryState,
   fileHistoryEnabled,
-  fileHistoryMakeSnapshot,
-} from './utils/fileHistory.js'
+  fileHistoryMakeSnapshot} from './utils/fileHistory.js'
 import {
   cloneFileStateCache,
-  type FileStateCache,
-} from './utils/fileStateCache.js'
+  type FileStateCache} from './utils/fileStateCache.js'
 import { headlessProfilerCheckpoint } from './utils/headlessProfiler.js'
 import { registerStructuredOutputEnforcement } from './utils/hooks/hookHelpers.js'
 import { getInMemoryErrors } from './utils/log.js'
 import { countToolCalls, SYNTHETIC_MESSAGES } from './utils/messages.js'
 import {
   getMainLoopModel,
-  parseUserSpecifiedModel,
-} from './utils/model/model.js'
+  parseUserSpecifiedModel} from './utils/model/model.js'
 import { loadAllPluginsCacheOnly } from './utils/plugins/pluginLoader.js'
 import {
   type ProcessUserInputContext,
-  processUserInput,
-} from './utils/processUserInput/processUserInput.js'
+  processUserInput} from './utils/processUserInput/processUserInput.js'
 import { fetchSystemPromptParts } from './utils/queryContext.js'
 import { setCwd } from './utils/Shell.js'
 import {
   flushSessionStorage,
-  recordTranscript,
-} from './utils/sessionStorage.js'
+  recordTranscript} from './utils/sessionStorage.js'
 import { asSystemPrompt } from './utils/systemPromptType.js'
 import { resolveThemeSetting } from './utils/systemTheme.js'
 import {
   shouldEnableThinkingByDefault,
-  type ThinkingConfig,
-} from './utils/thinking.js'
+  type ThinkingConfig} from './utils/thinking.js'
 
 // Lazy: MessageSelector.tsx pulls React/ink; only needed for message filtering at query time
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -98,22 +88,18 @@ const messageSelector = ():
 
 import {
   localCommandOutputToSDKAssistantMessage,
-  toSDKCompactMetadata,
-} from './utils/messages/mappers.js'
+  toSDKCompactMetadata} from './utils/messages/mappers.js'
 import {
   buildSystemInitMessage,
-  sdkCompatToolName,
-} from './utils/messages/systemInit.js'
+  sdkCompatToolName} from './utils/messages/systemInit.js'
 import {
   getScratchpadDir,
-  isScratchpadEnabled,
-} from './utils/permissions/filesystem.js'
+  isScratchpadEnabled} from './utils/permissions/filesystem.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
 import {
   handleOrphanedPermission,
   isResultSuccessful,
-  normalizeMessage,
-} from './utils/queryHelpers.js'
+  normalizeMessage} from './utils/queryHelpers.js'
 
 // Dead code elimination: conditional import for coordinator mode
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -240,8 +226,7 @@ export class QueryEngine {
       includePartialMessages = false,
       agents = [],
       setSDKStatus,
-      orphanedPermission,
-    } = this.config
+      orphanedPermission} = this.config
 
     this.discoveredSkillNames.clear()
     this.permissionDenials = []
@@ -273,8 +258,7 @@ export class QueryEngine {
           type: 'permission_denial',
           tool_name: sdkCompatToolName(tool.name),
           tool_use_id: toolUseID,
-          tool_input: input,
-        })
+          tool_input: input})
       }
 
       return result
@@ -298,24 +282,21 @@ export class QueryEngine {
     const {
       defaultSystemPrompt,
       userContext: baseUserContext,
-      systemContext,
-    } = await fetchSystemPromptParts({
+      systemContext} = await fetchSystemPromptParts({
       tools,
       mainLoopModel: initialMainLoopModel,
       additionalWorkingDirectories: Array.from(
         initialAppState.toolPermissionContext.additionalWorkingDirectories.keys(),
       ),
       mcpClients,
-      customSystemPrompt: customPrompt,
-    })
+      customSystemPrompt: customPrompt})
     headlessProfilerCheckpoint('after_getSystemPrompt')
     const userContext = {
       ...baseUserContext,
       ...getCoordinatorUserContext(
         mcpClients,
         isScratchpadEnabled() ? getScratchpadDir() : undefined,
-      ),
-    }
+      )}
 
     // When an SDK caller provides a custom system prompt AND has set
     // CLAUDE_COWORK_MEMORY_PATH_OVERRIDE, inject the memory-mechanics prompt.
@@ -371,8 +352,7 @@ export class QueryEngine {
         appendSystemPrompt,
         agentDefinitions: { activeAgents: agents, allAgents: [] },
         theme: resolveThemeSetting(getGlobalConfig().theme),
-        maxBudgetUsd,
-      },
+        maxBudgetUsd},
       getAppState,
       setAppState,
       abortController: this.abortController,
@@ -401,8 +381,7 @@ export class QueryEngine {
           return { ...prev, attribution: updated }
         })
       },
-      setSDKStatus,
-    }
+      setSDKStatus}
 
     // Handle orphaned permission (only once per engine lifetime)
     if (orphanedPermission && !this.hasHandledOrphanedPermission) {
@@ -422,20 +401,17 @@ export class QueryEngine {
       shouldQuery,
       allowedTools,
       model: modelFromUserInput,
-      resultText,
-    } = await processUserInput({
+      resultText} = await processUserInput({
       input: prompt,
       mode: 'prompt',
       setToolJSX: () => {},
       context: {
         ...processUserInputContext,
-        messages: this.mutableMessages,
-      },
+        messages: this.mutableMessages},
       messages: this.mutableMessages,
       uuid: options?.uuid,
       isMeta: options?.isMeta,
-      querySource: 'sdk',
-    })
+      querySource: 'sdk'})
 
     // Push new messages, including user input and any attachments
     this.mutableMessages.push(...messagesFromUserInput)
@@ -491,10 +467,7 @@ export class QueryEngine {
         ...prev.toolPermissionContext,
         alwaysAllowRules: {
           ...prev.toolPermissionContext.alwaysAllowRules,
-          command: allowedTools,
-        },
-      },
-    }))
+          command: allowedTools}}}))
 
     const mainLoopModel = modelFromUserInput ?? initialMainLoopModel
 
@@ -520,8 +493,7 @@ export class QueryEngine {
         appendSystemPrompt,
         theme: resolveThemeSetting(getGlobalConfig().theme),
         agentDefinitions: { activeAgents: agents, allAgents: [] },
-        maxBudgetUsd,
-      },
+        maxBudgetUsd},
       getAppState,
       setAppState,
       abortController: this.abortController,
@@ -534,8 +506,7 @@ export class QueryEngine {
       setResponseLength: () => {},
       updateFileHistoryState: processUserInputContext.updateFileHistoryState,
       updateAttributionState: processUserInputContext.updateAttributionState,
-      setSDKStatus,
-    }
+      setSDKStatus}
 
     headlessProfilerCheckpoint('before_skills_plugins')
     // Cache-only: headless/SDK/CCR startup must not block on network for
@@ -558,8 +529,7 @@ export class QueryEngine {
       agents,
       skills,
       plugins: enabledPlugins,
-      fastMode: initialAppState.fastMode,
-    })
+      fastMode: initialAppState.fastMode})
 
     // Record when system message is yielded for headless latency tracking
     headlessProfilerCheckpoint('system_message_yielded')
@@ -580,15 +550,13 @@ export class QueryEngine {
             type: 'user',
             message: {
               ...msg.message,
-              content: stripAnsi(msg.message!.content),
-            },
+              content: stripAnsi(msg.message!.content)},
             session_id: getSessionId(),
             parent_tool_use_id: null,
             uuid: msg.uuid,
             timestamp: msg.timestamp,
             isReplay: !msg.isCompactSummary,
-            isSynthetic: msg.isMeta || msg.isVisibleInTranscriptOnly,
-          } as unknown as SDKUserMessageReplay
+            isSynthetic: msg.isMeta || msg.isVisibleInTranscriptOnly} as unknown as SDKUserMessageReplay
         }
 
         // Local command output — yield as a synthetic assistant message so
@@ -612,8 +580,7 @@ export class QueryEngine {
             subtype: 'compact_boundary' as const,
             session_id: getSessionId(),
             uuid: msg.uuid,
-            compact_metadata: toSDKCompactMetadata(compactMsg.compactMetadata),
-          } as unknown as SDKCompactBoundaryMessage
+            compact_metadata: toSDKCompactMetadata(compactMsg.compactMetadata)} as unknown as SDKCompactBoundaryMessage
         }
       }
 
@@ -645,8 +612,7 @@ export class QueryEngine {
           mainLoopModel,
           initialAppState.fastMode,
         ),
-        uuid: randomUUID(),
-      }
+        uuid: randomUUID()}
       return
     }
 
@@ -659,8 +625,7 @@ export class QueryEngine {
           (updater: (prev: FileHistoryState) => FileHistoryState) => {
             setAppState(prev => ({
               ...prev,
-              fileHistory: updater(prev.fileHistory),
-            }))
+              fileHistory: updater(prev.fileHistory)}))
           },
           message.uuid,
         )
@@ -695,8 +660,7 @@ export class QueryEngine {
       fallbackModel,
       querySource: 'sdk',
       maxTurns,
-      taskBudget,
-    })) {
+      taskBudget})) {
       // Record assistant, user, and compact boundary messages
       if (
         message.type === 'assistant' ||
@@ -758,8 +722,7 @@ export class QueryEngine {
                 parent_tool_use_id: null,
                 uuid: msgToAck.uuid,
                 timestamp: msgToAck.timestamp,
-                isReplay: true,
-              } as unknown as SDKUserMessageReplay
+                isReplay: true} as unknown as SDKUserMessageReplay
             }
           }
         }
@@ -853,8 +816,7 @@ export class QueryEngine {
               event,
               session_id: getSessionId(),
               parent_tool_use_id: null,
-              uuid: randomUUID(),
-            }
+              uuid: randomUUID()}
           }
 
           break
@@ -912,8 +874,7 @@ export class QueryEngine {
               uuid: randomUUID(),
               errors: [
                 `Reached maximum number of turns (${attachment.maxTurns})`,
-              ],
-            }
+              ]}
             return
           }
           // Yield queued_command attachments as SDK user message replays
@@ -922,14 +883,12 @@ export class QueryEngine {
               type: 'user',
               message: {
                 role: 'user' as const,
-                content: attachment.prompt,
-              },
+                content: attachment.prompt},
               session_id: getSessionId(),
               parent_tool_use_id: null,
               uuid: attachment.source_uuid || msg.uuid,
               timestamp: msg.timestamp,
-              isReplay: true,
-            } as unknown as SDKUserMessageReplay
+              isReplay: true} as unknown as SDKUserMessageReplay
           }
           break
         }
@@ -977,8 +936,7 @@ export class QueryEngine {
               uuid: msg.uuid,
               compact_metadata: toSDKCompactMetadata(
                 compactMsg.compactMetadata,
-              ),
-            }
+              )}
           }
           if (msg.subtype === 'api_error') {
             const apiErrorMsg = msg as Message & {
@@ -996,8 +954,7 @@ export class QueryEngine {
               error_status: apiErrorMsg.error.status ?? null,
               error: categorizeRetryableAPIError(apiErrorMsg.error),
               session_id: getSessionId(),
-              uuid: msg.uuid,
-            }
+              uuid: msg.uuid}
           }
           // Don't yield other system messages in headless mode
           break
@@ -1013,8 +970,7 @@ export class QueryEngine {
             summary: msg.summary,
             preceding_tool_use_ids: msg.precedingToolUseIds,
             session_id: getSessionId(),
-            uuid: msg.uuid,
-          }
+            uuid: msg.uuid}
           break
         }
       }
@@ -1049,8 +1005,7 @@ export class QueryEngine {
           uuid: randomUUID(),
           errors: [
             `Reached maximum budget ($${maxBudgetUsd}). Increase the limit with --max-budget-usd or start a new session.`,
-          ],
-        }
+          ]}
         return
       }
 
@@ -1094,8 +1049,7 @@ export class QueryEngine {
             uuid: randomUUID(),
             errors: [
               `Failed to provide valid structured output after ${maxRetries} attempts`,
-            ],
-          }
+            ]}
           return
         }
       }
@@ -1168,8 +1122,7 @@ export class QueryEngine {
             `[ede_diagnostic] result_type=${edeResultType} last_content_type=${edeLastContentType} stop_reason=${lastStopReason}`,
             ...all.slice(start).map(_ => _.error),
           ]
-        })(),
-      }
+        })()}
       return
     }
 
@@ -1210,8 +1163,7 @@ export class QueryEngine {
         mainLoopModel,
         initialAppState.fastMode,
       ),
-      uuid: randomUUID(),
-    }
+      uuid: randomUUID()}
   }
 
   interrupt(): void {
@@ -1283,8 +1235,7 @@ export async function* ask({
   handleElicitation,
   agents = [],
   setSDKStatus,
-  orphanedPermission,
-}: {
+  orphanedPermission}: {
   commands: Command[]
   prompt: string | Array<ContentBlockParam>
   promptUuid?: string
@@ -1349,16 +1300,13 @@ export async function* ask({
             if (!snipProjection!.isSnipBoundaryMessage(yielded))
               return undefined
             return snipModule!.snipCompactIfNeeded(store, { force: true })
-          },
-        }
-      : {}),
-  })
+          }}
+      : {})})
 
   try {
     yield* engine.submitMessage(prompt, {
       uuid: promptUuid,
-      isMeta,
-    })
+      isMeta})
   } finally {
     setReadFileCache(engine.getReadFileState())
   }

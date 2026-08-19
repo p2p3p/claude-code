@@ -18,8 +18,7 @@ export const getBedrockInferenceProfiles = memoize(async function (): Promise<
     do {
       const command = new ListInferenceProfilesCommand({
         ...(nextToken && { nextToken }),
-        typeEquals: 'SYSTEM_DEFINED',
-      })
+        typeEquals: 'SYSTEM_DEFINED'})
       const response = await client.send(command)
 
       if (response.inferenceProfileSummaries) {
@@ -60,8 +59,7 @@ async function createBedrockClient() {
   const clientConfig: ConstructorParameters<typeof BedrockClient>[0] = {
     region,
     ...(process.env.ANTHROPIC_BEDROCK_BASE_URL && {
-      endpoint: process.env.ANTHROPIC_BEDROCK_BASE_URL,
-    }),
+      endpoint: process.env.ANTHROPIC_BEDROCK_BASE_URL}),
     ...(await getAWSClientProxyConfig()),
     ...(skipAuth && {
       requestHandler: new (
@@ -71,12 +69,9 @@ async function createBedrockClient() {
         {
           schemeId: 'smithy.api#noAuth',
           identityProvider: () => async () => ({}),
-          signer: new (await import('@smithy/core')).NoAuthSigner(),
-        },
+          signer: new (await import('@smithy/core')).NoAuthSigner()},
       ],
-      httpAuthSchemeProvider: () => [{ schemeId: 'smithy.api#noAuth' }],
-    }),
-  }
+      httpAuthSchemeProvider: () => [{ schemeId: 'smithy.api#noAuth' }]})}
 
   if (!skipAuth && !process.env.AWS_BEARER_TOKEN_BEDROCK) {
     // Only refresh credentials if not using API key authentication
@@ -85,8 +80,7 @@ async function createBedrockClient() {
       clientConfig.credentials = {
         accessKeyId: cachedCredentials.accessKeyId,
         secretAccessKey: cachedCredentials.secretAccessKey,
-        sessionToken: cachedCredentials.sessionToken,
-      }
+        sessionToken: cachedCredentials.sessionToken}
     }
   }
 
@@ -103,8 +97,7 @@ export async function createBedrockRuntimeClient() {
   const clientConfig: ConstructorParameters<typeof BedrockRuntimeClient>[0] = {
     region,
     ...(process.env.ANTHROPIC_BEDROCK_BASE_URL && {
-      endpoint: process.env.ANTHROPIC_BEDROCK_BASE_URL,
-    }),
+      endpoint: process.env.ANTHROPIC_BEDROCK_BASE_URL}),
     ...(await getAWSClientProxyConfig()),
     ...(skipAuth && {
       // BedrockRuntimeClient defaults to HTTP/2 without fallback
@@ -116,12 +109,9 @@ export async function createBedrockRuntimeClient() {
         {
           schemeId: 'smithy.api#noAuth',
           identityProvider: () => async () => ({}),
-          signer: new (await import('@smithy/core')).NoAuthSigner(),
-        },
+          signer: new (await import('@smithy/core')).NoAuthSigner()},
       ],
-      httpAuthSchemeProvider: () => [{ schemeId: 'smithy.api#noAuth' }],
-    }),
-  }
+      httpAuthSchemeProvider: () => [{ schemeId: 'smithy.api#noAuth' }]})}
 
   if (!skipAuth && !process.env.AWS_BEARER_TOKEN_BEDROCK) {
     // Only refresh credentials if not using API key authentication
@@ -130,8 +120,7 @@ export async function createBedrockRuntimeClient() {
       clientConfig.credentials = {
         accessKeyId: cachedCredentials.accessKeyId,
         secretAccessKey: cachedCredentials.secretAccessKey,
-        sessionToken: cachedCredentials.sessionToken,
-      }
+        sessionToken: cachedCredentials.sessionToken}
     }
   }
 
@@ -147,8 +136,7 @@ export const getInferenceProfileBackingModel = memoize(async function (
       import('@aws-sdk/client-bedrock'),
     ])
     const command = new GetInferenceProfileCommand({
-      inferenceProfileIdentifier: profileId,
-    })
+      inferenceProfileIdentifier: profileId})
     const response = await client.send(command)
 
     if (!response.models || response.models.length === 0) {

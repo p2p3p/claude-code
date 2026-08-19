@@ -3,8 +3,7 @@ import { logError } from 'src/utils/log.js'
 import { z } from 'zod/v4'
 import type {
   ConnectedMCPServer,
-  MCPServerConnection,
-} from '../services/mcp/types.js'
+  MCPServerConnection} from '../services/mcp/types.js'
 import { getConnectedIdeClient } from '../utils/ide.js'
 import type { AnyObjectSchema } from '@modelcontextprotocol/sdk/server/zod-compat.js'
 import { lazySchema } from '../utils/lazySchema.js'
@@ -38,19 +37,14 @@ const SelectionChangedSchema: () => AnyObjectSchema = lazySchema(() =>
         .object({
           start: z.object({
             line: z.number(),
-            character: z.number(),
-          }),
+            character: z.number()}),
           end: z.object({
             line: z.number(),
-            character: z.number(),
-          }),
-        })
+            character: z.number()})})
         .nullable()
         .optional(),
       text: z.string().optional(),
-      filePath: z.string().optional(),
-    }),
-  }),
+      filePath: z.string().optional()})}),
 )
 
 /**
@@ -79,8 +73,7 @@ export function useIdeSelection(
         lineCount: 0,
         lineStart: undefined,
         text: undefined,
-        filePath: undefined,
-      })
+        filePath: undefined})
     }
 
     // Skip if we've already registered handlers for the current IDE or if there's no IDE client
@@ -102,8 +95,7 @@ export function useIdeSelection(
           lineCount,
           lineStart: start.line,
           text: data.text,
-          filePath: data.filePath,
-        }
+          filePath: data.filePath}
 
         onSelect(selection)
       }
@@ -134,8 +126,7 @@ export function useIdeSelection(
             selectionChangeHandler({
               selection: null,
               text: selectionData.text,
-              filePath: selectionData.filePath,
-            })
+              filePath: selectionData.filePath})
           }
         } catch (error) {
           logError(error as Error)

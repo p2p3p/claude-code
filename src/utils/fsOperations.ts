@@ -8,8 +8,7 @@ import {
   rmdir as rmdirPromise,
   rm as rmPromise,
   stat as statPromise,
-  unlink as unlinkPromise,
-} from 'fs/promises'
+  unlink as unlinkPromise} from 'fs/promises'
 import { homedir } from 'os'
 import * as nodePath from 'path'
 import { getErrnoCode } from './errors.js'
@@ -167,8 +166,7 @@ export function safeResolvePath(
       // realpathSync returned: resolvedPath is canonical (all symlinks in
       // all path components resolved). Callers can skip further symlink
       // resolution on this path.
-      isCanonical: true,
-    }
+      isCanonical: true}
   } catch (_error) {
     // If lstat/realpath fails for any reason (ENOENT, broken symlink,
     // EACCES, ELOOP, etc.), return the original path to allow operations
@@ -528,8 +526,7 @@ export const NodeFsOperations: FsOperations = {
   mkdirSync(dirPath, options) {
     using _ = slowLogging`fs.mkdirSync(${dirPath})`
     const mkdirOptions: { recursive: boolean; mode?: number } = {
-      recursive: true,
-    }
+      recursive: true}
     if (options?.mode !== undefined) {
       mkdirOptions.mode = options.mode
     }
@@ -599,8 +596,7 @@ export const NodeFsOperations: FsOperations = {
     } finally {
       await handle.close()
     }
-  },
-}
+  }}
 
 // The currently active filesystem implementation
 let activeFs: FsOperations = NodeFsOperations
@@ -671,8 +667,7 @@ export async function readFileRange(
   return {
     content: buffer.toString('utf8', 0, totalRead),
     bytesRead: totalRead,
-    bytesTotal: size,
-  }
+    bytesTotal: size}
 }
 
 /**
@@ -709,8 +704,7 @@ export async function tailFile(
   return {
     content: buffer.toString('utf8', 0, totalRead),
     bytesRead: totalRead,
-    bytesTotal: size,
-  }
+    bytesTotal: size}
 }
 
 /**

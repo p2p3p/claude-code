@@ -128,14 +128,11 @@ export async function refreshActivePlugins(
       disabled,
       commands: pluginCommands,
       errors: mergePluginErrors(prev.plugins.errors, errors),
-      needsRefresh: false,
-    },
+      needsRefresh: false},
     agentDefinitions,
     mcp: {
       ...prev.mcp,
-      pluginReconnectKey: prev.mcp.pluginReconnectKey + 1,
-    },
-  }))
+      pluginReconnectKey: prev.mcp.pluginReconnectKey + 1}}))
 
   // Re-initialize LSP manager so newly-loaded plugin LSP servers are picked
   // up. No-op if LSP was never initialized (headless subcommand path).
@@ -194,8 +191,7 @@ export async function refreshActivePlugins(
     lsp_count,
     error_count: errors.length + (hook_load_failed ? 1 : 0),
     agentDefinitions,
-    pluginCommands,
-  }
+    pluginCommands}
 }
 
 /**

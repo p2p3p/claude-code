@@ -1,6 +1,7 @@
 import figures from 'figures';
 import { homedir } from 'os';
 import { Box, Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import type { Step } from '../../projectOnboardingState.js';
 import { formatCreditAmount, getCachedReferrerReward } from '../../services/api/referral.js';
 import type { LogOption } from '../../types/logs.js';
@@ -15,16 +16,14 @@ export function createRecentActivityFeed(activities: LogOption[]): FeedConfig {
 
     return {
       text: description || '',
-      timestamp: time,
-    };
+      timestamp: time};
   });
 
   return {
-    title: 'Recent activity',
+    title: t('feed.recent'),
     lines,
-    footer: lines.length > 0 ? '/resume for more' : undefined,
-    emptyMessage: 'No recent activity',
-  };
+    footer: lines.length > 0 ? t('feed.resumeMore') : undefined,
+    emptyMessage: t('feed.noRecent')};
 }
 
 export function createWhatsNewFeed(releaseNotes: string[]): FeedConfig {
@@ -34,26 +33,23 @@ export function createWhatsNewFeed(releaseNotes: string[]): FeedConfig {
       if (match) {
         return {
           timestamp: match[1],
-          text: match[2] || '',
-        };
+          text: match[2] || ''};
       }
     }
     return {
-      text: note,
-    };
+      text: note};
   });
 
   const emptyMessage =
     process.env.USER_TYPE === 'ant'
-      ? 'Unable to fetch latest claude-cli-internal commits'
-      : 'Check the Claude Code changelog for updates';
+      ? t('feed.unableToFetch')
+      : t('feed.checkChangelog');
 
   return {
-    title: process.env.USER_TYPE === 'ant' ? "What's new [ANT-ONLY: Latest CC commits]" : "What's new",
+    title: process.env.USER_TYPE === 'ant' ? t('feed.antOnlyCommits') : t('feed.whatsNew'),
     lines,
-    footer: lines.length > 0 ? '/release-notes for more' : undefined,
-    emptyMessage,
-  };
+    footer: lines.length > 0 ? t('feed.releaseNotes') : undefined,
+    emptyMessage};
 }
 
 export function createProjectOnboardingFeed(steps: Step[]): FeedConfig {
@@ -64,34 +60,31 @@ export function createProjectOnboardingFeed(steps: Step[]): FeedConfig {
   const lines: FeedLine[] = enabledSteps.map(({ text, isComplete }) => {
     const checkmark = isComplete ? `${figures.tick} ` : '';
     return {
-      text: `${checkmark}${text}`,
-    };
+      text: `${checkmark}${text}`};
   });
 
   const warningText =
     getCwd() === homedir()
-      ? 'Note: You have launched claude in your home directory. For the best experience, launch it in a project directory instead.'
+      ? t('feed.homeDirWarning')
       : undefined;
 
   if (warningText) {
     lines.push({
-      text: warningText,
-    });
+      text: warningText});
   }
 
   return {
-    title: 'Tips for getting started',
-    lines,
-  };
+    title: t('feed.tips'),
+    lines};
 }
 
 export function createGuestPassesFeed(): FeedConfig {
   const reward = getCachedReferrerReward();
   const subtitle = reward
-    ? `Share Claude Code and earn ${formatCreditAmount(reward)} of extra usage`
-    : 'Share Claude Code with friends';
+    ? t('feed.shareEarn', formatCreditAmount(reward))
+    : t('feed.shareFriends');
   return {
-    title: '3 guest passes',
+    title: t('feed.guestPasses'),
     lines: [],
     customContent: {
       content: (
@@ -102,8 +95,6 @@ export function createGuestPassesFeed(): FeedConfig {
           <Text dimColor>{subtitle}</Text>
         </>
       ),
-      width: 48,
-    },
-    footer: '/passes',
-  };
+      width: 48},
+    footer: t('feed.passesFooter')};
 }

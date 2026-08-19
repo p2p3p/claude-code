@@ -6,8 +6,7 @@ import { stringWidth, useTheme } from '@anthropic/ink';
 import { useKeybindings } from '../../../keybindings/useKeybinding.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../../services/analytics/index.js';
+  logEvent} from '../../../services/analytics/index.js';
 import { useAppState } from '../../../state/AppState.js';
 import type { Question } from '@claude-code-best/builtin-tools/tools/AskUserQuestionTool/AskUserQuestionTool.js';
 import { AskUserQuestionTool } from '@claude-code-best/builtin-tools/tools/AskUserQuestionTool/AskUserQuestionTool.js';
@@ -18,6 +17,7 @@ import { maybeResizeAndDownsampleImageBlock } from '../../../utils/imageResizer.
 import { cacheImagePath, storeImage } from '../../../utils/imageStore.js';
 import { logError } from '../../../utils/log.js';
 import { applyMarkdown } from '../../../utils/markdown.js';
+import { t } from '../../../utils/i18n/index.js';
 import { isPlanModeInterviewPhaseEnabled } from '../../../utils/planModeV2.js';
 import { getPlanFilePath } from '../../../utils/plans.js';
 import type { PermissionRequestProps } from '../PermissionRequest.js';
@@ -51,8 +51,7 @@ function AskUserQuestionPermissionRequestBody({
   toolUseConfirm,
   onDone,
   onReject,
-  highlight,
-}: PermissionRequestProps & {
+  highlight}: PermissionRequestProps & {
   highlight: CliHighlight | null;
 }): React.ReactNode {
   // Memoize parse result: safeParse returns a new object (and new `questions`
@@ -128,8 +127,7 @@ function AskUserQuestionPermissionRequestBody({
 
     return {
       globalContentHeight: Math.min(Math.max(maxHeight, MIN_CONTENT_HEIGHT), maxAllowedHeight),
-      globalContentWidth: Math.max(maxWidth, MIN_CONTENT_WIDTH),
-    };
+      globalContentWidth: Math.max(maxWidth, MIN_CONTENT_WIDTH)};
   }, [questions, terminalRows, theme, highlight]);
   const metadataSource = result.success ? result.data.metadata?.source : undefined;
 
@@ -152,15 +150,13 @@ function AskUserQuestionPermissionRequestBody({
       type: 'image',
       content: base64Image,
       mediaType: mediaType || 'image/png',
-      filename: filename || 'Pasted image',
-      dimensions,
-    };
+      filename: filename || t('askUserQuestion.pastedImage'),
+      dimensions};
     cacheImagePath(newContent);
     void storeImage(newContent);
     setPastedContentsByQuestion(prev => ({
       ...prev,
-      [questionText]: { ...(prev[questionText] ?? {}), [pasteId]: newContent },
-    }));
+      [questionText]: { ...(prev[questionText] ?? {}), [pasteId]: newContent }}));
   }
 
   const onRemoveImage = useCallback((questionText: string, id: number) => {
@@ -189,8 +185,7 @@ function AskUserQuestionPermissionRequestBody({
     prevQuestion,
     updateQuestionState,
     setAnswer,
-    setTextInputMode,
-  } = state;
+    setTextInputMode} = state;
 
   const currentQuestion = currentQuestionIndex < (questions?.length || 0) ? questions?.[currentQuestionIndex] : null;
 
@@ -207,8 +202,7 @@ function AskUserQuestionPermissionRequestBody({
         source: metadataSource as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         questionCount: questions.length,
         isInPlanMode,
-        interviewPhaseEnabled: isInPlanMode && isPlanModeInterviewPhaseEnabled(),
-      });
+        interviewPhaseEnabled: isInPlanMode && isPlanModeInterviewPhaseEnabled()});
     }
     onDone();
     onReject();
@@ -238,8 +232,7 @@ function AskUserQuestionPermissionRequestBody({
         source: metadataSource as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         questionCount: questions.length,
         isInPlanMode,
-        interviewPhaseEnabled: isInPlanMode && isPlanModeInterviewPhaseEnabled(),
-      });
+        interviewPhaseEnabled: isInPlanMode && isPlanModeInterviewPhaseEnabled()});
     }
 
     const imageBlocks = await convertImagesToBlocks(allImageAttachments);
@@ -269,8 +262,7 @@ Questions asked and answers provided:\n${questionsWithAnswers}`;
         source: metadataSource as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         questionCount: questions.length,
         isInPlanMode,
-        interviewPhaseEnabled: isInPlanMode && isPlanModeInterviewPhaseEnabled(),
-      });
+        interviewPhaseEnabled: isInPlanMode && isPlanModeInterviewPhaseEnabled()});
     }
 
     const imageBlocks = await convertImagesToBlocks(allImageAttachments);
@@ -288,8 +280,7 @@ Questions asked and answers provided:\n${questionsWithAnswers}`;
           questionCount: questions.length,
           answerCount: Object.keys(answersToSubmit).length,
           isInPlanMode,
-          interviewPhaseEnabled: isInPlanMode && isPlanModeInterviewPhaseEnabled(),
-        });
+          interviewPhaseEnabled: isInPlanMode && isPlanModeInterviewPhaseEnabled()});
       }
       // Build annotations from questionStates (e.g., selected preview, user notes)
       const annotations: Record<string, { preview?: string; notes?: string }> = {};
@@ -302,16 +293,14 @@ Questions asked and answers provided:\n${questionsWithAnswers}`;
         if (preview || notes?.trim()) {
           annotations[q.question] = {
             ...(preview && { preview }),
-            ...(notes?.trim() && { notes: notes.trim() }),
-          };
+            ...(notes?.trim() && { notes: notes.trim() })};
         }
       }
 
       const updatedInput = {
         ...toolUseConfirm.input,
         answers: answersToSubmit,
-        ...(Object.keys(annotations).length > 0 && { annotations }),
-      };
+        ...(Object.keys(annotations).length > 0 && { annotations })};
 
       const contentBlocks = await convertImagesToBlocks(allImageAttachments);
 
@@ -354,8 +343,7 @@ Questions asked and answers provided:\n${questionsWithAnswers}`;
       if (!isMultiSelect && isSingleQuestion && shouldAdvance) {
         const updatedAnswers = {
           ...answers,
-          [questionText]: answer,
-        };
+          [questionText]: answer};
         void submitAnswers(updatedAnswers).catch(logError);
         return;
       }
@@ -400,8 +388,7 @@ Questions asked and answers provided:\n${questionsWithAnswers}`;
   useKeybindings(
     {
       'tabs:previous': handleTabPrev,
-      'tabs:next': handleTabNext,
-    },
+      'tabs:next': handleTabNext},
     { context: 'Tabs', isActive: !(isInTextInput && !isInSubmitView) },
   );
 
@@ -466,9 +453,7 @@ async function convertImagesToBlocks(images: PastedContent[]): Promise<ImageBloc
         source: {
           type: 'base64',
           media_type: (img.mediaType || 'image/png') as Base64ImageSource['media_type'],
-          data: img.content,
-        },
-      };
+          data: img.content}};
       const resized = await maybeResizeAndDownsampleImageBlock(block);
       return resized.block;
     }),

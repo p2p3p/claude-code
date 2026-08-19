@@ -7,6 +7,7 @@
  */
 import { feature } from 'bun:bundle'
 import { useCallback } from 'react'
+import { t } from '../utils/i18n/index.js'
 
 type StoreApi = { getState: () => any }
 type SetAppState = (updater: (prev: any) => any) => void
@@ -104,42 +105,36 @@ export function usePipeRouter({ store, setAppState, addNotification }: Deps): {
                   type: 'prompt',
                   content: promptText,
                   from: pipeIpc.serverName ?? 'master',
-                  timestamp: promptTimestamp,
-                },
-              ],
-            }
+                  timestamp: promptTimestamp},
+              ]}
           }
           return {
             ...prev,
-            pipeIpc: { ...pipeIpc, slaves: nextSlaves },
-          }
+            pipeIpc: { ...pipeIpc, slaves: nextSlaves }}
         })
 
         addNotification({
           key: 'pipe-route-success',
-          text: `Routed to ${sentTargetLabels.join(', ')}; main can continue other tasks`,
+          text: t('notif.pipeRouter.routed', { targets: sentTargetLabels.join(', ') }),
           color: 'success',
           priority: 'immediate',
-          timeoutMs: 3000,
-        })
+          timeoutMs: 3000})
       } else {
         addNotification({
           key: 'pipe-route-fallback',
-          text: 'Selected pipes are unavailable; processing locally.',
+          text: t('notif.pipeRouter.unavailable'),
           color: 'warning',
           priority: 'immediate',
-          timeoutMs: 4000,
-        })
+          timeoutMs: 4000})
       }
 
       if (failedTargetNames.length > 0) {
         addNotification({
           key: 'pipe-route-partial-failure',
-          text: `Failed to send to: ${failedTargetNames.join(', ')}`,
+          text: t('notif.pipeRouter.failedToSend', { targets: failedTargetNames.join(', ') }),
           color: 'warning',
           priority: 'immediate',
-          timeoutMs: 4000,
-        })
+          timeoutMs: 4000})
       }
 
       return sentTargetNames.length > 0

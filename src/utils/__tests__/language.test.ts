@@ -71,8 +71,8 @@ describe('getLanguageDisplayName', () => {
     expect(getLanguageDisplayName('en')).toBe('English')
   })
 
-  test('returns 中文 for zh', () => {
-    expect(getLanguageDisplayName('zh')).toBe('中文')
+  test('returns 简体中文 for zh', () => {
+    expect(getLanguageDisplayName('zh')).toBe('简体中文')
   })
 
   test('returns the input string for unknown language codes', () => {

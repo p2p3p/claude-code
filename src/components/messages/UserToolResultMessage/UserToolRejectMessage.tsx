@@ -24,8 +24,7 @@ export function UserToolRejectMessage({
   tool,
   tools,
   verbose,
-  isTranscriptMode,
-}: Props): React.ReactNode {
+  isTranscriptMode}: Props): React.ReactNode {
   const { columns } = useTerminalSize();
   const [theme] = useTheme();
 
@@ -47,7 +46,6 @@ export function UserToolRejectMessage({
       progressMessagesForMessage: filterToolProgressMessages(progressMessagesForMessage),
       style,
       theme,
-      isTranscriptMode,
-    }) ?? <FallbackToolUseRejectedMessage />
+      isTranscriptMode}) ?? <FallbackToolUseRejectedMessage />
   );
 }

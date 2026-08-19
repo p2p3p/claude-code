@@ -42,8 +42,7 @@ interface MCPConnectionManagerProps {
 export function MCPConnectionManager({
   children,
   dynamicMcpConfig,
-  isStrictMcpConfig,
-}: MCPConnectionManagerProps): React.ReactNode {
+  isStrictMcpConfig}: MCPConnectionManagerProps): React.ReactNode {
   const { reconnectMcpServer, toggleMcpServer } = useManageMCPConnections(dynamicMcpConfig, isStrictMcpConfig);
   const value = useMemo(() => ({ reconnectMcpServer, toggleMcpServer }), [reconnectMcpServer, toggleMcpServer]);
 

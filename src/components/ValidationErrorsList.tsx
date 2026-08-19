@@ -110,8 +110,7 @@ export function ValidationErrorsList({ errors }: { errors: ValidationError[] }):
             if (!suggestionPairs.has(key)) {
               suggestionPairs.set(key, {
                 suggestion: error.suggestion,
-                docLink: error.docLink,
-              });
+                docLink: error.docLink});
             }
           }
         });
@@ -123,9 +122,7 @@ export function ValidationErrorsList({ errors }: { errors: ValidationError[] }):
           treeCharColors: {
             treeChar: 'inactive',
             key: 'text',
-            value: 'inactive',
-          },
-        });
+            value: 'inactive'}});
 
         return (
           <Box key={file} flexDirection="column">

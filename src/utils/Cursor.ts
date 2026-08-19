@@ -2,8 +2,7 @@ import { stringWidth, wrapAnsi } from '@anthropic/ink'
 import {
   firstGrapheme,
   getGraphemeSegmenter,
-  getWordSegmenter,
-} from './intl.js'
+  getWordSegmenter} from './intl.js'
 
 /**
  * Kill ring for storing killed (cut) text that can be yanked (pasted) with Ctrl+Y.
@@ -340,8 +339,7 @@ export class Cursor {
     if (column > prevLineDisplayWidth) {
       const newOffset = this.getOffset({
         line: line - 1,
-        column: prevLineDisplayWidth,
-      })
+        column: prevLineDisplayWidth})
       return new Cursor(this.measuredText, newOffset, 0)
     }
 
@@ -369,16 +367,14 @@ export class Cursor {
     if (column > nextLineDisplayWidth) {
       const newOffset = this.getOffset({
         line: line + 1,
-        column: nextLineDisplayWidth,
-      })
+        column: nextLineDisplayWidth})
       return new Cursor(this.measuredText, newOffset, 0)
     }
 
     // Otherwise, move to the same column on the next line
     const newOffset = this.getOffset({
       line: line + 1,
-      column,
-    })
+      column})
     return new Cursor(this.measuredText, newOffset, 0)
   }
 
@@ -392,8 +388,7 @@ export class Cursor {
       this.measuredText,
       this.getOffset({
         line,
-        column: 0,
-      }),
+        column: 0}),
       0,
     )
   }
@@ -407,8 +402,7 @@ export class Cursor {
         this.measuredText,
         this.getOffset({
           line: line - 1,
-          column: 0,
-        }),
+          column: 0}),
         0,
       )
     }
@@ -449,8 +443,7 @@ export class Cursor {
   private getLogicalLineBounds(): { start: number; end: number } {
     return {
       start: this.findLogicalLineStart(),
-      end: this.findLogicalLineEnd(),
-    }
+      end: this.findLogicalLineEnd()}
   }
 
   // Helper to create cursor with preserved column, clamped to line length
@@ -1156,8 +1149,7 @@ export class MeasuredText {
         this.wordBoundariesCache.push({
           start: segment.index,
           end: segment.index + segment.segment.length,
-          isWordLike: segment.isWordLike ?? false,
-        })
+          isWordLike: segment.isWordLike ?? false})
       }
     }
     return this.wordBoundariesCache
@@ -1268,8 +1260,7 @@ export class MeasuredText {
   private measureWrappedText(): WrappedLine[] {
     const wrappedText = wrapAnsi(this.text, this.columns, {
       hard: true,
-      trim: false,
-    })
+      trim: false})
 
     const wrappedLines: WrappedLine[] = []
     let searchOffset = 0
@@ -1441,8 +1432,7 @@ export class MeasuredText {
 
         return {
           line,
-          column: Math.max(0, displayColumn),
-        }
+          column: Math.max(0, displayColumn)}
       }
     }
 
@@ -1451,8 +1441,7 @@ export class MeasuredText {
     const lastLine = this.wrappedLines[line]!
     return {
       line,
-      column: stringWidth(lastLine.text),
-    }
+      column: stringWidth(lastLine.text)}
   }
 
   public get lineCount(): number {

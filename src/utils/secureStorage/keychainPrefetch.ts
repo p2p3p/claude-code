@@ -27,8 +27,7 @@ import {
   CREDENTIALS_SERVICE_SUFFIX,
   getMacOsKeychainStorageServiceName,
   getUsername,
-  primeKeychainCacheFromPrefetch,
-} from './macOsKeychainHelpers.js'
+  primeKeychainCacheFromPrefetch} from './macOsKeychainHelpers.js'
 
 const KEYCHAIN_PREFETCH_TIMEOUT_MS = 10_000
 
@@ -54,8 +53,7 @@ function spawnSecurity(serviceName: string): Promise<SpawnResult> {
         // a key we couldn't fetch — don't prime, let sync spawn retry.
         resolve({
           stdout: err ? null : stdout?.trim() || null,
-          timedOut: Boolean(err && 'killed' in err && err.killed),
-        })
+          timedOut: Boolean(err && 'killed' in err && err.killed)})
       },
     )
   })

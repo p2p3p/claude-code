@@ -31,8 +31,7 @@ import {
   errorMessage,
   getErrnoCode,
   isENOENT,
-  toError,
-} from '../errors.js'
+  toError} from '../errors.js'
 import { execFileNoThrow, execFileNoThrowWithCwd } from '../execFileNoThrow.js'
 import { getFsImplementation } from '../fsOperations.js'
 import { gitExe } from '../git.js'
@@ -40,18 +39,15 @@ import { logError } from '../log.js'
 import {
   getInitialSettings,
   getSettingsForSource,
-  updateSettingsForSource,
-} from '../settings/settings.js'
+  updateSettingsForSource} from '../settings/settings.js'
 import type { SettingsJson } from '../settings/types.js'
 import {
   jsonParse,
   jsonStringify,
-  writeFileSync_DEPRECATED,
-} from '../slowOperations.js'
+  writeFileSync_DEPRECATED} from '../slowOperations.js'
 import {
   getAddDirEnabledPlugins,
-  getAddDirExtraMarketplaces,
-} from './addDirPluginSettings.js'
+  getAddDirExtraMarketplaces} from './addDirPluginSettings.js'
 import { markPluginVersionOrphaned } from './cacheUtils.js'
 import { classifyFetchError, logPluginFetch } from './fetchTelemetry.js'
 import { removeAllPluginsForMarketplace } from './installedPluginsManager.js'
@@ -61,18 +57,15 @@ import {
   getHostPatternsFromAllowlist,
   getStrictKnownMarketplaces,
   isSourceAllowedByPolicy,
-  isSourceInBlocklist,
-} from './marketplaceHelpers.js'
+  isSourceInBlocklist} from './marketplaceHelpers.js'
 import {
   OFFICIAL_MARKETPLACE_NAME,
-  OFFICIAL_MARKETPLACE_SOURCE,
-} from './officialMarketplace.js'
+  OFFICIAL_MARKETPLACE_SOURCE} from './officialMarketplace.js'
 import { fetchOfficialMarketplaceFromGcs } from './officialMarketplaceGcs.js'
 import {
   deletePluginDataDir,
   getPluginSeedDirs,
-  getPluginsDirectory,
-} from './pluginDirectories.js'
+  getPluginsDirectory} from './pluginDirectories.js'
 import { parsePluginIdentifier } from './pluginIdentifier.js'
 import { deletePluginOptions } from './pluginOptionsStorage.js'
 import {
@@ -84,8 +77,7 @@ import {
   type PluginMarketplace,
   type PluginMarketplaceEntry,
   PluginMarketplaceSchema,
-  validateOfficialNameSource,
-} from './schemas.js'
+  validateOfficialNameSource} from './schemas.js'
 
 /**
  * Result of loading and caching a marketplace
@@ -166,8 +158,7 @@ export function getDeclaredMarketplaces(): Record<string, DeclaredMarketplace> {
   // Explicitly-disabled entries (value: false) don't count.
   const enabledPlugins = {
     ...getAddDirEnabledPlugins(),
-    ...(getInitialSettings().enabledPlugins ?? {}),
-  }
+    ...(getInitialSettings().enabledPlugins ?? {})}
   for (const [pluginId, value] of Object.entries(enabledPlugins)) {
     if (
       value &&
@@ -175,8 +166,7 @@ export function getDeclaredMarketplaces(): Record<string, DeclaredMarketplace> {
     ) {
       implicit[OFFICIAL_MARKETPLACE_NAME] = {
         source: OFFICIAL_MARKETPLACE_SOURCE,
-        sourceIsFallback: true,
-      }
+        sourceIsFallback: true}
       break
     }
   }
@@ -187,8 +177,7 @@ export function getDeclaredMarketplaces(): Record<string, DeclaredMarketplace> {
   return {
     ...implicit,
     ...getAddDirExtraMarketplaces(),
-    ...(getInitialSettings().extraKnownMarketplaces ?? {}),
-  } as any
+    ...(getInitialSettings().extraKnownMarketplaces ?? {})} as any
 }
 
 /**
@@ -267,16 +256,14 @@ export async function loadKnownMarketplacesConfig(): Promise<KnownMarketplacesCo
 
   try {
     const content = await fs.readFile(configFile, {
-      encoding: 'utf-8',
-    })
+      encoding: 'utf-8'})
     const data = jsonParse(content)
     // Validate against schema
     const parsed = KnownMarketplacesFileSchema().safeParse(data)
     if (!parsed.success) {
       const errorMsg = `Marketplace configuration file is corrupted: ${parsed.error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')}`
       logForDebugging(errorMsg, {
-        level: 'error',
-      })
+        level: 'error'})
       throw new ConfigParseError(errorMsg, configFile, data)
     }
     return parsed.data
@@ -291,8 +278,7 @@ export async function loadKnownMarketplacesConfig(): Promise<KnownMarketplacesCo
     // For JSON parse errors or I/O errors, throw with helpful message
     const errorMsg = `Failed to load marketplace configuration: ${errorMessage(error)}`
     logForDebugging(errorMsg, {
-      level: 'error',
-    })
+      level: 'error'})
     throw new Error(errorMsg)
   }
 }
@@ -345,8 +331,7 @@ export async function saveKnownMarketplacesConfig(
   await fs.mkdir(dir)
   writeFileSync_DEPRECATED(configFile, jsonStringify(parsed.data, null, 2), {
     encoding: 'utf-8',
-    flush: true,
-  })
+    flush: true})
 }
 
 /**
@@ -413,8 +398,7 @@ export async function registerSeedMarketplaces(): Promise<boolean> {
         source: seedEntry.source,
         installLocation: resolvedLocation,
         lastUpdated: seedEntry.lastUpdated,
-        autoUpdate: false,
-      }
+        autoUpdate: false}
 
       // Skip if primary already matches — idempotent no-op, no write.
       if (isEqual(primary[name], desired)) continue
@@ -439,8 +423,7 @@ async function readSeedKnownMarketplaces(
   const seedJsonPath = join(seedDir, 'known_marketplaces.json')
   try {
     const content = await getFsImplementation().readFile(seedJsonPath, {
-      encoding: 'utf-8',
-    })
+      encoding: 'utf-8'})
     const parsed = KnownMarketplacesFileSchema().safeParse(jsonParse(content))
     if (!parsed.success) {
       logForDebugging(
@@ -661,8 +644,7 @@ function enhanceGitPullErrorMessages(result: {
     const timeoutSec = Math.round(getPluginGitTimeoutMs() / 1000)
     return {
       ...result,
-      stderr: `Git pull timed out after ${timeoutSec}s. Try increasing the timeout via CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS environment variable.\n\nOriginal error: ${result.stderr}`,
-    }
+      stderr: `Git pull timed out after ${timeoutSec}s. Try increasing the timeout via CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS environment variable.\n\nOriginal error: ${result.stderr}`}
   }
 
   // Detect SSH host key verification failures (check before the generic
@@ -673,14 +655,12 @@ function enhanceGitPullErrorMessages(result: {
   if (result.stderr.includes('REMOTE HOST IDENTIFICATION HAS CHANGED')) {
     return {
       ...result,
-      stderr: `SSH host key for this marketplace's git host has changed (server key rotation or possible MITM). Remove the stale entry with: ssh-keygen -R <host>\nThen connect once manually to accept the new key.\n\nOriginal error: ${result.stderr}`,
-    }
+      stderr: `SSH host key for this marketplace's git host has changed (server key rotation or possible MITM). Remove the stale entry with: ssh-keygen -R <host>\nThen connect once manually to accept the new key.\n\nOriginal error: ${result.stderr}`}
   }
   if (result.stderr.includes('Host key verification failed')) {
     return {
       ...result,
-      stderr: `SSH host key verification failed while updating marketplace. The host key is not in your known_hosts file. Connect once manually to add it (e.g., ssh -T git@<host>), or remove and re-add the marketplace with an HTTPS URL.\n\nOriginal error: ${result.stderr}`,
-    }
+      stderr: `SSH host key verification failed while updating marketplace. The host key is not in your known_hosts file. Connect once manually to add it (e.g., ssh -T git@<host>), or remove and re-add the marketplace with an HTTPS URL.\n\nOriginal error: ${result.stderr}`}
   }
 
   // Detect SSH authentication failures
@@ -690,8 +670,7 @@ function enhanceGitPullErrorMessages(result: {
   ) {
     return {
       ...result,
-      stderr: `SSH authentication failed while updating marketplace. Please ensure your SSH keys are configured.\n\nOriginal error: ${result.stderr}`,
-    }
+      stderr: `SSH authentication failed while updating marketplace. Please ensure your SSH keys are configured.\n\nOriginal error: ${result.stderr}`}
   }
 
   // Detect network issues
@@ -701,8 +680,7 @@ function enhanceGitPullErrorMessages(result: {
   ) {
     return {
       ...result,
-      stderr: `Network error while updating marketplace. Please check your internet connection.\n\nOriginal error: ${result.stderr}`,
-    }
+      stderr: `Network error while updating marketplace. Please check your internet connection.\n\nOriginal error: ${result.stderr}`}
   }
 
   return result
@@ -754,8 +732,7 @@ async function isGitHubSshLikelyConfigured(): Promise<boolean> {
   } catch (error) {
     // Any error means SSH isn't configured properly
     logForDebugging(`SSH configuration check failed: ${errorMessage(error)}`, {
-      level: 'warn',
-    })
+      level: 'warn'})
     return false
   }
 }
@@ -839,8 +816,7 @@ export async function gitClone(
   const result = await execFileNoThrowWithCwd(gitExe(), args, {
     timeout: timeoutMs,
     stdin: 'ignore',
-    env: { ...process.env, ...GIT_NO_PROMPT_ENV },
-  })
+    env: { ...process.env, ...GIT_NO_PROMPT_ENV }})
 
   // Scrub credentials from execa's error/stderr fields before any logging or
   // returning. execa's shortMessage embeds the full command line (including
@@ -865,14 +841,12 @@ export async function gitClone(
           cwd: targetPath,
           timeout: timeoutMs,
           stdin: 'ignore',
-          env: { ...process.env, ...GIT_NO_PROMPT_ENV },
-        },
+          env: { ...process.env, ...GIT_NO_PROMPT_ENV }},
       )
       if (sparseResult.code !== 0) {
         return {
           code: sparseResult.code,
-          stderr: `git sparse-checkout set failed: ${sparseResult.stderr}`,
-        }
+          stderr: `git sparse-checkout set failed: ${sparseResult.stderr}`}
       }
 
       const checkoutResult = await execFileNoThrowWithCwd(
@@ -884,14 +858,12 @@ export async function gitClone(
           cwd: targetPath,
           timeout: timeoutMs,
           stdin: 'ignore',
-          env: { ...process.env, ...GIT_NO_PROMPT_ENV },
-        },
+          env: { ...process.env, ...GIT_NO_PROMPT_ENV }},
       )
       if (checkoutResult.code !== 0) {
         return {
           code: checkoutResult.code,
-          stderr: `git checkout after sparse-checkout failed: ${checkoutResult.stderr}`,
-        }
+          stderr: `git checkout after sparse-checkout failed: ${checkoutResult.stderr}`}
       }
     }
     logForDebugging(`git clone succeeded: ${redactUrlCredentials(gitUrl)}`)
@@ -910,8 +882,7 @@ export async function gitClone(
   if (result.error?.includes('timed out')) {
     return {
       ...result,
-      stderr: `Git clone timed out after ${Math.round(timeoutMs / 1000)}s. The repository may be too large for the current timeout. Set CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS to increase it (e.g., 300000 for 5 minutes).\n\nOriginal error: ${result.stderr}`,
-    }
+      stderr: `Git clone timed out after ${Math.round(timeoutMs / 1000)}s. The repository may be too large for the current timeout. Set CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS to increase it (e.g., 300000 for 5 minutes).\n\nOriginal error: ${result.stderr}`}
   }
 
   // Enhance error messages for common scenarios
@@ -926,16 +897,14 @@ export async function gitClone(
       const removeHint = host ? `ssh-keygen -R ${host}` : 'ssh-keygen -R <host>'
       return {
         ...result,
-        stderr: `SSH host key has changed (server key rotation or possible MITM). Remove the stale known_hosts entry:\n  ${removeHint}\nThen connect once manually to verify and accept the new key.\n\nOriginal error: ${result.stderr}`,
-      }
+        stderr: `SSH host key has changed (server key rotation or possible MITM). Remove the stale known_hosts entry:\n  ${removeHint}\nThen connect once manually to verify and accept the new key.\n\nOriginal error: ${result.stderr}`}
     }
     if (result.stderr.includes('Host key verification failed')) {
       const host = extractSshHost(gitUrl)
       const connectHint = host ? `ssh -T git@${host}` : 'ssh -T git@<host>'
       return {
         ...result,
-        stderr: `SSH host key is not in your known_hosts file. To add it, connect once manually (this will show the fingerprint for you to verify):\n  ${connectHint}\n\nOr use an HTTPS URL instead (recommended for public repos).\n\nOriginal error: ${result.stderr}`,
-      }
+        stderr: `SSH host key is not in your known_hosts file. To add it, connect once manually (this will show the fingerprint for you to verify):\n  ${connectHint}\n\nOr use an HTTPS URL instead (recommended for public repos).\n\nOriginal error: ${result.stderr}`}
     }
 
     if (
@@ -944,15 +913,13 @@ export async function gitClone(
     ) {
       return {
         ...result,
-        stderr: `SSH authentication failed. Please ensure your SSH keys are configured for GitHub, or use an HTTPS URL instead.\n\nOriginal error: ${result.stderr}`,
-      }
+        stderr: `SSH authentication failed. Please ensure your SSH keys are configured for GitHub, or use an HTTPS URL instead.\n\nOriginal error: ${result.stderr}`}
     }
 
     if (isAuthenticationError(result.stderr)) {
       return {
         ...result,
-        stderr: `HTTPS authentication failed. Please ensure your credential helper is configured (e.g., gh auth login).\n\nOriginal error: ${result.stderr}`,
-      }
+        stderr: `HTTPS authentication failed. Please ensure your credential helper is configured (e.g., gh auth login).\n\nOriginal error: ${result.stderr}`}
     }
 
     if (
@@ -962,8 +929,7 @@ export async function gitClone(
     ) {
       return {
         ...result,
-        stderr: `Network error or timeout while cloning repository. Please check your internet connection and try again.\n\nOriginal error: ${result.stderr}`,
-      }
+        stderr: `Network error or timeout while cloning repository. Please check your internet connection and try again.\n\nOriginal error: ${result.stderr}`}
     }
   }
 
@@ -977,8 +943,7 @@ export async function gitClone(
       code: result.code,
       stderr:
         result.error ||
-        `git clone exited with code ${result.code} (no stderr output). Run with --debug to see the full command.`,
-    }
+        `git clone exited with code ${result.code} (no stderr output). Run with --debug to see the full command.`}
   }
 
   return result
@@ -1013,8 +978,7 @@ function safeCallProgress(
     onProgress(message)
   } catch (callbackError) {
     logForDebugging(`Progress callback error: ${errorMessage(callbackError)}`, {
-      level: 'warn',
-    })
+      level: 'warn'})
   }
 }
 
@@ -1054,8 +1018,7 @@ export async function reconcileSparseCheckout(
     return {
       code: 1,
       stderr:
-        'sparsePaths removed from config but repository is sparse; re-cloning for full checkout',
-    }
+        'sparsePaths removed from config but repository is sparse; re-cloning for full checkout'}
   }
   return { code: 0, stderr: '' }
 }
@@ -1108,8 +1071,7 @@ async function cacheMarketplaceFromGit(
     const pullStarted = performance.now()
     const pullResult = await gitPull(cachePath, ref, {
       disableCredentialHelper: options?.disableCredentialHelper,
-      sparsePaths,
-    })
+      sparsePaths})
     logPluginFetch(
       'marketplace_pull',
       gitUrl,
@@ -1119,8 +1081,7 @@ async function cacheMarketplaceFromGit(
     )
     if (pullResult.code === 0) return
     logForDebugging(`git pull failed, will re-clone: ${pullResult.stderr}`, {
-      level: 'warn',
-    })
+      level: 'warn'})
   } else {
     logForDebugging(
       `sparse-checkout reconcile requires re-clone: ${reconcileResult.stderr}`,
@@ -1273,16 +1234,14 @@ async function cacheMarketplaceFromUrl(
   const headers = {
     ...customHeaders,
     // User-Agent must come last to prevent override (for consistency with WebFetch)
-    'User-Agent': 'Claude-Code-Plugin-Manager',
-  }
+    'User-Agent': 'Claude-Code-Plugin-Manager'}
 
   let response
   const fetchStarted = performance.now()
   try {
     response = await axios.get(url, {
       timeout: 10000,
-      headers,
-    })
+      headers})
   } catch (error) {
     logPluginFetch(
       'marketplace_url',
@@ -1345,8 +1304,7 @@ async function cacheMarketplaceFromUrl(
   // Write the validated marketplace file
   writeFileSync_DEPRECATED(cachePath, jsonStringify(result.data, null, 2), {
     encoding: 'utf-8',
-    flush: true,
-  })
+    flush: true})
 }
 
 /**
@@ -1675,8 +1633,7 @@ async function loadAndCacheMarketplace(
             {
               name: source.name,
               owner: source.owner ?? { name: 'settings' },
-              plugins: source.plugins,
-            },
+              plugins: source.plugins},
             null,
             2,
           ),
@@ -1914,8 +1871,7 @@ export async function addMarketplaceSource(
   config[marketplace.name] = {
     source: resolvedSource,
     installLocation: cachePath,
-    lastUpdated: new Date().toISOString(),
-  }
+    lastUpdated: new Date().toISOString()}
   await saveKnownMarketplacesConfig(config)
 
   logForDebugging(`Added marketplace source: ${marketplace.name}`)
@@ -2154,8 +2110,7 @@ export const getMarketplace = memoize(
       logForDebugging(
         `Cache corrupted or missing for marketplace ${name}, re-fetching from source: ${errorMessage(error)}`,
         {
-          level: 'warn',
-        },
+          level: 'warn'},
       )
     }
 
@@ -2219,8 +2174,7 @@ export async function getPluginByIdCacheOnly(pluginId: string): Promise<{
 
     return {
       entry: plugin,
-      marketplaceInstallLocation: marketplaceConfig.installLocation,
-    }
+      marketplaceInstallLocation: marketplaceConfig.installLocation}
   } catch {
     return null
   }
@@ -2268,8 +2222,7 @@ export async function getPluginById(pluginId: string): Promise<{
 
     return {
       entry: plugin,
-      marketplaceInstallLocation: marketplaceConfig.installLocation,
-    }
+      marketplaceInstallLocation: marketplaceConfig.installLocation}
   } catch (error) {
     logForDebugging(
       `Could not find plugin ${pluginId}: ${errorMessage(error)}`,
@@ -2341,8 +2294,7 @@ export async function refreshAllMarketplaces(): Promise<void> {
       logForDebugging(
         `Failed to refresh marketplace ${name}: ${errorMessage(error)}`,
         {
-          level: 'error',
-        },
+          level: 'error'},
       )
     }
   }
@@ -2458,8 +2410,7 @@ export async function refreshMarketplace(
         )
       }
       logForDebugging('Official marketplace GCS failed; falling back to git', {
-        level: 'warn',
-      })
+        level: 'warn'})
       // ...falls through to source.source === 'github' branch below
     }
 
@@ -2568,8 +2519,7 @@ export async function refreshMarketplace(
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     logForDebugging(`Failed to refresh marketplace ${name}: ${errorMessage}`, {
-      level: 'error',
-    })
+      level: 'error'})
     throw new Error(`Failed to refresh marketplace '${name}': ${errorMessage}`)
   }
 }
@@ -2616,8 +2566,7 @@ export async function setMarketplaceAutoUpdate(
 
   config[name] = {
     ...entry,
-    autoUpdate,
-  }
+    autoUpdate}
   await saveKnownMarketplacesConfig(config)
 
   // Also update intent in settings if declared there — write to the SAME
@@ -2639,5 +2588,4 @@ export async function setMarketplaceAutoUpdate(
 }
 
 export const _test = {
-  redactUrlCredentials,
-}
+  redactUrlCredentials}

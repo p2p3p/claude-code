@@ -21,9 +21,9 @@
 import React from 'react'
 import type {
   LocalJSXCommandCall,
-  LocalJSXCommandOnDone,
-} from '../../types/command.js'
+  LocalJSXCommandOnDone} from '../../types/command.js'
 import type { ToolUseContext } from '../../Tool.js'
+import { t } from '../../utils/i18n/index.js'
 
 /** Shape returned by parseArgs when args are invalid. */
 export interface InvalidParsed {
@@ -91,7 +91,7 @@ export function launchCommand<TParsed, TViewProps>(
     const parsed = opts.parseArgs(args ?? '')
 
     if (isInvalid(parsed)) {
-      onDone(`Invalid args: ${parsed.reason}`, { display: 'system' })
+      onDone(t('launchCmd.invalidArgs', parsed.reason), { display: 'system' })
       return opts.errorView(parsed.reason)
     }
 
@@ -106,7 +106,7 @@ export function launchCommand<TParsed, TViewProps>(
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
       opts.onDispatchError?.(err)
-      onDone(`${opts.commandName} failed: ${msg}`, { display: 'system' })
+      onDone(t('launchCmd.failed', opts.commandName, msg), { display: 'system' })
       return opts.errorView(msg)
     }
   }

@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { t } from '../utils/i18n/index.js'
 import { Text, Dialog } from '@anthropic/ink';
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js';
 import { isSupportedTerminal } from '../utils/ide.js';
@@ -17,8 +18,7 @@ export function IdeAutoConnectDialog({ onComplete }: IdeAutoConnectDialogProps):
       saveGlobalConfig(current => ({
         ...current,
         autoConnectIde: autoConnect,
-        hasIdeAutoConnectDialogBeenShown: true,
-      }));
+        hasIdeAutoConnectDialogBeenShown: true}));
 
       onComplete();
     },
@@ -26,14 +26,14 @@ export function IdeAutoConnectDialog({ onComplete }: IdeAutoConnectDialogProps):
   );
 
   const options = [
-    { label: 'Yes', value: 'yes' },
-    { label: 'No', value: 'no' },
+    { label: t('ideAutoConnect.yes'), value: 'yes' },
+    { label: t('ideAutoConnect.no'), value: 'no' },
   ];
 
   return (
-    <Dialog title="Do you wish to enable auto-connect to IDE?" color="ide" onCancel={onComplete}>
+    <Dialog title={t('ideautoconnectdialog.doYouWishToEnableAutoConnectToIDE')} color="ide" onCancel={onComplete}>
       <Select options={options} onChange={handleSelect} defaultValue={'yes'} />
-      <Text dimColor>You can also configure this in /config or with the --ide flag</Text>
+      <Text dimColor>{t('ideAutoConnectDialog.youCanAlsoConfigure')}</Text>
     </Dialog>
   );
 }
@@ -55,8 +55,7 @@ export function IdeDisableAutoConnectDialog({ onComplete }: IdeDisableAutoConnec
       if (disableAutoConnect) {
         saveGlobalConfig(current => ({
           ...current,
-          autoConnectIde: false,
-        }));
+          autoConnectIde: false}));
       }
 
       onComplete(disableAutoConnect);
@@ -69,14 +68,14 @@ export function IdeDisableAutoConnectDialog({ onComplete }: IdeDisableAutoConnec
   }, [onComplete]);
 
   const options = [
-    { label: 'No', value: 'no' },
-    { label: 'Yes', value: 'yes' },
+    { label: t('ideAutoConnect.no'), value: 'no' },
+    { label: t('ideAutoConnect.yes'), value: 'yes' },
   ];
 
   return (
     <Dialog
-      title="Do you wish to disable auto-connect to IDE?"
-      subtitle="You can also configure this in /config"
+      title={t('ideautoconnectdialog.doYouWishToDisableAutoConnectToIDE')}
+      subtitle={t('ideAutoConnectDialog.youCanAlsoConfigure')}
       onCancel={handleCancel}
       color="ide"
     >

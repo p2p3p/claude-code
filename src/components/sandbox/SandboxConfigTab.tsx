@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, Text } from '@anthropic/ink';
 import { SandboxManager, shouldAllowManagedSandboxDomainsOnly } from '../../utils/sandbox/sandbox-adapter.js';
 
@@ -21,7 +22,7 @@ export function SandboxConfigTab(): React.ReactNode {
   if (!isEnabled) {
     return (
       <Box flexDirection="column" paddingY={1}>
-        <Text color="subtle">Sandbox is not enabled</Text>
+        <Text color="subtle">{t('sandboxconfigtab.sandboxIsNotEnabled')}</Text>
         {warningsNote}
       </Box>
     );
@@ -39,20 +40,20 @@ export function SandboxConfigTab(): React.ReactNode {
       {/* Excluded Commands */}
       <Box flexDirection="column">
         <Text bold color="permission">
-          Excluded Commands:
+          {t('ui.excludedCommands')}
         </Text>
-        <Text dimColor>{excludedCommands.length > 0 ? excludedCommands.join(', ') : 'None'}</Text>
+        <Text dimColor>{excludedCommands.length > 0 ? excludedCommands.join(', ') : t('ui.none')}</Text>
       </Box>
 
       {/* Filesystem Read Restrictions */}
       {fsReadConfig.denyOnly.length > 0 && (
         <Box marginTop={1} flexDirection="column">
           <Text bold color="permission">
-            Filesystem Read Restrictions:
+            {t('ui.fsReadRestrictions')}
           </Text>
-          <Text dimColor>Denied: {fsReadConfig.denyOnly.join(', ')}</Text>
+          <Text dimColor>{t('ui.denied', fsReadConfig.denyOnly.join(', '))}</Text>
           {fsReadConfig.allowWithinDeny && fsReadConfig.allowWithinDeny.length > 0 && (
-            <Text dimColor>Allowed within denied: {fsReadConfig.allowWithinDeny.join(', ')}</Text>
+            <Text dimColor>{t('ui.allowedWithinDenied', fsReadConfig.allowWithinDeny.join(', '))}</Text>
           )}
         </Box>
       )}
@@ -61,11 +62,11 @@ export function SandboxConfigTab(): React.ReactNode {
       {fsWriteConfig.allowOnly.length > 0 && (
         <Box marginTop={1} flexDirection="column">
           <Text bold color="permission">
-            Filesystem Write Restrictions:
+            {t('ui.fsWriteRestrictions')}
           </Text>
-          <Text dimColor>Allowed: {fsWriteConfig.allowOnly.join(', ')}</Text>
+          <Text dimColor>{t('ui.allowed', fsWriteConfig.allowOnly.join(', '))}</Text>
           {fsWriteConfig.denyWithinAllow.length > 0 && (
-            <Text dimColor>Denied within allowed: {fsWriteConfig.denyWithinAllow.join(', ')}</Text>
+            <Text dimColor>{t('ui.deniedWithinAllowed', fsWriteConfig.denyWithinAllow.join(', '))}</Text>
           )}
         </Box>
       )}
@@ -75,14 +76,13 @@ export function SandboxConfigTab(): React.ReactNode {
         (networkConfig.deniedHosts && networkConfig.deniedHosts.length > 0)) && (
         <Box marginTop={1} flexDirection="column">
           <Text bold color="permission">
-            Network Restrictions
-            {shouldAllowManagedSandboxDomainsOnly() ? ' (Managed)' : ''}:
+            {t('ui.networkRestrictions')}{shouldAllowManagedSandboxDomainsOnly() ? t('ui.managedLabel') : ''}:
           </Text>
           {networkConfig.allowedHosts && networkConfig.allowedHosts.length > 0 && (
-            <Text dimColor>Allowed: {networkConfig.allowedHosts.join(', ')}</Text>
+            <Text dimColor>{t('ui.allowed', networkConfig.allowedHosts.join(', '))}</Text>
           )}
           {networkConfig.deniedHosts && networkConfig.deniedHosts.length > 0 && (
-            <Text dimColor>Denied: {networkConfig.deniedHosts.join(', ')}</Text>
+            <Text dimColor>{t('ui.denied', networkConfig.deniedHosts.join(', '))}</Text>
           )}
         </Box>
       )}
@@ -91,7 +91,7 @@ export function SandboxConfigTab(): React.ReactNode {
       {allowUnixSockets && allowUnixSockets.length > 0 && (
         <Box marginTop={1} flexDirection="column">
           <Text bold color="permission">
-            Allowed Unix Sockets:
+            {t('ui.allowedUnixSockets')}
           </Text>
           <Text dimColor>{allowUnixSockets.join(', ')}</Text>
         </Box>
@@ -101,11 +101,11 @@ export function SandboxConfigTab(): React.ReactNode {
       {globPatternWarnings.length > 0 && (
         <Box marginTop={1} flexDirection="column">
           <Text bold color="warning">
-            ⚠ Warning: Glob patterns not fully supported on Linux
+            {t('ui.globPatternWarning')}
           </Text>
           <Text dimColor>
-            The following patterns will be ignored: {globPatternWarnings.slice(0, 3).join(', ')}
-            {globPatternWarnings.length > 3 && ` (${globPatternWarnings.length - 3} more)`}
+            {t('ui.patternsWillBeIgnored', globPatternWarnings.slice(0, 3).join(', '))}
+            {globPatternWarnings.length > 3 && t('ui.andMore', globPatternWarnings.length - 3)}
           </Text>
         </Box>
       )}

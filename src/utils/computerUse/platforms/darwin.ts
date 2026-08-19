@@ -15,8 +15,7 @@ import type {
   DisplayPlatform,
   AppsPlatform,
   WindowHandle,
-  FrontmostAppInfo,
-} from './types.js'
+  FrontmostAppInfo} from './types.js'
 import { requireComputerUseInput } from '../inputLoader.js'
 import { requireComputerUseSwift } from '../swiftLoader.js'
 
@@ -103,8 +102,7 @@ const display: DisplayPlatform = {
   getSize(displayId) {
     const swift = requireComputerUseSwift()
     return swift.display.getSize(displayId)
-  },
-}
+  }}
 
 // ---------------------------------------------------------------------------
 // Apps — delegate to @ant/computer-use-swift
@@ -117,8 +115,7 @@ const apps: AppsPlatform = {
     return running.map((app: any) => ({
       id: app.bundleId ?? '',
       pid: 0, // macOS listRunning doesn't expose PID through this API
-      title: app.displayName ?? '',
-    }))
+      title: app.displayName ?? ''}))
   },
 
   async listInstalled() {
@@ -127,8 +124,7 @@ const apps: AppsPlatform = {
     return installed.map((app: any) => ({
       id: app.bundleId ?? '',
       displayName: app.displayName ?? '',
-      path: app.path ?? '',
-    }))
+      path: app.path ?? ''}))
   },
 
   async open(name) {
@@ -148,8 +144,7 @@ const apps: AppsPlatform = {
     // Use apps.listRunning() and filter by title instead.
     const all = this.listRunning()
     return all.find(w => w.title.includes(_title)) ?? null
-  },
-}
+  }}
 
 // ---------------------------------------------------------------------------
 // Export

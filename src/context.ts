@@ -2,14 +2,12 @@ import { feature } from 'bun:bundle'
 import memoize from 'lodash-es/memoize.js'
 import {
   getAdditionalDirectoriesForClaudeMd,
-  setCachedClaudeMdContent,
-} from './bootstrap/state.js'
+  setCachedClaudeMdContent} from './bootstrap/state.js'
 import { getLocalISODate } from './constants/common.js'
 import {
   filterInjectedMemoryFiles,
   getClaudeMds,
-  getMemoryFiles,
-} from './utils/claudemd.js'
+  getMemoryFiles} from './utils/claudemd.js'
 import { logForDiagnosticsNoPII } from './utils/diagLogs.js'
 import { isBareMode, isEnvTruthy } from './utils/envUtils.js'
 import { execFileNoThrow } from './utils/execFileNoThrow.js'
@@ -46,13 +44,11 @@ export const getGitStatus = memoize(async (): Promise<string | null> => {
   const isGit = await getIsGit()
   logForDiagnosticsNoPII('info', 'git_is_git_check_completed', {
     duration_ms: Date.now() - isGitStart,
-    is_git: isGit,
-  })
+    is_git: isGit})
 
   if (!isGit) {
     logForDiagnosticsNoPII('info', 'git_status_skipped_not_git', {
-      duration_ms: Date.now() - startTime,
-    })
+      duration_ms: Date.now() - startTime})
     return null
   }
 
@@ -62,24 +58,20 @@ export const getGitStatus = memoize(async (): Promise<string | null> => {
       getBranch(),
       getDefaultBranch(),
       execFileNoThrow(gitExe(), ['--no-optional-locks', 'status', '--short'], {
-        preserveOutputOnError: false,
-      }).then(({ stdout }) => stdout.trim()),
+        preserveOutputOnError: false}).then(({ stdout }) => stdout.trim()),
       execFileNoThrow(
         gitExe(),
         ['--no-optional-locks', 'log', '--oneline', '-n', '5'],
         {
-          preserveOutputOnError: false,
-        },
+          preserveOutputOnError: false},
       ).then(({ stdout }) => stdout.trim()),
       execFileNoThrow(gitExe(), ['config', 'user.name'], {
-        preserveOutputOnError: false,
-      }).then(({ stdout }) => stdout.trim()),
+        preserveOutputOnError: false}).then(({ stdout }) => stdout.trim()),
     ])
 
     logForDiagnosticsNoPII('info', 'git_commands_completed', {
       duration_ms: Date.now() - gitCmdsStart,
-      status_length: status.length,
-    })
+      status_length: status.length})
 
     // Check if status exceeds character limit
     const truncatedStatus =
@@ -90,8 +82,7 @@ export const getGitStatus = memoize(async (): Promise<string | null> => {
 
     logForDiagnosticsNoPII('info', 'git_status_completed', {
       duration_ms: Date.now() - startTime,
-      truncated: status.length > MAX_STATUS_CHARS,
-    })
+      truncated: status.length > MAX_STATUS_CHARS})
 
     return [
       `This is the git status at the start of the conversation. Note that this status is a snapshot in time, and will not update during the conversation.`,
@@ -103,8 +94,7 @@ export const getGitStatus = memoize(async (): Promise<string | null> => {
     ].join('\n\n')
   } catch (error) {
     logForDiagnosticsNoPII('error', 'git_status_failed', {
-      duration_ms: Date.now() - startTime,
-    })
+      duration_ms: Date.now() - startTime})
     logError(error)
     return null
   }
@@ -135,17 +125,14 @@ export const getSystemContext = memoize(
     logForDiagnosticsNoPII('info', 'system_context_completed', {
       duration_ms: Date.now() - startTime,
       has_git_status: gitStatus !== null,
-      has_injection: injection !== null,
-    })
+      has_injection: injection !== null})
 
     return {
       ...(gitStatus && { gitStatus }),
       ...(feature('BREAK_CACHE_COMMAND') && injection
         ? {
-            cacheBreaker: `[CACHE_BREAKER: ${injection}]`,
-          }
-        : {}),
-    }
+            cacheBreaker: `[CACHE_BREAKER: ${injection}]`}
+        : {})}
   },
 )
 
@@ -178,12 +165,10 @@ export const getUserContext = memoize(
     logForDiagnosticsNoPII('info', 'user_context_completed', {
       duration_ms: Date.now() - startTime,
       claudemd_length: claudeMd?.length ?? 0,
-      claudemd_disabled: Boolean(shouldDisableClaudeMd),
-    })
+      claudemd_disabled: Boolean(shouldDisableClaudeMd)})
 
     return {
       ...(claudeMd && { claudeMd }),
-      currentDate: `Today's date is ${getLocalISODate()}.`,
-    }
+      currentDate: `Today's date is ${getLocalISODate()}.`}
   },
 )

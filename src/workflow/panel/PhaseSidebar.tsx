@@ -25,8 +25,7 @@ export function PhaseSidebar({
   phases,
   agents,
   selectedIndex,
-  focused,
-}: {
+  focused}: {
   phases: MergedPhase[];
   agents: AgentProgress[];
   selectedIndex: number;

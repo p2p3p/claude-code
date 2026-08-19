@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { Box, Byline, KeyboardShortcutHint } from '@anthropic/ink';
+import { t } from '../../../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { Select } from '../../../CustomSelect/select.js';
 import { useWizard } from '../../../wizard/index.js';
@@ -11,23 +12,21 @@ export function MethodStep(): ReactNode {
 
   const methodOptions = [
     {
-      label: 'Generate with Claude (recommended)',
-      value: 'generate',
-    },
+      label: t('agentMethodStep.generateWithClaude'),
+      value: 'generate'},
     {
-      label: 'Manual configuration',
-      value: 'manual',
-    },
+      label: t('agentMethodStep.manualConfig'),
+      value: 'manual'},
   ];
 
   return (
     <WizardDialogLayout
-      subtitle="Creation method"
+      subtitle={t('methodstep.creationMethod')}
       footerText={
         <Byline>
-          <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
-          <KeyboardShortcutHint shortcut="Enter" action="select" />
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="go back" />
+          <KeyboardShortcutHint shortcut="↑↓" action={t('shortcutHint.navigate')} />
+          <KeyboardShortcutHint shortcut="Enter" action={t('shortcutHint.select')} />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.goBack')} />
         </Byline>
       }
     >
@@ -39,8 +38,7 @@ export function MethodStep(): ReactNode {
             const method = value as 'generate' | 'manual';
             updateWizardData({
               method,
-              wasGenerated: method === 'generate',
-            });
+              wasGenerated: method === 'generate'});
 
             // Dynamic navigation based on method
             if (method === 'generate') {

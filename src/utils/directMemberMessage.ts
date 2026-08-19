@@ -60,8 +60,7 @@ export async function sendDirectMemberMessage(
     {
       from: 'user',
       text: message,
-      timestamp: new Date().toISOString(),
-    },
+      timestamp: new Date().toISOString()},
     teamContext.teamName,
   )
 

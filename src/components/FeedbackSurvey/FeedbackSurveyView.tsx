@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import { useDebouncedDigitInput } from './useDebouncedDigitInput.js';
 import type { FeedbackSurveyResponse } from './utils.js';
+import { t } from '../../utils/i18n/index.js';
 
 type Props = {
   onSelect: (option: FeedbackSurveyResponse) => void;
@@ -17,26 +18,23 @@ const inputToResponse: Record<ResponseInput, FeedbackSurveyResponse> = {
   '0': 'dismissed',
   '1': 'bad',
   '2': 'fine',
-  '3': 'good',
-} as const;
+  '3': 'good'} as const;
 
 export const isValidResponseInput = (input: string): input is ResponseInput =>
   (RESPONSE_INPUTS as readonly string[]).includes(input);
 
-const DEFAULT_MESSAGE = 'How is Claude doing this session? (optional)';
+const DEFAULT_MESSAGE = t('feedbackSurvey.defaultMessage');
 
 export function FeedbackSurveyView({
   onSelect,
   inputValue,
   setInputValue,
-  message = DEFAULT_MESSAGE,
-}: Props): React.ReactNode {
+  message = DEFAULT_MESSAGE}: Props): React.ReactNode {
   useDebouncedDigitInput({
     inputValue,
     setInputValue,
     isValidDigit: isValidResponseInput,
-    onDigit: digit => onSelect(inputToResponse[digit]),
-  });
+    onDigit: digit => onSelect(inputToResponse[digit])});
 
   return (
     <Box flexDirection="column" marginTop={1}>
@@ -48,22 +46,22 @@ export function FeedbackSurveyView({
       <Box marginLeft={2}>
         <Box width={10}>
           <Text>
-            <Text color="ansi:cyan">1</Text>: Bad
+            <Text color="ansi:cyan">1</Text>: {t('feedbackSurvey.bad')}
           </Text>
         </Box>
         <Box width={10}>
           <Text>
-            <Text color="ansi:cyan">2</Text>: Fine
+            <Text color="ansi:cyan">2</Text>: {t('feedbackSurvey.fine')}
           </Text>
         </Box>
         <Box width={10}>
           <Text>
-            <Text color="ansi:cyan">3</Text>: Good
+            <Text color="ansi:cyan">3</Text>: {t('feedbackSurvey.good')}
           </Text>
         </Box>
         <Box>
           <Text>
-            <Text color="ansi:cyan">0</Text>: Dismiss
+            <Text color="ansi:cyan">0</Text>: {t('feedbackSurvey.dismiss')}
           </Text>
         </Box>
       </Box>

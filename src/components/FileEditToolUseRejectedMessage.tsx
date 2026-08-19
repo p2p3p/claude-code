@@ -1,6 +1,7 @@
 import type { StructuredPatchHunk } from 'diff';
 import { relative } from 'path';
 import * as React from 'react';
+import { t } from '../utils/i18n/index.js';
 import { useTerminalSize } from 'src/hooks/useTerminalSize.js';
 import { getCwd } from 'src/utils/cwd.js';
 import { Box, Text } from '@anthropic/ink';
@@ -31,12 +32,11 @@ export function FileEditToolUseRejectedMessage({
   fileContent,
   content,
   style,
-  verbose,
-}: Props): React.ReactNode {
+  verbose}: Props): React.ReactNode {
   const { columns } = useTerminalSize();
   const text = (
     <Box flexDirection="row">
-      <Text color="subtle">User rejected {operation} to </Text>
+      <Text color="subtle">{t('ui.userRejectedTo', operation)}</Text>
       <Text bold color="subtle">
         {verbose ? file_path : relative(getCwd(), file_path)}
       </Text>
@@ -59,7 +59,7 @@ export function FileEditToolUseRejectedMessage({
       <MessageResponse>
         <Box flexDirection="column">
           {text}
-          <HighlightedCode code={truncatedContent || '(No content)'} filePath={file_path} width={columns - 12} dim />
+          <HighlightedCode code={truncatedContent || t('fileWrite.noContent')} filePath={file_path} width={columns - 12} dim />
           {!verbose && plusLines > 0 && <Text dimColor>… +{plusLines} lines</Text>}
         </Box>
       </MessageResponse>

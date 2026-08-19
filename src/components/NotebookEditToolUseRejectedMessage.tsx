@@ -1,5 +1,6 @@
 import { relative } from 'path';
 import * as React from 'react';
+import { t } from '../utils/i18n/index.js';
 import { getCwd } from 'src/utils/cwd.js';
 import { Box, Text } from '@anthropic/ink';
 import { HighlightedCode } from './HighlightedCode.js';
@@ -20,19 +21,18 @@ export function NotebookEditToolUseRejectedMessage({
   new_source,
   cell_type,
   edit_mode = 'replace',
-  verbose,
-}: Props): React.ReactNode {
+  verbose}: Props): React.ReactNode {
   const operation = edit_mode === 'delete' ? 'delete' : `${edit_mode} cell in`;
 
   return (
     <MessageResponse>
       <Box flexDirection="column">
         <Box flexDirection="row">
-          <Text color="subtle">User rejected {operation} </Text>
+          <Text color="subtle">{t('ui.userRejected', operation)}</Text>
           <Text bold color="subtle">
             {verbose ? notebook_path : relative(getCwd(), notebook_path)}
           </Text>
-          <Text color="subtle"> at cell {cell_id}</Text>
+          <Text color="subtle">{t('ui.atCell', cell_id)}</Text>
         </Box>
         {edit_mode !== 'delete' && (
           <Box marginTop={1} flexDirection="column">

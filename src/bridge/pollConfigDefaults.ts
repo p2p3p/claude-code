@@ -78,5 +78,4 @@ export const DEFAULT_POLL_CONFIG: PollIntervalConfig = {
   // session-ingress at this interval so upstream proxies don't GC an idle
   // remote-control session. 2 min is the default. _v2: bridge-only gate
   // (pre-v2 clients read the old key, new clients ignore it).
-  session_keepalive_interval_v2_ms: 120_000,
-}
+  session_keepalive_interval_v2_ms: 120_000}

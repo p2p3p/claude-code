@@ -10,8 +10,7 @@ import { quote } from '../bash/shellQuote.js'
 import {
   quoteShellCommand,
   rewriteWindowsNullRedirect,
-  shouldAddStdinRedirect,
-} from '../bash/shellQuoting.js'
+  shouldAddStdinRedirect} from '../bash/shellQuoting.js'
 import { logForDebugging } from '../debug.js'
 import { getPlatform } from '../platform.js'
 import { getSessionEnvironmentScript } from '../sessionEnvironment.js'
@@ -19,8 +18,7 @@ import { getSessionEnvVars } from '../sessionEnvVars.js'
 import {
   ensureSocketInitialized,
   getClaudeTmuxEnv,
-  hasTmuxToolBeenUsed,
-} from '../tmuxSocket.js'
+  hasTmuxToolBeenUsed} from '../tmuxSocket.js'
 import { windowsPathToPosixPath } from '../windowsPaths.js'
 import type { ShellProvider } from './shellProvider.js'
 
@@ -250,6 +248,5 @@ export async function createBashShellProvider(
         env[key] = value
       }
       return env
-    },
-  }
+    }}
 }

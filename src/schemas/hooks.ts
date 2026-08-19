@@ -61,8 +61,7 @@ function buildHookSchemas() {
       .optional()
       .describe(
         'If true, hook runs in background and wakes the model on exit code 2 (blocking error). Implies async.',
-      ),
-  })
+      )})
 
   const PromptHookSchema = z.object({
     type: z.literal('prompt').describe('LLM prompt hook type'),
@@ -91,8 +90,7 @@ function buildHookSchemas() {
     once: z
       .boolean()
       .optional()
-      .describe('If true, hook runs once and is removed after execution'),
-  })
+      .describe('If true, hook runs once and is removed after execution')})
 
   const HttpHookSchema = z.object({
     type: z.literal('http').describe('HTTP hook type'),
@@ -120,8 +118,7 @@ function buildHookSchemas() {
     once: z
       .boolean()
       .optional()
-      .describe('If true, hook runs once and is removed after execution'),
-  })
+      .describe('If true, hook runs once and is removed after execution')})
 
   const AgentHookSchema = z.object({
     type: z.literal('agent').describe('Agentic verifier hook type'),
@@ -157,15 +154,13 @@ function buildHookSchemas() {
     once: z
       .boolean()
       .optional()
-      .describe('If true, hook runs once and is removed after execution'),
-  })
+      .describe('If true, hook runs once and is removed after execution')})
 
   return {
     BashCommandHookSchema,
     PromptHookSchema,
     HttpHookSchema,
-    AgentHookSchema,
-  }
+    AgentHookSchema}
 }
 
 /**
@@ -176,8 +171,7 @@ export const HookCommandSchema = lazySchema(() => {
     BashCommandHookSchema,
     PromptHookSchema,
     AgentHookSchema,
-    HttpHookSchema,
-  } = buildHookSchemas()
+    HttpHookSchema} = buildHookSchemas()
   return z.discriminatedUnion('type', [
     BashCommandHookSchema,
     PromptHookSchema,
@@ -197,8 +191,7 @@ export const HookMatcherSchema = lazySchema(() =>
       .describe('String pattern to match (e.g. tool names like "Write")'), // String (e.g. Write) to match values related to the hook event, e.g. tool names
     hooks: z
       .array(HookCommandSchema())
-      .describe('List of hooks to execute when the matcher matches'),
-  }),
+      .describe('List of hooks to execute when the matcher matches')}),
 )
 
 /**

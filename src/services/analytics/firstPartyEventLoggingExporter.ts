@@ -2,8 +2,7 @@ import type { HrTime } from '@opentelemetry/api'
 import { type ExportResult, ExportResultCode } from '@opentelemetry/core'
 import type {
   LogRecordExporter,
-  ReadableLogRecord,
-} from '@opentelemetry/sdk-logs'
+  ReadableLogRecord} from '@opentelemetry/sdk-logs'
 import axios from 'axios'
 import { randomUUID } from 'crypto'
 import { appendFile, mkdir, readdir, unlink, writeFile } from 'fs/promises'
@@ -11,15 +10,13 @@ import * as path from 'path'
 import type { CoreUserData } from 'src/utils/user.js'
 import {
   getIsNonInteractiveSession,
-  getSessionId,
-} from '../../bootstrap/state.js'
+  getSessionId} from '../../bootstrap/state.js'
 import { ClaudeCodeInternalEvent } from '../../types/generated/events_mono/claude_code/v1/claude_code_internal_event.js'
 import { GrowthbookExperimentEvent } from '../../types/generated/events_mono/growthbook/v1/growthbook_experiment_event.js'
 import {
   getClaudeAIOAuthTokens,
   hasProfileScope,
-  isClaudeAISubscriber,
-} from '../../utils/auth.js'
+  isClaudeAISubscriber} from '../../utils/auth.js'
 import { checkHasTrustDialogAccepted } from '../../utils/config.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
@@ -109,11 +106,11 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
       schedule?: (fn: () => Promise<void>, delayMs: number) => () => void
     } = {},
   ) {
-    // Default: prod, except when ANTHROPIC_BASE_URL is explicitly staging.
+    // Default: prod, except when BASE_URL is explicitly staging.
     // Overridable via tengu_1p_event_batch_config.baseUrl.
     const baseUrl =
       options.baseUrl ||
-      (process.env.ANTHROPIC_BASE_URL === 'https://api-staging.anthropic.com'
+      (process.env.BASE_URL === 'https://api-staging.anthropic.com'
         ? 'https://api-staging.anthropic.com'
         : 'https://api.anthropic.com')
 
@@ -286,8 +283,7 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
       }
       resultCallback({
         code: ExportResultCode.FAILED,
-        error: new Error('Exporter has been shutdown'),
-      })
+        error: new Error('Exporter has been shutdown')})
       return
     }
 
@@ -332,8 +328,7 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
           code: ExportResultCode.FAILED,
           error: new Error(
             `Dropped ${events.length} events: max attempts (${this.maxAttempts}) reached`,
-          ),
-        })
+          )})
         return
       }
 
@@ -351,8 +346,7 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
           code: ExportResultCode.FAILED,
           error: new Error(
             `Failed to export ${failedEvents.length} events${context}`,
-          ),
-        })
+          )})
         return
       }
 
@@ -371,8 +365,7 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
       logError(error)
       resultCallback({
         code: ExportResultCode.FAILED,
-        error: toError(error),
-      })
+        error: toError(error)})
     }
   }
 
@@ -538,8 +531,7 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
     const baseHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
       'User-Agent': getClaudeCodeUserAgent(),
-      'x-service-name': 'claude-code',
-    }
+      'x-service-name': 'claude-code'}
 
     // Skip auth if trust hasn't been established yet
     // This prevents executing apiKeyHelper commands before the trust dialog
@@ -586,8 +578,7 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
     try {
       const response = await axios.post(this.endpoint, payload, {
         timeout: this.timeout,
-        headers,
-      })
+        headers})
       this.logSuccess(payload.events.length, useAuth, response.data)
       return
     } catch (error) {
@@ -604,8 +595,7 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
         }
         const response = await axios.post(this.endpoint, payload, {
           timeout: this.timeout,
-          headers: baseHeaders,
-        })
+          headers: baseHeaders})
         this.logSuccess(payload.events.length, false, response.data)
         return
       }
@@ -662,9 +652,7 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
             auth:
               account_uuid || organization_uuid
                 ? { account_uuid, organization_uuid }
-                : undefined,
-          }),
-        })
+                : undefined})})
         continue
       }
 
@@ -698,11 +686,8 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
             session_id: getSessionId(),
             additional_metadata: Buffer.from(
               jsonStringify({
-                transform_error: 'core_metadata attribute is missing',
-              }),
-            ).toString('base64'),
-          }),
-        })
+                transform_error: 'core_metadata attribute is missing'}),
+            ).toString('base64')})})
         continue
       }
 
@@ -755,9 +740,7 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
               ? Buffer.from(jsonStringify(additionalMetadata)).toString(
                   'base64',
                 )
-              : undefined,
-        }),
-      })
+              : undefined})})
     }
 
     return { events }

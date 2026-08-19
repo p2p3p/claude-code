@@ -3,6 +3,7 @@ import { MessageResponse } from '../../components/MessageResponse.js';
 import { Text } from '@anthropic/ink';
 import { truncateToWidth } from '../format.js';
 import type { MCPToolResult } from '../mcpValidation.js';
+import { t } from '../i18n/index.js';
 
 type CuToolInput = Record<string, unknown> & {
   coordinate?: [number, number];
@@ -33,8 +34,7 @@ const RESULT_SUMMARY: Readonly<Partial<Record<string, string>>> = {
   hold_key: 'Pressed',
   scroll: 'Scrolled',
   left_click_drag: 'Dragged',
-  open_application: 'Opened',
-};
+  open_application: 'Opened'};
 
 /**
  * Rendering overrides for `mcp__computer-use__*` tools. Spread into the MCP
@@ -52,7 +52,7 @@ export function getComputerUseMCPRenderingOverrides(toolName: string): {
 } {
   return {
     userFacingName() {
-      return `Computer Use[${toolName}]`;
+      return t('computerUse.userFacingName', toolName);
     },
 
     // AssistantToolUseMessage.tsx contract: null hides the ENTIRE row, '' shows
@@ -139,6 +139,5 @@ export function getComputerUseMCPRenderingOverrides(toolName: string): {
           <Text dimColor>{summary}</Text>
         </MessageResponse>
       );
-    },
-  };
+    }};
 }

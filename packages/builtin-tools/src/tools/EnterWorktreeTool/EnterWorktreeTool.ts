@@ -6,6 +6,7 @@ import type { Tool } from 'src/Tool.js'
 import { buildTool, type ToolDef } from 'src/Tool.js'
 import { clearMemoryFileCaches } from 'src/utils/claudemd.js'
 import { getCwd } from 'src/utils/cwd.js'
+import { t } from 'src/utils/i18n/index.js'
 import { findCanonicalGitRoot } from 'src/utils/git.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import { getPlanSlug, getPlansDirectory } from 'src/utils/plans.js'
@@ -51,10 +52,10 @@ export type Output = z.infer<OutputSchema>
 
 export const EnterWorktreeTool: Tool<InputSchema, Output> = buildTool({
   name: ENTER_WORKTREE_TOOL_NAME,
-  searchHint: 'create an isolated git worktree and switch into it',
+  searchHint: t('toolUI.enterWorktree.searchHint'),
   maxResultSizeChars: 100_000,
   async description() {
-    return 'Creates an isolated worktree (via git or configured hooks) and switches the session into it'
+    return t('toolUI.enterWorktree.description')
   },
   async prompt() {
     return getEnterWorktreeToolPrompt()
@@ -66,7 +67,7 @@ export const EnterWorktreeTool: Tool<InputSchema, Output> = buildTool({
     return outputSchema()
   },
   userFacingName() {
-    return 'Creating worktree'
+    return t('toolUI.enterWorktree.userFacingName')
   },
   shouldDefer: true,
   toAutoClassifierInput(input) {
@@ -77,7 +78,7 @@ export const EnterWorktreeTool: Tool<InputSchema, Output> = buildTool({
   async call(input) {
     // Validate not already in a worktree created by this session
     if (getCurrentWorktreeSession()) {
-      throw new Error('Already in a worktree session')
+      throw new Error(t('toolUI.enterWorktree.alreadyInWorktree'))
     }
 
     // Resolve to main repo root so worktree creation works from within a worktree
@@ -106,14 +107,14 @@ export const EnterWorktreeTool: Tool<InputSchema, Output> = buildTool({
     })
 
     const branchInfo = worktreeSession.worktreeBranch
-      ? ` on branch ${worktreeSession.worktreeBranch}`
+      ? t('toolUI.enterWorktree.onBranch') + worktreeSession.worktreeBranch
       : ''
 
     return {
       data: {
         worktreePath: worktreeSession.worktreePath,
         worktreeBranch: worktreeSession.worktreeBranch,
-        message: `Created worktree at ${worktreeSession.worktreePath}${branchInfo}. The session is now working in the worktree. Use ExitWorktree to leave mid-session, or exit the session to be prompted.`,
+        message: t('toolUI.enterWorktree.created', worktreeSession.worktreePath, branchInfo),
       },
     }
   },

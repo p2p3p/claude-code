@@ -4,15 +4,13 @@ import {
   type OAuthClientProvider,
   type OAuthDiscoveryState,
   auth as sdkAuth,
-  refreshAuthorization as sdkRefreshAuthorization,
-} from '@modelcontextprotocol/sdk/client/auth.js'
+  refreshAuthorization as sdkRefreshAuthorization} from '@modelcontextprotocol/sdk/client/auth.js'
 import {
   InvalidGrantError,
   OAuthError,
   ServerError,
   TemporarilyUnavailableError,
-  TooManyRequestsError,
-} from '@modelcontextprotocol/sdk/server/auth/errors.js'
+  TooManyRequestsError} from '@modelcontextprotocol/sdk/server/auth/errors.js'
 import {
   type AuthorizationServerMetadata,
   type OAuthClientInformation,
@@ -21,8 +19,7 @@ import {
   OAuthErrorResponseSchema,
   OAuthMetadataSchema,
   type OAuthTokens,
-  OAuthTokensSchema,
-} from '@modelcontextprotocol/sdk/shared/auth.js'
+  OAuthTokensSchema} from '@modelcontextprotocol/sdk/shared/auth.js'
 import type { FetchLike } from '@modelcontextprotocol/sdk/shared/transport.js'
 import axios from 'axios'
 import { createHash, randomBytes, randomUUID } from 'crypto'
@@ -35,6 +32,7 @@ import { MCP_CLIENT_METADATA_URL } from '../../constants/oauth.js'
 import { openBrowser } from '../../utils/browser.js'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
 import { errorMessage, getErrnoCode } from '../../utils/errors.js'
+import { t } from '../../utils/i18n/index.js'
 import * as lockfile from '../../utils/lockfile.js'
 import { logMCPDebug } from '../../utils/log.js'
 import { getPlatform } from '../../utils/platform.js'
@@ -56,8 +54,7 @@ import {
   getCachedIdpIdToken,
   getIdpClientSecret,
   getXaaIdpSettings,
-  isXaaEnabled,
-} from './xaaIdpLogin.js'
+  isXaaEnabled} from './xaaIdpLogin.js'
 
 /**
  * Timeout for individual OAuth requests (metadata discovery, token refresh, etc.)
@@ -179,14 +176,12 @@ export async function normalizeOAuthErrorBody(
         error: 'invalid_grant',
         error_description:
           result.data.error_description ??
-          `Server returned non-standard error code: ${result.data.error}`,
-      }
+          `Server returned non-standard error code: ${result.data.error}`}
     : result.data
   return new Response(jsonStringify(normalized), {
     status: 400,
     statusText: 'Bad Request',
-    headers: response.headers,
-  })
+    headers: response.headers})
 }
 /* eslint-enable eslint-plugin-n/no-unsupported-features/node-builtins */
 
@@ -262,20 +257,15 @@ async function fetchAuthServerMetadata(
 ): Promise<Awaited<ReturnType<typeof discoverAuthorizationServerMetadata>>> {
   if (configuredMetadataUrl) {
     if (!configuredMetadataUrl.startsWith('https://')) {
-      throw new Error(
-        `authServerMetadataUrl must use https:// (got: ${configuredMetadataUrl})`,
-      )
+      throw new Error(t('mcpAuth.metadataUrlMustBeHttps', configuredMetadataUrl))
     }
     const authFetch = fetchFn ?? createAuthFetch()
     const response = await authFetch(configuredMetadataUrl, {
-      headers: { Accept: 'application/json' },
-    })
+      headers: { Accept: 'application/json' }})
     if (response.ok) {
       return OAuthMetadataSchema.parse(await response.json())
     }
-    throw new Error(
-      `HTTP ${response.status} fetching configured auth server metadata from ${configuredMetadataUrl}`,
-    )
+    throw new Error(t('mcpAuth.fetchMetadataFailed', String(response.status), configuredMetadataUrl))
   }
 
   try {
@@ -283,8 +273,7 @@ async function fetchAuthServerMetadata(
       serverUrl,
       {
         ...(fetchFn && { fetchFn }),
-        ...(resourceMetadataUrl && { resourceMetadataUrl }),
-      },
+        ...(resourceMetadataUrl && { resourceMetadataUrl })},
     )
     if (authorizationServerMetadata) {
       return authorizationServerMetadata
@@ -306,8 +295,7 @@ async function fetchAuthServerMetadata(
     return undefined
   }
   return discoverAuthorizationServerMetadata(url, {
-    ...(fetchFn && { fetchFn }),
-  })
+    ...(fetchFn && { fetchFn })})
 }
 
 export class AuthenticationCancelledError extends Error {
@@ -329,8 +317,7 @@ export function getServerKey(
   const configJson = jsonStringify({
     type: serverConfig.type,
     url: serverConfig.url,
-    headers: serverConfig.headers || {},
-  })
+    headers: serverConfig.headers || {}})
 
   const hash = createHash('sha256')
     .update(configJson)
@@ -386,8 +373,7 @@ async function revokeToken({
   clientId,
   clientSecret,
   accessToken,
-  authMethod = 'client_secret_basic',
-}: {
+  authMethod = 'client_secret_basic'}: {
   serverName: string
   endpoint: string
   token: string
@@ -402,8 +388,7 @@ async function revokeToken({
   params.set('token_type_hint', tokenTypeHint)
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-  }
+    'Content-Type': 'application/x-www-form-urlencoded'}
 
   // RFC 7009 §2.1 requires client auth per RFC 6749 §2.3. XAA always uses a
   // confidential client at the AS — strict ASes (Okta/Stytch) reject public-
@@ -446,8 +431,7 @@ async function revokeToken({
       params.delete('client_id')
       params.delete('client_secret')
       await axios.post(endpoint, params, {
-        headers: { ...headers, Authorization: `Bearer ${accessToken}` },
-      })
+        headers: { ...headers, Authorization: `Bearer ${accessToken}` }})
       logMCPDebug(
         serverName,
         `Successfully revoked ${tokenTypeHint} with Bearer auth`,
@@ -531,8 +515,7 @@ export async function revokeServerTokens(
                 clientId: tokenData.clientId,
                 clientSecret: tokenData.clientSecret,
                 accessToken: tokenData.accessToken,
-                authMethod,
-              })
+                authMethod})
             } catch (error: unknown) {
               // Log but continue
               logMCPDebug(
@@ -553,8 +536,7 @@ export async function revokeServerTokens(
                 clientId: tokenData.clientId,
                 clientSecret: tokenData.clientSecret,
                 accessToken: tokenData.accessToken,
-                authMethod,
-              })
+                authMethod})
             } catch (error: unknown) {
               logMCPDebug(
                 serverName,
@@ -605,13 +587,8 @@ export async function revokeServerTokens(
                   authorizationServerUrl:
                     tokenData.discoveryState.authorizationServerUrl,
                   resourceMetadataUrl:
-                    tokenData.discoveryState.resourceMetadataUrl,
-                },
-              }
-            : {}),
-        },
-      },
-    }
+                    tokenData.discoveryState.resourceMetadataUrl}}
+            : {})}}}
     storage.update(updatedData)
     logMCPDebug(serverName, 'Preserved step-up auth state across revocation')
   }
@@ -669,22 +646,18 @@ async function performMCPXaaAuth(
   skipBrowserOpen?: boolean,
 ): Promise<void> {
   if (!serverConfig.oauth?.xaa) {
-    throw new Error('XAA: oauth.xaa must be set') // guarded by caller
+    throw new Error(t('mcpAuth.xaaMustBeSet')) // guarded by caller
   }
 
   // IdP config comes from user-level settings, not per-server.
   const idp = getXaaIdpSettings()
   if (!idp) {
-    throw new Error(
-      "XAA: no IdP connection configured. Run 'claude mcp xaa setup --issuer <url> --client-id <id> --client-secret' to configure.",
-    )
+    throw new Error(t('mcpAuth.xaaNoIdpConfigured'))
   }
 
   const clientId = serverConfig.oauth?.clientId
   if (!clientId) {
-    throw new Error(
-      `XAA: server '${serverName}' needs an AS client_id. Re-add with --client-id.`,
-    )
+    throw new Error(t('mcpAuth.xaaNeedsClientId', serverName))
   }
 
   const clientConfig = getMcpClientConfig(serverName, serverConfig)
@@ -705,9 +678,7 @@ async function performMCPXaaAuth(
       serverName,
       `XAA: secret lookup miss. wanted=${wantedKey} have=[${haveKeys.join(', ')}] configHeaders=${jsonStringify(headersForLogging)}`,
     )
-    throw new Error(
-      `XAA: AS client secret not found for '${serverName}'. Re-add with --client-secret.`,
-    )
+    throw new Error(t('mcpAuth.xaaClientSecretNotFound', serverName))
   }
 
   logMCPDebug(serverName, 'XAA: starting cross-app access flow')
@@ -732,8 +703,7 @@ async function performMCPXaaAuth(
         callbackPort: idp.callbackPort,
         onAuthorizationUrl,
         skipBrowserOpen,
-        abortSignal,
-      })
+        abortSignal})
     } catch (e) {
       if (abortSignal?.aborted) throw new AuthenticationCancelledError()
       throw e
@@ -756,8 +726,7 @@ async function performMCPXaaAuth(
           idpClientId: idp.clientId,
           idpClientSecret,
           idpIdToken: idToken,
-          idpTokenEndpoint: oidc.token_endpoint,
-        },
+          idpTokenEndpoint: oidc.token_endpoint},
         serverName,
         abortSignal,
       )
@@ -816,18 +785,13 @@ async function performMCPXaaAuth(
           // the token/revocation endpoints when MCP URL ≠ AS URL (the common
           // XAA topology).
           discoveryState: {
-            authorizationServerUrl: tokens.authorizationServerUrl,
-          },
-        },
-      },
-    })
+            authorizationServerUrl: tokens.authorizationServerUrl}}}})
 
     logMCPDebug(serverName, 'XAA: tokens saved')
     logEvent('tengu_mcp_oauth_flow_success', {
       authMethod:
         'xaa' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      idTokenCacheHit,
-    })
+      idTokenCacheHit})
   } catch (e) {
     // User-initiated cancel (Esc during IdP browser pop) isn't a failure.
     if (e instanceof AuthenticationCancelledError) {
@@ -838,8 +802,7 @@ async function performMCPXaaAuth(
         'xaa' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       xaaFailureStage:
         failureStage as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      idTokenCacheHit,
-    })
+      idTokenCacheHit})
     throw e
   }
 }
@@ -870,9 +833,7 @@ export async function performMCPOAuthFlow(
   // actionable copy rather than silently degrade to consent.
   if (serverConfig.oauth?.xaa) {
     if (!isXaaEnabled()) {
-      throw new Error(
-        `XAA is not enabled (set CLAUDE_CODE_ENABLE_XAA=1). Remove 'oauth.xaa' from server '${serverName}' to use the standard consent flow.`,
-      )
+      throw new Error(t('mcpAuth.xaaNotEnabled', serverName))
     }
     logEvent('tengu_mcp_oauth_flow_start', {
       isOAuthFlow: true,
@@ -884,10 +845,8 @@ export async function performMCPOAuthFlow(
         ? {
             mcpServerBaseUrl: getLoggingSafeMcpBaseUrl(
               serverConfig,
-            ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          }
-        : {}),
-    })
+            ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
+        : {})})
     // performMCPXaaAuth logs its own success/failure events (with
     // idTokenCacheHit + xaaFailureStage).
     await performMCPXaaAuth(
@@ -931,8 +890,7 @@ export async function performMCPOAuthFlow(
   }
   const wwwAuthParams: WWWAuthenticateParams = {
     scope: cachedStepUpScope,
-    resourceMetadataUrl,
-  }
+    resourceMetadataUrl}
 
   const flowAttemptId = randomUUID()
 
@@ -946,10 +904,8 @@ export async function performMCPOAuthFlow(
       ? {
           mcpServerBaseUrl: getLoggingSafeMcpBaseUrl(
             serverConfig,
-          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
-      : {}),
-  })
+          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
+      : {})})
 
   // Track whether we reached the token-exchange phase so the catch block can
   // attribute the failure reason correctly.
@@ -1178,8 +1134,7 @@ export async function performMCPOAuthFlow(
           const result = await sdkAuth(provider, {
             serverUrl: serverConfig.url,
             scope: wwwAuthParams.scope,
-            resourceMetadataUrl: wwwAuthParams.resourceMetadataUrl,
-          })
+            resourceMetadataUrl: wwwAuthParams.resourceMetadataUrl})
           logMCPDebug(serverName, `Initial auth result: ${result}`)
 
           if (result !== 'REDIRECT') {
@@ -1220,8 +1175,7 @@ export async function performMCPOAuthFlow(
     const result = await sdkAuth(provider, {
       serverUrl: serverConfig.url,
       authorizationCode,
-      resourceMetadataUrl: wwwAuthParams.resourceMetadataUrl,
-    })
+      resourceMetadataUrl: wwwAuthParams.resourceMetadataUrl})
 
     logMCPDebug(serverName, `Auth result: ${result}`)
 
@@ -1249,12 +1203,10 @@ export async function performMCPOAuthFlow(
           ? {
               mcpServerBaseUrl: getLoggingSafeMcpBaseUrl(
                 serverConfig,
-              ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            }
-          : {}),
-      })
+              ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
+          : {})})
     } else {
-      throw new Error('Unexpected auth result: ' + result)
+      throw new Error(t('mcpAuth.unexpectedAuthResult', result))
     }
   } catch (error) {
     logMCPDebug(serverName, `Error during auth completion: ${error}`)
@@ -1333,10 +1285,8 @@ export async function performMCPOAuthFlow(
         ? {
             mcpServerBaseUrl: getLoggingSafeMcpBaseUrl(
               serverConfig,
-            ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          }
-        : {}),
-    })
+            ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
+        : {})})
     throw error
   }
 }
@@ -1490,8 +1440,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
       logMCPDebug(this.serverName, `Found client info`)
       return {
         client_id: storedInfo.clientId,
-        client_secret: storedInfo.clientSecret,
-      }
+        client_secret: storedInfo.clientSecret}
     }
 
     // Fallback: pre-configured client ID from server config
@@ -1501,8 +1450,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
       logMCPDebug(this.serverName, `Using pre-configured client ID`)
       return {
         client_id: configClientId,
-        client_secret: clientConfig?.clientSecret,
-      }
+        client_secret: clientConfig?.clientSecret}
     }
 
     // If we don't have stored client info, return undefined to trigger registration
@@ -1529,10 +1477,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
           clientSecret: clientInformation.client_secret,
           // Provide default values for required fields if not present
           accessToken: existingData.mcpOAuth?.[serverKey]?.accessToken || '',
-          expiresAt: existingData.mcpOAuth?.[serverKey]?.expiresAt || 0,
-        },
-      },
-    }
+          expiresAt: existingData.mcpOAuth?.[serverKey]?.expiresAt || 0}}}
 
     storage.update(updatedData)
   }
@@ -1690,8 +1635,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
       refresh_token: needsStepUp ? undefined : tokenData.refreshToken,
       expires_in: expiresIn,
       scope: tokenData.scope,
-      token_type: 'Bearer',
-    }
+      token_type: 'Bearer'}
 
     logMCPDebug(this.serverName, `Returning tokens`)
     logMCPDebug(this.serverName, `Token length: ${tokens.access_token?.length}`)
@@ -1722,10 +1666,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
           accessToken: tokens.access_token,
           refreshToken: tokens.refresh_token,
           expiresAt: Date.now() + (tokens.expires_in || 3600) * 1000,
-          scope: tokens.scope,
-        },
-      },
-    }
+          scope: tokens.scope}}}
 
     storage.update(updatedData)
   }
@@ -1797,8 +1738,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
           idpClientId: idp.clientId,
           idpClientSecret,
           idpIdToken: idToken,
-          idpTokenEndpoint: oidc.token_endpoint,
-        },
+          idpTokenEndpoint: oidc.token_endpoint},
         this.serverName,
       )
       // Write directly (not via saveTokens) so clientId + clientSecret land in
@@ -1825,18 +1765,13 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
             clientId,
             clientSecret: clientConfig.clientSecret,
             discoveryState: {
-              authorizationServerUrl: tokens.authorizationServerUrl,
-            },
-          },
-        },
-      })
+              authorizationServerUrl: tokens.authorizationServerUrl}}}})
       return {
         access_token: tokens.access_token,
         token_type: 'Bearer',
         expires_in: tokens.expires_in,
         scope: tokens.scope,
-        refresh_token: tokens.refresh_token,
-      }
+        refresh_token: tokens.refresh_token}
     } catch (e) {
       if (e instanceof XaaTokenExchangeError && e.shouldClearIdToken) {
         clearIdpIdToken(idp.issuer)
@@ -1910,9 +1845,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
     // Validate URL scheme for security
     const urlString = authorizationUrl.toString()
     if (!urlString.startsWith('http://') && !urlString.startsWith('https://')) {
-      throw new Error(
-        'Invalid authorization URL: must use http:// or https:// scheme',
-      )
+      throw new Error(t('mcpAuth.invalidAuthUrlScheme'))
     }
 
     logMCPDebug(this.serverName, `Redirecting to authorization URL`)
@@ -1951,7 +1884,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
   async codeVerifier(): Promise<string> {
     if (!this._codeVerifier) {
       logMCPDebug(this.serverName, `No code verifier saved`)
-      throw new Error('No code verifier saved')
+      throw new Error(t('mcpAuth.noCodeVerifier'))
     }
     logMCPDebug(this.serverName, `Returning code verifier`)
     return this._codeVerifier
@@ -2025,11 +1958,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
           expiresAt: existingData.mcpOAuth?.[serverKey]?.expiresAt || 0,
           discoveryState: {
             authorizationServerUrl: state.authorizationServerUrl,
-            resourceMetadataUrl: state.resourceMetadataUrl,
-          },
-        },
-      },
-    }
+            resourceMetadataUrl: state.resourceMetadataUrl}}}}
 
     storage.update(updatedData)
   }
@@ -2052,8 +1981,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
         resourceMetadata:
           cached.resourceMetadata as OAuthDiscoveryState['resourceMetadata'],
         authorizationServerMetadata:
-          cached.authorizationServerMetadata as OAuthDiscoveryState['authorizationServerMetadata'],
-      }
+          cached.authorizationServerMetadata as OAuthDiscoveryState['authorizationServerMetadata']}
     }
 
     // Check config hint for direct metadata URL
@@ -2073,8 +2001,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
           return {
             authorizationServerUrl: metadata.issuer,
             authorizationServerMetadata:
-              metadata as OAuthDiscoveryState['authorizationServerMetadata'],
-          }
+              metadata as OAuthDiscoveryState['authorizationServerMetadata']}
         }
       } catch (error) {
         logMCPDebug(
@@ -2107,8 +2034,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
           realpath: false,
           onCompromised: () => {
             logMCPDebug(this.serverName, `Refresh lock was compromised`)
-          },
-        })
+          }})
         logMCPDebug(this.serverName, `Acquired refresh lock`)
         break
       } catch (e: unknown) {
@@ -2153,8 +2079,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
             refresh_token: tokenData.refreshToken,
             expires_in: expiresIn,
             scope: tokenData.scope,
-            token_type: 'Bearer',
-          }
+            token_type: 'Bearer'}
         }
         // Use the freshest refresh token from storage
         if (tokenData.refreshToken) {
@@ -2194,16 +2119,13 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
           ...(mcpServerBaseUrl
             ? {
                 mcpServerBaseUrl:
-                  mcpServerBaseUrl as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-              }
+                  mcpServerBaseUrl as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
             : {}),
           ...(reason
             ? {
                 reason:
-                  reason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-              }
-            : {}),
-        },
+                  reason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
+            : {})},
       )
     }
 
@@ -2269,8 +2191,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
             clientInformation: clientInfo,
             refreshToken,
             resource: new URL(this.serverConfig.url),
-            fetchFn: authFetch,
-          },
+            fetchFn: authFetch},
         )
 
         if (newTokens) {
@@ -2311,8 +2232,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
                 refresh_token: tokenData.refreshToken,
                 expires_in: expiresIn,
                 scope: tokenData.scope,
-                token_type: 'Bearer',
-              }
+                token_type: 'Bearer'}
             }
           }
           logMCPDebug(
@@ -2366,13 +2286,11 @@ export async function readClientSecret(): Promise<string> {
   }
 
   if (!process.stdin.isTTY) {
-    throw new Error(
-      'No TTY available to prompt for client secret. Set MCP_CLIENT_SECRET env var instead.',
-    )
+    throw new Error(t('mcpAuth.noTtyForClientSecret'))
   }
 
   return new Promise((resolve, reject) => {
-    process.stderr.write('Enter OAuth client secret: ')
+    process.stderr.write(t('mcpAuth.enterClientSecret'))
     process.stdin.setRawMode?.(true)
     let secret = ''
     const onData = (ch: Buffer) => {
@@ -2408,9 +2326,7 @@ export function saveMcpClientSecret(
     ...existingData,
     mcpOAuthClientConfig: {
       ...existingData.mcpOAuthClientConfig,
-      [serverKey]: { clientSecret },
-    },
-  })
+      [serverKey]: { clientSecret }}})
 }
 
 export function clearMcpClientConfig(

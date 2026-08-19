@@ -61,8 +61,7 @@ export function computeInitialTeamContext():
     selfAgentId: agentId,
     selfAgentName: agentName,
     isLeader,
-    teammates: {},
-  }
+    teammates: {}}
 }
 
 /**
@@ -109,9 +108,7 @@ export function initializeTeammateContextFromSession(
       selfAgentId: agentId,
       selfAgentName: agentName,
       isLeader: false,
-      teammates: {},
-    },
-  }))
+      teammates: {}}}))
 
   logForDebugging(
     `[Reconnection] Initialized agent context from session for ${agentName} in team ${teamName}`,

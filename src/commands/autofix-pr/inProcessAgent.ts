@@ -25,6 +25,5 @@ export function createAutofixTeammate(
     planModeRequired: false,
     parentSessionId: getSessionId(),
     abortController: new AbortController(),
-    taskId: randomUUID(),
-  }
+    taskId: randomUUID()}
 }

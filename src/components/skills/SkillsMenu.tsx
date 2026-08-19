@@ -5,14 +5,13 @@ import {
   type CommandBase,
   type CommandResultDisplay,
   getCommandName,
-  type PromptCommand,
-} from '../../commands.js';
+  type PromptCommand} from '../../commands.js';
 import { Box, FuzzyPicker, Text } from '@anthropic/ink';
 import type { Theme } from '@anthropic/ink';
 import { estimateSkillFrontmatterTokens } from '../../skills/loadSkillsDir.js';
 import { formatTokens } from '../../utils/format.js';
 import { getSettingSourceName, type SettingSource } from '../../utils/settings/constants.js';
-import { plural } from '../../utils/stringUtils.js';
+import { t } from '../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Dialog } from '@anthropic/ink';
 import { filterSkills } from './filterSkills.js';
@@ -64,8 +63,7 @@ export function SkillsMenu({ onExit, commands }: Props): React.ReactNode {
       skills.map(s => ({
         ...s,
         name: getCommandName(s),
-        description: s.description ?? '',
-      })),
+        description: s.description ?? ''})),
       searchQuery,
     );
   }, [skills, searchQuery]);
@@ -78,8 +76,7 @@ export function SkillsMenu({ onExit, commands }: Props): React.ReactNode {
       localSettings: [],
       flagSettings: [],
       plugin: [],
-      mcp: [],
-    };
+      mcp: []};
 
     for (const skill of filteredSkills) {
       const source = skill.source as SkillSource;
@@ -101,10 +98,10 @@ export function SkillsMenu({ onExit, commands }: Props): React.ReactNode {
 
   if (skills.length === 0) {
     return (
-      <Dialog title="Skills" subtitle="No skills found" onCancel={handleCancel} hideInputGuide>
-        <Text dimColor>Create skills in .claude/skills/ or ~/.claude/skills/</Text>
+      <Dialog title={t('skillsmenu.skills')} subtitle={t('skillsmenu.noSkillsFound')} onCancel={handleCancel} hideInputGuide>
+        <Text dimColor>{t('skillsMenu.createSkillsIn')}</Text>
         <Text dimColor italic>
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="close" />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.close')} />
         </Text>
       </Dialog>
     );
@@ -135,7 +132,7 @@ export function SkillsMenu({ onExit, commands }: Props): React.ReactNode {
         <Text color={isFocused ? ('suggestion' as keyof Theme) : undefined}>{getCommandName(skill)}</Text>
         {scopeTag && <Text color={scopeTag.color as keyof Theme}> [{scopeTag.label}]</Text>}
         <Text dimColor>
-          {pluginName ? ` · ${pluginName}` : ''} · {getSourceLabel(skill.source as SkillSource)} · {tokenDisplay} tokens
+          {pluginName ? ` · ${pluginName}` : ''} · {getSourceLabel(skill.source as SkillSource)} · {tokenDisplay} {t('skillsMenu.tokens')}
         </Text>
       </Box>
     );
@@ -148,16 +145,16 @@ export function SkillsMenu({ onExit, commands }: Props): React.ReactNode {
 
   const subtitle =
     searchQuery.trim() === ''
-      ? `${skills.length} ${plural(skills.length, 'skill')}`
-      : `${filteredSkills.length}/${skills.length} ${plural(skills.length, 'skill')}`;
+      ? t('skillsMenu.nSkills', skills.length)
+      : `${filteredSkills.length}/${skills.length} ${t('skillsMenu.nSkills', skills.length)}`;
 
   // Source group headers — rendered as section labels inside the picker list
   // via renderItem. We annotate each item with its source to detect group
   // boundary changes.
   return (
     <FuzzyPicker
-      title="Skills"
-      placeholder="Type to filter skills…"
+      title={t('skillsmenu.skills2')}
+      placeholder={t('skillsMenu.typeToFilterSkills')}
       items={orderedFilteredSkills}
       getKey={s => `${s.name}-${s.source}`}
       visibleCount={12}
@@ -167,9 +164,9 @@ export function SkillsMenu({ onExit, commands }: Props): React.ReactNode {
         onExit(`/${getCommandName(skill)}`, { display: 'user' });
       }}
       onCancel={handleCancel}
-      emptyMessage={q => (q.trim() ? `No skills matching "${q.trim()}"` : 'No skills found')}
+      emptyMessage={q => t('skillsMenu.noSkillsMatching', q.trim())}
       matchLabel={subtitle}
-      selectAction="invoke skill"
+      selectAction={t('skillsMenu.invokeSkill')}
       renderItem={(skill, isFocused) => renderSkillItem(skill, isFocused)}
     />
   );

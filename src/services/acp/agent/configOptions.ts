@@ -1,8 +1,7 @@
 import type {
   SessionModeState,
   SessionModelState,
-  SessionConfigOption,
-} from '@agentclientprotocol/sdk'
+  SessionConfigOption} from '@agentclientprotocol/sdk'
 
 export function buildConfigOptions(
   modes: SessionModeState,
@@ -20,10 +19,8 @@ export function buildConfigOptions(
         (m: SessionModeState['availableModes'][number]) => ({
           value: m.id,
           name: m.name,
-          description: m.description,
-        }),
-      ),
-    },
+          description: m.description}),
+      )},
     {
       id: 'model',
       name: 'Model',
@@ -35,10 +32,8 @@ export function buildConfigOptions(
         (m: SessionModelState['availableModels'][number]) => ({
           value: m.modelId,
           name: m.name,
-          description: m.description ?? undefined,
-        }),
-      ),
-    },
+          description: m.description ?? undefined}),
+      )},
   ] as SessionConfigOption[]
 }
 

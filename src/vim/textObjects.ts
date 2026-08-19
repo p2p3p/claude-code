@@ -7,8 +7,7 @@
 import {
   isVimPunctuation,
   isVimWhitespace,
-  isVimWordChar,
-} from '../utils/Cursor.js'
+  isVimWordChar} from '../utils/Cursor.js'
 import { getGraphemeSegmenter } from '../utils/intl.js'
 
 export type TextObjectRange = { start: number; end: number } | null
@@ -29,8 +28,7 @@ const PAIRS: Record<string, [string, string]> = {
   '>': ['<', '>'],
   '"': ['"', '"'],
   "'": ["'", "'"],
-  '`': ['`', '`'],
-}
+  '`': ['`', '`']}
 
 /**
  * Find a text object at the given position.

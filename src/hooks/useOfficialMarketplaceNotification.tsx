@@ -3,6 +3,7 @@ import { Text } from '@anthropic/ink';
 import { logForDebugging } from '../utils/debug.js';
 import { checkAndInstallOfficialMarketplace } from '../utils/plugins/officialMarketplaceStartupCheck.js';
 import { useStartupNotification } from './notifs/useStartupNotification.js';
+import { t } from '../utils/i18n/index.js';
 
 /**
  * Hook that handles official marketplace auto-installation and shows
@@ -18,28 +19,25 @@ export function useOfficialMarketplaceNotification(): void {
       logForDebugging('Showing marketplace config save failure notification');
       notifs.push({
         key: 'marketplace-config-save-failed',
-        jsx: <Text color="error">Failed to save marketplace retry info · Check ~/.claude.json permissions</Text>,
+        jsx: <Text color="error">{t('marketplaceNotif.configSaveFailed')}</Text>,
         priority: 'immediate',
-        timeoutMs: 10000,
-      });
+        timeoutMs: 10000});
     }
 
     if (result.installed) {
       logForDebugging('Showing marketplace installation success notification');
       notifs.push({
         key: 'marketplace-installed',
-        jsx: <Text color="success">✓ Anthropic marketplace installed · /plugin to see available plugins</Text>,
+        jsx: <Text color="success">{t('marketplaceNotif.installed')}</Text>,
         priority: 'immediate',
-        timeoutMs: 7000,
-      });
+        timeoutMs: 7000});
     } else if (result.skipped && result.reason === 'unknown') {
       logForDebugging('Showing marketplace installation failure notification');
       notifs.push({
         key: 'marketplace-install-failed',
-        jsx: <Text color="warning">Failed to install Anthropic marketplace · Will retry on next startup</Text>,
+        jsx: <Text color="warning">{t('marketplaceNotif.installFailed')}</Text>,
         priority: 'immediate',
-        timeoutMs: 8000,
-      });
+        timeoutMs: 8000});
     }
     // Don't show notifications for:
     // - already_installed (user already has it)

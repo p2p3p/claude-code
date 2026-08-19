@@ -11,6 +11,7 @@ import { distRoot } from './distRoot.js'
 import { isEnvDefinedFalsy } from './envUtils.js'
 import { execFileNoThrow } from './execFileNoThrow.js'
 import { findExecutable } from './findExecutable.js'
+import { t } from './i18n/index.js'
 import { logError } from './log.js'
 import { getPlatform } from './platform.js'
 import { countCharInString } from './stringUtils.js'
@@ -51,8 +52,7 @@ export const getRipgrepConfig = memoize((): RipgrepConfig => {
       mode: 'embedded',
       command: process.execPath,
       args: ['--no-config'],
-      argv0: 'rg',
-    }
+      argv0: 'rg'}
   }
 
   const rgRoot = path.resolve(__dirname, 'vendor', 'ripgrep')
@@ -103,8 +103,7 @@ export function resolveBuiltinWithFallback(
       mode: 'system',
       command: 'rg',
       args: [],
-      note: `fallback: builtin rg unavailable on ${p}, using system rg`,
-    }
+      note: t('ripgrep.fallbackNote', p)}
   }
 
   // Neither available.
@@ -112,8 +111,7 @@ export function resolveBuiltinWithFallback(
     mode: 'builtin',
     command: builtinPath,
     args: [],
-    note: `no ripgrep available on ${p}; install ripgrep via apt/pkg/brew`,
-  }
+    note: t('ripgrep.noRipgrep', p)}
 }
 
 export function ripgrepCommand(): {
@@ -125,8 +123,7 @@ export function ripgrepCommand(): {
   return {
     rgPath: config.command,
     rgArgs: config.args,
-    argv0: config.argv0,
-  }
+    argv0: config.argv0}
 }
 
 const MAX_BUFFER_SIZE = 20_000_000 // 20MB; large monorepos can have 200k+ files
@@ -190,8 +187,7 @@ function ripGrepRaw(
       argv0,
       signal: abortSignal,
       // Prevent visible console window on Windows (no-op on other platforms)
-      windowsHide: true,
-    })
+      windowsHide: true})
 
     let stdout = ''
     let stderr = ''
@@ -277,8 +273,7 @@ function ripGrepRaw(
       maxBuffer: MAX_BUFFER_SIZE,
       signal: abortSignal,
       timeout,
-      killSignal: process.platform === 'win32' ? undefined : 'SIGKILL',
-    },
+      killSignal: process.platform === 'win32' ? undefined : 'SIGKILL'},
     callback,
   )
 }
@@ -308,8 +303,7 @@ async function ripGrepFileCount(
       argv0,
       signal: abortSignal,
       windowsHide: true,
-      stdio: ['ignore', 'pipe', 'ignore'],
-    })
+      stdio: ['ignore', 'pipe', 'ignore']})
 
     let lines = 0
     child.stdout?.on('data', (chunk: Buffer) => {
@@ -358,8 +352,7 @@ export async function ripGrepStream(
       argv0,
       signal: abortSignal,
       windowsHide: true,
-      stdio: ['ignore', 'pipe', 'ignore'],
-    })
+      stdio: ['ignore', 'pipe', 'ignore']})
 
     const stripCR = (l: string) => (l.endsWith('\r') ? l.slice(0, -1) : l)
     let remainder = ''
@@ -596,8 +589,7 @@ export function getRipgrepStatus(): {
     mode: config.mode,
     path: config.command,
     working: ripgrepStatus?.working ?? null,
-    note: ripgrepStatus?.note ?? config.note,
-  }
+    note: ripgrepStatus?.note ?? config.note}
 }
 
 /**
@@ -621,8 +613,7 @@ const testRipgrepOnFirstUse = memoize(async (): Promise<void> => {
       const proc = Bun.spawn([config.command, '--version'], {
         argv0: config.argv0,
         stderr: 'ignore',
-        stdout: 'pipe',
-      })
+        stdout: 'pipe'})
 
       // Bun's ReadableStream has .text() at runtime, but TS types don't reflect it
       const [stdout, code] = await Promise.all([
@@ -631,15 +622,13 @@ const testRipgrepOnFirstUse = memoize(async (): Promise<void> => {
       ])
       test = {
         code,
-        stdout,
-      }
+        stdout}
     } else {
       test = await execFileNoThrow(
         config.command,
         [...config.args, '--version'],
         {
-          timeout: 5000,
-        },
+          timeout: 5000},
       )
     }
 
@@ -650,8 +639,7 @@ const testRipgrepOnFirstUse = memoize(async (): Promise<void> => {
       working,
       lastTested: Date.now(),
       config,
-      note: config.note,
-    }
+      note: config.note}
 
     logForDebugging(
       `Ripgrep first use test: ${working ? 'PASSED' : 'FAILED'} (mode=${config.mode}, path=${config.command})`,
@@ -660,15 +648,13 @@ const testRipgrepOnFirstUse = memoize(async (): Promise<void> => {
     // Log telemetry for actual ripgrep availability
     logEvent('tengu_ripgrep_availability', {
       working: working ? 1 : 0,
-      using_system: config.mode === 'system' ? 1 : 0,
-    })
+      using_system: config.mode === 'system' ? 1 : 0})
   } catch (error) {
     ripgrepStatus = {
       working: false,
       lastTested: Date.now(),
       config,
-      note: config.note,
-    }
+      note: config.note}
     logError(error)
   }
 })
@@ -691,8 +677,7 @@ async function codesignRipgrepIfNecessary() {
   // First, check to see if ripgrep is already signed
   const lines = (
     await execFileNoThrow('codesign', ['-vv', '-d', builtinPath], {
-      preserveOutputOnError: false,
-    })
+      preserveOutputOnError: false})
   ).stdout.split('\n')
 
   const needsSigned = lines.find(line => line.includes('linker-signed'))

@@ -13,16 +13,14 @@ import {
   executeReplace,
   executeToggleCase,
   executeX,
-  type OperatorContext,
-} from '../vim/operators.js'
+  type OperatorContext} from '../vim/operators.js'
 import { type TransitionContext, transition } from '../vim/transitions.js'
 import {
   createInitialPersistentState,
   createInitialVimState,
   type PersistentState,
   type RecordedChange,
-  type VimState,
-} from '../vim/types.js'
+  type VimState} from '../vim/types.js'
 import { type UseTextInputProps, useTextInput } from './useTextInput.js'
 
 type UseVimInputProps = Omit<UseTextInputProps, 'inputFilter'> & {
@@ -63,8 +61,7 @@ export function useVimInput(props: UseVimInputProps): VimInputState {
     if (current.mode === 'INSERT' && current.insertedText) {
       persistentRef.current.lastChange = {
         type: 'insert',
-        text: current.insertedText,
-      }
+        text: current.insertedText}
     }
 
     // Vim behavior: move cursor left by 1 when exiting insert mode
@@ -102,8 +99,7 @@ export function useVimInput(props: UseVimInputProps): VimInputState {
         ? () => {}
         : (change: RecordedChange) => {
             persistentRef.current.lastChange = change
-          },
-    }
+          }}
   }
 
   function replayLastChange(): void {
@@ -215,14 +211,12 @@ export function useVimInput(props: UseVimInputProps): VimInputState {
             insertedText: state.insertedText.slice(
               0,
               -(lastGrapheme(state.insertedText).length || 1),
-            ),
-          }
+            )}
         }
       } else {
         vimStateRef.current = {
           mode: 'INSERT',
-          insertedText: state.insertedText + input,
-        }
+          insertedText: state.insertedText + input}
       }
       textInput.onInput(input, key)
       return
@@ -245,8 +239,7 @@ export function useVimInput(props: UseVimInputProps): VimInputState {
     const ctx: TransitionContext = {
       ...createOperatorContext(cursor, false),
       onUndo: props.onUndo,
-      onDotRepeat: replayLastChange,
-    }
+      onDotRepeat: replayLastChange}
 
     // Backspace/Delete are only mapped in motion-expecting states. In
     // literal-char states (replace, find, operatorFind), mapping would turn
@@ -311,6 +304,5 @@ export function useVimInput(props: UseVimInputProps): VimInputState {
     ...textInput,
     onInput: handleVimInput,
     mode,
-    setMode: setModeExternal,
-  }
+    setMode: setModeExternal}
 }

@@ -39,14 +39,12 @@ async function _fetchMetricsEnabled(): Promise<MetricsEnabledResponse> {
   const headers = {
     'Content-Type': 'application/json',
     'User-Agent': getClaudeCodeUserAgent(),
-    ...authResult.headers,
-  }
+    ...authResult.headers}
 
   const endpoint = `https://api.anthropic.com/api/claude_code/organizations/metrics_enabled`
   const response = await axios.get<MetricsEnabledResponse>(endpoint, {
     headers,
-    timeout: 5000,
-  })
+    timeout: 5000})
   return response.data
 }
 
@@ -60,8 +58,7 @@ async function _checkMetricsEnabledAPI(): Promise<MetricsStatus> {
 
   try {
     const data = await withOAuth401Retry(_fetchMetricsEnabled, {
-      also403Revoked: true,
-    })
+      also403Revoked: true})
 
     logForDebugging(
       `Metrics opt-out API response: enabled=${data.metrics_logging_enabled}`,
@@ -69,8 +66,7 @@ async function _checkMetricsEnabledAPI(): Promise<MetricsStatus> {
 
     return {
       enabled: data.metrics_logging_enabled,
-      hasError: false,
-    }
+      hasError: false}
   } catch (error) {
     logForDebugging(
       `Failed to check metrics opt-out status: ${errorMessage(error)}`,
@@ -109,9 +105,7 @@ async function refreshMetricsStatus(): Promise<MetricsStatus> {
     ...current,
     metricsStatusCache: {
       enabled: result.enabled,
-      timestamp: Date.now(),
-    },
-  }))
+      timestamp: Date.now()}}))
   return result
 }
 
@@ -145,8 +139,7 @@ export async function checkMetricsEnabled(): Promise<MetricsStatus> {
     }
     return {
       enabled: cached.enabled,
-      hasError: false,
-    }
+      hasError: false}
   }
 
   // First-ever run on this machine: block on the network to populate disk.

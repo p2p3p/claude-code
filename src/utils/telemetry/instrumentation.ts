@@ -7,28 +7,23 @@ import {
   envDetector,
   hostDetector,
   osDetector,
-  resourceFromAttributes,
-} from '@opentelemetry/resources'
+  resourceFromAttributes} from '@opentelemetry/resources'
 import {
   BatchLogRecordProcessor,
   ConsoleLogRecordExporter,
-  LoggerProvider,
-} from '@opentelemetry/sdk-logs'
+  LoggerProvider} from '@opentelemetry/sdk-logs'
 import {
   ConsoleMetricExporter,
   MeterProvider,
-  PeriodicExportingMetricReader,
-} from '@opentelemetry/sdk-metrics'
+  PeriodicExportingMetricReader} from '@opentelemetry/sdk-metrics'
 import {
   BasicTracerProvider,
   BatchSpanProcessor,
-  ConsoleSpanExporter,
-} from '@opentelemetry/sdk-trace-base'
+  ConsoleSpanExporter} from '@opentelemetry/sdk-trace-base'
 import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
-  SEMRESATTRS_HOST_ARCH,
-} from '@opentelemetry/semantic-conventions'
+  SEMRESATTRS_HOST_ARCH} from '@opentelemetry/semantic-conventions'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import {
   getLoggerProvider,
@@ -37,14 +32,12 @@ import {
   setEventLogger,
   setLoggerProvider,
   setMeterProvider,
-  setTracerProvider,
-} from 'src/bootstrap/state.js'
+  setTracerProvider} from 'src/bootstrap/state.js'
 import {
   getOtelHeadersFromHelper,
   getSubscriptionType,
   is1PApiCustomer,
-  isClaudeAISubscriber,
-} from 'src/utils/auth.js'
+  isClaudeAISubscriber} from 'src/utils/auth.js'
 import { getPlatform, getWslVersion } from 'src/utils/platform.js'
 
 import { getCACertificates } from '../caCerts.js'
@@ -63,8 +56,7 @@ import { ClaudeCodeDiagLogger } from './logger.js'
 import { initializePerfettoTracing } from './perfettoTracing.js'
 import {
   endInteractionSpan,
-  isEnhancedTelemetryEnabled,
-} from './sessionTracing.js'
+  isEnhancedTelemetryEnabled} from './sessionTracing.js'
 
 const DEFAULT_METRICS_EXPORT_INTERVAL_MS = 60000
 const DEFAULT_LOGS_EXPORT_INTERVAL_MS = 5000
@@ -208,8 +200,7 @@ async function getOtlpReaders() {
     if ('export' in exporter) {
       return new PeriodicExportingMetricReader({
         exporter,
-        exportIntervalMillis: exportInterval,
-      })
+        exportIntervalMillis: exportInterval})
     }
     return exporter
   })
@@ -365,23 +356,19 @@ async function initializeBetaTracing(
   ])
 
   const httpConfig = {
-    url: `${endpoint}/v1/traces`,
-  }
+    url: `${endpoint}/v1/traces`}
 
   const logHttpConfig = {
-    url: `${endpoint}/v1/logs`,
-  }
+    url: `${endpoint}/v1/logs`}
 
   // Initialize trace exporter
   const traceExporter = new OTLPTraceExporter(httpConfig)
   const spanProcessor = new BatchSpanProcessor(traceExporter, {
-    scheduledDelayMillis: DEFAULT_TRACES_EXPORT_INTERVAL_MS,
-  })
+    scheduledDelayMillis: DEFAULT_TRACES_EXPORT_INTERVAL_MS})
 
   const tracerProvider = new BasicTracerProvider({
     resource,
-    spanProcessors: [spanProcessor],
-  })
+    spanProcessors: [spanProcessor]})
 
   trace.setGlobalTracerProvider(tracerProvider)
   setTracerProvider(tracerProvider)
@@ -392,10 +379,8 @@ async function initializeBetaTracing(
     resource,
     processors: [
       new BatchLogRecordProcessor(logExporter, {
-        scheduledDelayMillis: DEFAULT_LOGS_EXPORT_INTERVAL_MS,
-      }),
-    ],
-  })
+        scheduledDelayMillis: DEFAULT_LOGS_EXPORT_INTERVAL_MS}),
+    ]})
 
   logs.setGlobalLoggerProvider(loggerProvider)
   setLoggerProvider(loggerProvider)
@@ -473,8 +458,7 @@ export async function initializeTelemetry() {
   const platform = getPlatform()
   const baseAttributes: Record<string, string> = {
     [ATTR_SERVICE_NAME]: 'claude-code',
-    [ATTR_SERVICE_VERSION]: MACRO.VERSION,
-  }
+    [ATTR_SERVICE_VERSION]: MACRO.VERSION}
 
   // Add WSL-specific attributes if running on WSL
   if (platform === 'wsl') {
@@ -495,8 +479,7 @@ export async function initializeTelemetry() {
   const hostDetected = hostDetector.detect()
   const hostArchAttributes = hostDetected.attributes?.[SEMRESATTRS_HOST_ARCH]
     ? {
-        [SEMRESATTRS_HOST_ARCH]: hostDetected.attributes[SEMRESATTRS_HOST_ARCH],
-      }
+        [SEMRESATTRS_HOST_ARCH]: hostDetected.attributes[SEMRESATTRS_HOST_ARCH]}
     : {}
   const hostArchResource = resourceFromAttributes(hostArchAttributes)
 
@@ -520,8 +503,7 @@ export async function initializeTelemetry() {
     const meterProvider = new MeterProvider({
       resource,
       views: [],
-      readers,
-    })
+      readers})
     setMeterProvider(meterProvider)
 
     // Register shutdown for beta tracing
@@ -568,8 +550,7 @@ export async function initializeTelemetry() {
   const meterProvider = new MeterProvider({
     resource,
     views: [],
-    readers,
-  })
+    readers})
 
   // Store reference in state for flushing
   setMeterProvider(meterProvider)
@@ -592,10 +573,8 @@ export async function initializeTelemetry() {
                 process.env.OTEL_LOGS_EXPORT_INTERVAL ||
                   DEFAULT_LOGS_EXPORT_INTERVAL_MS.toString(),
                 10,
-              ),
-            }),
-        ),
-      })
+              )}),
+        )})
 
       // Register the logger provider globally
       logs.setGlobalLoggerProvider(loggerProvider)
@@ -639,14 +618,12 @@ export async function initializeTelemetry() {
               process.env.OTEL_TRACES_EXPORT_INTERVAL ||
                 DEFAULT_TRACES_EXPORT_INTERVAL_MS.toString(),
               10,
-            ),
-          }),
+            )}),
       )
 
       const tracerProvider = new BasicTracerProvider({
         resource,
-        spanProcessors,
-      })
+        spanProcessors})
 
       // Register the tracer provider globally
       trace.setGlobalTracerProvider(tracerProvider)
@@ -745,8 +722,7 @@ export async function flushTelemetry(): Promise<void> {
       )
     } else {
       logForDebugging(`Telemetry flush failed: ${errorMessage(error)}`, {
-        level: 'error',
-      })
+        level: 'error'})
     }
     // Don't throw - allow logout to continue even if flush fails
   }
@@ -801,8 +777,7 @@ function getOTLPExporterConfig() {
     if (mtlsConfig || caCerts) {
       config.httpAgentOptions = {
         ...mtlsConfig,
-        ...(caCerts && { ca: caCerts }),
-      }
+        ...(caCerts && { ca: caCerts })}
     }
     return config
   }
@@ -817,10 +792,8 @@ function getOTLPExporterConfig() {
             ...(mtlsConfig && {
               cert: mtlsConfig.cert,
               key: mtlsConfig.key,
-              passphrase: mtlsConfig.passphrase,
-            }),
-            ...(caCerts && { ca: caCerts }),
-          })
+              passphrase: mtlsConfig.passphrase}),
+            ...(caCerts && { ca: caCerts })})
         : new HttpsProxyAgent(proxyUrl)
 
     return proxyAgent

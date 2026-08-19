@@ -1,12 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import {
   appendObservation,
-  type StoredSkillObservation,
-} from './observationStore.js'
+  type StoredSkillObservation} from './observationStore.js'
 import type {
   SkillLearningProjectContext,
-  SkillObservationOutcome,
-} from './types.js'
+  SkillObservationOutcome} from './types.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { logError } from '../../utils/log.js'
 
@@ -133,8 +131,7 @@ function baseObservation(
     // Persist turn so runtimeObserver can filter tool-hook observations by
     // the current turn rather than sweeping all historical tool-hook data
     // (codex review Q1).
-    turn: ctx.turn,
-  }
+    turn: ctx.turn}
 }
 
 // Cached import promise — resolved once so the hot path pays no repeated
@@ -158,8 +155,7 @@ function _getDeps() {
       resolveProjectContext: pc.resolveProjectContext,
       isSkillLearningEnabled: fc.isSkillLearningEnabled,
       RUNTIME_SESSION_ID: ro.RUNTIME_SESSION_ID,
-      getRuntimeTurn: ro.getRuntimeTurn,
-    }))
+      getRuntimeTurn: ro.getRuntimeTurn}))
   }
   return _depImportCache
 }
@@ -190,8 +186,7 @@ export async function runToolCallWithSkillLearningHooks<T>(
       resolveProjectContext,
       isSkillLearningEnabled,
       RUNTIME_SESSION_ID,
-      getRuntimeTurn,
-    } = await _getDeps()
+      getRuntimeTurn} = await _getDeps()
     if (!isSkillLearningEnabled()) {
       return invoke()
     }
@@ -206,8 +201,7 @@ export async function runToolCallWithSkillLearningHooks<T>(
       projectId: project.projectId,
       projectName: project.projectName,
       cwd: project.cwd,
-      project,
-    }
+      project}
     // Fire-and-forget: do NOT await — tool invoke must not be blocked.
     void recordToolStart(ctx, toolName, input).catch(e => {
       logForDebugging('skill-learning: recordToolStart error')
@@ -250,8 +244,7 @@ export async function recordToolStart(
     ...baseObservation(ctx),
     event: 'tool_start',
     toolName,
-    toolInput: stringify(input),
-  }
+    toolInput: stringify(input)}
   return appendObservation(observation, { project: ctx.project })
 }
 
@@ -267,8 +260,7 @@ export async function recordToolComplete(
     event: 'tool_complete',
     toolName,
     toolOutput: stringify(output),
-    outcome,
-  }
+    outcome}
   return appendObservation(observation, { project: ctx.project })
 }
 
@@ -283,8 +275,7 @@ export async function recordToolError(
     event: 'tool_complete',
     toolName,
     toolOutput: stringify(error),
-    outcome: 'failure',
-  }
+    outcome: 'failure'}
   return appendObservation(observation, { project: ctx.project })
 }
 
@@ -296,8 +287,7 @@ export async function recordUserCorrection(
   const observation: StoredSkillObservation = {
     ...baseObservation(ctx),
     event: 'user_message',
-    messageText,
-  }
+    messageText}
   return appendObservation(observation, { project: ctx.project })
 }
 

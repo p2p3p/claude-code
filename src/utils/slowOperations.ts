@@ -4,8 +4,7 @@ import {
   closeSync,
   writeFileSync as fsWriteFileSync,
   fsyncSync,
-  openSync,
-} from 'fs'
+  openSync} from 'fs'
 import lodashCloneDeep from 'lodash-es/cloneDeep.js'
 import { addSlowOperation } from '../bootstrap/state.js'
 import { logForDebugging } from './debug.js'

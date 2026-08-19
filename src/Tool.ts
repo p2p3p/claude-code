@@ -1,12 +1,10 @@
 import type {
   ToolResultBlockParam,
-  ToolUseBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+  ToolUseBlockParam} from '@anthropic-ai/sdk/resources/index.mjs'
 export type { ToolResultBlockParam }
 import type {
   ElicitRequestURLParams,
-  ElicitResult,
-} from '@modelcontextprotocol/sdk/types.js'
+  ElicitResult} from '@modelcontextprotocol/sdk/types.js'
 import type { UUID } from 'crypto'
 import type { z } from 'zod/v4'
 import type { Command } from './commands.js'
@@ -24,12 +22,10 @@ export type ToolInputJSONSchema = {
 import type { Notification } from './context/notifications.js'
 import type {
   MCPServerConnection,
-  ServerResource,
-} from './services/mcp/types.js'
+  ServerResource} from './services/mcp/types.js'
 import type {
   AgentDefinition,
-  AgentDefinitionsResult,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
+  AgentDefinitionsResult} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import type {
   AssistantMessage,
   AttachmentMessage,
@@ -37,15 +33,13 @@ import type {
   ProgressMessage,
   SystemLocalCommandMessage,
   SystemMessage,
-  UserMessage,
-} from './types/message.js'
+  UserMessage} from './types/message.js'
 // Import permission types from centralized location to break import cycles
 // Import PermissionResult from centralized location to break import cycles
 import type {
   AdditionalWorkingDirectory,
   PermissionMode,
-  PermissionResult,
-} from './types/permissions.js'
+  PermissionResult} from './types/permissions.js'
 // Import tool progress types from centralized location to break import cycles
 import type {
   AgentToolProgress,
@@ -55,8 +49,7 @@ import type {
   SkillToolProgress,
   TaskOutputProgress,
   ToolProgressData,
-  WebSearchProgress,
-} from './types/tools.js'
+  WebSearchProgress} from './types/tools.js'
 import type { FileStateCache } from './utils/fileStateCache.js'
 import type { DenialTrackingState } from './utils/permissions/denialTracking.js'
 import type { SystemPrompt } from './utils/systemPromptType.js'
@@ -70,8 +63,7 @@ import type { LangfuseSpan } from './services/langfuse/index.js'
 import type {
   HookProgress,
   PromptRequest,
-  PromptResponse,
-} from './types/hooks.js'
+  PromptResponse} from './types/hooks.js'
 import type { AgentId } from './types/ids.js'
 import type { DeepImmutable } from './types/utils.js'
 import type { AttributionState } from './utils/commitAttribution.js'
@@ -135,8 +127,7 @@ export const getEmptyToolPermissionContext: () => ToolPermissionContext =
     alwaysAllowRules: {},
     alwaysDenyRules: {},
     alwaysAskRules: {},
-    isBypassPermissionsModeAvailable: true,
-  })
+    isBypassPermissionsModeAvailable: true})
 
 export type CompactProgressEvent =
   | {
@@ -776,8 +767,7 @@ const TOOL_DEFAULTS = {
   ): Promise<PermissionResult> =>
     Promise.resolve({ behavior: 'allow', updatedInput: input }),
   toAutoClassifierInput: (_input?: unknown) => '',
-  userFacingName: (_input?: unknown) => '',
-}
+  userFacingName: (_input?: unknown) => ''}
 
 // The defaults type is the ACTUAL shape of TOOL_DEFAULTS (optional params so
 // both 0-arg and full-arg call sites type-check — stubs varied in arity and
@@ -798,6 +788,5 @@ export function buildTool<D extends AnyToolDef>(def: D): BuiltTool<D> {
   return {
     ...TOOL_DEFAULTS,
     userFacingName: () => def.name,
-    ...def,
-  } as BuiltTool<D>
+    ...def} as BuiltTool<D>
 }

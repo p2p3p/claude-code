@@ -11,12 +11,12 @@ import {
   getAnthropicApiKeyWithSource,
   getApiKeyFromConfigOrMacOSKeychain,
   getAuthTokenSource,
-  isClaudeAISubscriber,
-} from './auth.js';
+  isClaudeAISubscriber} from './auth.js';
 import type { AgentDefinitionsResult } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js';
 import { getAgentDescriptionsTotalTokens, AGENT_DESCRIPTIONS_THRESHOLD } from './statusNoticeHelpers.js';
 import { isSupportedJetBrainsTerminal, toIDEDisplayName, getTerminalIdeType } from './ide.js';
 import { isJetBrainsPluginInstalledCachedSync } from './jetbrains.js';
+import { t } from './i18n/index.js';
 
 // Types
 export type StatusNoticeType = 'warning' | 'info';
@@ -58,8 +58,7 @@ const largeMemoryFilesNotice: StatusNoticeDefinition = {
         })}
       </>
     );
-  },
-};
+  }};
 
 const claudeAiSubscriberExternalTokenNotice: StatusNoticeDefinition = {
   id: 'claude-ai-external-token',
@@ -82,16 +81,14 @@ const claudeAiSubscriberExternalTokenNotice: StatusNoticeDefinition = {
         </Text>
       </Box>
     );
-  },
-};
+  }};
 
 const apiKeyConflictNotice: StatusNoticeDefinition = {
   id: 'api-key-conflict',
   type: 'warning',
   isActive: () => {
     const { source: apiKeySource } = getAnthropicApiKeyWithSource({
-      skipRetrievingKeyFromApiKeyHelper: true,
-    });
+      skipRetrievingKeyFromApiKeyHelper: true});
     return (
       !!getApiKeyFromConfigOrMacOSKeychain() &&
       (apiKeySource === 'ANTHROPIC_API_KEY' || apiKeySource === 'apiKeyHelper')
@@ -99,8 +96,7 @@ const apiKeyConflictNotice: StatusNoticeDefinition = {
   },
   render: () => {
     const { source: apiKeySource } = getAnthropicApiKeyWithSource({
-      skipRetrievingKeyFromApiKeyHelper: true,
-    });
+      skipRetrievingKeyFromApiKeyHelper: true});
     return (
       <Box flexDirection="row" marginTop={1}>
         <Text color="warning">{figures.warning}</Text>
@@ -110,16 +106,14 @@ const apiKeyConflictNotice: StatusNoticeDefinition = {
         </Text>
       </Box>
     );
-  },
-};
+  }};
 
 const bothAuthMethodsNotice: StatusNoticeDefinition = {
   id: 'both-auth-methods',
   type: 'warning',
   isActive: () => {
     const { source: apiKeySource } = getAnthropicApiKeyWithSource({
-      skipRetrievingKeyFromApiKeyHelper: true,
-    });
+      skipRetrievingKeyFromApiKeyHelper: true});
     const authTokenInfo = getAuthTokenSource();
     return (
       apiKeySource !== 'none' &&
@@ -129,8 +123,7 @@ const bothAuthMethodsNotice: StatusNoticeDefinition = {
   },
   render: () => {
     const { source: apiKeySource } = getAnthropicApiKeyWithSource({
-      skipRetrievingKeyFromApiKeyHelper: true,
-    });
+      skipRetrievingKeyFromApiKeyHelper: true});
     const authTokenInfo = getAuthTokenSource();
     return (
       <Box flexDirection="column" marginTop={1}>
@@ -159,8 +152,7 @@ const bothAuthMethodsNotice: StatusNoticeDefinition = {
         </Box>
       </Box>
     );
-  },
-};
+  }};
 
 const largeAgentDescriptionsNotice: StatusNoticeDefinition = {
   id: 'large-agent-descriptions',
@@ -175,14 +167,12 @@ const largeAgentDescriptionsNotice: StatusNoticeDefinition = {
       <Box flexDirection="row">
         <Text color="warning">{figures.warning}</Text>
         <Text color="warning">
-          Large cumulative agent descriptions will impact performance (~
-          {formatNumber(totalTokens)} tokens &gt; {formatNumber(AGENT_DESCRIPTIONS_THRESHOLD)})
-          <Text dimColor> · /agents to manage</Text>
+          {t('prompt.largeAgentDescriptions', formatNumber(totalTokens), formatNumber(AGENT_DESCRIPTIONS_THRESHOLD))}
+          <Text dimColor>{t('prompt.agentsToManage')}</Text>
         </Text>
       </Box>
     );
-  },
-};
+  }};
 
 const jetbrainsPluginNotice: StatusNoticeDefinition = {
   id: 'jetbrains-plugin-install',
@@ -213,8 +203,7 @@ const jetbrainsPluginNotice: StatusNoticeDefinition = {
         </Text>
       </Box>
     );
-  },
-};
+  }};
 
 // All notice definitions
 export const statusNoticeDefinitions: StatusNoticeDefinition[] = [

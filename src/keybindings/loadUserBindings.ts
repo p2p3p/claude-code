@@ -27,8 +27,7 @@ import type { KeybindingBlock, ParsedBinding } from './types.js'
 import {
   checkDuplicateKeysInJson,
   type KeybindingWarning,
-  validateBindings,
-} from './validate.js'
+  validateBindings} from './validate.js'
 
 /**
  * Check if keybinding customization is enabled.
@@ -85,8 +84,7 @@ function logCustomBindingsLoadedOncePerDay(userBindingCount: number): void {
   if (lastCustomBindingsLogDate === today) return
   lastCustomBindingsLogDate = today
   logEvent('tengu_custom_keybindings_loaded', {
-    user_binding_count: userBindingCount,
-  })
+    user_binding_count: userBindingCount})
 }
 
 /**
@@ -160,10 +158,8 @@ export async function loadKeybindings(): Promise<KeybindingsLoadResult> {
             type: 'parse_error',
             severity: 'error',
             message: errorMessage,
-            suggestion,
-          },
-        ],
-      }
+            suggestion},
+        ]}
     }
 
     // Validate structure - bindings must be an array of valid keybinding blocks
@@ -182,10 +178,8 @@ export async function loadKeybindings(): Promise<KeybindingsLoadResult> {
             type: 'parse_error',
             severity: 'error',
             message: errorMessage,
-            suggestion,
-          },
-        ],
-      }
+            suggestion},
+        ]}
     }
 
     const userParsed = parseBindings(userBlocks)
@@ -229,10 +223,8 @@ export async function loadKeybindings(): Promise<KeybindingsLoadResult> {
         {
           type: 'parse_error',
           severity: 'error',
-          message: `Failed to parse keybindings.json: ${errorMessage(error)}`,
-        },
-      ],
-    }
+          message: `Failed to parse keybindings.json: ${errorMessage(error)}`},
+      ]}
   }
 }
 
@@ -289,8 +281,7 @@ export function loadKeybindingsSyncWithWarnings(): KeybindingsLoadResult {
           type: 'parse_error',
           severity: 'error',
           message: 'keybindings.json must have a "bindings" array',
-          suggestion: 'Use format: { "bindings": [ ... ] }',
-        },
+          suggestion: 'Use format: { "bindings": [ ... ] }'},
       ]
       return { bindings: cachedBindings, warnings: cachedWarnings }
     }
@@ -309,8 +300,7 @@ export function loadKeybindingsSyncWithWarnings(): KeybindingsLoadResult {
           type: 'parse_error',
           severity: 'error',
           message: errorMessage,
-          suggestion,
-        },
+          suggestion},
       ]
       return { bindings: cachedBindings, warnings: cachedWarnings }
     }
@@ -388,12 +378,10 @@ export async function initializeKeybindingWatcher(): Promise<void> {
     ignoreInitial: true,
     awaitWriteFinish: {
       stabilityThreshold: FILE_STABILITY_THRESHOLD_MS,
-      pollInterval: FILE_STABILITY_POLL_INTERVAL_MS,
-    },
+      pollInterval: FILE_STABILITY_POLL_INTERVAL_MS},
     ignorePermissionErrors: true,
     usePolling: false,
-    atomic: true,
-  })
+    atomic: true})
 
   watcher.on('add', handleChange)
   watcher.on('change', handleChange)

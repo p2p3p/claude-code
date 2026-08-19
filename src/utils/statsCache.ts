@@ -91,8 +91,7 @@ function getEmptyCache(): PersistedStatsCache {
     firstSessionDate: null,
     hourCounts: {},
     totalSpeculationTimeSavedMs: 0,
-    shotDistribution: {},
-  }
+    shotDistribution: {}}
 }
 
 /**
@@ -136,8 +135,7 @@ function migrateStatsCache(
     totalSpeculationTimeSavedMs: parsed.totalSpeculationTimeSavedMs ?? 0,
     // Preserve undefined (don't default to {}) so the SHOT_STATS recompute
     // check in loadStatsCache fires for v1/v2 caches that lacked this field.
-    shotDistribution: parsed.shotDistribution,
-  }
+    shotDistribution: parsed.shotDistribution}
 }
 
 /**
@@ -324,8 +322,7 @@ export function mergeCacheWithNewStats(
         maxOutputTokens: Math.max(
           modelUsage[model]!.maxOutputTokens,
           usage.maxOutputTokens,
-        ),
-      }
+        )}
     } else {
       modelUsage[model] = { ...usage }
     }
@@ -378,13 +375,11 @@ export function mergeCacheWithNewStats(
     hourCounts,
     totalSpeculationTimeSavedMs:
       existingCache.totalSpeculationTimeSavedMs +
-      newStats.totalSpeculationTimeSavedMs,
-  }
+      newStats.totalSpeculationTimeSavedMs}
 
   if (feature('SHOT_STATS')) {
     const shotDistribution: { [shotCount: number]: number } = {
-      ...(existingCache.shotDistribution || {}),
-    }
+      ...(existingCache.shotDistribution || {})}
     for (const [count, sessions] of Object.entries(
       newStats.shotDistribution || {},
     )) {

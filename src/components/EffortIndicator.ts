@@ -3,14 +3,13 @@ import {
   EFFORT_LOW,
   EFFORT_MAX,
   EFFORT_MEDIUM,
-  EFFORT_XHIGH,
-} from '../constants/figures.js'
+  EFFORT_XHIGH} from '../constants/figures.js'
+import { t } from '../utils/i18n/index.js'
 import {
   type EffortLevel,
   type EffortValue,
   getDisplayedEffortLevel,
-  modelSupportsEffort,
-} from '../utils/effort.js'
+  modelSupportsEffort} from '../utils/effort.js'
 
 /**
  * Build the text for the effort-changed notification, e.g. "◐ medium · /effort".
@@ -22,7 +21,8 @@ export function getEffortNotificationText(
 ): string | undefined {
   if (!modelSupportsEffort(model)) return undefined
   const level = getDisplayedEffortLevel(model, effortValue)
-  return `${effortLevelToSymbol(level)} ${level} · /effort`
+  const levelLabel = t(`effortcallout.${level}`)
+  return `${effortLevelToSymbol(level)} ${levelLabel} · /effort`
 }
 
 export function effortLevelToSymbol(level: EffortLevel): string {

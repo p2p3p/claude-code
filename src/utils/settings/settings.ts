@@ -6,8 +6,7 @@ import {
   getFlagSettingsInline,
   getFlagSettingsPath,
   getOriginalCwd,
-  getUseCoworkPlugins,
-} from '../../bootstrap/state.js'
+  getUseCoworkPlugins} from '../../bootstrap/state.js'
 import { getRemoteManagedSettingsSyncFromCache } from '../../services/remoteManagedSettings/syncCacheState.js'
 import { uniq } from '../array.js'
 import { logForDebugging } from '../debug.js'
@@ -26,13 +25,11 @@ import { profileCheckpoint } from '../startupProfiler.js'
 import {
   type EditableSettingSource,
   getEnabledSettingSources,
-  type SettingSource,
-} from './constants.js'
+  type SettingSource} from './constants.js'
 import { markInternalWrite } from './internalWrites.js'
 import {
   getManagedFilePath,
-  getManagedSettingsDropInDir,
-} from './managedPath.js'
+  getManagedSettingsDropInDir} from './managedPath.js'
 import { getHkcuSettings, getMdmSettings } from './mdm/settings.js'
 import {
   getCachedParsedFile,
@@ -42,15 +39,13 @@ import {
   resetSettingsCache,
   setCachedParsedFile,
   setCachedSettingsForSource,
-  setSessionSettingsCache,
-} from './settingsCache.js'
+  setSessionSettingsCache} from './settingsCache.js'
 import { type SettingsJson, SettingsSchema } from './types.js'
 import {
   filterInvalidPermissionRules,
   formatZodError,
   type SettingsWithErrors,
-  type ValidationError,
-} from './validation.js'
+  type ValidationError} from './validation.js'
 
 /**
  * Get the path to the managed settings file based on the current platform
@@ -185,8 +180,7 @@ export function parseSettingsFile(path: string): {
     // updateSettingsForSource) can't mutate the cached entry.
     return {
       settings: cached.settings ? clone(cached.settings) : null,
-      errors: cached.errors,
-    }
+      errors: cached.errors}
   }
   const result = parseSettingsFileUncached(path)
   setCachedParsedFile(path, result)
@@ -194,8 +188,7 @@ export function parseSettingsFile(path: string): {
   // another caller reads the same cache entry.
   return {
     settings: result.settings ? clone(result.settings) : null,
-    errors: result.errors,
-  }
+    errors: result.errors}
 }
 
 function parseSettingsFileUncached(path: string): {
@@ -458,8 +451,7 @@ export function updateSettingsForSource(
           return {
             error: new Error(
               `Invalid JSON syntax in settings file at ${filePath}`,
-            ),
-          }
+            )}
         }
         if (rawData && typeof rawData === 'object') {
           existingSettings = rawData as SettingsJson
@@ -494,7 +486,9 @@ export function updateSettingsForSource(
       },
     )
 
-    // Mark this as an internal write before writing the file
+    // Mark this as an internal write before writing the file so the file
+    // watcher does not re-trigger applySettingsChange (which would cause
+    // unnecessary re-renders and could interfere with dialogs like login).
     markInternalWrite(filePath)
 
     writeFileSyncAndFlush_DEPRECATED(
@@ -605,8 +599,7 @@ export function getManagedSettingsKeysForLogging(
       'TeammateIdle',
       'TaskCreated',
       'TaskCompleted',
-    ]),
-  }
+    ])}
 
   for (const key of Object.keys(validSettings)) {
     if (
@@ -786,8 +779,7 @@ function loadSettingsFromDisk(): SettingsWithErrors {
     logForDiagnosticsNoPII('info', 'settings_load_completed', {
       duration_ms: Date.now() - startTime,
       source_count: seenFiles.size,
-      error_count: allErrors.length,
-    })
+      error_count: allErrors.length})
 
     return { settings: mergedSettings, errors: allErrors }
   } finally {
@@ -929,8 +921,7 @@ export function getAutoModeConfig():
       allow: z.array(z.string()).optional(),
       soft_deny: z.array(z.string()).optional(),
       deny: z.array(z.string()).optional(),
-      environment: z.array(z.string()).optional(),
-    })
+      environment: z.array(z.string()).optional()})
 
     const allow: string[] = []
     const soft_deny: string[] = []
@@ -962,8 +953,7 @@ export function getAutoModeConfig():
       return {
         ...(allow.length > 0 && { allow }),
         ...(soft_deny.length > 0 && { soft_deny }),
-        ...(environment.length > 0 && { environment }),
-      }
+        ...(environment.length > 0 && { environment })}
     }
   }
   return undefined

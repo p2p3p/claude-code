@@ -8,6 +8,7 @@ import { useShortcutDisplay } from '../keybindings/useShortcutDisplay.js';
 import { logForDebugging } from '../utils/debug.js';
 import { detectCurrentRepository } from '../utils/detectRepository.js';
 import { formatRelativeTime } from '../utils/format.js';
+import { t } from '../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { Select } from './CustomSelect/index.js';
 import { Byline, KeyboardShortcutHint } from '@anthropic/ink';
@@ -22,7 +23,7 @@ type Props = {
 
 type LoadErrorType = 'network' | 'auth' | 'api' | 'other';
 
-const UPDATED_STRING = 'Updated';
+const UPDATED_STRING = t('resumetask.updated');
 const SPACE_BETWEEN_TABLE_COLUMNS = '  ';
 
 export function ResumeTask({ onSelect, onCancel, isEmbedded = false }: Props): React.ReactNode {
@@ -127,9 +128,9 @@ export function ResumeTask({ onSelect, onCancel, isEmbedded = false }: Props): R
       <Box flexDirection="column" padding={1}>
         <Box flexDirection="row">
           <Spinner />
-          <Text bold>Loading Claude Code sessions…</Text>
+          <Text bold>{t('resumeTask.loading')}</Text>
         </Box>
-        <Text dimColor>{retrying ? 'Retrying…' : 'Fetching your Claude Code sessions…'}</Text>
+        <Text dimColor>{retrying ? t('resumeTask.retrying') : t('resumeTask.fetching')}</Text>
       </Box>
     );
   }
@@ -138,13 +139,13 @@ export function ResumeTask({ onSelect, onCancel, isEmbedded = false }: Props): R
     return (
       <Box flexDirection="column" padding={1}>
         <Text bold color="error">
-          Error loading Claude Code sessions
+          {t('resumetask.errorLoading')}
         </Text>
 
         {renderErrorSpecificGuidance(loadErrorType)}
 
         <Text dimColor>
-          Press <Text bold>Ctrl+R</Text> to retry · Press <Text bold>{escKey}</Text> to cancel
+          {t('resumeTask.pressCtrlR')} · {t('resumeTask.pressToCancel', escKey)}
         </Text>
       </Box>
     );
@@ -154,12 +155,12 @@ export function ResumeTask({ onSelect, onCancel, isEmbedded = false }: Props): R
     return (
       <Box flexDirection="column" padding={1}>
         <Text bold>
-          No Claude Code sessions found
-          {currentRepo && <Text> for {currentRepo}</Text>}
+          {t('resumetask.noSessions')}
+          {currentRepo && <Text>{t('resumetask.forRepo', currentRepo)}</Text>}
         </Text>
         <Box marginTop={1}>
           <Text dimColor>
-            Press <Text bold>{escKey}</Text> to cancel
+            {t('resumeTask.pressToCancel', escKey)}
           </Text>
         </Box>
       </Box>
@@ -168,8 +169,7 @@ export function ResumeTask({ onSelect, onCancel, isEmbedded = false }: Props): R
 
   const sessionMetadata = sessions.map(session => ({
     ...session,
-    timeString: formatRelativeTime(new Date(session.updated_at)),
-  }));
+    timeString: formatRelativeTime(new Date(session.updated_at))}));
   const maxTimeStringLength = Math.max(UPDATED_STRING.length, ...sessionMetadata.map(meta => meta.timeString.length));
 
   const options = sessionMetadata.map(({ timeString, title, id }) => {
@@ -178,8 +178,7 @@ export function ResumeTask({ onSelect, onCancel, isEmbedded = false }: Props): R
     // TODO: include branch name when API returns it
     return {
       label: `${paddedTime}  ${title}`,
-      value: id,
-    };
+      value: id};
   });
 
   // Adjust layout for embedded vs full-screen rendering
@@ -199,7 +198,7 @@ export function ResumeTask({ onSelect, onCancel, isEmbedded = false }: Props): R
   return (
     <Box flexDirection="column" padding={1} height={maxHeight}>
       <Text bold>
-        Select a session to resume
+        {t('resumetask.selectSession')}
         {showScrollPosition && (
           <Text dimColor>
             {' '}
@@ -213,7 +212,7 @@ export function ResumeTask({ onSelect, onCancel, isEmbedded = false }: Props): R
           <Text bold>
             {UPDATED_STRING.padEnd(maxTimeStringLength, ' ')}
             {SPACE_BETWEEN_TABLE_COLUMNS}
-            {'Session Title'}
+            {t('resumetask.sessionTitle')}
           </Text>
         </Box>
         <Select
@@ -236,9 +235,9 @@ export function ResumeTask({ onSelect, onCancel, isEmbedded = false }: Props): R
       <Box flexDirection="row">
         <Text dimColor>
           <Byline>
-            <KeyboardShortcutHint shortcut="↑/↓" action="select" />
-            <KeyboardShortcutHint shortcut="Enter" action="confirm" />
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+            <KeyboardShortcutHint shortcut="↑/↓" action={t('shortcutHint.select')} />
+            <KeyboardShortcutHint shortcut="Enter" action={t('shortcutHint.confirm')} />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
           </Byline>
         </Text>
       </Box>
@@ -284,31 +283,29 @@ function renderErrorSpecificGuidance(errorType: LoadErrorType): React.ReactNode 
     case 'network':
       return (
         <Box marginY={1} flexDirection="column">
-          <Text dimColor>Check your internet connection</Text>
+          <Text dimColor>{t('resumetask.checkYourInternetConnection')}</Text>
         </Box>
       );
 
     case 'auth':
       return (
         <Box marginY={1} flexDirection="column">
-          <Text dimColor>Teleport requires a Claude account</Text>
-          <Text dimColor>
-            Run <Text bold>/login</Text> and select &quot;Claude account with subscription&quot;
-          </Text>
+          <Text dimColor>{t('resumetask.teleportRequiresAClaudeAccount')}</Text>
+          <Text dimColor>{t('resumetask.loginHint')}</Text>
         </Box>
       );
 
     case 'api':
       return (
         <Box marginY={1} flexDirection="column">
-          <Text dimColor>Sorry, Claude encountered an error</Text>
+          <Text dimColor>{t('resumetask.sorryClaudeEncounteredAnError')}</Text>
         </Box>
       );
 
     case 'other':
       return (
         <Box marginY={1} flexDirection="row">
-          <Text dimColor>Sorry, Claude Code encountered an error</Text>
+          <Text dimColor>{t('resumetask.sorryClaudeCodeEncounteredAnError')}</Text>
         </Box>
       );
   }

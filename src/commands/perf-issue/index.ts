@@ -4,11 +4,11 @@ import { homedir } from 'node:os'
 import {
   getOriginalCwd,
   getSessionId,
-  getSessionProjectDir,
-} from '../../bootstrap/state.js'
+  getSessionProjectDir} from '../../bootstrap/state.js'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
 import { sanitizePath } from '../../utils/path.js'
 import type { Command, LocalCommandResult } from '../../types/command.js'
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * Cost rates in USD per 1M tokens, keyed by model ID prefix.
@@ -24,51 +24,43 @@ const MODEL_COST_RATES: Record<
     input: 3.0,
     output: 15.0,
     cache_creation: 3.75,
-    cache_read: 0.3,
-  },
+    cache_read: 0.3},
   // Claude Opus 4.5 / claude-opus-4 series
   'claude-opus-4': {
     input: 15.0,
     output: 75.0,
     cache_creation: 18.75,
-    cache_read: 1.5,
-  },
+    cache_read: 1.5},
   // Claude Haiku 4.5 / claude-haiku-4 series
   'claude-haiku-4': {
     input: 0.8,
     output: 4.0,
     cache_creation: 1.0,
-    cache_read: 0.08,
-  },
+    cache_read: 0.08},
   // Claude 3.7 Sonnet
   'claude-3-7-sonnet': {
     input: 3.0,
     output: 15.0,
     cache_creation: 3.75,
-    cache_read: 0.3,
-  },
+    cache_read: 0.3},
   // Claude 3.5 Sonnet
   'claude-3-5-sonnet': {
     input: 3.0,
     output: 15.0,
     cache_creation: 3.75,
-    cache_read: 0.3,
-  },
+    cache_read: 0.3},
   // Claude 3.5 Haiku
   'claude-3-5-haiku': {
     input: 0.8,
     output: 4.0,
     cache_creation: 1.0,
-    cache_read: 0.08,
-  },
+    cache_read: 0.08},
   // Claude 3 Opus
   'claude-3-opus': {
     input: 15.0,
     output: 75.0,
     cache_creation: 18.75,
-    cache_read: 1.5,
-  },
-}
+    cache_read: 1.5}}
 
 type CostRates = {
   input: number
@@ -191,8 +183,7 @@ function analyzeLog(logPath: string, maxLines = MAX_LOG_LINES): AnalyzedLog {
     input_tokens: 0,
     output_tokens: 0,
     cache_creation_input_tokens: 0,
-    cache_read_input_tokens: 0,
-  }
+    cache_read_input_tokens: 0}
   const toolCounts: Record<string, number> = {}
   const toolDurations: Record<string, number[]> = {}
   const pendingToolUses = new Map<string, ToolTiming>()
@@ -300,8 +291,7 @@ function analyzeLog(logPath: string, maxLines = MAX_LOG_LINES): AnalyzedLog {
     detectedModel,
     firstTimestampMs,
     lastTimestampMs,
-    wallClockSeconds,
-  }
+    wallClockSeconds}
 }
 
 function top10Tools(toolCounts: Record<string, number>): string[] {
@@ -330,8 +320,7 @@ function formatReportMarkdown(
     cacheHitRate,
     estimatedCostUsd,
     detectedModel,
-    wallClockSeconds,
-  } = analyzed
+    wallClockSeconds} = analyzed
   const m = process.memoryUsage()
   const cpu = process.cpuUsage()
   const totalTokens =
@@ -350,64 +339,64 @@ function formatReportMarkdown(
     )
 
   return [
-    '# Claude Code Performance Snapshot',
+    t('perfIssue.title'),
     '',
-    `- timestamp: ${new Date().toISOString()}`,
-    `- session:   ${sessionId}`,
-    `- pid:       ${process.pid}`,
-    `- platform:  ${process.platform} ${process.arch}`,
-    `- bun:       ${typeof Bun !== 'undefined' ? Bun.version : 'n/a'}`,
-    `- node:      ${process.version}`,
-    `- uptime:    ${process.uptime().toFixed(1)}s`,
+    t('perfIssue.timestamp', new Date().toISOString()),
+    t('perfIssue.session', sessionId),
+    t('perfIssue.pid', String(process.pid)),
+    t('perfIssue.platform', process.platform, process.arch),
+    t('perfIssue.bun', typeof Bun !== 'undefined' ? Bun.version : 'n/a'),
+    t('perfIssue.node', process.version),
+    t('perfIssue.uptime', process.uptime().toFixed(1)),
     '',
-    '## Memory',
-    `- rss:           ${m.rss}`,
-    `- heap used:     ${m.heapUsed}`,
-    `- heap total:    ${m.heapTotal}`,
-    `- external:      ${m.external}`,
-    `- array buffers: ${m.arrayBuffers ?? 0}`,
+    t('perfIssue.memorySection'),
+    t('perfIssue.rss', String(m.rss)),
+    t('perfIssue.heapUsed', String(m.heapUsed)),
+    t('perfIssue.heapTotal', String(m.heapTotal)),
+    t('perfIssue.external', String(m.external)),
+    t('perfIssue.arrayBuffers', String(m.arrayBuffers ?? 0)),
     '',
-    '## CPU (process.cpuUsage, microseconds)',
-    `- user:   ${cpu.user}`,
-    `- system: ${cpu.system}`,
+    t('perfIssue.cpuSection'),
+    t('perfIssue.cpuUser', String(cpu.user)),
+    t('perfIssue.cpuSystem', String(cpu.system)),
     '',
-    '## Session Token Usage',
-    `- total_tokens:          ${totalTokens.toLocaleString()}`,
-    `- input_tokens:          ${usage.input_tokens.toLocaleString()}`,
-    `- output_tokens:         ${usage.output_tokens.toLocaleString()}`,
-    `- cache_creation:        ${usage.cache_creation_input_tokens.toLocaleString()}`,
-    `- cache_read:            ${usage.cache_read_input_tokens.toLocaleString()}`,
-    `- turns (user messages): ${turnCount}`,
-    `- total log entries:     ${messageCount}`,
+    t('perfIssue.tokenUsageSection'),
+    t('perfIssue.totalTokens', totalTokens.toLocaleString()),
+    t('perfIssue.inputTokens', usage.input_tokens.toLocaleString()),
+    t('perfIssue.outputTokens', usage.output_tokens.toLocaleString()),
+    t('perfIssue.cacheCreation', usage.cache_creation_input_tokens.toLocaleString()),
+    t('perfIssue.cacheRead', usage.cache_read_input_tokens.toLocaleString()),
+    t('perfIssue.turns', String(turnCount)),
+    t('perfIssue.totalLogEntries', String(messageCount)),
     wallClockSeconds !== null
-      ? `- wall_clock_seconds:    ${wallClockSeconds.toFixed(1)}`
+      ? t('perfIssue.wallClockSeconds', wallClockSeconds.toFixed(1))
       : '',
     '',
-    '## Cost Estimate (approximate)',
+    t('perfIssue.costEstimateSection'),
     detectedModel
-      ? `- model: ${detectedModel}`
-      : '- model: (unknown — not present in log)',
+      ? t('perfIssue.detectedModel', detectedModel)
+      : t('perfIssue.unknownModel'),
     estimatedCostUsd !== null
-      ? `- estimated_usd: $${estimatedCostUsd.toFixed(4)}`
-      : '- estimated_usd: ~$ unknown (unrecognized model)',
-    `- cache_hit_rate: ${(cacheHitRate * 100).toFixed(1)}%`,
+      ? t('perfIssue.estimatedCost', estimatedCostUsd.toFixed(4))
+      : t('perfIssue.unknownCost'),
+    t('perfIssue.cacheHitRate', (cacheHitRate * 100).toFixed(1)),
     '',
-    '## Tool Call Counts (top 10)',
-    toolLines.length > 0 ? toolLines.join('\n') : '  (no tool calls)',
+    t('perfIssue.toolCallCountsSection'),
+    toolLines.length > 0 ? toolLines.join('\n') : t('perfIssue.noToolCalls'),
     '',
-    '## Tool Average Execution Time (top 10 by call count)',
+    t('perfIssue.toolAvgExecutionSection'),
     toolAvgLines.length > 0
       ? toolAvgLines.join('\n')
-      : '  (no timing data — tool_result/tool_use pairs not found)',
+      : t('perfIssue.noTimingData'),
     '',
-    '## Notes',
+    t('perfIssue.notesSection'),
     '',
-    'Add a description of what you were doing when the perf issue surfaced:',
+    t('perfIssue.addDescription'),
     '',
-    '- ___',
+    t('perfIssue.placeholderLine'),
     '',
-    "_(File this report in your repo's issue tracker. No network call was made._",
-    '_The fork does not transmit perf reports to Anthropic.)_',
+    t('perfIssue.footerLine1'),
+    t('perfIssue.footerLine2'),
   ]
     .filter(line => line !== '')
     .join('\n')
@@ -437,8 +426,7 @@ function formatReportJSON(sessionId: string, analyzed: AnalyzedLog): string {
         input: analyzed.usage.input_tokens,
         output: analyzed.usage.output_tokens,
         cache_creation: analyzed.usage.cache_creation_input_tokens,
-        cache_read: analyzed.usage.cache_read_input_tokens,
-      },
+        cache_read: analyzed.usage.cache_read_input_tokens},
       turns: analyzed.turnCount,
       messages: analyzed.messageCount,
       cache_hit_rate: analyzed.cacheHitRate,
@@ -448,8 +436,7 @@ function formatReportJSON(sessionId: string, analyzed: AnalyzedLog): string {
       tool_counts: analyzed.toolCounts,
       tool_avg_ms: Object.fromEntries(
         Object.entries(analyzed.toolDurations).map(([k, v]) => [k, avgMs(v)]),
-      ),
-    },
+      )},
     null,
     2,
   )
@@ -477,8 +464,7 @@ function formatReportCSV(analyzed: AnalyzedLog): string {
 const perfIssue: Command = {
   type: 'local',
   name: 'perf-issue',
-  description:
-    'Capture a performance + token-usage snapshot. Flags: --format=json|csv|md (default md)',
+  description: t('cmd.descPerfIssue'),
   isHidden: false,
   isEnabled: () => true,
   supportsNonInteractive: true,
@@ -526,8 +512,7 @@ const perfIssue: Command = {
             input_tokens: 0,
             output_tokens: 0,
             cache_creation_input_tokens: 0,
-            cache_read_input_tokens: 0,
-          },
+            cache_read_input_tokens: 0},
           toolCounts: {},
           toolDurations: {},
           turnCount: 0,
@@ -537,8 +522,7 @@ const perfIssue: Command = {
           detectedModel: null,
           firstTimestampMs: null,
           lastTimestampMs: null,
-          wallClockSeconds: null,
-        }
+          wallClockSeconds: null}
 
         let reportContent: string
         if (format === 'json') {
@@ -548,23 +532,20 @@ const perfIssue: Command = {
         } else {
           reportContent = formatReportMarkdown(sessionId, logPath, safeAnalyzed)
           if (!hasLog) {
-            reportContent += `\n\n## Session Log\n(log not found at \`${logPath}\`)`
+            reportContent += `\n\n## Session Log\n${t('perfIssue.logNotFound', logPath)}`
           }
         }
 
         writeFileSync(reportPath, reportContent, 'utf8')
         return {
           type: 'text',
-          value: `Perf snapshot written to:\n  \`${reportPath}\`\n\nFormat: ${format}\nEdit it to add notes, then attach to your bug report.`,
-        }
+          value: t('perfIssue.snapshotWritten', reportPath, format)}
       } catch (err: unknown) {
         const msg = sanitizeErrorMessage(
           err instanceof Error ? err.message : String(err),
         )
-        return { type: 'text', value: `Failed to write perf report: ${msg}` }
+        return { type: 'text', value: t('perfIssue.failedToWrite', msg) }
       }
-    },
-  }),
-}
+    }})}
 
 export default perfIssue

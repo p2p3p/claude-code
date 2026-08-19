@@ -13,8 +13,7 @@ import { logError } from '../log.js'
 import { getSecureStorage } from '../secureStorage/index.js'
 import {
   getSettings_DEPRECATED,
-  updateSettingsForSource,
-} from '../settings/settings.js'
+  updateSettingsForSource} from '../settings/settings.js'
 import { jsonParse, jsonStringify } from '../slowOperations.js'
 import { getSystemDirectories } from '../systemDirectories.js'
 import { classifyFetchError, logPluginFetch } from './fetchTelemetry.js'
@@ -262,8 +261,7 @@ export function saveMcpServerUserConfig(
       // semantics to worry about (unlike settings.json's mergeWith).
       existing.pluginSecrets[k] = {
         ...secureScrubbed,
-        ...sensitive,
-      }
+        ...sensitive}
       const result = storage.update(existing)
       if (!result.success) {
         throw new Error(
@@ -272,8 +270,7 @@ export function saveMcpServerUserConfig(
       }
       if (result.warning) {
         logForDebugging(`Server secrets save warning: ${result.warning}`, {
-          level: 'warn',
-        })
+          level: 'warn'})
       }
       if (needSecureScrub) {
         logForDebugging(
@@ -325,8 +322,7 @@ export function saveMcpServerUserConfig(
       ) as Record<string, undefined>
       settings.pluginConfigs[pluginId].mcpServers![serverName] = {
         ...nonSensitive,
-        ...scrubbed,
-      } as UserConfigValues
+        ...scrubbed} as UserConfigValues
       const result = updateSettingsForSource('userSettings', settings)
       if (result.error) {
         throw result.error
@@ -433,8 +429,7 @@ async function generateMcpConfig(
     extensionPath: extractedPath,
     systemDirs: getSystemDirectories(),
     userConfig,
-    pathSeparator: '/',
-  })
+    pathSeparator: '/'})
 
   if (!mcpConfig) {
     const error = new Error(
@@ -466,8 +461,7 @@ async function loadCacheMetadata(
     const errorObj = toError(error)
     logError(errorObj)
     logForDebugging(`Failed to load MCPB cache metadata: ${error}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return null
   }
 }
@@ -513,8 +507,7 @@ async function downloadMcpb(
           )
           onProgress(`Downloading... ${percent}%`)
         }
-      },
-    })
+      }})
 
     const data = new Uint8Array(response.data)
     // Fire telemetry before writeFile — the event measures the network
@@ -764,8 +757,7 @@ export async function loadMcpbFile(
           contentHash: metadata.contentHash,
           configSchema: manifest.user_config,
           existingConfig: savedConfig || {},
-          validationErrors: validation.valid ? [] : validation.errors,
-        }
+          validationErrors: validation.valid ? [] : validation.errors}
       }
 
       // Save config if it was provided (first time or reconfiguration)
@@ -789,8 +781,7 @@ export async function loadMcpbFile(
         manifest,
         mcpConfig,
         extractedPath: metadata.extractedPath,
-        contentHash: metadata.contentHash,
-      }
+        contentHash: metadata.contentHash}
     }
 
     // No user_config required - generate config without it
@@ -800,8 +791,7 @@ export async function loadMcpbFile(
       manifest,
       mcpConfig,
       extractedPath: metadata.extractedPath,
-      contentHash: metadata.contentHash,
-    }
+      contentHash: metadata.contentHash}
   }
 
   // Not cached or changed - need to download/load and extract
@@ -897,8 +887,7 @@ export async function loadMcpbFile(
         contentHash,
         extractedPath: extractPath,
         cachedAt: new Date().toISOString(),
-        lastChecked: new Date().toISOString(),
-      }
+        lastChecked: new Date().toISOString()}
       await saveCacheMetadata(cacheDir, source, newMetadata)
 
       // Return "needs configuration" status
@@ -909,8 +898,7 @@ export async function loadMcpbFile(
         contentHash,
         configSchema: manifest.user_config,
         existingConfig: savedConfig || {},
-        validationErrors: validation.errors,
-      }
+        validationErrors: validation.errors}
     }
 
     // Save config if it was provided (first time or reconfiguration)
@@ -936,16 +924,14 @@ export async function loadMcpbFile(
       contentHash,
       extractedPath: extractPath,
       cachedAt: new Date().toISOString(),
-      lastChecked: new Date().toISOString(),
-    }
+      lastChecked: new Date().toISOString()}
     await saveCacheMetadata(cacheDir, source, newMetadata)
 
     return {
       manifest,
       mcpConfig,
       extractedPath: extractPath,
-      contentHash,
-    }
+      contentHash}
   }
 
   // No user_config required - generate config without it
@@ -961,8 +947,7 @@ export async function loadMcpbFile(
     contentHash,
     extractedPath: extractPath,
     cachedAt: new Date().toISOString(),
-    lastChecked: new Date().toISOString(),
-  }
+    lastChecked: new Date().toISOString()}
   await saveCacheMetadata(cacheDir, source, newMetadata)
 
   logForDebugging(
@@ -973,6 +958,5 @@ export async function loadMcpbFile(
     manifest,
     mcpConfig: mcpConfig as McpServerConfig,
     extractedPath: extractPath,
-    contentHash,
-  }
+    contentHash}
 }

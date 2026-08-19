@@ -9,6 +9,7 @@ import { Select } from '../../components/CustomSelect/select.js';
 import { Byline, KeyboardShortcutHint, Pane } from '@anthropic/ink';
 import { Box, setClipboard, Text, stringWidth, type KeyboardEvent } from '@anthropic/ink';
 import { logEvent } from '../../services/analytics/index.js';
+import { t } from '../../utils/i18n/index.js';
 import type { LocalJSXCommandCall } from '../../types/command.js';
 import type { AssistantMessage, Message } from '../../types/message.js';
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js';
@@ -82,9 +83,9 @@ async function copyOrWriteToFile(text: string, filename: string): Promise<string
   // terminal support), so the file provides a reliable fallback.
   try {
     const filePath = await writeToFile(text, filename);
-    return `Copied to clipboard (${charCount} characters, ${lineCount} lines)\nAlso written to ${filePath}`;
+    return t('copyCmd.copiedToClipboardAndFile', charCount, lineCount, filePath);
   } catch {
-    return `Copied to clipboard (${charCount} characters, ${lineCount} lines)`;
+    return t('copyCmd.copiedToClipboard', charCount, lineCount);
   }
 }
 
@@ -119,24 +120,21 @@ function CopyPicker({ fullText, codeBlocks, messageAge, onDone }: PickerProps): 
 
   const options: OptionWithDescription<PickerSelection>[] = [
     {
-      label: 'Full response',
+      label: t('cmdUI.copyFull'),
       value: 'full' as const,
-      description: `${fullText.length} chars, ${countCharInString(fullText, '\n') + 1} lines`,
-    },
+      description: `${fullText.length} chars, ${countCharInString(fullText, '\n') + 1} lines`},
     ...codeBlocks.map((block, index) => {
       const blockLines = countCharInString(block.code, '\n') + 1;
       return {
         label: truncateLine(block.code, 60),
         value: index,
         description:
-          [block.lang, blockLines > 1 ? `${blockLines} lines` : undefined].filter(Boolean).join(', ') || undefined,
-      };
+          [block.lang, blockLines > 1 ? `${blockLines} lines` : undefined].filter(Boolean).join(', ') || undefined};
     }),
     {
-      label: 'Always copy full response',
+      label: t('cmdUI.alwaysCopyFullResponse'),
       value: 'always' as const,
-      description: 'Skip this picker in the future (revert via /config)',
-    },
+      description: t('cmdUI.copySkip')},
   ];
 
   function getSelectionContent(selected: PickerSelection): {
@@ -151,8 +149,7 @@ function CopyPicker({ fullText, codeBlocks, messageAge, onDone }: PickerProps): 
     return {
       text: block.code,
       filename: `copy${fileExtension(block.lang)}`,
-      blockIndex: selected,
-    };
+      blockIndex: selected};
   }
 
   async function handleSelect(selected: PickerSelection): Promise<void> {
@@ -164,17 +161,15 @@ function CopyPicker({ fullText, codeBlocks, messageAge, onDone }: PickerProps): 
       logEvent('tengu_copy', {
         block_count: codeBlocks.length,
         always: true,
-        message_age: messageAge,
-      });
+        message_age: messageAge});
       const result = await copyOrWriteToFile(content.text, content.filename);
-      onDone(`${result}\nPreference saved. Use /config to change copyFullResponse`);
+      onDone(`${result}\n${t('copyCmd.preferenceSaved')}`);
       return;
     }
     logEvent('tengu_copy', {
       selected_block: content.blockIndex,
       block_count: codeBlocks.length,
-      message_age: messageAge,
-    });
+      message_age: messageAge});
     const result = await copyOrWriteToFile(content.text, content.filename);
     onDone(result);
   }
@@ -185,13 +180,12 @@ function CopyPicker({ fullText, codeBlocks, messageAge, onDone }: PickerProps): 
       selected_block: content.blockIndex,
       block_count: codeBlocks.length,
       message_age: messageAge,
-      write_shortcut: true,
-    });
+      write_shortcut: true});
     try {
       const filePath = await writeToFile(content.text, content.filename);
-      onDone(`Written to ${filePath}`);
+      onDone(t('copyCmd.writtenTo', filePath));
     } catch (e) {
-      onDone(`Failed to write file: ${e instanceof Error ? e.message : e}`);
+      onDone(t('copyCmd.failedToWrite', e instanceof Error ? e.message : String(e)));
     }
   }
 
@@ -205,7 +199,7 @@ function CopyPicker({ fullText, codeBlocks, messageAge, onDone }: PickerProps): 
   return (
     <Pane>
       <Box flexDirection="column" gap={1} tabIndex={0} autoFocus onKeyDown={handleKeyDown}>
-        <Text dimColor>Select content to copy:</Text>
+        <Text dimColor>{t('cmdUI.copySelect')}</Text>
         <Select<PickerSelection>
           options={options}
           hideIndexes={false}
@@ -216,14 +210,14 @@ function CopyPicker({ fullText, codeBlocks, messageAge, onDone }: PickerProps): 
             void handleSelect(selected);
           }}
           onCancel={() => {
-            onDone('Copy cancelled', { display: 'system' });
+            onDone(t('cmdUI.copyCancelled'), { display: 'system' });
           }}
         />
         <Text dimColor>
           <Byline>
-            <KeyboardShortcutHint shortcut="enter" action="copy" />
-            <KeyboardShortcutHint shortcut="w" action="write to file" />
-            <KeyboardShortcutHint shortcut="esc" action="cancel" />
+            <KeyboardShortcutHint shortcut="enter" action={t('cmdUI.copyAction')} />
+            <KeyboardShortcutHint shortcut="w" action={t('cmdUI.copyWrite')} />
+            <KeyboardShortcutHint shortcut="esc" action={t('cmdUI.copyCancel')} />
           </Byline>
         </Text>
       </Box>
@@ -235,7 +229,7 @@ export const call: LocalJSXCommandCall = async (onDone, context, args) => {
   const texts = collectRecentAssistantTexts(context.messages);
 
   if (texts.length === 0) {
-    onDone('No assistant message to copy');
+    onDone(t('cmdUI.copyNoMessage'));
     return null;
   }
 
@@ -245,11 +239,11 @@ export const call: LocalJSXCommandCall = async (onDone, context, args) => {
   if (arg) {
     const n = Number(arg);
     if (!Number.isInteger(n) || n < 1) {
-      onDone(`Usage: /copy [N] where N is 1 (latest), 2, 3, \u2026 Got: ${arg}`);
+      onDone(t('cmdUI.copyUsage', arg));
       return null;
     }
     if (n > texts.length) {
-      onDone(`Only ${texts.length} assistant ${texts.length === 1 ? 'message' : 'messages'} available to copy`);
+      onDone(t('copyCmd.onlyAssistantMessages', texts.length));
       return null;
     }
     age = n - 1;
@@ -263,8 +257,7 @@ export const call: LocalJSXCommandCall = async (onDone, context, args) => {
     logEvent('tengu_copy', {
       always: config.copyFullResponse,
       block_count: codeBlocks.length,
-      message_age: age,
-    });
+      message_age: age});
     const result = await copyOrWriteToFile(text, RESPONSE_FILENAME);
     onDone(result);
     return null;

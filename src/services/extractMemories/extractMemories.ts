@@ -20,13 +20,11 @@ import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import { ENTRYPOINT_NAME } from '../../memdir/memdir.js'
 import {
   formatMemoryManifest,
-  scanMemoryFiles,
-} from '../../memdir/memoryScan.js'
+  scanMemoryFiles} from '../../memdir/memoryScan.js'
 import {
   getAutoMemPath,
   isAutoMemoryEnabled,
-  isAutoMemPath,
-} from '../../memdir/paths.js'
+  isAutoMemPath} from '../../memdir/paths.js'
 import type { Tool } from '../../Tool.js'
 import { BASH_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/BashTool/toolName.js'
 import { FILE_EDIT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileEditTool/constants.js'
@@ -38,27 +36,23 @@ import { REPL_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/REPLTool/c
 import type {
   AssistantMessage,
   Message,
-  SystemMessage,
-} from '../../types/message.js'
+  SystemMessage} from '../../types/message.js'
 import { createAbortController } from '../../utils/abortController.js'
 import { count, uniq } from '../../utils/array.js'
 import { logForDebugging } from '../../utils/debug.js'
 import {
   createCacheSafeParams,
-  runForkedAgent,
-} from '../../utils/forkedAgent.js'
+  runForkedAgent} from '../../utils/forkedAgent.js'
 import type { REPLHookContext } from '../../utils/hooks/postSamplingHooks.js'
 import {
   createMemorySavedMessage,
-  createUserMessage,
-} from '../../utils/messages.js'
+  createUserMessage} from '../../utils/messages.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../analytics/growthbook.js'
 import { logEvent } from '../analytics/index.js'
 import { sanitizeToolNameForAnalytics } from '../analytics/metadata.js'
 import {
   buildExtractAutoOnlyPrompt,
-  buildExtractCombinedPrompt,
-} from './prompts.js'
+  buildExtractCombinedPrompt} from './prompts.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const teamMemPaths = feature('TEAMMEM')
@@ -153,13 +147,11 @@ function hasMemoryWritesSince(
 function denyAutoMemTool(tool: Tool, reason: string) {
   logForDebugging(`[autoMem] denied ${tool.name}: ${reason}`)
   logEvent('tengu_auto_mem_tool_denied', {
-    tool_name: sanitizeToolNameForAnalytics(tool.name),
-  })
+    tool_name: sanitizeToolNameForAnalytics(tool.name)})
   return {
     behavior: 'deny' as const,
     message: reason,
-    decisionReason: { type: 'other' as const, reason },
-  }
+    decisionReason: { type: 'other' as const, reason }}
 }
 
 /**
@@ -326,8 +318,7 @@ export function initExtractMemories(): void {
   async function runExtraction({
     context,
     appendSystemMessage,
-    isTrailingRun,
-  }: {
+    isTrailingRun}: {
     context: REPLHookContext
     appendSystemMessage?: AppendSystemMessageFn
     isTrailingRun?: boolean
@@ -351,8 +342,7 @@ export function initExtractMemories(): void {
         lastMemoryMessageUuid = lastMessage.uuid
       }
       logEvent('tengu_extract_memories_skipped_direct_write', {
-        message_count: newMessageCount,
-      })
+        message_count: newMessageCount})
       return
     }
 
@@ -420,8 +410,7 @@ export function initExtractMemories(): void {
         skipTranscript: true,
         // Well-behaved extractions complete in 2-4 turns (read → write).
         // A hard cap prevents verification rabbit-holes from burning turns.
-        maxTurns: 5,
-      })
+        maxTurns: 5})
 
       // Advance the cursor only after a successful run. If the agent errors
       // out (caught below), the cursor stays put so those messages are
@@ -478,8 +467,7 @@ export function initExtractMemories(): void {
         files_written: writtenPaths.length,
         memories_saved: memoryPaths.length,
         team_memories_saved: teamCount,
-        duration_ms: Date.now() - startTime,
-      })
+        duration_ms: Date.now() - startTime})
 
       logForDebugging(
         `[extractMemories] writtenPaths=${writtenPaths.length} memoryPaths=${memoryPaths.length} appendSystemMessage defined=${appendSystemMessage != null}`,
@@ -495,8 +483,7 @@ export function initExtractMemories(): void {
       // Extraction is best-effort — log but don't notify on error
       logForDebugging(`[extractMemories] error: ${error}`)
       logEvent('tengu_extract_memories_error', {
-        duration_ms: Date.now() - startTime,
-      })
+        duration_ms: Date.now() - startTime})
     } finally {
       inProgress = false
 
@@ -513,8 +500,7 @@ export function initExtractMemories(): void {
         await runExtraction({
           context: trailing.context,
           appendSystemMessage: trailing.appendSystemMessage,
-          isTrailingRun: true,
-        })
+          isTrailingRun: true})
       }
     }
   }

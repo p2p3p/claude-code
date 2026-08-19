@@ -138,8 +138,7 @@ function makeLexer(src: string): Lexer {
     i: 0,
     b: 0,
     heredocs: [],
-    byteTable: null,
-  }
+    byteTable: null}
 }
 
 /** Advance one JS char, updating byte offset for UTF-8. */
@@ -320,8 +319,7 @@ function nextToken(L: Lexer, ctx: 'cmd' | 'arg' = 'arg'): Token {
       type: 'COMMENT',
       value: L.src.slice(si, L.i),
       start,
-      end: L.b,
-    }
+      end: L.b}
   }
 
   // Multi-char operators (longest match first)
@@ -484,8 +482,7 @@ function nextToken(L: Lexer, ctx: 'cmd' | 'arg' = 'arg'): Token {
       type: 'SQUOTE',
       value: L.src.slice(si, L.i),
       start,
-      end: L.b,
-    }
+      end: L.b}
   }
 
   if (c === '$') {
@@ -519,8 +516,7 @@ function nextToken(L: Lexer, ctx: 'cmd' | 'arg' = 'arg'): Token {
         type: 'ANSI_C',
         value: L.src.slice(si, L.i),
         start,
-        end: L.b,
-      }
+        end: L.b}
     }
     advance(L)
     return { type: 'DOLLAR', value: '$', start, end: L.b }
@@ -543,8 +539,7 @@ function nextToken(L: Lexer, ctx: 'cmd' | 'arg' = 'arg'): Token {
         type: 'WORD',
         value: L.src.slice(si, L.i),
         start,
-        end: L.b,
-      }
+        end: L.b}
     }
   }
 
@@ -619,8 +614,7 @@ function parseSource(source: string, timeoutMs?: number): TsNode | null {
     deadline: performance.now() + (timeoutMs ?? PARSE_TIMEOUT_MS),
     aborted: false,
     inBacktick: 0,
-    stopToken: null,
-  }
+    stopToken: null}
   try {
     const program = parseProgram(P)
     if (P.aborted) return null
@@ -670,8 +664,7 @@ function mk(
     text: sliceBytes(P, start, end),
     startIndex: start,
     endIndex: end,
-    children,
-  }
+    children}
 }
 
 function sliceBytes(P: ParseState, startByte: number, endByte: number): string {
@@ -1699,8 +1692,7 @@ function tryParseRedirect(P: ParseState, greedy = false): TsNode | null {
       bodyStart: 0,
       bodyEnd: 0,
       endStart: 0,
-      endEnd: 0,
-    })
+      endEnd: 0})
     const kids = fd ? [fd, op, startNode] : [op, startNode]
     const startIdx = fd ? fd.startIndex : op.startIndex
     // SECURITY: tree-sitter nests any pipeline/list/file_redirect appearing
@@ -2051,8 +2043,7 @@ function parseWord(P: ParseState, _ctx: 'cmd' | 'arg'): TsNode | null {
           type: 'DOLLAR',
           value: '$',
           start: P.L.b,
-          end: P.L.b + 1,
-        }
+          end: P.L.b + 1}
         advance(P.L)
         parts.push(leaf(P, '$', dTok))
         parts.push(parseDoubleQuoted(P))
@@ -2767,7 +2758,7 @@ function parseExpansionBody(P: ParseState): TsNode[] {
         // Replacement: per grammar, choice includes `seq(cmd_sub, word)`
         // which emits TWO siblings (not concatenation). Also `(` at start
         // of replacement is a regular word char, NOT array — unlike `:-`
-        // default-value context. `${v/(/(Gentoo ${x}, }` replacement
+        // default-value context. `${v/(/(Gentoo ${x}}` replacement
         // `(Gentoo ${x}, ` is (concatenation (word)(expansion)(word)).
         const repl = parseExpansionRest(P, 'replword', false)
         if (repl) {
@@ -4103,8 +4094,7 @@ const ARITH_PREC: Record<string, number> = {
   '*': 13,
   '/': 13,
   '%': 13,
-  '**': 14,
-}
+  '**': 14}
 
 /** Right-associative operators (assignment and exponent). */
 const ARITH_RIGHT_ASSOC = new Set([

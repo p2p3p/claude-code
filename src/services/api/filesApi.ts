@@ -15,23 +15,23 @@ import { count } from '../../utils/array.js'
 import { getCwd } from '../../utils/cwd.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { errorMessage } from '../../utils/errors.js'
+import { t } from '../../utils/i18n/index.js'
 import { logError } from '../../utils/log.js'
 import { sleep } from '../../utils/sleep.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../analytics/index.js'
+  logEvent} from '../analytics/index.js'
 
 // Files API is currently in beta. oauth-2025-04-20 enables Bearer OAuth
 // on public-api routes (auth.py: "oauth_auth" not in beta_versions → 404).
 const FILES_API_BETA_HEADER = 'files-api-2025-04-14,oauth-2025-04-20'
 const ANTHROPIC_VERSION = '2023-06-01'
 
-// API base URL - uses ANTHROPIC_BASE_URL set by env-manager for the appropriate environment
+// API base URL - uses BASE_URL set by env-manager for the appropriate environment
 // Falls back to public API for standalone usage
 function getDefaultApiBaseUrl(): string {
   return (
-    process.env.ANTHROPIC_BASE_URL ||
+    process.env.BASE_URL ||
     process.env.CLAUDE_CODE_API_BASE_URL ||
     'https://api.anthropic.com'
   )
@@ -119,7 +119,7 @@ async function retryWithBackoff<T>(
     }
   }
 
-  throw new Error(`${lastError} after ${MAX_RETRIES} attempts`)
+  throw new Error(t('filesApi.retriesExhausted', lastError, String(MAX_RETRIES)))
 }
 
 /**
@@ -139,8 +139,7 @@ export async function downloadFile(
   const headers = {
     Authorization: `Bearer ${config.oauthToken}`,
     'anthropic-version': ANTHROPIC_VERSION,
-    'anthropic-beta': FILES_API_BETA_HEADER,
-  }
+    'anthropic-beta': FILES_API_BETA_HEADER}
 
   logDebug(`Downloading file ${fileId} from ${url}`)
 
@@ -150,8 +149,7 @@ export async function downloadFile(
         headers,
         responseType: 'arraybuffer',
         timeout: 60000, // 60 second timeout for large files
-        validateStatus: status => status < 500,
-      })
+        validateStatus: status => status < 500})
 
       if (response.status === 200) {
         logDebug(`Downloaded file ${fileId} (${response.data.length} bytes)`)
@@ -160,13 +158,13 @@ export async function downloadFile(
 
       // Non-retriable errors - throw immediately
       if (response.status === 404) {
-        throw new Error(`File not found: ${fileId}`)
+        throw new Error(t('filesApi.fileNotFound', fileId))
       }
       if (response.status === 401) {
-        throw new Error('Authentication failed: invalid or missing API key')
+        throw new Error(t('filesApi.authFailed'))
       }
       if (response.status === 403) {
-        throw new Error(`Access denied to file: ${fileId}`)
+        throw new Error(t('filesApi.accessDenied', fileId))
       }
 
       return { done: false, error: `status ${response.status}` }
@@ -228,8 +226,7 @@ export async function downloadAndSaveFile(
       fileId,
       path: '',
       success: false,
-      error: `Invalid file path: ${relativePath}`,
-    }
+      error: t('filesApi.invalidFilePath', relativePath)}
   }
 
   try {
@@ -249,8 +246,7 @@ export async function downloadAndSaveFile(
       fileId,
       path: fullPath,
       success: true,
-      bytesWritten: content.length,
-    }
+      bytesWritten: content.length}
   } catch (error) {
     logDebugError(`Failed to download file ${fileId}: ${errorMessage(error)}`)
     if (error instanceof Error) {
@@ -261,8 +257,7 @@ export async function downloadAndSaveFile(
       fileId,
       path: fullPath,
       success: false,
-      error: errorMessage(error),
-    }
+      error: errorMessage(error)}
   }
 }
 
@@ -387,8 +382,7 @@ export async function uploadFile(
   const headers = {
     Authorization: `Bearer ${config.oauthToken}`,
     'anthropic-version': ANTHROPIC_VERSION,
-    'anthropic-beta': FILES_API_BETA_HEADER,
-  }
+    'anthropic-beta': FILES_API_BETA_HEADER}
 
   logDebug(`Uploading file ${filePath} as ${relativePath}`)
 
@@ -399,13 +393,11 @@ export async function uploadFile(
   } catch (error) {
     logEvent('tengu_file_upload_failed', {
       error_type:
-        'file_read' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'file_read' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return {
       path: relativePath,
       error: errorMessage(error),
-      success: false,
-    }
+      success: false}
   }
 
   const fileSize = content.length
@@ -413,13 +405,11 @@ export async function uploadFile(
   if (fileSize > MAX_FILE_SIZE_BYTES) {
     logEvent('tengu_file_upload_failed', {
       error_type:
-        'file_too_large' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'file_too_large' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return {
       path: relativePath,
-      error: `File exceeds maximum size of ${MAX_FILE_SIZE_BYTES} bytes (actual: ${fileSize})`,
-      success: false,
-    }
+      error: t('filesApi.fileTooLarge', String(MAX_FILE_SIZE_BYTES), String(fileSize)),
+      success: false}
   }
 
   // Use crypto.randomUUID for boundary to avoid collisions when uploads start same millisecond
@@ -461,20 +451,17 @@ export async function uploadFile(
           headers: {
             ...headers,
             'Content-Type': `multipart/form-data; boundary=${boundary}`,
-            'Content-Length': body.length.toString(),
-          },
+            'Content-Length': body.length.toString()},
           timeout: 120000, // 2 minute timeout for uploads
           signal: opts?.signal,
-          validateStatus: status => status < 500,
-        })
+          validateStatus: status => status < 500})
 
         if (response.status === 200 || response.status === 201) {
           const fileId = response.data?.id
           if (!fileId) {
             return {
               done: false,
-              error: 'Upload succeeded but no file ID returned',
-            }
+              error: t('filesApi.uploadNoFileId')}
           }
           logDebug(`Uploaded file ${filePath} -> ${fileId} (${fileSize} bytes)`)
           return {
@@ -483,36 +470,31 @@ export async function uploadFile(
               path: relativePath,
               fileId,
               size: fileSize,
-              success: true as const,
-            },
-          }
+              success: true as const}}
         }
 
         // Non-retriable errors - throw to exit retry loop
         if (response.status === 401) {
           logEvent('tengu_file_upload_failed', {
             error_type:
-              'auth' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          })
+              'auth' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
           throw new UploadNonRetriableError(
-            'Authentication failed: invalid or missing API key',
+            t('filesApi.authFailed'),
           )
         }
 
         if (response.status === 403) {
           logEvent('tengu_file_upload_failed', {
             error_type:
-              'forbidden' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          })
-          throw new UploadNonRetriableError('Access denied for upload')
+              'forbidden' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
+          throw new UploadNonRetriableError(t('filesApi.uploadAccessDenied'))
         }
 
         if (response.status === 413) {
           logEvent('tengu_file_upload_failed', {
             error_type:
-              'size' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          })
-          throw new UploadNonRetriableError('File too large for upload')
+              'size' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
+          throw new UploadNonRetriableError(t('filesApi.uploadTooLarge'))
         }
 
         return { done: false, error: `status ${response.status}` }
@@ -522,7 +504,7 @@ export async function uploadFile(
           throw error
         }
         if (axios.isCancel(error)) {
-          throw new UploadNonRetriableError('Upload canceled')
+          throw new UploadNonRetriableError(t('filesApi.uploadCanceled'))
         }
         // Network errors are retriable
         if (axios.isAxiosError(error)) {
@@ -536,18 +518,15 @@ export async function uploadFile(
       return {
         path: relativePath,
         error: error.message,
-        success: false,
-      }
+        success: false}
     }
     logEvent('tengu_file_upload_failed', {
       error_type:
-        'network' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'network' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return {
       path: relativePath,
       error: errorMessage(error),
-      success: false,
-    }
+      success: false}
   }
 }
 
@@ -622,8 +601,7 @@ export async function listFilesCreatedAfter(
   const headers = {
     Authorization: `Bearer ${config.oauthToken}`,
     'anthropic-version': ANTHROPIC_VERSION,
-    'anthropic-beta': FILES_API_BETA_HEADER,
-  }
+    'anthropic-beta': FILES_API_BETA_HEADER}
 
   logDebug(`Listing files created after ${afterCreatedAt}`)
 
@@ -633,8 +611,7 @@ export async function listFilesCreatedAfter(
   // Paginate through results
   while (true) {
     const params: Record<string, string> = {
-      after_created_at: afterCreatedAt,
-    }
+      after_created_at: afterCreatedAt}
     if (afterId) {
       params.after_id = afterId
     }
@@ -647,8 +624,7 @@ export async function listFilesCreatedAfter(
             headers,
             params,
             timeout: 60000,
-            validateStatus: status => status < 500,
-          })
+            validateStatus: status => status < 500})
 
           if (response.status === 200) {
             return { done: true, value: response.data }
@@ -657,16 +633,14 @@ export async function listFilesCreatedAfter(
           if (response.status === 401) {
             logEvent('tengu_file_list_failed', {
               error_type:
-                'auth' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            })
-            throw new Error('Authentication failed: invalid or missing API key')
+                'auth' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
+            throw new Error(t('filesApi.authFailed'))
           }
           if (response.status === 403) {
             logEvent('tengu_file_list_failed', {
               error_type:
-                'forbidden' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            })
-            throw new Error('Access denied to list files')
+                'forbidden' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
+            throw new Error(t('filesApi.listAccessDenied'))
           }
 
           return { done: false, error: `status ${response.status}` }
@@ -676,8 +650,7 @@ export async function listFilesCreatedAfter(
           }
           logEvent('tengu_file_list_failed', {
             error_type:
-              'network' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          })
+              'network' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
           return { done: false, error: error.message }
         }
       },
@@ -688,8 +661,7 @@ export async function listFilesCreatedAfter(
       allFiles.push({
         filename: f.filename,
         fileId: f.id,
-        size: f.size_bytes,
-      })
+        size: f.size_bytes})
     }
 
     if (!page.has_more) {

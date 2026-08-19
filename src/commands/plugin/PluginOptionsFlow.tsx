@@ -10,6 +10,7 @@
 import * as React from 'react';
 import type { LoadedPlugin } from '../../types/plugin.js';
 import { errorMessage } from '../../utils/errors.js';
+import { t } from '../../utils/i18n/index.js';
 import { loadMcpServerUserConfig, saveMcpServerUserConfig } from '../../utils/plugins/mcpbHandler.js';
 import { getUnconfiguredChannels, type UnconfiguredChannel } from '../../utils/plugins/mcpPluginIntegration.js';
 import { loadAllPlugins } from '../../utils/plugins/pluginLoader.js';
@@ -18,8 +19,7 @@ import {
   loadPluginOptions,
   type PluginOptionSchema,
   type PluginOptionValues,
-  savePluginOptions,
-} from '../../utils/plugins/pluginOptionsStorage.js';
+  savePluginOptions} from '../../utils/plugins/pluginOptionsStorage.js';
 import { PluginOptionsDialog } from './PluginOptionsDialog.js';
 
 /**
@@ -72,12 +72,11 @@ export function PluginOptionsFlow({ plugin, pluginId, onDone }: Props): React.Re
     if (Object.keys(unconfigured).length > 0) {
       result.push({
         key: 'top-level',
-        title: `Configure ${plugin.name}`,
-        subtitle: 'Plugin options',
+        title: t('pluginUI.configure', plugin.name),
+        subtitle: t('pluginUI.pluginOptions'),
         schema: unconfigured,
         load: () => loadPluginOptions(pluginId),
-        save: values => savePluginOptions(pluginId, values, plugin.manifest.userConfig!),
-      });
+        save: values => savePluginOptions(pluginId, values, plugin.manifest.userConfig!)});
     }
 
     // Per-channel userConfig (assistant-mode channels)
@@ -85,12 +84,11 @@ export function PluginOptionsFlow({ plugin, pluginId, onDone }: Props): React.Re
     for (const channel of channels) {
       result.push({
         key: `channel:${channel.server}`,
-        title: `Configure ${channel.displayName}`,
-        subtitle: `Plugin: ${plugin.name}`,
+        title: t('pluginUI.configure', channel.displayName),
+        subtitle: t('pluginUI.plugin', plugin.name),
         schema: channel.configSchema,
         load: () => loadMcpServerUserConfig(pluginId, channel.server) ?? undefined,
-        save: values => saveMcpServerUserConfig(pluginId, channel.server, values, channel.configSchema),
-      });
+        save: values => saveMcpServerUserConfig(pluginId, channel.server, values, channel.configSchema)});
     }
 
     return result;

@@ -3,8 +3,7 @@ import { isFeedbackSurveyDisabled } from 'src/services/analytics/config.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
 import { isAutoMemoryEnabled } from '../../memdir/paths.js';
 import { isPolicyAllowed } from '../../services/policyLimits/index.js';
 import { FILE_READ_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileReadTool/prompt.js';
@@ -72,27 +71,23 @@ export function useMemorySurvey(
   const onOpen = useCallback((appearanceId: string) => {
     logEvent(MEMORY_SURVEY_EVENT, {
       event_type: 'appeared' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      appearance_id: appearanceId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      appearance_id: appearanceId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     void logOTelEvent('feedback_survey', {
       event_type: 'appeared',
       appearance_id: appearanceId,
-      survey_type: 'memory',
-    });
+      survey_type: 'memory'});
   }, []);
 
   const onSelect = useCallback((appearanceId: string, selected: FeedbackSurveyResponse) => {
     logEvent(MEMORY_SURVEY_EVENT, {
       event_type: 'responded' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       appearance_id: appearanceId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      response: selected as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      response: selected as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     void logOTelEvent('feedback_survey', {
       event_type: 'responded',
       appearance_id: appearanceId,
       response: selected,
-      survey_type: 'memory',
-    });
+      survey_type: 'memory'});
   }, []);
 
   const shouldShowTranscriptPrompt = useCallback((selected: FeedbackSurveyResponse) => {
@@ -115,13 +110,11 @@ export function useMemorySurvey(
     logEvent(MEMORY_SURVEY_EVENT, {
       event_type: 'transcript_prompt_appeared' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       appearance_id: appearanceId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      trigger: TRANSCRIPT_SHARE_TRIGGER as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      trigger: TRANSCRIPT_SHARE_TRIGGER as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     void logOTelEvent('feedback_survey', {
       event_type: 'transcript_prompt_appeared',
       appearance_id: appearanceId,
-      survey_type: 'memory',
-    });
+      survey_type: 'memory'});
   }, []);
 
   const onTranscriptSelect = useCallback(
@@ -129,14 +122,12 @@ export function useMemorySurvey(
       logEvent(MEMORY_SURVEY_EVENT, {
         event_type: `transcript_share_${selected}` as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         appearance_id: appearanceId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        trigger: TRANSCRIPT_SHARE_TRIGGER as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        trigger: TRANSCRIPT_SHARE_TRIGGER as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
       if (selected === 'dont_ask_again') {
         saveGlobalConfig(current => ({
           ...current,
-          transcriptShareDismissed: true,
-        }));
+          transcriptShareDismissed: true}));
       }
 
       if (selected === 'yes') {
@@ -146,8 +137,7 @@ export function useMemorySurvey(
             ? 'transcript_share_submitted'
             : 'transcript_share_failed') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           appearance_id: appearanceId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          trigger: TRANSCRIPT_SHARE_TRIGGER as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        });
+          trigger: TRANSCRIPT_SHARE_TRIGGER as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
         return result.success;
       }
 
@@ -162,8 +152,7 @@ export function useMemorySurvey(
     onSelect,
     shouldShowTranscriptPrompt,
     onTranscriptPromptShown,
-    onTranscriptSelect,
-  });
+    onTranscriptSelect});
 
   const lastAssistant = useMemo(() => getLastAssistantMessage(messages), [messages]);
 

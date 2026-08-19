@@ -27,7 +27,7 @@ export function createAcpStream(
 export async function runAcpAgent(): Promise<void> {
   enableConfigs()
 
-  // Apply environment variables from settings.json (ANTHROPIC_BASE_URL,
+  // Apply environment variables from settings.json (BASE_URL,
   // ANTHROPIC_AUTH_TOKEN, model overrides, etc.) so the API client can
   // authenticate. Without this, Zed-launched processes won't have these
   // env vars in process.env.

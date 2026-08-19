@@ -32,8 +32,7 @@ function toTaskStateItem(task: Task): TaskStateItem {
     status: task.status,
     owner: task.owner,
     blocks: [...task.blocks],
-    blockedBy: [...task.blockedBy],
-  }
+    blockedBy: [...task.blockedBy]}
 }
 
 function compareTaskStateItems(a: TaskStateItem, b: TaskStateItem): number {
@@ -49,8 +48,7 @@ export function buildTaskStateSnapshot(
     tasks: tasks
       .filter(task => !task.metadata?._internal)
       .map(toTaskStateItem)
-      .sort(compareTaskStateItems),
-  }
+      .sort(compareTaskStateItems)}
 }
 
 export function getTaskStateSnapshotKey(
@@ -68,6 +66,5 @@ export function buildTaskStateMessage(
   return {
     type: 'task_state',
     uuid: randomUUID(),
-    ...snapshot,
-  }
+    ...snapshot}
 }

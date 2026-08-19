@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { BaseText, Box, Text, useTerminalSize } from '@anthropic/ink';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import { type EffortValue, getDisplayedEffortLevel, getEffortEnvOverride } from '../../utils/effort.js';
@@ -9,8 +10,7 @@ import {
   getInitialCursor,
   moveLeft,
   moveRight,
-  PANEL_POSITIONS,
-} from './effortPanelState.js';
+  PANEL_POSITIONS} from './effortPanelState.js';
 import { executeEffort } from '../../commands/effort/effort.js';
 import { useMainLoopModel } from '../../hooks/useMainLoopModel.js';
 import { useSetAppState } from '../../state/AppState.js';
@@ -24,16 +24,13 @@ import {
   computeRippleCells,
   fadeCells,
   getHueShiftAtTime,
-  rotateHue,
-} from './rippleAnimation.js';
+  rotateHue} from './rippleAnimation.js';
 
 /**
  * 每档最小宽度（足够装下 'ultracode' 9 字符 + 居中留白）。
  * 当终端窄时使用此值，保证最低可读性。
  */
 const MIN_SEGMENT = 12;
-
-const SUBLABEL_ULTRACODE = 'xhigh + workflows';
 
 // 颜色：与项目主题对齐（suggestion=Medium blue #5769F7）。
 const COLOR_LABEL_SELECTED = '#5769F7'; // 选中档位（suggestion）
@@ -136,8 +133,7 @@ export function EffortPanel({ appStateEffort, onDone }: Props): React.ReactNode 
     if (outcome.kind === 'apply' && outcome.effortUpdate) {
       setAppState(prev => ({
         ...prev,
-        effortValue: outcome.effortUpdate!.value,
-      }));
+        effortValue: outcome.effortUpdate!.value}));
     }
     onDone(outcome.message);
   }, [cursor, done, onDone, setAppState]);
@@ -155,8 +151,7 @@ export function EffortPanel({ appStateEffort, onDone }: Props): React.ReactNode 
       'effortPanel:home': () => setCursor('low'),
       'effortPanel:end': () => setCursor('ultracode'),
       'effortPanel:confirm': handleConfirm,
-      'effortPanel:cancel': handleCancel,
-    },
+      'effortPanel:cancel': handleCancel},
     { context: 'EffortPanel' },
   );
 
@@ -173,8 +168,7 @@ export function EffortPanel({ appStateEffort, onDone }: Props): React.ReactNode 
         width: panelWidth,
         time,
         sourceX: rippleSourceX,
-        sourceY: RIPPLE_SOURCE_Y,
-      });
+        sourceY: RIPPLE_SOURCE_Y});
       const overlayed = applyOverlaysToCells(cells, overlays);
       const faded = fadeCells(overlayed, fade);
       return cellsToSegments(faded);
@@ -185,9 +179,9 @@ export function EffortPanel({ appStateEffort, onDone }: Props): React.ReactNode 
   return (
     <Box ref={rippleRef} flexDirection="column" paddingX={1} width={panelWidth + 2}>
       <Text bold color="suggestion">
-        Effort
+        {t('effortpanel.title')}
       </Text>
-      {envActive && <Text color="warning">{`⚠ CLAUDE_CODE_EFFORT_LEVEL=${envRaw} overrides this session`}</Text>}
+      {envActive && <Text color="warning">{t('effortpanel.envOverride', envRaw)}</Text>}
       {showingRipple ? (
         <RippleContent
           renderRow={renderRippleRow}
@@ -201,7 +195,7 @@ export function EffortPanel({ appStateEffort, onDone }: Props): React.ReactNode 
         <>
           <PlainContent cursor={cursor} segment={segment} panelWidth={panelWidth} />
           <Box marginTop={1}>
-            <Text color="subtle">←/→ adjust · Enter confirm · Esc cancel</Text>
+            <Text color="subtle">{t('effortPanel.adjustHint')}</Text>
           </Box>
         </>
       )}
@@ -214,8 +208,7 @@ export function EffortPanel({ appStateEffort, onDone }: Props): React.ReactNode 
 function PlainContent({
   cursor,
   segment,
-  panelWidth,
-}: {
+  panelWidth}: {
   cursor: PanelPosition;
   segment: number;
   panelWidth: number;
@@ -223,8 +216,8 @@ function PlainContent({
   return (
     <>
       <Box marginTop={1} flexDirection="row" justifyContent="space-between">
-        <Text color="suggestion">Faster</Text>
-        <Text color="suggestion">Smarter</Text>
+        <Text color="suggestion">{t('effortpanel.faster')}</Text>
+        <Text color="suggestion">{t('effortpanel.smarter')}</Text>
       </Box>
       <Text color="subtle">{'─'.repeat(panelWidth)}</Text>
       <Box flexDirection="row">
@@ -248,7 +241,7 @@ function PlainContent({
       <Box flexDirection="row">
         <Box width={segment * (PANEL_POSITIONS.length - 1)} />
         <Box width={segment} justifyContent="center">
-          <Text color="subtle">{SUBLABEL_ULTRACODE}</Text>
+          <Text color="subtle">{t('effortpanel.sublabelUltracode')}</Text>
         </Box>
       </Box>
     </>
@@ -293,32 +286,30 @@ function RippleContent({ renderRow, cursor, segment, panelWidth, time }: RippleC
   const labelSelectedColor = rotateHue(COLOR_LABEL_SELECTED, hueShift);
   const labelDefaultColor = rotateHue(COLOR_LABEL_DEFAULT, hueShift);
 
-  const fasterOverlay: Overlay = { text: 'Faster', x: 0, color: overlayColor };
+  const fasterLabel = t('effortpanel.faster');
+  const smarterLabel = t('effortpanel.smarter');
+  const fasterOverlay: Overlay = { text: fasterLabel, x: 0, color: overlayColor };
   const smarterOverlay: Overlay = {
-    text: 'Smarter',
-    x: panelWidth - 'Smarter'.length,
-    color: overlayColor,
-  };
+    text: smarterLabel,
+    x: panelWidth - smarterLabel.length,
+    color: overlayColor};
   const separatorOverlay: Overlay = {
     text: '─'.repeat(panelWidth),
     x: 0,
-    color: labelDefaultColor,
-  };
+    color: labelDefaultColor};
   const cursorOverlay: Overlay = {
     text: '▲',
     x: segmentTextStartX(cursorIdx, 1, segment),
-    color: overlayColor,
-  };
+    color: overlayColor};
   const labelOverlays: Overlay[] = PANEL_POSITIONS.map((p, idx) => ({
     text: p,
     x: segmentTextStartX(idx, p.length, segment),
-    color: p === cursor ? labelSelectedColor : labelDefaultColor,
-  }));
+    color: p === cursor ? labelSelectedColor : labelDefaultColor}));
+  const sublabel = t('effortpanel.sublabelUltracode');
   const sublabelOverlay: Overlay = {
-    text: SUBLABEL_ULTRACODE,
-    x: segmentTextStartX(ultracodeIdx, SUBLABEL_ULTRACODE.length, segment),
-    color: labelDefaultColor,
-  };
+    text: sublabel,
+    x: segmentTextStartX(ultracodeIdx, sublabel.length, segment),
+    color: labelDefaultColor};
 
   // 各行 y 坐标（相对震源 RIPPLE_SOURCE_Y = 档位名行）
   //   y=-4: 顶部纯波纹行（视觉一致，无 overlay）
@@ -339,7 +330,7 @@ function RippleContent({ renderRow, cursor, segment, panelWidth, time }: RippleC
       <RippleRow segments={renderRow(0, labelOverlays)} />
       <RippleRow segments={renderRow(1, [sublabelOverlay])} />
       <RippleRow segments={renderRow(2, [])} />
-      <Text color={COLOR_LABEL_DEFAULT}>←/→ adjust · Enter confirm · Esc cancel</Text>
+      <Text color={COLOR_LABEL_DEFAULT}>{t('effortPanel.adjustHint')}</Text>
     </>
   );
 }
@@ -365,8 +356,7 @@ function RippleRow({ segments }: { segments: Segment[] }): React.ReactNode {
       tokens.push({
         text: buf,
         kind: bufIsSpace ? 'space' : 'text',
-        color: seg.color,
-      });
+        color: seg.color});
       buf = '';
       bufIsSpace = null;
     };

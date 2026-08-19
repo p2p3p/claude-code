@@ -10,21 +10,19 @@ import { getSmallFastModel } from '../utils/model/model.js'
 import { isEssentialTrafficOnly } from '../utils/privacyLevel.js'
 import type { AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS } from './analytics/index.js'
 import { logEvent } from './analytics/index.js'
-import { getAPIMetadata } from './api/claude.js'
-import { getAnthropicClient } from './api/client.js'
+import { getAPIMetadata } from './api/anthropic/index.js'
+import { getAnthropicClient } from './api/anthropic/client.js'
 import { anthropicAdapter } from './providerUsage/adapters/anthropic.js'
 import { updateProviderBuckets } from './providerUsage/store.js'
 import {
   processRateLimitHeaders,
-  shouldProcessRateLimits,
-} from './rateLimitMocking.js'
+  shouldProcessRateLimits} from './rateLimitMocking.js'
 
 // Re-export message functions from centralized location
 export {
   getRateLimitErrorMessage,
   getRateLimitWarning,
-  getUsingOverageText,
-} from './rateLimitMessages.js'
+  getUsingOverageText} from './rateLimitMessages.js'
 
 type QuotaStatus = 'allowed' | 'allowed_warning' | 'rejected'
 
@@ -57,8 +55,7 @@ const EARLY_WARNING_CONFIGS: EarlyWarningConfig[] = [
     rateLimitType: 'five_hour',
     claimAbbrev: '5h',
     windowSeconds: 5 * 60 * 60,
-    thresholds: [{ utilization: 0.9, timePct: 0.72 }],
-  },
+    thresholds: [{ utilization: 0.9, timePct: 0.72 }]},
   {
     rateLimitType: 'seven_day',
     claimAbbrev: '7d',
@@ -67,16 +64,14 @@ const EARLY_WARNING_CONFIGS: EarlyWarningConfig[] = [
       { utilization: 0.75, timePct: 0.6 },
       { utilization: 0.5, timePct: 0.35 },
       { utilization: 0.25, timePct: 0.15 },
-    ],
-  },
+    ]},
 ]
 
 // Maps claim abbreviations to rate limit types for header-based detection
 const EARLY_WARNING_CLAIM_MAP: Record<string, RateLimitType> = {
   '5h': 'five_hour',
   '7d': 'seven_day',
-  overage: 'overage',
-}
+  overage: 'overage'}
 
 /**
  * Calculate what fraction of a time window has elapsed.
@@ -129,8 +124,7 @@ export type ClaudeAILimits = {
 export let currentLimits: ClaudeAILimits = {
   status: 'allowed',
   unifiedRateLimitFallbackAvailable: false,
-  isUsingOverage: false,
-}
+  isUsingOverage: false}
 
 /**
  * Raw per-window utilization from response headers, tracked on every API
@@ -182,8 +176,7 @@ export function emitStatusChange(limits: ClaudeAILimits) {
     status:
       limits.status as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     unifiedRateLimitFallbackAvailable: limits.unifiedRateLimitFallbackAvailable,
-    hoursTillReset,
-  })
+    hoursTillReset})
 }
 
 async function makeTestQuery() {
@@ -191,8 +184,7 @@ async function makeTestQuery() {
   const anthropic = await getAnthropicClient({
     maxRetries: 0,
     model,
-    source: 'quota_check',
-  })
+    source: 'quota_check'})
   const messages: MessageParam[] = [{ role: 'user', content: 'quota' }]
   const betas = getModelBetas(model)
   return anthropic.beta.messages
@@ -201,8 +193,7 @@ async function makeTestQuery() {
       max_tokens: 1,
       messages,
       metadata: getAPIMetadata(),
-      ...(betas.length > 0 ? { betas } : {}),
-    })
+      ...(betas.length > 0 ? { betas } : {})})
     .asResponse()
 }
 
@@ -274,8 +265,7 @@ function getHeaderBasedEarlyWarning(
         utilization,
         unifiedRateLimitFallbackAvailable,
         isUsingOverage: false,
-        surpassedThreshold: Number(surpassedThreshold),
-      }
+        surpassedThreshold: Number(surpassedThreshold)}
     }
   }
 
@@ -324,8 +314,7 @@ function getTimeRelativeEarlyWarning(
     rateLimitType,
     utilization,
     unifiedRateLimitFallbackAvailable,
-    isUsingOverage: false,
-  }
+    isUsingOverage: false}
 }
 
 /**
@@ -420,8 +409,7 @@ function computeNewLimitsFromHeaders(
     ...(overageStatus && { overageStatus }),
     ...(overageResetsAt && { overageResetsAt }),
     ...(overageDisabledReason && { overageDisabledReason }),
-    isUsingOverage,
-  }
+    isUsingOverage}
 }
 
 /**
@@ -435,8 +423,7 @@ function cacheExtraUsageDisabledReason(headers: globalThis.Headers): void {
   if (cached !== reason) {
     saveGlobalConfig(current => ({
       ...current,
-      cachedExtraUsageDisabledReason: reason,
-    }))
+      cachedExtraUsageDisabledReason: reason}))
   }
 }
 
@@ -454,8 +441,7 @@ export function extractQuotaStatusFromHeaders(
       const defaultLimits: ClaudeAILimits = {
         status: 'allowed',
         unifiedRateLimitFallbackAvailable: false,
-        isUsingOverage: false,
-      }
+        isUsingOverage: false}
       emitStatusChange(defaultLimits)
     }
     return

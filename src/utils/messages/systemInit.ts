@@ -5,12 +5,10 @@ import { DEFAULT_OUTPUT_STYLE_NAME } from 'src/constants/outputStyles.js'
 import type {
   ApiKeySource,
   PermissionMode,
-  SDKMessage,
-} from 'src/entrypoints/agentSdkTypes.js'
+  SDKMessage} from 'src/entrypoints/agentSdkTypes.js'
 import {
   AGENT_TOOL_NAME,
-  LEGACY_AGENT_TOOL_NAME,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/constants.js'
+  LEGACY_AGENT_TOOL_NAME} from '@claude-code-best/builtin-tools/tools/AgentTool/constants.js'
 import { getAnthropicApiKeyWithSource } from '../auth.js'
 import { getCwd } from '../cwd.js'
 import { getFastModeState } from '../fastMode.js'
@@ -62,8 +60,7 @@ export function buildSystemInitMessage(inputs: SystemInitInputs): SDKMessage {
     tools: inputs.tools.map(tool => sdkCompatToolName(tool.name)),
     mcp_servers: inputs.mcpClients.map(client => ({
       name: client.name,
-      status: client.type,
-    })),
+      status: client.type})),
     model: inputs.model,
     permissionMode: inputs.permissionMode,
     slash_commands: inputs.commands
@@ -80,10 +77,8 @@ export function buildSystemInitMessage(inputs: SystemInitInputs): SDKMessage {
     plugins: inputs.plugins.map(plugin => ({
       name: plugin.name,
       path: plugin.path,
-      source: plugin.source,
-    })),
-    uuid: randomUUID(),
-  }
+      source: plugin.source})),
+    uuid: randomUUID()}
   // Hidden from public SDK types — ant-only UDS messaging socket path
   if (feature('UDS_INBOX')) {
     /* eslint-disable @typescript-eslint/no-require-imports */

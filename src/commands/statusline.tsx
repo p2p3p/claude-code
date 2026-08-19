@@ -1,26 +1,25 @@
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/index.mjs';
 import type { Command } from '../commands.js';
 import { AGENT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/AgentTool/constants.js';
+import { t } from '../utils/i18n/index.js';
 
 const statusline = {
   type: 'prompt',
-  description: "Set up Claude Code's status line UI",
+  description: t('cmd.descStatusline'),
   contentLength: 0, // Dynamic content
   aliases: [],
   name: 'statusline',
-  progressMessage: 'setting up statusLine',
+  progressMessage: t('statuslineCmd.progressMessage'),
   allowedTools: [AGENT_TOOL_NAME, 'Read(~/**)', 'Edit(~/.claude/settings.json)'],
   source: 'builtin',
   disableNonInteractive: true,
   async getPromptForCommand(args): Promise<ContentBlockParam[]> {
-    const prompt = args.trim() || 'Configure my statusLine from my shell PS1 configuration';
+    const prompt = args.trim() || t('statuslineCmd.defaultPrompt');
     return [
       {
         type: 'text',
-        text: `Create an ${AGENT_TOOL_NAME} with subagent_type "statusline-setup" and the prompt "${prompt}"`,
-      },
+        text: t('statuslineCmd.createAgent', AGENT_TOOL_NAME, prompt)},
     ];
-  },
-} satisfies Command;
+  }} satisfies Command;
 
 export default statusline;

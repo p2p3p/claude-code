@@ -11,16 +11,14 @@ import { getIsScrollDraining, getOriginalCwd } from '../bootstrap/state.js'
 import { callIdeRpc } from '../services/mcp/client.js'
 import type {
   ConnectedMCPServer,
-  MCPServerConnection,
-} from '../services/mcp/types.js'
+  MCPServerConnection} from '../services/mcp/types.js'
 import { getGlobalConfig, saveGlobalConfig } from './config.js'
 import { env } from './env.js'
 import { getClaudeConfigHomeDir, isEnvTruthy } from './envUtils.js'
 import {
   execFileNoThrow,
   execFileNoThrowWithCwd,
-  execSyncWithDefaults_DEPRECATED,
-} from './execFileNoThrow.js'
+  execSyncWithDefaults_DEPRECATED} from './execFileNoThrow.js'
 import { getFsImplementation } from './fsOperations.js'
 import { getAncestorPidsAsync } from './genericProcessUtils.js'
 import { isJetBrainsPluginInstalledCached } from './jetbrains.js'
@@ -41,8 +39,7 @@ import { errorMessage, isFsInaccessible } from './errors.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
 import {
   checkWSLDistroMatch,
-  WindowsToWSLConverter,
-} from './idePathConversion.js'
+  WindowsToWSLConverter} from './idePathConversion.js'
 import { sleep } from './sleep.js'
 import { jsonParse } from './slowOperations.js'
 
@@ -133,128 +130,109 @@ const supportedIdeConfigs: Record<IdeType, IdeConfig> = {
     displayName: 'Cursor',
     processKeywordsMac: ['Cursor Helper', 'Cursor.app'],
     processKeywordsWindows: ['cursor.exe'],
-    processKeywordsLinux: ['cursor'],
-  },
+    processKeywordsLinux: ['cursor']},
   windsurf: {
     ideKind: 'vscode',
     displayName: 'Windsurf',
     processKeywordsMac: ['Windsurf Helper', 'Windsurf.app'],
     processKeywordsWindows: ['windsurf.exe'],
-    processKeywordsLinux: ['windsurf'],
-  },
+    processKeywordsLinux: ['windsurf']},
   vscode: {
     ideKind: 'vscode',
     displayName: 'VS Code',
     processKeywordsMac: ['Visual Studio Code', 'Code Helper'],
     processKeywordsWindows: ['code.exe'],
-    processKeywordsLinux: ['code'],
-  },
+    processKeywordsLinux: ['code']},
   intellij: {
     ideKind: 'jetbrains',
     displayName: 'IntelliJ IDEA',
     processKeywordsMac: ['IntelliJ IDEA'],
     processKeywordsWindows: ['idea64.exe'],
-    processKeywordsLinux: ['idea', 'intellij'],
-  },
+    processKeywordsLinux: ['idea', 'intellij']},
   pycharm: {
     ideKind: 'jetbrains',
     displayName: 'PyCharm',
     processKeywordsMac: ['PyCharm'],
     processKeywordsWindows: ['pycharm64.exe'],
-    processKeywordsLinux: ['pycharm'],
-  },
+    processKeywordsLinux: ['pycharm']},
   webstorm: {
     ideKind: 'jetbrains',
     displayName: 'WebStorm',
     processKeywordsMac: ['WebStorm'],
     processKeywordsWindows: ['webstorm64.exe'],
-    processKeywordsLinux: ['webstorm'],
-  },
+    processKeywordsLinux: ['webstorm']},
   phpstorm: {
     ideKind: 'jetbrains',
     displayName: 'PhpStorm',
     processKeywordsMac: ['PhpStorm'],
     processKeywordsWindows: ['phpstorm64.exe'],
-    processKeywordsLinux: ['phpstorm'],
-  },
+    processKeywordsLinux: ['phpstorm']},
   rubymine: {
     ideKind: 'jetbrains',
     displayName: 'RubyMine',
     processKeywordsMac: ['RubyMine'],
     processKeywordsWindows: ['rubymine64.exe'],
-    processKeywordsLinux: ['rubymine'],
-  },
+    processKeywordsLinux: ['rubymine']},
   clion: {
     ideKind: 'jetbrains',
     displayName: 'CLion',
     processKeywordsMac: ['CLion'],
     processKeywordsWindows: ['clion64.exe'],
-    processKeywordsLinux: ['clion'],
-  },
+    processKeywordsLinux: ['clion']},
   goland: {
     ideKind: 'jetbrains',
     displayName: 'GoLand',
     processKeywordsMac: ['GoLand'],
     processKeywordsWindows: ['goland64.exe'],
-    processKeywordsLinux: ['goland'],
-  },
+    processKeywordsLinux: ['goland']},
   rider: {
     ideKind: 'jetbrains',
     displayName: 'Rider',
     processKeywordsMac: ['Rider'],
     processKeywordsWindows: ['rider64.exe'],
-    processKeywordsLinux: ['rider'],
-  },
+    processKeywordsLinux: ['rider']},
   datagrip: {
     ideKind: 'jetbrains',
     displayName: 'DataGrip',
     processKeywordsMac: ['DataGrip'],
     processKeywordsWindows: ['datagrip64.exe'],
-    processKeywordsLinux: ['datagrip'],
-  },
+    processKeywordsLinux: ['datagrip']},
   appcode: {
     ideKind: 'jetbrains',
     displayName: 'AppCode',
     processKeywordsMac: ['AppCode'],
     processKeywordsWindows: ['appcode.exe'],
-    processKeywordsLinux: ['appcode'],
-  },
+    processKeywordsLinux: ['appcode']},
   dataspell: {
     ideKind: 'jetbrains',
     displayName: 'DataSpell',
     processKeywordsMac: ['DataSpell'],
     processKeywordsWindows: ['dataspell64.exe'],
-    processKeywordsLinux: ['dataspell'],
-  },
+    processKeywordsLinux: ['dataspell']},
   aqua: {
     ideKind: 'jetbrains',
     displayName: 'Aqua',
     processKeywordsMac: [], // Do not auto-detect since aqua is too common
     processKeywordsWindows: ['aqua64.exe'],
-    processKeywordsLinux: [],
-  },
+    processKeywordsLinux: []},
   gateway: {
     ideKind: 'jetbrains',
     displayName: 'Gateway',
     processKeywordsMac: [], // Do not auto-detect since gateway is too common
     processKeywordsWindows: ['gateway64.exe'],
-    processKeywordsLinux: [],
-  },
+    processKeywordsLinux: []},
   fleet: {
     ideKind: 'jetbrains',
     displayName: 'Fleet',
     processKeywordsMac: [], // Do not auto-detect since fleet is too common
     processKeywordsWindows: ['fleet.exe'],
-    processKeywordsLinux: [],
-  },
+    processKeywordsLinux: []},
   androidstudio: {
     ideKind: 'jetbrains',
     displayName: 'Android Studio',
     processKeywordsMac: ['Android Studio'],
     processKeywordsWindows: ['studio64.exe'],
-    processKeywordsLinux: ['android-studio'],
-  },
-}
+    processKeywordsLinux: ['android-studio']}}
 
 export function isVSCodeIde(ide: IdeType | null): boolean {
   if (!ide) return false
@@ -346,8 +324,7 @@ export async function getSortedIdeLockfiles(): Promise<string[]> {
 async function readIdeLockfile(path: string): Promise<IdeLockfileInfo | null> {
   try {
     const content = await getFsImplementation().readFile(path, {
-      encoding: 'utf-8',
-    })
+      encoding: 'utf-8'})
 
     let workspaceFolders: string[] = []
     let pid: number | undefined
@@ -384,8 +361,7 @@ async function readIdeLockfile(path: string): Promise<IdeLockfileInfo | null> {
       ideName,
       useWebSocket,
       runningInWindows,
-      authToken,
-    }
+      authToken}
   } catch (error) {
     logError(error as Error)
     return null
@@ -409,8 +385,7 @@ async function checkIdeConnection(
       const socket = createConnection({
         host: host,
         port: port,
-        timeout: timeout,
-      })
+        timeout: timeout})
 
       socket.on('connect', () => {
         socket.destroy()
@@ -605,8 +580,7 @@ export async function maybeInstallIDEExtension(
       installed: true,
       error: null,
       installedVersion,
-      ideType: ideType,
-    }
+      ideType: ideType}
   } catch (error) {
     logEvent('tengu_ext_install_error', {})
     // Handle installation errors
@@ -616,8 +590,7 @@ export async function maybeInstallIDEExtension(
       installed: false,
       error: errorMessage,
       installedVersion: null,
-      ideType: ideType,
-    }
+      ideType: ideType}
   }
 }
 
@@ -804,8 +777,7 @@ export async function detectIDEs(
         port: lockfileInfo.port,
         isValid: isValid,
         authToken: lockfileInfo.authToken,
-        ideRunningInWindows: lockfileInfo.runningInWindows,
-      })
+        ideRunningInWindows: lockfileInfo.runningInWindows})
     }
 
     // The envPort should be defined for supported IDE terminals. If there is
@@ -830,9 +802,7 @@ export async function maybeNotifyIDEConnected(client: Client) {
   await client.notification({
     method: 'ide_connected',
     params: {
-      pid: process.pid,
-    },
-  })
+      pid: process.pid}})
 }
 
 export function hasAccessToIDEExtensionDiffFeature(
@@ -860,8 +830,7 @@ export async function isIDEExtensionInstalled(
           command,
           ['--list-extensions'],
           {
-            env: getInstallationEnv(),
-          },
+            env: getInstallationEnv()},
         )
         if (result.stdout?.includes(EXTENSION_ID)) {
           return true
@@ -893,8 +862,7 @@ async function installIDEExtension(ideType: IdeType): Promise<string | null> {
           command,
           ['--force', '--install-extension', 'anthropic.claude-code'],
           {
-            env: getInstallationEnv(),
-          },
+            env: getInstallationEnv()},
         )
         if (result.code !== 0) {
           throw new Error(`${result.code}: ${result.error} ${result.stderr}`)
@@ -918,8 +886,7 @@ function getInstallationEnv(): NodeJS.ProcessEnv | undefined {
   if (getPlatform() === 'linux') {
     return {
       ...process.env,
-      DISPLAY: '',
-    }
+      DISPLAY: ''}
   }
   return undefined
 }
@@ -935,8 +902,7 @@ async function getInstalledVSCodeExtensionVersion(
     command,
     ['--list-extensions', '--show-versions'],
     {
-      env: getInstallationEnv(),
-    },
+      env: getInstallationEnv()},
   )
   const lines = stdout?.split('\n') || []
   for (const line of lines) {
@@ -978,8 +944,7 @@ function getVSCodeIDECommandByParentProcess(): string | null {
           'Cursor.app': 'cursor',
           'Windsurf.app': 'windsurf',
           'Visual Studio Code - Insiders.app': 'code',
-          'VSCodium.app': 'codium',
-        }
+          'VSCodium.app': 'codium'}
         const pathToExecutable = '/Contents/MacOS/Electron'
 
         for (const [appName, executableName] of Object.entries(appNames)) {
@@ -1208,8 +1173,7 @@ const EDITOR_DISPLAY_NAMES: Record<string, string> = {
   'start /wait notepad': 'Notepad',
   emacs: 'Emacs',
   subl: 'Sublime Text',
-  atom: 'Atom',
-}
+  atom: 'Atom'}
 
 export function toIDEDisplayName(terminal: string | null): string {
   if (!terminal) return 'IDE'
@@ -1311,8 +1275,7 @@ export async function initializeIdeIntegration(
                 installed: false,
                 error: error.message || 'Installation failed',
                 installedVersion: null,
-                ideType: ideType,
-              }
+                ideType: ideType}
               return ideInstallationStatus
             })
             .then(status => {
@@ -1366,8 +1329,7 @@ const detectHostIP = memoize(
     try {
       const routeResult = await execa('ip route show | grep -i default', {
         shell: true,
-        reject: false,
-      })
+        reject: false})
       if (routeResult.exitCode === 0 && routeResult.stdout) {
         const gatewayMatch = routeResult.stdout.match(
           /default via (\d+\.\d+\.\d+\.\d+)/,
@@ -1397,8 +1359,7 @@ async function installFromArtifactory(command: string): Promise<string> {
 
   try {
     const npmrcContent = await fs.readFile(npmrcPath, {
-      encoding: 'utf8',
-    })
+      encoding: 'utf8'})
     const lines = npmrcContent.split('\n')
     for (const line of lines) {
       // Look for the artifactory auth token line
@@ -1426,9 +1387,7 @@ async function installFromArtifactory(command: string): Promise<string> {
   try {
     const versionResponse = await axios.get(versionUrl, {
       headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-    })
+        Authorization: `Bearer ${authToken}`}})
 
     const version = versionResponse.data.trim()
     if (!version) {
@@ -1445,10 +1404,8 @@ async function installFromArtifactory(command: string): Promise<string> {
     try {
       const vsixResponse = await axios.get(vsixUrl, {
         headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-        responseType: 'stream',
-      })
+          Authorization: `Bearer ${authToken}`},
+        responseType: 'stream'})
 
       // Write the downloaded file to disk
       const writeStream = getFsImplementation().createWriteStream(tempVsixPath)
@@ -1466,8 +1423,7 @@ async function installFromArtifactory(command: string): Promise<string> {
         command,
         ['--force', '--install-extension', tempVsixPath],
         {
-          env: getInstallationEnv(),
-        },
+          env: getInstallationEnv()},
       )
 
       if (result.code !== 0) {

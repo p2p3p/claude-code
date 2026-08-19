@@ -11,23 +11,20 @@ import { wrappedRender as render } from '@anthropic/ink';
 import { KeybindingSetup } from '../../keybindings/KeybindingProviderSetup.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js';
+  logEvent} from '../../services/analytics/index.js';
 import {
   clearMcpClientConfig,
   clearServerTokensFromLocalStorage,
   getMcpClientConfig,
   readClientSecret,
-  saveMcpClientSecret,
-} from '../../services/mcp/auth.js';
+  saveMcpClientSecret} from '../../services/mcp/auth.js';
 import { connectToServer, getMcpServerConnectionBatchSize } from '../../services/mcp/client.js';
 import {
   addMcpConfig,
   getAllMcpConfigs,
   getMcpConfigByName,
   getMcpConfigsByScope,
-  removeMcpConfig,
-} from '../../services/mcp/config.js';
+  removeMcpConfig} from '../../services/mcp/config.js';
 import type { ConfigScope, ScopedMcpServerConfig } from '../../services/mcp/types.js';
 import { describeMcpConfigFilePath, ensureConfigScope, getScopeLabel } from '../../services/mcp/utils.js';
 import { AppStateProvider } from '../../state/AppState.js';
@@ -37,19 +34,20 @@ import { gracefulShutdown } from '../../utils/gracefulShutdown.js';
 import { safeParseJSON } from '../../utils/json.js';
 import { getPlatform } from '../../utils/platform.js';
 import { cliError, cliOk } from '../exit.js';
+import { t } from '../../utils/i18n/index.js';
 
 async function checkMcpServerHealth(name: string, server: ScopedMcpServerConfig): Promise<string> {
   try {
     const result = await connectToServer(name, server);
     if (result.type === 'connected') {
-      return '✓ Connected';
+      return t('mcp.connected');
     } else if (result.type === 'needs-auth') {
-      return '! Needs authentication';
+      return t('mcp.needsAuth');
     } else {
-      return '✗ Failed to connect';
+      return t('mcp.failedToConnect');
     }
   } catch (_error) {
-    return '✗ Connection error';
+    return t('mcp.connectionError');
   }
 }
 
@@ -62,7 +60,7 @@ export async function mcpServeHandler({ debug, verbose }: { debug?: boolean; ver
     await stat(providedCwd);
   } catch (error) {
     if (isFsInaccessible(error)) {
-      cliError(`Error: Directory ${providedCwd} does not exist`);
+      cliError(t('mcp.dirDoesNotExist', providedCwd));
     }
     throw error;
   }
@@ -73,7 +71,7 @@ export async function mcpServeHandler({ debug, verbose }: { debug?: boolean; ver
     const { startMCPServer } = await import('../../entrypoints/mcp.js');
     await startMCPServer(providedCwd, debug ?? false, verbose ?? false);
   } catch (error) {
-    cliError(`Error: Failed to start MCP server: ${error}`);
+    cliError(t('mcp.failedToStartServer', error));
   }
 }
 
@@ -94,13 +92,12 @@ export async function mcpRemoveHandler(name: string, options: { scope?: string }
       const scope = ensureConfigScope(options.scope);
       logEvent('tengu_mcp_delete', {
         name: name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
       await removeMcpConfig(name, scope);
       cleanupSecureStorage();
-      process.stdout.write(`Removed MCP server ${name} from ${scope} config\n`);
-      cliOk(`File modified: ${describeMcpConfigFilePath(scope)}`);
+      process.stdout.write(`${t('mcp.removedServer', name, scope)}\n`);
+      cliOk(t('mcp.fileModified', describeMcpConfigFilePath(scope)));
     }
 
     // If no scope specified, check where the server exists
@@ -118,26 +115,25 @@ export async function mcpRemoveHandler(name: string, options: { scope?: string }
     if (globalConfig.mcpServers?.[name]) scopes.push('user');
 
     if (scopes.length === 0) {
-      cliError(`No MCP server found with name: "${name}"`);
+      cliError(t('mcp.serverNotFound', name));
     } else if (scopes.length === 1) {
       // Server exists in only one scope, remove it
       const scope = scopes[0]!;
       logEvent('tengu_mcp_delete', {
         name: name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
       await removeMcpConfig(name, scope);
       cleanupSecureStorage();
-      process.stdout.write(`Removed MCP server "${name}" from ${scope} config\n`);
-      cliOk(`File modified: ${describeMcpConfigFilePath(scope)}`);
+      process.stdout.write(`${t('mcp.removedServerQuoted', name, scope)}\n`);
+      cliOk(t('mcp.fileModified', describeMcpConfigFilePath(scope)));
     } else {
       // Server exists in multiple scopes
-      process.stderr.write(`MCP server "${name}" exists in multiple scopes:\n`);
+      process.stderr.write(`${t('mcp.existsInMultipleScopes', name)}\n`);
       scopes.forEach(scope => {
         process.stderr.write(`  - ${getScopeLabel(scope)} (${describeMcpConfigFilePath(scope)})\n`);
       });
-      process.stderr.write('\nTo remove from a specific scope, use:\n');
+      process.stderr.write(`\n${t('mcp.removeFromScopeHint')}\n`);
       scopes.forEach(scope => {
         process.stderr.write(`  claude mcp remove "${name}" -s ${scope}\n`);
       });
@@ -153,9 +149,9 @@ export async function mcpListHandler(): Promise<void> {
   logEvent('tengu_mcp_list', {});
   const { servers: configs } = await getAllMcpConfigs();
   if (Object.keys(configs).length === 0) {
-    console.log('No MCP servers configured. Use `claude mcp add` to add a server.');
+    console.log(t('mcp.noServersConfigured'));
   } else {
-    console.log('Checking MCP server health...\n');
+    console.log(`${t('mcp.checkingHealth')}\n`);
 
     // Check servers concurrently
     const entries = Object.entries(configs);
@@ -164,8 +160,7 @@ export async function mcpListHandler(): Promise<void> {
       async ([name, server]) => ({
         name,
         server,
-        status: await checkMcpServerHealth(name, server),
-      }),
+        status: await checkMcpServerHealth(name, server)}),
       { concurrency: getMcpServerConnectionBatchSize() },
     );
 
@@ -192,26 +187,25 @@ export async function mcpListHandler(): Promise<void> {
 // mcp get (lines 4694–4786)
 export async function mcpGetHandler(name: string): Promise<void> {
   logEvent('tengu_mcp_get', {
-    name: name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  });
+    name: name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
   const server = getMcpConfigByName(name);
   if (!server) {
-    cliError(`No MCP server found with name: ${name}`);
+    cliError(t('mcp.serverNotFound', name));
   }
 
   console.log(`${name}:`);
-  console.log(`  Scope: ${getScopeLabel(server.scope)}`);
+  console.log(`  ${t('mcp.scope', getScopeLabel(server.scope))}`);
 
   // Check server health
   const status = await checkMcpServerHealth(name, server);
-  console.log(`  Status: ${status}`);
+  console.log(`  ${t('mcp.status', status)}`);
 
   // Intentionally excluding sse-ide servers here since they're internal
   if (server.type === 'sse') {
-    console.log(`  Type: sse`);
-    console.log(`  URL: ${server.url}`);
+    console.log(`  ${t('mcp.typeSSE')}`);
+    console.log(`  ${t('mcp.url', server.url)}`);
     if (server.headers) {
-      console.log('  Headers:');
+      console.log(`  ${t('mcp.headers')}`);
       for (const [key, value] of Object.entries(server.headers)) {
         console.log(`    ${key}: ${value}`);
       }
@@ -219,18 +213,18 @@ export async function mcpGetHandler(name: string): Promise<void> {
     if (server.oauth?.clientId || server.oauth?.callbackPort) {
       const parts: string[] = [];
       if (server.oauth.clientId) {
-        parts.push('client_id configured');
+        parts.push(t('mcp.clientIdConfigured'));
         const clientConfig = getMcpClientConfig(name, server);
-        if (clientConfig?.clientSecret) parts.push('client_secret configured');
+        if (clientConfig?.clientSecret) parts.push(t('mcp.clientSecretConfigured'));
       }
-      if (server.oauth.callbackPort) parts.push(`callback_port ${server.oauth.callbackPort}`);
-      console.log(`  OAuth: ${parts.join(', ')}`);
+      if (server.oauth.callbackPort) parts.push(t('mcp.callbackPort', server.oauth.callbackPort));
+      console.log(`  ${t('mcp.oauth', parts.join(', '))}`);
     }
   } else if (server.type === 'http') {
-    console.log(`  Type: http`);
-    console.log(`  URL: ${server.url}`);
+    console.log(`  ${t('mcp.typeHTTP')}`);
+    console.log(`  ${t('mcp.url', server.url)}`);
     if (server.headers) {
-      console.log('  Headers:');
+      console.log(`  ${t('mcp.headers')}`);
       for (const [key, value] of Object.entries(server.headers)) {
         console.log(`    ${key}: ${value}`);
       }
@@ -238,26 +232,26 @@ export async function mcpGetHandler(name: string): Promise<void> {
     if (server.oauth?.clientId || server.oauth?.callbackPort) {
       const parts: string[] = [];
       if (server.oauth.clientId) {
-        parts.push('client_id configured');
+        parts.push(t('mcp.clientIdConfigured'));
         const clientConfig = getMcpClientConfig(name, server);
-        if (clientConfig?.clientSecret) parts.push('client_secret configured');
+        if (clientConfig?.clientSecret) parts.push(t('mcp.clientSecretConfigured'));
       }
-      if (server.oauth.callbackPort) parts.push(`callback_port ${server.oauth.callbackPort}`);
-      console.log(`  OAuth: ${parts.join(', ')}`);
+      if (server.oauth.callbackPort) parts.push(t('mcp.callbackPort', server.oauth.callbackPort));
+      console.log(`  ${t('mcp.oauth', parts.join(', '))}`);
     }
   } else if (server.type === 'stdio') {
-    console.log(`  Type: stdio`);
-    console.log(`  Command: ${server.command}`);
+    console.log(`  ${t('mcp.typeStdio')}`);
+    console.log(`  ${t('mcp.command', server.command)}`);
     const args = Array.isArray(server.args) ? server.args : [];
-    console.log(`  Args: ${args.join(' ')}`);
+    console.log(`  ${t('mcp.args', args.join(' '))}`);
     if (server.env) {
-      console.log('  Environment:');
+      console.log(`  ${t('mcp.environment')}`);
       for (const [key, value] of Object.entries(server.env)) {
         console.log(`    ${key}=${value}`);
       }
     }
   }
-  console.log(`\nTo remove this server, run: claude mcp remove "${name}" -s ${server.scope}`);
+  console.log(`\n${t('mcp.removeServerHint', name, server.scope)}`);
   // Use gracefulShutdown to properly clean up MCP server connections
   // (process.exit bypasses cleanup handlers, leaving child processes orphaned)
   await gracefulShutdown(0);
@@ -310,10 +304,9 @@ export async function mcpAddJsonHandler(
     logEvent('tengu_mcp_add', {
       scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       source: 'json' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      type: transportType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      type: transportType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
-    cliOk(`Added ${transportType} MCP server ${name} to ${scope} config`);
+    cliOk(t('mcp.addedServer', transportType, name, scope));
   } catch (error) {
     cliError((error as Error).message);
   }
@@ -328,14 +321,13 @@ export async function mcpAddFromDesktopHandler(options: { scope?: string }): Pro
     logEvent('tengu_mcp_add', {
       scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       platform: platform as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      source: 'desktop' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      source: 'desktop' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
     const { readClaudeDesktopMcpServers } = await import('../../utils/claudeDesktop.js');
     const servers = await readClaudeDesktopMcpServers();
 
     if (Object.keys(servers).length === 0) {
-      cliOk('No MCP servers found in Claude Desktop configuration or configuration file does not exist.');
+      cliOk(t('mcp.noDesktopServers'));
     }
 
     const { unmount } = await render(
@@ -364,10 +356,6 @@ export async function mcpResetChoicesHandler(): Promise<void> {
     ...current,
     enabledMcpjsonServers: [],
     disabledMcpjsonServers: [],
-    enableAllProjectMcpServers: false,
-  }));
-  cliOk(
-    'All project-scoped (.mcp.json) server approvals and rejections have been reset.\n' +
-      'You will be prompted for approval next time you start Claude Code.',
-  );
+    enableAllProjectMcpServers: false}));
+  cliOk(t('mcp.resetChoices'));
 }

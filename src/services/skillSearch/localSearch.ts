@@ -206,8 +206,7 @@ const FIELD_WEIGHT = {
   name: 3.0,
   whenToUse: 2.0,
   description: 1.0,
-  allowedTools: 0.3,
-} as const
+  allowedTools: 0.3} as const
 
 export function computeWeightedTf(
   fields: { tokens: string[]; weight: number }[],
@@ -359,8 +358,7 @@ export async function getSkillIndex(cwd: string): Promise<SkillIndexEntry[]> {
         | number
         | undefined,
       tokens: allTokens,
-      tfVector,
-    })
+      tfVector})
   }
 
   const idf = computeIdf(entries)
@@ -433,8 +431,7 @@ export function searchSkills(
         source: entry.source,
         loadedFrom: entry.loadedFrom,
         skillRoot: entry.skillRoot,
-        contentLength: entry.contentLength,
-      })
+        contentLength: entry.contentLength})
     }
   }
 

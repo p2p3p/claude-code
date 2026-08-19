@@ -3,8 +3,7 @@ import {
   subscribeToSearchExtraToolsPrefetch,
   getSearchExtraToolsPrefetchSnapshot,
   clearSearchExtraToolsPrefetchResults,
-  type ToolDiscoveryResult,
-} from 'src/services/searchExtraTools/prefetch.js'
+  type ToolDiscoveryResult} from 'src/services/searchExtraTools/prefetch.js'
 
 type SearchExtraToolsHintItem = {
   name: string
@@ -35,8 +34,7 @@ export function useSearchExtraToolsHint(): SearchExtraToolsHintResult {
       .map((r: ToolDiscoveryResult) => ({
         name: r.name,
         description: r.description.slice(0, 60),
-        score: r.score,
-      }))
+        score: r.score}))
   }, [prefetchResult])
 
   const visible = tools.length > 0 && (tools[0]?.score ?? 0) >= MAX_HINT_SCORE

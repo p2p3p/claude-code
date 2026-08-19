@@ -8,8 +8,7 @@ import type {
   KeyboardEvent,
   Styles,
   TextStyles,
-  DOMElement,
-} from '@anthropic/ink'
+  DOMElement} from '@anthropic/ink'
 
 declare global {
   namespace JSX {

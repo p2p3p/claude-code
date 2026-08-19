@@ -10,14 +10,14 @@ import { logEvent } from '../services/analytics/index.js'
 import type { McpServerConfig } from '../services/mcp/types.js'
 import type {
   BillingType,
-  ReferralEligibilityResponse,
-} from '../services/oauth/types.js'
+  ReferralEligibilityResponse} from '../services/oauth/types.js'
 import { getCwd } from '../utils/cwd.js'
 import { registerCleanup } from './cleanupRegistry.js'
 import { logForDebugging } from './debug.js'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
 import { getGlobalClaudeFile } from './env.js'
 import { getClaudeConfigHomeDir, isEnvTruthy } from './envUtils.js'
+import { t } from './i18n/index.js'
 import { ConfigParseError, getErrnoCode } from './errors.js'
 import { writeFileSyncAndFlush_DEPRECATED } from './file.js'
 import { getFsImplementation } from './fsOperations.js'
@@ -144,15 +144,13 @@ const DEFAULT_PROJECT_CONFIG: ProjectConfig = {
   hasTrustDialogAccepted: false,
   projectOnboardingSeenCount: 0,
   hasClaudeMdExternalIncludesApproved: false,
-  hasClaudeMdExternalIncludesWarningShown: false,
-}
+  hasClaudeMdExternalIncludesWarningShown: false}
 
 export type InstallMethod = 'local' | 'native' | 'global' | 'unknown'
 
 export {
   EDITOR_MODES,
-  NOTIFICATION_CHANNELS,
-} from './configConstants.js'
+  NOTIFICATION_CHANNELS} from './configConstants.js'
 
 import type { EDITOR_MODES, NOTIFICATION_CHANNELS } from './configConstants.js'
 
@@ -340,8 +338,9 @@ export type GlobalConfig = {
   overageCreditUpsellSeenCount?: number // Number of times the overage credit upsell has been shown
   hasVisitedExtraUsage?: boolean // Whether the user has visited /extra-usage — hides credit upsells
 
-  // Display language preference
-  preferredLanguage?: 'auto' | 'en' | 'zh' // auto = follow system locale, en = English, zh = 中文
+  // Preferred language — controls both AI response language and UI language
+  // auto = follow system locale, en = English, zh = 中文
+  preferredLanguage?: 'auto' | 'en' | 'zh'
 
   // Voice mode notice tracking
   voiceNoticeSeenCount?: number // Number of times the voice-mode-available notice has been shown
@@ -608,8 +607,7 @@ function createDefaultGlobalConfig(): GlobalConfig {
     diffTool: 'auto',
     customApiKeyResponses: {
       approved: [],
-      rejected: [],
-    },
+      rejected: []},
     env: {},
     tipsHistory: {},
     memoryUsageCount: 0,
@@ -626,8 +624,7 @@ function createDefaultGlobalConfig(): GlobalConfig {
     cachedDynamicConfigs: {},
     cachedGrowthBookFeatures: {},
     respectGitignore: true,
-    copyFullResponse: false,
-  }
+    copyFullResponse: false}
 }
 
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfig = createDefaultGlobalConfig()
@@ -771,11 +768,9 @@ export function isPathTrusted(dir: string): boolean {
 // We have to put this test code here because Jest doesn't support mocking ES modules :O
 const TEST_GLOBAL_CONFIG_FOR_TESTING: GlobalConfig = {
   ...DEFAULT_GLOBAL_CONFIG,
-  autoUpdates: false,
-}
+  autoUpdates: false}
 const TEST_PROJECT_CONFIG_FOR_TESTING: ProjectConfig = {
-  ...DEFAULT_PROJECT_CONFIG,
-}
+  ...DEFAULT_PROJECT_CONFIG}
 
 export function isProjectConfigKey(key: string): key is ProjectConfigKey {
   return PROJECT_CONFIG_KEYS.includes(key as ProjectConfigKey)
@@ -828,8 +823,7 @@ export function saveGlobalConfig(
         }
         written = {
           ...config,
-          projects: removeProjectHistory(current.projects),
-        }
+          projects: removeProjectHistory(current.projects)}
         return written
       },
     )
@@ -841,8 +835,7 @@ export function saveGlobalConfig(
     }
   } catch (error) {
     logForDebugging(`Failed to save config with lock: ${error}`, {
-      level: 'error',
-    })
+      level: 'error'})
     // Fall back to non-locked version on error. This fallback is a race
     // window: if another process is mid-write (or the file got truncated),
     // getConfig returns defaults. Refuse to write those over a good cached
@@ -866,8 +859,7 @@ export function saveGlobalConfig(
     }
     written = {
       ...config,
-      projects: removeProjectHistory(currentConfig.projects),
-    }
+      projects: removeProjectHistory(currentConfig.projects)}
     saveConfig(getGlobalClaudeFile(), written, DEFAULT_GLOBAL_CONFIG)
     writeThroughGlobalConfigCache(written)
   }
@@ -876,8 +868,7 @@ export function saveGlobalConfig(
 // Cache for global config
 let globalConfigCache: { config: GlobalConfig | null; mtime: number } = {
   config: null,
-  mtime: 0,
-}
+  mtime: 0}
 
 // Tracking for config file operations (telemetry)
 let lastReadFileStats: { mtime: number; size: number } | null = null
@@ -900,8 +891,7 @@ function reportConfigCacheStats(): void {
     logEvent('tengu_config_cache_stats', {
       cache_hits: configCacheHits,
       cache_misses: configCacheMisses,
-      hit_rate: configCacheHits / total,
-    })
+      hit_rate: configCacheHits / total})
   }
   configCacheHits = 0
   configCacheMisses = 0
@@ -963,8 +953,7 @@ function migrateConfigFields(config: GlobalConfig): GlobalConfig {
   return {
     ...config,
     installMethod,
-    autoUpdates,
-  }
+    autoUpdates}
 }
 
 /**
@@ -1026,10 +1015,8 @@ function startGlobalConfigFreshnessWatcher(): void {
           globalConfigCache = {
             config: migrateConfigFields({
               ...createDefaultGlobalConfig(),
-              ...(parsed as Partial<GlobalConfig>),
-            }),
-            mtime: curr.mtimeMs,
-          }
+              ...(parsed as Partial<GlobalConfig>)}),
+            mtime: curr.mtimeMs}
           lastReadFileStats = { mtime: curr.mtimeMs, size: curr.size }
         })
         .catch(() => {})
@@ -1078,8 +1065,7 @@ export function getGlobalConfig(): GlobalConfig {
     )
     globalConfigCache = {
       config,
-      mtime: stats?.mtimeMs ?? Date.now(),
-    }
+      mtime: stats?.mtimeMs ?? Date.now()}
     lastReadFileStats = stats
       ? { mtime: stats.mtimeMs, size: stats.size }
       : null
@@ -1144,8 +1130,7 @@ function saveConfig<A extends object>(
     jsonStringify(filteredConfig, null, 2),
     {
       encoding: 'utf-8',
-      mode: 0o600,
-    },
+      mode: 0o600},
   )
   if (file === getGlobalClaudeFile()) {
     globalConfigWriteCount++
@@ -1181,16 +1166,14 @@ function saveConfigWithLock<A extends object>(
         // becomes an unhandled exception. Log instead -- the lock being
         // stolen (e.g. after a 10s event-loop stall) is recoverable.
         logForDebugging(`Config lock compromised: ${err}`, { level: 'error' })
-      },
-    })
+      }})
     const lockTime = Date.now() - startTime
     if (lockTime > 100) {
       logForDebugging(
         'Lock acquisition took longer than expected - another Claude instance may be running',
       )
       logEvent('tengu_config_lock_contention', {
-        lock_time_ms: lockTime,
-      })
+        lock_time_ms: lockTime})
     }
 
     // Check for stale write - file changed since we last read it
@@ -1206,8 +1189,7 @@ function saveConfigWithLock<A extends object>(
             read_mtime: lastReadFileStats.mtime,
             write_mtime: currentStats.mtimeMs,
             read_size: lastReadFileStats.size,
-            write_size: currentStats.size,
-          })
+            write_size: currentStats.size})
         }
       } catch (e) {
         const code = getErrnoCode(e)
@@ -1310,8 +1292,7 @@ function saveConfigWithLock<A extends object>(
       const code = getErrnoCode(e)
       if (code !== 'ENOENT') {
         logForDebugging(`Failed to backup config: ${e}`, {
-          level: 'error',
-        })
+          level: 'error'})
       }
       // No file to backup or backup failed, continue with write
     }
@@ -1322,8 +1303,7 @@ function saveConfigWithLock<A extends object>(
       jsonStringify(filteredConfig, null, 2),
       {
         encoding: 'utf-8',
-        mode: 0o600,
-      },
+        mode: 0o600},
     )
     if (file === getGlobalClaudeFile()) {
       globalConfigWriteCount++
@@ -1359,8 +1339,7 @@ export function enableConfigs(): void {
   )
 
   logForDiagnosticsNoPII('info', 'enable_configs_completed', {
-    duration_ms: Date.now() - startTime,
-  })
+    duration_ms: Date.now() - startTime})
 }
 
 /**
@@ -1440,15 +1419,13 @@ function getConfig<A>(
 
   try {
     const fileContent = fs.readFileSync(file, {
-      encoding: 'utf-8',
-    })
+      encoding: 'utf-8'})
     try {
       // Strip BOM before parsing - PowerShell 5.x adds BOM to UTF-8 files
       const parsedConfig = jsonParse(stripBOM(fileContent))
       return {
         ...createDefault(),
-        ...parsedConfig,
-      }
+        ...parsedConfig}
     } catch (error) {
       // Throw a ConfigParseError with the file path and default config
       const errorMessage =
@@ -1461,11 +1438,7 @@ function getConfig<A>(
     if (errCode === 'ENOENT') {
       const backupPath = findMostRecentBackup(file)
       if (backupPath) {
-        process.stderr.write(
-          `\nClaude configuration file not found at: ${file}\n` +
-            `A backup file exists at: ${backupPath}\n` +
-            `You can manually restore it by running: cp "${backupPath}" "${file}"\n\n`,
-        )
+        process.stderr.write(t('configFile.notFound', file, backupPath))
       }
       return createDefault()
     }
@@ -1501,16 +1474,13 @@ function getConfig<A>(
             // No backup
           }
           logEvent('tengu_config_parse_error', {
-            has_backup: hasBackup,
-          })
+            has_backup: hasBackup})
         } finally {
           insideGetConfig = false
         }
       }
 
-      process.stderr.write(
-        `\nClaude configuration file at ${file} is corrupted: ${error.message}\n`,
-      )
+      process.stderr.write(t('configFile.corrupted', file, error.message))
 
       // Try to backup the corrupted config file (only if not already backed up)
       const fileBase = basename(file)
@@ -1560,8 +1530,7 @@ function getConfig<A>(
           logForDebugging(
             `Corrupted config backed up to: ${corruptedBackupPath}`,
             {
-              level: 'error',
-            },
+              level: 'error'},
           )
         } catch {
           // Ignore backup errors
@@ -1571,18 +1540,13 @@ function getConfig<A>(
       // Notify user about corrupted config and available backup
       const backupPath = findMostRecentBackup(file)
       if (corruptedBackupPath) {
-        process.stderr.write(
-          `The corrupted file has been backed up to: ${corruptedBackupPath}\n`,
-        )
+        process.stderr.write(t('configFile.backupCreated', corruptedBackupPath))
       } else if (alreadyBackedUp) {
-        process.stderr.write(`The corrupted file has already been backed up.\n`)
+        process.stderr.write(t('configFile.backupAlreadyExists'))
       }
 
       if (backupPath) {
-        process.stderr.write(
-          `A backup file exists at: ${backupPath}\n` +
-            `You can manually restore it by running: cp "${backupPath}" "${file}"\n\n`,
-        )
+        process.stderr.write(t('configFile.backupRestoreHint', backupPath, file))
       } else {
         process.stderr.write(`\n`)
       }
@@ -1661,9 +1625,7 @@ export function saveCurrentProjectConfig(
           ...current,
           projects: {
             ...current.projects,
-            [absolutePath]: newProjectConfig,
-          },
-        }
+            [absolutePath]: newProjectConfig}}
         return written
       },
     )
@@ -1672,8 +1634,7 @@ export function saveCurrentProjectConfig(
     }
   } catch (error) {
     logForDebugging(`Failed to save config with lock: ${error}`, {
-      level: 'error',
-    })
+      level: 'error'})
 
     // Same race window as saveGlobalConfig's fallback -- refuse to write
     // defaults over good cached config. See GH #3117.
@@ -1697,9 +1658,7 @@ export function saveCurrentProjectConfig(
       ...config,
       projects: {
         ...config.projects,
-        [absolutePath]: newProjectConfig,
-      },
-    }
+        [absolutePath]: newProjectConfig}}
     saveConfig(getGlobalClaudeFile(), written, DEFAULT_GLOBAL_CONFIG)
     writeThroughGlobalConfigCache(written)
   }
@@ -1783,8 +1742,7 @@ export function recordFirstStartTime(): void {
     const firstStartTime = new Date().toISOString()
     saveGlobalConfig(current => ({
       ...current,
-      firstStartTime: current.firstStartTime ?? firstStartTime,
-    }))
+      firstStartTime: current.firstStartTime ?? firstStartTime}))
   }
 }
 

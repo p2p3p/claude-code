@@ -1,4 +1,5 @@
 import { resolve as resolvePath } from 'path';
+import { t } from '../utils/i18n/index.js'
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useRegisterOverlay } from '../context/overlayContext.js';
@@ -80,16 +81,14 @@ export function GlobalSearchDialog({ onDone, onInsert }: Props): React.ReactNode
         setPreview({
           file: focused.file,
           line: focused.line,
-          content: r.content,
-        });
+          content: r.content});
       })
       .catch(() => {
         if (controller.signal.aborted) return;
         setPreview({
           file: focused.file,
           line: focused.line,
-          content: '(preview unavailable)',
-        });
+          content: '(preview unavailable)'});
       });
     return () => controller.abort();
   }, [focused]);
@@ -196,8 +195,7 @@ export function GlobalSearchDialog({ onDone, onInsert }: Props): React.ReactNode
     const opened = openFileInExternalEditor(resolvePath(getCwd(), m.file), m.line);
     logEvent('tengu_global_search_select', {
       result_count: matches.length,
-      opened_editor: opened,
-    });
+      opened_editor: opened});
     onDone();
   };
 
@@ -205,20 +203,19 @@ export function GlobalSearchDialog({ onDone, onInsert }: Props): React.ReactNode
     onInsert(mention ? `@${m.file}#L${m.line} ` : `${m.file}:${m.line} `);
     logEvent('tengu_global_search_insert', {
       result_count: matches.length,
-      mention,
-    });
+      mention});
     onDone();
   };
 
   // Always pass a non-empty string so the line is reserved — prevents the
   // searchBox from bouncing when the count appears/disappears.
   const matchLabel =
-    matches.length > 0 ? `${matches.length}${truncated ? '+' : ''} matches${isSearching ? '…' : ''}` : ' ';
+    matches.length > 0 ? `${matches.length}${truncated ? '+' : ''} ${t('globalSearch.matches').replace('{count}', String(matches.length))}${isSearching ? '…' : ''}` : ' ';
 
   return (
     <FuzzyPicker
-      title="Global Search"
-      placeholder="Type to search…"
+      title={t('globalsearchdialog.globalSearch')}
+      placeholder={t('globalSearch.typeToSearch')}
       items={matches}
       getKey={matchKey}
       visibleCount={visibleResults}
@@ -230,12 +227,11 @@ export function GlobalSearchDialog({ onDone, onInsert }: Props): React.ReactNode
       onTab={{ action: 'mention', handler: m => handleInsert(m, true) }}
       onShiftTab={{
         action: 'insert path',
-        handler: m => handleInsert(m, false),
-      }}
+        handler: m => handleInsert(m, false)}}
       onCancel={onDone}
-      emptyMessage={q => (isSearching ? 'Searching…' : q ? 'No matches' : 'Type to search…')}
+      emptyMessage={q => (isSearching ? t('globalSearch.searching') : q ? t('globalSearch.noMatches') : t('globalSearch.typeToSearch'))}
       matchLabel={matchLabel}
-      selectAction="open in editor"
+      selectAction={t('globalsearchdialog.openInEditor')}
       renderItem={(m, isFocused) => (
         <Text color={isFocused ? 'suggestion' : undefined}>
           <Text dimColor>
@@ -255,7 +251,7 @@ export function GlobalSearchDialog({ onDone, onInsert }: Props): React.ReactNode
             ))}
           </>
         ) : (
-          <LoadingState message="Loading…" dimColor />
+          <LoadingState message={t('globalSearch.loading')} dimColor />
         )
       }
     />

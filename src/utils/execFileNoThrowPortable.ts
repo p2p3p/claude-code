@@ -52,8 +52,7 @@ export function execSyncWithDefaults_DEPRECATED(
     // Old signature - second argument is AbortSignal
     options = {
       abortSignal: optionsOrAbortSignal,
-      timeout,
-    }
+      timeout}
   } else {
     // New signature - second argument is options object
     options = optionsOrAbortSignal
@@ -63,8 +62,7 @@ export function execSyncWithDefaults_DEPRECATED(
     abortSignal,
     timeout: finalTimeout = 10 * SECONDS_IN_MINUTE * MS_IN_SECOND,
     input,
-    stdio = ['ignore', 'pipe', 'pipe'],
-  } = options
+    stdio = ['ignore', 'pipe', 'pipe']} = options
 
   abortSignal?.throwIfAborted()
   using _ = slowLogging`exec: ${command.slice(0, 200)}`
@@ -77,8 +75,7 @@ export function execSyncWithDefaults_DEPRECATED(
       stdio,
       shell: true, // execSync typically runs shell commands
       reject: false, // Don't throw on non-zero exit codes
-      input,
-    })
+      input})
     if (!result.stdout) {
       return null
     }

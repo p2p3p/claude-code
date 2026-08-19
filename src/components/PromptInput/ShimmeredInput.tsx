@@ -41,8 +41,7 @@ export function HighlightedInput({ text, highlights }: Props): React.ReactNode {
           lines[lines.length - 1]!.push({
             text: part,
             highlight: segment.highlight,
-            start: pos,
-          });
+            start: pos});
         }
         pos += part.length;
       }

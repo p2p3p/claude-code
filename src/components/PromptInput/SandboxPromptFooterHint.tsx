@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Box, Text } from '@anthropic/ink';
 import { useShortcutDisplay } from '../../keybindings/useShortcutDisplay.js';
 import { SandboxManager } from '../../utils/sandbox/sandbox-adapter.js';
+import { t } from '../../utils/i18n/index.js';
 
 export function SandboxPromptFooterHint(): ReactNode {
   const [recentViolationCount, setRecentViolationCount] = useState(0);
@@ -47,8 +48,7 @@ export function SandboxPromptFooterHint(): ReactNode {
   return (
     <Box paddingX={0} paddingY={0}>
       <Text color="inactive" wrap="truncate">
-        ⧈ Sandbox blocked {recentViolationCount} {recentViolationCount === 1 ? 'operation' : 'operations'} ·{' '}
-        {detailsShortcut} for details · /sandbox to disable
+        ⧈ {t('sandboxPromptFooterHint.blocked', { count: recentViolationCount, shortcut: detailsShortcut })}
       </Text>
     </Box>
   );

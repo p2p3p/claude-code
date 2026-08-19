@@ -1,7 +1,6 @@
 import {
   execFileNoThrowWithCwd,
-  execSyncWithDefaults_DEPRECATED,
-} from './execFileNoThrow.js'
+  execSyncWithDefaults_DEPRECATED} from './execFileNoThrow.js'
 
 // This file contains platform-agnostic implementations of common `ps` type commands.
 // When adding new code to this file, make sure to handle:
@@ -72,8 +71,7 @@ export async function getAncestorPidsAsync(
   const script = `pid=${String(pid)}; for i in $(seq 1 ${maxDepth}); do ppid=$(ps -o ppid= -p $pid 2>/dev/null | tr -d ' '); if [ -z "$ppid" ] || [ "$ppid" = "0" ] || [ "$ppid" = "1" ]; then break; fi; echo $ppid; pid=$ppid; done`
 
   const result = await execFileNoThrowWithCwd('sh', ['-c', script], {
-    timeout: 3000,
-  })
+    timeout: 3000})
   if (result.code !== 0 || !result.stdout?.trim()) {
     return []
   }
@@ -147,8 +145,7 @@ export async function getAncestorCommandsAsync(
   const script = `currentpid=${String(pid)}; for i in $(seq 1 ${maxDepth}); do cmd=$(ps -o command= -p $currentpid 2>/dev/null); if [ -n "$cmd" ]; then printf '%s\\0' "$cmd"; fi; ppid=$(ps -o ppid= -p $currentpid 2>/dev/null | tr -d ' '); if [ -z "$ppid" ] || [ "$ppid" = "0" ] || [ "$ppid" = "1" ]; then break; fi; currentpid=$ppid; done`
 
   const result = await execFileNoThrowWithCwd('sh', ['-c', script], {
-    timeout: 3000,
-  })
+    timeout: 3000})
   if (result.code !== 0 || !result.stdout?.trim()) {
     return []
   }

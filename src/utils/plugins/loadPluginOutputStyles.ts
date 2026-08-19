@@ -5,8 +5,7 @@ import { getPluginErrorMessage } from '../../types/plugin.js'
 import { logForDebugging } from '../debug.js'
 import {
   coerceDescriptionToString,
-  parseFrontmatter,
-} from '../frontmatterParser.js'
+  parseFrontmatter} from '../frontmatterParser.js'
 import { getFsImplementation, isDuplicatePath } from '../fsOperations.js'
 import { extractDescriptionFromMarkdown } from '../markdownConfigLoader.js'
 import { loadAllPluginsCacheOnly } from './pluginLoader.js'
@@ -74,12 +73,10 @@ async function loadOutputStyleFromFile(
       description,
       prompt: markdownContent.trim(),
       source: 'plugin',
-      forceForPlugin,
-    }
+      forceForPlugin}
   } catch (error) {
     logForDebugging(`Failed to load output style from ${filePath}: ${error}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return null
   }
 }

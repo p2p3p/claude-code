@@ -27,8 +27,7 @@ export const HighlightedCode = memo(function HighlightedCode({
   code,
   filePath,
   width,
-  dim = false,
-}: Props): React.ReactElement {
+  dim = false}: Props): React.ReactElement {
   const ref = useRef<DOMElement>(null);
   const [measuredWidth, setMeasuredWidth] = useState(width || DEFAULT_WIDTH);
   const [theme] = useTheme();

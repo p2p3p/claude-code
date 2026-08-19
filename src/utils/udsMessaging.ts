@@ -17,8 +17,7 @@ import {
   open,
   readFile,
   rename,
-  unlink,
-} from 'fs/promises'
+  unlink} from 'fs/promises'
 import { dirname, join } from 'path'
 import { tmpdir } from 'os'
 import { registerCleanup } from './cleanupRegistry.js'
@@ -368,8 +367,7 @@ function writeSocketErrorAndDestroy(socket: Socket, data: string): void {
   writeSocketMessageAndDestroy(socket, {
     type: 'error',
     data,
-    ts: new Date().toISOString(),
-  })
+    ts: new Date().toISOString()})
 }
 
 function unrefTimer(timer: ReturnType<typeof setTimeout>): void {
@@ -398,8 +396,7 @@ function stripAuthToken(message: UdsMessage): UdsMessage {
   const { authToken: _authToken, ...metaWithoutAuth } = message.meta ?? {}
   return {
     ...message,
-    meta: Object.keys(metaWithoutAuth).length > 0 ? metaWithoutAuth : undefined,
-  }
+    meta: Object.keys(metaWithoutAuth).length > 0 ? metaWithoutAuth : undefined}
 }
 
 function withRequestAuthToken(message: UdsMessage, token: string): UdsMessage {
@@ -407,9 +404,7 @@ function withRequestAuthToken(message: UdsMessage, token: string): UdsMessage {
     ...message,
     meta: {
       ...message.meta,
-      authToken: token,
-    },
-  }
+      authToken: token}}
 }
 
 // ---------------------------------------------------------------------------
@@ -503,8 +498,7 @@ export async function startUdsMessaging(
               writeSocketMessage(socket, {
                 type: 'pong',
                 from: socketPath ?? undefined,
-                ts: new Date().toISOString(),
-              })
+                ts: new Date().toISOString()})
               return
             }
 
@@ -514,8 +508,7 @@ export async function startUdsMessaging(
               id: `uds-${nextId++}`,
               message: sanitizedMessage,
               receivedAt: Date.now(),
-              status: 'pending',
-            }
+              status: 'pending'}
             if (!enqueueInboxEntry(entry)) {
               closeWithError('inbox full')
               return
@@ -527,8 +520,7 @@ export async function startUdsMessaging(
               type: 'response',
               data: 'ok',
               ts: new Date().toISOString(),
-              meta: { id: entry.id },
-            })
+              meta: { id: entry.id }})
             onEnqueueCb?.()
           },
           text => jsonParse(text) as UdsMessage,
@@ -544,8 +536,7 @@ export async function startUdsMessaging(
               )
               closeWithError('invalid frame')
             },
-            destroyOnFrameError: false,
-          },
+            destroyOnFrameError: false},
         )
 
         socket.on('close', () => {
@@ -721,8 +712,7 @@ export async function sendUdsMessage(
     {
       ...message,
       from: message.from ?? socketPath ?? undefined,
-      ts: message.ts ?? new Date().toISOString(),
-    },
+      ts: message.ts ?? new Date().toISOString()},
     token,
   )
 
@@ -749,8 +739,7 @@ export async function sendUdsMessage(
     attachUdsResponseReader(conn, {
       maxFrameBytes: MAX_UDS_FRAME_BYTES,
       acceptPong: true,
-      onSettled: finish,
-    })
+      onSettled: finish})
     // Timeout so we don't hang on unreachable sockets
     conn.setTimeout(5000, () => {
       finish(new Error('Connection timed out'))

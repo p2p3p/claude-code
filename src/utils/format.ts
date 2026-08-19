@@ -105,8 +105,7 @@ const getNumberFormatter = (
       numberFormatterForConsistentDecimals = new Intl.NumberFormat('en-US', {
         notation: 'compact',
         maximumFractionDigits: 1,
-        minimumFractionDigits: 1,
-      })
+        minimumFractionDigits: 1})
     }
     return numberFormatterForConsistentDecimals
   } else {
@@ -114,8 +113,7 @@ const getNumberFormatter = (
       numberFormatterForInconsistentDecimals = new Intl.NumberFormat('en-US', {
         notation: 'compact',
         maximumFractionDigits: 1,
-        minimumFractionDigits: 0,
-      })
+        minimumFractionDigits: 0})
     }
     return numberFormatterForInconsistentDecimals
   }
@@ -257,8 +255,7 @@ export function formatResetTime(
       day: 'numeric',
       hour: showTime ? 'numeric' : undefined,
       minute: !showTime || minutes === 0 ? undefined : '2-digit',
-      hour12: showTime ? true : undefined,
-    }
+      hour12: showTime ? true : undefined}
 
     // Add year if it's not the current year
     if (date.getFullYear() !== now.getFullYear()) {
@@ -278,8 +275,7 @@ export function formatResetTime(
   const timeString = date.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: minutes === 0 ? undefined : '2-digit',
-    hour12: true,
-  })
+    hour12: true})
 
   // Remove the space before AM/PM and make it lowercase, then add timezone
   return (
@@ -304,5 +300,4 @@ export {
   truncateStartToWidth,
   truncateToWidth,
   truncateToWidthNoEllipsis,
-  wrapText,
-} from './truncate.js'
+  wrapText} from './truncate.js'

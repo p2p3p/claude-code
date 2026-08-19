@@ -24,9 +24,7 @@ export function createSummaryPromptMessage(content: string): UserMessage {
     type: 'user',
     message: {
       role: 'user',
-      content,
-    },
+      content},
     uuid: randomUUID() as UUID,
-    timestamp: new Date().toISOString(),
-  }
+    timestamp: new Date().toISOString()}
 }

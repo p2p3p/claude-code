@@ -21,8 +21,7 @@ import type {
   ScreenshotResult,
   DisplayInfo,
   InstalledApp,
-  FrontmostAppInfo,
-} from './types.js'
+  FrontmostAppInfo} from './types.js'
 
 // ---------------------------------------------------------------------------
 // Shell helpers
@@ -44,8 +43,7 @@ function commandExists(name: string): boolean {
   const result = Bun.spawnSync({
     cmd: ['which', name],
     stdout: 'pipe',
-    stderr: 'pipe',
-  })
+    stderr: 'pipe'})
   return result.exitCode === 0
 }
 
@@ -103,8 +101,7 @@ const KEY_MAP: Record<string, string> = {
   pause: 'Pause',
   numlock: 'Num_Lock',
   capslock: 'Caps_Lock',
-  scrolllock: 'Scroll_Lock',
-}
+  scrolllock: 'Scroll_Lock'}
 
 const MODIFIER_KEYS = new Set([
   'shift',
@@ -209,8 +206,7 @@ const input: InputPlatform = {
     const yMatch = out.match(/y:(\d+)/)
     return {
       x: xMatch ? Number(xMatch[1]) : 0,
-      y: yMatch ? Number(yMatch[1]) : 0,
-    }
+      y: yMatch ? Number(yMatch[1]) : 0}
   },
 
   // No window-bound input on Linux
@@ -298,8 +294,7 @@ const screenshot: ScreenshotPlatform = {
     } catch {
       return null
     }
-  },
-}
+  }}
 
 // ---------------------------------------------------------------------------
 // Display — xrandr
@@ -319,8 +314,7 @@ const display: DisplayPlatform = {
           width: Number(match[1]),
           height: Number(match[2]),
           scaleFactor: 1,
-          displayId: idx++,
-        })
+          displayId: idx++})
       }
 
       if (displays.length === 0) {
@@ -339,8 +333,7 @@ const display: DisplayPlatform = {
       if (found) return found
     }
     return all[0] ?? { width: 1920, height: 1080, scaleFactor: 1, displayId: 0 }
-  },
-}
+  }}
 
 // ---------------------------------------------------------------------------
 // Apps — wmctrl + ps + .desktop files
@@ -370,8 +363,7 @@ const apps: AppsPlatform = {
             id: windowId ?? '',
             pid,
             title,
-            exePath: exePath || undefined,
-          })
+            exePath: exePath || undefined})
         }
 
         // Deduplicate by id
@@ -436,8 +428,7 @@ const apps: AppsPlatform = {
             result.push({
               id: filepath.split('/').pop()?.replace('.desktop', '') ?? '',
               displayName: name,
-              path: exec.split(/\s+/)[0] ?? '',
-            })
+              path: exec.split(/\s+/)[0] ?? ''})
           } catch {
             /* skip unreadable */
           }
@@ -483,8 +474,7 @@ const apps: AppsPlatform = {
       if (!exePath && !appName) return null
       return {
         id: exePath || `/proc/${pidStr}/exe`,
-        appName: appName || 'unknown',
-      }
+        appName: appName || 'unknown'}
     } catch {
       return null
     }
@@ -507,8 +497,7 @@ const apps: AppsPlatform = {
     } catch {
       return null
     }
-  },
-}
+  }}
 
 // ---------------------------------------------------------------------------
 // Export

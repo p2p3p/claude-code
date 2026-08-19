@@ -9,8 +9,7 @@ import { checkGate_CACHED_OR_BLOCKING } from '../services/analytics/growthbook.j
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,
-  logEventAsync,
-} from '../services/analytics/index.js'
+  logEventAsync} from '../services/analytics/index.js'
 import { getBootstrapArgs, getScriptPath } from '../utils/cliLaunch.js'
 import { logForDebugging } from '../utils/debug.js'
 import { rcLog } from './rcDebugLog.js'
@@ -18,6 +17,7 @@ import { logForDiagnosticsNoPII } from '../utils/diagLogs.js'
 import { isEnvTruthy, isInProtectedNamespace } from '../utils/envUtils.js'
 import { errorMessage } from '../utils/errors.js'
 import { truncateToWidth } from '../utils/format.js'
+import { t } from '../utils/i18n/index.js'
 import { logError } from '../utils/log.js'
 import { sleep } from '../utils/sleep.js'
 import { createAgentWorktree, removeAgentWorktree } from '../utils/worktree.js'
@@ -26,8 +26,7 @@ import {
   createBridgeApiClient,
   isExpiredErrorType,
   isSuppressible403,
-  validateBridgeId,
-} from './bridgeApi.js'
+  validateBridgeId} from './bridgeApi.js'
 import { formatDuration } from './bridgeStatusUtil.js'
 import { createBridgeLogger } from './bridgeUI.js'
 import { createCapacityWake } from './capacityWake.js'
@@ -47,15 +46,13 @@ import {
   type SessionHandle,
   type SessionSpawner,
   type SessionSpawnOpts,
-  type SpawnMode,
-} from './types.js'
+  type SpawnMode} from './types.js'
 import {
   buildCCRv2SdkUrl,
   buildSdkUrl,
   decodeWorkSecret,
   registerWorker,
-  sameSessionId,
-} from './workSecret.js'
+  sameSessionId} from './workSecret.js'
 
 export type BackoffConfig = {
   connInitialMs: number
@@ -224,8 +221,7 @@ export async function runBridgeLoop(
               err.status as unknown as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             error_type: (err.status === 401 || err.status === 403
               ? 'auth_failed'
-              : 'fatal') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          })
+              : 'fatal') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
           if (err.status === 401 || err.status === 403) {
             authFailedSessions.push(sessionId)
           } else {
@@ -308,8 +304,7 @@ export async function runBridgeLoop(
             handle.updateAccessToken(oauthToken)
           }
         },
-        label: 'bridge',
-      })
+        label: 'bridge'})
     : null
   const loopStartTime = Date.now()
   // Track all in-flight cleanup promises (stopWork, worktree removal) so
@@ -335,8 +330,7 @@ export async function runBridgeLoop(
   )
   logForDiagnosticsNoPII('info', 'bridge_loop_started', {
     max_sessions: config.maxSessions,
-    spawn_mode: config.spawnMode,
-  })
+    spawn_mode: config.spawnMode})
 
   // For ant users, show where session debug logs will land so they can tail them.
   // sessionRunner.ts uses the same base path. File appears once a session spawns.
@@ -485,12 +479,10 @@ export async function runBridgeLoop(
       logEvent('tengu_bridge_session_done', {
         status:
           status as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        duration_ms: durationMs,
-      })
+        duration_ms: durationMs})
       logForDiagnosticsNoPII('info', 'bridge_session_done', {
         status,
-        duration_ms: durationMs,
-      })
+        duration_ms: durationMs})
 
       // Clear the status display before printing final log
       logger.clearStatus()
@@ -511,7 +503,7 @@ export async function runBridgeLoop(
           // Also skip for timeout-killed sessions — the timeout watchdog
           // already logged a clear timeout message.
           if (!wasTimedOut && !loopSignal.aborted) {
-            failureMessage = stderrSummary ?? 'Process exited with error'
+            failureMessage = stderrSummary ?? t('bridgeMain.processExitedWithError')
             logger.logSessionFailed(sessionId, failureMessage)
             logError(new Error(`Bridge session failed: ${failureMessage}`))
           }
@@ -630,8 +622,7 @@ export async function runBridgeLoop(
           `[bridge:poll] Reconnected after ${formatDuration(disconnectedMs)}`,
         )
         logEvent('tengu_bridge_reconnected', {
-          disconnected_ms: disconnectedMs,
-        })
+          disconnected_ms: disconnectedMs})
       }
 
       connBackoff = 0
@@ -659,8 +650,7 @@ export async function runBridgeLoop(
             logEvent('tengu_bridge_heartbeat_mode_entered', {
               active_sessions: activeSessions.size,
               heartbeat_interval_ms:
-                pollConfig.non_exclusive_heartbeat_interval_ms,
-            })
+                pollConfig.non_exclusive_heartbeat_interval_ms})
             // Deadline computed once at entry — GB updates to atCapMs don't
             // shift an in-flight deadline (next entry picks up the new value).
             const pollDeadline = atCapMs > 0 ? Date.now() + atCapMs : null
@@ -709,8 +699,7 @@ export async function runBridgeLoop(
               reason:
                 exitReason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               heartbeat_cycles: hbCycles,
-              active_sessions: activeSessions.size,
-            })
+              active_sessions: activeSessions.size})
             if (exitReason === 'poll_due') {
               // bridgeApi throttles empty-poll logs (EMPTY_POLL_LOG_INTERVAL=100)
               // so the once-per-10min poll_due poll is invisible at counter=2.
@@ -862,7 +851,7 @@ export async function runBridgeLoop(
         case 'healthcheck':
           await ackWork()
           logForDebugging('[bridge:work] Healthcheck received')
-          logger.logVerbose('Healthcheck received')
+          logger.logVerbose(t('bridgeMain.healthcheckReceived'))
           break
         case 'session': {
           const sessionId = work.data.id
@@ -999,8 +988,7 @@ export async function runBridgeLoop(
                 worktreePath: wt.worktreePath,
                 worktreeBranch: wt.worktreeBranch,
                 gitRoot: wt.gitRoot,
-                hookBased: wt.hookBased,
-              })
+                hookBased: wt.hookBased})
               sessionDir = wt.worktreePath
               logForDebugging(
                 `[bridge:session] Created worktree for sessionId=${sessionId} at ${wt.worktreePath}`,
@@ -1063,8 +1051,7 @@ export async function runBridgeLoop(
                 void import('./createSession.js')
                   .then(({ updateBridgeSessionTitle }) =>
                     updateBridgeSessionTitle(compatSessionId, title, {
-                      baseUrl: config.apiBaseUrl,
-                    }),
+                      baseUrl: config.apiBaseUrl}),
                   )
                   .catch(err =>
                     logForDebugging(
@@ -1072,8 +1059,7 @@ export async function runBridgeLoop(
                       { level: 'error' },
                     ),
                   )
-              },
-            },
+              }},
             sessionDir,
           )
           if (typeof spawnResult === 'string') {
@@ -1119,14 +1105,12 @@ export async function runBridgeLoop(
             in_worktree: sessionWorktrees.has(sessionId),
             spawn_duration_ms: spawnDurationMs,
             worktree_create_ms: worktreeCreateMs,
-            inProtectedNamespace: isInProtectedNamespace(),
-          })
+            inProtectedNamespace: isInProtectedNamespace()})
           logForDiagnosticsNoPII('info', 'bridge_session_started', {
             spawn_mode: spawnModeAtDecision,
             in_worktree: sessionWorktrees.has(sessionId),
             spawn_duration_ms: spawnDurationMs,
-            worktree_create_ms: worktreeCreateMs,
-          })
+            worktree_create_ms: worktreeCreateMs})
 
           activeSessions.set(sessionId, handle)
           sessionWorkIds.set(sessionId, work.id)
@@ -1137,7 +1121,7 @@ export async function runBridgeLoop(
           sessionStartTimes.set(sessionId, startTime)
 
           // Use a generic prompt description since we no longer get startup_context
-          logger.logSessionStart(sessionId, `Session ${sessionId}`)
+          logger.logSessionStart(sessionId, t('bridgeMain.sessionStart', sessionId))
 
           // Compute the actual debug file path (mirrors sessionRunner.ts logic)
           const safeId = safeFilenameId(sessionId)
@@ -1272,8 +1256,7 @@ export async function runBridgeLoop(
         logEvent('tengu_bridge_fatal_error', {
           status: err.status,
           error_type:
-            err.errorType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            err.errorType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         logForDiagnosticsNoPII(
           isExpiredErrorType(err.errorType) ? 'info' : 'error',
           'bridge_fatal_error',
@@ -1303,8 +1286,7 @@ export async function runBridgeLoop(
             `[bridge:work] Detected system sleep (${Math.round((now - lastPollErrorTime) / 1000)}s gap), resetting error budget`,
           )
           logForDiagnosticsNoPII('info', 'bridge_poll_sleep_detected', {
-            gapMs: now - lastPollErrorTime,
-          })
+            gapMs: now - lastPollErrorTime})
           connErrorStart = null
           connBackoff = 0
           generalErrorStart = null
@@ -1323,12 +1305,10 @@ export async function runBridgeLoop(
           logEvent('tengu_bridge_poll_give_up', {
             error_type:
               'connection' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            elapsed_ms: elapsed,
-          })
+            elapsed_ms: elapsed})
           logForDiagnosticsNoPII('error', 'bridge_poll_give_up', {
             error_type: 'connection',
-            elapsed_ms: elapsed,
-          })
+            elapsed_ms: elapsed})
           fatalExit = true
           break
         }
@@ -1369,8 +1349,7 @@ export async function runBridgeLoop(
             `[bridge:work] Detected system sleep (${Math.round((now - lastPollErrorTime) / 1000)}s gap), resetting error budget`,
           )
           logForDiagnosticsNoPII('info', 'bridge_poll_sleep_detected', {
-            gapMs: now - lastPollErrorTime,
-          })
+            gapMs: now - lastPollErrorTime})
           connErrorStart = null
           connBackoff = 0
           generalErrorStart = null
@@ -1389,12 +1368,10 @@ export async function runBridgeLoop(
           logEvent('tengu_bridge_poll_give_up', {
             error_type:
               'general' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            elapsed_ms: elapsed,
-          })
+            elapsed_ms: elapsed})
           logForDiagnosticsNoPII('error', 'bridge_poll_give_up', {
             error_type: 'general',
-            elapsed_ms: elapsed,
-          })
+            elapsed_ms: elapsed})
           fatalExit = true
           break
         }
@@ -1429,12 +1406,10 @@ export async function runBridgeLoop(
   const loopDurationMs = Date.now() - loopStartTime
   logEvent('tengu_bridge_shutdown', {
     active_sessions: activeSessions.size,
-    loop_duration_ms: loopDurationMs,
-  })
+    loop_duration_ms: loopDurationMs})
   logForDiagnosticsNoPII('info', 'bridge_shutdown', {
     active_sessions: activeSessions.size,
-    loop_duration_ms: loopDurationMs,
-  })
+    loop_duration_ms: loopDurationMs})
 
   // Graceful shutdown: kill active sessions, report them as interrupted,
   // archive sessions, then deregister the environment so the web UI shows
@@ -1456,9 +1431,7 @@ export async function runBridgeLoop(
     logForDebugging(
       `[bridge:shutdown] Shutting down ${activeSessions.size} active session(s)`,
     )
-    logger.logStatus(
-      `Shutting down ${activeSessions.size} active session(s)\u2026`,
-    )
+    logger.logStatus(t('bridgeMain.shuttingDownSessions', activeSessions.size))
 
     // Snapshot work IDs before killing — onSessionDone clears the maps when
     // each child exits, so we need a copy for the stopWork calls below.
@@ -1550,9 +1523,7 @@ export async function runBridgeLoop(
     initialSessionId &&
     !fatalExit
   ) {
-    logger.logStatus(
-      `Resume this session by running \`claude remote-control --continue\``,
-    )
+    logger.logStatus(t('bridgeMain.resumeSession'))
     logForDebugging(
       `[bridge:shutdown] Skipping archive+deregister to allow resume of session ${initialSessionId}`,
     )
@@ -1587,7 +1558,7 @@ export async function runBridgeLoop(
     logForDebugging(
       `[bridge:shutdown] Environment deregistered, bridge offline`,
     )
-    logger.logVerbose('Environment deregistered.')
+    logger.logVerbose(t('bridgeMain.environmentDeregistered'))
   } catch (err) {
     logger.logVerbose(`Failed to deregister environment: ${errorMessage(err)}`)
   }
@@ -1598,7 +1569,7 @@ export async function runBridgeLoop(
   const { clearBridgePointer } = await import('./bridgePointer.js')
   await clearBridgePointer(config.dir)
 
-  logger.logVerbose('Environment offline.')
+  logger.logVerbose(t('bridgeMain.environmentOffline'))
 }
 
 const CONNECTION_ERROR_CODES = new Set([
@@ -1674,8 +1645,7 @@ async function stopWorkWithRetry(
         }
         logForDiagnosticsNoPII('error', 'bridge_stop_work_failed', {
           attempts: attempt,
-          fatal: true,
-        })
+          fatal: true})
         return
       }
       const errMsg = errorMessage(err)
@@ -1690,8 +1660,7 @@ async function stopWorkWithRetry(
           `Failed to stop work ${workId} after ${MAX_ATTEMPTS} attempts: ${errMsg}`,
         )
         logForDiagnosticsNoPII('error', 'bridge_stop_work_failed', {
-          attempts: MAX_ATTEMPTS,
-        })
+          attempts: MAX_ATTEMPTS})
       }
     }
   }
@@ -1708,11 +1677,10 @@ function onSessionTimeout(
     `[bridge:session] sessionId=${sessionId} timed out after ${formatDuration(timeoutMs)}`,
   )
   logEvent('tengu_bridge_session_timeout', {
-    timeout_ms: timeoutMs,
-  })
+    timeout_ms: timeoutMs})
   logger.logSessionFailed(
     sessionId,
-    `Session timed out after ${formatDuration(timeoutMs)}`,
+    t('bridgeMain.sessionTimedOut', formatDuration(timeoutMs)),
   )
   timedOutSessions.add(sessionId)
   handle.kill()
@@ -1745,13 +1713,13 @@ function parseSpawnValue(raw: string | undefined): SpawnMode | string {
   if (raw === 'session') return 'single-session'
   if (raw === 'same-dir') return 'same-dir'
   if (raw === 'worktree') return 'worktree'
-  return `--spawn requires one of: ${SPAWN_FLAG_VALUES.join(', ')} (got: ${raw ?? '<missing>'})`
+  return t('bridgeMain.spawnRequiresValue', SPAWN_FLAG_VALUES.join(', '), raw ?? '<missing>')
 }
 
 function parseCapacityValue(raw: string | undefined): number | string {
   const n = raw === undefined ? NaN : parseInt(raw, 10)
   if (isNaN(n) || n < 1) {
-    return `--capacity requires a positive integer (got: ${raw ?? '<missing>'})`
+    return t('bridgeMain.capacityRequiresValue', raw ?? '<missing>')
   }
   return n
 }
@@ -1804,18 +1772,18 @@ export function parseArgs(args: string[]): ParsedArgs {
     ) {
       sessionId = args[++i]!
       if (!sessionId) {
-        return makeError('--session-id requires a value')
+        return makeError(t('bridgeMain.sessionIdRequiresValue'))
       }
     } else if (feature('KAIROS') && arg.startsWith('--session-id=')) {
       sessionId = arg.slice('--session-id='.length)
       if (!sessionId) {
-        return makeError('--session-id requires a value')
+        return makeError(t('bridgeMain.sessionIdRequiresValue'))
       }
     } else if (feature('KAIROS') && (arg === '--continue' || arg === '-c')) {
       continueSession = true
     } else if (arg === '--spawn' || arg.startsWith('--spawn=')) {
       if (spawnMode !== undefined) {
-        return makeError('--spawn may only be specified once')
+        return makeError(t('bridgeMain.spawnOnce'))
       }
       const raw = arg.startsWith('--spawn=')
         ? arg.slice('--spawn='.length)
@@ -1828,7 +1796,7 @@ export function parseArgs(args: string[]): ParsedArgs {
       }
     } else if (arg === '--capacity' || arg.startsWith('--capacity=')) {
       if (capacity !== undefined) {
-        return makeError('--capacity may only be specified once')
+        return makeError(t('bridgeMain.capacityOnce'))
       }
       const raw = arg.startsWith('--capacity=')
         ? arg.slice('--capacity='.length)
@@ -1841,9 +1809,7 @@ export function parseArgs(args: string[]): ParsedArgs {
     } else if (arg === '--no-create-session-in-dir') {
       createSessionInDir = false
     } else {
-      return makeError(
-        `Unknown argument: ${arg}\nRun 'claude remote-control --help' for usage.`,
-      )
+      return makeError(t('bridgeMain.unknownArg', arg))
     }
   }
 
@@ -1852,9 +1818,7 @@ export function parseArgs(args: string[]): ParsedArgs {
 
   // --capacity only makes sense for multi-session modes.
   if (spawnMode === 'single-session' && capacity !== undefined) {
-    return makeError(
-      `--capacity cannot be used with --spawn=session (single-session mode has fixed capacity 1).`,
-    )
+    return makeError(t('bridgeMain.capacityWithSession'))
   }
 
   // --session-id / --continue resume a specific session on its original
@@ -1866,12 +1830,10 @@ export function parseArgs(args: string[]): ParsedArgs {
       capacity !== undefined ||
       createSessionInDir !== undefined)
   ) {
-    return makeError(
-      `--session-id and --continue cannot be used with --spawn, --capacity, or --create-session-in-dir.`,
-    )
+    return makeError(t('bridgeMain.resumeWithSpawn'))
   }
   if (sessionId && continueSession) {
-    return makeError(`--session-id and --continue cannot be used together.`)
+    return makeError(t('bridgeMain.sessionIdAndContinue'))
   }
 
   return {
@@ -1886,8 +1848,7 @@ export function parseArgs(args: string[]): ParsedArgs {
     createSessionInDir,
     sessionId,
     continueSession,
-    help,
-  }
+    help}
 
   function makeError(error: string): ParsedArgs {
     return {
@@ -1903,8 +1864,7 @@ export function parseArgs(args: string[]): ParsedArgs {
       sessionId,
       continueSession,
       help,
-      error,
-    }
+      error}
   }
 }
 
@@ -1936,8 +1896,7 @@ async function printHelp(): Promise<void> {
 `
     : ''
   const serverNote = showServer
-    ? `  - Worktree mode requires a git repository or WorktreeCreate/WorktreeRemove hooks
-`
+    ? t('bridgeMain.worktreeRequiresGit')
     : ''
   const help = `
 Remote Control - Connect your local environment to claude.ai/code
@@ -2006,7 +1965,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     return
   }
   if (parsed.error) {
-    console.error(`Error: ${parsed.error}`)
+    console.error(`${t('bridgeMain.errorPrefix')}${parsed.error}`)
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(1)
   }
@@ -2022,8 +1981,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     capacity: parsedCapacity,
     createSessionInDir: parsedCreateSessionInDir,
     sessionId: parsedSessionId,
-    continueSession,
-  } = parsed
+    continueSession} = parsed
   // Mutable so --continue can set it from the pointer file. The #20460
   // resume flow below then treats it the same as an explicit --session-id.
   let resumeSessionId = parsedSessionId
@@ -2045,7 +2003,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     const valid: readonly string[] = PERMISSION_MODES
     if (!valid.includes(permissionMode)) {
       console.error(
-        `Error: Invalid permission mode '${permissionMode}'. Valid modes: ${valid.join(', ')}`,
+        t('bridgeMain.invalidPermissionMode', permissionMode, valid.join(', ')),
       )
       // eslint-disable-next-line custom-rules/no-process-exit
       process.exit(1)
@@ -2076,8 +2034,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     await logEventAsync('tengu_bridge_multi_session_denied', {
       used_spawn: parsedSpawnMode !== undefined,
       used_capacity: parsedCapacity !== undefined,
-      used_create_session_in_dir: parsedCreateSessionInDir !== undefined,
-    })
+      used_create_session_in_dir: parsedCreateSessionInDir !== undefined})
     // logEventAsync only enqueues — process.exit() discards buffered events.
     // Flush explicitly, capped at 500ms to match gracefulShutdown.ts.
     // (sleep() doesn't unref its timer, but process.exit() follows immediately
@@ -2086,9 +2043,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
       Promise.all([shutdown1PEventLogging(), shutdownDatadog()]),
       sleep(500, undefined, { unref: true }),
     ]).catch(() => {})
-    console.error(
-      'Error: Multi-session Remote Control is not enabled for your account yet.',
-    )
+    console.error(t('bridgeMain.multiSessionNotEnabled'))
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(1)
   }
@@ -2102,9 +2057,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
   // The bridge bypasses main.tsx (which renders the interactive TrustDialog via showSetupScreens),
   // so we must verify trust was previously established by a normal `claude` session.
   if (!checkHasTrustDialogAccepted()) {
-    console.error(
-      `Error: Workspace not trusted. Please run \`claude\` in ${dir} first to review and accept the workspace trust dialog.`,
-    )
+    console.error(t('bridgeMain.workspaceNotTrusted', dir))
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(1)
   }
@@ -2128,14 +2081,12 @@ export async function bridgeMain(args: string[]): Promise<void> {
     getGlobalConfig,
     saveGlobalConfig,
     getCurrentProjectConfig,
-    saveCurrentProjectConfig,
-  } = await import('../utils/config.js')
+    saveCurrentProjectConfig} = await import('../utils/config.js')
   if (!getGlobalConfig().remoteDialogSeen) {
     const readline = await import('readline')
     const rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout,
-    })
+      output: process.stdout})
     console.log(
       '\nRemote Control lets you access this CLI session from the web (claude.ai/code)\nor the Claude app, so you can pick up where you left off on any device.\n\nYou can disconnect remote access anytime by running /remote-control again.\n',
     )
@@ -2167,9 +2118,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     )
     const found = await readBridgePointerAcrossWorktrees(dir)
     if (!found) {
-      console.error(
-        `Error: No recent session found in this directory or its worktrees. Run \`claude remote-control\` to start a new one.`,
-      )
+      console.error(t('bridgeMain.noRecentSession'))
       // eslint-disable-next-line custom-rules/no-process-exit
       process.exit(1)
     }
@@ -2178,7 +2127,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     const ageStr = ageMin < 60 ? `${ageMin}m` : `${Math.round(ageMin / 60)}h`
     const fromWt = pointerDir !== dir ? ` from worktree ${pointerDir}` : ''
     console.error(
-      `Resuming session ${pointer.sessionId} (${ageStr} ago)${fromWt}\u2026`,
+      t('bridgeMain.resumingSession', pointer.sessionId, ageStr, fromWt),
     )
     resumeSessionId = pointer.sessionId
     // Track where the pointer came from so the #20460 exit(1) paths below
@@ -2197,9 +2146,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     !baseUrl.includes('localhost') &&
     !baseUrl.includes('127.0.0.1')
   ) {
-    console.error(
-      'Error: Remote Control base URL uses HTTP. Only HTTPS or localhost HTTP is allowed.',
-    )
+    console.error(t('bridgeMain.baseUrlHttp'))
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(1)
   }
@@ -2233,7 +2180,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     : undefined
   if (savedSpawnMode === 'worktree' && !worktreeAvailable) {
     console.error(
-      'Warning: Saved spawn mode is worktree but this directory is not a git repository. Falling back to same-dir.',
+      t('bridgeMain.savedSpawnModeFallback'),
     )
     savedSpawnMode = undefined
     saveCurrentProjectConfig(current => {
@@ -2256,8 +2203,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     const readline = await import('readline')
     const rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout,
-    })
+      output: process.stdout})
     console.log(
       `\nClaude Remote Control is launching in spawn mode which lets you create new sessions in this project from Claude Code on Web or your Mobile app. Learn more here: https://code.claude.com/docs/en/remote-control\n\n` +
         `Spawn mode for this project:\n` +
@@ -2274,8 +2220,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     savedSpawnMode = chosen
     logEvent('tengu_bridge_spawn_mode_chosen', {
       spawn_mode:
-        chosen as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        chosen as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     saveCurrentProjectConfig(current => {
       if (current.remoteControlSpawnMode === chosen) return current
       return { ...current, remoteControlSpawnMode: chosen }
@@ -2337,7 +2282,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
   // saved worktree pref was already guarded above.
   if (spawnMode === 'worktree' && !worktreeAvailable) {
     console.error(
-      `Error: Worktree mode requires a git repository or WorktreeCreate hooks configured. Use --spawn=session for single-session mode.`,
+      t('bridgeMain.worktreeError'),
     )
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(1)
@@ -2355,8 +2300,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     runnerVersion: MACRO.VERSION,
     onDebug: logForDebugging,
     onAuth401: handleOAuth401Error,
-    getTrustedDeviceToken,
-  })
+    getTrustedDeviceToken})
 
   // When resuming a session via --session-id, fetch it to learn its
   // environment_id and reuse that for registration (idempotent on the
@@ -2370,9 +2314,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     try {
       validateBridgeId(resumeSessionId, 'sessionId')
     } catch {
-      console.error(
-        `Error: Invalid session ID "${resumeSessionId}". Session IDs must not contain unsafe characters.`,
-      )
+      console.error(t('bridgeMain.invalidSessionId', resumeSessionId))
       // eslint-disable-next-line custom-rules/no-process-exit
       process.exit(1)
     }
@@ -2384,8 +2326,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     const { getBridgeSession } = await import('./createSession.js')
     const session = await getBridgeSession(resumeSessionId, {
       baseUrl,
-      getAccessToken: getBridgeAccessToken,
-    })
+      getAccessToken: getBridgeAccessToken})
     if (!session) {
       // Session gone on server → pointer is stale. Clear it so the user
       // isn't re-prompted next launch. (Explicit --session-id leaves the
@@ -2395,9 +2336,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
         const { clearBridgePointer } = await import('./bridgePointer.js')
         await clearBridgePointer(resumePointerDir)
       }
-      console.error(
-        `Error: Session ${resumeSessionId} not found. It may have been archived or expired, or your login may have lapsed (run \`claude /login\`).`,
-      )
+      console.error(t('bridgeMain.sessionNotFound', resumeSessionId))
       // eslint-disable-next-line custom-rules/no-process-exit
       process.exit(1)
     }
@@ -2406,9 +2345,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
         const { clearBridgePointer } = await import('./bridgePointer.js')
         await clearBridgePointer(resumePointerDir)
       }
-      console.error(
-        `Error: Session ${resumeSessionId} has no environment_id. It may never have been attached to a bridge.`,
-      )
+      console.error(t('bridgeMain.sessionNoEnvironment', resumeSessionId))
       // eslint-disable-next-line custom-rules/no-process-exit
       process.exit(1)
     }
@@ -2434,8 +2371,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     apiBaseUrl: baseUrl,
     sessionIngressUrl,
     debugFile,
-    sessionTimeoutMs,
-  }
+    sessionTimeoutMs}
 
   logForDebugging(
     `[bridge:init] bridgeId=${bridgeId}${reuseEnvironmentId ? ` reuseEnvironmentId=${reuseEnvironmentId}` : ''} dir=${dir} branch=${branch} gitRepoUrl=${gitRepoUrl} machine=${machineName}`,
@@ -2456,13 +2392,12 @@ export async function bridgeMain(args: string[]): Promise<void> {
     environmentSecret = reg.environment_secret
   } catch (err) {
     logEvent('tengu_bridge_registration_failed', {
-      status: err instanceof BridgeFatalError ? err.status : undefined,
-    })
+      status: err instanceof BridgeFatalError ? err.status : undefined})
     // Registration failures are fatal — print a clean message instead of a stack trace.
     console.error(
       err instanceof BridgeFatalError && err.status === 404
-        ? 'Remote Control environments are not available for your account.'
-        : `Error: ${errorMessage(err)}`,
+        ? t('bridgeMain.environmentsNotAvailable')
+        : t('bridgeMain.error', errorMessage(err)),
     )
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(1)
@@ -2535,8 +2470,8 @@ export async function bridgeMain(args: string[]): Promise<void> {
         }
         console.error(
           isFatal
-            ? `Error: ${errorMessage(err)}`
-            : `Error: Failed to reconnect session ${resumeSessionId}: ${errorMessage(err)}\nThe session may still be resumable — try running the same command again.`,
+            ? t('bridgeMain.error', errorMessage(err))
+            : t('bridgeMain.reconnectFailed', resumeSessionId, errorMessage(err)),
         )
         // eslint-disable-next-line custom-rules/no-process-exit
         process.exit(1)
@@ -2561,13 +2496,11 @@ export async function bridgeMain(args: string[]): Promise<void> {
       spawnModeSource as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     multi_session_gate: multiSessionEnabled,
     pre_create_session: preCreateSession,
-    worktree_available: worktreeAvailable,
-  })
+    worktree_available: worktreeAvailable})
   logForDiagnosticsNoPII('info', 'bridge_started', {
     max_sessions: config.maxSessions,
     sandbox: config.sandbox,
-    spawn_mode: config.spawnMode,
-  })
+    spawn_mode: config.spawnMode})
 
   const spawner = createSessionSpawner({
     execPath: process.execPath,
@@ -2587,8 +2520,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
       logForDebugging(
         `[bridge:perm] sessionId=${sessionId} tool=${request.request.tool_name} request_id=${request.request_id} (not auto-approving)`,
       )
-    },
-  })
+    }})
 
   const logger = createBridgeLogger({ verbose })
   const { parseGitHubRepository } = await import('../utils/detectRepository.js')
@@ -2625,8 +2557,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
       config.spawnMode = newMode
       logEvent('tengu_bridge_spawn_mode_toggled', {
         spawn_mode:
-          newMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          newMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       logger.logStatus(
         newMode === 'worktree'
           ? 'Spawn mode: worktree (new sessions get isolated git worktrees)'
@@ -2683,8 +2614,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
         signal: controller.signal,
         baseUrl,
         getAccessToken: getBridgeAccessToken,
-        permissionMode,
-      })
+        permissionMode})
       if (initialSessionId) {
         logForDebugging(
           `[bridge:init] Created initial session ${initialSessionId}`,
@@ -2715,8 +2645,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     const pointerPayload = {
       sessionId: initialSessionId,
       environmentId,
-      source: 'standalone' as const,
-    }
+      source: 'standalone' as const}
     await writeBridgePointer(config.dir, pointerPayload)
     pointerRefreshTimer = setInterval(
       writeBridgePointer,
@@ -2830,7 +2759,7 @@ export async function runBridgeHeadless(
 
   if (!checkHasTrustDialogAccepted()) {
     throw new BridgeHeadlessPermanentError(
-      `Workspace not trusted: ${dir}. Run \`claude\` in that directory first to accept the trust dialog.`,
+      t('bridgeMain.workspaceNotTrustedHeadless', dir),
     )
   }
 
@@ -2847,7 +2776,7 @@ export async function runBridgeHeadless(
     !baseUrl.includes('127.0.0.1')
   ) {
     throw new BridgeHeadlessPermanentError(
-      'Remote Control base URL uses HTTP. Only HTTPS or localhost HTTP is allowed.',
+      t('bridgeMain.baseUrlHttpHeadless'),
     )
   }
   const sessionIngressUrl =
@@ -2863,7 +2792,7 @@ export async function runBridgeHeadless(
       hasWorktreeCreateHook() || findGitRoot(dir) !== null
     if (!worktreeAvailable) {
       throw new BridgeHeadlessPermanentError(
-        `Worktree mode requires a git repository or WorktreeCreate hooks. Directory ${dir} has neither.`,
+        t('bridgeMain.worktreeErrorNoDir', dir),
       )
     }
   }
@@ -2887,8 +2816,7 @@ export async function runBridgeHeadless(
     environmentId: randomUUID(),
     apiBaseUrl: baseUrl,
     sessionIngressUrl,
-    sessionTimeoutMs: opts.sessionTimeoutMs,
-  }
+    sessionTimeoutMs: opts.sessionTimeoutMs}
 
   const api = createBridgeApiClient({
     baseUrl,
@@ -2896,8 +2824,7 @@ export async function runBridgeHeadless(
     runnerVersion: MACRO.VERSION,
     onDebug: log,
     onAuth401: opts.onAuth401,
-    getTrustedDeviceToken,
-  })
+    getTrustedDeviceToken})
 
   let environmentId: string
   let environmentSecret: string
@@ -2907,7 +2834,7 @@ export async function runBridgeHeadless(
     environmentSecret = reg.environment_secret
   } catch (err) {
     // Transient — let supervisor backoff-retry.
-    throw new Error(`Bridge registration failed: ${errorMessage(err)}`)
+    throw new Error(t('bridgeMain.bridgeRegistrationFailed', errorMessage(err)))
   }
 
   const spawner = createSessionSpawner({
@@ -2917,8 +2844,7 @@ export async function runBridgeHeadless(
     verbose: false,
     sandbox: opts.sandbox,
     permissionMode: opts.permissionMode,
-    onDebug: log,
-  })
+    onDebug: log})
 
   const logger = createHeadlessBridgeLogger(log)
   logger.printBanner(config, environmentId)
@@ -2936,8 +2862,7 @@ export async function runBridgeHeadless(
         signal,
         baseUrl,
         getAccessToken: opts.getAccessToken,
-        permissionMode: opts.permissionMode,
-      })
+        permissionMode: opts.permissionMode})
       if (sid) {
         initialSessionId = sid
         log(`created initial session ${sid}`)
@@ -2991,6 +2916,5 @@ function createHeadlessBridgeLogger(log: (s: string) => void): BridgeLogger {
     setSessionTitle: noop,
     clearStatus: noop,
     toggleQr: noop,
-    refreshDisplay: noop,
-  }
+    refreshDisplay: noop}
 }

@@ -42,8 +42,7 @@ export async function* all<A>(
         done,
         value,
         generator,
-        promise,
-      }))
+        promise}))
     return promise
   }
   const waiting = [...generators]

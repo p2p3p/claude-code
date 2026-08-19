@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import type { Theme } from '@anthropic/ink';
 import type { Credential, Vault } from './vaultsApi.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props =
   | { mode: 'list'; vaults: Vault[] }
@@ -21,10 +22,10 @@ function VaultRow({ vault }: { vault: Vault }): React.ReactNode {
       <Box>
         <Text bold>{vault.vault_id}</Text>
         <Text dimColor> · </Text>
-        <Text color={(isArchived ? 'warning' : 'success') as keyof Theme}>{isArchived ? 'archived' : 'active'}</Text>
+        <Text color={(isArchived ? 'warning' : 'success') as keyof Theme}>{isArchived ? t('vaultView.archived') : t('vaultView.active')}</Text>
       </Box>
-      <Text>Name: {vault.name}</Text>
-      <Text dimColor>Created: {createdAt}</Text>
+      <Text>{t('vaultView.name')} {vault.name}</Text>
+      <Text dimColor>{t('vaultView.created')} {createdAt}</Text>
     </Box>
   );
 }
@@ -34,14 +35,14 @@ export function VaultView(props: Props): React.ReactNode {
     if (props.vaults.length === 0) {
       return (
         <Box>
-          <Text dimColor>No vaults found. Use /vault create &lt;name&gt; to create one.</Text>
+          <Text dimColor>{t('vaultView.noVaultsFound')}</Text>
         </Box>
       );
     }
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Vaults ({props.vaults.length})</Text>
+          <Text bold>{t('vaultView.vaultsCount', props.vaults.length)}</Text>
         </Box>
         {props.vaults.map(vault => (
           <VaultRow key={vault.vault_id} vault={vault} />
@@ -58,15 +59,15 @@ export function VaultView(props: Props): React.ReactNode {
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Vault: {vault.vault_id}</Text>
+          <Text bold>{t('vaultView.vaultDetail')} {vault.vault_id}</Text>
         </Box>
-        <Text>Name: {vault.name}</Text>
+        <Text>{t('vaultView.name')} {vault.name}</Text>
         <Text>
-          Status:{' '}
-          <Text color={(isArchived ? 'warning' : 'success') as keyof Theme}>{isArchived ? 'archived' : 'active'}</Text>
+          {t('vaultView.status')}{' '}
+          <Text color={(isArchived ? 'warning' : 'success') as keyof Theme}>{isArchived ? t('vaultView.archived') : t('vaultView.active')}</Text>
         </Text>
-        <Text dimColor>Created: {createdAt}</Text>
-        {archivedAt ? <Text dimColor>Archived: {archivedAt}</Text> : null}
+        <Text dimColor>{t('vaultView.created')} {createdAt}</Text>
+        {archivedAt ? <Text dimColor>{t('vaultView.archivedAt')} {archivedAt}</Text> : null}
       </Box>
     );
   }
@@ -77,11 +78,11 @@ export function VaultView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'success' as keyof Theme}>
-            Vault created
+            {t('vaultView.vaultCreated')}
           </Text>
         </Box>
-        <Text>ID: {vault.vault_id}</Text>
-        <Text>Name: {vault.name}</Text>
+        <Text>{t('vaultView.id')} {vault.vault_id}</Text>
+        <Text>{t('vaultView.name')} {vault.name}</Text>
       </Box>
     );
   }
@@ -93,11 +94,11 @@ export function VaultView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'warning' as keyof Theme}>
-            Vault archived
+            {t('vaultView.vaultArchived')}
           </Text>
         </Box>
-        <Text>ID: {vault.vault_id}</Text>
-        <Text dimColor>Archived at: {archivedAt}</Text>
+        <Text>{t('vaultView.id')} {vault.vault_id}</Text>
+        <Text dimColor>{t('vaultView.archivedAtLabel')} {archivedAt}</Text>
       </Box>
     );
   }
@@ -108,7 +109,7 @@ export function VaultView(props: Props): React.ReactNode {
       return (
         <Box>
           <Text dimColor>
-            No credentials in vault {vaultId}. Use /vault add-credential {vaultId} &lt;key&gt; &lt;value&gt; to add one.
+            {t('vaultView.noCredentials', vaultId)}
           </Text>
         </Box>
       );
@@ -117,7 +118,7 @@ export function VaultView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box marginBottom={1}>
           <Text bold>
-            Credentials in {vaultId} ({credentials.length})
+            {t('vaultView.credentialsIn', vaultId, credentials.length)}
           </Text>
         </Box>
         {credentials.map(cred => {
@@ -131,12 +132,12 @@ export function VaultView(props: Props): React.ReactNode {
                 {isArchived ? (
                   <>
                     <Text dimColor> · </Text>
-                    <Text color={'warning' as keyof Theme}>archived</Text>
+                    <Text color={'warning' as keyof Theme}>{t('vaultView.archived')}</Text>
                   </>
                 ) : null}
               </Box>
               {/* SECURITY: credential value is never displayed */}
-              <Text dimColor>Value: ***mask***</Text>
+              <Text dimColor>{t('vaultView.valueMask')}</Text>
             </Box>
           );
         })}
@@ -150,13 +151,13 @@ export function VaultView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'success' as keyof Theme}>
-            Credential added
+            {t('vaultView.credentialAdded')}
           </Text>
         </Box>
-        <Text>ID: {credentialId}</Text>
-        <Text>Vault: {vaultId}</Text>
+        <Text>{t('vaultView.id')} {credentialId}</Text>
+        <Text>{t('vaultView.vaultLabel')} {vaultId}</Text>
         {/* SECURITY: credential value is never echoed back */}
-        <Text dimColor>Value: ***mask***</Text>
+        <Text dimColor>{t('vaultView.valueMask')}</Text>
       </Box>
     );
   }
@@ -167,11 +168,11 @@ export function VaultView(props: Props): React.ReactNode {
       <Box flexDirection="column">
         <Box>
           <Text bold color={'warning' as keyof Theme}>
-            Credential archived
+            {t('vaultView.credentialArchived')}
           </Text>
         </Box>
-        <Text>ID: {credentialId}</Text>
-        <Text>Vault: {vaultId}</Text>
+        <Text>{t('vaultView.id')} {credentialId}</Text>
+        <Text>{t('vaultView.vaultLabel')} {vaultId}</Text>
       </Box>
     );
   }

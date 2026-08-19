@@ -47,8 +47,7 @@ export function createCachedMCState(): CachedMCState {
     toolOrder: [],
     deletedRefs: new Set(),
     pinnedEdits: [],
-    toolsSentToAPI: false,
-  }
+    toolsSentToAPI: false}
 }
 
 export function markToolsSentToAPI(state: CachedMCState): void {
@@ -106,7 +105,5 @@ export function createCacheEditsBlock(
     type: 'cache_edits',
     edits: toolIds.map(id => ({
       type: 'delete_tool_result',
-      tool_use_id: id,
-    })),
-  }
+      tool_use_id: id}))}
 }

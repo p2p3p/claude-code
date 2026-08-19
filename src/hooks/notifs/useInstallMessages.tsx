@@ -15,8 +15,7 @@ export function useInstallMessages(): void {
         key: `install-message-${index}-${message.type}`,
         text: message.message,
         priority,
-        color: message.type === 'error' ? 'error' : 'warning',
-      };
+        color: message.type === 'error' ? 'error' : 'warning'};
     });
   });
 }

@@ -12,6 +12,7 @@ import {
   saveGlobalConfig,
 } from 'src/utils/config.js'
 import { errorMessage } from 'src/utils/errors.js'
+import { t } from '../../../../../src/utils/i18n/index.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import { logError } from 'src/utils/log.js'
 import {
@@ -102,7 +103,7 @@ export const ConfigTool = buildTool({
     }
     return {
       behavior: 'ask' as const,
-      message: `Set ${input.setting} to ${jsonStringify(input.value)}`,
+      message: t('toolUI.config.settingTo', input.setting, jsonStringify(input.value)),
     }
   },
   renderToolUseMessage,
@@ -119,13 +120,13 @@ export const ConfigTool = buildTool({
       )
       if (!isVoiceGrowthBookEnabled()) {
         return {
-          data: { success: false, error: `Unknown setting: "${setting}"` },
+          data: { success: false, error: t('configTool.unknownSetting', setting) },
         }
       }
     }
     if (!isSupported(setting)) {
       return {
-        data: { success: false, error: `Unknown setting: "${setting}"` },
+        data: { success: false, error: t('configTool.unknownSetting', setting) },
       }
     }
 
@@ -194,7 +195,7 @@ export const ConfigTool = buildTool({
             success: false,
             operation: 'set',
             setting,
-            error: `${setting} requires true or false.`,
+            error: t('configTool.requiresTrueFalse', setting),
           },
         }
       }
@@ -208,7 +209,7 @@ export const ConfigTool = buildTool({
           success: false,
           operation: 'set',
           setting,
-          error: `Invalid value "${value}". Options: ${options.join(', ')}`,
+          error: t('configTool.invalidValue', String(value), options.join(', ')),
         },
       }
     }
@@ -243,8 +244,8 @@ export const ConfigTool = buildTool({
           data: {
             success: false,
             error: !isAnthropicAuthEnabled()
-              ? 'Voice mode requires a Claude.ai account. Please run /login to sign in.'
-              : 'Voice mode is not available.',
+              ? t('configTool.voiceRequiresLogin')
+              : t('configTool.voiceNotAvailable'),
           },
         }
       }
@@ -264,7 +265,7 @@ export const ConfigTool = buildTool({
             success: false,
             error:
               recording.reason ??
-              'Voice mode is not available in this environment.',
+              t('configTool.voiceNotAvailableEnv'),
           },
         }
       }
@@ -272,8 +273,7 @@ export const ConfigTool = buildTool({
         return {
           data: {
             success: false,
-            error:
-              'Voice mode requires a Claude.ai account. Please run /login to sign in.',
+            error: t('configTool.voiceRequiresLogin'),
           },
         }
       }
@@ -283,8 +283,8 @@ export const ConfigTool = buildTool({
           data: {
             success: false,
             error:
-              'No audio recording tool found.' +
-              (deps.installCommand ? ` Run: ${deps.installCommand}` : ''),
+              t('configTool.noRecordingTool') +
+              (deps.installCommand ? t('configTool.runCommand', deps.installCommand) : ''),
           },
         }
       }
@@ -301,7 +301,7 @@ export const ConfigTool = buildTool({
         return {
           data: {
             success: false,
-            error: `Microphone access is denied. To enable it, go to ${guidance}, then try again.`,
+            error: t('configTool.microphoneDenied', guidance),
           },
         }
       }
@@ -319,7 +319,7 @@ export const ConfigTool = buildTool({
               success: false,
               operation: 'set',
               setting,
-              error: 'Invalid setting path',
+              error: t('configTool.invalidSettingPath'),
             },
           }
         }
@@ -427,7 +427,7 @@ export const ConfigTool = buildTool({
     return {
       tool_use_id: toolUseID,
       type: 'tool_result' as const,
-      content: `Error: ${content.error}`,
+      content: t('configTool.errorPrefix', content.error),
       is_error: true,
     }
   },

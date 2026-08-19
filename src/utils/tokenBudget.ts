@@ -11,8 +11,7 @@ const VERBOSE_RE_G = new RegExp(VERBOSE_RE.source, 'gi')
 const MULTIPLIERS: Record<string, number> = {
   k: 1_000,
   m: 1_000_000,
-  b: 1_000_000_000,
-}
+  b: 1_000_000_000}
 
 function parseBudgetMatch(value: string, suffix: string): number {
   return parseFloat(value) * MULTIPLIERS[suffix.toLowerCase()]!
@@ -40,8 +39,7 @@ export function findTokenBudgetPositions(
       startMatch[0].trimStart().length
     positions.push({
       start: offset,
-      end: startMatch.index! + startMatch[0].length,
-    })
+      end: startMatch.index! + startMatch[0].length})
   }
   const endMatch = text.match(SHORTHAND_END_RE)
   if (endMatch) {
@@ -53,8 +51,7 @@ export function findTokenBudgetPositions(
     if (!alreadyCovered) {
       positions.push({
         start: endStart,
-        end: endMatch.index! + endMatch[0].length,
-      })
+        end: endMatch.index! + endMatch[0].length})
     }
   }
   for (const match of text.matchAll(VERBOSE_RE_G)) {

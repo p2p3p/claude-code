@@ -2,8 +2,7 @@ import { feature } from 'bun:bundle'
 import memoize from 'lodash-es/memoize.js'
 import {
   checkStatsigFeatureGate_CACHED_MAY_BE_STALE,
-  getFeatureValue_CACHED_MAY_BE_STALE,
-} from 'src/services/analytics/growthbook.js'
+  getFeatureValue_CACHED_MAY_BE_STALE} from 'src/services/analytics/growthbook.js'
 import { getIsNonInteractiveSession, getSdkBetas } from '../bootstrap/state.js'
 import {
   BEDROCK_EXTRA_PARAMS_HEADERS,
@@ -18,8 +17,7 @@ import {
   TOKEN_EFFICIENT_TOOLS_BETA_HEADER,
   SEARCH_EXTRA_TOOLS_BETA_HEADER_1P,
   SEARCH_EXTRA_TOOLS_BETA_HEADER_3P,
-  WEB_SEARCH_BETA_HEADER,
-} from '../constants/betas.js'
+  WEB_SEARCH_BETA_HEADER} from '../constants/betas.js'
 import { OAUTH_BETA_HEADER } from '../constants/oauth.js'
 import { isClaudeAISubscriber } from './auth.js'
 import { has1mContext } from './context.js'
@@ -27,9 +25,7 @@ import { isEnvTruthy } from './envUtils.js'
 import { getCanonicalName } from './model/model.js'
 import { get3PModelCapabilityOverride } from './model/modelSupportOverrides.js'
 import {
-  getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
-} from './model/providers.js'
+  getAPIProvider} from './model/providers.js'
 import { getInitialSettings } from './settings/settings.js'
 
 /**
@@ -103,7 +99,7 @@ export function modelSupportsISP(model: string): boolean {
   if (provider === 'foundry') {
     return true
   }
-  if (provider === 'firstParty') {
+  if (provider === 'anthropic') {
     return !canonical.includes('claude-3-')
   }
   return (
@@ -128,7 +124,7 @@ export function modelSupportsContextManagement(model: string): boolean {
   if (provider === 'foundry') {
     return true
   }
-  if (provider === 'firstParty') {
+  if (provider === 'anthropic') {
     return !canonical.includes('claude-3-')
   }
   return (
@@ -143,7 +139,7 @@ export function modelSupportsStructuredOutputs(model: string): boolean {
   const canonical = getCanonicalName(model)
   const provider = getAPIProvider()
   // Structured outputs only supported on firstParty and Foundry (not Bedrock/Vertex yet)
-  if (provider !== 'firstParty' && provider !== 'foundry') {
+  if (provider !== 'anthropic' && provider !== 'foundry') {
     return false
   }
   return (
@@ -181,9 +177,9 @@ export function getSearchExtraToolsBetaHeader(): string {
  */
 export function shouldIncludeFirstPartyOnlyBetas(): boolean {
   return (
-    (getAPIProvider() === 'firstParty' || getAPIProvider() === 'foundry') &&
+    (getAPIProvider() === 'anthropic' || getAPIProvider() === 'foundry') &&
     !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS) &&
-    isFirstPartyAnthropicBaseUrl()
+    false
   )
 }
 
@@ -194,7 +190,7 @@ export function shouldIncludeFirstPartyOnlyBetas(): boolean {
  */
 export function shouldUseGlobalCacheScope(): boolean {
   return (
-    getAPIProvider() === 'firstParty' &&
+    getAPIProvider() === 'anthropic' &&
     !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS)
   )
 }

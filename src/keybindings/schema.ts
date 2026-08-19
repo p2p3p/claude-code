@@ -55,8 +55,7 @@ export const KEYBINDING_CONTEXT_DESCRIPTIONS: Record<
   DiffDialog: 'When the diff dialog is open',
   ModelPicker: 'When the model picker is open',
   Select: 'When a select/list component is focused',
-  Plugin: 'When the plugin dialog is open',
-}
+  Plugin: 'When the plugin dialog is open'}
 
 /**
  * All valid keybinding action identifiers.
@@ -212,8 +211,7 @@ export const KeybindingBlockSchema = lazySchema(() =>
               'Action to trigger, command to invoke, or null to unbind',
             ),
         )
-        .describe('Map of keystroke patterns to actions'),
-    })
+        .describe('Map of keystroke patterns to actions')})
     .describe('A block of keybindings for a specific context'),
 )
 
@@ -231,8 +229,7 @@ export const KeybindingsSchema = lazySchema(() =>
       $docs: z.string().optional().describe('Documentation URL'),
       bindings: z
         .array(KeybindingBlockSchema())
-        .describe('Array of keybinding blocks by context'),
-    })
+        .describe('Array of keybinding blocks by context')})
     .describe(
       'Claude Code keybindings configuration. Customize keyboard shortcuts by context.',
     ),

@@ -54,8 +54,7 @@ export const DEFAULT_ENV_LESS_BRIDGE_CONFIG: EnvLessBridgeConfig = {
   teardown_archive_timeout_ms: 1500,
   connect_timeout_ms: 15_000,
   min_version: '0.0.0',
-  should_show_app_upgrade_message: false,
-}
+  should_show_app_upgrade_message: false}
 
 // Floors reject the whole object on violation (fall back to DEFAULT) rather
 // than partially trusting — same defense-in-depth as pollConfig.ts.
@@ -112,8 +111,7 @@ const envLessBridgeConfigSchema = lazySchema(() =>
         }
       })
       .default('0.0.0'),
-    should_show_app_upgrade_message: z.boolean().default(false),
-  }),
+    should_show_app_upgrade_message: z.boolean().default(false)}),
 )
 
 /**

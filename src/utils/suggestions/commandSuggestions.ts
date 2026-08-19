@@ -3,8 +3,7 @@ import {
   type Command,
   formatDescriptionWithSource,
   getCommand,
-  getCommandName,
-} from '../../commands.js'
+  getCommandName} from '../../commands.js'
 import type { SuggestionItem } from '../../components/PromptInput/PromptInputFooterSuggestions.js'
 import { getSkillUsageScore } from './skillUsageTracking.js'
 
@@ -46,8 +45,7 @@ function getCommandFuse(commands: Command[]): Fuse<CommandSearchItem> {
         partKey: parts.length > 1 ? parts : undefined,
         commandName,
         command: cmd,
-        aliasKey: cmd.aliases,
-      }
+        aliasKey: cmd.aliases}
     })
 
   const fuse = new Fuse(commandData, {
@@ -72,8 +70,7 @@ function getCommandFuse(commands: Command[]): Fuse<CommandSearchItem> {
         name: 'descriptionKey',
         weight: 0.5, // Lower priority for descriptions
       },
-    ],
-  })
+    ]})
 
   fuseCache = { commands, fuse }
   return fuse
@@ -149,8 +146,7 @@ export function findMidInputSlashCommand(
   return {
     token: '/' + fullCommand,
     startPos: slashPos,
-    partialCommand: fullCommand,
-  }
+    partialCommand: fullCommand}
 }
 
 /**
@@ -291,8 +287,7 @@ function createCommandSuggestionItem(
     displayText: `/${commandName}${aliasText}`,
     tag: isWorkflow ? 'workflow' : scopeTag,
     description: fullDescription,
-    metadata: cmd,
-  }
+    metadata: cmd}
 }
 
 /**
@@ -324,8 +319,7 @@ export function generateCommandSuggestions(
       .filter(cmd => cmd.type === 'prompt')
       .map(cmd => ({
         cmd,
-        score: getSkillUsageScore(getCommandName(cmd)),
-      }))
+        score: getSkillUsageScore(getCommandName(cmd))}))
       .filter(item => item.score > 0)
       .sort((a, b) => b.score - a.score)
 

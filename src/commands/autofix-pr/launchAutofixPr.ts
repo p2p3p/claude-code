@@ -3,12 +3,12 @@
 // call is a nice-to-have and safe to skip — teleport + registerRemoteAgentTask
 // is sufficient for the core autofix flow.
 
+import { t } from '../../utils/i18n/index.js'
 import React from 'react'
 import { feature } from 'bun:bundle'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import {
   checkRemoteAgentEligibility,
   formatPreconditionError,
@@ -18,8 +18,7 @@ import {
   registerContentExtractor,
   registerRemoteAgentTask,
   type AutofixPrRemoteTaskMetadata,
-  type BackgroundRemoteSessionPrecondition,
-} from '../../tasks/RemoteAgentTask/RemoteAgentTask.js'
+  type BackgroundRemoteSessionPrecondition} from '../../tasks/RemoteAgentTask/RemoteAgentTask.js'
 import type { LocalJSXCommandCall } from '../../types/command.js'
 import { detectCurrentRepositoryWithHost } from '../../utils/detectRepository.js'
 import { teleportToRemote } from '../../utils/teleport.js'
@@ -30,8 +29,7 @@ import {
   getActiveMonitor,
   isMonitoring,
   trySetActiveMonitor,
-  updateActiveMonitor,
-} from './monitorState.js'
+  updateActiveMonitor} from './monitorState.js'
 import { extractAutofixResultFromLog } from './extractAutofixResult.js'
 import { parseAutofixArgs } from './parseArgs.js'
 import { checkPrAutofixOutcome, fetchPrHeadSha } from './prFetch.js'
@@ -65,8 +63,7 @@ registerCompletionChecker('autofix-pr', async metadata => {
     owner: meta.owner,
     repo: meta.repo,
     prNumber: meta.prNumber,
-    initialHeadSha: meta.initialHeadSha,
-  })
+    initialHeadSha: meta.initialHeadSha})
   return result.completed ? result.summary : null
 })
 
@@ -95,9 +92,8 @@ function makeErrorText(message: string, code: string): string {
     result:
       'failed' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     error_code:
-      code as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
-  return `Autofix PR failed: ${message}`
+      code as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
+  return t('autofix.failed', message)
 }
 
 export const callAutofixPr: LocalJSXCommandCall = async (
@@ -112,7 +108,7 @@ export const callAutofixPr: LocalJSXCommandCall = async (
     if (parsed.action === 'stop') {
       const m = getActiveMonitor()
       if (!m) {
-        onDone('No active autofix monitor.', { display: 'system' })
+        onDone(t('autofix.noMonitor'), { display: 'system' })
         return null
       }
       clearActiveMonitor()
@@ -121,7 +117,7 @@ export const callAutofixPr: LocalJSXCommandCall = async (
       // started running on the cloud will continue until it completes or is
       // cancelled from claude.ai/code.
       onDone(
-        `Stopped local monitoring of ${m.repo}#${m.prNumber}. Any already-running remote session continues until it finishes or is cancelled from claude.ai/code.`,
+        t('autofix.stoppedMonitor', m.repo, m.prNumber),
         { display: 'system' },
       )
       return null
@@ -130,10 +126,9 @@ export const callAutofixPr: LocalJSXCommandCall = async (
     // 2. invalid
     if (parsed.action === 'invalid') {
       onDone(
-        `Invalid args: ${parsed.reason}. Use /autofix-pr <pr-number> | stop | <owner>/<repo>#<n>`,
+        t('autofix.invalidArgs', parsed.reason),
         {
-          display: 'system',
-        },
+          display: 'system'},
       )
       return null
     }
@@ -141,10 +136,9 @@ export const callAutofixPr: LocalJSXCommandCall = async (
     // 3. freeform — not yet supported
     if (parsed.action === 'freeform') {
       onDone(
-        'Freeform prompt mode not yet supported. Use /autofix-pr <pr-number>.',
+        t('autofix.freeformNotSupported'),
         {
-          display: 'system',
-        },
+          display: 'system'},
       )
       return null
     }
@@ -158,8 +152,7 @@ export const callAutofixPr: LocalJSXCommandCall = async (
         'true' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       has_repo_path: String(
         !!(parsed.owner && parsed.repo),
-      ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+      ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
     // 4.1 resolve owner/repo. Always detect cwd repo first because teleport
     // takes the git source from the working directory; cross-repo args that
@@ -170,7 +163,7 @@ export const callAutofixPr: LocalJSXCommandCall = async (
     } catch {
       onDone(
         makeErrorText(
-          'Cannot detect GitHub repo from current directory.',
+          t('autofix.noRepo'),
           'session_create_failed',
         ),
         { display: 'system' },
@@ -180,7 +173,7 @@ export const callAutofixPr: LocalJSXCommandCall = async (
     if (!detected || detected.host !== 'github.com') {
       onDone(
         makeErrorText(
-          'Cannot detect GitHub repo from current directory.',
+          t('autofix.noRepo'),
           'session_create_failed',
         ),
         { display: 'system' },
@@ -199,7 +192,7 @@ export const callAutofixPr: LocalJSXCommandCall = async (
     ) {
       onDone(
         makeErrorText(
-          `Cross-repo autofix is not supported from this directory. Run from ${detected.owner}/${detected.name} or pass only the PR number.`,
+          t('autofix.crossRepoNotSupported', detected.owner, detected.name),
           'repo_mismatch',
         ),
         { display: 'system' },
@@ -215,11 +208,9 @@ export const callAutofixPr: LocalJSXCommandCall = async (
     if (isMonitoring(owner, repo, prNumber)) {
       logEvent('tengu_autofix_pr_result', {
         result:
-          'success_rc' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
-      onDone(`Already monitoring ${repo}#${prNumber} in background.`, {
-        display: 'system',
-      })
+          'success_rc' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
+      onDone(t('autofix.alreadyMonitoring', repo, prNumber), {
+        display: 'system'})
       return null
     }
 
@@ -242,7 +233,7 @@ export const callAutofixPr: LocalJSXCommandCall = async (
         const reasons = blockers.map(formatPreconditionError).join('\n')
         onDone(
           makeErrorText(
-            `Remote agent not available:\n${reasons}`,
+            t('autofix.remoteAgentNotAvailable', reasons),
             'session_create_failed',
           ),
           { display: 'system' },
@@ -288,13 +279,12 @@ If no fix was needed, omit <commits-pushed> and <files-changed> and explain in <
       repo,
       prNumber,
       abortController: teammate.abortController,
-      startedAt: Date.now(),
-    })
+      startedAt: Date.now()})
     if (!lockAcquired) {
       const existing = getActiveMonitor()
       onDone(
         makeErrorText(
-          `already monitoring ${existing?.repo}#${existing?.prNumber}. Run /autofix-pr stop first.`,
+          t('autofix.alreadyMonitoringOther', existing?.repo ?? '', existing?.prNumber ?? 0),
           'rc_already_monitoring_other',
         ),
         { display: 'system' },
@@ -326,15 +316,13 @@ If no fix was needed, omit <commits-pushed> and <files-changed> and explain in <
         signal: teammate.abortController.signal,
         githubPr: { owner, repo, number: prNumber },
         onBundleFail: captureFailMsg,
-        onCreateFail: captureFailMsg,
-      })
+        onCreateFail: captureFailMsg})
     } catch (teleErr: unknown) {
       clearActiveMonitor(teammate.taskId)
       const teleMsg =
         teleErr instanceof Error ? teleErr.message : String(teleErr)
-      onDone(makeErrorText(`teleport failed: ${teleMsg}`, 'teleport_failed'), {
-        display: 'system',
-      })
+      onDone(makeErrorText(t('autofix.teleportFailed', teleMsg), 'teleport_failed'), {
+        display: 'system'})
       return null
     }
 
@@ -342,7 +330,7 @@ If no fix was needed, omit <commits-pushed> and <files-changed> and explain in <
       clearActiveMonitor(teammate.taskId)
       onDone(
         makeErrorText(
-          teleportFailMsg ?? 'remote session creation failed.',
+          teleportFailMsg ?? t('autofix.sessionCreateFailed', ''),
           'session_create_failed',
         ),
         { display: 'system' },
@@ -376,15 +364,14 @@ If no fix was needed, omit <commits-pushed> and <files-changed> and explain in <
         command: `/autofix-pr ${prNumber}`,
         context,
         isLongRunning: true,
-        remoteTaskMetadata: { owner, repo, prNumber, initialHeadSha },
-      })
+        remoteTaskMetadata: { owner, repo, prNumber, initialHeadSha }})
       updateActiveMonitor({ taskId: frameworkTaskId })
     } catch (regErr: unknown) {
       clearActiveMonitor(teammate.taskId)
       const regMsg = regErr instanceof Error ? regErr.message : String(regErr)
       onDone(
         makeErrorText(
-          `task registration failed: ${regMsg}`,
+          t('autofix.taskRegistrationFailed', regMsg),
           'registration_failed',
         ),
         { display: 'system' },
@@ -401,28 +388,24 @@ If no fix was needed, omit <commits-pushed> and <files-changed> and explain in <
     const sessionUrl = getRemoteTaskSessionUrl(session.id)
     logEvent('tengu_autofix_pr_result', {
       result:
-        'success_rc' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'success_rc' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     // Also call onDone so callers that listen to the callback get notified.
-    onDone(`Autofix launched for ${target}. Track: ${sessionUrl}`, {
-      display: 'system',
-    })
+    onDone(t('autofix.launched', target, sessionUrl), {
+      display: 'system'})
     // Return a React progress UI showing the completed pipeline.
     // The REPL renders the returned React element inline alongside the text.
     return React.createElement(AutofixProgress, {
       phase: 'done',
       target,
-      sessionUrl,
-    })
+      sessionUrl})
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err)
     logEvent('tengu_autofix_pr_result', {
       result:
         'failed' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       error_code:
-        'exception' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
-    onDone(`Autofix PR failed: ${msg}`, { display: 'system' })
+        'exception' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
+    onDone(t('autofix.failed', msg), { display: 'system' })
     return null
   }
 }

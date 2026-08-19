@@ -2,6 +2,7 @@ import figures from 'figures';
 import * as React from 'react';
 import { useMemo, useRef } from 'react';
 import { Box, Text, useAnimationFrame, stringWidth, Byline, ProgressBar } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import { toInkColor } from '../../utils/ink.js';
 import type { InProcessTeammateTaskState } from '../../tasks/InProcessTeammateTask/types.js';
 import { formatDuration, formatNumber } from '../../utils/format.js';
@@ -94,8 +95,7 @@ export function SpinnerAnimationRow({
   foregroundedTeammate,
   leaderIsIdle = false,
   thinkingStatus,
-  effortSuffix,
-}: SpinnerAnimationRowProps): React.ReactNode {
+  effortSuffix}: SpinnerAnimationRowProps): React.ReactNode {
   const [viewportRef, time] = useAnimationFrame(reducedMotion ? null : 50);
 
   // === Elapsed time (wall-clock, derived from refs each frame) ===
@@ -270,9 +270,9 @@ export function SpinnerAnimationRow({
   const status =
     foregroundedTeammate && !foregroundedTeammate.isIdle ? (
       <>
-        <Text dimColor>(esc to interrupt </Text>
+        <Text dimColor>{t('spinner.escToInterruptPrefix')}</Text>
         <Text color={toInkColor(foregroundedTeammate.identity.color)}>{foregroundedTeammate.identity.agentName}</Text>
-        <Text dimColor>)</Text>
+        <Text dimColor>{t('spinner.escToInterruptSuffix')}</Text>
       </>
     ) : !foregroundedTeammate && parts.length > 0 ? (
       thinkingOnly ? (

@@ -22,28 +22,24 @@ import type {
   ScreenshotResult,
   DisplayInfo,
   InstalledApp,
-  FrontmostAppInfo,
-} from './types.js'
+  FrontmostAppInfo} from './types.js'
 import { listWindows } from '../win32/windowEnum.js'
 import { detectAppType, openWithController } from '../win32/appDispatcher.js'
 import {
   markBound,
   unmarkBound,
-  cleanupAllBorders,
-} from '../win32/windowBorder.js'
+  cleanupAllBorders} from '../win32/windowBorder.js'
 import {
   showVirtualCursor,
   hideVirtualCursor,
-  moveVirtualCursor,
-} from '../win32/virtualCursor.js'
+  moveVirtualCursor} from '../win32/virtualCursor.js'
 import { showIndicator, hideIndicator } from '../win32/inputIndicator.js'
 import {
   ps,
   psAsync,
   validateHwnd,
   VK_MAP,
-  MODIFIER_KEYS,
-} from '../win32/shared.js'
+  MODIFIER_KEYS} from '../win32/shared.js'
 import { logForDebugging } from '../../debug.js'
 
 // ---------------------------------------------------------------------------
@@ -391,8 +387,7 @@ public class WScroll {
   },
   async sendText(hwnd, text) {
     getWm().sendText(String(hwnd), text)
-  },
-}
+  }}
 
 // ---------------------------------------------------------------------------
 // Screenshot — JPEG output only
@@ -408,8 +403,7 @@ const screenshot: ScreenshotPlatform = {
 
     // Python Bridge (mss + Pillow, ~300ms)
     const bridgeResult = bridgeCallSync<ScreenshotResult>('screenshot', {
-      display_id: displayId ?? 0,
-    })
+      display_id: displayId ?? 0})
     if (bridgeResult && bridgeResult.base64) {
       return bridgeResult
     }
@@ -432,8 +426,7 @@ const screenshot: ScreenshotPlatform = {
   async captureWindow(hwnd) {
     // Python Bridge (ctypes PrintWindow + GDI → Pillow JPEG, ~300ms)
     const bridgeResult = bridgeCallSync<ScreenshotResult>('screenshot_window', {
-      hwnd: String(hwnd),
-    })
+      hwnd: String(hwnd)})
     if (bridgeResult && bridgeResult.base64) {
       return bridgeResult
     }
@@ -441,8 +434,7 @@ const screenshot: ScreenshotPlatform = {
     throw new Error(
       `[computer-use] Window screenshot failed for HWND ${hwnd}: Python bridge returned no data.`,
     )
-  },
-}
+  }}
 
 // ---------------------------------------------------------------------------
 // Display — Screen.AllScreens
@@ -470,8 +462,7 @@ $result -join "|"
             width: Number(w),
             height: Number(h),
             scaleFactor: 1,
-            displayId: Number(id),
-          }
+            displayId: Number(id)}
         })
     } catch {
       return [{ width: 1920, height: 1080, scaleFactor: 1, displayId: 0 }]
@@ -485,8 +476,7 @@ $result -join "|"
       if (found) return found
     }
     return all[0] ?? { width: 1920, height: 1080, scaleFactor: 1, displayId: 0 }
-  },
-}
+  }}
 
 // ---------------------------------------------------------------------------
 // Find existing window by process name or title (avoid launching new instance)
@@ -517,8 +507,7 @@ const apps: AppsPlatform = {
     return windows.map(w => ({
       id: String(w.hwnd),
       pid: w.pid,
-      title: w.title,
-    }))
+      title: w.title}))
   },
 
   async listInstalled(): Promise<InstalledApp[]> {
@@ -554,8 +543,7 @@ $apps | Select-Object -Unique | Select-Object -First 300
           return {
             id: (id ?? name ?? '').trim(),
             displayName: (name ?? '').trim(),
-            path: (path ?? '').trim(),
-          }
+            path: (path ?? '').trim()}
         })
     } catch {
       return []
@@ -775,8 +763,7 @@ $proc = Get-Process -Id $procId -ErrorAction SilentlyContinue
     const found = windows.find(w => w.title.includes(title))
     if (!found) return null
     return { id: String(found.hwnd), pid: found.pid, title: found.title }
-  },
-}
+  }}
 
 // ---------------------------------------------------------------------------
 // Window Management — Win32 API calls targeted at bound HWND.
@@ -948,8 +935,7 @@ if ([CuWinMgmt]::GetWindowRect([IntPtr]::new([long]${boundHwnd}), [ref]$rect)) {
     if (!out || out === 'FAIL') return null
     const [l, t, r, b] = out.split(',').map(Number)
     return { x: l, y: t, width: r - l, height: b - t }
-  },
-}
+  }}
 
 // ---------------------------------------------------------------------------
 // Export
@@ -980,5 +966,4 @@ export const platform: Platform = {
   screenshot,
   display,
   apps,
-  windowManagement,
-}
+  windowManagement}

@@ -2,8 +2,7 @@ import { useEffect, useSyncExternalStore } from 'react'
 import type { QueuedCommand } from '../types/textInputTypes.js'
 import {
   getCommandQueueSnapshot,
-  subscribeToCommandQueue,
-} from '../utils/messageQueueManager.js'
+  subscribeToCommandQueue} from '../utils/messageQueueManager.js'
 import type { QueryGuard } from '../utils/QueryGuard.js'
 import { processQueueIfReady } from '../utils/queueProcessor.js'
 
@@ -28,8 +27,7 @@ type UseQueueProcessorParams = {
 export function useQueueProcessor({
   executeQueuedInput,
   hasActiveLocalJsxUI,
-  queryGuard,
-}: UseQueueProcessorParams): void {
+  queryGuard}: UseQueueProcessorParams): void {
   // Subscribe to the query guard. Re-renders when a query starts or ends
   // (or when reserve/cancelReservation transitions dispatching state).
   const isQueryActive = useSyncExternalStore(

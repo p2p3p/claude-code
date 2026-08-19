@@ -6,6 +6,7 @@ import { ThemeProvider } from './lib/theme';
 import { getUuid, setUuid, apiBind, setActiveApiToken } from './api/client';
 import { ACPDirectView } from './components/ACPDirectView';
 import { useTokens } from './hooks/useTokens';
+import { t } from '../../../../src/utils/i18n/index.js';
 
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const SessionDetail = lazy(() => import('./pages/SessionDetail').then(m => ({ default: m.SessionDetail })));
@@ -116,11 +117,11 @@ export default function App() {
           onIdentityClick={() => setIdentityOpen(true)}
           onTokenClick={() => setTokenDialogOpen(true)}
           activeTokenLabel={currentSessionId ? undefined : activeLabel}
-          sessionTitle={currentSessionId || (acpDirect ? 'ACP' : undefined)}
+          sessionTitle={currentSessionId || (acpDirect ? t('rcs.acpLabel') : undefined)}
           onBack={currentSessionId || acpDirect ? navigateToDashboard : undefined}
         />
 
-        <Suspense fallback={<div className="flex flex-1 items-center justify-center text-text-muted">Loading...</div>}>
+        <Suspense fallback={<div className="flex flex-1 items-center justify-center text-text-muted">{t('rcs.loadingApp')}</div>}>
           {acpDirect ? (
             <ACPDirectView url={acpDirect.url} token={acpDirect.token} onBack={navigateToDashboard} />
           ) : currentSessionId ? (

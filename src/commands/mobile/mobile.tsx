@@ -5,6 +5,7 @@ import { Pane } from '@anthropic/ink';
 import { type KeyboardEvent, Box, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Platform = 'ios' | 'android';
 
@@ -14,19 +15,15 @@ type Props = {
 
 const PLATFORMS: Record<Platform, { url: string }> = {
   ios: {
-    url: 'https://apps.apple.com/app/claude-by-anthropic/id6473753684',
-  },
+    url: 'https://apps.apple.com/app/claude-by-anthropic/id6473753684'},
   android: {
-    url: 'https://play.google.com/store/apps/details?id=com.anthropic.claude',
-  },
-};
+    url: 'https://play.google.com/store/apps/details?id=com.anthropic.claude'}};
 
 function MobileQRCode({ onDone }: Props): React.ReactNode {
   const [platform, setPlatform] = useState<Platform>('ios');
   const [qrCodes, setQrCodes] = useState<Record<Platform, string>>({
     ios: '',
-    android: '',
-  });
+    android: ''});
 
   const { url } = PLATFORMS[platform];
   const qrCode = qrCodes[platform];
@@ -37,12 +34,10 @@ function MobileQRCode({ onDone }: Props): React.ReactNode {
       const [ios, android] = await Promise.all([
         qrToString(PLATFORMS.ios.url, {
           type: 'utf8',
-          errorCorrectionLevel: 'L',
-        }),
+          errorCorrectionLevel: 'L'}),
         qrToString(PLATFORMS.android.url, {
           type: 'utf8',
-          errorCorrectionLevel: 'L',
-        }),
+          errorCorrectionLevel: 'L'}),
       ]);
       setQrCodes({ ios, android });
     }
@@ -93,7 +88,7 @@ function MobileQRCode({ onDone }: Props): React.ReactNode {
               Android
             </Text>
           </Text>
-          <Text dimColor>(tab to switch, esc to close)</Text>
+          <Text dimColor>{t("cmdSystemUI.pressEscClose")}</Text>
         </Box>
         <Text dimColor>{url}</Text>
       </Box>

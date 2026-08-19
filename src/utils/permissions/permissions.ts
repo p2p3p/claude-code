@@ -3,8 +3,7 @@ import { APIUserAbortError } from '@anthropic-ai/sdk'
 import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import {
   getToolNameForPermissionCheck,
-  mcpInfoFromString,
-} from '../../services/mcp/mcpStringUtils.js'
+  mcpInfoFromString} from '../../services/mcp/mcpStringUtils.js'
 import type { Tool, ToolPermissionContext, ToolUseContext } from '../../Tool.js'
 import { AGENT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/AgentTool/constants.js'
 import { shouldUseSandbox } from '@claude-code-best/builtin-tools/tools/BashTool/shouldUseSandbox.js'
@@ -19,41 +18,35 @@ import { logError } from '../log.js'
 import { SandboxManager } from '../sandbox/sandbox-adapter.js'
 import {
   getSettingSourceDisplayNameLowercase,
-  SETTING_SOURCES,
-} from '../settings/constants.js'
+  SETTING_SOURCES} from '../settings/constants.js'
 import { plural } from '../stringUtils.js'
+import { t } from '../i18n/index.js'
 import { permissionModeTitle } from './PermissionMode.js'
 import type {
   PermissionAskDecision,
   PermissionDecision,
   PermissionDecisionReason,
   PermissionDenyDecision,
-  PermissionResult,
-} from './PermissionResult.js'
+  PermissionResult} from './PermissionResult.js'
 import type {
   PermissionBehavior,
   PermissionRule,
   PermissionRuleSource,
-  PermissionRuleValue,
-} from './PermissionRule.js'
+  PermissionRuleValue} from './PermissionRule.js'
 import {
   applyPermissionUpdate,
   applyPermissionUpdates,
-  persistPermissionUpdates,
-} from './PermissionUpdate.js'
+  persistPermissionUpdates} from './PermissionUpdate.js'
 import type {
   PermissionUpdate,
-  PermissionUpdateDestination,
-} from './PermissionUpdateSchema.js'
+  PermissionUpdateDestination} from './PermissionUpdateSchema.js'
 import {
   permissionRuleValueFromString,
-  permissionRuleValueToString,
-} from './permissionRuleParser.js'
+  permissionRuleValueToString} from './permissionRuleParser.js'
 import {
   deletePermissionRuleFromSettings,
   type PermissionRuleFromEditableSettings,
-  shouldAllowManagedPermissionRulesOnly,
-} from './permissionsLoader.js'
+  shouldAllowManagedPermissionRulesOnly} from './permissionsLoader.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const classifierDecisionModule = feature('TRANSCRIPT_CLASSIFIER')
@@ -68,26 +61,22 @@ import {
   getTotalCacheCreationInputTokens,
   getTotalCacheReadInputTokens,
   getTotalInputTokens,
-  getTotalOutputTokens,
-} from '../../bootstrap/state.js'
+  getTotalOutputTokens} from '../../bootstrap/state.js'
 import { getFeatureValue_CACHED_WITH_REFRESH } from '../../services/analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import { sanitizeToolNameForAnalytics } from '../../services/analytics/metadata.js'
 import {
   clearClassifierChecking,
-  setClassifierChecking,
-} from '../classifierApprovals.js'
+  setClassifierChecking} from '../classifierApprovals.js'
 import { isInProtectedNamespace } from '../envUtils.js'
 import { executePermissionRequestHooks } from '../hooks.js'
 import {
   AUTO_REJECT_MESSAGE,
   buildClassifierUnavailableMessage,
   buildYoloRejectionMessage,
-  DONT_ASK_REJECT_MESSAGE,
-} from '../messages.js'
+  DONT_ASK_REJECT_MESSAGE} from '../messages.js'
 import { calculateCostFromTokens } from '../modelCost.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
 import { jsonStringify } from '../slowOperations.js'
@@ -97,12 +86,10 @@ import {
   type DenialTrackingState,
   recordDenial,
   recordSuccess,
-  shouldFallbackToPrompting,
-} from './denialTracking.js'
+  shouldFallbackToPrompting} from './denialTracking.js'
 import {
   classifyYoloAction,
-  formatActionForClassifier,
-} from './yoloClassifier.js'
+  formatActionForClassifier} from './yoloClassifier.js'
 
 const CLASSIFIER_FAIL_CLOSED_REFRESH_MS = 30 * 60 * 1000 // 30 minutes
 
@@ -126,8 +113,7 @@ export function getAllowRules(
     (context.alwaysAllowRules[source] || []).map(ruleString => ({
       source,
       ruleBehavior: 'allow',
-      ruleValue: permissionRuleValueFromString(ruleString),
-    })),
+      ruleValue: permissionRuleValueFromString(ruleString)})),
   )
 }
 
@@ -144,13 +130,13 @@ export function createPermissionRequestMessage(
       (feature('BASH_CLASSIFIER') || feature('TRANSCRIPT_CLASSIFIER')) &&
       decisionReason.type === 'classifier'
     ) {
-      return `Classifier '${decisionReason.classifier}' requires approval for this ${toolName} command: ${decisionReason.reason}`
+      return t('permissionReason.classifier', decisionReason.classifier, toolName, decisionReason.reason)
     }
     switch (decisionReason.type) {
       case 'hook': {
         const hookMessage = decisionReason.reason
-          ? `Hook '${decisionReason.hookName}' blocked this action: ${decisionReason.reason}`
-          : `Hook '${decisionReason.hookName}' requires approval for this ${toolName} command`
+          ? t('permissionReason.hookBlocked', decisionReason.hookName, decisionReason.reason)
+          : t('permissionReason.hookApproval', decisionReason.hookName, toolName)
         return hookMessage
       }
       case 'rule': {
@@ -160,7 +146,7 @@ export function createPermissionRequestMessage(
         const sourceString = permissionRuleSourceDisplayString(
           decisionReason.rule.source,
         )
-        return `Permission rule '${ruleString}' from ${sourceString} requires approval for this ${toolName} command`
+        return t('permissionReason.rule', ruleString, sourceString, toolName)
       }
       case 'subcommandResults': {
         const needsApproval: string[] = []
@@ -182,14 +168,14 @@ export function createPermissionRequestMessage(
         }
         if (needsApproval.length > 0) {
           const n = needsApproval.length
-          return `This ${toolName} command contains multiple operations. The following ${plural(n, 'part')} ${plural(n, 'requires', 'require')} approval: ${needsApproval.join(', ')}`
+          return t('permissionReason.multiOperations', toolName, plural(n, 'part'), plural(n, 'requires', 'require'), needsApproval.join(', '))
         }
-        return `This ${toolName} command contains multiple operations that require approval`
+        return t('permissionReason.multiOperationsShort', toolName)
       }
       case 'permissionPromptTool':
-        return `Tool '${decisionReason.permissionPromptToolName}' requires approval for this ${toolName} command`
+        return t('permissionReason.toolApproval', decisionReason.permissionPromptToolName, toolName)
       case 'sandboxOverride':
-        return 'Run outside of the sandbox'
+        return t('permissionReason.sandboxOverride')
       case 'workingDir':
         return decisionReason.reason
       case 'safetyCheck':
@@ -197,7 +183,7 @@ export function createPermissionRequestMessage(
         return decisionReason.reason
       case 'mode': {
         const modeTitle = permissionModeTitle(decisionReason.mode)
-        return `Current permission mode (${modeTitle}) requires approval for this ${toolName} command`
+        return t('permissionReason.modeApproval', modeTitle, toolName)
       }
       case 'asyncAgent':
         return decisionReason.reason
@@ -205,7 +191,7 @@ export function createPermissionRequestMessage(
   }
 
   // Default message without listing allowed commands
-  const message = `Claude requested permissions to use ${toolName}, but you haven't granted it yet.`
+  const message = t('permissionReason.notGrantedYet', toolName)
 
   return message
 }
@@ -215,8 +201,7 @@ export function getDenyRules(context: ToolPermissionContext): PermissionRule[] {
     (context.alwaysDenyRules[source] || []).map(ruleString => ({
       source,
       ruleBehavior: 'deny',
-      ruleValue: permissionRuleValueFromString(ruleString),
-    })),
+      ruleValue: permissionRuleValueFromString(ruleString)})),
   )
 }
 
@@ -225,8 +210,7 @@ export function getAskRules(context: ToolPermissionContext): PermissionRule[] {
     (context.alwaysAskRules[source] || []).map(ruleString => ({
       source,
       ruleBehavior: 'ask',
-      ruleValue: permissionRuleValueFromString(ruleString),
-    })),
+      ruleValue: permissionRuleValueFromString(ruleString)})),
   )
 }
 
@@ -429,17 +413,14 @@ async function runPermissionRequestHooksForHeadlessAgent(
             toolPermissionContext: applyPermissionUpdates(
               prev.toolPermissionContext,
               decision.updatedPermissions as any,
-            ),
-          }))
+            )}))
         }
         return {
           behavior: 'allow',
           updatedInput: finalInput,
           decisionReason: {
             type: 'hook',
-            hookName: 'PermissionRequest',
-          },
-        }
+            hookName: 'PermissionRequest'}}
       }
       if (decision.behavior === 'deny') {
         if (decision.interrupt) {
@@ -454,17 +435,14 @@ async function runPermissionRequestHooksForHeadlessAgent(
           decisionReason: {
             type: 'hook',
             hookName: 'PermissionRequest',
-            reason: decision.message,
-          },
-        }
+            reason: decision.message}}
       }
     }
   } catch (error) {
     // If hooks fail, fall through to auto-deny rather than crashing
     logError(
       new Error('PermissionRequest hook failed for headless agent', {
-        cause: toError(error),
-      }),
+        cause: toError(error)}),
     )
   }
   return null
@@ -509,10 +487,8 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
         behavior: 'deny',
         decisionReason: {
           type: 'mode',
-          mode: 'dontAsk',
-        },
-        message: DONT_ASK_REJECT_MESSAGE(tool.name),
-      }
+          mode: 'dontAsk'},
+        message: DONT_ASK_REJECT_MESSAGE(tool.name)}
     }
     // Apply auto mode: use AI classifier instead of prompting user
     // Check this BEFORE shouldAvoidPermissionPrompts so classifiers work in headless mode
@@ -539,9 +515,7 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
             decisionReason: {
               type: 'asyncAgent',
               reason:
-                'Safety check requires interactive approval and permission prompts are not available in this context',
-            },
-          }
+                'Safety check requires interactive approval and permission prompts are not available in this context'}}
         }
         return result
       }
@@ -579,9 +553,7 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
             decisionReason: {
               type: 'asyncAgent',
               reason:
-                'PowerShell tool requires interactive approval and permission prompts are not available in this context',
-            },
-          }
+                'PowerShell tool requires interactive approval and permission prompts are not available in this context'}}
         }
         logForDebugging(
           `Skipping auto mode classifier for ${tool.name}: tool requires explicit user permission`,
@@ -611,11 +583,8 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
                 ...state,
                 toolPermissionContext: {
                   ...state.toolPermissionContext,
-                  mode: 'acceptEdits' as const,
-                },
-              }
-            },
-          })
+                  mode: 'acceptEdits' as const}}
+            }})
           if (acceptEditsResult.behavior === 'allow') {
             const newDenialState = recordSuccess(denialState)
             persistDenialState(context, newDenialState)
@@ -635,16 +604,13 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
               confidence:
                 'high' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               fastPath:
-                'acceptEdits' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            })
+                'acceptEdits' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
             return {
               behavior: 'allow',
               updatedInput: acceptEditsResult.updatedInput ?? input,
               decisionReason: {
                 type: 'mode',
-                mode: 'auto',
-              },
-            }
+                mode: 'auto'}}
           }
         } catch (e) {
           if (e instanceof AbortError || e instanceof APIUserAbortError) {
@@ -672,16 +638,13 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
           confidence:
             'high' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           fastPath:
-            'allowlist' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            'allowlist' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return {
           behavior: 'allow',
           updatedInput: input,
           decisionReason: {
             type: 'mode',
-            mode: 'auto',
-          },
-        }
+            mode: 'auto'}}
       }
 
       // Run the auto mode classifier
@@ -714,8 +677,7 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
           key: 'auto-mode-error-dump',
           text: `Auto mode classifier error — prompts dumped to ${classifierResult.errorDumpPath} (included in /share)`,
           priority: 'immediate',
-          color: 'error',
-        })
+          color: 'error'})
       }
 
       // Log classifier decision for metrics (including overhead telemetry)
@@ -811,8 +773,7 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
                 classifierResult.model,
                 classifierResult.stage2Usage,
               )
-            : undefined,
-      })
+            : undefined})
 
       if (classifierResult.durationMs !== undefined) {
         addToTurnClassifierDuration(classifierResult.durationMs)
@@ -839,9 +800,7 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
             decisionReason: {
               type: 'other',
               reason:
-                'Auto mode classifier transcript exceeded context window — falling back to manual approval',
-            },
-          }
+                'Auto mode classifier transcript exceeded context window — falling back to manual approval'}}
         }
         // When classifier is unavailable (API error), behavior depends on
         // the tengu_iron_gate_closed gate.
@@ -863,13 +822,11 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
                 decisionReason: {
                   type: 'classifier',
                   classifier: 'auto-mode',
-                  reason: 'Classifier unavailable',
-                },
+                  reason: 'Classifier unavailable'},
                 message: buildClassifierUnavailableMessage(
                   tool.name,
                   classifierResult.model,
-                ),
-              }
+                )}
             }
             logForDebugging(
               'Auto mode classifier unavailable, falling back to prompting with retry guidance (fail closed)',
@@ -880,13 +837,11 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
               decisionReason: {
                 type: 'classifier',
                 classifier: 'auto-mode',
-                reason: 'Classifier unavailable',
-              },
+                reason: 'Classifier unavailable'},
               message: buildClassifierUnavailableMessage(
                 tool.name,
                 classifierResult.model,
-              ),
-            }
+              )}
           }
           // Fail open: fall back to normal permission handling
           logForDebugging(
@@ -926,10 +881,8 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
           decisionReason: {
             type: 'classifier',
             classifier: 'auto-mode',
-            reason: classifierResult.reason,
-          },
-          message: buildYoloRejectionMessage(classifierResult.reason),
-        }
+            reason: classifierResult.reason},
+          message: buildYoloRejectionMessage(classifierResult.reason)}
       }
 
       // Reset consecutive denials on success
@@ -942,9 +895,7 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
         decisionReason: {
           type: 'classifier',
           classifier: 'auto-mode',
-          reason: classifierResult.reason,
-        },
-      }
+          reason: classifierResult.reason}}
     }
 
     // When permission prompts should be avoided (e.g., background/headless agents),
@@ -966,10 +917,8 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
         behavior: 'deny',
         decisionReason: {
           type: 'asyncAgent',
-          reason: 'Permission prompts are not available in this context',
-        },
-        message: AUTO_REJECT_MESSAGE(tool.name),
-      }
+          reason: 'Permission prompts are not available in this context'},
+        message: AUTO_REJECT_MESSAGE(tool.name)}
     }
   }
 
@@ -1038,8 +987,7 @@ function handleDenialLimitExceeded(
       .id as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     consecutiveDenials: consecutiveCount,
     totalDenials: totalCount,
-    toolName: sanitizeToolNameForAnalytics(tool.name),
-  })
+    toolName: sanitizeToolNameForAnalytics(tool.name)})
 
   if (isHeadless) {
     throw new AbortError(
@@ -1056,8 +1004,7 @@ function handleDenialLimitExceeded(
     persistDenialState(context, {
       ...denialState,
       totalDenials: 0,
-      consecutiveDenials: 0,
-    })
+      consecutiveDenials: 0})
   }
 
   // Preserve the original classifier value (e.g. 'dangerous-agent-action')
@@ -1073,9 +1020,7 @@ function handleDenialLimitExceeded(
     decisionReason: {
       type: 'classifier',
       classifier: originalClassifier,
-      reason: `${warning}\n\nLatest blocked action: ${classifierReason}`,
-    },
-  }
+      reason: `${warning}\n\nLatest blocked action: ${classifierReason}`}}
 }
 
 /**
@@ -1103,10 +1048,8 @@ export async function checkRuleBasedPermissions(
       behavior: 'deny',
       decisionReason: {
         type: 'rule',
-        rule: denyRule,
-      },
-      message: `Permission to use ${tool.name} has been denied.`,
-    }
+        rule: denyRule},
+      message: `Permission to use ${tool.name} has been denied.`}
   }
 
   // 1b. Entire tool has an ask rule
@@ -1123,10 +1066,8 @@ export async function checkRuleBasedPermissions(
         behavior: 'ask',
         decisionReason: {
           type: 'rule',
-          rule: askRule,
-        },
-        message: createPermissionRequestMessage(tool.name),
-      }
+          rule: askRule},
+        message: createPermissionRequestMessage(tool.name)}
     }
     // Fall through to let tool.checkPermissions handle command-specific rules
   }
@@ -1134,8 +1075,7 @@ export async function checkRuleBasedPermissions(
   // 1c. Tool-specific permission check (e.g. bash subcommand rules)
   let toolPermissionResult: PermissionResult = {
     behavior: 'passthrough',
-    message: createPermissionRequestMessage(tool.name),
-  }
+    message: createPermissionRequestMessage(tool.name)}
   try {
     const parsedInput = tool.inputSchema.parse(input)
     toolPermissionResult = await tool.checkPermissions(parsedInput, context)
@@ -1195,10 +1135,8 @@ async function hasPermissionsToUseToolInner(
       behavior: 'deny',
       decisionReason: {
         type: 'rule',
-        rule: denyRule,
-      },
-      message: `Permission to use ${tool.name} has been denied.`,
-    }
+        rule: denyRule},
+      message: `Permission to use ${tool.name} has been denied.`}
   }
 
   // 1b. Check if the entire tool should always ask for permission
@@ -1218,10 +1156,8 @@ async function hasPermissionsToUseToolInner(
         behavior: 'ask',
         decisionReason: {
           type: 'rule',
-          rule: askRule,
-        },
-        message: createPermissionRequestMessage(tool.name),
-      }
+          rule: askRule},
+        message: createPermissionRequestMessage(tool.name)}
     }
     // Fall through to let Bash's checkPermissions handle command-specific rules
   }
@@ -1230,8 +1166,7 @@ async function hasPermissionsToUseToolInner(
   // Overridden unless tool input schema is not valid
   let toolPermissionResult: PermissionResult = {
     behavior: 'passthrough',
-    message: createPermissionRequestMessage(tool.name),
-  }
+    message: createPermissionRequestMessage(tool.name)}
   try {
     const parsedInput = tool.inputSchema.parse(input)
     toolPermissionResult = await tool.checkPermissions(parsedInput, context)
@@ -1296,9 +1231,7 @@ async function hasPermissionsToUseToolInner(
       updatedInput: getUpdatedInputOrFallback(toolPermissionResult, input),
       decisionReason: {
         type: 'mode',
-        mode: appState.toolPermissionContext.mode,
-      },
-    }
+        mode: appState.toolPermissionContext.mode}}
   }
 
   // 2b. Entire tool is allowed
@@ -1312,9 +1245,7 @@ async function hasPermissionsToUseToolInner(
       updatedInput: getUpdatedInputOrFallback(toolPermissionResult, input),
       decisionReason: {
         type: 'rule',
-        rule: alwaysAllowedRule,
-      },
-    }
+        rule: alwaysAllowedRule}}
   }
 
   // 3. Convert "passthrough" to "ask"
@@ -1326,8 +1257,7 @@ async function hasPermissionsToUseToolInner(
           message: createPermissionRequestMessage(
             tool.name,
             toolPermissionResult.decisionReason,
-          ),
-        }
+          )}
       : toolPermissionResult
 
   if (result.behavior === 'ask' && result.suggestions) {
@@ -1350,8 +1280,7 @@ type EditPermissionRuleArgs = {
 export async function deletePermissionRule({
   rule,
   initialContext,
-  setToolPermissionContext,
-}: EditPermissionRuleArgs & { rule: PermissionRule }): Promise<void> {
+  setToolPermissionContext}: EditPermissionRuleArgs & { rule: PermissionRule }): Promise<void> {
   if (
     rule.source === 'policySettings' ||
     rule.source === 'flagSettings' ||
@@ -1364,8 +1293,7 @@ export async function deletePermissionRule({
     type: 'removeRules',
     rules: [rule.ruleValue],
     behavior: rule.ruleBehavior,
-    destination: rule.source as PermissionUpdateDestination,
-  })
+    destination: rule.source as PermissionUpdateDestination})
 
   // Per-destination logic to delete the rule from settings
   const destination = rule.source
@@ -1416,8 +1344,7 @@ function convertRulesToUpdates(
       type: updateType,
       rules: ruleValues,
       behavior: behavior as PermissionBehavior,
-      destination: source as PermissionUpdateDestination,
-    })
+      destination: source as PermissionUpdateDestination})
   }
 
   return updates
@@ -1460,8 +1387,7 @@ export function syncPermissionRulesFromDisk(
           type: 'replaceRules',
           rules: [],
           behavior,
-          destination: source,
-        })
+          destination: source})
       }
     }
   }
@@ -1482,8 +1408,7 @@ export function syncPermissionRulesFromDisk(
         type: 'replaceRules',
         rules: [],
         behavior,
-        destination: diskSource,
-      })
+        destination: diskSource})
     }
   }
 

@@ -2,8 +2,7 @@ import type { ToolUseBlock } from '@anthropic-ai/sdk/resources/index.mjs'
 import {
   createUserMessage,
   REJECT_MESSAGE,
-  withMemoryCorrectionHint,
-} from 'src/utils/messages.js'
+  withMemoryCorrectionHint} from 'src/utils/messages.js'
 import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import { findToolByName, type Tools, type ToolUseContext } from '../../Tool.js'
 import { BASH_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/BashTool/toolName.js'
@@ -97,8 +96,7 @@ export class StreamingToolExecutor {
       if (this.turnSpan) {
         this.toolUseContext = {
           ...this.toolUseContext,
-          langfuseBatchSpan: this.turnSpan,
-        }
+          langfuseBatchSpan: this.turnSpan}
       }
     }
     const toolDefinition = findToolByName(this.toolDefinitions, block.name)
@@ -117,14 +115,11 @@ export class StreamingToolExecutor {
                 type: 'tool_result',
                 content: `<tool_use_error>Error: No such tool available: ${block.name}</tool_use_error>`,
                 is_error: true,
-                tool_use_id: block.id,
-              },
+                tool_use_id: block.id},
             ],
             toolUseResult: `Error: No such tool available: ${block.name}`,
-            sourceToolAssistantUUID: assistantMessage.uuid,
-          }),
-        ],
-      })
+            sourceToolAssistantUUID: assistantMessage.uuid}),
+        ]})
       return
     }
 
@@ -144,8 +139,7 @@ export class StreamingToolExecutor {
       assistantMessage,
       status: 'queued',
       isConcurrencySafe,
-      pendingProgress: [],
-    })
+      pendingProgress: []})
 
     void this.processQueue()
   }
@@ -191,12 +185,10 @@ export class StreamingToolExecutor {
             type: 'tool_result',
             content: withMemoryCorrectionHint(REJECT_MESSAGE),
             is_error: true,
-            tool_use_id: toolUseId,
-          },
+            tool_use_id: toolUseId},
         ],
         toolUseResult: 'User rejected tool use',
-        sourceToolAssistantUUID: assistantMessage.uuid,
-      })
+        sourceToolAssistantUUID: assistantMessage.uuid})
     }
     if (reason === 'streaming_fallback') {
       return createUserMessage({
@@ -206,12 +198,10 @@ export class StreamingToolExecutor {
             content:
               '<tool_use_error>Error: Streaming fallback - tool execution discarded</tool_use_error>',
             is_error: true,
-            tool_use_id: toolUseId,
-          },
+            tool_use_id: toolUseId},
         ],
         toolUseResult: 'Streaming fallback - tool execution discarded',
-        sourceToolAssistantUUID: assistantMessage.uuid,
-      })
+        sourceToolAssistantUUID: assistantMessage.uuid})
     }
     const desc = this.erroredToolDescription
     const msg = desc
@@ -223,12 +213,10 @@ export class StreamingToolExecutor {
           type: 'tool_result',
           content: `<tool_use_error>${msg}</tool_use_error>`,
           is_error: true,
-          tool_use_id: toolUseId,
-        },
+          tool_use_id: toolUseId},
       ],
       toolUseResult: msg,
-      sourceToolAssistantUUID: assistantMessage.uuid,
-    })
+      sourceToolAssistantUUID: assistantMessage.uuid})
   }
 
   /**

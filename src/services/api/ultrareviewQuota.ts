@@ -25,10 +25,8 @@ export async function fetchUltrareviewQuota(): Promise<UltrareviewQuotaResponse 
       {
         headers: {
           ...getOAuthHeaders(accessToken),
-          'x-organization-uuid': orgUUID,
-        },
-        timeout: 5000,
-      },
+          'x-organization-uuid': orgUUID},
+        timeout: 5000},
     )
     return response.data
   } catch (error) {

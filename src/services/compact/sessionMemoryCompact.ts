@@ -10,34 +10,30 @@ import { errorMessage } from '../../utils/errors.js'
 import {
   createCompactBoundaryMessage,
   createUserMessage,
-  isCompactBoundaryMessage,
-} from '../../utils/messages.js'
+  isCompactBoundaryMessage} from '../../utils/messages.js'
 import { getMainLoopModel } from '../../utils/model/model.js'
 import { getSessionMemoryPath } from '../../utils/permissions/filesystem.js'
 import { processSessionStartHooks } from '../../utils/sessionStart.js'
+import { t } from '../../utils/i18n/index.js'
 import { getTranscriptPath } from '../../utils/sessionStorage.js'
 import { tokenCountFromLastAPIResponse } from '../../utils/tokens.js'
 import { extractDiscoveredToolNames } from '../../utils/searchExtraTools.js'
 import {
   getDynamicConfig_BLOCKS_ON_INIT,
-  getFeatureValue_CACHED_MAY_BE_STALE,
-} from '../analytics/growthbook.js'
+  getFeatureValue_CACHED_MAY_BE_STALE} from '../analytics/growthbook.js'
 import { logEvent } from '../analytics/index.js'
 import {
   isSessionMemoryEmpty,
-  truncateSessionMemoryForCompact,
-} from '../SessionMemory/prompts.js'
+  truncateSessionMemoryForCompact} from '../SessionMemory/prompts.js'
 import {
   getLastSummarizedMessageId,
   getSessionMemoryContent,
-  waitForSessionMemoryExtraction,
-} from '../SessionMemory/sessionMemoryUtils.js'
+  waitForSessionMemoryExtraction} from '../SessionMemory/sessionMemoryUtils.js'
 import {
   annotateBoundaryWithPreservedSegment,
   buildPostCompactMessages,
   type CompactionResult,
-  createPlanAttachmentIfNeeded,
-} from './compact.js'
+  createPlanAttachmentIfNeeded} from './compact.js'
 import { estimateMessageTokens } from './microCompact.js'
 import { getCompactUserSummaryMessage } from './prompt.js'
 
@@ -57,13 +53,11 @@ export type SessionMemoryCompactConfig = {
 export const DEFAULT_SM_COMPACT_CONFIG: SessionMemoryCompactConfig = {
   minTokens: 10_000,
   minTextBlockMessages: 5,
-  maxTokens: 40_000,
-}
+  maxTokens: 40_000}
 
 // Current configuration (starts with defaults)
 let smCompactConfig: SessionMemoryCompactConfig = {
-  ...DEFAULT_SM_COMPACT_CONFIG,
-}
+  ...DEFAULT_SM_COMPACT_CONFIG}
 
 // Track whether config has been initialized from remote
 let configInitialized = false
@@ -76,8 +70,7 @@ export function setSessionMemoryCompactConfig(
 ): void {
   smCompactConfig = {
     ...smCompactConfig,
-    ...config,
-  }
+    ...config}
 }
 
 /**
@@ -124,8 +117,7 @@ async function initSessionMemoryCompactConfig(): Promise<void> {
     maxTokens:
       remoteConfig.maxTokens && remoteConfig.maxTokens > 0
         ? remoteConfig.maxTokens
-        : DEFAULT_SM_COMPACT_CONFIG.maxTokens,
-  }
+        : DEFAULT_SM_COMPACT_CONFIG.maxTokens}
   setSessionMemoryCompactConfig(config)
 }
 
@@ -426,8 +418,7 @@ export function shouldUseSessionMemoryCompaction(): boolean {
     logEvent('tengu_sm_compact_flag_check', {
       tengu_session_memory: sessionMemoryFlag,
       tengu_sm_compact: smCompactFlag,
-      should_use: shouldUse,
-    })
+      should_use: shouldUse})
   }
 
   return shouldUse
@@ -472,15 +463,14 @@ function createCompactionResultFromSessionMemory(
 
   if (wasTruncated) {
     const memoryPath = getSessionMemoryPath()
-    summaryContent += `\n\nSome session memory sections were truncated for length. The full session memory can be viewed at: ${memoryPath}`
+    summaryContent += `\n\n${t('services.sessionMemoryTruncated', memoryPath)}`
   }
 
   const summaryMessages = [
     createUserMessage({
       content: summaryContent,
       isCompactSummary: true,
-      isVisibleInTranscriptOnly: true,
-    }),
+      isVisibleInTranscriptOnly: true}),
   ]
 
   const planAttachment = createPlanAttachmentIfNeeded(agentId)
@@ -500,8 +490,7 @@ function createCompactionResultFromSessionMemory(
     // SM-compact has no compact-API-call, so postCompactTokenCount (kept for
     // event continuity) and truePostCompactTokenCount converge to the same value.
     postCompactTokenCount: estimateMessageTokens(summaryMessages),
-    truePostCompactTokenCount: estimateMessageTokens(summaryMessages),
-  }
+    truePostCompactTokenCount: estimateMessageTokens(summaryMessages)}
 }
 
 /**
@@ -584,8 +573,7 @@ export async function trySessionMemoryCompaction(
 
     // Run session start hooks to restore CLAUDE.md and other context
     const hookResults = await processSessionStartHooks('compact', {
-      model: getMainLoopModel(),
-    })
+      model: getMainLoopModel()})
 
     // Get transcript path for the summary message
     const transcriptPath = getTranscriptPath()
@@ -610,16 +598,14 @@ export async function trySessionMemoryCompaction(
     ) {
       logEvent('tengu_sm_compact_threshold_exceeded', {
         postCompactTokenCount,
-        autoCompactThreshold,
-      })
+        autoCompactThreshold})
       return null
     }
 
     return {
       ...compactionResult,
       postCompactTokenCount,
-      truePostCompactTokenCount: postCompactTokenCount,
-    }
+      truePostCompactTokenCount: postCompactTokenCount}
   } catch (error) {
     // Use logEvent instead of logError since errors here are expected
     // (e.g., file not found, path issues) and shouldn't go to error logs

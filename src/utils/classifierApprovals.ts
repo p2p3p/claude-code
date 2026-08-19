@@ -25,8 +25,7 @@ export function setClassifierApproval(
   }
   CLASSIFIER_APPROVALS.set(toolUseID, {
     classifier: 'bash',
-    matchedRule,
-  })
+    matchedRule})
 }
 
 export function getClassifierApproval(toolUseID: string): string | undefined {

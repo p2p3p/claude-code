@@ -21,8 +21,7 @@ export function interpolateColor(
   return {
     r: Math.round(color1.r + (color2.r - color1.r) * t),
     g: Math.round(color1.g + (color2.g - color1.g) * t),
-    b: Math.round(color1.b + (color2.b - color1.b) * t),
-  }
+    b: Math.round(color1.b + (color2.b - color1.b) * t)}
 }
 
 // Convert RGB object to rgb() color string for Text component
@@ -63,8 +62,7 @@ export function hueToRgb(hue: number): RGBColorType {
   return {
     r: Math.round((r + m) * 255),
     g: Math.round((g + m) * 255),
-    b: Math.round((b + m) * 255),
-  }
+    b: Math.round((b + m) * 255)}
 }
 
 const RGB_CACHE = new Map<string, RGBColorType | null>()
@@ -78,8 +76,7 @@ export function parseRGB(colorStr: string): RGBColorType | null {
     ? {
         r: parseInt(match[1]!, 10),
         g: parseInt(match[2]!, 10),
-        b: parseInt(match[3]!, 10),
-      }
+        b: parseInt(match[3]!, 10)}
     : null
   RGB_CACHE.set(colorStr, result)
   return result

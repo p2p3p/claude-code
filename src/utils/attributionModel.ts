@@ -1,8 +1,7 @@
 import {
   resolveGeminiModel,
   resolveGrokModel,
-  resolveOpenAIModel,
-} from '@ant/model-provider'
+  resolveOpenAIModel} from '@ant/model-provider'
 import { getMainLoopModel } from './model/model.js'
 import { getAPIProvider } from './model/providers.js'
 

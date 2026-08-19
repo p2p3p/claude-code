@@ -38,8 +38,7 @@ import {
   rename,
   rm,
   stat,
-  writeFile,
-} from 'fs/promises'
+  writeFile} from 'fs/promises'
 import { tmpdir } from 'os'
 import { basename, dirname, join } from 'path'
 import { logForDebugging } from '../debug.js'

@@ -53,8 +53,7 @@ export async function createAdminRequest(
 
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   const url = `${getOauthConfig().BASE_API_URL}/api/oauth/organizations/${orgUUID}/admin_requests`
 
@@ -76,8 +75,7 @@ export async function getMyAdminRequests(
 
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   let url = `${getOauthConfig().BASE_API_URL}/api/oauth/organizations/${orgUUID}/admin_requests/me?request_type=${requestType}`
   for (const status of statuses) {
@@ -85,8 +83,7 @@ export async function getMyAdminRequests(
   }
 
   const response = await axios.get<AdminRequest[] | null>(url, {
-    headers,
-  })
+    headers})
 
   return response.data
 }
@@ -106,14 +103,12 @@ export async function checkAdminRequestEligibility(
 
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   const url = `${getOauthConfig().BASE_API_URL}/api/oauth/organizations/${orgUUID}/admin_requests/eligibility?request_type=${requestType}`
 
   const response = await axios.get<AdminRequestEligibilityResponse>(url, {
-    headers,
-  })
+    headers})
 
   return response.data
 }

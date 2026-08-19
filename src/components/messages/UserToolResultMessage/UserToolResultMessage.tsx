@@ -6,8 +6,7 @@ import {
   type buildMessageLookups,
   CANCEL_MESSAGE,
   INTERRUPT_MESSAGE_FOR_TOOL_USE,
-  REJECT_MESSAGE,
-} from '../../../utils/messages.js';
+  REJECT_MESSAGE} from '../../../utils/messages.js';
 import { UserToolCanceledMessage } from './UserToolCanceledMessage.js';
 import { UserToolErrorMessage } from './UserToolErrorMessage.js';
 import { UserToolRejectMessage } from './UserToolRejectMessage.js';
@@ -37,8 +36,7 @@ export function UserToolResultMessage({
   verbose,
   width,
   isTranscriptMode,
-  shouldCollapseDiffs,
-}: Props): React.ReactNode {
+  shouldCollapseDiffs}: Props): React.ReactNode {
   const toolUse = useGetToolFromMessages(param.tool_use_id, tools, lookups);
   if (!toolUse) {
     return null;

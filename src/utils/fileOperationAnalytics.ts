@@ -50,8 +50,7 @@ export function logFileOperation(params: {
     operation:
       params.operation as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     tool: params.tool as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    filePathHash: hashFilePath(params.filePath),
-  }
+    filePathHash: hashFilePath(params.filePath)}
 
   // Only hash content if it's provided and below size limit
   // This prevents memory exhaustion from hashing large files (e.g., base64-encoded images)

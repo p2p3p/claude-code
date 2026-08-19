@@ -46,8 +46,7 @@ function isUnifiedSuggestion(itemId: string): boolean {
 const SuggestionItemRow = memo(function SuggestionItemRow({
   item,
   maxColumnWidth,
-  isSelected,
-}: {
+  isSelected}: {
   item: SuggestionItem;
   maxColumnWidth?: number;
   isSelected: boolean;
@@ -164,8 +163,7 @@ export function PromptInputFooterSuggestions({
   suggestions,
   selectedSuggestion,
   maxColumnWidth: maxColumnWidthProp,
-  overlay,
-}: Props): ReactNode {
+  overlay}: Props): ReactNode {
   const { rows } = useTerminalSize();
   // Maximum number of suggestions to show at once (leaving space for prompt).
   // Overlay mode (fullscreen) uses a fixed 5 — the floating box sits over

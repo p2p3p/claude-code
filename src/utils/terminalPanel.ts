@@ -131,8 +131,7 @@ class TerminalPanel {
         // creation and cleanup — prevents spurious uncaughtException noise.
         spawn('tmux', ['-L', socket, 'kill-server'], {
           detached: true,
-          stdio: 'ignore',
-        })
+          stdio: 'ignore'})
           .on('error', () => {})
           .unref()
       })
@@ -185,7 +184,6 @@ class TerminalPanel {
     spawnSync(shell, ['-i', '-l'], {
       stdio: 'inherit',
       cwd,
-      env: process.env,
-    })
+      env: process.env})
   }
 }

@@ -14,6 +14,7 @@ import { buildCliLaunch, spawnCli } from '../../utils/cliLaunch.js';
 import type { ToolUseContext } from '../../Tool.js';
 import type { LocalJSXCommandContext, LocalJSXCommandOnDone } from '../../types/command.js';
 import { errorMessage } from '../../utils/errors.js';
+import { t } from '../../utils/i18n/index.js'
 
 type ServerStatus = 'stopped' | 'starting' | 'running' | 'error';
 
@@ -66,7 +67,7 @@ function RemoteControlServer({ onDone }: Props): React.ReactNode {
         if (!cancelled) {
           setStatus('running');
           daemonStatus = 'running';
-          onDone('Remote Control Server started. Use /remote-control-server to manage.', { display: 'system' });
+          onDone(t('rcsCmd.started'), { display: 'system' });
         }
       } catch (err) {
         if (!cancelled) {
@@ -74,9 +75,8 @@ function RemoteControlServer({ onDone }: Props): React.ReactNode {
           setStatus('error');
           setError(msg);
           daemonStatus = 'error';
-          onDone(`Remote Control Server failed to start: ${msg}`, {
-            display: 'system',
-          });
+          onDone(t('rcsCmd.failedToStart', msg), {
+            display: 'system'});
         }
       }
     })();
@@ -108,16 +108,16 @@ function ServerManagementDialog({ onDone }: Props): React.ReactNode {
 
   function handleStop(): void {
     stopDaemon();
-    onDone('Remote Control Server stopped.', { display: 'system' });
+    onDone(t('rcsCmd.stopped'), { display: 'system' });
   }
 
   function handleRestart(): void {
     stopDaemon();
     try {
       startDaemon();
-      onDone('Remote Control Server restarted.', { display: 'system' });
+      onDone(t('rcsCmd.restarted'), { display: 'system' });
     } catch (err) {
-      onDone(`Failed to restart: ${errorMessage(err)}`, { display: 'system' });
+      onDone(t('rcsCmd.failedToRestart', errorMessage(err)), { display: 'system' });
     }
   }
 
@@ -139,16 +139,15 @@ function ServerManagementDialog({ onDone }: Props): React.ReactNode {
         } else {
           handleContinue();
         }
-      },
-    },
+      }},
     { context: 'Select' },
   );
 
   return (
-    <Dialog title="Remote Control Server" onCancel={handleContinue} hideInputGuide>
+    <Dialog title={t("cmdSystemUI.rcsTitle")} onCancel={handleContinue} hideInputGuide>
       <Box flexDirection="column" gap={1}>
         <Text>
-          Remote Control Server is{' '}
+          {t("cmdSystemUI.rcsRunning")}{' '}
           <Text bold color="success">
             running
           </Text>
@@ -156,7 +155,7 @@ function ServerManagementDialog({ onDone }: Props): React.ReactNode {
         </Text>
         {logPreview.length > 0 && (
           <Box flexDirection="column">
-            <Text dimColor>Recent logs:</Text>
+            <Text dimColor>{t("cmdSystemUI.rcsRecentLogs")}</Text>
             {logPreview.map((line, i) => (
               <Text key={i} dimColor>
                 {line}
@@ -166,16 +165,16 @@ function ServerManagementDialog({ onDone }: Props): React.ReactNode {
         )}
         <Box flexDirection="column">
           <ListItem isFocused={focusIndex === 0}>
-            <Text>Stop server</Text>
+            <Text>{t("cmdSystemUI.rcsStop")}</Text>
           </ListItem>
           <ListItem isFocused={focusIndex === 1}>
-            <Text>Restart server</Text>
+            <Text>{t("cmdSystemUI.rcsRestart")}</Text>
           </ListItem>
           <ListItem isFocused={focusIndex === 2}>
-            <Text>Continue</Text>
+            <Text>{t('remotecontrolserver.continue')}</Text>
           </ListItem>
         </Box>
-        <Text dimColor>Enter to select · Esc to continue</Text>
+        <Text dimColor>{t("cmdSystemUI.rcsNav")}</Text>
       </Box>
     </Dialog>
   );
@@ -208,8 +207,7 @@ function startDaemon(): void {
   const child = spawnCli(launch, {
     cwd: dir,
     stdio: ['ignore', 'pipe', 'pipe'],
-    detached: false,
-  });
+    detached: false});
 
   daemonProcess = child;
   daemonLogs = [];

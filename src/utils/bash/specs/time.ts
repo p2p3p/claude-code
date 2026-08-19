@@ -6,8 +6,6 @@ const time: CommandSpec = {
   args: {
     name: 'command',
     description: 'Command to time',
-    isCommand: true,
-  },
-}
+    isCommand: true}}
 
 export default time

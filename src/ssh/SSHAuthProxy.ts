@@ -33,7 +33,7 @@ function resolveAuthHeaders(): Record<string, string> {
 }
 
 function resolveUpstreamBaseUrl(): string {
-  return process.env.ANTHROPIC_BASE_URL || getOauthConfig().BASE_API_URL
+  return process.env.BASE_URL || getOauthConfig().BASE_API_URL
 }
 
 async function proxyFetch(
@@ -52,8 +52,7 @@ async function proxyFetch(
   if (Object.keys(authHeaders).length === 0) {
     return new Response(
       JSON.stringify({
-        error: 'No API credentials available on local machine',
-      }),
+        error: 'No API credentials available on local machine'}),
       { status: 401, headers: { 'content-type': 'application/json' } },
     )
   }
@@ -75,8 +74,7 @@ async function proxyFetch(
       headers: forwardHeaders,
       body: req.body,
       // @ts-expect-error Bun supports duplex for streaming request bodies
-      duplex: 'half',
-    })
+      duplex: 'half'})
 
     const responseHeaders = new Headers(upstreamRes.headers)
     responseHeaders.delete('content-encoding')
@@ -85,8 +83,7 @@ async function proxyFetch(
     return new Response(upstreamRes.body, {
       status: upstreamRes.status,
       statusText: upstreamRes.statusText,
-      headers: responseHeaders,
-    })
+      headers: responseHeaders})
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     logForDebugging(`[SSHAuthProxy] upstream error: ${message}`)
@@ -111,8 +108,7 @@ async function createUnixSocketAuthProxy(id: string): Promise<AuthProxyInfo> {
 
   const server = Bun.serve({
     unix: socketPath,
-    fetch: req => proxyFetch(req, null),
-  })
+    fetch: req => proxyFetch(req, null)})
 
   logForDebugging(`[SSHAuthProxy] listening on unix:${socketPath}`)
 
@@ -124,14 +120,12 @@ async function createUnixSocketAuthProxy(id: string): Promise<AuthProxyInfo> {
       } catch {
         // Socket file may already be cleaned up
       }
-    },
-  }
+    }}
 
   return {
     proxy,
     localAddress: socketPath,
-    authEnv: { ANTHROPIC_AUTH_SOCKET: socketPath },
-  }
+    authEnv: { ANTHROPIC_AUTH_SOCKET: socketPath }}
 }
 
 async function createTcpAuthProxy(id: string): Promise<AuthProxyInfo> {
@@ -140,8 +134,7 @@ async function createTcpAuthProxy(id: string): Promise<AuthProxyInfo> {
   const server = Bun.serve({
     port: 0,
     hostname: '127.0.0.1',
-    fetch: req => proxyFetch(req, nonce),
-  })
+    fetch: req => proxyFetch(req, nonce)})
 
   const port = server.port
   logForDebugging(
@@ -151,15 +144,12 @@ async function createTcpAuthProxy(id: string): Promise<AuthProxyInfo> {
   const proxy: SSHAuthProxy = {
     stop() {
       server.stop(true)
-    },
-  }
+    }}
 
   return {
     proxy,
     localAddress: `127.0.0.1:${port}`,
     authEnv: {
       ANTHROPIC_BASE_URL: `http://127.0.0.1:${port}`,
-      ANTHROPIC_AUTH_NONCE: nonce,
-    },
-  }
+      ANTHROPIC_AUTH_NONCE: nonce}}
 }

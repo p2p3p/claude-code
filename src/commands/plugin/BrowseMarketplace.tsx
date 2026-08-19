@@ -17,8 +17,7 @@ import {
   formatFailureDetails,
   formatMarketplaceLoadingErrors,
   getMarketplaceSourceDisplay,
-  loadMarketplacesWithGracefulDegradation,
-} from '../../utils/plugins/marketplaceHelpers.js';
+  loadMarketplacesWithGracefulDegradation} from '../../utils/plugins/marketplaceHelpers.js';
 import { getMarketplace, loadKnownMarketplacesConfig } from '../../utils/plugins/marketplaceManager.js';
 import { OFFICIAL_MARKETPLACE_NAME } from '../../utils/plugins/officialMarketplace.js';
 import { installPluginFromMarketplace } from '../../utils/plugins/pluginInstallationHelpers.js';
@@ -31,10 +30,10 @@ import {
   buildPluginDetailsMenuOptions,
   extractGitHubRepo,
   type InstallablePlugin,
-  PluginSelectionKeyHint,
-} from './pluginDetailsHelpers.js';
+  PluginSelectionKeyHint} from './pluginDetailsHelpers.js';
 import type { ViewState as ParentViewState } from './types.js';
 import { usePagination } from './usePagination.js';
+import { t } from '../../utils/i18n/index.js';
 
 type Props = {
   error: string | null;
@@ -68,8 +67,7 @@ export function BrowseMarketplace({
   setViewState: setParentViewState,
   onInstallComplete,
   targetMarketplace,
-  targetPlugin,
-}: Props): React.ReactNode {
+  targetPlugin}: Props): React.ReactNode {
   // View state
   const [viewState, setViewState] = useState<ViewState>('marketplace-list');
   const [selectedMarketplace, setSelectedMarketplace] = useState<string | null>(null);
@@ -89,8 +87,7 @@ export function BrowseMarketplace({
   // Pagination for plugin list (continuous scrolling)
   const pagination = usePagination<InstallablePlugin>({
     totalItems: availablePlugins.length,
-    selectedIndex,
-  });
+    selectedIndex});
 
   // Details view state
   const [detailsMenuIndex, setDetailsMenuIndex] = useState(0);
@@ -108,8 +105,7 @@ export function BrowseMarketplace({
       if (targetMarketplace) {
         setParentViewState({
           type: 'manage-marketplaces',
-          targetMarketplace,
-        });
+          targetMarketplace});
       } else if (marketplaces.length === 1) {
         // If there's only one marketplace, skip the marketplace-list view
         // since we auto-navigated past it on load
@@ -151,8 +147,7 @@ export function BrowseMarketplace({
               name,
               totalPlugins: marketplace.plugins.length,
               installedCount: installedFromThisMarketplace,
-              source: getMarketplaceSourceDisplay(marketplaceConfig.source),
-            });
+              source: getMarketplaceSourceDisplay(marketplaceConfig.source)});
           }
         }
 
@@ -170,7 +165,7 @@ export function BrowseMarketplace({
         const errorResult = formatMarketplaceLoadingErrors(failures, successCount);
         if (errorResult) {
           if (errorResult.type === 'warning') {
-            setWarning(errorResult.message + '. Showing available marketplaces.');
+            setWarning(errorResult.message + '. ' + t('pluginUI.showingAvailableMarketplaces'));
           } else {
             throw new Error(errorResult.message);
           }
@@ -204,8 +199,7 @@ export function BrowseMarketplace({
                   // isPluginGloballyInstalled: only block when user/managed scope
                   // exists (nothing to add). Project/local-scope installs don't
                   // block — user may want to promote to user scope (gh-29997).
-                  isInstalled: isPluginGloballyInstalled(pluginId),
-                };
+                  isInstalled: isPluginGloballyInstalled(pluginId)};
                 foundMarketplace = name;
                 break;
               }
@@ -223,7 +217,7 @@ export function BrowseMarketplace({
             const globallyInstalled = isPluginGloballyInstalled(pluginId);
 
             if (globallyInstalled) {
-              setError(`Plugin '${pluginId}' is already installed globally. Use '/plugin' to manage existing plugins.`);
+              setError(t('pluginUI.alreadyInstalledGlobal', pluginId));
             } else {
               // Navigate to the plugin details view
               setSelectedMarketplace(foundMarketplace);
@@ -231,7 +225,7 @@ export function BrowseMarketplace({
               setViewState('plugin-details');
             }
           } else {
-            setError(`Plugin "${targetPlugin}" not found in any marketplace`);
+            setError(t('pluginUI.notFoundInMarketplace', targetPlugin));
           }
         } else if (targetMarketplace) {
           // Navigate directly to the specified marketplace
@@ -240,11 +234,11 @@ export function BrowseMarketplace({
             setSelectedMarketplace(targetMarketplace);
             setViewState('plugin-list');
           } else {
-            setError(`Marketplace "${targetMarketplace}" not found`);
+            setError(t('pluginUI.marketplaceNotFound', targetMarketplace));
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load marketplaces');
+        setError(err instanceof Error ? err.message : t('pluginUI.failedLoadMarketplaces'));
       } finally {
         setLoading(false);
       }
@@ -264,7 +258,7 @@ export function BrowseMarketplace({
         const marketplace = await getMarketplace(marketplaceName);
         if (cancelled) return;
         if (!marketplace) {
-          throw new Error(`Failed to load marketplace: ${marketplaceName}`);
+          throw new Error(t('pluginUI.failedLoadMarketplace', marketplaceName));
         }
 
         // Filter out already installed plugins
@@ -279,8 +273,7 @@ export function BrowseMarketplace({
             // Only mark as "installed" when globally scoped (user/managed).
             // Project/local installs don't block — user can add user scope
             // via the plugin-details view (gh-29997).
-            isInstalled: isPluginGloballyInstalled(pluginId),
-          });
+            isInstalled: isPluginGloballyInstalled(pluginId)});
         }
 
         // Fetch install counts and sort by popularity
@@ -313,7 +306,7 @@ export function BrowseMarketplace({
         setSelectedForInstall(new Set());
       } catch (err) {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : 'Failed to load plugins');
+        setError(err instanceof Error ? err.message : t('pluginUI.failedLoadPlugins'));
       } finally {
         setLoading(false);
       }
@@ -342,8 +335,7 @@ export function BrowseMarketplace({
         pluginId: plugin.pluginId,
         entry: plugin.entry,
         marketplaceName: plugin.marketplaceName,
-        scope: 'user',
-      });
+        scope: 'user'});
 
       if (result.success) {
         successCount++;
@@ -351,8 +343,7 @@ export function BrowseMarketplace({
         failureCount++;
         newFailedPlugins.push({
           name: plugin.entry.name,
-          reason: (result as { success: false; error: string }).error,
-        });
+          reason: (result as { success: false; error: string }).error});
       }
     }
 
@@ -363,21 +354,13 @@ export function BrowseMarketplace({
     // Handle installation results
     if (failureCount === 0) {
       // All succeeded
-      const message =
-        `✓ Installed ${successCount} ${plural(successCount, 'plugin')}. ` + `Run /reload-plugins to activate.`;
-
-      setResult(message);
+      setResult(t('pluginUI.installedCount', successCount));
     } else if (successCount === 0) {
       // All failed - show error with reasons
-      setError(`Failed to install: ${formatFailureDetails(newFailedPlugins, true)}`);
+      setError(t('pluginUI.failedInstall', formatFailureDetails(newFailedPlugins, true)));
     } else {
       // Mixed results - show partial success
-      const message =
-        `✓ Installed ${successCount} of ${successCount + failureCount} plugins. ` +
-        `Failed: ${formatFailureDetails(newFailedPlugins, false)}. ` +
-        `Run /reload-plugins to activate successfully installed plugins.`;
-
-      setResult(message);
+      setResult(t('pluginUI.partialInstall', successCount, successCount + failureCount, formatFailureDetails(newFailedPlugins, false)));
     }
 
     // Handle completion callback and navigation
@@ -399,8 +382,7 @@ export function BrowseMarketplace({
       pluginId: plugin.pluginId,
       entry: plugin.entry,
       marketplaceName: plugin.marketplaceName,
-      scope,
-    });
+      scope});
 
     if (result.success) {
       const loaded = await findPluginOptionsTarget(plugin.pluginId);
@@ -409,8 +391,7 @@ export function BrowseMarketplace({
         setViewState({
           type: 'plugin-options',
           plugin: loaded,
-          pluginId: plugin.pluginId,
-        });
+          pluginId: plugin.pluginId});
         return;
       }
       setResult(result.message);
@@ -450,8 +431,7 @@ export function BrowseMarketplace({
           setSelectedMarketplace(marketplace.name);
           setViewState('plugin-list');
         }
-      },
-    },
+      }},
     { context: 'Select', isActive: viewState === 'marketplace-list' },
   );
 
@@ -478,8 +458,7 @@ export function BrowseMarketplace({
               setParentViewState({
                 type: 'manage-plugins',
                 targetPlugin: plugin.entry.name,
-                targetMarketplace: plugin.marketplaceName,
-              });
+                targetMarketplace: plugin.marketplaceName});
             } else {
               setSelectedPlugin(plugin);
               setViewState('plugin-details');
@@ -488,8 +467,7 @@ export function BrowseMarketplace({
             }
           }
         }
-      },
-    },
+      }},
     { context: 'Select', isActive: viewState === 'plugin-list' },
   );
 
@@ -513,8 +491,7 @@ export function BrowseMarketplace({
         if (selectedForInstall.size > 0) {
           void installSelectedPlugins();
         }
-      },
-    },
+      }},
     { context: 'Plugin', isActive: viewState === 'plugin-list' },
   );
 
@@ -557,12 +534,10 @@ export function BrowseMarketplace({
           setViewState('plugin-list');
           setSelectedPlugin(null);
         }
-      },
-    },
+      }},
     {
       context: 'Select',
-      isActive: viewState === 'plugin-details' && !!selectedPlugin,
-    },
+      isActive: viewState === 'plugin-details' && !!selectedPlugin},
   );
 
   if (typeof viewState === 'object' && viewState.type === 'plugin-options') {
@@ -581,13 +556,13 @@ export function BrowseMarketplace({
         onDone={(outcome, detail) => {
           switch (outcome) {
             case 'configured':
-              finish(`✓ Installed and configured ${plugin.name}. Run /reload-plugins to apply.`);
+              finish(t('pluginUI.installedAndConfigured', plugin.name));
               break;
             case 'skipped':
-              finish(`✓ Installed ${plugin.name}. Run /reload-plugins to apply.`);
+              finish(t('pluginUI.installedSimple', plugin.name));
               break;
             case 'error':
-              finish(`Installed but failed to save config: ${detail}`);
+              finish(t('pluginUI.installedConfigError', detail));
               break;
           }
         }}
@@ -597,7 +572,7 @@ export function BrowseMarketplace({
 
   // Loading state
   if (loading) {
-    return <Text>Loading…</Text>;
+    return <Text>{t('pluginUI.loading')}</Text>;
   }
 
   // Error state
@@ -611,17 +586,17 @@ export function BrowseMarketplace({
       return (
         <Box flexDirection="column">
           <Box marginBottom={1}>
-            <Text bold>Select marketplace</Text>
+            <Text bold>{t('pluginUI.selectMarketplace')}</Text>
           </Box>
-          <Text>No marketplaces configured.</Text>
-          <Text dimColor>Add a marketplace first using {"'Add marketplace'"}.</Text>
+          <Text>{t('pluginUI.noMarketplaces')}</Text>
+          <Text dimColor>{t('pluginUI.addMarketplaceCommand')}</Text>
           <Box marginTop={1} paddingLeft={1}>
             <Text dimColor>
               <ConfigurableShortcutHint
                 action="confirm:no"
                 context="Confirmation"
                 fallback="Esc"
-                description="go back"
+                description={t('desc.goBack')}
               />
             </Text>
           </Box>
@@ -632,7 +607,7 @@ export function BrowseMarketplace({
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Select marketplace</Text>
+          <Text bold>{t('pluginUI.selectMarketplace')}</Text>
         </Box>
 
         {/* Warning banner for marketplace load failures */}
@@ -652,8 +627,8 @@ export function BrowseMarketplace({
             </Box>
             <Box marginLeft={2}>
               <Text dimColor>
-                {marketplace.totalPlugins} {plural(marketplace.totalPlugins, 'plugin')} available
-                {marketplace.installedCount > 0 && ` · ${marketplace.installedCount} already installed`}
+                {t('pluginUI.pluginsAvailable', marketplace.totalPlugins)}
+                {marketplace.installedCount > 0 && ` · ${marketplace.installedCount} ${t('pluginUI.alreadyInstalledSuffix')}`}
                 {marketplace.source && ` · ${marketplace.source}`}
               </Text>
             </Box>
@@ -663,12 +638,12 @@ export function BrowseMarketplace({
         <Box marginTop={1}>
           <Text dimColor italic>
             <Byline>
-              <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description="select" />
+              <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description={t('desc.select')} />
               <ConfigurableShortcutHint
                 action="confirm:no"
                 context="Confirmation"
                 fallback="Esc"
-                description="go back"
+                description={t('desc.goBack')}
               />
             </Byline>
           </Text>
@@ -687,13 +662,13 @@ export function BrowseMarketplace({
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Plugin Details</Text>
+          <Text bold>{t('pluginUI.pluginTitle')}</Text>
         </Box>
 
         {/* Plugin metadata */}
         <Box flexDirection="column" marginBottom={1}>
           <Text bold>{selectedPlugin.entry.name}</Text>
-          {selectedPlugin.entry.version && <Text dimColor>Version: {selectedPlugin.entry.version}</Text>}
+          {selectedPlugin.entry.version && <Text dimColor>{t('pluginUI.version')}: {selectedPlugin.entry.version}</Text>}
           {selectedPlugin.entry.description && (
             <Box marginTop={1}>
               <Text>{selectedPlugin.entry.description}</Text>
@@ -702,7 +677,7 @@ export function BrowseMarketplace({
           {selectedPlugin.entry.author && (
             <Box marginTop={1}>
               <Text dimColor>
-                By:{' '}
+                {t('pluginUI.by')}{' '}
                 {typeof selectedPlugin.entry.author === 'string'
                   ? selectedPlugin.entry.author
                   : selectedPlugin.entry.author.name}
@@ -713,10 +688,10 @@ export function BrowseMarketplace({
 
         {/* What will be installed */}
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>Will install:</Text>
+          <Text bold>{t('pluginUI.willInstall')}</Text>
           {selectedPlugin.entry.commands && (
             <Text dimColor>
-              · Commands:{' '}
+              · {t('pluginUI.commands')}{' '}
               {Array.isArray(selectedPlugin.entry.commands)
                 ? selectedPlugin.entry.commands.join(', ')
                 : Object.keys(selectedPlugin.entry.commands).join(', ')}
@@ -724,23 +699,23 @@ export function BrowseMarketplace({
           )}
           {selectedPlugin.entry.agents && (
             <Text dimColor>
-              · Agents:{' '}
+              · {t('pluginUI.agents')}{' '}
               {Array.isArray(selectedPlugin.entry.agents)
                 ? selectedPlugin.entry.agents.join(', ')
                 : Object.keys(selectedPlugin.entry.agents).join(', ')}
             </Text>
           )}
           {selectedPlugin.entry.hooks && (
-            <Text dimColor>· Hooks: {Object.keys(selectedPlugin.entry.hooks).join(', ')}</Text>
+            <Text dimColor>· {t('pluginUI.hooks')} {Object.keys(selectedPlugin.entry.hooks).join(', ')}</Text>
           )}
           {selectedPlugin.entry.mcpServers && (
             <Text dimColor>
-              · MCP Servers:{' '}
+              · {t('pluginUI.mcpServers')}{' '}
               {Array.isArray(selectedPlugin.entry.mcpServers)
                 ? selectedPlugin.entry.mcpServers.join(', ')
                 : typeof selectedPlugin.entry.mcpServers === 'object'
                   ? Object.keys(selectedPlugin.entry.mcpServers).join(', ')
-                  : 'configured'}
+                  : t('pluginUI.configured')}
             </Text>
           )}
           {!selectedPlugin.entry.commands &&
@@ -754,15 +729,9 @@ export function BrowseMarketplace({
                   selectedPlugin.entry.source.source === 'url' ||
                   selectedPlugin.entry.source.source === 'npm' ||
                   selectedPlugin.entry.source.source === 'pip') ? (
-                  <Text dimColor>· Component summary not available for remote plugin</Text>
+                  <Text dimColor>· {t('pluginUI.noSummary')}</Text>
                 ) : (
-                  // TODO: Actually scan local plugin directories to show real components
-                  // This would require accessing the filesystem to check for:
-                  // - commands/ directory and list files
-                  // - agents/ directory and list files
-                  // - hooks/ directory and list files
-                  // - .mcp.json or mcp-servers.json files
-                  <Text dimColor>· Components will be discovered at installation</Text>
+                  <Text dimColor>· {t('pluginUI.componentsWillBeDiscovered')}</Text>
                 )}
               </>
             )}
@@ -773,7 +742,7 @@ export function BrowseMarketplace({
         {/* Error message */}
         {installError && (
           <Box marginBottom={1}>
-            <Text color="error">Error: {installError}</Text>
+            <Text color="error">{t('pluginUI.error')}: {installError}</Text>
           </Box>
         )}
 
@@ -784,7 +753,7 @@ export function BrowseMarketplace({
               {detailsMenuIndex === index && <Text>{'> '}</Text>}
               {detailsMenuIndex !== index && <Text>{'  '}</Text>}
               <Text bold={detailsMenuIndex === index}>
-                {isInstalling && option.action === 'install' ? 'Installing…' : option.label}
+                {isInstalling && option.action === 'install' ? t('pluginUI.installing') : option.label}
               </Text>
             </Box>
           ))}
@@ -793,8 +762,8 @@ export function BrowseMarketplace({
         <Box marginTop={1} paddingLeft={1}>
           <Text dimColor>
             <Byline>
-              <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description="select" />
-              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+              <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description={t('desc.select')} />
+              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.back')} />
             </Byline>
           </Text>
         </Box>
@@ -807,13 +776,13 @@ export function BrowseMarketplace({
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Install plugins</Text>
+          <Text bold>{t('pluginUI.installPluginsTitle')}</Text>
         </Box>
-        <Text dimColor>No new plugins available to install.</Text>
-        <Text dimColor>All plugins from this marketplace are already installed.</Text>
+        <Text dimColor>{t('pluginUI.noNewPlugins')}</Text>
+        <Text dimColor>{t('pluginUI.allPluginsInstalledInMarketplace')}</Text>
         <Box marginLeft={3}>
           <Text dimColor italic>
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="go back" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.goBack')} />
           </Text>
         </Box>
       </Box>
@@ -826,13 +795,13 @@ export function BrowseMarketplace({
   return (
     <Box flexDirection="column">
       <Box marginBottom={1}>
-        <Text bold>Install Plugins</Text>
+        <Text bold>{t('pluginUI.installPluginsTitle')}</Text>
       </Box>
 
       {/* Scroll up indicator */}
       {pagination.scrollPosition.canScrollUp && (
         <Box>
-          <Text dimColor> {figures.arrowUp} more above</Text>
+          <Text dimColor> {figures.arrowUp}{t('pluginUI.moreAbove')}</Text>
         </Box>
       )}
 
@@ -858,12 +827,12 @@ export function BrowseMarketplace({
                       : figures.radioOff}{' '}
                 {plugin.entry.name}
                 {plugin.entry.category && <Text dimColor> [{plugin.entry.category}]</Text>}
-                {plugin.entry.tags?.includes('community-managed') && <Text dimColor> [Community Managed]</Text>}
-                {plugin.isInstalled && <Text dimColor> (installed)</Text>}
+                {plugin.entry.tags?.includes('community-managed') && <Text dimColor> {t('pluginUI.communityManaged')}</Text>}
+                {plugin.isInstalled && <Text dimColor> {t('pluginUI.installed')}</Text>}
                 {installCounts && selectedMarketplace === OFFICIAL_MARKETPLACE_NAME && (
                   <Text dimColor>
                     {' · '}
-                    {formatInstallCount(installCounts.get(plugin.pluginId) ?? 0)} installs
+                    {t('pluginUI.installCount', formatInstallCount(installCounts.get(plugin.pluginId) ?? 0))}
                   </Text>
                 )}
               </Text>
@@ -881,7 +850,7 @@ export function BrowseMarketplace({
       {/* Scroll down indicator */}
       {pagination.scrollPosition.canScrollDown && (
         <Box>
-          <Text dimColor> {figures.arrowDown} more below</Text>
+          <Text dimColor> {figures.arrowDown}{t('pluginUI.moreBelow')}</Text>
         </Box>
       )}
 

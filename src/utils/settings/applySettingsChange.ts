@@ -6,12 +6,16 @@ import {
   findOverlyBroadBashPermissions,
   isBypassPermissionsModeDisabled,
   removeDangerousPermissions,
-  transitionPlanAutoMode,
-} from '../permissions/permissionSetup.js'
+  transitionPlanAutoMode} from '../permissions/permissionSetup.js'
 import { syncPermissionRulesFromDisk } from '../permissions/permissions.js'
+import { applyPermissionUpdate } from '../permissions/PermissionUpdate.js'
+import type { ExternalPermissionMode, PermissionMode } from '../permissions/PermissionMode.js'
 import { loadAllPermissionRulesFromDisk } from '../permissions/permissionsLoader.js'
 import type { SettingSource } from './constants.js'
 import { getInitialSettings } from './settings.js'
+
+/** Tracks whether the session's default permission mode has been seeded from disk. */
+let sessionDefaultModeSeeded = false
 
 /**
  * Apply a settings change to app state. Re-reads settings from disk,
@@ -67,6 +71,23 @@ export function applySettingsChange(
 
     newContext = transitionPlanAutoMode(newContext)
 
+    // Sync permissions.defaultMode from settings to toolPermissionContext.mode.
+    // Only applied on the first call (startup seed) — subsequent disk changes
+    // from other sessions must not override this session's runtime mode.
+    // (The config panel writes to disk AND directly updates memory via setAppState,
+    // so the hot-reload path is covered without relying on the file watcher.)
+    if (!sessionDefaultModeSeeded) {
+      const newDefaultMode = newSettings.permissions?.defaultMode
+      if (newDefaultMode) {
+        const mappedMode = newDefaultMode === 'auto' ? 'default' : newDefaultMode
+        newContext = applyPermissionUpdate(newContext, {
+          type: 'setMode',
+          mode: mappedMode === 'default' ? 'default' : (mappedMode as ExternalPermissionMode),
+          destination: 'userSettings'})
+      }
+      sessionDefaultModeSeeded = true
+    }
+
     // Sync effortLevel from settings to top-level AppState when it changes
     // (e.g. via applyFlagSettings from IDE). Only propagate if the setting
     // itself changed — otherwise unrelated settings churn (e.g. tips dismissal
@@ -86,7 +107,6 @@ export function applySettingsChange(
       // be true and we'd wipe a session-scoped value held in effortValue.
       ...(effortChanged && newEffort !== undefined
         ? { effortValue: newEffort }
-        : {}),
-    }
+        : {})}
   })
 }

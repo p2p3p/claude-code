@@ -23,11 +23,9 @@ export function toolInfoFromToolUse(
           ? [
               {
                 type: 'content' as const,
-                content: { type: 'text' as const, text: prompt },
-              },
+                content: { type: 'text' as const, text: prompt }},
             ]
-          : [],
-      }
+          : []}
     }
 
     case 'Bash': {
@@ -47,11 +45,9 @@ export function toolInfoFromToolUse(
           ? [
               {
                 type: 'content' as const,
-                content: { type: 'text' as const, text: description },
-              },
+                content: { type: 'text' as const, text: description }},
             ]
-          : [],
-      }
+          : []}
     }
 
     case 'Read': {
@@ -73,8 +69,7 @@ export function toolInfoFromToolUse(
         locations: absReadPath
           ? [{ path: absReadPath, line: offset ?? 1 }]
           : [],
-        content: [],
-      }
+        content: []}
     }
 
     case 'Write': {
@@ -91,17 +86,14 @@ export function toolInfoFromToolUse(
                 type: 'diff' as const,
                 path: absWritePath,
                 oldText: null,
-                newText: content,
-              },
+                newText: content},
             ]
           : [
               {
                 type: 'content' as const,
-                content: { type: 'text' as const, text: content },
-              },
+                content: { type: 'text' as const, text: content }},
             ],
-        locations: absWritePath ? [{ path: absWritePath }] : [],
-      }
+        locations: absWritePath ? [{ path: absWritePath }] : []}
     }
 
     case 'Edit': {
@@ -119,12 +111,10 @@ export function toolInfoFromToolUse(
                 type: 'diff' as const,
                 path: absEditPath,
                 oldText: oldString || null,
-                newText: newString,
-              },
+                newText: newString},
             ]
           : [],
-        locations: absEditPath ? [{ path: absEditPath }] : [],
-      }
+        locations: absEditPath ? [{ path: absEditPath }] : []}
     }
 
     case 'Glob': {
@@ -138,8 +128,7 @@ export function toolInfoFromToolUse(
         title: label,
         kind: 'search',
         content: [],
-        locations: absGlobPath ? [{ path: absGlobPath }] : [],
-      }
+        locations: absGlobPath ? [{ path: absGlobPath }] : []}
     }
 
     case 'Grep': {
@@ -163,8 +152,7 @@ export function toolInfoFromToolUse(
       return {
         title: label,
         kind: 'search',
-        content: [],
-      }
+        content: []}
     }
 
     case 'WebFetch': {
@@ -177,11 +165,9 @@ export function toolInfoFromToolUse(
           ? [
               {
                 type: 'content' as const,
-                content: { type: 'text' as const, text: fetchPrompt },
-              },
+                content: { type: 'text' as const, text: fetchPrompt }},
             ]
-          : [],
-      }
+          : []}
     }
 
     case 'WebSearch': {
@@ -196,8 +182,7 @@ export function toolInfoFromToolUse(
       return {
         title: label,
         kind: 'fetch',
-        content: [],
-      }
+        content: []}
     }
 
     case 'TodoWrite': {
@@ -207,8 +192,7 @@ export function toolInfoFromToolUse(
           ? `Update TODOs: ${todos.map(t => t.content).join(', ')}`
           : 'Update TODOs',
         kind: 'think',
-        content: [],
-      }
+        content: []}
     }
 
     case 'ExitPlanMode': {
@@ -222,18 +206,15 @@ export function toolInfoFromToolUse(
           ? [
               {
                 type: 'content' as const,
-                content: { type: 'text' as const, text: plan },
-              },
+                content: { type: 'text' as const, text: plan }},
             ]
-          : [],
-      }
+          : []}
     }
 
     default:
       return {
         title: name || 'Unknown Tool',
         kind: 'other',
-        content: [],
-      }
+        content: []}
   }
 }

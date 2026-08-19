@@ -1,6 +1,7 @@
 import { feature } from 'bun:bundle'
 import { writeFile } from 'fs/promises'
 import { z } from 'zod/v4'
+import { t } from 'src/utils/i18n/index.js'
 import {
   getAllowedChannels,
   hasExitedPlanModeInSession,
@@ -146,10 +147,10 @@ export type Output = z.infer<OutputSchema>
 
 export const ExitPlanModeV2Tool: Tool<InputSchema, Output> = buildTool({
   name: EXIT_PLAN_MODE_V2_TOOL_NAME,
-  searchHint: 'present plan for approval and start coding (plan mode only)',
+  searchHint: t('toolUI.exitPlanMode.searchHint'),
   maxResultSizeChars: 100_000,
   async description() {
-    return 'Prompts the user to exit plan mode and start coding'
+    return t('toolUI.exitPlanMode.toolDescription')
   },
   async prompt() {
     return EXIT_PLAN_MODE_V2_TOOL_PROMPT
@@ -211,8 +212,7 @@ export const ExitPlanModeV2Tool: Tool<InputSchema, Output> = buildTool({
       })
       return {
         result: false,
-        message:
-          'You are not in plan mode. This tool is only for exiting plan mode after writing a plan. If your plan was already approved, continue with implementation.',
+        message: t('toolUI.exitPlanMode.outsidePlanMode'),
         errorCode: 1,
       }
     }
@@ -233,7 +233,7 @@ export const ExitPlanModeV2Tool: Tool<InputSchema, Output> = buildTool({
     // For non-teammates, require user confirmation to exit plan mode
     return {
       behavior: 'ask' as const,
-      message: 'Exit plan mode?',
+      message: t('toolUI.exitPlanMode.exitPlanMode'),
       updatedInput: input,
     }
   },
@@ -265,7 +265,7 @@ export const ExitPlanModeV2Tool: Tool<InputSchema, Output> = buildTool({
       // Plan is required for plan_mode_required teammates
       if (!plan) {
         throw new Error(
-          `No plan file found at ${filePath}. Please write your plan to this file before calling ExitPlanMode.`,
+          t('toolUI.exitPlanMode.noPlanFile', { filePath }),
         )
       }
       const agentName = getAgentName() || 'unknown'

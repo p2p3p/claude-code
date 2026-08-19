@@ -81,8 +81,7 @@ export const keychainCacheState: {
 } = {
   cache: { data: null, cachedAt: 0 },
   generation: 0,
-  readInFlight: null,
-}
+  readInFlight: null}
 
 export function clearKeychainCache(): void {
   keychainCacheState.cache = { data: null, cachedAt: 0 }

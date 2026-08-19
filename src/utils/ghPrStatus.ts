@@ -98,8 +98,7 @@ export async function fetchPrStatus(): Promise<PrStatus | null> {
     return {
       number: data.number,
       url: data.url,
-      reviewState: deriveReviewState(data.isDraft, data.reviewDecision),
-    }
+      reviewState: deriveReviewState(data.isDraft, data.reviewDecision)}
   } catch {
     return null
   }

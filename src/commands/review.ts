@@ -1,6 +1,7 @@
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.js'
 import type { Command } from '../commands.js'
 import { isUltrareviewEnabled } from './review/ultrareviewEnabled.js'
+import { t } from '../utils/i18n/index.js'
 
 // Legal wants the explicit surface name plus a docs link visible before the
 // user triggers, so the description carries "Claude Code on the web" + URL.
@@ -33,14 +34,13 @@ const LOCAL_REVIEW_PROMPT = (args: string) => `
 const review: Command = {
   type: 'prompt',
   name: 'review',
-  description: 'Review a pull request',
+  description: t('cmd.descUltrareview'),
   progressMessage: 'reviewing pull request',
   contentLength: 0,
   source: 'builtin',
   async getPromptForCommand(args): Promise<ContentBlockParam[]> {
     return [{ type: 'text', text: LOCAL_REVIEW_PROMPT(args) }]
-  },
-}
+  }}
 
 // /ultrareview is the ONLY entry point to the remote bughunter path —
 // /review stays purely local. local-jsx type renders the overage permission
@@ -50,8 +50,7 @@ const ultrareview: Command = {
   name: 'ultrareview',
   description: `~10–20 min · Finds and verifies bugs in your branch. Runs in Claude Code on the web. See ${CCR_TERMS_URL}`,
   isEnabled: () => isUltrareviewEnabled(),
-  load: () => import('./review/ultrareviewCommand.js'),
-}
+  load: () => import('./review/ultrareviewCommand.js')}
 
 export default review
 export { ultrareview }

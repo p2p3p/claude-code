@@ -3,6 +3,7 @@ import type { CommandResultDisplay, LocalJSXCommandContext } from '../../command
 import { Feedback } from '../../components/Feedback.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import type { Message } from '../../types/message.js';
+import { t } from '../../utils/i18n/index.js'
 
 // Shared function to render the Feedback component
 export function renderFeedbackComponent(

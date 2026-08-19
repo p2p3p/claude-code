@@ -1,8 +1,7 @@
 import {
   checkAdminRequestEligibility,
   createAdminRequest,
-  getMyAdminRequests,
-} from '../../services/api/adminRequests.js'
+  getMyAdminRequests} from '../../services/api/adminRequests.js'
 import { invalidateOverageCreditGrantCache } from '../../services/api/overageCreditGrant.js'
 import { type ExtraUsage, fetchUtilization } from '../../services/api/usage.js'
 import { getSubscriptionType } from '../../utils/auth.js'
@@ -10,6 +9,7 @@ import { hasClaudeAiBillingAccess } from '../../utils/billing.js'
 import { openBrowser } from '../../utils/browser.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
 import { logError } from '../../utils/log.js'
+import { t } from '../../utils/i18n/index.js'
 
 type ExtraUsageResult =
   | { type: 'message'; value: string }
@@ -44,9 +44,7 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
     if (extraUsage?.is_enabled && extraUsage.monthly_limit === null) {
       return {
         type: 'message',
-        value:
-          'Your organization already has unlimited extra usage. No request needed.',
-      }
+        value: t('extraUsage.unlimitedExtraUsage')}
     }
 
     try {
@@ -54,8 +52,7 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
       if (eligibility?.is_allowed === false) {
         return {
           type: 'message',
-          value: 'Please contact your admin to manage extra usage settings.',
-        }
+          value: t('extraUsage.contactAdmin')}
       }
     } catch (error) {
       logError(error as Error)
@@ -70,9 +67,7 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
       if (pendingOrDismissedRequests && pendingOrDismissedRequests.length > 0) {
         return {
           type: 'message',
-          value:
-            'You have already submitted a request for extra usage to your admin.',
-        }
+          value: t('extraUsage.alreadySubmitted')}
       }
     } catch (error) {
       logError(error as Error)
@@ -82,14 +77,12 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
     try {
       await createAdminRequest({
         request_type: 'limit_increase',
-        details: null,
-      })
+        details: null})
       return {
         type: 'message',
         value: extraUsage?.is_enabled
-          ? 'Request sent to your admin to increase extra usage.'
-          : 'Request sent to your admin to enable extra usage.',
-      }
+          ? t('extraUsage.requestSentIncrease')
+          : t('extraUsage.requestSentEnable')}
     } catch (error) {
       logError(error as Error)
       // Fall through to generic message below
@@ -97,8 +90,7 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
 
     return {
       type: 'message',
-      value: 'Please contact your admin to manage extra usage settings.',
-    }
+      value: t('extraUsage.contactAdmin')}
   }
 
   const url = isTeamOrEnterprise
@@ -112,7 +104,6 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
     logError(error as Error)
     return {
       type: 'message',
-      value: `Failed to open browser. Please visit ${url} to manage extra usage.`,
-    }
+      value: t('extraUsage.failedOpenBrowser', url)}
   }
 }

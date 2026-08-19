@@ -5,12 +5,12 @@ import { getCwd } from 'src/utils/cwd.js';
 import { isENOENT } from 'src/utils/errors.js';
 import { detectEncodingForResolvedPath } from 'src/utils/fileRead.js';
 import { getFsImplementation } from 'src/utils/fsOperations.js';
+import { t } from '../../../utils/i18n/index.js';
 import { Text } from '@anthropic/ink';
 import { BashTool } from '@claude-code-best/builtin-tools/tools/BashTool/BashTool.js';
 import {
   applySedSubstitution,
-  type SedEditInfo,
-} from '@claude-code-best/builtin-tools/tools/BashTool/sedEditParser.js';
+  type SedEditInfo} from '@claude-code-best/builtin-tools/tools/BashTool/sedEditParser.js';
 import { FilePermissionDialog } from '../FilePermissionDialog/FilePermissionDialog.js';
 import type { PermissionRequestProps } from '../PermissionRequest.js';
 
@@ -36,8 +36,7 @@ export function SedEditPermissionRequest({ sedInfo, ...props }: SedEditPermissio
         const raw = await getFsImplementation().readFile(filePath, { encoding });
         return {
           oldContent: raw.replaceAll('\r\n', '\n'),
-          fileExists: true,
-        };
+          fileExists: true};
       })().catch((e: unknown): FileReadResult => {
         if (!isENOENT(e)) throw e;
         return { oldContent: '', fileExists: false };
@@ -76,17 +75,16 @@ function SedEditPermissionRequestInner({
       {
         old_string: oldContent,
         new_string: newContent,
-        replace_all: false,
-      },
+        replace_all: false},
     ];
   }, [oldContent, newContent]);
 
   // Determine appropriate message when no changes
   const noChangesMessage = useMemo(() => {
     if (!fileExists) {
-      return 'File does not exist';
+      return t('permGeneral.fileDoesNotExist');
     }
-    return 'Pattern did not match any content';
+    return t('permGeneral.patternNoMatch');
   }, [fileExists]);
 
   // Parse input and add _simulatedSedEdit to ensure what user previewed
@@ -97,9 +95,7 @@ function SedEditPermissionRequestInner({
       ...parsed,
       _simulatedSedEdit: {
         filePath,
-        newContent,
-      },
-    };
+        newContent}};
   };
 
   return (
@@ -108,11 +104,11 @@ function SedEditPermissionRequestInner({
       toolUseContext={props.toolUseContext}
       onDone={props.onDone}
       onReject={props.onReject}
-      title="Edit file"
+      title={t('permGeneral.editFile')}
       subtitle={relative(getCwd(), filePath)}
       question={
         <Text>
-          Do you want to make this edit to <Text bold>{basename(filePath)}</Text>?
+          {t('permGeneral.editQuestion', basename(filePath))}
         </Text>
       }
       content={

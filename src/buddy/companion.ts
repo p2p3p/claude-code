@@ -10,8 +10,7 @@ import {
   type Rarity,
   SPECIES,
   STAT_NAMES,
-  type StatName,
-} from './types.js'
+  type StatName} from './types.js'
 
 // Mulberry32 — tiny seeded PRNG, good enough for picking ducks
 function mulberry32(seed: number): () => number {
@@ -56,8 +55,7 @@ const RARITY_FLOOR: Record<Rarity, number> = {
   uncommon: 15,
   rare: 25,
   epic: 35,
-  legendary: 50,
-}
+  legendary: 50}
 
 // One peak stat, one dump stat, rest scattered. Rarity bumps the floor.
 function rollStats(
@@ -97,8 +95,7 @@ function rollFrom(rng: () => number): Roll {
     eye: pick(rng, EYES),
     hat: rarity === 'common' ? 'none' : pick(rng, HATS),
     shiny: rng() < 0.01,
-    stats: rollStats(rng, rarity),
-  }
+    stats: rollStats(rng, rarity)}
   return { bones, inspirationSeed: Math.floor(rng() * 1e9) }
 }
 

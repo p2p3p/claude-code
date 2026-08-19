@@ -155,8 +155,7 @@ export class ActivityManager {
     return {
       isUserActive,
       isCLIActive: this.isCLIActive,
-      activeOperationCount: this.activeOperations.size,
-    }
+      activeOperationCount: this.activeOperations.size}
   }
 }
 

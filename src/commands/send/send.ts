@@ -1,11 +1,11 @@
 import type { LocalCommandCall } from '../../types/command.js'
 import { getSlaveClient } from '../../hooks/useMasterMonitor.js'
 import { getPipeIpc } from '../../utils/pipeTransport.js'
+import { t } from '../../utils/i18n/index.js'
 import {
   addSendOverride,
   removeSendOverride,
-  removeMasterPipeMute,
-} from '../../utils/pipeMuteState.js'
+  removeMasterPipeMute} from '../../utils/pipeMuteState.js'
 
 export const call: LocalCommandCall = async (args, context) => {
   const currentState = context.getAppState()
@@ -13,8 +13,7 @@ export const call: LocalCommandCall = async (args, context) => {
   if (getPipeIpc(currentState).role !== 'master') {
     return {
       type: 'text',
-      value: 'Not in master mode. Use /attach <pipe-name> first.',
-    }
+      value: t('sendCmd.notMasterMode')}
   }
 
   // Parse: first word is pipe name, rest is the message
@@ -23,8 +22,7 @@ export const call: LocalCommandCall = async (args, context) => {
   if (spaceIdx === -1) {
     return {
       type: 'text',
-      value: 'Usage: /send <pipe-name> <message>',
-    }
+      value: t('sendCmd.usage')}
   }
 
   const targetName = trimmed.slice(0, spaceIdx)
@@ -33,23 +31,20 @@ export const call: LocalCommandCall = async (args, context) => {
   if (!message) {
     return {
       type: 'text',
-      value: 'Usage: /send <pipe-name> <message>',
-    }
+      value: t('sendCmd.usage')}
   }
 
   const client = getSlaveClient(targetName)
   if (!client) {
     return {
       type: 'text',
-      value: `Not attached to "${targetName}". Use /status to see connected sub sessions.`,
-    }
+      value: t('sendCmd.notAttached', targetName)}
   }
 
   if (!client.connected) {
     return {
       type: 'text',
-      value: `Connection to "${targetName}" is closed. Use /detach ${targetName} and re-attach.`,
-    }
+      value: t('sendCmd.connectionClosed', targetName)}
   }
 
   try {
@@ -61,8 +56,7 @@ export const call: LocalCommandCall = async (args, context) => {
     client.send({ type: 'relay_unmute' })
     client.send({
       type: 'prompt',
-      data: message,
-    })
+      data: message})
 
     // Record the sent prompt in history
     context.setAppState(prev => {
@@ -86,25 +80,18 @@ export const call: LocalCommandCall = async (args, context) => {
                   type: 'prompt' as const,
                   content: message,
                   from: getPipeIpc(currentState).serverName ?? 'master',
-                  timestamp: new Date().toISOString(),
-                },
-              ],
-            },
-          },
-        },
-      }
+                  timestamp: new Date().toISOString()},
+              ]}}}}
     })
 
     return {
       type: 'text',
-      value: `Sent to "${targetName}": ${message.slice(0, 100)}${message.length > 100 ? '...' : ''}`,
-    }
+      value: t('sendCmd.sent', targetName, message.slice(0, 100) + (message.length > 100 ? '...' : ''))}
   } catch (err) {
     // Roll back override on send failure to prevent permanent unmute
     removeSendOverride(targetName)
     return {
       type: 'text',
-      value: `Failed to send to "${targetName}": ${err instanceof Error ? err.message : String(err)}`,
-    }
+      value: t('sendCmd.failedToSend', targetName, err instanceof Error ? err.message : String(err))}
   }
 }

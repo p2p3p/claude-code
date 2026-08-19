@@ -1,14 +1,12 @@
 import type { BetaContentBlock } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
 import type {
   ContentBlock,
-  ContentBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+  ContentBlockParam} from '@anthropic-ai/sdk/resources/index.mjs'
 import { roughTokenCountEstimation as countTokens } from '../services/tokenEstimation.js'
 import type {
   AssistantMessage,
   Message,
-  UserMessage,
-} from '../types/message.js'
+  UserMessage} from '../types/message.js'
 import { normalizeMessagesForAPI } from './messages.js'
 import { jsonStringify } from './slowOperations.js'
 
@@ -34,8 +32,7 @@ export function analyzeContext(messages: Message[]): TokenStats {
     other: 0,
     attachments: new Map(),
     duplicateFileReads: new Map(),
-    total: 0,
-  }
+    total: 0}
 
   const toolIdsToToolNames = new Map<string, string>()
   const readToolIdToFilePath = new Map<string, string>()
@@ -88,8 +85,7 @@ export function analyzeContext(messages: Message[]): TokenStats {
 
       stats.duplicateFileReads.set(path, {
         count: data.count,
-        tokens: duplicateTokens,
-      })
+        tokens: duplicateTokens})
     }
   })
 
@@ -158,8 +154,7 @@ function processBlock(
             const current = fileReads.get(path) || { count: 0, totalTokens: 0 }
             fileReads.set(path, {
               count: current.count + 1,
-              totalTokens: current.totalTokens + tokens,
-            })
+              totalTokens: current.totalTokens + tokens})
           }
         }
       }
@@ -200,8 +195,7 @@ export function tokenStatsToStatsigMetrics(
     human_message_tokens: stats.humanMessages,
     assistant_message_tokens: stats.assistantMessages,
     local_command_output_tokens: stats.localCommandOutputs,
-    other_tokens: stats.other,
-  }
+    other_tokens: stats.other}
 
   stats.attachments.forEach((count, type) => {
     metrics[`attachment_${type}_count`] = count

@@ -40,14 +40,12 @@ const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 // Initialize LRU cache for directory scans
 const directoryCache = new LRUCache<string, DirectoryEntry[]>({
   max: CACHE_SIZE,
-  ttl: CACHE_TTL,
-})
+  ttl: CACHE_TTL})
 
 // Initialize LRU cache for path scans (files and directories)
 const pathCache = new LRUCache<string, PathEntry[]>({
   max: CACHE_SIZE,
-  ttl: CACHE_TTL,
-})
+  ttl: CACHE_TTL})
 
 /**
  * Parses a partial path into directory and prefix components
@@ -101,8 +99,7 @@ export async function scanDirectory(
       .map(entry => ({
         name: entry.name,
         path: join(dirPath, entry.name),
-        type: 'directory' as const,
-      }))
+        type: 'directory' as const}))
       .slice(0, 100) // Limit results for MVP
 
     // Cache the results
@@ -135,8 +132,7 @@ export async function getDirectoryCompletions(
     id: entry.path,
     displayText: entry.name + '/',
     description: 'directory',
-    metadata: { type: 'directory' as const },
-  }))
+    metadata: { type: 'directory' as const }}))
 }
 
 /**
@@ -184,8 +180,7 @@ export async function scanDirectoryForPaths(
       .map(entry => ({
         name: entry.name,
         path: join(dirPath, entry.name),
-        type: entry.isDirectory() ? ('directory' as const) : ('file' as const),
-      }))
+        type: entry.isDirectory() ? ('directory' as const) : ('file' as const)}))
       .sort((a, b) => {
         // Sort directories first, then alphabetically
         if (a.type === 'directory' && b.type !== 'directory') return -1
@@ -213,8 +208,7 @@ export async function getPathCompletions(
     basePath = getCwd(),
     maxResults = 10,
     includeFiles = true,
-    includeHidden = false,
-  } = options
+    includeHidden = false} = options
 
   const { directory, prefix } = parsePartialPath(partialPath, basePath)
   const entries = await scanDirectoryForPaths(directory, includeHidden)
@@ -249,8 +243,7 @@ export async function getPathCompletions(
     return {
       id: fullPath,
       displayText: entry.type === 'directory' ? fullPath + '/' : fullPath,
-      metadata: { type: entry.type },
-    }
+      metadata: { type: entry.type }}
   })
 }
 

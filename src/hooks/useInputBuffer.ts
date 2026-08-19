@@ -26,8 +26,7 @@ export type UseInputBufferResult = {
 
 export function useInputBuffer({
   maxBufferSize,
-  debounceMs,
-}: UseInputBufferProps): UseInputBufferResult {
+  debounceMs}: UseInputBufferProps): UseInputBufferResult {
   const [buffer, setBuffer] = useState<BufferEntry[]>([])
   const [currentIndex, setCurrentIndex] = useState(-1)
   const lastPushTime = useRef<number>(0)
@@ -127,6 +126,5 @@ export function useInputBuffer({
     pushToBuffer,
     undo,
     canUndo,
-    clearBuffer,
-  }
+    clearBuffer}
 }

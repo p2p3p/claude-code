@@ -19,8 +19,7 @@ export function renderToolActivity(activity: ToolActivity, tools: Tools, theme: 
     }
     const toolArgs = tool.renderToolUseMessage(parsedInput, {
       theme,
-      verbose: false,
-    });
+      verbose: false});
     if (toolArgs) {
       return (
         <Text>

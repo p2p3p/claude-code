@@ -5,6 +5,7 @@ import { extractTag } from 'src/utils/messages.js';
 import type { ThemeName } from 'src/utils/theme.js';
 import type { z } from 'zod/v4';
 import { FallbackToolUseErrorMessage } from 'src/components/FallbackToolUseErrorMessage.js';
+import { t } from 'src/utils/i18n/index.js';
 
 import { HighlightedCode } from 'src/components/HighlightedCode.js';
 import { MessageResponse } from 'src/components/MessageResponse.js';
@@ -78,7 +79,7 @@ export function renderToolUseErrorMessage(
   if (!verbose && typeof result === 'string' && extractTag(result, 'tool_use_error')) {
     return (
       <MessageResponse>
-        <Text color="error">Error editing notebook</Text>
+        <Text color="error">{t('toolUI.notebookEdit.errorEditing')}</Text>
       </MessageResponse>
     );
   }
@@ -98,7 +99,7 @@ export function renderToolResultMessage({ cell_id, new_source, error }: Output):
     <MessageResponse>
       <Box flexDirection="column">
         <Text>
-          Updated cell <Text bold>{cell_id}</Text>:
+          {t('toolUI.notebookEdit.updatedCell')}<Text bold>{cell_id}</Text>:
         </Text>
         <Box marginLeft={2}>
           <HighlightedCode code={new_source} filePath="notebook.py" />

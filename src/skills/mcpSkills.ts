@@ -2,8 +2,7 @@ import {
   type ListResourcesResult,
   ListResourcesResultSchema,
   type ReadResourceResult,
-  ReadResourceResultSchema,
-} from '@modelcontextprotocol/sdk/types.js'
+  ReadResourceResultSchema} from '@modelcontextprotocol/sdk/types.js'
 import type { Command } from '../commands.js'
 import type { MCPServerConnection } from '../services/mcp/types.js'
 import { normalizeNameForMCP } from '../services/mcp/normalization.js'
@@ -66,8 +65,7 @@ export const fetchMcpSkillsForClient = memoizeWithLRU(
           const readResult = (await client.client.request(
             {
               method: 'resources/read',
-              params: { uri: resource.uri },
-            },
+              params: { uri: resource.uri }},
             ReadResourceResultSchema,
           )) as ReadResourceResult
 
@@ -112,8 +110,7 @@ export const fetchMcpSkillsForClient = memoizeWithLRU(
               source: 'mcp',
               loadedFrom: 'mcp',
               baseDir: undefined,
-              paths: undefined,
-            }),
+              paths: undefined}),
           )
         } catch (error) {
           logMCPError(

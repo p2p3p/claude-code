@@ -3,8 +3,7 @@ import { getFeatureValue_CACHED_WITH_REFRESH } from '../services/analytics/growt
 import { lazySchema } from '../utils/lazySchema.js'
 import {
   DEFAULT_POLL_CONFIG,
-  type PollIntervalConfig,
-} from './pollConfigDefaults.js'
+  type PollIntervalConfig} from './pollConfigDefaults.js'
 
 // .min(100) on the seek-work intervals restores the old Math.max(..., 100)
 // defense-in-depth floor against fat-fingered GrowthBook values. Unlike a
@@ -23,8 +22,7 @@ import {
 // restoring at_capacity) falls through every throttle site with no sleep —
 // tight-looping /poll at HTTP-round-trip speed.
 const zeroOrAtLeast100 = {
-  message: 'must be 0 (disabled) or ≥100ms',
-}
+  message: 'must be 0 (disabled) or ≥100ms'}
 const pollIntervalConfigSchema = lazySchema(() =>
   z
     .object({
@@ -69,16 +67,14 @@ const pollIntervalConfigSchema = lazySchema(() =>
         .number()
         .int()
         .min(0)
-        .default(120_000),
-    })
+        .default(120_000)})
     .refine(
       cfg =>
         cfg.non_exclusive_heartbeat_interval_ms > 0 ||
         cfg.poll_interval_ms_at_capacity > 0,
       {
         message:
-          'at-capacity liveness requires non_exclusive_heartbeat_interval_ms > 0 or poll_interval_ms_at_capacity > 0',
-      },
+          'at-capacity liveness requires non_exclusive_heartbeat_interval_ms > 0 or poll_interval_ms_at_capacity > 0'},
     )
     .refine(
       cfg =>
@@ -86,8 +82,7 @@ const pollIntervalConfigSchema = lazySchema(() =>
         cfg.multisession_poll_interval_ms_at_capacity > 0,
       {
         message:
-          'at-capacity liveness requires non_exclusive_heartbeat_interval_ms > 0 or multisession_poll_interval_ms_at_capacity > 0',
-      },
+          'at-capacity liveness requires non_exclusive_heartbeat_interval_ms > 0 or multisession_poll_interval_ms_at_capacity > 0'},
     ),
 )
 

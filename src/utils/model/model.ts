@@ -5,6 +5,7 @@
  * literals with process.env.USER_TYPE === 'ant' for Bun to remove the codenames
  * during dead code elimination
  */
+import { t } from '../i18n/index.js'
 import { getMainLoopModelOverride } from '../../bootstrap/state.js'
 import { resolveAntModel, getAntModelOverrideConfig } from './antModels.js'
 import {
@@ -12,19 +13,17 @@ import {
   isClaudeAISubscriber,
   isMaxSubscriber,
   isProSubscriber,
-  isTeamPremiumSubscriber,
-} from '../auth.js'
+  isTeamPremiumSubscriber} from '../auth.js'
 import {
   has1mContext,
   is1mContextDisabled,
-  modelSupports1M,
-} from '../context.js'
+  modelSupports1M} from '../context.js'
 import { isEnvTruthy } from '../envUtils.js'
 import { getModelStrings, resolveOverriddenModel } from './modelStrings.js'
 import { formatModelPricing, getOpus46CostTier } from '../modelCost.js'
 import { getSettings_DEPRECATED } from '../settings/settings.js'
 import type { PermissionMode } from '../permissions/PermissionMode.js'
-import { getAPIProvider, isFirstPartyAnthropicBaseUrl } from './providers.js'
+import { getAPIProvider} from './providers.js'
 import { LIGHTNING_BOLT } from '../../constants/figures.js'
 import { isModelAllowed } from './modelAllowlist.js'
 import { type ModelAlias, isModelAlias } from './aliases.js'
@@ -32,32 +31,11 @@ import { capitalize } from '../stringUtils.js'
 import {
   type ChatGPTCodexModelTier,
   isChatGPTAuthMode,
-  resolveChatGPTCodexModelForTier,
-} from './chatgptModels.js'
+  resolveChatGPTCodexModelForTier} from './chatgptModels.js'
 
 export type ModelShortName = string
 export type ModelName = string
 export type ModelSetting = ModelName | ModelAlias | null
-
-const OPENAI_DEFAULT_MODEL_ENV_BY_TIER: Record<ChatGPTCodexModelTier, string> =
-  {
-    opus: 'OPENAI_DEFAULT_OPUS_MODEL',
-    sonnet: 'OPENAI_DEFAULT_SONNET_MODEL',
-    haiku: 'OPENAI_DEFAULT_HAIKU_MODEL',
-  }
-
-function getOpenAIModelForTier(
-  provider: ReturnType<typeof getAPIProvider>,
-  tier: ChatGPTCodexModelTier,
-): ModelName | undefined {
-  if (provider !== 'openai') return undefined
-
-  return resolveChatGPTCodexModelForTier({
-    tier,
-    isChatGPTAuth: isChatGPTAuthMode(),
-    tierOverride: process.env[OPENAI_DEFAULT_MODEL_ENV_BY_TIER[tier]],
-  })
-}
 
 export function getSmallFastModel(): ModelName {
   const provider = getAPIProvider()
@@ -65,20 +43,19 @@ export function getSmallFastModel(): ModelName {
     const chatGPTModel = resolveChatGPTCodexModelForTier({
       tier: 'haiku',
       isChatGPTAuth: true,
-      tierOverride: process.env.OPENAI_DEFAULT_HAIKU_MODEL,
-      taskOverride: process.env.OPENAI_SMALL_FAST_MODEL,
-    })
+      tierOverride: process.env.MODEL,
+      taskOverride: process.env.MODEL})
     if (chatGPTModel) return chatGPTModel
   }
   // Provider-specific small fast model
-  if (provider === 'openai' && process.env.OPENAI_SMALL_FAST_MODEL) {
-    return process.env.OPENAI_SMALL_FAST_MODEL
+  if (provider === 'openai' && process.env.MODEL) {
+    return process.env.MODEL
   }
-  if (provider === 'gemini' && process.env.GEMINI_SMALL_FAST_MODEL) {
-    return process.env.GEMINI_SMALL_FAST_MODEL
+  if (provider === 'gemini' && process.env.MODEL) {
+    return process.env.MODEL
   }
   // Anthropic-specific or fallback
-  return process.env.ANTHROPIC_SMALL_FAST_MODEL || getDefaultHaikuModel()
+  return process.env.MODEL || getDefaultModel()
 }
 
 export function isNonCustomOpusModel(model: ModelName): boolean {
@@ -92,16 +69,11 @@ export function isNonCustomOpusModel(model: ModelName): boolean {
 }
 
 /**
- * Helper to get the model from /model (including via /config), the --model flag, environment variable,
- * or the saved settings. The returned value can be a model alias if that's what the user specified.
- * Undefined if the user didn't configure anything, in which case we fall back to
- * the default (null).
- *
- * Priority order within this function:
- * 1. Model override during session (from /model command) - highest priority
- * 2. Model override at startup (from --model flag)
- * 3. ANTHROPIC_MODEL environment variable
- * 4. Settings (from user's saved settings)
+ * Get the user-specified model setting. Priority:
+ * 1. /model session override (getMainLoopModelOverride)
+ * 2. --model flag
+ * 3. process.env.MODEL (set by the platform config system)
+ * Returns undefined when nothing is configured (use platform default).
  */
 export function getUserSpecifiedModelSetting(): ModelSetting | undefined {
   let specifiedModel: ModelSetting | undefined
@@ -110,8 +82,7 @@ export function getUserSpecifiedModelSetting(): ModelSetting | undefined {
   if (modelOverride !== undefined) {
     specifiedModel = modelOverride
   } else {
-    const settings = getSettings_DEPRECATED() || {}
-    specifiedModel = process.env.ANTHROPIC_MODEL || settings.model || undefined
+    specifiedModel = process.env.MODEL || undefined
   }
 
   // Ignore the user-specified model if it's not in the availableModels allowlist.
@@ -124,15 +95,7 @@ export function getUserSpecifiedModelSetting(): ModelSetting | undefined {
 
 /**
  * Get the main loop model to use for the current session.
- *
- * Model Selection Priority Order:
- * 1. Model override during session (from /model command) - highest priority
- * 2. Model override at startup (from --model flag)
- * 3. ANTHROPIC_MODEL environment variable
- * 4. Settings (from user's saved settings)
- * 5. Built-in default
- *
- * @returns The resolved model name to use
+ * Returns a resolved full model name (not an alias).
  */
 export function getMainLoopModel(): ModelName {
   const model = getUserSpecifiedModelSetting()
@@ -142,92 +105,11 @@ export function getMainLoopModel(): ModelName {
   return getDefaultMainLoopModel()
 }
 
-export function getBestModel(): ModelName {
-  return getDefaultOpusModel()
-}
-
 /**
- * Resolve the provider's primary model from its env var (e.g. OPENAI_MODEL).
- * Returns undefined for providers that don't have a primary-model env var
- * (Bedrock, Vertex, Foundry, firstParty).
+ * Default model: process.env.MODEL set by the platform config system.
  */
-function getProviderPrimaryModel(): ModelName | undefined {
-  const provider = getAPIProvider()
-  if (provider === 'openai') return process.env.OPENAI_MODEL
-  if (provider === 'gemini') return process.env.GEMINI_MODEL
-  if (provider === 'grok') return process.env.GROK_MODEL
-  return undefined
-}
-
-// @[MODEL LAUNCH]: Update the default Opus model (3P providers may lag so keep defaults unchanged).
-export function getDefaultOpusModel(): ModelName {
-  const provider = getAPIProvider()
-  const openAIModel = getOpenAIModelForTier(provider, 'opus')
-  if (openAIModel) return openAIModel
-  // For Gemini provider, check GEMINI_DEFAULT_OPUS_MODEL
-  if (provider === 'gemini' && process.env.GEMINI_DEFAULT_OPUS_MODEL) {
-    return process.env.GEMINI_DEFAULT_OPUS_MODEL
-  }
-  // Anthropic-specific override (for first-party and other 3P providers)
-  if (process.env.ANTHROPIC_DEFAULT_OPUS_MODEL) {
-    return process.env.ANTHROPIC_DEFAULT_OPUS_MODEL
-  }
-  // 3P providers: if user set a primary model (e.g. OPENAI_MODEL=glm-5.1),
-  // fall back to it instead of a hardcoded Anthropic model. This prevents
-  // sideQuery / background tasks from sending requests to Anthropic's API
-  // when the user configured a third-party provider.
-  const primaryModel = getProviderPrimaryModel()
-  if (primaryModel) return primaryModel
-  if (provider !== 'firstParty') {
-    return getModelStrings().opus47
-  }
-  return getModelStrings().opus47
-}
-
-// @[MODEL LAUNCH]: Update the default Sonnet model (3P providers may lag so keep defaults unchanged).
-export function getDefaultSonnetModel(): ModelName {
-  const provider = getAPIProvider()
-  const openAIModel = getOpenAIModelForTier(provider, 'sonnet')
-  if (openAIModel) return openAIModel
-  // For Gemini provider, check GEMINI_DEFAULT_SONNET_MODEL
-  if (provider === 'gemini' && process.env.GEMINI_DEFAULT_SONNET_MODEL) {
-    return process.env.GEMINI_DEFAULT_SONNET_MODEL
-  }
-  // Anthropic-specific override (for first-party and other 3P providers)
-  if (process.env.ANTHROPIC_DEFAULT_SONNET_MODEL) {
-    return process.env.ANTHROPIC_DEFAULT_SONNET_MODEL
-  }
-  // 3P providers: fall back to user's primary model instead of a hardcoded
-  // Anthropic model name. Prevents background API calls from being routed to
-  // Anthropic when the user configured a third-party endpoint.
-  const primaryModel = getProviderPrimaryModel()
-  if (primaryModel) return primaryModel
-  if (provider !== 'firstParty') {
-    return getModelStrings().sonnet45
-  }
-  return getModelStrings().sonnet46
-}
-
-// @[MODEL LAUNCH]: Update the default Haiku model (3P providers may lag so keep defaults unchanged).
-export function getDefaultHaikuModel(): ModelName {
-  const provider = getAPIProvider()
-  const openAIModel = getOpenAIModelForTier(provider, 'haiku')
-  if (openAIModel) return openAIModel
-  // For Gemini provider, check GEMINI_DEFAULT_HAIKU_MODEL
-  if (provider === 'gemini' && process.env.GEMINI_DEFAULT_HAIKU_MODEL) {
-    return process.env.GEMINI_DEFAULT_HAIKU_MODEL
-  }
-  // Anthropic-specific override (for first-party and other 3P providers)
-  if (process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL) {
-    return process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL
-  }
-  // 3P providers: fall back to user's primary model instead of a hardcoded
-  // Anthropic model name.
-  const primaryModel = getProviderPrimaryModel()
-  if (primaryModel) return primaryModel
-
-  // Haiku 4.5 is available on all platforms (first-party, Foundry, Bedrock, Vertex)
-  return getModelStrings().haiku45
+export function getDefaultModel(): ModelName {
+  return process.env.MODEL || ''
 }
 
 /**
@@ -248,12 +130,12 @@ export function getRuntimeMainLoopModel(params: {
     permissionMode === 'plan' &&
     !exceeds200kTokens
   ) {
-    return getDefaultOpusModel()
+    return getDefaultModel()
   }
 
   // sonnetplan by default
   if (getUserSpecifiedModelSetting() === 'haiku' && permissionMode === 'plan') {
-    return getDefaultSonnetModel()
+    return getDefaultModel()
   }
 
   return mainLoopModel
@@ -273,23 +155,23 @@ export function getDefaultMainLoopModelSetting(): ModelName | ModelAlias {
   if (process.env.USER_TYPE === 'ant') {
     return (
       (getAntModelOverrideConfig()?.defaultModel as string) ??
-      getDefaultOpusModel() + '[1m]'
+      getDefaultModel() + '[1m]'
     )
   }
 
   // Max users get Opus as default
   if (isMaxSubscriber()) {
-    return getDefaultOpusModel() + (isOpus1mMergeEnabled() ? '[1m]' : '')
+    return getDefaultModel() + (isOpus1mMergeEnabled() ? '[1m]' : '')
   }
 
   // Team Premium gets Opus (same as Max)
   if (isTeamPremiumSubscriber()) {
-    return getDefaultOpusModel() + (isOpus1mMergeEnabled() ? '[1m]' : '')
+    return getDefaultModel() + (isOpus1mMergeEnabled() ? '[1m]' : '')
   }
 
   // PAYG (1P and 3P), Enterprise, Team Standard, and Pro get Sonnet as default
   // Note that PAYG (3P) may default to an older Sonnet model
-  return getDefaultSonnetModel()
+  return getDefaultModel()
 }
 
 /**
@@ -384,24 +266,24 @@ export function getClaudeAiUserDefaultModelDescription(
 ): string {
   if (isMaxSubscriber() || isTeamPremiumSubscriber()) {
     if (isOpus1mMergeEnabled()) {
-      return `Opus 4.7 with 1M context · Most capable for complex work${fastMode ? getOpusPricingSuffix(true) : ''}`
+      return t('modelDescriptions.opus1m', fastMode ? getOpusPricingSuffix(true) : '')
     }
-    return `Opus 4.7 · Most capable for complex work${fastMode ? getOpusPricingSuffix(true) : ''}`
+    return t('modelDescriptions.opus', fastMode ? getOpusPricingSuffix(true) : '')
   }
-  return 'Sonnet 4.6 · Best for everyday tasks'
+  return t('modelDescriptions.sonnet')
 }
 
 export function renderDefaultModelSetting(
   setting: ModelName | ModelAlias,
 ): string {
   if (setting === 'opusplan') {
-    return 'Opus 4.7 in plan mode, else Sonnet 4.6'
+    return t('modelDescriptions.opusPlan')
   }
   return renderModelName(parseUserSpecifiedModel(setting))
 }
 
 export function getOpusPricingSuffix(fastMode: boolean): string {
-  if (getAPIProvider() !== 'firstParty') return ''
+  if (getAPIProvider() !== 'anthropic') return ''
   const pricing = formatModelPricing(getOpus46CostTier(fastMode))
   const fastModeIndicator = fastMode ? ` (${LIGHTNING_BOLT})` : ''
   return ` ·${fastModeIndicator} ${pricing}`
@@ -411,8 +293,8 @@ export function isOpus1mMergeEnabled(): boolean {
   if (
     is1mContextDisabled() ||
     isProSubscriber() ||
-    getAPIProvider() !== 'firstParty' ||
-    !isFirstPartyAnthropicBaseUrl()
+    getAPIProvider() !== 'anthropic' ||
+    !false
   ) {
     return false
   }
@@ -557,15 +439,15 @@ export function parseUserSpecifiedModel(
   if (isModelAlias(modelString)) {
     switch (modelString) {
       case 'opusplan':
-        return getDefaultSonnetModel() + (has1mTag ? '[1m]' : '') // Sonnet is default, Opus in plan mode
+        return getDefaultModel() + (has1mTag ? '[1m]' : '') // Sonnet is default, Opus in plan mode
       case 'sonnet':
-        return getDefaultSonnetModel() + (has1mTag ? '[1m]' : '')
+        return getDefaultModel() + (has1mTag ? '[1m]' : '')
       case 'haiku':
-        return getDefaultHaikuModel() + (has1mTag ? '[1m]' : '')
+        return getDefaultModel() + (has1mTag ? '[1m]' : '')
       case 'opus':
-        return getDefaultOpusModel() + (has1mTag ? '[1m]' : '')
+        return getDefaultModel() + (has1mTag ? '[1m]' : '')
       case 'best':
-        return getBestModel()
+        return getDefaultModel()
       default:
     }
   }
@@ -577,11 +459,11 @@ export function parseUserSpecifiedModel(
   // before 4.5 launched. 3P providers may not yet have 4.6/4.7 capacity,
   // so pass through unchanged.
   if (
-    getAPIProvider() === 'firstParty' &&
+    getAPIProvider() === 'anthropic' &&
     isLegacyOpusFirstParty(modelString) &&
     isLegacyModelRemapEnabled()
   ) {
-    return getDefaultOpusModel() + (has1mTag ? '[1m]' : '')
+    return getDefaultModel() + (has1mTag ? '[1m]' : '')
   }
 
   if (process.env.USER_TYPE === 'ant') {

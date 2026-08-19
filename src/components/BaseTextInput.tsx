@@ -39,8 +39,7 @@ export function BaseTextInput({
   const cursorRef = useDeclaredCursor({
     line: cursorLine,
     column: cursorColumn,
-    active: Boolean(props.focus && props.showCursor && terminalFocus),
-  });
+    active: Boolean(props.focus && props.showCursor && terminalFocus)});
 
   const { wrappedOnInput, isPasting } = usePasteHandler({
     onPaste: props.onPaste,
@@ -51,8 +50,7 @@ export function BaseTextInput({
       }
       onInput(input, key);
     },
-    onImagePaste: props.onImagePaste,
-  });
+    onImagePaste: props.onImagePaste});
 
   // Notify parent when paste state changes
   const { onIsPastingChange } = props;
@@ -69,8 +67,7 @@ export function BaseTextInput({
     focus: props.focus,
     terminalFocus,
     invert,
-    hidePlaceholderText,
-  });
+    hidePlaceholderText});
 
   useInput(wrappedOnInput, { isActive: props.focus });
 
@@ -103,8 +100,7 @@ export function BaseTextInput({
           .map(h => ({
             ...h,
             start: Math.max(0, h.start - viewportCharOffset),
-            end: h.end - viewportCharOffset,
-          }))
+            end: h.end - viewportCharOffset}))
       : cursorFiltered;
 
   const hasHighlights = filteredHighlights && filteredHighlights.length > 0;

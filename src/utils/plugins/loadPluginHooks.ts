@@ -3,15 +3,13 @@ import type { HookEvent } from 'src/entrypoints/agentSdkTypes.js'
 import {
   clearRegisteredPluginHooks,
   getRegisteredHooks,
-  registerHookCallbacks,
-} from '../../bootstrap/state.js'
+  registerHookCallbacks} from '../../bootstrap/state.js'
 import type { LoadedPlugin } from '../../types/plugin.js'
 import { logForDebugging } from '../debug.js'
 import { settingsChangeDetector } from '../settings/changeDetector.js'
 import {
   getSettings_DEPRECATED,
-  getSettingsForSource,
-} from '../settings/settings.js'
+  getSettingsForSource} from '../settings/settings.js'
 import type { PluginHookMatcher } from '../settings/types.js'
 import { jsonStringify } from '../slowOperations.js'
 import { clearPluginCache, loadAllPluginsCacheOnly } from './pluginLoader.js'
@@ -55,8 +53,7 @@ function convertPluginHooksToMatchers(
     WorktreeRemove: [],
     InstructionsLoaded: [],
     CwdChanged: [],
-    FileChanged: [],
-  }
+    FileChanged: []}
 
   if (!plugin.hooksConfig) {
     return pluginMatchers
@@ -76,8 +73,7 @@ function convertPluginHooksToMatchers(
           hooks: matcher.hooks,
           pluginRoot: plugin.path,
           pluginName: plugin.name,
-          pluginId: plugin.source,
-        })
+          pluginId: plugin.source})
       }
     }
   }
@@ -117,8 +113,7 @@ export const loadPluginHooks = memoize(async (): Promise<void> => {
     WorktreeRemove: [],
     InstructionsLoaded: [],
     CwdChanged: [],
-    FileChanged: [],
-  }
+    FileChanged: []}
 
   // Process each enabled plugin
   for (const plugin of enabled) {
@@ -242,8 +237,7 @@ export function getPluginAffectingSettingsSnapshot(): string {
     enabledPlugins: sortKeys(merged.enabledPlugins),
     extraKnownMarketplaces: sortKeys(merged.extraKnownMarketplaces),
     strictKnownMarketplaces: policy?.strictKnownMarketplaces ?? [],
-    blockedMarketplaces: policy?.blockedMarketplaces ?? [],
-  })
+    blockedMarketplaces: policy?.blockedMarketplaces ?? []})
 }
 
 /**

@@ -17,8 +17,7 @@ import {
   rabbit,
   robot,
   snail,
-  turtle,
-} from './types.js'
+  turtle} from './types.js'
 
 // Each sprite is 5 lines tall, 12 wide (after {E}→1char substitution).
 // Multiple frames per species for idle fidget animation.
@@ -437,8 +436,7 @@ const BODIES: Record<Species, string[][]> = {
       ' (   ..   ) ',
       '  `------´~ ',
     ],
-  ],
-}
+  ]}
 
 const HAT_LINES: Record<Hat, string> = {
   none: '',
@@ -448,8 +446,7 @@ const HAT_LINES: Record<Hat, string> = {
   halo: '   (   )    ',
   wizard: '    /^\\     ',
   beanie: '   (___)    ',
-  tinyduck: '    ,>      ',
-}
+  tinyduck: '    ,>      '}
 
 export function renderSprite(bones: CompanionBones, frame = 0): string[] {
   const frames = BODIES[bones.species]

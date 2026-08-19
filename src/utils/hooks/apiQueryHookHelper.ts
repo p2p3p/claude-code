@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { QuerySource } from '../../constants/querySource.js'
-import { queryModelWithoutStreaming } from '../../services/api/claude.js'
+import { queryModelWithoutStreaming } from '../../services/api/anthropic/index.js'
 import type { Message } from '../../types/message.js'
 import { createAbortController } from '../../utils/abortController.js'
 import { logError } from '../../utils/log.js'
@@ -104,9 +104,7 @@ export function createApiQueryHook<TResult>(
           querySource: config.name,
           mcpTools: [],
           agentId: context.toolUseContext.agentId,
-          langfuseTrace: context.toolUseContext.langfuseTrace,
-        },
-      })
+          langfuseTrace: context.toolUseContext.langfuseTrace}})
 
       // Parse response
       const content = extractTextContent(
@@ -122,8 +120,7 @@ export function createApiQueryHook<TResult>(
             result,
             messageId: response.message.id ?? '',
             model,
-            uuid,
-          },
+            uuid},
           context,
         )
       } catch (error) {
@@ -132,8 +129,7 @@ export function createApiQueryHook<TResult>(
             type: 'error',
             queryName: config.name,
             error: error as Error,
-            uuid,
-          },
+            uuid},
           context,
         )
       }

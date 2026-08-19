@@ -4,8 +4,7 @@ import { useRegisterOverlay } from '../../context/overlayContext.js'
 import { type InputEvent, useInput } from '@anthropic/ink'
 import {
   normalizeFullWidthDigits,
-  normalizeFullWidthSpace,
-} from '../../utils/stringUtils.js'
+  normalizeFullWidthSpace} from '../../utils/stringUtils.js'
 import type { OptionWithDescription } from './select.js'
 import { useSelectNavigation } from './use-select-navigation.js'
 
@@ -162,8 +161,7 @@ export function useMultiSelectState<T>({
   onDownFromLastItem,
   onUpFromFirstItem,
   initialFocusLast,
-  hideIndexes = false,
-}: UseMultiSelectStateProps<T>): MultiSelectState<T> {
+  hideIndexes = false}: UseMultiSelectStateProps<T>): MultiSelectState<T> {
   const [selectedValues, setSelectedValues] = useState<T[]>(defaultValue)
   const [isSubmitFocused, setIsSubmitFocused] = useState(false)
 
@@ -205,8 +203,7 @@ export function useMultiSelectState<T>({
       ? options[options.length - 1]?.value
       : undefined,
     onFocus,
-    focusValue,
-  })
+    focusValue})
 
   // Automatically register as an overlay.
   // This ensures CancelRequestHandler won't intercept Escape when the multi-select is active.
@@ -407,6 +404,5 @@ export function useMultiSelectState<T>({
     inputValues,
     isSubmitFocused,
     updateInputValue,
-    onCancel,
-  }
+    onCancel}
 }

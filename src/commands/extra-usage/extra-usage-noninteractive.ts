@@ -1,3 +1,4 @@
+import { t } from '../../utils/i18n/index.js'
 import { runExtraUsage } from './extra-usage-core.js'
 
 export async function call(): Promise<{ type: 'text'; value: string }> {
@@ -10,7 +11,6 @@ export async function call(): Promise<{ type: 'text'; value: string }> {
   return {
     type: 'text',
     value: result.opened
-      ? `Browser opened to manage extra usage. If it didn't open, visit: ${result.url}`
-      : `Please visit ${result.url} to manage extra usage.`,
-  }
+      ? t('extraUsage.browserOpened', result.url)
+      : t('extraUsage.visitUrl', result.url)}
 }

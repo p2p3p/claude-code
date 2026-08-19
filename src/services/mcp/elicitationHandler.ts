@@ -3,20 +3,18 @@ import {
   ElicitationCompleteNotificationSchema,
   type ElicitRequestParams,
   ElicitRequestSchema,
-  type ElicitResult,
-} from '@modelcontextprotocol/sdk/types.js'
+  type ElicitResult} from '@modelcontextprotocol/sdk/types.js'
 import type { AppState } from '../../state/AppState.js'
 import {
   executeElicitationHooks,
   executeElicitationResultHooks,
-  executeNotificationHooks,
-} from '../../utils/hooks.js'
+  executeNotificationHooks} from '../../utils/hooks.js'
 import { logMCPDebug, logMCPError } from '../../utils/log.js'
+import { t } from '../../utils/i18n/index.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../analytics/index.js'
+  logEvent} from '../analytics/index.js'
 
 /** Configuration for the waiting state shown after the user opens a URL. */
 export type ElicitationWaitingState = {
@@ -83,8 +81,7 @@ export function registerElicitationHandler(
       const mode = getElicitationMode(request.params)
 
       logEvent('tengu_mcp_elicitation_shown', {
-        mode: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+        mode: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
       try {
         // Run elicitation hooks first - they can provide a response programmatically
@@ -101,8 +98,7 @@ export function registerElicitationHandler(
           logEvent('tengu_mcp_elicitation_response', {
             mode: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             action:
-              hookResponse.action as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          })
+              hookResponse.action as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
           return hookResponse
         }
 
@@ -122,7 +118,7 @@ export function registerElicitationHandler(
           }
 
           const waitingState: ElicitationWaitingState | undefined =
-            elicitationId ? { actionLabel: 'Skip confirmation' } : undefined
+            elicitationId ? { actionLabel: t('services.skipConfirmation') } : undefined
 
           setAppState(prev => ({
             ...prev,
@@ -140,14 +136,10 @@ export function registerElicitationHandler(
                     logEvent('tengu_mcp_elicitation_response', {
                       mode: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                       action:
-                        result.action as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-                    })
+                        result.action as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
                     resolve(result)
-                  },
-                },
-              ],
-            },
-          }))
+                  }},
+              ]}}))
 
           extra.signal.addEventListener('abort', onAbort, { once: true })
         })
@@ -182,8 +174,7 @@ export function registerElicitationHandler(
         )
         void executeNotificationHooks({
           message: `MCP server "${serverName}" confirmed elicitation ${elicitationId} complete`,
-          notificationType: 'elicitation_complete',
-        })
+          notificationType: 'elicitation_complete'})
         let found = false
         setAppState(prev => {
           const idx = findElicitationInQueue(
@@ -235,8 +226,7 @@ export async function runElicitationHooks(
         signal,
         mode,
         url,
-        elicitationId,
-      })
+        elicitationId})
 
     if (blockingError) {
       return { action: 'decline' }
@@ -245,8 +235,7 @@ export async function runElicitationHooks(
     if (elicitationResponse) {
       return {
         action: elicitationResponse.action,
-        content: elicitationResponse.content,
-      }
+        content: elicitationResponse.content}
     }
 
     return undefined
@@ -276,29 +265,25 @@ export async function runElicitationResultHooks(
         content: result.content as Record<string, unknown> | undefined,
         signal,
         mode,
-        elicitationId,
-      })
+        elicitationId})
 
     if (blockingError) {
       void executeNotificationHooks({
         message: `Elicitation response for server "${serverName}": decline`,
-        notificationType: 'elicitation_response',
-      })
+        notificationType: 'elicitation_response'})
       return { action: 'decline' }
     }
 
     const finalResult = elicitationResultResponse
       ? {
           action: elicitationResultResponse.action,
-          content: elicitationResultResponse.content ?? result.content,
-        }
+          content: elicitationResultResponse.content ?? result.content}
       : result
 
     // Fire a notification for observability
     void executeNotificationHooks({
       message: `Elicitation response for server "${serverName}": ${finalResult.action}`,
-      notificationType: 'elicitation_response',
-    })
+      notificationType: 'elicitation_response'})
 
     return finalResult
   } catch (error) {
@@ -306,8 +291,7 @@ export async function runElicitationResultHooks(
     // Fire notification even on error
     void executeNotificationHooks({
       message: `Elicitation response for server "${serverName}": ${result.action}`,
-      notificationType: 'elicitation_response',
-    })
+      notificationType: 'elicitation_response'})
     return result
   }
 }

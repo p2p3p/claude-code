@@ -256,7 +256,6 @@ mock.module('../../../../services/analytics/growthbook.js', () => ({
 // Avoid partial mocks of bootstrap/state and envUtils — incomplete surfaces
 // break transitive named imports when this file is run alone.
 mock.module('../chatgptAuth.js', () => ({
-  isChatGPTAuthEnabled: () => false,
   getValidChatGPTAuth: async () => null,
 }))
 

@@ -17,13 +17,11 @@ import {
   hasSendOverride,
   clearSendOverrides,
   subscribeSendOverride,
-  getSendOverrideVersion,
-} from '../utils/pipeMuteState.js'
+  getSendOverrideVersion} from '../utils/pipeMuteState.js'
 import {
   getAllSlaveClients,
   subscribeToSlaveClientRegistry,
-  getSlaveClientRegistryVersion,
-} from './useMasterMonitor.js'
+  getSlaveClientRegistryVersion} from './useMasterMonitor.js'
 
 type UsePipeMuteSyncDeps = {
   setToolUseConfirmQueue: (
@@ -32,8 +30,7 @@ type UsePipeMuteSyncDeps = {
 }
 
 export function usePipeMuteSync({
-  setToolUseConfirmQueue,
-}: UsePipeMuteSyncDeps): void {
+  setToolUseConfirmQueue}: UsePipeMuteSyncDeps): void {
   // Subscribe to individual scalars to avoid object-selector re-render churn
   // (AppState.tsx warns against object-returning selectors)
   const routeMode = useAppState(

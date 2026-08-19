@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import figures from 'figures';
 import Fuse from 'fuse.js';
 import React from 'react';
+import { unlink } from 'fs/promises';
 import { getOriginalCwd, getSessionId } from '../bootstrap/state.js';
 import { useExitOnCtrlCDWithKeybindings } from '../hooks/useExitOnCtrlCDWithKeybindings.js';
 import { useSearchInput } from '../hooks/useSearchInput.js';
@@ -16,8 +17,7 @@ import {
   type Color,
   Byline,
   Divider,
-  KeyboardShortcutHint,
-} from '@anthropic/ink';
+  KeyboardShortcutHint} from '@anthropic/ink';
 import { useKeybinding } from '../keybindings/useKeybinding.js';
 import { logEvent } from '../services/analytics/index.js';
 import type { LogOption, SerializedMessage } from '../types/logs.js';
@@ -25,12 +25,12 @@ import { formatLogMetadata, truncateToWidth } from '../utils/format.js';
 import { getWorktreePaths } from '../utils/getWorktreePaths.js';
 import { getBranch } from '../utils/git.js';
 import { getLogDisplayTitle } from '../utils/log.js';
+import { t } from '../utils/i18n/index.js';
 import {
   getFirstMeaningfulUserMessageTextContent,
   getSessionIdFromLog,
   isCustomTitleEnabled,
-  saveCustomTitle,
-} from '../utils/sessionStorage.js';
+  saveCustomTitle} from '../utils/sessionStorage.js';
 import { getTheme } from '../utils/theme.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { Select } from './CustomSelect/select.js';
@@ -40,6 +40,8 @@ import { Spinner } from './Spinner.js';
 import { TagTabs } from './TagTabs.js';
 import TextInput from './TextInput.js';
 import { type TreeNode, TreeSelect } from './ui/TreeSelect.js';
+
+const ALL_TAG = 'All';
 
 type AgenticSearchState =
   | { status: 'idle' }
@@ -62,6 +64,17 @@ export type LogSelectorProps = {
 };
 
 type LogTreeNode = TreeNode<{ log: LogOption; indexInFiltered: number }>;
+
+function findLogNode(nodes: LogTreeNode[], log: LogOption): LogTreeNode | null {
+  for (const node of nodes) {
+    if (node.value.log === log) return node;
+    if (node.children) {
+      const child = node.children.find(c => c.value.log === log);
+      if (child) return child;
+    }
+  }
+  return null;
+}
 
 function normalizeAndTruncateToWidth(text: string, maxWidth: number): string {
   const normalized = text.replace(/\s+/g, ' ').trim();
@@ -105,8 +118,7 @@ function extractSnippet(text: string, query: string, contextChars: number): Snip
   return {
     before: (snippetStart > 0 ? '…' : '') + beforeRaw.replace(/\s+/g, ' ').trimStart(),
     match: matchText.trim(),
-    after: afterRaw.replace(/\s+/g, ' ').trimEnd() + (snippetEnd < text.length ? '…' : ''),
-  };
+    after: afterRaw.replace(/\s+/g, ' ').trimEnd() + (snippetEnd < text.length ? '…' : '')};
 }
 
 function buildLogLabel(
@@ -124,9 +136,9 @@ function buildLogLabel(
   const prefixWidth = isGroupHeader && forkCount > 0 ? PARENT_PREFIX_WIDTH : isChild ? CHILD_PREFIX_WIDTH : 0;
 
   const sessionCountSuffix =
-    isGroupHeader && forkCount > 0 ? ` (+${forkCount} other ${forkCount === 1 ? 'session' : 'sessions'})` : '';
+    isGroupHeader && forkCount > 0 ? t('logSelector.otherSessions', forkCount) : '';
 
-  const sidechainSuffix = log.isSidechain ? ' (sidechain)' : '';
+  const sidechainSuffix = log.isSidechain ? t('logSelector.sidechain') : '';
 
   const maxSummaryWidth = maxLabelWidth - prefixWidth - sidechainSuffix.length - sessionCountSuffix.length;
   const truncatedSummary = normalizeAndTruncateToWidth(getLogDisplayTitle(log), maxSummaryWidth);
@@ -153,8 +165,7 @@ export function LogSelector({
   initialSearchQuery,
   showAllProjects = false,
   onToggleAllProjects,
-  onAgenticSearch,
-}: LogSelectorProps): React.ReactNode {
+  onAgenticSearch}: LogSelectorProps): React.ReactNode {
   const terminalSize = useTerminalSize();
   const columns = forceWidth === undefined ? terminalSize.columns : forceWidth;
   const exitState = useExitOnCtrlCDWithKeybindings(onCancel);
@@ -176,10 +187,13 @@ export function LogSelector({
   const currentCwd = React.useMemo(() => getOriginalCwd(), []);
   const [renameValue, setRenameValue] = React.useState('');
   const [renameCursorOffset, setRenameCursorOffset] = React.useState(0);
+  const [deletedLogPaths, setDeletedLogPaths] = React.useState<Set<string>>(new Set());
   const [expandedGroupSessionIds, setExpandedGroupSessionIds] = React.useState<Set<string>>(new Set());
   const [focusedNode, setFocusedNode] = React.useState<LogTreeNode | null>(null);
   // Track focused index for scroll position display in title
   const [focusedIndex, setFocusedIndex] = React.useState(1);
+  // After deleting a session, focus the next one once the tree/list rebuilds
+  const pendingFocusLogRef = React.useRef<LogOption | null>(null);
   const [viewMode, setViewMode] = React.useState<'list' | 'preview' | 'rename' | 'search'>('list');
   const [previewLog, setPreviewLog] = React.useState<LogOption | null>(null);
   const prevFocusedIdRef = React.useRef<string | null>(null);
@@ -195,8 +209,7 @@ export function LogSelector({
   const {
     query: searchQuery,
     setQuery: setSearchQuery,
-    cursorOffset: searchCursorOffset,
-  } = useSearchInput({
+    cursorOffset: searchCursorOffset} = useSearchInput({
     isActive: viewMode === 'search' && agenticSearchState.status !== 'searching',
     onExit: () => {
       setViewMode('list');
@@ -207,8 +220,7 @@ export function LogSelector({
       logEvent('tengu_session_search_toggled', { enabled: false });
     },
     passthroughCtrlKeys: ['n'],
-    initialQuery: initialSearchQuery || '',
-  });
+    initialQuery: initialSearchQuery || ''});
 
   // Debounce transcript search for performance (title search is instant)
   const deferredSearchQuery = React.useDeferredValue(searchQuery);
@@ -248,27 +260,25 @@ export function LogSelector({
     const logsWithText = logs
       .map(log => ({
         log,
-        searchableText: searchableTextByLog.get(log) ?? '',
-      }))
+        searchableText: searchableTextByLog.get(log) ?? ''}))
       .filter(item => item.searchableText);
 
     return new Fuse(logsWithText, {
       keys: ['searchableText'],
       threshold: FUSE_THRESHOLD,
       ignoreLocation: true,
-      includeScore: true,
-    });
+      includeScore: true});
   }, [logs, searchableTextByLog, isDeepSearchEnabled]);
 
   // Compute unique tags from logs (before any filtering)
   const uniqueTags = React.useMemo(() => getUniqueTags(logs), [logs]);
   const hasTags = uniqueTags.length > 0;
-  const tagTabs = React.useMemo(() => (hasTags ? ['All', ...uniqueTags] : []), [hasTags, uniqueTags]);
+  const tagTabs = React.useMemo(() => (hasTags ? [ALL_TAG, ...uniqueTags] : []), [hasTags, uniqueTags]);
 
   // Clamp out-of-bounds index (e.g., after logs change) without an extra render
   const effectiveTagIndex = tagTabs.length > 0 && selectedTagIndex < tagTabs.length ? selectedTagIndex : 0;
   const selectedTab = tagTabs[effectiveTagIndex];
-  const tagFilter = selectedTab === 'All' ? undefined : selectedTab;
+  const tagFilter = selectedTab === ALL_TAG ? undefined : selectedTab;
 
   // Tag tabs are now a single line with horizontal scrolling
   const tagTabsLines = hasTags ? 1 : 0;
@@ -379,10 +389,8 @@ export function LogSelector({
           results: results.map(r => ({
             log: r.item.log,
             score: r.score,
-            searchableText: r.item.searchableText,
-          })),
-          query: debouncedDeepSearchQuery,
-        });
+            searchableText: r.item.searchableText})),
+          query: debouncedDeepSearchQuery});
         setIsSearching(false);
       },
       0,
@@ -428,12 +436,18 @@ export function LogSelector({
   }, [titleFilteredLogs, deepSearchResults, debouncedDeepSearchQuery]);
 
   // Use agentic search results when available and non-empty, otherwise use regular filtered logs
-  const displayedLogs = React.useMemo(() => {
+  const baseLogs = React.useMemo(() => {
     if (agenticSearchState.status === 'results' && agenticSearchState.results.length > 0) {
       return agenticSearchState.results;
     }
     return filteredLogs;
   }, [agenticSearchState, filteredLogs]);
+
+  // Filter out recently deleted logs (avoid full parent refresh flicker)
+  const displayedLogs = React.useMemo(() => {
+    if (deletedLogPaths.size === 0) return baseLogs;
+    return baseLogs.filter(log => !log.fullPath || !deletedLogPaths.has(log.fullPath));
+  }, [baseLogs, deletedLogPaths]);
 
   // Calculate available width for the summary text
   const maxLabelWidth = Math.max(30, columns - 4);
@@ -455,15 +469,13 @@ export function LogSelector({
       if (groupLogs.length === 1) {
         // Single log - no children
         const metadata = buildLogMetadata(latestLog, {
-          showProjectPath: showAllProjects,
-        });
+          showProjectPath: showAllProjects});
         return {
           id: `log:${sessionId}:0`,
           value: { log: latestLog, indexInFiltered },
           label: buildLogLabel(latestLog, maxLabelWidth),
           description: snippetStr ? `${metadata}\n  ${snippetStr}` : metadata,
-          dimDescription: true,
-        };
+          dimDescription: true};
       }
 
       // Multiple logs - parent with children
@@ -474,31 +486,26 @@ export function LogSelector({
         const childSnippetStr = childSnippet ? formatSnippet(childSnippet, highlightColor) : null;
         const childMetadata = buildLogMetadata(log, {
           isChild: true,
-          showProjectPath: showAllProjects,
-        });
+          showProjectPath: showAllProjects});
         return {
           id: `log:${sessionId}:${index + 1}`,
           value: { log, indexInFiltered: childIndexInFiltered },
           label: buildLogLabel(log, maxLabelWidth, { isChild: true }),
           description: childSnippetStr ? `${childMetadata}\n      ${childSnippetStr}` : childMetadata,
-          dimDescription: true,
-        };
+          dimDescription: true};
       });
 
       const parentMetadata = buildLogMetadata(latestLog, {
-        showProjectPath: showAllProjects,
-      });
+        showProjectPath: showAllProjects});
       return {
         id: `group:${sessionId}`,
         value: { log: latestLog, indexInFiltered },
         label: buildLogLabel(latestLog, maxLabelWidth, {
           isGroupHeader: true,
-          forkCount,
-        }),
+          forkCount}),
         description: snippetStr ? `${parentMetadata}\n  ${snippetStr}` : parentMetadata,
         dimDescription: true,
-        children,
-      };
+        children};
     });
   }, [isResumeWithRenameEnabled, displayedLogs, maxLabelWidth, showAllProjects, snippets, highlightColor]);
 
@@ -524,8 +531,7 @@ export function LogSelector({
           ? `${baseDescription}${projectSuffix}\n  ${snippetStr}`
           : baseDescription + projectSuffix,
         dimDescription: true,
-        value: index.toString(),
-      };
+        value: index.toString()};
     });
   }, [isResumeWithRenameEnabled, displayedLogs, highlightColor, maxLabelWidth, showAllProjects, snippets]);
 
@@ -546,10 +552,10 @@ export function LogSelector({
     const isChildNode = sessionLogs.indexOf(focusedLog) > 0;
 
     if (isChildNode) {
-      return '← to collapse';
+      return t('shortcutHint.leftToCollapse');
     }
 
-    return isExpanded ? '← to collapse' : '→ to expand';
+    return isExpanded ? t('shortcutHint.leftToCollapse') : t('shortcutHint.rightToExpand');
   };
 
   const handleRenameSubmit = React.useCallback(async () => {
@@ -570,6 +576,60 @@ export function LogSelector({
     setViewMode('list');
     setRenameValue('');
   }, [focusedLog, renameValue, onLogsChanged, isResumeWithRenameEnabled]);
+
+  const handleDeleteSession = React.useCallback(async () => {
+    if (!focusedLog || !focusedLog.fullPath) return;
+    const sessionId = getSessionIdFromLog(focusedLog);
+    if (!sessionId) return;
+
+    try {
+      await unlink(focusedLog.fullPath);
+      logEvent('tengu_session_deleted', {});
+
+      // Remember the item to focus next (falls back to the previous one)
+      const currentIndex = displayedLogs.indexOf(focusedLog);
+      if (currentIndex >= 0) {
+        const nextLog =
+          displayedLogs[currentIndex < displayedLogs.length - 1 ? currentIndex + 1 : currentIndex - 1];
+        if (nextLog) {
+          pendingFocusLogRef.current = nextLog;
+        }
+      }
+
+      // Filter out the deleted log locally to avoid a full parent refresh flicker
+      setDeletedLogPaths(prev => new Set([...prev, focusedLog.fullPath!]));
+    } catch {
+      // File may already be deleted, ignore
+    }
+  }, [focusedLog, displayedLogs]);
+
+  // After the tree/list rebuilds (deleted session removed from displayedLogs),
+  // move focus to the remembered next item.
+  React.useEffect(() => {
+    const target = pendingFocusLogRef.current;
+    if (!target) return;
+    pendingFocusLogRef.current = null;
+
+    if (isResumeWithRenameEnabled) {
+      const node = findLogNode(treeNodes, target);
+      if (node) {
+        setFocusedNode(node);
+        const index = displayedLogs.findIndex(log => getSessionIdFromLog(log) === getSessionIdFromLog(target));
+        if (index >= 0) {
+          setFocusedIndex(index + 1);
+        }
+      }
+    } else if (displayedLogs.length > 0) {
+      const flatIndex = displayedLogs.indexOf(target);
+      if (flatIndex >= 0) {
+        setFocusedNode({
+          id: flatIndex.toString(),
+          value: { log: target, indexInFiltered: flatIndex },
+          label: ''});
+        setFocusedIndex(flatIndex + 1);
+      }
+    }
+  }, [treeNodes, displayedLogs, isResumeWithRenameEnabled]);
 
   const exitSearchMode = React.useCallback(() => {
     setViewMode('list');
@@ -594,8 +654,7 @@ export function LogSelector({
 
     setAgenticSearchState({ status: 'searching' });
     logEvent('tengu_agentic_search_started', {
-      query_length: searchQuery.length,
-    });
+      query_length: searchQuery.length});
 
     try {
       const results = await onAgenticSearch(searchQuery, logs, abortController.signal);
@@ -606,8 +665,7 @@ export function LogSelector({
       setAgenticSearchState({ status: 'results', results, query: searchQuery });
       logEvent('tengu_agentic_search_completed', {
         query_length: searchQuery.length,
-        results_count: results.length,
-      });
+        results_count: results.length});
     } catch (error) {
       // Don't show error for aborted requests
       if (abortController.signal.aborted) {
@@ -615,11 +673,9 @@ export function LogSelector({
       }
       setAgenticSearchState({
         status: 'error',
-        message: error instanceof Error ? error.message : 'Search failed',
-      });
+        message: error instanceof Error ? error.message : t('logselector.searchFailed')});
       logEvent('tengu_agentic_search_error', {
-        query_length: searchQuery.length,
-      });
+        query_length: searchQuery.length});
     }
   }, [searchQuery, onAgenticSearch, isAgenticSearchEnabled, logs]);
 
@@ -658,8 +714,7 @@ export function LogSelector({
         setFocusedNode({
           id: '0',
           value: { log: firstLog, indexInFiltered: 0 },
-          label: '',
-        });
+          label: ''});
       }
     }
   }, [agenticSearchState.status, isResumeWithRenameEnabled, treeNodes, displayedLogs]);
@@ -675,8 +730,7 @@ export function LogSelector({
       setFocusedNode({
         id: index.toString(),
         value: { log, indexInFiltered: index },
-        label: '',
-      });
+        label: ''});
       setFocusedIndex(index + 1);
     },
     [displayedLogs],
@@ -704,8 +758,7 @@ export function LogSelector({
     },
     {
       context: 'Confirmation',
-      isActive: viewMode !== 'preview' && agenticSearchState.status === 'searching',
-    },
+      isActive: viewMode !== 'preview' && agenticSearchState.status === 'searching'},
   );
 
   // Escape in rename mode - exit rename mode
@@ -718,8 +771,7 @@ export function LogSelector({
     },
     {
       context: 'Settings',
-      isActive: viewMode === 'rename' && agenticSearchState.status !== 'searching',
-    },
+      isActive: viewMode === 'rename' && agenticSearchState.status !== 'searching'},
   );
 
   // Escape when agentic search option focused - clear and cancel
@@ -737,8 +789,7 @@ export function LogSelector({
         viewMode !== 'rename' &&
         viewMode !== 'search' &&
         isAgenticSearchOptionFocused &&
-        agenticSearchState.status !== 'searching',
-    },
+        agenticSearchState.status !== 'searching'},
   );
 
   // Handle non-escape input
@@ -800,9 +851,8 @@ export function LogSelector({
             const newIndex = (current + tagTabs.length + offset) % tagTabs.length;
             const newTab = tagTabs[newIndex];
             logEvent('tengu_session_tag_filter_changed', {
-              is_all: newTab === 'All',
-              tag_count: uniqueTags.length,
-            });
+              is_all: newTab === ALL_TAG,
+              tag_count: uniqueTags.length});
             return newIndex;
           });
           return;
@@ -814,20 +864,17 @@ export function LogSelector({
         if (lowerInput === 'a' && key.ctrl && onToggleAllProjects) {
           onToggleAllProjects();
           logEvent('tengu_session_all_projects_toggled', {
-            enabled: !showAllProjects,
-          });
+            enabled: !showAllProjects});
         } else if (lowerInput === 'b' && key.ctrl) {
           const newEnabled = !branchFilterEnabled;
           setBranchFilterEnabled(newEnabled);
           logEvent('tengu_session_branch_filter_toggled', {
-            enabled: newEnabled,
-          });
+            enabled: newEnabled});
         } else if (lowerInput === 'w' && key.ctrl && hasMultipleWorktrees) {
           const newValue = !showAllWorktrees;
           setShowAllWorktrees(newValue);
           logEvent('tengu_session_worktree_filter_toggled', {
-            enabled: newValue,
-          });
+            enabled: newValue});
         } else if (lowerInput === '/' && keyIsNotCtrlOrMeta) {
           setViewMode('search');
           logEvent('tengu_session_search_toggled', { enabled: true });
@@ -839,8 +886,9 @@ export function LogSelector({
           setPreviewLog(focusedLog);
           setViewMode('preview');
           logEvent('tengu_session_preview_opened', {
-            messageCount: focusedLog.messageCount,
-          });
+            messageCount: focusedLog.messageCount});
+        } else if (lowerInput === 'd' && key.shift && focusedLog) {
+          handleDeleteSession();
         } else if (focusedLog && keyIsNotCtrlOrMeta && input.length > 0 && !/^\s+$/.test(input)) {
           // Any printable character enters search mode and starts typing
           setViewMode('search');
@@ -857,7 +905,7 @@ export function LogSelector({
     filterIndicators.push(currentBranch);
   }
   if (hasMultipleWorktrees && !showAllWorktrees) {
-    filterIndicators.push('current worktree');
+    filterIndicators.push(t('logselector.currentWorktree'));
   }
 
   const showAdditionalFilterLine = filterIndicators.length > 0 && viewMode !== 'search';
@@ -907,7 +955,7 @@ export function LogSelector({
 
       {hasTags ? (
         <TagTabs
-          tabs={tagTabs}
+          tabs={tagTabs.map(tab => (tab === ALL_TAG ? t('tagTabs.all') : tab))}
           selectedIndex={effectiveTagIndex}
           availableWidth={columns}
           showAllProjects={showAllProjects}
@@ -915,7 +963,7 @@ export function LogSelector({
       ) : (
         <Box flexShrink={0}>
           <Text bold color="suggestion">
-            Resume Session
+            {t('logSelector.resumeSession')}
             {viewMode === 'list' && displayedLogs.length > visibleCount && (
               <Text dimColor>
                 {' '}
@@ -946,7 +994,7 @@ export function LogSelector({
       {agenticSearchState.status === 'searching' && (
         <Box paddingLeft={1} flexShrink={0}>
           <Spinner />
-          <Text> Searching…</Text>
+          <Text> {t('logSelector.searching')}</Text>
         </Box>
       )}
 
@@ -954,7 +1002,7 @@ export function LogSelector({
       {agenticSearchState.status === 'results' && agenticSearchState.results.length > 0 && (
         <Box paddingLeft={1} marginBottom={1} flexShrink={0}>
           <Text dimColor italic>
-            Claude found these results:
+            {t('logselector.claudeFoundResults')}
           </Text>
         </Box>
       )}
@@ -965,7 +1013,7 @@ export function LogSelector({
         filteredLogs.length === 0 && (
           <Box paddingLeft={1} marginBottom={1} flexShrink={0}>
             <Text dimColor italic>
-              No matching sessions found.
+              {t('logselector.noMatchingSessions')}
             </Text>
           </Box>
         )}
@@ -974,7 +1022,7 @@ export function LogSelector({
       {agenticSearchState.status === 'error' && filteredLogs.length === 0 && (
         <Box paddingLeft={1} marginBottom={1} flexShrink={0}>
           <Text dimColor italic>
-            No matching sessions found.
+            {t('logselector.noMatchingSessions')}
           </Text>
         </Box>
       )}
@@ -1002,13 +1050,13 @@ export function LogSelector({
       {/* Hide session list when agentic search is in progress */}
       {agenticSearchState.status === 'searching' ? null : viewMode === 'rename' && focusedLog ? (
         <Box paddingLeft={2} flexDirection="column">
-          <Text bold>Rename session:</Text>
+          <Text bold>{t('logselector.renameSession')}</Text>
           <Box paddingTop={1}>
             <TextInput
               value={renameValue}
               onChange={setRenameValue}
               onSubmit={handleRenameSubmit}
-              placeholder={getLogDisplayTitle(focusedLog!, 'Enter new session name')}
+              placeholder={getLogDisplayTitle(focusedLog!, t('logselector.enterNewSessionName'))}
               columns={columns}
               cursorOffset={renameCursorOffset}
               onChangeCursorOffset={setRenameCursorOffset}
@@ -1079,50 +1127,50 @@ export function LogSelector({
       )}
       <Box paddingLeft={2}>
         {exitState.pending ? (
-          <Text dimColor>Press {exitState.keyName} again to exit</Text>
+          <Text dimColor>{t('common.pressAgain', exitState.keyName)}</Text>
         ) : viewMode === 'rename' ? (
           <Text dimColor>
             <Byline>
-              <KeyboardShortcutHint shortcut="Enter" action="save" />
+              <KeyboardShortcutHint shortcut="Enter" action={t('logSelector.shortcutSave')} />
               <ConfigurableShortcutHint
                 action="confirm:no"
                 context="Confirmation"
                 fallback="Esc"
-                description="cancel"
+                description={t('desc.cancel')}
               />
             </Byline>
           </Text>
         ) : agenticSearchState.status === 'searching' ? (
           <Text dimColor>
             <Byline>
-              <Text>Searching with Claude…</Text>
+              <Text>{t('logSelector.searchingWithClaude')}</Text>
               <ConfigurableShortcutHint
                 action="confirm:no"
                 context="Confirmation"
                 fallback="Esc"
-                description="cancel"
+                description={t('desc.cancel')}
               />
             </Byline>
           </Text>
         ) : isAgenticSearchOptionFocused ? (
           <Text dimColor>
             <Byline>
-              <KeyboardShortcutHint shortcut="Enter" action="search" />
-              <KeyboardShortcutHint shortcut="↓" action="skip" />
+              <KeyboardShortcutHint shortcut="Enter" action={t('logSelector.shortcutSearch')} />
+              <KeyboardShortcutHint shortcut="↓" action={t('logSelector.shortcutSkip')} />
               <ConfigurableShortcutHint
                 action="confirm:no"
                 context="Confirmation"
                 fallback="Esc"
-                description="cancel"
+                description={t('desc.cancel')}
               />
             </Byline>
           </Text>
         ) : viewMode === 'search' ? (
           <Text dimColor>
             <Byline>
-              <Text>{isSearching && isDeepSearchEnabled ? 'Searching…' : 'Type to Search'}</Text>
-              <KeyboardShortcutHint shortcut="Enter" action="select" />
-              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="clear" />
+              <Text>{isSearching && isDeepSearchEnabled ? t('logSelector.searching') : t('logSelector.typeToSearch')}</Text>
+              <KeyboardShortcutHint shortcut="Enter" action={t('logSelector.shortcutSelect')} />
+              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.clear')} />
             </Byline>
           </Text>
         ) : (
@@ -1131,24 +1179,25 @@ export function LogSelector({
               {onToggleAllProjects && (
                 <KeyboardShortcutHint
                   shortcut="Ctrl+A"
-                  action={`show ${showAllProjects ? 'current dir' : 'all projects'}`}
+                  action={showAllProjects ? t('logSelector.shortcutShowCurrentDir') : t('logSelector.shortcutShowAllProjects')}
                 />
               )}
-              {currentBranch && <KeyboardShortcutHint shortcut="Ctrl+B" action="toggle branch" />}
+              {currentBranch && <KeyboardShortcutHint shortcut="Ctrl+B" action={t('logSelector.shortcutToggleBranch')} />}
               {hasMultipleWorktrees && (
                 <KeyboardShortcutHint
                   shortcut="Ctrl+W"
-                  action={`show ${showAllWorktrees ? 'current worktree' : 'all worktrees'}`}
+                  action={showAllWorktrees ? t('logSelector.shortcutShowCurrentWorktree') : t('logSelector.shortcutShowAllWorktrees')}
                 />
               )}
-              <KeyboardShortcutHint shortcut="Ctrl+V" action="preview" />
-              <KeyboardShortcutHint shortcut="Ctrl+R" action="rename" />
-              <Text>Type to search</Text>
+              <KeyboardShortcutHint shortcut="Ctrl+V" action={t('logSelector.shortcutPreview')} />
+              <KeyboardShortcutHint shortcut="Ctrl+R" action={t('logSelector.shortcutRename')} />
+              <KeyboardShortcutHint shortcut="Shift+D" action={t('logSelector.shortcutDelete')} />
+              <Text>{t('logSelector.typeToSearch')}</Text>
               <ConfigurableShortcutHint
                 action="confirm:no"
                 context="Confirmation"
                 fallback="Esc"
-                description="cancel"
+                description={t('desc.cancel')}
               />
               {getExpandCollapseHint() && <Text>{getExpandCollapseHint()}</Text>}
             </Byline>

@@ -113,8 +113,7 @@ export async function fetchAndStoreChangelog(): Promise<void> {
     const changelogLastFetched = Date.now()
     saveGlobalConfig(current => ({
       ...current,
-      changelogLastFetched,
-    }))
+      changelogLastFetched}))
   }
 }
 
@@ -295,13 +294,11 @@ export async function checkForReleaseNotes(
       const commits = changelog.trim().split('\n').filter(Boolean)
       return {
         hasReleaseNotes: commits.length > 0,
-        releaseNotes: commits,
-      }
+        releaseNotes: commits}
     }
     return {
       hasReleaseNotes: false,
-      releaseNotes: [],
-    }
+      releaseNotes: []}
   }
 
   // Ensure the in-memory cache is populated for subsequent sync reads
@@ -322,8 +319,7 @@ export async function checkForReleaseNotes(
 
   return {
     hasReleaseNotes,
-    releaseNotes,
-  }
+    releaseNotes}
 }
 
 /**
@@ -343,18 +339,15 @@ export function checkForReleaseNotesSync(
       const commits = changelog.trim().split('\n').filter(Boolean)
       return {
         hasReleaseNotes: commits.length > 0,
-        releaseNotes: commits,
-      }
+        releaseNotes: commits}
     }
     return {
       hasReleaseNotes: false,
-      releaseNotes: [],
-    }
+      releaseNotes: []}
   }
 
   const releaseNotes = getRecentReleaseNotes(currentVersion, lastSeenVersion)
   return {
     hasReleaseNotes: releaseNotes.length > 0,
-    releaseNotes,
-  }
+    releaseNotes}
 }

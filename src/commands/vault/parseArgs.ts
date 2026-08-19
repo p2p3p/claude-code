@@ -45,8 +45,7 @@ export function parseVaultArgs(args: string): VaultArgs {
     if (!rest) {
       return {
         action: 'invalid',
-        reason: 'create requires a vault name, e.g. create "My Work Vault"',
-      }
+        reason: 'create requires a vault name, e.g. create "My Work Vault"'}
     }
     return { action: 'create', name: rest }
   }
@@ -84,8 +83,7 @@ export function parseVaultArgs(args: string): VaultArgs {
       return {
         action: 'invalid',
         reason:
-          'add-credential requires vault_id, key, and value, e.g. add-credential vault_123 MY_API_KEY <value>',
-      }
+          'add-credential requires vault_id, key, and value, e.g. add-credential vault_123 MY_API_KEY <value>'}
     }
     const vaultId = parts[0]
     const key = parts[1]
@@ -93,15 +91,13 @@ export function parseVaultArgs(args: string): VaultArgs {
     if (!secret.trim()) {
       return {
         action: 'invalid',
-        reason: 'add-credential requires a non-empty credential value',
-      }
+        reason: 'add-credential requires a non-empty credential value'}
     }
     return {
       action: 'add-credential',
       vaultId,
       key,
-      secret: secret.trim(),
-    }
+      secret: secret.trim()}
   }
 
   // ── archive-credential ────────────────────────────────────────────────────
@@ -111,18 +107,15 @@ export function parseVaultArgs(args: string): VaultArgs {
       return {
         action: 'invalid',
         reason:
-          'archive-credential requires vault_id and credential_id, e.g. archive-credential vault_123 cred_456',
-      }
+          'archive-credential requires vault_id and credential_id, e.g. archive-credential vault_123 cred_456'}
     }
     return {
       action: 'archive-credential',
       vaultId: parts[0],
-      credentialId: parts[1],
-    }
+      credentialId: parts[1]}
   }
 
   return {
     action: 'invalid',
-    reason: `Unknown sub-command "${subCmd}". ${USAGE}`,
-  }
+    reason: `Unknown sub-command "${subCmd}". ${USAGE}`}
 }

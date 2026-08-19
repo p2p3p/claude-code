@@ -38,7 +38,7 @@ mock.module('src/services/analytics/index.js', () => ({
   logEvent: () => {},
 }))
 
-mock.module('src/services/api/claude.js', () => ({
+mock.module('src/services/api/anthropic/index.js', () => ({
   queryHaiku: async () => ({ message: { content: [] } }),
 }))
 

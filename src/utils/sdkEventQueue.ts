@@ -96,8 +96,7 @@ export function drainSdkEvents(): Array<
   return events.map(e => ({
     ...e,
     uuid: randomUUID(),
-    session_id: getSessionId(),
-  }))
+    session_id: getSessionId()}))
 }
 
 /**
@@ -129,6 +128,5 @@ export function emitTaskTerminatedSdk(
     status,
     output_file: opts?.outputFile ?? '',
     summary: opts?.summary ?? '',
-    usage: opts?.usage,
-  })
+    usage: opts?.usage})
 }

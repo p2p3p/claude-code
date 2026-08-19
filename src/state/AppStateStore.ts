@@ -6,14 +6,12 @@ import type { ChannelPermissionCallbacks } from '../services/mcp/channelPermissi
 import type { ElicitationRequestEvent } from '../services/mcp/elicitationHandler.js'
 import type {
   MCPServerConnection,
-  ServerResource,
-} from '../services/mcp/types.js'
+  ServerResource} from '../services/mcp/types.js'
 import { shouldEnablePromptSuggestion } from '../services/PromptSuggestion/promptSuggestion.js'
 import {
   getEmptyToolPermissionContext,
   type Tool,
-  type ToolPermissionContext,
-} from '../Tool.js'
+  type ToolPermissionContext} from '../Tool.js'
 import type { TaskState } from '../tasks/types.js'
 import type { AgentColorName } from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js'
 import type { AgentDefinitionsResult } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
@@ -24,8 +22,7 @@ import type { LoadedPlugin, PluginError } from '../types/plugin.js'
 import type { DeepImmutable } from '../types/utils.js'
 import {
   type AttributionState,
-  createEmptyAttributionState,
-} from '../utils/commitAttribution.js'
+  createEmptyAttributionState} from '../utils/commitAttribution.js'
 import type { EffortValue } from '../utils/effort.js'
 import type { FileHistoryState } from '../utils/fileHistory.js'
 import type { REPLHookContext } from '../utils/hooks/postSamplingHooks.js'
@@ -507,23 +504,20 @@ export function getDefaultAppState(): AppState {
     showRemoteCallout: false,
     toolPermissionContext: {
       ...getEmptyToolPermissionContext(),
-      mode: initialMode,
-    },
+      mode: initialMode},
     agent: undefined,
     agentDefinitions: { activeAgents: [], allAgents: [] },
     fileHistory: {
       snapshots: [],
       trackedFiles: new Set(),
-      snapshotSequence: 0,
-    },
+      snapshotSequence: 0},
     attribution: createEmptyAttributionState(),
     mcp: {
       clients: [],
       tools: [],
       commands: [],
       resources: {},
-      pluginReconnectKey: 0,
-    },
+      pluginReconnectKey: 0},
     plugins: {
       enabled: [],
       disabled: [],
@@ -531,29 +525,23 @@ export function getDefaultAppState(): AppState {
       errors: [],
       installationStatus: {
         marketplaces: [],
-        plugins: [],
-      },
-      needsRefresh: false,
-    },
+        plugins: []},
+      needsRefresh: false},
     todos: {},
     remoteAgentTaskSuggestions: [],
     notifications: {
       current: null,
-      queue: [],
-    },
+      queue: []},
     elicitation: {
-      queue: [],
-    },
+      queue: []},
     thinkingEnabled: shouldEnableThinkingByDefault(),
     promptSuggestionEnabled: shouldEnablePromptSuggestion(),
     sessionHooks: new Map(),
     inbox: {
-      messages: [],
-    },
+      messages: []},
     workerSandboxPermissions: {
       queue: [],
-      selectedIndex: 0,
-    },
+      selectedIndex: 0},
     pendingWorkerRequest: null,
     pendingSandboxRequest: null,
     promptSuggestion: {
@@ -561,17 +549,14 @@ export function getDefaultAppState(): AppState {
       promptId: null,
       shownAt: 0,
       acceptedAt: 0,
-      generationRequestId: null,
-    },
+      generationRequestId: null},
     speculation: IDLE_SPECULATION_STATE,
     speculationSessionTimeSavedMs: 0,
     skillImprovement: {
-      suggestion: null,
-    },
+      suggestion: null},
     authVersion: 0,
     initialMessage: null,
     effortValue: undefined,
     activeOverlays: new Set<string>(),
-    fastMode: false,
-  }
+    fastMode: false}
 }

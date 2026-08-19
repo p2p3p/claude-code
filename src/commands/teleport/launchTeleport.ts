@@ -1,16 +1,15 @@
 import type { UUID } from 'node:crypto'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import type { LocalJSXCommandCall } from '../../types/command.js'
 import type { LogOption } from '../../types/logs.js'
 import { getLastSessionLog } from '../../utils/sessionStorage.js'
 import {
   teleportResumeCodeSession,
-  validateGitState,
-} from '../../utils/teleport.js'
+  validateGitState} from '../../utils/teleport.js'
 import { fetchCodeSessionsFromSessionsAPI } from '../../utils/teleport/api.js'
+import { t } from '../../utils/i18n/index.js'
 
 // Minimum length for a UUID-like session ID (8 hex chars with dashes allowed)
 const SESSION_ID_MIN_LENGTH = 8
@@ -48,14 +47,14 @@ function formatSessionsPicker(
     const title = s.title.slice(0, 50).padEnd(50)
     const status = s.status.padEnd(14)
     const created = s.created_at.slice(0, 10)
-    return `  ${idx}. ${title}  ${status}  ${created}  id=${s.id}`
+    return t('teleportCmd.sessionPickerRow', idx, title, status, created, s.id)
   })
   return [
-    '## Available sessions (most recent first)',
+    t('teleportCmd.availableSessionsHeader'),
     '',
     ...rows,
     '',
-    'Run `/teleport <session-id>` to resume a session.',
+    t('teleportCmd.runTeleportHint'),
   ].join('\n')
 }
 
@@ -103,14 +102,12 @@ export const callTeleport: LocalJSXCommandCall = async (
     : rawArgs
 
   logEvent('tengu_teleport_started', {
-    has_session_id: meta(sessionId ? 'true' : 'false'),
-  })
+    has_session_id: meta(sessionId ? 'true' : 'false')})
 
   // ── No session ID: interactive picker ──
   if (!sessionId) {
     logEvent('tengu_teleport_source_decision', {
-      source: meta('sessions_api'),
-    })
+      source: meta('sessions_api')})
 
     let sessions: Array<{
       id: string
@@ -122,68 +119,47 @@ export const callTeleport: LocalJSXCommandCall = async (
       const raw = await fetchCodeSessionsFromSessionsAPI()
       sessions = raw.map(s => ({
         id: s.id,
-        title: s.title ?? 'Untitled',
-        status: (s.status ?? 'unknown') as string,
-        created_at: s.created_at ?? '',
-      }))
+        title: s.title ?? t('teleportCmd.untitled'),
+        status: (s.status ?? t('teleportCmd.unknown')) as string,
+        created_at: s.created_at ?? ''}))
     } catch (fetchErr: unknown) {
       const msg =
         fetchErr instanceof Error ? fetchErr.message : String(fetchErr)
 
       if (/forbidden|401|403/i.test(msg)) {
         logEvent('tengu_teleport_events_fetch_forbidden', {
-          error: meta(msg.slice(0, 200)),
-        })
-        onDone(
-          'Teleport: permission denied fetching sessions. Check your OAuth token (`claude auth status`).',
-          { display: 'system' },
-        )
+          error: meta(msg.slice(0, 200))})
+        onDone(t('teleportCmd.permissionDenied'), { display: 'system' })
         return null
       }
       if (/not found|404/i.test(msg)) {
         logEvent('tengu_teleport_events_fetch_not_found', {
-          error: meta(msg.slice(0, 200)),
-        })
-        onDone(
-          'Teleport: sessions endpoint returned 404. The Sessions API may not be available for your account.',
-          { display: 'system' },
-        )
+          error: meta(msg.slice(0, 200))})
+        onDone(t('teleportCmd.endpointNotFound'), { display: 'system' })
         return null
       }
       if (/token|unauthorized/i.test(msg)) {
         logEvent('tengu_teleport_error_bad_token', {
-          error: meta(msg.slice(0, 200)),
-        })
-        onDone(
-          `Teleport: authentication error — ${msg}. Try \`claude auth login\`.`,
-          { display: 'system' },
-        )
+          error: meta(msg.slice(0, 200))})
+        onDone(t('teleportCmd.authError', msg), { display: 'system' })
         return null
       }
 
       logEvent('tengu_teleport_events_fetch_fail', {
-        error: meta(msg.slice(0, 200)),
-      })
-      onDone(
-        `Teleport: failed to fetch sessions — ${msg}.\nUsage: /teleport SESSION_ID`,
-        { display: 'system' },
-      )
+        error: meta(msg.slice(0, 200))})
+      onDone(t('teleportCmd.fetchFailed', msg), { display: 'system' })
       return null
     }
 
     if (sessions.length === 0) {
       logEvent('tengu_teleport_null', {})
-      onDone(
-        'No active sessions found on claude.ai/code.\nStart a new session at https://claude.ai/code',
-        { display: 'system' },
-      )
+      onDone(t('teleportCmd.noActiveSessions'), { display: 'system' })
       return null
     }
 
     if (sessions.length >= PICKER_PAGE_CAP) {
       logEvent('tengu_teleport_page_cap', {
-        count: meta(String(sessions.length)),
-      })
+        count: meta(String(sessions.length))})
     }
 
     const pickerText = formatSessionsPicker(sessions)
@@ -203,15 +179,11 @@ export const callTeleport: LocalJSXCommandCall = async (
   // ── Basic format guard ──
   if (
     sessionId.length < SESSION_ID_MIN_LENGTH ||
-    !/^[0-9a-f-]{8,}$/i.test(sessionId)
+    !/^[0-9a-f-]{8}$/i.test(sessionId)
   ) {
     logEvent('tengu_teleport_error_bad_status', {
-      error: meta(`invalid_session_id: ${sessionId.slice(0, 40)}`),
-    })
-    onDone(
-      `Invalid session id "${sessionId}". Expected a UUID-like string (e.g. 12345678-abcd-...).`,
-      { display: 'system' },
-    )
+      error: meta(`invalid_session_id: ${sessionId.slice(0, 40)}`)})
+    onDone(t('teleportCmd.invalidSessionId', sessionId), { display: 'system' })
     return null
   }
 
@@ -230,9 +202,8 @@ export const callTeleport: LocalJSXCommandCall = async (
   } catch (gErr: unknown) {
     const msg = gErr instanceof Error ? gErr.message : String(gErr)
     logEvent('tengu_teleport_errors_detected', {
-      error: meta(msg.slice(0, 200)),
-    })
-    onDone(`Cannot teleport: ${msg}`, { display: 'system' })
+      error: meta(msg.slice(0, 200))})
+    onDone(t('teleportCmd.cannotTeleport', msg), { display: 'system' })
     return null
   }
 
@@ -246,8 +217,7 @@ export const callTeleport: LocalJSXCommandCall = async (
     })
 
     logEvent('tengu_teleport_resume_session', {
-      stage: meta(lastProgress),
-    })
+      stage: meta(lastProgress)})
 
     recordStep('ready')
 
@@ -255,15 +225,11 @@ export const callTeleport: LocalJSXCommandCall = async (
       logEvent('tengu_teleport_null', {})
       // resume callback unavailable (e.g. non-interactive context)
       if (isPrintMode) {
-        onDone(`Session ${sessionId} fetched successfully.`, {
-          display: 'system',
-        })
+        onDone(t('teleportCmd.sessionFetched', sessionId), {
+          display: 'system'})
         return null
       }
-      onDone(
-        `Teleport resume succeeded for ${sessionId}, but the REPL did not provide a resume callback.`,
-        { display: 'system' },
-      )
+      onDone(t('teleportCmd.resumeNoCallback', sessionId), { display: 'system' })
       return null
     }
 
@@ -272,12 +238,8 @@ export const callTeleport: LocalJSXCommandCall = async (
     const log: LogOption | null = await getLastSessionLog(sessionId as UUID)
     if (!log) {
       logEvent('tengu_teleport_errors_detected', {
-        error: meta('log_not_found_after_resume'),
-      })
-      onDone(
-        `Teleport fetched session ${sessionId} but the local log was not found. Try /resume ${sessionId} manually.`,
-        { display: 'system' },
-      )
+        error: meta('log_not_found_after_resume')})
+      onDone(t('teleportCmd.logNotFound', sessionId), { display: 'system' })
       return null
     }
 
@@ -306,9 +268,8 @@ export const callTeleport: LocalJSXCommandCall = async (
 
     logEvent(evt, { error: meta(msg.slice(0, 200)) })
     logEvent('tengu_teleport_first_message_error', {
-      error: meta(msg.slice(0, 200)),
-    })
-    onDone(`Teleport failed: ${msg}`, { display: 'system' })
+      error: meta(msg.slice(0, 200))})
+    onDone(t('teleportCmd.teleportFailed', msg), { display: 'system' })
     return null
   }
 }

@@ -10,8 +10,7 @@ import {
   getDefaultBranch,
   getGitDir,
   getIsGit,
-  gitExe,
-} from './git.js'
+  gitExe} from './git.js'
 
 export type GitDiffStats = {
   filesCount: number
@@ -73,8 +72,7 @@ export async function fetchGitDiff(): Promise<GitDiffResult | null> {
       return {
         stats: quickStats,
         perFileStats: new Map(),
-        hunks: new Map(),
-      }
+        hunks: new Map()}
     }
   }
 
@@ -173,8 +171,7 @@ export function parseGitNumstat(stdout: string): NumstatResult {
       perFileStats.set(filePath, {
         added: fileAdded,
         removed: fileRemoved,
-        isBinary,
-      })
+        isBinary})
     }
   }
 
@@ -182,10 +179,8 @@ export function parseGitNumstat(stdout: string): NumstatResult {
     stats: {
       filesCount: validFileCount,
       linesAdded: added,
-      linesRemoved: removed,
-    },
-    perFileStats,
-  }
+      linesRemoved: removed},
+    perFileStats}
 }
 
 /**
@@ -243,8 +238,7 @@ export function parseGitDiff(
           oldLines: parseInt(hunkMatch[2] ?? '1', 10),
           newStart: parseInt(hunkMatch[3] ?? '0', 10),
           newLines: parseInt(hunkMatch[4] ?? '1', 10),
-          lines: [],
-        }
+          lines: []}
         continue
       }
 
@@ -354,8 +348,7 @@ async function fetchUntrackedFiles(
       added: 0,
       removed: 0,
       isBinary: false,
-      isUntracked: true,
-    })
+      isUntracked: true})
   }
 
   return perFileStats
@@ -377,8 +370,7 @@ export function parseShortstat(stdout: string): GitDiffStats | null {
   return {
     filesCount: parseInt(match[1] ?? '0', 10),
     linesAdded: parseInt(match[2] ?? '0', 10),
-    linesRemoved: parseInt(match[3] ?? '0', 10),
-  }
+    linesRemoved: parseInt(match[3] ?? '0', 10)}
 }
 
 const SINGLE_FILE_DIFF_TIMEOUT_MS = 3000
@@ -430,8 +422,7 @@ export async function fetchSingleFileGitDiff(
     if (!stdout) return null
     return {
       ...parseRawDiffToToolUseDiff(gitPath, stdout, 'modified'),
-      repository,
-    }
+      repository}
   }
 
   // File is untracked - generate synthetic diff
@@ -476,8 +467,7 @@ function parseRawDiffToToolUseDiff(
     additions,
     deletions,
     changes: additions + deletions,
-    patch: patchLines.join('\n'),
-  }
+    patch: patchLines.join('\n')}
 }
 
 /**
@@ -524,8 +514,7 @@ async function generateSyntheticDiff(
       additions: lineCount,
       deletions: 0,
       changes: lineCount,
-      patch,
-    }
+      patch}
   } catch {
     return null
   }

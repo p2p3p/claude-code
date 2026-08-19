@@ -5,6 +5,7 @@ import { MessageResponse } from 'src/components/MessageResponse.js';
 import { BLACK_CIRCLE } from 'src/constants/figures.js';
 import { getModeColor } from 'src/utils/permissions/PermissionMode.js';
 import { z } from 'zod/v4';
+import { t } from 'src/utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import type { Tool } from 'src/Tool.js';
 import { buildTool, type ToolDef } from 'src/Tool.js';
@@ -155,7 +156,7 @@ function AskUserQuestionResultMessage({ answers }: { answers: Output['answers'] 
     <Box flexDirection="column" marginTop={1}>
       <Box flexDirection="row">
         <Text color={getModeColor('default')}>{BLACK_CIRCLE}&nbsp;</Text>
-        <Text>User answered Claude&apos;s questions:</Text>
+        <Text>{t('toolUI.askUserQuestion.answered')}</Text>
       </Box>
       <MessageResponse>
         <Box flexDirection="column">
@@ -240,7 +241,7 @@ export const AskUserQuestionTool: Tool<InputSchema, Output> = buildTool({
   async checkPermissions(input) {
     return {
       behavior: 'ask' as const,
-      message: 'Answer questions?',
+      message: t('toolUI.askUserQuestion.answerQuestions'),
       updatedInput: input,
     };
   },
@@ -257,7 +258,7 @@ export const AskUserQuestionTool: Tool<InputSchema, Output> = buildTool({
     return (
       <Box flexDirection="row" marginTop={1}>
         <Text color={getModeColor('default')}>{BLACK_CIRCLE}&nbsp;</Text>
-        <Text>User declined to answer questions</Text>
+        <Text>{t('toolUI.askUserQuestion.declined')}</Text>
       </Box>
     );
   },

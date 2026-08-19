@@ -8,21 +8,18 @@ import { toError } from '../../utils/errors.js'
 import {
   type CacheSafeParams,
   createCacheSafeParams,
-  runForkedAgent,
-} from '../../utils/forkedAgent.js'
+  runForkedAgent} from '../../utils/forkedAgent.js'
 import type { REPLHookContext } from '../../utils/hooks/postSamplingHooks.js'
 import { logError } from '../../utils/log.js'
 import {
   createUserMessage,
-  getLastAssistantMessage,
-} from '../../utils/messages.js'
+  getLastAssistantMessage} from '../../utils/messages.js'
 import { getInitialSettings } from '../../utils/settings/settings.js'
 import { isTeammate } from '../../utils/teammate.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../analytics/index.js'
+  logEvent} from '../analytics/index.js'
 import { currentLimits } from '../claudeAiLimits.js'
 import { isSpeculationEnabled, startSpeculation } from './speculation.js'
 
@@ -41,16 +38,14 @@ export function shouldEnablePromptSuggestion(): boolean {
     logEvent('tengu_prompt_suggestion_init', {
       enabled: false,
       source:
-        'env' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'env' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return false
   }
   if (isEnvTruthy(envOverride)) {
     logEvent('tengu_prompt_suggestion_init', {
       enabled: true,
       source:
-        'env' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'env' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return true
   }
 
@@ -59,8 +54,7 @@ export function shouldEnablePromptSuggestion(): boolean {
     logEvent('tengu_prompt_suggestion_init', {
       enabled: false,
       source:
-        'growthbook' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'growthbook' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return false
   }
 
@@ -69,8 +63,7 @@ export function shouldEnablePromptSuggestion(): boolean {
     logEvent('tengu_prompt_suggestion_init', {
       enabled: false,
       source:
-        'non_interactive' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'non_interactive' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return false
   }
 
@@ -79,8 +72,7 @@ export function shouldEnablePromptSuggestion(): boolean {
     logEvent('tengu_prompt_suggestion_init', {
       enabled: false,
       source:
-        'swarm_teammate' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'swarm_teammate' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return false
   }
 
@@ -88,8 +80,7 @@ export function shouldEnablePromptSuggestion(): boolean {
   logEvent('tengu_prompt_suggestion_init', {
     enabled,
     source:
-      'setting' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      'setting' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
   return enabled
 }
 
@@ -207,9 +198,7 @@ export async function executePromptSuggestion(
         promptId: result.promptId,
         shownAt: 0,
         acceptedAt: 0,
-        generationRequestId: result.generationRequestId,
-      },
-    }))
+        generationRequestId: result.generationRequestId}}))
 
     if (isSpeculationEnabled() && result.suggestion) {
       void startSpeculation(
@@ -290,8 +279,7 @@ Reply with ONLY the suggestion, no quotes or explanation.`
 
 const SUGGESTION_PROMPTS: Record<PromptVariant, string> = {
   user_intent: SUGGESTION_PROMPT,
-  stated_intent: SUGGESTION_PROMPT,
-}
+  stated_intent: SUGGESTION_PROMPT}
 
 export async function generateSuggestion(
   abortController: AbortController,
@@ -304,8 +292,7 @@ export async function generateSuggestion(
   const canUseTool = async () => ({
     behavior: 'deny' as const,
     message: 'No tools needed for suggestion',
-    decisionReason: { type: 'other' as const, reason: 'suggestion only' },
-  })
+    decisionReason: { type: 'other' as const, reason: 'suggestion only' }})
 
   // DO NOT override any API parameter that differs from the parent request.
   // The fork piggybacks on the main thread's prompt cache by sending identical
@@ -325,11 +312,9 @@ export async function generateSuggestion(
     querySource: 'prompt_suggestion',
     forkLabel: 'prompt_suggestion',
     overrides: {
-      abortController,
-    },
+      abortController},
     skipTranscript: true,
-    skipCacheWrite: true,
-  })
+    skipCacheWrite: true})
 
   // Check ALL messages - model may loop (try tool → denied → text in next message)
   // Also extract the requestId from the first assistant message for RL dataset joins
@@ -485,20 +470,16 @@ export function logSuggestionOutcome(
       promptId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     ...(generationRequestId && {
       generationRequestId:
-        generationRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    }),
+        generationRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
     ...(wasAccepted && {
-      timeToAcceptMs: timeMs,
-    }),
+      timeToAcceptMs: timeMs}),
     ...(!wasAccepted && { timeToIgnoreMs: timeMs }),
     similarity,
     ...(process.env.USER_TYPE === 'ant' && {
       suggestion:
         suggestion as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       userInput:
-        userInput as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    }),
-  })
+        userInput as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})})
 }
 
 export function logSuggestionSuppressed(
@@ -511,8 +492,7 @@ export function logSuggestionSuppressed(
   logEvent('tengu_prompt_suggestion', {
     ...(source && {
       source:
-        source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    }),
+        source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
     outcome:
       'suppressed' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     reason:
@@ -522,7 +502,5 @@ export function logSuggestionSuppressed(
     ...(process.env.USER_TYPE === 'ant' &&
       suggestion && {
         suggestion:
-          suggestion as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      }),
-  })
+          suggestion as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})})
 }

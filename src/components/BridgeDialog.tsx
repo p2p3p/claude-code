@@ -1,4 +1,5 @@
 import { basename } from 'path';
+import { t } from '../utils/i18n/index.js'
 import { toString as qrToString } from 'qrcode';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
@@ -7,8 +8,7 @@ import {
   buildActiveFooterText,
   buildIdleFooterText,
   FAILED_FOOTER_TEXT,
-  getBridgeStatus,
-} from '../bridge/bridgeStatusUtil.js';
+  getBridgeStatus} from '../bridge/bridgeStatusUtil.js';
 import { BRIDGE_FAILED_INDICATOR, BRIDGE_READY_INDICATOR } from '../constants/figures.js';
 import { useRegisterOverlay } from '../context/overlayContext.js';
 // eslint-disable-next-line custom-rules/prefer-use-keybindings -- raw 'd' key for disconnect, not a configurable keybinding action
@@ -63,8 +63,7 @@ export function BridgeDialog({ onDone }: Props): React.ReactNode {
     qrToString(displayUrl, {
       type: 'terminal',
       errorCorrectionLevel: 'L',
-      small: true,
-    })
+      small: true})
       .then(setQrText)
       .catch(() => setQrText(''));
   }, [showQR, displayUrl]);
@@ -74,8 +73,7 @@ export function BridgeDialog({ onDone }: Props): React.ReactNode {
       'confirm:yes': onDone,
       'confirm:toggle': () => {
         setShowQR(prev => !prev);
-      },
-    },
+      }},
     { context: 'Confirmation' },
   );
 
@@ -103,8 +101,7 @@ export function BridgeDialog({ onDone }: Props): React.ReactNode {
     error,
     connected,
     sessionActive,
-    reconnecting,
-  });
+    reconnecting});
   const indicator = error ? BRIDGE_FAILED_INDICATOR : BRIDGE_READY_INDICATOR;
   const qrLines = qrText ? qrText.split('\n').filter(l => l.length > 0) : [];
 
@@ -124,7 +121,7 @@ export function BridgeDialog({ onDone }: Props): React.ReactNode {
       : undefined;
 
   return (
-    <Dialog title="Remote Control" onCancel={onDone} hideInputGuide>
+    <Dialog title={t('bridgedialog.remoteControl')} onCancel={onDone} hideInputGuide>
       <Box flexDirection="column" gap={1}>
         <Box flexDirection="column">
           <Text>
@@ -145,7 +142,7 @@ export function BridgeDialog({ onDone }: Props): React.ReactNode {
           </Box>
         )}
         {footerText && <Text dimColor>{footerText}</Text>}
-        <Text dimColor>d to disconnect · space for QR code · Enter/Esc to close</Text>
+        <Text dimColor>{t('bridgeDialog.disconnectHint')}</Text>
       </Box>
     </Dialog>
   );

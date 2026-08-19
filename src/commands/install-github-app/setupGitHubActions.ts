@@ -1,18 +1,19 @@
+import { t } from 'src/utils/i18n/index.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { saveGlobalConfig } from 'src/utils/config.js'
 import {
   CODE_REVIEW_PLUGIN_WORKFLOW_CONTENT,
   PR_BODY,
   PR_TITLE,
-  WORKFLOW_CONTENT,
-} from '../../constants/github-app.js'
+  WORKFLOW_CONTENT} from '../../constants/github-app.js'
 import { openBrowser } from '../../utils/browser.js'
 import { execFileNoThrow } from '../../utils/execFileNoThrow.js'
 import { logError } from '../../utils/log.js'
 import type { Workflow } from './types.js'
+
+const FAILED_TO = t('setupGithubActions.failedTo')
 
 async function createWorkflowFile(
   repoName: string,
@@ -83,28 +84,18 @@ async function createWorkflowFile(
         reason:
           'failed_to_create_workflow_file' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         exit_code: createFileResult.code,
-        ...context,
-      })
-      throw new Error(
-        `Failed to create workflow file ${workflowPath}: A Claude workflow file already exists in this repository. Please remove it first or update it manually.`,
-      )
+        ...context})
+      throw new Error(t('setupGithubActions.workflowExists', workflowPath))
     }
 
     logEvent('tengu_setup_github_actions_failed', {
       reason:
         'failed_to_create_workflow_file' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       exit_code: createFileResult.code,
-      ...context,
-    })
-
-    const helpText =
-      '\n\nNeed help? Common issues:\n' +
-      '· Permission denied → Run: gh auth refresh -h github.com -s repo,workflow\n' +
-      '· Not authorized → Ensure you have admin access to the repository\n' +
-      '· For manual setup → Visit: https://github.com/anthropics/claude-code-action'
+      ...context})
 
     throw new Error(
-      `Failed to create workflow file ${workflowPath}: ${createFileResult.stderr}${helpText}`,
+      t('setupGithubActions.workflowFailed', workflowPath, createFileResult.stderr) + t('setupGithubActions.helpText'),
     )
   }
 }
@@ -131,8 +122,7 @@ export async function setupGitHubActions(
       selected_claude_workflow: selectedWorkflows.includes('claude'),
       selected_claude_review_workflow:
         selectedWorkflows.includes('claude-review'),
-      ...context,
-    })
+      ...context})
 
     // Check if repository exists
     const repoCheckResult = await execFileNoThrow('gh', [
@@ -146,11 +136,8 @@ export async function setupGitHubActions(
         reason:
           'repo_not_found' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         exit_code: repoCheckResult.code,
-        ...context,
-      })
-      throw new Error(
-        `Failed to access repository ${repoName}: ${repoCheckResult.stderr}`,
-      )
+        ...context})
+      throw new Error(t('setupGithubActions.repoAccess', repoName, repoCheckResult.stderr))
     }
 
     // Get default branch
@@ -165,11 +152,8 @@ export async function setupGitHubActions(
         reason:
           'failed_to_get_default_branch' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         exit_code: defaultBranchResult.code,
-        ...context,
-      })
-      throw new Error(
-        `Failed to get default branch: ${defaultBranchResult.stderr}`,
-      )
+        ...context})
+      throw new Error(t('setupGithubActions.defaultBranch', defaultBranchResult.stderr))
     }
     const defaultBranch = defaultBranchResult.stdout.trim()
 
@@ -185,9 +169,8 @@ export async function setupGitHubActions(
         reason:
           'failed_to_get_branch_sha' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         exit_code: shaResult.code,
-        ...context,
-      })
-      throw new Error(`Failed to get branch SHA: ${shaResult.stderr}`)
+        ...context})
+      throw new Error(t('setupGithubActions.branchSha', shaResult.stderr))
     }
     const sha = shaResult.stdout.trim()
 
@@ -212,9 +195,8 @@ export async function setupGitHubActions(
           reason:
             'failed_to_create_branch' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           exit_code: createBranchResult.code,
-          ...context,
-        })
-        throw new Error(`Failed to create branch: ${createBranchResult.stderr}`)
+          ...context})
+        throw new Error(t('setupGithubActions.createBranch', createBranchResult.stderr))
       }
 
       updateProgress()
@@ -225,16 +207,14 @@ export async function setupGitHubActions(
         workflows.push({
           path: '.github/workflows/claude.yml',
           content: WORKFLOW_CONTENT,
-          message: 'Claude PR Assistant workflow',
-        })
+          message: 'Claude PR Assistant workflow'})
       }
 
       if (selectedWorkflows.includes('claude-review')) {
         workflows.push({
           path: '.github/workflows/claude-code-review.yml',
           content: CODE_REVIEW_PLUGIN_WORKFLOW_CONTENT,
-          message: 'Claude Code Review workflow',
-        })
+          message: 'Claude Code Review workflow'})
       }
 
       for (const workflow of workflows) {
@@ -267,17 +247,10 @@ export async function setupGitHubActions(
           reason:
             'failed_to_set_api_key_secret' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           exit_code: setSecretResult.code,
-          ...context,
-        })
-
-        const helpText =
-          '\n\nNeed help? Common issues:\n' +
-          '· Permission denied → Run: gh auth refresh -h github.com -s repo\n' +
-          '· Not authorized → Ensure you have admin access to the repository\n' +
-          '· For manual setup → Visit: https://github.com/anthropics/claude-code-action'
+          ...context})
 
         throw new Error(
-          `Failed to set API key secret: ${setSecretResult.stderr || 'Unknown error'}${helpText}`,
+          t('setupGithubActions.setSecret', setSecretResult.stderr || t('setupGithubActions.unknownError')) + t('setupGithubActions.helpTextSecret'),
         )
       }
     }
@@ -299,23 +272,20 @@ export async function setupGitHubActions(
       selected_claude_workflow: selectedWorkflows.includes('claude'),
       selected_claude_review_workflow:
         selectedWorkflows.includes('claude-review'),
-      ...context,
-    })
+      ...context})
     saveGlobalConfig(current => ({
       ...current,
-      githubActionSetupCount: (current.githubActionSetupCount ?? 0) + 1,
-    }))
+      githubActionSetupCount: (current.githubActionSetupCount ?? 0) + 1}))
   } catch (error) {
     if (
       !error ||
       !(error instanceof Error) ||
-      !error.message.includes('Failed to')
+      !error.message.startsWith(FAILED_TO)
     ) {
       logEvent('tengu_setup_github_actions_failed', {
         reason:
           'unexpected_error' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        ...context,
-      })
+        ...context})
     }
     if (error instanceof Error) {
       logError(error)

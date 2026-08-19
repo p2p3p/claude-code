@@ -1,8 +1,7 @@
 import { SETTING_SOURCES, type SettingSource } from '../settings/constants.js'
 import {
   getSettings_DEPRECATED,
-  getSettingsForSource,
-} from '../settings/settings.js'
+  getSettingsForSource} from '../settings/settings.js'
 import { type EnvironmentResource, fetchEnvironments } from './environments.js'
 
 export type EnvironmentSelectionInfo = {
@@ -29,8 +28,7 @@ export async function getEnvironmentSelectionInfo(): Promise<EnvironmentSelectio
     return {
       availableEnvironments: [],
       selectedEnvironment: null,
-      selectedEnvironmentSource: null,
-    }
+      selectedEnvironmentSource: null}
   }
 
   // Get the merged settings to see what would actually be used
@@ -72,6 +70,5 @@ export async function getEnvironmentSelectionInfo(): Promise<EnvironmentSelectio
   return {
     availableEnvironments: environments,
     selectedEnvironment,
-    selectedEnvironmentSource,
-  }
+    selectedEnvironmentSource}
 }

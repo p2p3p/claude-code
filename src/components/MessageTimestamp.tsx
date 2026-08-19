@@ -23,8 +23,7 @@ export function MessageTimestamp({ message, isTranscriptMode }: Props): React.Re
   const formattedTimestamp = new Date(message.timestamp as string | number | Date).toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
-    hour12: true,
-  });
+    hour12: true});
 
   return (
     <Box minWidth={stringWidth(formattedTimestamp)}>

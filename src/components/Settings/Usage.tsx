@@ -1,18 +1,109 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { extraUsage as extraUsageCommand } from 'src/commands/extra-usage/index.js';
-import { formatCost } from 'src/cost-tracker.js';
+import {
+  formatCost,
+  getModelUsage,
+  getTotalAPIDuration,
+  getTotalCacheCreationInputTokens,
+  getTotalCacheReadInputTokens,
+  getTotalCost,
+  getTotalDuration,
+  getTotalInputTokens,
+  getTotalLinesAdded,
+  getTotalLinesRemoved,
+  getTotalOutputTokens,
+  getTotalWebSearchRequests,
+  hasUnknownModelCost} from 'src/cost-tracker.js';
 import { getSubscriptionType } from 'src/utils/auth.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { Box, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import { type ExtraUsage, fetchUtilization, type RateLimit, type Utilization } from '../../services/api/usage.js';
-import { formatResetText } from '../../utils/format.js';
+import { formatDuration, formatNumber, formatResetText } from '../../utils/format.js';
 import { logError } from '../../utils/log.js';
+import { getCanonicalName } from '../../utils/model/model.js';
 import { jsonStringify } from '../../utils/slowOperations.js';
+import { t } from '../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Byline, ProgressBar } from '@anthropic/ink';
 import { isEligibleForOverageCreditGrant, OverageCreditUpsell } from '../LogoV2/OverageCreditUpsell.js';
+
+/**
+ * Session-scoped stats — cost, token counts, durations, code changes and
+ * per-model usage. These are tracked locally for every session (API key,
+ * alternate providers, etc.), so unlike the subscription rate-limit section
+ * below they are available to all users.
+ */
+function SessionStats(): React.ReactNode {
+  const added = getTotalLinesAdded();
+  const removed = getTotalLinesRemoved();
+
+  const lines: string[] = [
+    t('costTracker.totalCost', formatCost(getTotalCost())),
+    t('costTracker.totalApiDuration', formatDuration(getTotalAPIDuration())),
+    t('costTracker.totalWallDuration', formatDuration(getTotalDuration())),
+    t(
+      'costTracker.totalCodeChanges',
+      formatNumber(added),
+      added === 1 ? t('costTracker.line') : t('costTracker.lines'),
+      formatNumber(removed),
+      removed === 1 ? t('costTracker.line') : t('costTracker.lines'),
+    ),
+    t(
+      'settingsUsage.sessionTokens',
+      formatNumber(getTotalInputTokens()),
+      formatNumber(getTotalOutputTokens()),
+      formatNumber(getTotalCacheReadInputTokens()),
+      formatNumber(getTotalCacheCreationInputTokens()),
+    ),
+  ];
+
+  const webSearches = getTotalWebSearchRequests();
+  if (webSearches > 0) {
+    lines.push(t('settingsUsage.sessionWebSearch', formatNumber(webSearches)));
+  }
+
+  if (hasUnknownModelCost()) {
+    lines.push(t('costTracker.unknownCostWarning'));
+  }
+
+  const modelUsage = getModelUsage();
+  const usageKeys = Object.keys(modelUsage);
+
+  return (
+    <Box flexDirection="column" gap={1}>
+      <Text bold>{t('settingsUsage.sessionStats')}</Text>
+      <Box flexDirection="column">
+        {lines.map((line, i) => (
+          <Text key={i}>{line}</Text>
+        ))}
+      </Box>
+      {usageKeys.length > 0 && (
+        <Box flexDirection="column">
+          <Text>{t('costTracker.usageByModel')}</Text>
+          <Box flexDirection="column">
+            {usageKeys.map(model => {
+              const usage = modelUsage[model];
+              const shortName = getCanonicalName(model);
+              const parts = [
+                `${formatNumber(usage.inputTokens)} ${t('costTracker.input')}`,
+                `${formatNumber(usage.outputTokens)} ${t('costTracker.output')}`,
+                `${formatNumber(usage.cacheReadInputTokens)} ${t('costTracker.cacheRead')}`,
+                `${formatNumber(usage.cacheCreationInputTokens)} ${t('costTracker.cacheWrite')}`,
+              ];
+              if (usage.webSearchRequests > 0) {
+                parts.push(`${formatNumber(usage.webSearchRequests)} ${t('costTracker.webSearch')}`);
+              }
+              parts.push(`(${formatCost(usage.costUSD)})`);
+              return <Text key={model}>{`  ${shortName}: ${parts.join(', ')}`}</Text>;
+            })}
+          </Box>
+        </Box>
+      )}
+    </Box>
+  );
+}
 
 type LimitBarProps = {
   title: string;
@@ -105,7 +196,7 @@ export function Usage(): React.ReactNode {
       logError(err as Error);
       const axiosError = err as { response?: { data?: unknown } };
       const responseBody = axiosError.response?.data ? jsonStringify(axiosError.response.data) : undefined;
-      setError(responseBody ? `Failed to load usage data: ${responseBody}` : 'Failed to load usage data');
+      setError(t('settingsUsage.failedToLoad', responseBody));
     } finally {
       setIsLoading(false);
     }
@@ -126,11 +217,11 @@ export function Usage(): React.ReactNode {
   if (error) {
     return (
       <Box flexDirection="column" gap={1}>
-        <Text color="error">Error: {error}</Text>
+        <Text color="error">{t('settingsUsage.error')}: {error}</Text>
         <Text dimColor>
           <Byline>
-            <ConfigurableShortcutHint action="settings:retry" context="Settings" fallback="r" description="retry" />
-            <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="cancel" />
+            <ConfigurableShortcutHint action="settings:retry" context="Settings" fallback="r" description={t('desc.retry')} />
+            <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.cancel')} />
           </Byline>
         </Text>
       </Box>
@@ -140,9 +231,9 @@ export function Usage(): React.ReactNode {
   if (!utilization) {
     return (
       <Box flexDirection="column" gap={1}>
-        <Text dimColor>Loading usage data…</Text>
+        <Text dimColor>{t('settingsUsage.loading')}</Text>
         <Text dimColor>
-          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="cancel" />
+          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.cancel')} />
         </Text>
       </Box>
     );
@@ -157,26 +248,25 @@ export function Usage(): React.ReactNode {
 
   const limits = [
     {
-      title: 'Current session',
-      limit: utilization.five_hour,
-    },
+      title: t('settingsUsage.currentSession'),
+      limit: utilization.five_hour},
     {
-      title: 'Current week (all models)',
-      limit: utilization.seven_day,
-    },
+      title: t('settingsUsage.currentWeekAll'),
+      limit: utilization.seven_day},
     ...(showSonnetBar
       ? [
           {
-            title: 'Current week (Sonnet only)',
-            limit: utilization.seven_day_sonnet,
-          },
+            title: t('settingsUsage.currentWeekSonnet'),
+            limit: utilization.seven_day_sonnet},
         ]
       : []),
   ];
 
   return (
     <Box flexDirection="column" gap={1} width="100%">
-      {limits.some(({ limit }) => limit) || <Text dimColor>/usage is only available for subscription plans.</Text>}
+      <SessionStats />
+
+      {limits.some(({ limit }) => limit) || <Text dimColor>{t('settingsUsage.onlyAvailableForSubscriptions')}</Text>}
 
       {limits.map(
         ({ title, limit }) => limit && <LimitBar key={title} title={title} limit={limit} maxWidth={maxWidth} />,
@@ -187,7 +277,7 @@ export function Usage(): React.ReactNode {
       {isEligibleForOverageCreditGrant() && <OverageCreditUpsell maxWidth={maxWidth} />}
 
       <Text dimColor>
-        <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="cancel" />
+        <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.cancel')} />
       </Text>
     </Box>
   );
@@ -198,7 +288,7 @@ type ExtraUsageSectionProps = {
   maxWidth: number;
 };
 
-const EXTRA_USAGE_SECTION_TITLE = 'Extra usage';
+const EXTRA_USAGE_SECTION_TITLE = t('settingsUsage2.extraUsageTitle');
 
 function ExtraUsageSection({ extraUsage, maxWidth }: ExtraUsageSectionProps): React.ReactNode {
   const subscriptionType = getSubscriptionType();
@@ -213,7 +303,7 @@ function ExtraUsageSection({ extraUsage, maxWidth }: ExtraUsageSectionProps): Re
       return (
         <Box flexDirection="column">
           <Text bold>{EXTRA_USAGE_SECTION_TITLE}</Text>
-          <Text dimColor>Extra usage not enabled · /extra-usage to enable</Text>
+          <Text dimColor>{t('settingsUsage2.extraUsageNotEnabled')}</Text>
         </Box>
       );
     }
@@ -225,7 +315,7 @@ function ExtraUsageSection({ extraUsage, maxWidth }: ExtraUsageSectionProps): Re
     return (
       <Box flexDirection="column">
         <Text bold>{EXTRA_USAGE_SECTION_TITLE}</Text>
-        <Text dimColor>Unlimited</Text>
+        <Text dimColor>{t('settingsUsage.unlimited')}</Text>
       </Box>
     );
   }
@@ -245,8 +335,7 @@ function ExtraUsageSection({ extraUsage, maxWidth }: ExtraUsageSectionProps): Re
       limit={{
         utilization: extraUsage.utilization,
         // Not applicable for enterprises, but for now we don't render this for them
-        resets_at: oneMonthReset.toISOString(),
-      }}
+        resets_at: oneMonthReset.toISOString()}}
       showTimeInReset={false}
       extraSubtext={`${formattedUsedCredits} / ${formattedMonthlyLimit} spent`}
       maxWidth={maxWidth}

@@ -3,8 +3,7 @@ import { getOauthConfig } from '../../constants/oauth.js'
 import {
   getClaudeAIOAuthTokens,
   hasProfileScope,
-  isClaudeAISubscriber,
-} from '../../utils/auth.js'
+  isClaudeAISubscriber} from '../../utils/auth.js'
 import { getAuthHeaders } from '../../utils/http.js'
 import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
 import { isOAuthTokenExpired } from '../oauth/client.js'
@@ -49,8 +48,7 @@ export async function fetchUtilization(): Promise<Utilization | null> {
   const headers = {
     'Content-Type': 'application/json',
     'User-Agent': getClaudeCodeUserAgent(),
-    ...authResult.headers,
-  }
+    ...authResult.headers}
 
   const url = `${getOauthConfig().BASE_API_URL}/api/oauth/usage`
 

@@ -1,6 +1,7 @@
 import { feature } from 'bun:bundle';
 import chalk from 'chalk';
 import React from 'react';
+import { t } from '../../utils/i18n/index.js';
 import { Ansi, Box, Text } from '@anthropic/ink';
 import ThemedText from '../design-system/ThemedText.js';
 import { useAppState } from '../../state/AppState.js';
@@ -30,43 +31,35 @@ function stringsForDecisionReason(
   if ((feature('BASH_CLASSIFIER') || feature('TRANSCRIPT_CLASSIFIER')) && reason.type === 'classifier') {
     if (reason.classifier === 'auto-mode') {
       return {
-        reasonString: `Auto mode classifier requires confirmation for this ${toolType}.\n${reason.reason}`,
+        reasonString: t('permissionRuleExplanation.autoModeClassifierRequiresConfirmation', toolType, reason.reason),
         configString: undefined,
-        themeColor: 'error',
-      };
+        themeColor: 'error'};
     }
     return {
-      reasonString: `Classifier ${chalk.bold(reason.classifier)} requires confirmation for this ${toolType}.\n${reason.reason}`,
-      configString: undefined,
-    };
+      reasonString: t('permissionRuleExplanation.classifierRequiresConfirmation', chalk.bold(reason.classifier), toolType, reason.reason),
+      configString: undefined};
   }
   switch (reason.type) {
     case 'rule':
       return {
-        reasonString: `Permission rule ${chalk.bold(
-          permissionRuleValueToString(reason.rule.ruleValue),
-        )} requires confirmation for this ${toolType}.`,
-        configString: reason.rule.source === 'policySettings' ? undefined : '/permissions to update rules',
-      };
+        reasonString: t('permissionRuleExplanation.permissionRuleRequiresConfirmation', chalk.bold(permissionRuleValueToString(reason.rule.ruleValue)), toolType),
+        configString: reason.rule.source === 'policySettings' ? undefined : t('permissionRuleExplanation.permissionsToUpdateRules')};
     case 'hook': {
       const hookReasonString = reason.reason ? `:\n${reason.reason}` : '.';
       const sourceLabel = reason.hookSource ? ` ${chalk.dim(`[${reason.hookSource}]`)}` : '';
       return {
-        reasonString: `Hook ${chalk.bold(reason.hookName)} requires confirmation for this ${toolType}${hookReasonString}${sourceLabel}`,
-        configString: '/hooks to update',
-      };
+        reasonString: t('permissionRuleExplanation.hookRequiresConfirmation', chalk.bold(reason.hookName), toolType, `${hookReasonString}${sourceLabel}`),
+        configString: t('permissionRuleExplanation.hooksToUpdate')};
     }
     case 'safetyCheck':
     case 'other':
       return {
         reasonString: reason.reason,
-        configString: undefined,
-      };
+        configString: undefined};
     case 'workingDir':
       return {
         reasonString: reason.reason,
-        configString: '/permissions to update rules',
-      };
+        configString: t('permissionRuleExplanation.permissionsToUpdateRules')};
     default:
       return null;
   }
@@ -74,8 +67,7 @@ function stringsForDecisionReason(
 
 export function PermissionRuleExplanation({
   permissionResult,
-  toolType,
-}: PermissionRuleExplanationProps): React.ReactNode {
+  toolType}: PermissionRuleExplanationProps): React.ReactNode {
   const permissionMode = useAppState(s => s.toolPermissionContext.mode);
   const strings = stringsForDecisionReason(permissionResult?.decisionReason, toolType);
   if (!strings) {

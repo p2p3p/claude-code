@@ -2,8 +2,7 @@ import { getSkillToolCommands } from '../../commands.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import { getCharBudget } from '@claude-code-best/builtin-tools/tools/SkillTool/prompt.js'
 
 /**
@@ -32,8 +31,6 @@ export async function logSkillsLoaded(
       skill_budget: skillBudget,
       ...(skill.kind && {
         skill_kind:
-          skill.kind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      }),
-    })
+          skill.kind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})})
   }
 }

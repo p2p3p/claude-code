@@ -4,8 +4,7 @@ import { setPromptId } from 'src/bootstrap/state.js'
 import type {
   AttachmentMessage,
   SystemMessage,
-  UserMessage,
-} from 'src/types/message.js'
+  UserMessage} from 'src/types/message.js'
 import { logEvent } from '../../services/analytics/index.js'
 import type { PermissionMode } from '../../types/permissions.js'
 import { createUserMessage } from '../messages.js'
@@ -13,8 +12,7 @@ import { logOTelEvent, redactIfDisabled } from '../telemetry/events.js'
 import { startInteractionSpan } from '../telemetry/sessionTracing.js'
 import {
   matchesKeepGoingKeyword,
-  matchesNegativeKeyword,
-} from '../userPromptKeywords.js'
+  matchesNegativeKeyword} from '../userPromptKeywords.js'
 
 export function processTextPrompt(
   input: string | Array<ContentBlockParam>,
@@ -52,16 +50,14 @@ export function processTextPrompt(
     void logOTelEvent('user_prompt', {
       prompt_length: String(otelPromptText.length),
       prompt: redactIfDisabled(otelPromptText),
-      'prompt.id': promptId,
-    })
+      'prompt.id': promptId})
   }
 
   const isNegative = matchesNegativeKeyword(userPromptText)
   const isKeepGoing = matchesKeepGoingKeyword(userPromptText)
   logEvent('tengu_input_prompt', {
     is_negative: isNegative,
-    is_keep_going: isKeepGoing,
-  })
+    is_keep_going: isKeepGoing})
 
   // If we have pasted images, create a message with image content
   if (imageContentBlocks.length > 0) {
@@ -77,24 +73,20 @@ export function processTextPrompt(
       uuid: uuid,
       imagePasteIds: imagePasteIds.length > 0 ? imagePasteIds : undefined,
       permissionMode,
-      isMeta: isMeta || undefined,
-    })
+      isMeta: isMeta || undefined})
 
     return {
       messages: [userMessage, ...attachmentMessages],
-      shouldQuery: true,
-    }
+      shouldQuery: true}
   }
 
   const userMessage = createUserMessage({
     content: input,
     uuid,
     permissionMode,
-    isMeta: isMeta || undefined,
-  })
+    isMeta: isMeta || undefined})
 
   return {
     messages: [userMessage, ...attachmentMessages],
-    shouldQuery: true,
-  }
+    shouldQuery: true}
 }

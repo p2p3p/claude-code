@@ -15,14 +15,12 @@ import {
   getPipeIpc,
   type PipeClient,
   type PipeMessage,
-  type PipeIpcSlaveState,
-} from '../utils/pipeTransport.js'
+  type PipeIpcSlaveState} from '../utils/pipeTransport.js'
 import { logForDebugging } from '../utils/debug.js'
 import {
   isMasterPipeMuted,
   hasSendOverride,
-  removeSendOverride,
-} from '../utils/pipeMuteState.js'
+  removeSendOverride} from '../utils/pipeMuteState.js'
 
 /** Session history entry for pipe IPC monitoring. */
 export type SessionEntry = {
@@ -86,8 +84,7 @@ export function applyPipeEntryToSlaveState(
     lastSummary: summarizePipeEntry(entry),
     lastEventType: entry.type as PipeIpcSlaveState['lastEventType'],
     unreadCount: (slave.unreadCount ?? 0) + 1,
-    history: [...slave.history, entry],
-  }
+    history: [...slave.history, entry]}
 }
 
 /**
@@ -152,8 +149,7 @@ function pipeMessageToSessionEntry(
     content: msg.data ?? '',
     from: msg.from ?? slaveName,
     timestamp: msg.ts ?? new Date().toISOString(),
-    meta: msg.meta,
-  }
+    meta: msg.meta}
 }
 
 function emitPipeEntry(slaveName: string, entry: SessionEntry): void {
@@ -197,9 +193,7 @@ function attachPipeEntryEmitter(name: string, client: PipeClient): void {
                 requestId: payload.requestId,
                 behavior: 'deny',
                 feedback:
-                  'Permission auto-denied: pipe is logically disconnected.',
-              }),
-            })
+                  'Permission auto-denied: pipe is logically disconnected.'})})
           }
         } catch {
           // Malformed payload — safe to ignore
@@ -353,13 +347,9 @@ export function useMasterMonitor(): void {
                 [slaveName]: applyPipeEntryToSlaveState(
                   {
                     ...slave,
-                    status: newStatus,
-                  },
+                    status: newStatus},
                   entry,
-                ),
-              },
-            },
-          }
+                )}}}
         })
 
         if (msg.type === 'done') {
@@ -385,9 +375,7 @@ export function useMasterMonitor(): void {
               ...getPipeIpc(prev),
               role: hasSlaves ? 'master' : 'main',
               displayRole: hasSlaves ? 'master' : 'main',
-              slaves: remainingSlaves,
-            },
-          }
+              slaves: remainingSlaves}}
         })
       }
 

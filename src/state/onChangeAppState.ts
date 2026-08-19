@@ -1,22 +1,20 @@
+import { isEqual } from 'lodash-es'
 import { setMainLoopModelOverride } from '../bootstrap/state.js'
 import {
   clearApiKeyHelperCache,
   clearAwsCredentialsCache,
-  clearGcpCredentialsCache,
-} from '../utils/auth.js'
+  clearGcpCredentialsCache} from '../utils/auth.js'
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js'
 import { toError } from '../utils/errors.js'
 import { logError } from '../utils/log.js'
 import { applyConfigEnvironmentVariables } from '../utils/managedEnv.js'
 import {
   permissionModeFromString,
-  toExternalPermissionMode,
-} from '../utils/permissions/PermissionMode.js'
+  toExternalPermissionMode} from '../utils/permissions/PermissionMode.js'
 import {
   notifyPermissionModeChanged,
   notifySessionMetadataChanged,
-  type SessionExternalMetadata,
-} from '../utils/sessionState.js'
+  type SessionExternalMetadata} from '../utils/sessionState.js'
 import type { AppState } from './AppStateStore.js'
 
 // Inverse of the push below — restore on worker restart.
@@ -29,20 +27,16 @@ export function externalMetadataToAppState(
       ? {
           toolPermissionContext: {
             ...prev.toolPermissionContext,
-            mode: permissionModeFromString(metadata.permission_mode),
-          },
-        }
+            mode: permissionModeFromString(metadata.permission_mode)}}
       : {}),
     ...(typeof metadata.is_ultraplan_mode === 'boolean'
       ? { isUltraplanMode: metadata.is_ultraplan_mode }
-      : {}),
-  })
+      : {})})
 }
 
 export function onChangeAppState({
   newState,
-  oldState,
-}: {
+  oldState}: {
   newState: AppState
   oldState: AppState
 }) {
@@ -84,8 +78,7 @@ export function onChangeAppState({
           : null
       notifySessionMetadataChanged({
         permission_mode: newExternal,
-        is_ultraplan_mode: isUltraplan,
-      })
+        is_ultraplan_mode: isUltraplan})
     }
     notifyPermissionModeChanged(newMode)
   }
@@ -109,8 +102,7 @@ export function onChangeAppState({
       saveGlobalConfig(current => ({
         ...current,
         showExpandedTodos,
-        showSpinnerTree,
-      }))
+        showSpinnerTree}))
     }
   }
 
@@ -122,8 +114,7 @@ export function onChangeAppState({
     const verbose = newState.verbose
     saveGlobalConfig(current => ({
       ...current,
-      verbose,
-    }))
+      verbose}))
   }
 
   // tungstenPanelVisible (ant-only tmux panel sticky toggle)
@@ -138,17 +129,20 @@ export function onChangeAppState({
     }
   }
 
-  // settings: clear auth-related caches when settings change
-  // This ensures apiKeyHelper and AWS/GCP credential changes take effect immediately
-  if (newState.settings !== oldState.settings) {
+  // settings: clear auth-related caches when the settings *content* changes.
+  // applySettingsChange always builds a fresh settings object, so a reference
+  // comparison would fire on every unrelated settings write (e.g. hooks
+  // rewriting settings.json) and clear account caches needlessly. Deep-compare
+  // instead — only real changes take effect immediately.
+  if (!isEqual(newState.settings, oldState.settings)) {
     try {
       clearApiKeyHelperCache()
       clearAwsCredentialsCache()
       clearGcpCredentialsCache()
 
-      // Re-apply environment variables when settings.env changes
+      // Re-apply environment variables when settings.env content changes
       // This is additive-only: new vars are added, existing may be overwritten, nothing is deleted
-      if (newState.settings.env !== oldState.settings.env) {
+      if (!isEqual(newState.settings.env, oldState.settings.env)) {
         applyConfigEnvironmentVariables()
       }
     } catch (error) {

@@ -6,8 +6,7 @@ import { getClaudeConfigHomeDir } from '../utils/envUtils.js'
 import {
   getProjectDirsUpToHome,
   extractDescriptionFromMarkdown,
-  type ClaudeConfigDirectory,
-} from '../utils/markdownConfigLoader.js'
+  type ClaudeConfigDirectory} from '../utils/markdownConfigLoader.js'
 
 export interface TemplateInfo {
   name: string

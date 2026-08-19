@@ -10,6 +10,7 @@ import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js';
 import { env } from '../utils/env.js';
 import { isEnvTruthy } from '../utils/envUtils.js';
 import { KeyboardShortcutHint } from '@anthropic/ink';
+import { t } from '../utils/i18n/index.js';
 
 type Props = {
   onBackgroundSession: () => void;
@@ -61,8 +62,7 @@ export function SessionBackgroundHint({ onBackgroundSession, isLoading }: Props)
   const sessionBgEnabled = isEnvTruthy('false');
   useKeybinding('task:background', handleBackground, {
     context: 'Task',
-    isActive: hasForeground || (sessionBgEnabled && isLoading),
-  });
+    isActive: hasForeground || (sessionBgEnabled && isLoading)});
 
   // Get the configured shortcut for task:background
   const baseShortcut = useShortcutDisplay('task:background', 'Task', 'ctrl+b');
@@ -76,7 +76,7 @@ export function SessionBackgroundHint({ onBackgroundSession, isLoading }: Props)
   return (
     <Box paddingLeft={2}>
       <Text dimColor>
-        <KeyboardShortcutHint shortcut={shortcut} action="background" />
+        <KeyboardShortcutHint shortcut={shortcut} action={t('shortcutHint.background')} />
       </Text>
     </Box>
   );

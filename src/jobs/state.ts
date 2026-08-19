@@ -39,8 +39,7 @@ export function createJob(
     createdAt: now,
     updatedAt: now,
     status: 'created',
-    args,
-  }
+    args}
 
   writeFileSync(
     join(dir, 'state.json'),
@@ -82,8 +81,7 @@ export function appendJobReply(jobId: string, text: string): boolean {
   const repliesPath = join(dir, 'replies.jsonl')
   const entry = JSON.stringify({
     text,
-    timestamp: new Date().toISOString(),
-  })
+    timestamp: new Date().toISOString()})
 
   try {
     appendFileSync(repliesPath, entry + '\n', 'utf-8')

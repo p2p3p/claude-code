@@ -1,8 +1,8 @@
 import React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
 import { Box, Text } from '@anthropic/ink';
 import { FeedbackSurveyView, isValidResponseInput } from './FeedbackSurveyView.js';
 import type { TranscriptShareResponse } from './TranscriptSharePrompt.js';
@@ -29,8 +29,7 @@ export function FeedbackSurvey({
   inputValue,
   setInputValue,
   onRequestFeedback,
-  message,
-}: Props): React.ReactNode {
+  message}: Props): React.ReactNode {
   if (state === 'closed') {
     return null;
   }
@@ -49,7 +48,7 @@ export function FeedbackSurvey({
   if (state === 'submitted') {
     return (
       <Box marginTop={1}>
-        <Text color="success">{'\u2713'} Thanks for sharing your transcript!</Text>
+        <Text color="success">{t('feedbacksurvey.thanksForSharingTranscript')}</Text>
       </Box>
     );
   }
@@ -57,7 +56,7 @@ export function FeedbackSurvey({
   if (state === 'submitting') {
     return (
       <Box marginTop={1}>
-        <Text dimColor>Sharing transcript{'\u2026'}</Text>
+        <Text dimColor>{t('ui.sharingTranscript')}</Text>
       </Box>
     );
   }
@@ -106,8 +105,7 @@ function FeedbackSurveyThanks({
   lastResponse,
   inputValue,
   setInputValue,
-  onRequestFeedback,
-}: ThanksProps): React.ReactNode {
+  onRequestFeedback}: ThanksProps): React.ReactNode {
   const showFollowUp = onRequestFeedback && lastResponse === 'good';
 
   // Listen for "1" keypress to launch /feedback
@@ -120,26 +118,23 @@ function FeedbackSurveyThanks({
     onDigit: () => {
       logEvent('tengu_feedback_survey_event', {
         event_type: 'followup_accepted' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        response: lastResponse as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        response: lastResponse as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       onRequestFeedback?.();
-    },
-  });
+    }});
 
   const feedbackCommand = process.env.USER_TYPE === 'ant' ? '/issue' : '/feedback';
 
   return (
     <Box marginTop={1} flexDirection="column">
-      <Text color="success">Thanks for the feedback!</Text>
+      <Text color="success">{t('feedbacksurvey.thanksForTheFeedback')}</Text>
       {showFollowUp ? (
         <Text dimColor>
-          (Optional) Press [<Text color="ansi:cyan">1</Text>] to tell us what went well {' \u00b7 '}
-          {feedbackCommand}
+          {t('feedbacksurvey.followUpPrefix')}[<Text color="ansi:cyan">1</Text>]{t('feedbacksurvey.followUpSuffix', feedbackCommand)}
         </Text>
       ) : lastResponse === 'bad' ? (
-        <Text dimColor>Use /issue to report model behavior issues.</Text>
+        <Text dimColor>{t('feedbacksurvey.useIssueToReportModelBehaviorIssues')}</Text>
       ) : (
-        <Text dimColor>Use {feedbackCommand} to share detailed feedback anytime.</Text>
+        <Text dimColor>{t('feedbacksurvey.useCmdForDetailedFeedback', feedbackCommand)}</Text>
       )}
     </Box>
   );

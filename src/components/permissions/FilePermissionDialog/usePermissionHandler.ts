@@ -1,26 +1,22 @@
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../../services/analytics/index.js'
+  logEvent} from '../../../services/analytics/index.js'
 import { sanitizeToolNameForAnalytics } from '../../../services/analytics/metadata.js'
 import type { ToolPermissionContext } from '../../../Tool.js'
 import {
   CLAUDE_FOLDER_PERMISSION_PATTERN,
   FILE_EDIT_TOOL_NAME,
-  GLOBAL_CLAUDE_FOLDER_PERMISSION_PATTERN,
-} from '@claude-code-best/builtin-tools/tools/FileEditTool/constants.js'
+  GLOBAL_CLAUDE_FOLDER_PERMISSION_PATTERN} from '@claude-code-best/builtin-tools/tools/FileEditTool/constants.js'
 import { env } from '../../../utils/env.js'
 import { generateSuggestions } from '../../../utils/permissions/filesystem.js'
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js'
 import {
   type CompletionType,
-  logUnaryEvent,
-} from '../../../utils/unaryLogging.js'
+  logUnaryEvent} from '../../../utils/unaryLogging.js'
 import type { ToolUseConfirm } from '../PermissionRequest.js'
 import type {
   FileOperationType,
-  PermissionOption,
-} from './permissionOptions.js'
+  PermissionOption} from './permissionOptions.js'
 
 function logPermissionEvent(
   event: 'accept' | 'reject',
@@ -36,9 +32,7 @@ function logPermissionEvent(
       language_name: languageName,
       message_id: messageId,
       platform: env.platform,
-      hasFeedback: hasFeedback ?? false,
-    },
-  })
+      hasFeedback: hasFeedback ?? false}})
 }
 
 export type PermissionHandlerParams = {
@@ -77,8 +71,7 @@ function handleAcceptOnce(
     isMcp: toolUseConfirm.tool.isMcp ?? false,
     has_instructions: !!options?.feedback,
     instructions_length: options?.feedback?.length ?? 0,
-    entered_feedback_mode: options?.enteredFeedbackMode ?? false,
-  })
+    entered_feedback_mode: options?.enteredFeedbackMode ?? false})
 
   onDone()
   toolUseConfirm.onAllow(toolUseConfirm.input, [], options?.feedback)
@@ -96,8 +89,7 @@ function handleAcceptSession(
     onDone,
     completionType,
     languageName,
-    operationType,
-  } = params
+    operationType} = params
 
   logPermissionEvent('accept', completionType, languageName, messageId)
 
@@ -116,12 +108,10 @@ function handleAcceptSession(
         rules: [
           {
             toolName: FILE_EDIT_TOOL_NAME,
-            ruleContent: pattern,
-          },
+            ruleContent: pattern},
         ],
         behavior: 'allow',
-        destination: 'session',
-      },
+        destination: 'session'},
     ]
     onDone()
     toolUseConfirm.onAllow(toolUseConfirm.input, suggestions)
@@ -148,8 +138,7 @@ function handleReject(
     onDone,
     onReject,
     completionType,
-    languageName,
-  } = params
+    languageName} = params
 
   logPermissionEvent(
     'reject',
@@ -167,8 +156,7 @@ function handleReject(
     isMcp: toolUseConfirm.tool.isMcp ?? false,
     has_instructions: !!options?.feedback,
     instructions_length: options?.feedback?.length ?? 0,
-    entered_feedback_mode: options?.enteredFeedbackMode ?? false,
-  })
+    entered_feedback_mode: options?.enteredFeedbackMode ?? false})
 
   onDone()
   onReject()
@@ -181,5 +169,4 @@ export const PERMISSION_HANDLERS: Record<
 > = {
   'accept-once': handleAcceptOnce,
   'accept-session': handleAcceptSession,
-  reject: handleReject,
-}
+  reject: handleReject}

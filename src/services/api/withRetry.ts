@@ -1,17 +1,21 @@
 import { feature } from 'bun:bundle'
+import { randomUUID } from 'crypto'
 import type Anthropic from '@anthropic-ai/sdk'
 import {
   APIConnectionError,
   APIError,
-  APIUserAbortError,
-} from '@anthropic-ai/sdk'
+  APIUserAbortError} from '@anthropic-ai/sdk'
 import type { QuerySource } from 'src/constants/querySource.js'
 import type { SystemAPIErrorMessage } from 'src/types/message.js'
 import { isAwsCredentialsProviderError } from 'src/utils/aws.js'
 import { logForDebugging } from 'src/utils/debug.js'
 import { logError } from 'src/utils/log.js'
+import { t } from 'src/utils/i18n/index.js'
 import { createSystemAPIErrorMessage } from 'src/utils/messages.js'
-import { getAPIProviderForStatsig } from 'src/utils/model/providers.js'
+import {
+  getAPIProvider,
+  getAPIProviderForStatsig} from 'src/utils/model/providers.js'
+import { rotateOn401, toKeyGroupProviderKey } from 'src/accounts/index.js'
 import {
   clearApiKeyHelperCache,
   clearAwsCredentialsCache,
@@ -19,18 +23,17 @@ import {
   getClaudeAIOAuthTokens,
   handleOAuth401Error,
   isClaudeAISubscriber,
-  isEnterpriseSubscriber,
-} from '../../utils/auth.js'
+  isEnterpriseSubscriber} from '../../utils/auth.js'
 import { isEnvTruthy } from '../../utils/envUtils.js'
 import { errorMessage } from '../../utils/errors.js'
+import { getInitialSettings } from '../../utils/settings/settings.js'
 import {
   type CooldownReason,
   handleFastModeOverageRejection,
   handleFastModeRejectedByAPI,
   isFastModeCooldown,
   isFastModeEnabled,
-  triggerFastModeCooldown,
-} from '../../utils/fastMode.js'
+  triggerFastModeCooldown} from '../../utils/fastMode.js'
 import { isNonCustomOpusModel } from '../../utils/model/model.js'
 import { disableKeepAlive } from '../../utils/proxy.js'
 import { sleep } from '../../utils/sleep.js'
@@ -38,18 +41,16 @@ import type { ThinkingConfig } from '../../utils/thinking.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../analytics/index.js'
+  logEvent} from '../analytics/index.js'
 import {
   checkMockRateLimitError,
-  isMockRateLimitError,
-} from '../rateLimitMocking.js'
+  isMockRateLimitError} from '../rateLimitMocking.js'
 import { REPEATED_529_ERROR_MESSAGE } from './errors.js'
 import { extractConnectionErrorDetails } from './errorUtils.js'
 
 const abortError = () => new APIUserAbortError()
 
-const DEFAULT_MAX_RETRIES = 10
+const DEFAULT_MAX_RETRIES = 15
 const FLOOR_OUTPUT_TOKENS = 3000
 const MAX_529_RETRIES = 3
 export const BASE_DELAY_MS = 500
@@ -98,6 +99,10 @@ const PERSISTENT_RESET_CAP_MS = 6 * 60 * 60 * 1000
 const HEARTBEAT_INTERVAL_MS = 30_000
 
 function isPersistentRetryEnabled(): boolean {
+  const settings = getInitialSettings()
+  if (settings.maxApiRetries === 'always') {
+    return true
+  }
   return feature('UNATTENDED_RETRY')
     ? isEnvTruthy(process.env.CLAUDE_CODE_UNATTENDED_RETRY)
     : false
@@ -180,8 +185,7 @@ export async function* withRetry<T>(
   const retryContext: RetryContext = {
     model: options.model,
     thinkingConfig: options.thinkingConfig,
-    ...(isFastModeEnabled() && { fastMode: options.fastMode }),
-  }
+    ...(isFastModeEnabled() && { fastMode: options.fastMode })}
   let client: Anthropic | null = null
   let consecutive529Errors = options.initialConsecutive529Errors ?? 0
   let lastError: unknown
@@ -258,6 +262,30 @@ export async function* withRetry<T>(
         { level: 'error' },
       )
 
+      // Key group rotation: a 401 means the current API key is invalid or
+      // expired. If the active provider has a multi-key group configured,
+      // rotate to the next key within the current platform (default) — no
+      // cross-platform switching. Only fires for 401; 429/5xx keep their
+      // normal retry logic.
+      if (error instanceof APIError && error.status === 401) {
+        const provider = toKeyGroupProviderKey(getAPIProvider())
+        if (provider) {
+          const rotation = rotateOn401(provider)
+          if (rotation === 'rotated') {
+            logForDebugging('[keyRotation] 401 — retrying with a rotated key')
+            // Visible to the user (REPL renders key_rotation content), like a
+            // cache warning: tells them the credential was switched.
+            yield {
+              type: 'system',
+              subtype: 'key_rotation' as const,
+              content: t('keyGroup.rotationNotice'),
+              timestamp: new Date().toISOString(),
+              uuid: randomUUID()}
+            continue
+          }
+        }
+      }
+
       // Fast mode fallback: on 429/529, either wait and retry (short delays)
       // or fall back to standard speed (long delays) to avoid cache thrashing.
       // Skip in persistent mode: the short-retry path below loops with fast
@@ -318,8 +346,7 @@ export async function* withRetry<T>(
       if (is529Error(error) && !shouldRetry529(options.querySource)) {
         logEvent('tengu_api_529_background_dropped', {
           query_source:
-            options.querySource as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            options.querySource as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         throw new CannotRetryError(error, retryContext)
       }
 
@@ -340,8 +367,7 @@ export async function* withRetry<T>(
                 options.model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               fallback_model:
                 options.fallbackModel as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-              provider: getAPIProviderForStatsig(),
-            })
+              provider: getAPIProviderForStatsig()})
 
             // Throw special error to indicate fallback was triggered
             throw new FallbackTriggeredError(
@@ -419,8 +445,7 @@ export async function* withRetry<T>(
             inputTokens,
             contextLimit,
             adjustedMaxTokens,
-            attempt,
-          })
+            attempt})
 
           continue
         }
@@ -435,14 +460,18 @@ export async function* withRetry<T>(
         // Window-based limits (e.g. 5hr Max/Pro) include a reset timestamp.
         // Wait until reset rather than polling every 5 min uselessly.
         const resetDelay = getRateLimitResetDelayMs(error)
+        const baseDelay = getRetryDelay(
+          persistentAttempt,
+          retryAfter,
+          PERSISTENT_MAX_BACKOFF_MS,
+        )
+        // rpm exhausted 是每分钟限流，不管持久与否，至少等 60 秒
+        const rpmFloor =
+          error.message?.toLowerCase().includes('rpm exhausted') ? 60000 : 0
         delayMs =
           resetDelay ??
           Math.min(
-            getRetryDelay(
-              persistentAttempt,
-              retryAfter,
-              PERSISTENT_MAX_BACKOFF_MS,
-            ),
+            Math.max(baseDelay, rpmFloor),
             PERSISTENT_RESET_CAP_MS,
           )
       } else if (persistent) {
@@ -459,7 +488,12 @@ export async function* withRetry<T>(
           PERSISTENT_RESET_CAP_MS,
         )
       } else {
-        delayMs = getRetryDelay(attempt, retryAfter)
+        // rpm exhausted 是每分钟限流，默认等待太短，直接初始等待 60 秒
+        if (error instanceof APIError && error.status === 429 && error.message?.toLowerCase().includes('rpm exhausted')) {
+          delayMs = Math.max(60000, getRetryDelay(attempt, retryAfter))
+        } else {
+          delayMs = getRetryDelay(attempt, retryAfter)
+        }
       }
 
       // In persistent mode the for-loop `attempt` is clamped at maxRetries+1;
@@ -471,8 +505,7 @@ export async function* withRetry<T>(
         error: (error as APIError)
           .message as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         status: (error as APIError).status,
-        provider: getAPIProviderForStatsig(),
-      })
+        provider: getAPIProviderForStatsig()})
 
       if (persistent) {
         if (delayMs > 60_000) {
@@ -480,8 +513,7 @@ export async function* withRetry<T>(
             status: (error as APIError).status,
             delayMs,
             attempt: reportedAttempt,
-            provider: getAPIProviderForStatsig(),
-          })
+            provider: getAPIProviderForStatsig()})
         }
         // Chunk long sleeps so the host sees periodic stdout activity and
         // does not mark the session idle. Each yield surfaces as
@@ -696,6 +728,12 @@ function shouldRetry(error: APIError): boolean {
     return false
   }
 
+  // rpm exhausted 是短时限流（每分钟请求数超限），等几秒就能恢复，始终重试
+  // 必须在 x-should-retry 检查之前，否则服务器可能返回 false 导致跳过
+  if (error.status === 429 && error.message?.toLowerCase().includes('rpm exhausted')) {
+    return true
+  }
+
   // Persistent mode: 429/529 always retryable, bypass subscriber gates and
   // x-should-retry header.
   if (isPersistentRetryEnabled() && isTransientCapacityError(error)) {
@@ -765,6 +803,12 @@ function shouldRetry(error: APIError): boolean {
     return !isClaudeAISubscriber() || isEnterpriseSubscriber()
   }
 
+  // Retry on 403s from third-party providers/gateways which can be transient
+  // (e.g. Cloudflare, various API gateways). First-party 403s (revoked) are handled above.
+  if (error.status === 403) {
+    return true
+  }
+
   // Clear API key cache on 401 and allow retry.
   // OAuth token handling is done in the main retry loop via handleOAuth401Error.
   if (error.status === 401) {
@@ -784,6 +828,19 @@ function shouldRetry(error: APIError): boolean {
 }
 
 export function getDefaultMaxRetries(): number {
+  const settings = getInitialSettings()
+  const maxApiRetries = settings.maxApiRetries
+
+  if (maxApiRetries === 'off') {
+    return 0
+  }
+  if (typeof maxApiRetries === 'number') {
+    return Math.max(0, maxApiRetries)
+  }
+  if (maxApiRetries === 'always') {
+    return Number.MAX_SAFE_INTEGER
+  }
+
   if (process.env.CLAUDE_CODE_MAX_RETRIES) {
     return parseInt(process.env.CLAUDE_CODE_MAX_RETRIES, 10)
   }

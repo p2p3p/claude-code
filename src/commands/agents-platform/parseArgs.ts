@@ -50,16 +50,14 @@ export function parseAgentsPlatformArgs(args: string): AgentsPlatformArgs {
       return {
         action: 'invalid',
         reason:
-          'create requires a cron expression and prompt, e.g. create "0 9 * * 1" Run daily standup',
-      }
+          'create requires a cron expression and prompt, e.g. create "0 9 * * 1" Run daily standup'}
     }
     const parsed = splitCronAndPrompt(rest)
     if (!parsed) {
       return {
         action: 'invalid',
         reason:
-          'create requires at least 5 cron fields followed by a prompt, e.g. create "0 9 * * 1" Run daily standup',
-      }
+          'create requires at least 5 cron fields followed by a prompt, e.g. create "0 9 * * 1" Run daily standup'}
     }
     const { cron, prompt } = parsed
     // splitCronAndPrompt joins slice(5) so prompt is non-empty by construction;
@@ -97,6 +95,5 @@ export function parseAgentsPlatformArgs(args: string): AgentsPlatformArgs {
 
   return {
     action: 'invalid',
-    reason: `Unknown sub-command "${subCmd}". Use: list | create CRON PROMPT | delete ID | run ID`,
-  }
+    reason: `Unknown sub-command "${subCmd}". Use: list | create CRON PROMPT | delete ID | run ID`}
 }

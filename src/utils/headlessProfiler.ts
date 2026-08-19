@@ -15,8 +15,7 @@
 import { getIsNonInteractiveSession } from '../bootstrap/state.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import { logForDebugging } from './debug.js'
 import { isEnvTruthy } from './envUtils.js'
 import { getPerformance } from './profilerBase.js'
@@ -125,8 +124,7 @@ export function logHeadlessProfilerTurn(): void {
 
   // Compute phase durations relative to turn_start
   const metadata: Record<string, number | string | undefined> = {
-    turn_number: currentTurnNumber,
-  }
+    turn_number: currentTurnNumber}
 
   // Time to system message from process start (only meaningful for turn 0)
   // Use absolute time since perf_hooks startTime is relative to process start

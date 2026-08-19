@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { t } from '../../../utils/i18n/index.js';
 import { Box, Text, useTheme } from '@anthropic/ink';
 import { useKeybinding } from '../../../keybindings/useKeybinding.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../../services/analytics/growthbook.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../../services/analytics/index.js';
+  logEvent} from '../../../services/analytics/index.js';
 import { sanitizeToolNameForAnalytics } from '../../../services/analytics/metadata.js';
 import { getDestructiveCommandWarning } from '@claude-code-best/builtin-tools/tools/PowerShellTool/destructiveCommandWarning.js';
 import { PowerShellTool } from '@claude-code-best/builtin-tools/tools/PowerShellTool/PowerShellTool.js';
@@ -33,8 +33,7 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
     toolName: toolUseConfirm.tool.name,
     toolInput: toolUseConfirm.input,
     toolDescription: toolUseConfirm.description,
-    messages: toolUseContext.messages,
-  });
+    messages: toolUseContext.messages});
   const {
     yesInputMode,
     noInputMode,
@@ -47,13 +46,11 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
     focusedOption,
     handleInputModeToggle,
     handleReject,
-    handleFocus,
-  } = useShellPermissionFeedback({
+    handleFocus} = useShellPermissionFeedback({
     toolUseConfirm,
     onDone,
     onReject,
-    explainerVisible: explainerState.visible,
-  });
+    explainerVisible: explainerState.visible});
   const destructiveWarning = getFeatureValue_CACHED_MAY_BE_STALE('tengu_destructive_command_warning', false)
     ? getDestructiveCommandWarning(command)
     : null;
@@ -112,8 +109,7 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
         yesInputMode,
         noInputMode,
         editablePrefix,
-        onEditablePrefixChange,
-      }),
+        onEditablePrefixChange}),
     [toolUseConfirm, yesInputMode, noInputMode, editablePrefix, onEditablePrefixChange],
   );
 
@@ -122,8 +118,7 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
     setShowPermissionDebug(prev => !prev);
   }, []);
   useKeybinding('permission:toggleDebug', handleToggleDebug, {
-    context: 'Confirmation',
-  });
+    context: 'Confirmation'});
 
   function onSelect(value: string) {
     // Map options to numeric values for analytics (strings not allowed in logEvent)
@@ -131,12 +126,10 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
       yes: 1,
       'yes-apply-suggestions': 2,
       'yes-prefix-edited': 2,
-      no: 3,
-    };
+      no: 3};
     logEvent('tengu_permission_request_option_selected', {
       option_index: optionIndex[value],
-      explainer_visible: explainerState.visible,
-    });
+      explainer_visible: explainerState.visible});
 
     const toolNameForAnalytics = sanitizeToolNameForAnalytics(
       toolUseConfirm.tool.name,
@@ -154,12 +147,10 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
             rules: [
               {
                 toolName: PowerShellTool.name,
-                ruleContent: trimmedPrefix,
-              },
+                ruleContent: trimmedPrefix},
             ],
             behavior: 'allow',
-            destination: 'localSettings',
-          },
+            destination: 'localSettings'},
         ];
         toolUseConfirm.onAllow(toolUseConfirm.input, prefixUpdates);
       }
@@ -177,8 +168,7 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
           isMcp: toolUseConfirm.tool.isMcp ?? false,
           has_instructions: !!trimmedFeedback,
           instructions_length: trimmedFeedback.length,
-          entered_feedback_mode: yesFeedbackModeEntered,
-        });
+          entered_feedback_mode: yesFeedbackModeEntered});
         toolUseConfirm.onAllow(toolUseConfirm.input, [], trimmedFeedback || undefined);
         onDone();
         break;
@@ -201,8 +191,7 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
           isMcp: toolUseConfirm.tool.isMcp ?? false,
           has_instructions: !!trimmedFeedback,
           instructions_length: trimmedFeedback.length,
-          entered_feedback_mode: noFeedbackModeEntered,
-        });
+          entered_feedback_mode: noFeedbackModeEntered});
 
         // Process rejection (with or without feedback)
         handleReject(trimmedFeedback || undefined);
@@ -212,7 +201,7 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
   }
 
   return (
-    <PermissionDialog workerBadge={workerBadge} title="PowerShell command">
+    <PermissionDialog workerBadge={workerBadge} title={t('powershellpermissionrequest.powerShellCommand')}>
       <Box flexDirection="column" paddingX={2} paddingY={1}>
         <Text dimColor={explainerState.visible}>
           {PowerShellTool.renderToolUseMessage(
@@ -228,7 +217,7 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
           <PermissionDecisionDebugInfo permissionResult={toolUseConfirm.permissionResult} toolName="PowerShell" />
           {toolUseContext.options.debug && (
             <Box justifyContent="flex-end" marginTop={1}>
-              <Text dimColor>Ctrl-D to hide debug info</Text>
+              <Text dimColor>{t('powershellpermissionrequest.ctrlDToHideDebugInfo')}</Text>
             </Box>
           )}
         </>
@@ -241,7 +230,7 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
                 <Text color="warning">{destructiveWarning}</Text>
               </Box>
             )}
-            <Text>Do you want to proceed?</Text>
+            <Text>{t('permission.proceed')}</Text>
             <Select
               options={options}
               inlineDescriptions
@@ -253,12 +242,14 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
           </Box>
           <Box justifyContent="space-between" marginTop={1}>
             <Text dimColor>
-              Esc to cancel
+              {t('powershellpermissionrequest.escToCancel')}
               {((focusedOption === 'yes' && !yesInputMode) || (focusedOption === 'no' && !noInputMode)) &&
-                ' · Tab to amend'}
-              {explainerState.enabled && ` · ctrl+e to ${explainerState.visible ? 'hide' : 'explain'}`}
+                t('powershellpermissionrequest.tabToAmend')}
+              {explainerState.enabled && (explainerState.visible
+                ? t('powershellpermissionrequest.ctrlEToHide')
+                : t('powershellpermissionrequest.ctrlEToExplain'))}
             </Text>
-            {toolUseContext.options.debug && <Text dimColor>Ctrl+d to show debug info</Text>}
+            {toolUseContext.options.debug && <Text dimColor>{t('powershellpermissionrequest.ctrlDToShowDebugInfo')}</Text>}
           </Box>
         </>
       )}

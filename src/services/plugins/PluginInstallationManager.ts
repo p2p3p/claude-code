@@ -12,13 +12,11 @@ import { logError } from '../../utils/log.js'
 import {
   clearMarketplacesCache,
   getDeclaredMarketplaces,
-  loadKnownMarketplacesConfig,
-} from '../../utils/plugins/marketplaceManager.js'
+  loadKnownMarketplacesConfig} from '../../utils/plugins/marketplaceManager.js'
 import { clearPluginCache } from '../../utils/plugins/pluginLoader.js'
 import {
   diffMarketplaces,
-  reconcileMarketplaces,
-} from '../../utils/plugins/reconciler.js'
+  reconcileMarketplaces} from '../../utils/plugins/reconciler.js'
 import { refreshActivePlugins } from '../../utils/plugins/refresh.js'
 import { logEvent } from '../analytics/index.js'
 
@@ -41,10 +39,7 @@ function updateMarketplaceStatus(
         ...prevState.plugins.installationStatus,
         marketplaces: prevState.plugins.installationStatus.marketplaces.map(
           m => (m.name === name ? { ...m, status, error } : m),
-        ),
-      },
-    },
-  }))
+        )}}}))
 }
 
 /**
@@ -83,12 +78,8 @@ export async function performBackgroundPluginInstallations(
         installationStatus: {
           marketplaces: pendingNames.map(name => ({
             name,
-            status: 'pending' as const,
-          })),
-          plugins: [],
-        },
-      },
-    }))
+            status: 'pending' as const})),
+          plugins: []}}}))
 
     if (pendingNames.length === 0) {
       return
@@ -116,15 +107,13 @@ export async function performBackgroundPluginInstallations(
             )
             break
         }
-      },
-    })
+      }})
 
     const metrics = {
       installed_count: result.installed.length,
       updated_count: result.updated.length,
       failed_count: result.failed.length,
-      up_to_date_count: result.upToDate.length,
-    }
+      up_to_date_count: result.upToDate.length}
     logEvent('tengu_marketplace_background_install', metrics)
     logForDiagnosticsNoPII(
       'info',
@@ -159,8 +148,7 @@ export async function performBackgroundPluginInstallations(
           if (prev.plugins.needsRefresh) return prev
           return {
             ...prev,
-            plugins: { ...prev.plugins, needsRefresh: true },
-          }
+            plugins: { ...prev.plugins, needsRefresh: true }}
         })
       }
     } else if (result.updated.length > 0) {
@@ -174,8 +162,7 @@ export async function performBackgroundPluginInstallations(
         if (prev.plugins.needsRefresh) return prev
         return {
           ...prev,
-          plugins: { ...prev.plugins, needsRefresh: true },
-        }
+          plugins: { ...prev.plugins, needsRefresh: true }}
       })
     }
   } catch (error) {

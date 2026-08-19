@@ -8,8 +8,7 @@ import {
   type AppState,
   IDLE_SPECULATION_STATE,
   type SpeculationResult,
-  type SpeculationState,
-} from '../../state/AppStateStore.js'
+  type SpeculationState} from '../../state/AppStateStore.js'
 import { commandHasAnyCd } from '@claude-code-best/builtin-tools/tools/BashTool/bashPermissions.js'
 import { checkReadOnlyConstraints } from '@claude-code-best/builtin-tools/tools/BashTool/readOnlyValidation.js'
 import type { SpeculationAcceptMessage } from '../../types/logs.js'
@@ -22,13 +21,11 @@ import { errorMessage } from '../../utils/errors.js'
 import {
   type FileStateCache,
   mergeFileStateCaches,
-  READ_FILE_STATE_CACHE_SIZE,
-} from '../../utils/fileStateCache.js'
+  READ_FILE_STATE_CACHE_SIZE} from '../../utils/fileStateCache.js'
 import {
   type CacheSafeParams,
   createCacheSafeParams,
-  runForkedAgent,
-} from '../../utils/forkedAgent.js'
+  runForkedAgent} from '../../utils/forkedAgent.js'
 import { formatDuration, formatNumber } from '../../utils/format.js'
 import type { REPLHookContext } from '../../utils/hooks/postSamplingHooks.js'
 import { logError } from '../../utils/log.js'
@@ -37,23 +34,20 @@ import {
   createSystemMessage,
   createUserMessage,
   INTERRUPT_MESSAGE,
-  INTERRUPT_MESSAGE_FOR_TOOL_USE,
-} from '../../utils/messages.js'
+  INTERRUPT_MESSAGE_FOR_TOOL_USE} from '../../utils/messages.js'
 import { getClaudeTempDir } from '../../utils/permissions/filesystem.js'
 import { extractReadFilesFromMessages } from '../../utils/queryHelpers.js'
 import { getTranscriptPath } from '../../utils/sessionStorage.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../analytics/index.js'
+  logEvent} from '../analytics/index.js'
 import {
   generateSuggestion,
   getPromptVariant,
   getSuggestionSuppressReason,
   logSuggestionSuppressed,
-  shouldFilterSuggestion,
-} from './promptSuggestion.js'
+  shouldFilterSuggestion} from './promptSuggestion.js'
 
 const MAX_SPECULATION_TURNS = 20
 const MAX_SPECULATION_MESSAGES = 100
@@ -92,8 +86,7 @@ function denySpeculation(
   return {
     behavior: 'deny',
     message,
-    decisionReason: { type: 'other', reason },
-  }
+    decisionReason: { type: 'other', reason }}
 }
 
 async function copyOverlayToMain(
@@ -148,8 +141,7 @@ function logSpeculation(
     boundary_detail: getBoundaryDetail(boundary) as
       | AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
       | undefined,
-    ...extras,
-  })
+    ...extras})
 }
 
 function countToolsInMessages(messages: Message[]): number {
@@ -325,8 +317,7 @@ function updateActiveSpeculationState(
     if (!hasChanges) return prev
     return {
       ...prev,
-      speculation: { ...current, ...updates },
-    }
+      speculation: { ...current, ...updates }}
   })
 }
 
@@ -366,8 +357,7 @@ async function generatePipelinedSuggestion(
         ...context.messages,
         createUserMessage({ content: suggestionText }),
         ...speculatedMessages,
-      ],
-    }
+      ]}
 
     const pipelineAbortController = createChildAbortController(
       parentAbortController,
@@ -391,9 +381,7 @@ async function generatePipelinedSuggestion(
       pipelinedSuggestion: {
         text: suggestion!,
         promptId,
-        generationRequestId,
-      },
-    }))
+        generationRequestId}}))
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return
     logForDebugging(
@@ -450,9 +438,7 @@ export async function startSpeculation(
       suggestionLength: suggestionText.length,
       toolUseCount: 0,
       isPipelined,
-      contextRef,
-    },
-  }))
+      contextRef}}))
 
   logForDebugging(`[Speculation] Starting speculation ${id}`)
 
@@ -486,9 +472,7 @@ export async function startSpeculation(
                 type: 'edit',
                 toolName: tool.name,
                 filePath: editPath ?? '',
-                completedAt: Date.now(),
-              },
-            }))
+                completedAt: Date.now()}}))
             abortController.abort()
             return denySpeculation(
               'Speculation paused: file edit requires permission',
@@ -523,9 +507,7 @@ export async function startSpeculation(
                 updatedInput: input,
                 decisionReason: {
                   type: 'other' as const,
-                  reason: 'speculation_read_outside_root',
-                },
-              }
+                  reason: 'speculation_read_outside_root'}}
             }
 
             if (isWriteTool) {
@@ -558,9 +540,7 @@ export async function startSpeculation(
               updatedInput: input,
               decisionReason: {
                 type: 'other' as const,
-                reason: 'speculation_file_access',
-              },
-            }
+                reason: 'speculation_file_access'}}
           }
           // Read tools without explicit path (e.g. Glob/Grep defaulting to CWD) are safe
           if (isSafeReadOnlyTool) {
@@ -569,9 +549,7 @@ export async function startSpeculation(
               updatedInput: input,
               decisionReason: {
                 type: 'other' as const,
-                reason: 'speculation_read_default_cwd',
-              },
-            }
+                reason: 'speculation_read_default_cwd'}}
           }
           // Write tools with undefined path → fall through to default deny
         }
@@ -591,8 +569,7 @@ export async function startSpeculation(
               `[Speculation] Stopping at bash: ${command.slice(0, 50) || 'missing command'}`,
             )
             updateActiveSpeculationState(setAppState, () => ({
-              boundary: { type: 'bash', command, completedAt: Date.now() },
-            }))
+              boundary: { type: 'bash', command, completedAt: Date.now() }}))
             abortController.abort()
             return denySpeculation(
               'Speculation paused: bash boundary',
@@ -605,9 +582,7 @@ export async function startSpeculation(
             updatedInput: input,
             decisionReason: {
               type: 'other' as const,
-              reason: 'speculation_readonly_bash',
-            },
-          }
+              reason: 'speculation_readonly_bash'}}
         }
 
         // Deny all other tools by default
@@ -624,9 +599,7 @@ export async function startSpeculation(
             type: 'denied_tool',
             toolName: tool.name,
             detail,
-            completedAt: Date.now(),
-          },
-        }))
+            completedAt: Date.now()}}))
         abortController.abort()
         return denySpeculation(
           `Tool ${tool.name} not allowed during speculation`,
@@ -650,13 +623,11 @@ export async function startSpeculation(
             )
             if (newTools > 0) {
               updateActiveSpeculationState(setAppState, prev => ({
-                toolUseCount: prev.toolUseCount + newTools,
-              }))
+                toolUseCount: prev.toolUseCount + newTools}))
             }
           }
         }
-      },
-    })
+      }})
 
     if (abortController.signal.aborted) return
 
@@ -664,9 +635,7 @@ export async function startSpeculation(
       boundary: {
         type: 'complete' as const,
         completedAt: Date.now(),
-        outputTokens: result.totalUsage.output_tokens,
-      },
-    }))
+        outputTokens: result.totalUsage.output_tokens}}))
 
     logForDebugging(
       `[Speculation] Complete: ${countToolsInMessages(messagesRef.current)} tools`,
@@ -709,8 +678,7 @@ export async function startSpeculation(
         ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         error_phase:
           'start' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        is_pipelined: isPipelined,
-      },
+        is_pipelined: isPipelined},
     )
 
     resetSpeculationState(setAppState)
@@ -731,8 +699,7 @@ export async function acceptSpeculation(
     abort,
     startTime,
     suggestionLength,
-    isPipelined,
-  } = state
+    isPipelined} = state
   const messages = messagesRef.current
   const overlayPath = getOverlayPath(id)
   const acceptedAt = Date.now()
@@ -760,8 +727,7 @@ export async function acceptSpeculation(
       ...prev,
       speculation: IDLE_SPECULATION_STATE,
       speculationSessionTimeSavedMs:
-        prev.speculationSessionTimeSavedMs + timeSavedMs,
-    }
+        prev.speculationSessionTimeSavedMs + timeSavedMs}
   })
 
   logForDebugging(
@@ -780,19 +746,16 @@ export async function acceptSpeculation(
     {
       message_count: messages.length,
       time_saved_ms: timeSavedMs,
-      is_pipelined: isPipelined,
-    },
+      is_pipelined: isPipelined},
   )
 
   if (timeSavedMs > 0) {
     const entry: SpeculationAcceptMessage = {
       type: 'speculation-accept',
       timestamp: new Date().toISOString(),
-      timeSavedMs,
-    }
+      timeSavedMs}
     void appendFile(getTranscriptPath(), jsonStringify(entry) + '\n', {
-      mode: 0o600,
-    }).catch(() => {
+      mode: 0o600}).catch(() => {
       logForDebugging(
         '[Speculation] Failed to write speculation-accept to transcript',
       )
@@ -813,8 +776,7 @@ export function abortSpeculation(setAppState: SetAppState): void {
       boundary,
       suggestionLength,
       messagesRef,
-      isPipelined,
-    } = prev.speculation
+      isPipelined} = prev.speculation
 
     logForDebugging(`[Speculation] Aborting ${id}`)
 
@@ -865,9 +827,7 @@ export async function handleSpeculationAccept(
           promptId: null,
           shownAt: 0,
           acceptedAt: 0,
-          generationRequestId: null,
-        },
-      }
+          generationRequestId: null}}
     })
 
     // Capture speculation messages before any state updates - must be stable reference
@@ -942,9 +902,7 @@ export async function handleSpeculationAccept(
           promptId,
           shownAt: Date.now(),
           acceptedAt: 0,
-          generationRequestId,
-        },
-      }))
+          generationRequestId}}))
 
       // Start speculation on the pipelined suggestion
       const augmentedContext: REPLHookContext = {
@@ -953,8 +911,7 @@ export async function handleSpeculationAccept(
           ...speculationState.contextRef.current.messages,
           createUserMessage({ content: input }),
           ...cleanMessages,
-        ],
-      }
+        ]}
       void startSpeculation(text, augmentedContext, setAppState, true)
     }
 
@@ -983,8 +940,7 @@ export async function handleSpeculationAccept(
         ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         error_phase:
           'accept' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        is_pipelined: speculationState.isPipelined,
-      },
+        is_pipelined: speculationState.isPipelined},
     )
     safeRemoveOverlay(getOverlayPath(speculationState.id))
     resetSpeculationState(setAppState)

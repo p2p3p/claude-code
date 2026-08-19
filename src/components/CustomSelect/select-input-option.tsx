@@ -11,6 +11,7 @@ import { Byline } from '@anthropic/ink';
 import TextInput from '../TextInput.js';
 import type { OptionWithDescription } from './select.js';
 import { SelectOption } from './select-option.js';
+import { t } from '../../utils/i18n/index.js';
 
 type Props<T> = {
   option: Extract<OptionWithDescription<T>, { type: 'input' }>;
@@ -103,8 +104,7 @@ export function SelectInputOption<T>({
   imagesSelected,
   selectedImageIndex = 0,
   onImagesSelectedChange,
-  onSelectedImageIndexChange,
-}: Props<T>): React.ReactNode {
+  onSelectedImageIndexChange}: Props<T>): React.ReactNode {
   const imageAttachments = pastedContents ? Object.values(pastedContents).filter(c => c.type === 'image') : [];
 
   // Allow individual options to force showing the label via showLabelWithValue
@@ -163,8 +163,7 @@ export function SelectInputOption<T>({
     },
     {
       context: 'Attachments',
-      isActive: isFocused && !imagesSelected && inputValue === '' && imageAttachments.length > 0 && !!onRemoveImage,
-    },
+      isActive: isFocused && !imagesSelected && inputValue === '' && imageAttachments.length > 0 && !!onRemoveImage},
   );
 
   // Image selection mode keybindings — reuses existing Attachments actions
@@ -195,8 +194,7 @@ export function SelectInputOption<T>({
       },
       'attachments:exit': () => {
         onImagesSelectedChange?.(false);
-      },
-    },
+      }},
     { context: 'Attachments', isActive: isFocused && !!imagesSelected },
   );
 
@@ -336,13 +334,13 @@ export function SelectInputOption<T>({
                         action="attachments:next"
                         context="Attachments"
                         fallback="→"
-                        description="next"
+                        description={t('desc.next')}
                       />
                       <ConfigurableShortcutHint
                         action="attachments:previous"
                         context="Attachments"
                         fallback="←"
-                        description="prev"
+                        description={t('desc.prev')}
                       />
                     </>
                   )}
@@ -350,17 +348,17 @@ export function SelectInputOption<T>({
                     action="attachments:remove"
                     context="Attachments"
                     fallback="backspace"
-                    description="remove"
+                    description={t('desc.remove')}
                   />
                   <ConfigurableShortcutHint
                     action="attachments:exit"
                     context="Attachments"
                     fallback="esc"
-                    description="cancel"
+                    description={t('desc.cancel')}
                   />
                 </Byline>
               ) : isFocused ? (
-                '(↓ to select)'
+                t('shortcutHint.downToSelect')
               ) : null}
             </Text>
           </Box>

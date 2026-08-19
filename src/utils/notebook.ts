@@ -1,8 +1,7 @@
 import type {
   ImageBlockParam,
   TextBlockParam,
-  ToolResultBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+  ToolResultBlockParam} from '@anthropic-ai/sdk/resources/index.mjs'
 import { BASH_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/BashTool/toolName.js'
 import { formatOutput } from '@claude-code-best/builtin-tools/tools/BashTool/utils.js'
 import type {
@@ -11,8 +10,8 @@ import type {
   NotebookCellSource,
   NotebookCellSourceOutput,
   NotebookContent,
-  NotebookOutputImage,
-} from '../types/notebook.js'
+  NotebookOutputImage} from '../types/notebook.js'
+import { t } from './i18n/index.js'
 import { getFsImplementation } from './fsOperations.js'
 import { expandPath } from './path.js'
 import { jsonParse } from './slowOperations.js'
@@ -45,14 +44,12 @@ function extractImage(
   if (typeof data['image/png'] === 'string') {
     return {
       image_data: data['image/png'].replace(/\s/g, ''),
-      media_type: 'image/png',
-    }
+      media_type: 'image/png'}
   }
   if (typeof data['image/jpeg'] === 'string') {
     return {
       image_data: data['image/jpeg'].replace(/\s/g, ''),
-      media_type: 'image/jpeg',
-    }
+      media_type: 'image/jpeg'}
   }
   return undefined
 }
@@ -62,22 +59,19 @@ function processOutput(output: NotebookCellOutput) {
     case 'stream':
       return {
         output_type: output.output_type,
-        text: processOutputText(output.text),
-      }
+        text: processOutputText(output.text)}
     case 'execute_result':
     case 'display_data':
       return {
         output_type: output.output_type,
         text: processOutputText(output.data?.['text/plain']),
-        image: output.data && extractImage(output.data),
-      }
+        image: output.data && extractImage(output.data)}
     case 'error':
       return {
         output_type: output.output_type,
         text: processOutputText(
           `${output.ename}: ${output.evalue}\n${output.traceback.join('\n')}`,
-        ),
-      }
+        )}
   }
 }
 
@@ -93,8 +87,7 @@ function processCell(
     source: Array.isArray(cell.source) ? cell.source.join('') : cell.source,
     execution_count:
       cell.cell_type === 'code' ? cell.execution_count || undefined : undefined,
-    cell_id: cellId,
-  }
+    cell_id: cellId}
   // Avoid giving text cells the code language.
   if (cell.cell_type === 'code') {
     cellData.language = codeLanguage
@@ -106,8 +99,7 @@ function processCell(
       cellData.outputs = [
         {
           output_type: 'stream',
-          text: `Outputs are too large to include. Use ${BASH_TOOL_NAME} with: cat <notebook_path> | jq '.cells[${index}].outputs'`,
-        },
+          text: `Outputs are too large to include. Use ${BASH_TOOL_NAME} with: cat <notebook_path> | jq '.cells[${index}].outputs'`},
       ]
     } else {
       cellData.outputs = outputs
@@ -128,8 +120,7 @@ function cellContentToToolResult(cell: NotebookCellSource): TextBlockParam {
   const cellContent = `<cell id="${cell.cell_id}">${metadata.join('')}${cell.source}</cell id="${cell.cell_id}">`
   return {
     text: cellContent,
-    type: 'text',
-  }
+    type: 'text'}
 }
 
 function cellOutputToToolResult(output: NotebookCellSourceOutput) {
@@ -137,8 +128,7 @@ function cellOutputToToolResult(output: NotebookCellSourceOutput) {
   if (output.text) {
     outputs.push({
       text: `\n${output.text}`,
-      type: 'text',
-    })
+      type: 'text'})
   }
   if ('image' in output && output.image) {
     outputs.push({
@@ -146,9 +136,7 @@ function cellOutputToToolResult(output: NotebookCellSourceOutput) {
       source: {
         data: output.image.image_data,
         media_type: output.image.media_type,
-        type: 'base64',
-      },
-    })
+        type: 'base64'}})
   }
   return outputs
 }
@@ -174,7 +162,7 @@ export async function readNotebook(
   if (cellId) {
     const cell = notebook.cells.find((c: NotebookCell) => c.id === cellId)
     if (!cell) {
-      throw new Error(`Cell with ID "${cellId}" not found in notebook`)
+      throw new Error(t('notebook.cellNotFound', cellId))
     }
     return [processCell(cell, notebook.cells.indexOf(cell), language, true)]
   }
@@ -211,8 +199,7 @@ export function mapNotebookCellsToToolResult(
         return acc
       },
       [],
-    ),
-  }
+    )}
 }
 
 export function parseCellId(cellId: string): number | undefined {

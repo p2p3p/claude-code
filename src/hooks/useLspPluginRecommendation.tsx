@@ -71,8 +71,7 @@ export function useLspPluginRecommendation(): UseLspPluginRecommendationResult {
               pluginName: match.pluginName,
               pluginDescription: match.description,
               fileExtension: extname(filePath),
-              shownAt: Date.now(),
-            };
+              shownAt: Date.now()};
           }
         } catch (error) {
           logError(error);
@@ -110,9 +109,7 @@ export function useLspPluginRecommendation(): UseLspPluginRecommendationResult {
             updateSettingsForSource('userSettings', {
               enabledPlugins: {
                 ...settings?.enabledPlugins,
-                [pluginId]: true,
-              },
-            });
+                [pluginId]: true}});
             logForDebugging(`[useLspPluginRecommendation] Plugin installed: ${pluginId}`);
           });
           break;

@@ -5,7 +5,7 @@ import memoize from 'lodash-es/memoize.js'
 import { join } from 'path'
 import { z } from 'zod/v4'
 import { OAUTH_BETA_HEADER } from '../../constants/oauth.js'
-import { getAnthropicClient } from '../../services/api/client.js'
+import { getAnthropicClient } from '../../services/api/anthropic/client.js'
 import { isClaudeAISubscriber } from '../auth.js'
 import { logForDebugging } from '../debug.js'
 import { getClaudeConfigHomeDir } from '../envUtils.js'
@@ -13,7 +13,7 @@ import { safeParseJSON } from '../json.js'
 import { lazySchema } from '../lazySchema.js'
 import { isEssentialTrafficOnly } from '../privacyLevel.js'
 import { jsonStringify } from '../slowOperations.js'
-import { getAPIProvider, isFirstPartyAnthropicBaseUrl } from './providers.js'
+import { getAPIProvider} from './providers.js'
 
 // .strip() — don't persist internal-only fields (mycro_deployments etc.) to disk
 const ModelCapabilitySchema = lazySchema(() =>
@@ -21,16 +21,14 @@ const ModelCapabilitySchema = lazySchema(() =>
     .object({
       id: z.string(),
       max_input_tokens: z.number().optional(),
-      max_tokens: z.number().optional(),
-    })
+      max_tokens: z.number().optional()})
     .strip(),
 )
 
 const CacheFileSchema = lazySchema(() =>
   z.object({
     models: z.array(ModelCapabilitySchema()),
-    timestamp: z.number(),
-  }),
+    timestamp: z.number()}),
 )
 
 export type ModelCapability = z.infer<ReturnType<typeof ModelCapabilitySchema>>
@@ -48,8 +46,8 @@ function isModelCapabilitiesEligible(): boolean {
   // to all firstParty users (API key and OAuth). Enabling for everyone
   // lets model capabilities (max_input_tokens, max_tokens) be fetched
   // dynamically instead of relying on hardcoded values in context.ts.
-  if (getAPIProvider() !== 'firstParty') return false
-  if (!isFirstPartyAnthropicBaseUrl()) return false
+  if (getAPIProvider() !== 'anthropic') return false
+  if (!false) return false
   return true
 }
 
@@ -109,8 +107,7 @@ export async function refreshModelCapabilities(): Promise<void> {
     await mkdir(getCacheDir(), { recursive: true })
     await writeFile(path, jsonStringify({ models, timestamp: Date.now() }), {
       encoding: 'utf-8',
-      mode: 0o600,
-    })
+      mode: 0o600})
     loadCache.cache.delete(path)
     logForDebugging(`[modelCapabilities] cached ${models.length} models`)
   } catch (error) {

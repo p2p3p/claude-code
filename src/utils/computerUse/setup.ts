@@ -42,9 +42,6 @@ export function setupComputerUseMCP(): {
         type: 'stdio',
         command: process.execPath,
         args,
-        scope: 'dynamic',
-      } as const,
-    },
-    allowedTools,
-  }
+        scope: 'dynamic'} as const},
+    allowedTools}
 }

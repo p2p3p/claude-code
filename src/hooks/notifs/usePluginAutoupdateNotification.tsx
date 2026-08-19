@@ -3,6 +3,7 @@ import { getIsRemoteMode } from '../../bootstrap/state.js';
 import { useNotifications } from '../../context/notifications.js';
 import { Text } from '@anthropic/ink';
 import { logForDebugging } from '../../utils/debug.js';
+import { t } from '../../utils/i18n/index.js';
 import { onPluginsAutoUpdated } from '../../utils/plugins/pluginAutoupdate.js';
 
 /**
@@ -44,14 +45,13 @@ export function usePluginAutoupdateNotification(): void {
       jsx: (
         <>
           <Text color="success">
-            {pluginNames.length === 1 ? 'Plugin' : 'Plugins'} updated: {displayNames}
+            {t('notif.pluginAutoupdate.updated', { count: pluginNames.length, displayNames })}
           </Text>
-          <Text dimColor> · Run /reload-plugins to apply</Text>
+          <Text dimColor>{t('notif.pluginAutoupdate.reloadHint')}</Text>
         </>
       ),
       priority: 'low',
-      timeoutMs: 10000,
-    });
+      timeoutMs: 10000});
 
     logForDebugging(`Showing plugin autoupdate notification for: ${pluginNames.join(', ')}`);
   }, [updatedPlugins, addNotification]);

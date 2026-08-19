@@ -32,25 +32,20 @@ import {
   CLAUDE_AI_INFERENCE_SCOPE,
   CLAUDE_AI_PROFILE_SCOPE,
   getOauthConfig,
-  OAUTH_BETA_HEADER,
-} from '../../constants/oauth.js'
+  OAUTH_BETA_HEADER} from '../../constants/oauth.js'
 import {
   getTeamMemPath,
   PathTraversalError,
-  validateTeamMemKey,
-} from '../../memdir/teamMemPaths.js'
+  validateTeamMemKey} from '../../memdir/teamMemPaths.js'
 import { count } from '../../utils/array.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
-  getClaudeAIOAuthTokens,
-} from '../../utils/auth.js'
+  getClaudeAIOAuthTokens} from '../../utils/auth.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { classifyAxiosError } from '../../utils/errors.js'
 import { getGithubRepo } from '../../utils/git.js'
 import {
-  getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
-} from '../../utils/model/providers.js'
+  getAPIProvider} from '../../utils/model/providers.js'
 import { sleep } from '../../utils/sleep.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
@@ -65,8 +60,7 @@ import {
   type TeamMemorySyncFetchResult,
   type TeamMemorySyncPushResult,
   type TeamMemorySyncUploadResult,
-  TeamMemoryTooManyEntriesSchema,
-} from './types.js'
+  TeamMemoryTooManyEntriesSchema} from './types.js'
 
 const TEAM_MEMORY_SYNC_TIMEOUT_MS = 30_000
 // Per-entry size cap — server default from anthropic/anthropic#293258.
@@ -122,8 +116,7 @@ export function createSyncState(): SyncState {
   return {
     lastKnownChecksum: null,
     serverChecksums: new Map(),
-    serverMaxEntries: null,
-  }
+    serverMaxEntries: null}
 }
 
 /**
@@ -149,7 +142,7 @@ function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
  * Check if user is authenticated with first-party OAuth (required for team memory sync).
  */
 function isUsingOAuth(): boolean {
-  if (getAPIProvider() !== 'firstParty' || !isFirstPartyAnthropicBaseUrl()) {
+  if (getAPIProvider() !== 'anthropic' || !false) {
     return false
   }
   const tokens = getClaudeAIOAuthTokens()
@@ -176,9 +169,7 @@ function getAuthHeaders(): {
       headers: {
         Authorization: `Bearer ${oauthTokens.accessToken}`,
         'anthropic-beta': OAUTH_BETA_HEADER,
-        'User-Agent': getClaudeCodeUserAgent(),
-      },
-    }
+        'User-Agent': getClaudeCodeUserAgent()}}
   }
   return { error: 'No OAuth token available for team memory sync' }
 }
@@ -199,8 +190,7 @@ async function fetchTeamMemoryOnce(
         success: false,
         error: auth.error,
         skipRetry: true,
-        errorType: 'auth',
-      }
+        errorType: 'auth'}
     }
 
     const headers: Record<string, string> = { ...auth.headers }
@@ -213,20 +203,17 @@ async function fetchTeamMemoryOnce(
       headers,
       timeout: TEAM_MEMORY_SYNC_TIMEOUT_MS,
       validateStatus: status =>
-        status === 200 || status === 304 || status === 404,
-    })
+        status === 200 || status === 304 || status === 404})
 
     if (response.status === 304) {
       logForDebugging('team-memory-sync: not modified (304)', {
-        level: 'debug',
-      })
+        level: 'debug'})
       return { success: true, notModified: true, checksum: etag ?? undefined }
     }
 
     if (response.status === 404) {
       logForDebugging('team-memory-sync: no remote data (404)', {
-        level: 'debug',
-      })
+        level: 'debug'})
       state.lastKnownChecksum = null
       return { success: true, isEmpty: true }
     }
@@ -234,14 +221,12 @@ async function fetchTeamMemoryOnce(
     const parsed = TeamMemoryDataSchema().safeParse(response.data)
     if (!parsed.success) {
       logForDebugging('team-memory-sync: invalid response format', {
-        level: 'warn',
-      })
+        level: 'warn'})
       return {
         success: false,
         error: 'Invalid team memory response format',
         skipRetry: true,
-        errorType: 'parse',
-      }
+        errorType: 'parse'}
     }
 
     // Extract checksum from response data or ETag header
@@ -261,8 +246,7 @@ async function fetchTeamMemoryOnce(
       success: true,
       data: parsed.data,
       isEmpty: false,
-      checksum: responseChecksum,
-    }
+      checksum: responseChecksum}
   } catch (error) {
     const { kind, status, message } = classifyAxiosError(error)
     const body = axios.isAxiosError(error)
@@ -270,8 +254,7 @@ async function fetchTeamMemoryOnce(
       : ''
     if (kind !== 'other') {
       logForDebugging(`team-memory-sync: fetch error ${status}: ${body}`, {
-        level: 'warn',
-      })
+        level: 'warn'})
     }
     switch (kind) {
       case 'auth':
@@ -280,27 +263,23 @@ async function fetchTeamMemoryOnce(
           error: `Not authorized for team memory sync: ${body}`,
           skipRetry: true,
           errorType: 'auth',
-          httpStatus: status,
-        }
+          httpStatus: status}
       case 'timeout':
         return {
           success: false,
           error: 'Team memory sync request timeout',
-          errorType: 'timeout',
-        }
+          errorType: 'timeout'}
       case 'network':
         return {
           success: false,
           error: 'Cannot connect to server',
-          errorType: 'network',
-        }
+          errorType: 'network'}
       default:
         return {
           success: false,
           error: message,
           errorType: 'unknown',
-          httpStatus: status,
-        }
+          httpStatus: status}
     }
   }
 }
@@ -327,8 +306,7 @@ async function fetchTeamMemoryHashes(
     const response = await axios.get(endpoint, {
       headers: auth.headers,
       timeout: TEAM_MEMORY_SYNC_TIMEOUT_MS,
-      validateStatus: status => status === 200 || status === 404,
-    })
+      validateStatus: status => status === 200 || status === 404})
 
     if (response.status === 404) {
       state.lastKnownChecksum = null
@@ -346,8 +324,7 @@ async function fetchTeamMemoryHashes(
         success: false,
         error:
           'Server did not return entryChecksums (?view=hashes unsupported)',
-        errorType: 'parse',
-      }
+        errorType: 'parse'}
     }
 
     if (checksum) {
@@ -357,8 +334,7 @@ async function fetchTeamMemoryHashes(
       success: true,
       version: response.data?.version,
       checksum,
-      entryChecksums,
-    }
+      entryChecksums}
   } catch (error) {
     const { kind, status, message } = classifyAxiosError(error)
     switch (kind) {
@@ -367,8 +343,7 @@ async function fetchTeamMemoryHashes(
           success: false,
           error: 'Not authorized',
           errorType: 'auth',
-          httpStatus: status,
-        }
+          httpStatus: status}
       case 'timeout':
         return { success: false, error: 'Timeout', errorType: 'timeout' }
       case 'network':
@@ -378,8 +353,7 @@ async function fetchTeamMemoryHashes(
           success: false,
           error: message,
           errorType: 'unknown',
-          httpStatus: status,
-        }
+          httpStatus: status}
     }
   }
 }
@@ -401,8 +375,7 @@ async function fetchTeamMemory(
     }
     const delayMs = getRetryDelay(attempt)
     logForDebugging(`team-memory-sync: retry ${attempt}/${MAX_RETRIES}`, {
-      level: 'debug',
-    })
+      level: 'debug'})
     await sleep(delayMs)
   }
 
@@ -475,8 +448,7 @@ async function uploadTeamMemory(
 
     const headers: Record<string, string> = {
       ...auth.headers,
-      'Content-Type': 'application/json',
-    }
+      'Content-Type': 'application/json'}
     if (ifMatchChecksum) {
       headers['If-Match'] = `"${ifMatchChecksum.replace(/"/g, '')}"`
     }
@@ -488,14 +460,12 @@ async function uploadTeamMemory(
       {
         headers,
         timeout: TEAM_MEMORY_SYNC_TIMEOUT_MS,
-        validateStatus: status => status === 200 || status === 412,
-      },
+        validateStatus: status => status === 200 || status === 412},
     )
 
     if (response.status === 412) {
       logForDebugging('team-memory-sync: conflict (412 Precondition Failed)', {
-        level: 'info',
-      })
+        level: 'info'})
       return { success: false, conflict: true, error: 'ETag mismatch' }
     }
 
@@ -511,8 +481,7 @@ async function uploadTeamMemory(
     return {
       success: true,
       checksum: responseChecksum,
-      lastModified: response.data?.lastModified,
-    }
+      lastModified: response.data?.lastModified}
   } catch (error) {
     const body = axios.isAxiosError(error)
       ? JSON.stringify(error.response?.data ?? '')
@@ -547,8 +516,7 @@ async function uploadTeamMemory(
       httpStatus,
       ...(serverErrorCode !== undefined && { serverErrorCode }),
       ...(serverMaxEntries !== undefined && { serverMaxEntries }),
-      ...(serverReceivedEntries !== undefined && { serverReceivedEntries }),
-    }
+      ...(serverReceivedEntries !== undefined && { serverReceivedEntries })}
   }
 }
 
@@ -605,8 +573,7 @@ async function readLocalTeamMemory(maxEntries: number | null): Promise<{
                 skippedSecrets.push({
                   path: relPath,
                   ruleId: firstMatch.ruleId,
-                  label: firstMatch.label,
-                })
+                  label: firstMatch.label})
                 logForDebugging(
                   `team-memory-sync: skipping "${relPath}" — detected ${firstMatch.label}`,
                   { level: 'warn' },
@@ -661,8 +628,7 @@ async function readLocalTeamMemory(maxEntries: number | null): Promise<{
     logEvent('tengu_team_mem_entries_capped', {
       total_entries: keys.length,
       dropped_count: dropped.length,
-      max_entries: maxEntries,
-    })
+      max_entries: maxEntries})
     const truncated: Record<string, string> = {}
     for (const key of keys.slice(0, maxEntries)) {
       truncated[key] = entries[key]!
@@ -787,8 +753,7 @@ export async function pullTeamMemory(
       success: false,
       filesWritten: 0,
       entryCount: 0,
-      error: 'OAuth not available',
-    }
+      error: 'OAuth not available'}
   }
 
   const repoSlug = await getGithubRepo()
@@ -798,8 +763,7 @@ export async function pullTeamMemory(
       success: false,
       filesWritten: 0,
       entryCount: 0,
-      error: 'No git remote found',
-    }
+      error: 'No git remote found'}
   }
 
   const etag = skipEtagCache ? null : state.lastKnownChecksum
@@ -808,14 +772,12 @@ export async function pullTeamMemory(
     logPull(startTime, {
       success: false,
       errorType: result.errorType,
-      status: result.httpStatus,
-    })
+      status: result.httpStatus})
     return {
       success: false,
       filesWritten: 0,
       entryCount: 0,
-      error: result.error,
-    }
+      error: result.error}
   }
   if (result.notModified) {
     logPull(startTime, { success: true, notModified: true })
@@ -854,16 +816,14 @@ export async function pullTeamMemory(
     clearMemoryFileCaches()
   }
   logForDebugging(`team-memory-sync: pulled ${filesWritten} files`, {
-    level: 'info',
-  })
+    level: 'info'})
 
   logPull(startTime, { success: true, filesWritten })
 
   return {
     success: true,
     filesWritten,
-    entryCount: Object.keys(entries).length,
-  }
+    entryCount: Object.keys(entries).length}
 }
 
 /**
@@ -898,8 +858,7 @@ export async function pushTeamMemory(
       success: false,
       filesUploaded: 0,
       error: 'OAuth not available',
-      errorType: 'no_oauth',
-    }
+      errorType: 'no_oauth'}
   }
 
   const repoSlug = await getGithubRepo()
@@ -909,8 +868,7 @@ export async function pushTeamMemory(
       success: false,
       filesUploaded: 0,
       error: 'No git remote found',
-      errorType: 'no_repo',
-    }
+      errorType: 'no_repo'}
   }
 
   // Read local entries once at the start. Conflict resolution does NOT re-read
@@ -940,8 +898,7 @@ export async function pushTeamMemory(
         .map(s => s.ruleId)
         .join(
           ',',
-        ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
   }
 
   // Hash each local entry once. The loop recomputes the delta each iteration
@@ -978,13 +935,11 @@ export async function pushTeamMemory(
       logPush(startTime, {
         success: true,
         conflict: sawConflict,
-        conflictRetries,
-      })
+        conflictRetries})
       return {
         success: true,
         filesUploaded: 0,
-        ...(skippedSecrets.length > 0 && { skippedSecrets }),
-      }
+        ...(skippedSecrets.length > 0 && { skippedSecrets })}
     }
 
     // Split the delta into PUT-sized batches to stay under the gateway's
@@ -1033,14 +988,12 @@ export async function pushTeamMemory(
         filesUploaded,
         conflict: sawConflict,
         conflictRetries,
-        putBatches: batches.length > 1 ? batches.length : undefined,
-      })
+        putBatches: batches.length > 1 ? batches.length : undefined})
       return {
         success: true,
         filesUploaded,
         checksum: result.checksum,
-        ...(skippedSecrets.length > 0 && { skippedSecrets }),
-      }
+        ...(skippedSecrets.length > 0 && { skippedSecrets })}
     }
 
     if (!result.conflict) {
@@ -1072,15 +1025,13 @@ export async function pushTeamMemory(
         // too-many-files rejections distinct from gateway/unstructured 413s
         errorCode: result.serverErrorCode,
         serverMaxEntries: result.serverMaxEntries,
-        serverReceivedEntries: result.serverReceivedEntries,
-      })
+        serverReceivedEntries: result.serverReceivedEntries})
       return {
         success: false,
         filesUploaded,
         error: result.error,
         errorType: result.errorType,
-        httpStatus: result.httpStatus,
-      }
+        httpStatus: result.httpStatus}
     }
 
     // 412 conflict — refresh serverChecksums and retry with a tighter delta.
@@ -1094,14 +1045,12 @@ export async function pushTeamMemory(
         success: false,
         conflict: true,
         conflictRetries,
-        errorType: 'conflict',
-      })
+        errorType: 'conflict'})
       return {
         success: false,
         filesUploaded: 0,
         conflict: true,
-        error: 'Conflict resolution failed after retries',
-      }
+        error: 'Conflict resolution failed after retries'}
     }
 
     conflictRetries++
@@ -1122,14 +1071,12 @@ export async function pushTeamMemory(
         success: false,
         conflict: true,
         conflictRetries,
-        errorType: 'conflict',
-      })
+        errorType: 'conflict'})
       return {
         success: false,
         filesUploaded: 0,
         conflict: true,
-        error: `Conflict resolution hashes probe failed: ${probe.error}`,
-      }
+        error: `Conflict resolution hashes probe failed: ${probe.error}`}
     }
     state.serverChecksums.clear()
     for (const [key, hash] of Object.entries(probe.entryChecksums)) {
@@ -1141,8 +1088,7 @@ export async function pushTeamMemory(
   return {
     success: false,
     filesUploaded: 0,
-    error: 'Unexpected end of conflict resolution loop',
-  }
+    error: 'Unexpected end of conflict resolution loop'}
 }
 
 /**
@@ -1163,8 +1109,7 @@ export async function syncTeamMemory(state: SyncState): Promise<{
       success: false,
       filesPulled: 0,
       filesPushed: 0,
-      error: pullResult.error,
-    }
+      error: pullResult.error}
   }
 
   // 2. Push local → remote (with conflict resolution)
@@ -1174,8 +1119,7 @@ export async function syncTeamMemory(state: SyncState): Promise<{
       success: false,
       filesPulled: pullResult.filesWritten,
       filesPushed: 0,
-      error: pushResult.error,
-    }
+      error: pushResult.error}
   }
 
   logForDebugging(
@@ -1186,8 +1130,7 @@ export async function syncTeamMemory(state: SyncState): Promise<{
   return {
     success: true,
     filesPulled: pullResult.filesWritten,
-    filesPushed: pushResult.filesUploaded,
-  }
+    filesPushed: pushResult.filesUploaded}
 }
 
 // ─── Telemetry helpers ───────────────────────────────────────
@@ -1209,10 +1152,8 @@ function logPull(
     duration_ms: Date.now() - startTime,
     ...(outcome.errorType && {
       errorType:
-        outcome.errorType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    }),
-    ...(outcome.status && { status: outcome.status }),
-  })
+        outcome.errorType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
+    ...(outcome.status && { status: outcome.status })})
 }
 
 function logPush(
@@ -1238,19 +1179,14 @@ function logPush(
     duration_ms: Date.now() - startTime,
     ...(outcome.errorType && {
       errorType:
-        outcome.errorType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    }),
+        outcome.errorType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
     ...(outcome.status && { status: outcome.status }),
     ...(outcome.putBatches && { put_batches: outcome.putBatches }),
     ...(outcome.errorCode && {
       error_code:
-        outcome.errorCode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    }),
+        outcome.errorCode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
     ...(outcome.serverMaxEntries !== undefined && {
-      server_max_entries: outcome.serverMaxEntries,
-    }),
+      server_max_entries: outcome.serverMaxEntries}),
     ...(outcome.serverReceivedEntries !== undefined && {
-      server_received_entries: outcome.serverReceivedEntries,
-    }),
-  })
+      server_received_entries: outcome.serverReceivedEntries})})
 }

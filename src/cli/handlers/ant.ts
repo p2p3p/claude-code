@@ -1,11 +1,11 @@
 import type { Command } from '@commander-js/extra-typings'
+import { t } from '../../utils/i18n/index.js'
 import {
   createTask,
   getTask,
   updateTask,
   listTasks,
-  getTasksDir,
-} from '../../utils/tasks.js'
+  getTasksDir} from '../../utils/tasks.js'
 import { getRecentActivity } from '../../utils/logoV2Utils.js'
 import type { LogOption } from '../../types/logs.js'
 
@@ -23,9 +23,8 @@ export async function taskCreateHandler(
     description: opts.description || '',
     status: 'pending',
     blocks: [],
-    blockedBy: [],
-  })
-  console.log(`Created task ${id}: ${subject}`)
+    blockedBy: []})
+  console.log(t('cli.createdTask', id, subject))
 }
 
 export async function taskListHandler(opts: {
@@ -46,14 +45,14 @@ export async function taskListHandler(opts: {
   }
 
   if (tasks.length === 0) {
-    console.log('No tasks found.')
+    console.log(t('cli.noTasksFound'))
     return
   }
 
-  for (const t of tasks) {
-    console.log(`  [${t.status}] ${t.id}: ${t.subject}`)
-    if (t.description) console.log(`    ${t.description}`)
-    if (t.owner) console.log(`    owner: ${t.owner}`)
+  for (const task of tasks) {
+    console.log(t('cli.taskEntry', task.status, task.id, task.subject))
+    if (task.description) console.log(`    ${task.description}`)
+    if (task.owner) console.log(t('cli.taskOwner', task.owner))
   }
 }
 
@@ -64,7 +63,7 @@ export async function taskGetHandler(
   const listId = opts.list || DEFAULT_LIST
   const task = await getTask(listId, id)
   if (!task) {
-    console.error(`Task not found: ${id}`)
+    console.error(t('cli.taskNotFound', id))
     process.exitCode = 1
     return
   }
@@ -93,11 +92,11 @@ export async function taskUpdateHandler(
 
   const task = await updateTask(listId, id, updates)
   if (!task) {
-    console.error(`Task not found: ${id}`)
+    console.error(t('cli.taskNotFound', id))
     process.exitCode = 1
     return
   }
-  console.log(`Updated task ${id}: [${task.status}] ${task.subject}`)
+  console.log(t('cli.updatedTask', id, task.status, task.subject))
 }
 
 export async function taskDirHandler(opts: { list?: string }): Promise<void> {
@@ -114,7 +113,7 @@ export async function logHandler(
 
   if (logId === undefined) {
     if (logs.length === 0) {
-      console.log('No recent sessions.')
+      console.log(t('cli.noRecentSessions'))
       return
     }
     for (let i = 0; i < Math.min(logs.length, 20); i++) {
@@ -136,7 +135,7 @@ export async function logHandler(
       : logs.find(l => l.sessionId === String(logId))
 
   if (!log) {
-    console.error(`Session not found: ${logId}`)
+    console.error(t('cli.logSessionNotFound', logId))
     process.exitCode = 1
     return
   }
@@ -149,7 +148,7 @@ export async function errorHandler(num: number | undefined): Promise<void> {
   const logs = await getRecentActivity()
   const count = num ?? 5
 
-  console.log(`Last ${count} sessions:`)
+  console.log(t('cli.lastSessions', count))
   for (let i = 0; i < Math.min(count, logs.length); i++) {
     const log = logs[i]!
     const date = log.modified
@@ -180,17 +179,17 @@ export async function exportHandler(
     try {
       const content = await readFile(source, 'utf-8')
       await writeFile(outputFile, content, 'utf-8')
-      console.log(`Exported ${source} → ${outputFile}`)
+      console.log(t('cli.exportedFile', source, outputFile))
       return
     } catch {
-      console.error(`Source not found: ${source}`)
+      console.error(t('cli.sourceNotFound', source))
       process.exitCode = 1
       return
     }
   }
 
   await writeFile(outputFile, JSON.stringify(log, null, 2), 'utf-8')
-  console.log(`Exported session ${log.sessionId} → ${outputFile}`)
+  console.log(t('cli.exportedSession', log.sessionId, outputFile))
 }
 
 // ─── Group D: Completion ─────────────────────────────────────────────────────
@@ -207,10 +206,10 @@ export async function completionHandler(
   if (opts.output) {
     // Generate and write to file
     await regenerateCompletionCache()
-    console.log(`Completion cache regenerated for ${shell}.`)
+    console.log(t('cli.completionCacheRegenerated', shell))
   } else {
     // Regenerate and output to stdout
     await regenerateCompletionCache()
-    console.log(`Completion cache regenerated for ${shell}.`)
+    console.log(t('cli.completionCacheRegenerated', shell))
   }
 }

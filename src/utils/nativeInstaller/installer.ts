@@ -26,18 +26,17 @@ import {
   stat,
   symlink,
   unlink,
-  writeFile,
-} from 'fs/promises'
+  writeFile} from 'fs/promises'
 import { homedir } from 'os'
 import { basename, delimiter, dirname, join, resolve } from 'path'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { getMaxVersion, shouldSkipVersion } from '../autoUpdater.js'
 import { registerCleanup } from '../cleanupRegistry.js'
 import { getGlobalConfig, saveGlobalConfig } from '../config.js'
 import { logForDebugging } from '../debug.js'
+import { t } from '../i18n/index.js'
 import { getCurrentInstallationType } from '../doctorDiagnostic.js'
 import { env } from '../env.js'
 import { envDynamic } from '../envDynamic.js'
@@ -52,15 +51,13 @@ import {
   filterClaudeAliases,
   getShellConfigPaths,
   readFileLines,
-  writeFileLines,
-} from '../shellConfig.js'
+  writeFileLines} from '../shellConfig.js'
 import { sleep } from '../sleep.js'
 import {
   getUserBinDir,
   getXDGCacheHome,
   getXDGDataHome,
-  getXDGStateHome,
-} from '../xdg.js'
+  getXDGStateHome} from '../xdg.js'
 import { downloadVersion, getLatestVersion } from './download.js'
 import {
   acquireProcessLifetimeLock,
@@ -68,8 +65,7 @@ import {
   isLockActive,
   isPidBasedLockingEnabled,
   readLockContent,
-  withLock,
-} from './pidLock.js'
+  withLock} from './pidLock.js'
 
 export const VERSION_RETENTION_COUNT = 2
 
@@ -127,8 +123,7 @@ function getBaseDirectories() {
     locks: join(getXDGStateHome(), 'claude', 'locks'),
 
     // User bin
-    executable: join(getUserBinDir(), executableName),
-  }
+    executable: join(getUserBinDir(), executableName)}
 }
 
 async function isPossibleClaudeBinary(filePath: string): Promise<boolean> {
@@ -172,8 +167,7 @@ async function getVersionPaths(version: string) {
 
   return {
     stagingPath: join(dirs.staging, version),
-    installPath,
-  }
+    installPath}
 }
 
 // Execute a callback while holding a lock on a version file
@@ -215,8 +209,7 @@ async function tryWithVersionLock(
         logEvent('tengu_version_lock_acquired', {
           is_pid_based: true,
           is_lifetime_lock: false,
-          attempts: attempts + 1,
-        })
+          attempts: attempts + 1})
         return true
       }
 
@@ -231,8 +224,7 @@ async function tryWithVersionLock(
     logEvent('tengu_version_lock_failed', {
       is_pid_based: true,
       is_lifetime_lock: false,
-      attempts: maxAttempts,
-    })
+      attempts: maxAttempts})
     logLockAcquisitionError(
       versionFilePath,
       new Error('Lock held by another process'),
@@ -254,8 +246,7 @@ async function tryWithVersionLock(
         retries: {
           retries,
           minTimeout: retries > 0 ? 1000 : 100,
-          maxTimeout: retries > 0 ? 5000 : 500,
-        },
+          maxTimeout: retries > 0 ? 5000 : 500},
         lockfilePath,
         // Handle lock compromise gracefully to prevent unhandled rejections
         // This can happen if another process deletes the lock directory while we hold it
@@ -264,13 +255,11 @@ async function tryWithVersionLock(
             `NON-FATAL: Version lock was compromised during operation: ${err.message}`,
             { level: 'info' },
           )
-        },
-      })
+        }})
     } catch (lockError) {
       logEvent('tengu_version_lock_failed', {
         is_pid_based: false,
-        is_lifetime_lock: false,
-      })
+        is_lifetime_lock: false})
       logLockAcquisitionError(versionFilePath, lockError)
       return false
     }
@@ -280,8 +269,7 @@ async function tryWithVersionLock(
       await callback()
       logEvent('tengu_version_lock_acquired', {
         is_pid_based: false,
-        is_lifetime_lock: false,
-      })
+        is_lifetime_lock: false})
       return true
     } catch (error) {
       logError(error)
@@ -337,8 +325,7 @@ async function installVersionFromPackage(
     if (!nativePackage) {
       logEvent('tengu_native_install_package_failure', {
         stage_find_package: true,
-        error_package_not_found: true,
-      })
+        error_package_not_found: true})
       const error = new Error('Could not find platform-specific native package')
       throw error
     }
@@ -350,8 +337,7 @@ async function installVersionFromPackage(
     } catch {
       logEvent('tengu_native_install_package_failure', {
         stage_binary_exists: true,
-        error_binary_not_found: true,
-      })
+        error_binary_not_found: true})
       const error = new Error('Native binary not found in staged package')
       throw error
     }
@@ -371,8 +357,7 @@ async function installVersionFromPackage(
     ) {
       logEvent('tengu_native_install_package_failure', {
         stage_atomic_move: true,
-        error_move_failed: true,
-      })
+        error_move_failed: true})
     }
     logError(toError(error))
     throw error
@@ -394,8 +379,7 @@ async function installVersionFromBinary(
     } catch {
       logEvent('tengu_native_install_binary_failure', {
         stage_binary_exists: true,
-        error_binary_not_found: true,
-      })
+        error_binary_not_found: true})
       const error = new Error('Staged binary not found')
       throw error
     }
@@ -410,8 +394,7 @@ async function installVersionFromBinary(
     if (!errorMessage(error).includes('Staged binary not found')) {
       logEvent('tengu_native_install_binary_failure', {
         stage_atomic_move: true,
-        error_move_failed: true,
-      })
+        error_move_failed: true})
     }
     logError(toError(error))
     throw error
@@ -475,11 +458,7 @@ async function performVersionUpdate(
     } catch {
       // installPath doesn't exist
     }
-    throw new Error(
-      `Failed to create executable at ${executablePath}. ` +
-        `Source file exists: ${installPathExists}. ` +
-        `Check write permissions to ${executablePath}.`,
-    )
+    throw new Error(t('nativeInstaller.failedToCreateExec', executablePath, String(installPathExists), executablePath))
   }
   return needsInstall
 }
@@ -521,8 +500,7 @@ async function updateLatest(
           max_version:
             maxVersion as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           available_version:
-            version as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            version as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return { success: true, latestVersion: version }
       }
       version = maxVersion
@@ -543,8 +521,7 @@ async function updateLatest(
       latency_ms: Date.now() - startTime,
       was_new_install: false,
       was_force_reinstall: false,
-      was_already_running: true,
-    })
+      was_already_running: true})
     return { success: true, latestVersion: version }
   }
 
@@ -553,8 +530,7 @@ async function updateLatest(
     logEvent('tengu_native_update_skipped_minimum_version', {
       latency_ms: Date.now() - startTime,
       target_version:
-        version as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        version as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return { success: true, latestVersion: version }
   }
 
@@ -596,22 +572,19 @@ async function updateLatest(
       }
       logEvent('tengu_native_update_lock_failed', {
         latency_ms: latencyMs,
-        lock_holder_pid: lockHolderPid,
-      })
+        lock_holder_pid: lockHolderPid})
       return {
         success: false,
         latestVersion: version,
         lockFailed: true,
-        lockHolderPid,
-      }
+        lockHolderPid}
     }
   }
 
   logEvent('tengu_native_update_complete', {
     latency_ms: latencyMs,
     was_new_install: wasNewInstall,
-    was_force_reinstall: forceReinstall,
-  })
+    was_force_reinstall: forceReinstall})
   logForDebugging(`Successfully updated to version ${version}`)
   return { success: true, latestVersion: version }
 }
@@ -702,7 +675,7 @@ async function updateSymlink(
           await copyFile(targetPath, symlinkPath)
         } catch (e) {
           if (isENOENT(e)) {
-            throw new Error(`Source file does not exist: ${targetPath}`)
+            throw new Error(t('nativeInstaller.sourceFileMissing', targetPath))
           }
           throw e
         }
@@ -838,8 +811,7 @@ export async function checkInstall(
     messages.push({
       message: `installMethod is native, but directory ${localBinDir} does not exist`,
       userActionRequired: true,
-      type: 'error',
-    })
+      type: 'error'})
   }
 
   // Check if claude executable exists and is valid.
@@ -855,8 +827,7 @@ export async function checkInstall(
       messages.push({
         message: `installMethod is native, but claude command is missing or invalid at ${dirs.executable}`,
         userActionRequired: true,
-        type: 'error',
-      })
+        type: 'error'})
     }
   } else {
     try {
@@ -866,24 +837,21 @@ export async function checkInstall(
         messages.push({
           message: `Claude symlink points to missing or invalid binary: ${target}`,
           userActionRequired: true,
-          type: 'error',
-        })
+          type: 'error'})
       }
     } catch (e) {
       if (isENOENT(e)) {
         messages.push({
           message: `installMethod is native, but claude command not found at ${dirs.executable}`,
           userActionRequired: true,
-          type: 'error',
-        })
+          type: 'error'})
       } else {
         // EINVAL (not a symlink) or other — check as regular binary
         if (!(await isPossibleClaudeBinary(dirs.executable))) {
           messages.push({
             message: `${dirs.executable} exists but is not a valid Claude binary`,
             userActionRequired: true,
-            type: 'error',
-          })
+            type: 'error'})
         }
       }
     }
@@ -914,8 +882,7 @@ export async function checkInstall(
       messages.push({
         message: `Native installation exists but ${windowsBinPath} is not in your PATH. Add it by opening: System Properties → Environment Variables → Edit User PATH → New → Add the path above. Then restart your terminal.`,
         userActionRequired: true,
-        type: 'path',
-      })
+        type: 'path'})
     } else {
       // Unix-style PATH instructions
       const shellType = getShellType()
@@ -928,8 +895,7 @@ export async function checkInstall(
       messages.push({
         message: `Native installation exists but ~/.local/bin is not in your PATH. Run:\n\necho 'export PATH="$HOME/.local/bin:$PATH"' >> ${displayPath} && source ${displayPath}`,
         userActionRequired: true,
-        type: 'path',
-      })
+        type: 'path'})
     }
   }
 
@@ -981,8 +947,7 @@ async function installLatestImpl(
       latestVersion: null,
       wasUpdated: false,
       lockFailed: updateResult.lockFailed,
-      lockHolderPid: updateResult.lockHolderPid,
-    }
+      lockHolderPid: updateResult.lockHolderPid}
   }
 
   // Installation succeeded (early return above covers failure). Mark as native
@@ -996,8 +961,7 @@ async function installLatestImpl(
       // Native installations use NativeAutoUpdater instead, which respects native installation.
       autoUpdates: false,
       // Mark this as protection-based, not user preference
-      autoUpdatesProtectedForNative: true,
-    }))
+      autoUpdatesProtectedForNative: true}))
     logForDebugging(
       'Native installer: Set installMethod to "native" and disabled legacy auto-updater for protection',
     )
@@ -1008,8 +972,7 @@ async function installLatestImpl(
   return {
     latestVersion: updateResult.latestVersion,
     wasUpdated: updateResult.success,
-    lockFailed: false,
-  }
+    lockFailed: false}
 }
 
 async function getVersionFromSymlink(
@@ -1069,8 +1032,7 @@ export async function lockCurrentVersion(): Promise<void> {
       if (!acquired) {
         logEvent('tengu_version_lock_failed', {
           is_pid_based: true,
-          is_lifetime_lock: true,
-        })
+          is_lifetime_lock: true})
         logLockAcquisitionError(
           versionPath,
           new Error('Lock already held by another process'),
@@ -1080,8 +1042,7 @@ export async function lockCurrentVersion(): Promise<void> {
 
       logEvent('tengu_version_lock_acquired', {
         is_pid_based: true,
-        is_lifetime_lock: true,
-      })
+        is_lifetime_lock: true})
       logForDebugging(`Acquired PID lock on running version: ${versionPath}`)
     } else {
       // Acquire mtime-based lock and never release it (until process exits)
@@ -1101,12 +1062,10 @@ export async function lockCurrentVersion(): Promise<void> {
               `NON-FATAL: Lock on running version was compromised: ${err.message}`,
               { level: 'info' },
             )
-          },
-        })
+          }})
         logEvent('tengu_version_lock_acquired', {
           is_pid_based: false,
-          is_lifetime_lock: true,
-        })
+          is_lifetime_lock: true})
         logForDebugging(
           `Acquired mtime-based lock on running version: ${versionPath}`,
         )
@@ -1129,8 +1088,7 @@ export async function lockCurrentVersion(): Promise<void> {
         }
         logEvent('tengu_version_lock_failed', {
           is_pid_based: false,
-          is_lifetime_lock: true,
-        })
+          is_lifetime_lock: true})
         logLockAcquisitionError(versionPath, lockError)
         return
       }
@@ -1239,8 +1197,7 @@ export async function cleanupOldVersions(): Promise<void> {
         `Cleaned up ${stagingCleanedCount} orphaned staging directories`,
       )
       logEvent('tengu_native_staging_cleanup', {
-        cleaned_count: stagingCleanedCount,
-      })
+        cleaned_count: stagingCleanedCount})
     }
   } catch (error) {
     if (!isENOENT(error)) {
@@ -1254,8 +1211,7 @@ export async function cleanupOldVersions(): Promise<void> {
     if (staleLocksCleaned > 0) {
       logForDebugging(`Cleaned up ${staleLocksCleaned} stale version locks`)
       logEvent('tengu_native_stale_locks_cleanup', {
-        cleaned_count: staleLocksCleaned,
-      })
+        cleaned_count: staleLocksCleaned})
     }
   }
 
@@ -1317,8 +1273,7 @@ export async function cleanupOldVersions(): Promise<void> {
         name: entry,
         path: entryPath,
         resolvedPath: resolve(entryPath),
-        mtime: stats.mtime,
-      })
+        mtime: stats.mtime})
     } catch {
       // Skip files we can't stat
     }
@@ -1329,8 +1284,7 @@ export async function cleanupOldVersions(): Promise<void> {
       `Cleaned up ${tempFilesCleanedCount} orphaned temp install files`,
     )
     logEvent('tengu_native_temp_files_cleanup', {
-      cleaned_count: tempFilesCleanedCount,
-    })
+      cleaned_count: tempFilesCleanedCount})
   }
 
   if (versionFiles.length === 0) {
@@ -1362,8 +1316,7 @@ export async function cleanupOldVersions(): Promise<void> {
         try {
           hasActiveLock = await lockfile.check(v.resolvedPath, {
             stale: LOCK_STALE_MS,
-            lockfilePath: lockFilePath,
-          })
+            lockfilePath: lockFilePath})
         } catch {
           hasActiveLock = false
         }
@@ -1388,8 +1341,7 @@ export async function cleanupOldVersions(): Promise<void> {
         protected_count: protectedVersions.size,
         retained_count: VERSION_RETENTION_COUNT,
         lock_failed_count: 0,
-        error_count: 0,
-      })
+        error_count: 0})
       return
     }
 
@@ -1426,8 +1378,7 @@ export async function cleanupOldVersions(): Promise<void> {
       protected_count: protectedVersions.size,
       retained_count: VERSION_RETENTION_COUNT,
       lock_failed_count: lockFailedCount,
-      error_count: errorCount,
-    })
+      error_count: errorCount})
   } catch (error) {
     if (!isENOENT(error)) {
       logError(new Error(`Version cleanup failed: ${error}`))
@@ -1502,8 +1453,7 @@ export async function cleanupShellAliases(): Promise<SetupMessage[]> {
         messages.push({
           message: `Removed claude alias from ${configFile}. Run: unalias claude`,
           userActionRequired: true,
-          type: 'alias',
-        })
+          type: 'alias'})
         logForDebugging(`Cleaned up claude alias from ${shellType} config`)
       }
     } catch (error) {
@@ -1511,8 +1461,7 @@ export async function cleanupShellAliases(): Promise<SetupMessage[]> {
       messages.push({
         message: `Failed to clean up ${configFile}: ${error}`,
         userActionRequired: false,
-        type: 'error',
-      })
+        type: 'error'})
     }
   }
 
@@ -1532,8 +1481,7 @@ async function manualRemoveNpmPackage(
     if (prefixResult.code !== 0 || !prefixResult.stdout) {
       return {
         success: false,
-        error: 'Failed to get npm global prefix',
-      }
+        error: 'Failed to get npm global prefix'}
     }
 
     const globalPrefix = prefixResult.stdout.trim()
@@ -1587,19 +1535,16 @@ async function manualRemoveNpmPackage(
 
       return {
         success: true,
-        warning: `${packageName} executables removed, but node_modules directory was left intact for safety. You may manually delete it later at: ${nodeModulesPath}`,
-      }
+        warning: `${packageName} executables removed, but node_modules directory was left intact for safety. You may manually delete it later at: ${nodeModulesPath}`}
     } else {
       return { success: false }
     }
   } catch (manualError) {
     logForDebugging(`Manual removal failed: ${manualError}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return {
       success: false,
-      error: `Manual removal failed: ${manualError}`,
-    }
+      error: `Manual removal failed: ${manualError}`}
   }
 }
 
@@ -1631,8 +1576,7 @@ async function attemptNpmUninstall(
       } else if (manualResult.error) {
         return {
           success: false,
-          error: `Failed to remove global npm installation of ${packageName}: ${stderr}. Manual removal also failed: ${manualResult.error}`,
-        }
+          error: `Failed to remove global npm installation of ${packageName}: ${stderr}. Manual removal also failed: ${manualResult.error}`}
       }
     }
 
@@ -1643,8 +1587,7 @@ async function attemptNpmUninstall(
     )
     return {
       success: false,
-      error: `Failed to remove global npm installation of ${packageName}: ${stderr}`,
-    }
+      error: `Failed to remove global npm installation of ${packageName}: ${stderr}`}
   }
 
   return { success: false } // Package not found, not an error
@@ -1696,8 +1639,7 @@ export async function cleanupNpmInstallations(): Promise<{
     if (!isENOENT(error)) {
       errors.push(`Failed to remove ${localInstallDir}: ${error}`)
       logForDebugging(`Failed to remove local installation: ${error}`, {
-        level: 'error',
-      })
+        level: 'error'})
     }
   }
 

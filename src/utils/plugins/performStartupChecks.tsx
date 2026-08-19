@@ -53,8 +53,7 @@ export async function performStartupChecks(setAppState: SetAppState): Promise<vo
         if (prev.plugins.needsRefresh) return prev;
         return {
           ...prev,
-          plugins: { ...prev.plugins, needsRefresh: true },
-        };
+          plugins: { ...prev.plugins, needsRefresh: true }};
       });
     }
 

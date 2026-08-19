@@ -64,8 +64,7 @@ export function mergePhases(
       title,
       status: derivePhaseStatus(actual, inPhase),
       done: inPhase.filter(a => a.status === 'done').length,
-      total: inPhase.length,
-    })
+      total: inPhase.length})
   }
   for (const t of run.declaredPhases) push(t)
   for (const p of run.phases) push(p.title)

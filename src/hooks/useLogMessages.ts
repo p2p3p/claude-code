@@ -6,8 +6,7 @@ import { isAgentSwarmsEnabled } from '../utils/agentSwarmsEnabled.js'
 import {
   cleanMessagesForLogging,
   isChainParticipant,
-  recordTranscript,
-} from '../utils/sessionStorage.js'
+  recordTranscript} from '../utils/sessionStorage.js'
 
 /**
  * Hook that logs messages to the transcript
@@ -71,8 +70,7 @@ export function useLogMessages(messages: Message[], ignore: boolean = false) {
       isAgentSwarmsEnabled()
         ? {
             teamName: teamContext?.teamName,
-            agentName: teamContext?.selfAgentName,
-          }
+            agentName: teamContext?.selfAgentName}
         : {},
       parentHint,
       messages,

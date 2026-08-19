@@ -36,8 +36,7 @@ export function getSystemDirectories(
     HOME: homeDir,
     DESKTOP: join(homeDir, 'Desktop'),
     DOCUMENTS: join(homeDir, 'Documents'),
-    DOWNLOADS: join(homeDir, 'Downloads'),
-  }
+    DOWNLOADS: join(homeDir, 'Downloads')}
 
   switch (platform) {
     case 'windows': {
@@ -47,8 +46,7 @@ export function getSystemDirectories(
         HOME: homeDir,
         DESKTOP: join(userProfile, 'Desktop'),
         DOCUMENTS: join(userProfile, 'Documents'),
-        DOWNLOADS: join(userProfile, 'Downloads'),
-      }
+        DOWNLOADS: join(userProfile, 'Downloads')}
     }
 
     case 'linux':
@@ -58,8 +56,7 @@ export function getSystemDirectories(
         HOME: homeDir,
         DESKTOP: env.XDG_DESKTOP_DIR || defaults.DESKTOP,
         DOCUMENTS: env.XDG_DOCUMENTS_DIR || defaults.DOCUMENTS,
-        DOWNLOADS: env.XDG_DOWNLOAD_DIR || defaults.DOWNLOADS,
-      }
+        DOWNLOADS: env.XDG_DOWNLOAD_DIR || defaults.DOWNLOADS}
     }
 
     case 'macos':

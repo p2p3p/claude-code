@@ -2,8 +2,7 @@ import type { Subprocess } from 'bun'
 import { SSHSessionManagerImpl } from './SSHSessionManager.js'
 import type {
   SSHSessionManager,
-  SSHSessionManagerOptions,
-} from './SSHSessionManager.js'
+  SSHSessionManagerOptions} from './SSHSessionManager.js'
 import { createAuthProxy } from './SSHAuthProxy.js'
 export type { SSHAuthProxy } from './SSHAuthProxy.js'
 import type { SSHAuthProxy } from './SSHAuthProxy.js'
@@ -63,8 +62,7 @@ export async function createSSHSession(
         {
           stdin: 'ignore',
           stdout: 'pipe',
-          stderr: 'ignore',
-        },
+          stderr: 'ignore'},
       )
       await pwdProc.exited
       const pwd = (await new Response(pwdProc.stdout).text()).trim()
@@ -91,8 +89,7 @@ export async function createSSHSession(
         remotePlatform: probe.remotePlatform,
         remoteArch: probe.remoteArch,
         localVersion,
-        onProgress,
-      })
+        onProgress})
     }
   }
 
@@ -161,8 +158,7 @@ export async function createSSHSession(
     proc = Bun.spawn(sshArgs, {
       stdin: 'pipe',
       stdout: 'pipe',
-      stderr: 'pipe',
-    })
+      stderr: 'pipe'})
   } catch (err) {
     proxy.stop()
     throw new SSHSessionError(
@@ -220,8 +216,7 @@ export async function createSSHSession(
     const newProc = Bun.spawn(reconnectArgs, {
       stdin: 'pipe',
       stdout: 'pipe',
-      stderr: 'pipe',
-    })
+      stderr: 'pipe'})
 
     const newStderrChunks: string[] = []
     collectStderr(newProc, newStderrChunks)
@@ -243,13 +238,11 @@ export async function createSSHSession(
     createManager(options: SSHSessionManagerOptions): SSHSessionManager {
       return new SSHSessionManagerImpl(currentProc, {
         ...options,
-        reconnect,
-      })
+        reconnect})
     },
     getStderrTail(): string {
       return stderrChunks.slice(-STDERR_TAIL_LINES).join('')
-    },
-  }
+    }}
 }
 
 export async function createLocalSSHSession(config: {
@@ -284,8 +277,7 @@ export async function createLocalSSHSession(config: {
       stdin: 'pipe',
       stdout: 'pipe',
       stderr: 'pipe',
-      env: { ...spec.env, ...authEnv },
-    })
+      env: { ...spec.env, ...authEnv }})
   } catch (err) {
     proxy.stop()
     throw new SSHSessionError(
@@ -323,8 +315,7 @@ export async function createLocalSSHSession(config: {
       stdin: 'pipe',
       stdout: 'pipe',
       stderr: 'pipe',
-      env: { ...reconnectSpec.env, ...authEnv },
-    })
+      env: { ...reconnectSpec.env, ...authEnv }})
 
     const newStderrChunks: string[] = []
     collectStderr(newProc, newStderrChunks)
@@ -346,13 +337,11 @@ export async function createLocalSSHSession(config: {
     createManager(options: SSHSessionManagerOptions): SSHSessionManager {
       return new SSHSessionManagerImpl(currentProc, {
         ...options,
-        reconnect,
-      })
+        reconnect})
     },
     getStderrTail(): string {
       return stderrChunks.slice(-STDERR_TAIL_LINES).join('')
-    },
-  }
+    }}
 }
 
 async function waitForInit(

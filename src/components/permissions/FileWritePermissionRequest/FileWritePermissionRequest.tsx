@@ -1,6 +1,7 @@
 import { basename, relative } from 'path';
 import React, { useMemo } from 'react';
 import type { z } from 'zod/v4';
+import { t } from '../../../utils/i18n/index.js';
 import { Text } from '@anthropic/ink';
 import { FileWriteTool } from '@claude-code-best/builtin-tools/tools/FileWriteTool/FileWriteTool.js';
 import { getCwd } from '../../../utils/cwd.js';
@@ -10,8 +11,7 @@ import { FilePermissionDialog } from '../FilePermissionDialog/FilePermissionDial
 import {
   createSingleEditDiffConfig,
   type FileEdit,
-  type IDEDiffSupport,
-} from '../FilePermissionDialog/ideDiffConfig.js';
+  type IDEDiffSupport} from '../FilePermissionDialog/ideDiffConfig.js';
 import type { PermissionRequestProps } from '../PermissionRequest.js';
 import { FileWriteToolDiff } from './FileWriteToolDiff.js';
 
@@ -39,12 +39,10 @@ const ideDiffSupport: IDEDiffSupport<FileWriteToolInput> = {
     if (firstEdit) {
       return {
         ...input,
-        content: firstEdit.new_string,
-      };
+        content: firstEdit.new_string};
     }
     return input;
-  },
-};
+  }};
 
 export function FileWritePermissionRequest(props: PermissionRequestProps): React.ReactNode {
   const parseInput = (input: unknown): FileWriteToolInput => {
@@ -75,7 +73,7 @@ export function FileWritePermissionRequest(props: PermissionRequestProps): React
       onDone={props.onDone}
       onReject={props.onReject}
       workerBadge={props.workerBadge}
-      title={fileExists ? 'Overwrite file' : 'Create file'}
+      title={fileExists ? t('ui.overwriteFile') : t('ui.createFile')}
       subtitle={relative(getCwd(), file_path)}
       question={
         <Text>

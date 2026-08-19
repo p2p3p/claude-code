@@ -6,14 +6,14 @@
  * confirmation.
  */
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import type { HookEvent } from 'src/entrypoints/agentSdkTypes.js';
 import type { HookEventMetadata } from 'src/utils/hooks/hooksConfigManager.js';
 import { Box, Text } from '@anthropic/ink';
 import {
   getHookDisplayText,
   hookSourceHeaderDisplayString,
-  type IndividualHookConfig,
-} from '../../utils/hooks/hooksSettings.js';
+  type IndividualHookConfig} from '../../utils/hooks/hooksSettings.js';
 import { Select } from '../CustomSelect/select.js';
 import { Dialog } from '@anthropic/ink';
 
@@ -32,8 +32,7 @@ export function SelectHookMode({
   hooksForSelectedMatcher,
   hookEventMetadata,
   onSelect,
-  onCancel,
-}: Props): React.ReactNode {
+  onCancel}: Props): React.ReactNode {
   const title =
     hookEventMetadata.matcherMetadata !== undefined
       ? `${selectedEvent} - Matcher: ${selectedMatcher || '(all)'}`
@@ -45,11 +44,11 @@ export function SelectHookMode({
         title={title}
         subtitle={hookEventMetadata.description}
         onCancel={onCancel}
-        inputGuide={() => <Text>Esc to go back</Text>}
+        inputGuide={() => <Text>{t('selecthookmode.escToGoBack')}</Text>}
       >
         <Box flexDirection="column" gap={1}>
-          <Text dimColor>No hooks configured for this event.</Text>
-          <Text dimColor>To add hooks, edit settings.json directly or ask Claude.</Text>
+          <Text dimColor>{t('selecthookmode.noHooksConfiguredForThisEvent')}</Text>
+          <Text dimColor>{t('selecthookmode.toAddHooksEditSettingsJsonDirectlyOrAskClaude')}</Text>
         </Box>
       </Dialog>
     );
@@ -65,8 +64,7 @@ export function SelectHookMode({
             description:
               hook.source === 'pluginHook' && hook.pluginName
                 ? `${hookSourceHeaderDisplayString(hook.source)} (${hook.pluginName})`
-                : hookSourceHeaderDisplayString(hook.source),
-          }))}
+                : hookSourceHeaderDisplayString(hook.source)}))}
           onChange={value => {
             const index = parseInt(value, 10);
             const hook = hooksForSelectedMatcher[index];

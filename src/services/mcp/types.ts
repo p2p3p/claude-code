@@ -1,8 +1,7 @@
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import type {
   Resource,
-  ServerCapabilities,
-} from '@modelcontextprotocol/sdk/types.js'
+  ServerCapabilities} from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod/v4'
 import { lazySchema } from '../../utils/lazySchema.js'
 
@@ -30,8 +29,7 @@ export const McpStdioServerConfigSchema = lazySchema(() =>
     type: z.literal('stdio').optional(), // Optional for backwards compatibility
     command: z.string().min(1, 'Command cannot be empty'),
     args: z.array(z.string()).default([]),
-    env: z.record(z.string(), z.string()).optional(),
-  }),
+    env: z.record(z.string(), z.string()).optional()}),
 )
 
 // Cross-App Access (XAA / SEP-990): just a per-server flag. IdP connection
@@ -48,11 +46,9 @@ const McpOAuthConfigSchema = lazySchema(() =>
       .string()
       .url()
       .startsWith('https://', {
-        message: 'authServerMetadataUrl must use https://',
-      })
+        message: 'authServerMetadataUrl must use https://'})
       .optional(),
-    xaa: McpXaaConfigSchema().optional(),
-  }),
+    xaa: McpXaaConfigSchema().optional()}),
 )
 
 export const McpSSEServerConfigSchema = lazySchema(() =>
@@ -61,8 +57,7 @@ export const McpSSEServerConfigSchema = lazySchema(() =>
     url: z.string(),
     headers: z.record(z.string(), z.string()).optional(),
     headersHelper: z.string().optional(),
-    oauth: McpOAuthConfigSchema().optional(),
-  }),
+    oauth: McpOAuthConfigSchema().optional()}),
 )
 
 // Internal-only server type for IDE extensions
@@ -71,8 +66,7 @@ export const McpSSEIDEServerConfigSchema = lazySchema(() =>
     type: z.literal('sse-ide'),
     url: z.string(),
     ideName: z.string(),
-    ideRunningInWindows: z.boolean().optional(),
-  }),
+    ideRunningInWindows: z.boolean().optional()}),
 )
 
 // Internal-only server type for IDE extensions
@@ -82,8 +76,7 @@ export const McpWebSocketIDEServerConfigSchema = lazySchema(() =>
     url: z.string(),
     ideName: z.string(),
     authToken: z.string().optional(),
-    ideRunningInWindows: z.boolean().optional(),
-  }),
+    ideRunningInWindows: z.boolean().optional()}),
 )
 
 export const McpHTTPServerConfigSchema = lazySchema(() =>
@@ -92,8 +85,7 @@ export const McpHTTPServerConfigSchema = lazySchema(() =>
     url: z.string(),
     headers: z.record(z.string(), z.string()).optional(),
     headersHelper: z.string().optional(),
-    oauth: McpOAuthConfigSchema().optional(),
-  }),
+    oauth: McpOAuthConfigSchema().optional()}),
 )
 
 export const McpWebSocketServerConfigSchema = lazySchema(() =>
@@ -101,15 +93,13 @@ export const McpWebSocketServerConfigSchema = lazySchema(() =>
     type: z.literal('ws'),
     url: z.string(),
     headers: z.record(z.string(), z.string()).optional(),
-    headersHelper: z.string().optional(),
-  }),
+    headersHelper: z.string().optional()}),
 )
 
 export const McpSdkServerConfigSchema = lazySchema(() =>
   z.object({
     type: z.literal('sdk'),
-    name: z.string(),
-  }),
+    name: z.string()}),
 )
 
 // Config type for Claude.ai proxy servers
@@ -117,8 +107,7 @@ export const McpClaudeAIProxyServerConfigSchema = lazySchema(() =>
   z.object({
     type: z.literal('claudeai-proxy'),
     url: z.string(),
-    id: z.string(),
-  }),
+    id: z.string()}),
 )
 
 export const McpServerConfigSchema = lazySchema(() =>
@@ -170,8 +159,7 @@ export type ScopedMcpServerConfig = McpServerConfig & {
 
 export const McpJsonConfigSchema = lazySchema(() =>
   z.object({
-    mcpServers: z.record(z.string(), McpServerConfigSchema()),
-  }),
+    mcpServers: z.record(z.string(), McpServerConfigSchema())}),
 )
 
 export type McpJsonConfig = z.infer<ReturnType<typeof McpJsonConfigSchema>>

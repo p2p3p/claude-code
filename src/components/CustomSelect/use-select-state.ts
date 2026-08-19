@@ -131,8 +131,7 @@ export function useSelectState<T>({
   onChange,
   onCancel,
   onFocus,
-  focusValue,
-}: UseSelectStateProps<T>): SelectState<T> {
+  focusValue}: UseSelectStateProps<T>): SelectState<T> {
   const [value, setValue] = useState<T | undefined>(defaultValue)
 
   const navigation = useSelectNavigation<T>({
@@ -140,8 +139,7 @@ export function useSelectState<T>({
     options,
     initialFocusValue: undefined,
     onFocus,
-    focusValue,
-  })
+    focusValue})
 
   const selectFocusedOption = useCallback(() => {
     setValue(navigation.focusedValue)
@@ -152,6 +150,5 @@ export function useSelectState<T>({
     value,
     selectFocusedOption,
     onChange,
-    onCancel,
-  }
+    onCancel}
 }

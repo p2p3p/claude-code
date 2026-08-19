@@ -3,6 +3,7 @@ import TextInput from '../../components/TextInput.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { Box, Text } from '@anthropic/ink';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
+import { t } from '../../utils/i18n/index.js';
 
 interface ChooseRepoStepProps {
   currentRepo: string | null;
@@ -19,8 +20,7 @@ export function ChooseRepoStep({
   repoUrl,
   onRepoUrlChange,
   onSubmit,
-  onToggleUseCurrentRepo,
-}: ChooseRepoStepProps) {
+  onToggleUseCurrentRepo}: ChooseRepoStepProps) {
   const [cursorOffset, setCursorOffset] = useState(0);
   const [showEmptyError, setShowEmptyError] = useState(false);
   const terminalSize = useTerminalSize();
@@ -52,15 +52,13 @@ export function ChooseRepoStep({
     {
       'confirm:previous': handlePrevious,
       'confirm:next': handleNext,
-      'confirm:yes': handleSubmit,
-    },
+      'confirm:yes': handleSubmit},
     { context: 'Confirmation', isActive: !isTextInputVisible },
   );
   useKeybindings(
     {
       'confirm:previous': handlePrevious,
-      'confirm:next': handleNext,
-    },
+      'confirm:next': handleNext},
     { context: 'Confirmation', isActive: isTextInputVisible },
   );
 
@@ -68,14 +66,14 @@ export function ChooseRepoStep({
     <>
       <Box flexDirection="column" borderStyle="round" paddingX={1}>
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>Install GitHub App</Text>
-          <Text dimColor>Select GitHub repository</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
+          <Text dimColor>{t('installGithub.selectRepo')}</Text>
         </Box>
         {currentRepo && (
           <Box marginBottom={1}>
             <Text bold={useCurrentRepo} color={useCurrentRepo ? 'permission' : undefined}>
               {useCurrentRepo ? '> ' : '  '}
-              Use current repository: {currentRepo}
+              {t('installGithub.useCurrentRepo')} {currentRepo}
             </Text>
           </Box>
         )}
@@ -85,7 +83,7 @@ export function ChooseRepoStep({
             color={!useCurrentRepo || !currentRepo ? 'permission' : undefined}
           >
             {!useCurrentRepo || !currentRepo ? '> ' : '  '}
-            {currentRepo ? 'Enter a different repository' : 'Enter repository'}
+            {currentRepo ? t('installGithub.enterDiffRepo') : t('installGithub.enterRepo')}
           </Text>
         </Box>
         {(!useCurrentRepo || !currentRepo) && (
@@ -98,7 +96,7 @@ export function ChooseRepoStep({
               }}
               onSubmit={handleSubmit}
               focus={true}
-              placeholder="Enter a repo as owner/repo or https://github.com/owner/repo…"
+              placeholder={t('installGithub.repoPlaceholder')}
               columns={textInputColumns}
               cursorOffset={cursorOffset}
               onChangeCursorOffset={setCursorOffset}
@@ -109,11 +107,11 @@ export function ChooseRepoStep({
       </Box>
       {showEmptyError && (
         <Box marginLeft={3} marginBottom={1}>
-          <Text color="error">Please enter a repository name to continue</Text>
+          <Text color="error">{t('installGithub.enterRepoName')}</Text>
         </Box>
       )}
       <Box marginLeft={3}>
-        <Text dimColor>{currentRepo ? '↑/↓ to select · ' : ''}Enter to continue</Text>
+        <Text dimColor>{currentRepo ? '↑/↓ ' + t('installGithub.toSelect') + ' · ' : ''}{t('installGithub.enterContinue')}</Text>
       </Box>
     </>
   );

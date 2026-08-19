@@ -17,8 +17,7 @@ import type { LocalAgentTaskState } from '../../tasks/LocalAgentTask/LocalAgentT
 import { FileReadTool } from '@claude-code-best/builtin-tools/tools/FileReadTool/FileReadTool.js'
 import {
   FILE_READ_TOOL_NAME,
-  FILE_UNCHANGED_STUB,
-} from '@claude-code-best/builtin-tools/tools/FileReadTool/prompt.js'
+  FILE_UNCHANGED_STUB} from '@claude-code-best/builtin-tools/tools/FileReadTool/prompt.js'
 import { SearchExtraToolsTool } from '@claude-code-best/builtin-tools/tools/SearchExtraToolsTool/SearchExtraToolsTool.js'
 import type { AgentId } from '../../types/ids.js'
 import type {
@@ -31,33 +30,29 @@ import type {
   SystemAPIErrorMessage,
   SystemCompactBoundaryMessage,
   SystemMessage,
-  UserMessage,
-} from '../../types/message.js'
+  UserMessage} from '../../types/message.js'
 import {
   createAttachmentMessage,
   generateFileAttachment,
   getAgentListingDeltaAttachment,
   getDeferredToolsDeltaAttachment,
   getMcpInstructionsDeltaAttachment,
-  type Attachment,
-} from '../../utils/attachments.js'
+  type Attachment} from '../../utils/attachments.js'
 import { getMemoryPath } from '../../utils/config.js'
 import { COMPACT_MAX_OUTPUT_TOKENS } from '../../utils/context.js'
 import {
   analyzeContext,
-  tokenStatsToStatsigMetrics,
-} from '../../utils/contextAnalysis.js'
+  tokenStatsToStatsigMetrics} from '../../utils/contextAnalysis.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { hasExactErrorMessage } from '../../utils/errors.js'
 import { cacheToObject } from '../../utils/fileStateCache.js'
+import { t } from 'src/utils/i18n/index.js'
 import {
   type CacheSafeParams,
-  runForkedAgent,
-} from '../../utils/forkedAgent.js'
+  runForkedAgent} from '../../utils/forkedAgent.js'
 import {
   executePostCompactHooks,
-  executePreCompactHooks,
-} from '../../utils/hooks.js'
+  executePreCompactHooks} from '../../utils/hooks.js'
 import { logError } from '../../utils/log.js'
 import { MEMORY_TYPE_VALUES } from '../../utils/memory/types.js'
 import {
@@ -67,19 +62,16 @@ import {
   getLastAssistantMessage,
   getMessagesAfterCompactBoundary,
   isCompactBoundaryMessage,
-  normalizeMessagesForAPI,
-} from '../../utils/messages.js'
+  normalizeMessagesForAPI} from '../../utils/messages.js'
 import { expandPath } from '../../utils/path.js'
 import { getPlan, getPlanFilePath } from '../../utils/plans.js'
 import {
   isSessionActivityTrackingActive,
-  sendSessionActivitySignal,
-} from '../../utils/sessionActivity.js'
+  sendSessionActivitySignal} from '../../utils/sessionActivity.js'
 import { processSessionStartHooks } from '../../utils/sessionStart.js'
 import {
   getTranscriptPath,
-  reAppendSessionMetadata,
-} from '../../utils/sessionStorage.js'
+  reAppendSessionMetadata} from '../../utils/sessionStorage.js'
 import { sleep } from '../../utils/sleep.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
@@ -88,40 +80,33 @@ import { getTaskOutputPath } from '../../utils/task/diskOutput.js'
 import {
   getTokenUsage,
   tokenCountFromLastAPIResponse,
-  tokenCountWithEstimation,
-} from '../../utils/tokens.js'
+  tokenCountWithEstimation} from '../../utils/tokens.js'
 import {
   extractDiscoveredToolNames,
-  isSearchExtraToolsEnabled,
-} from '../../utils/searchExtraTools.js'
+  isSearchExtraToolsEnabled} from '../../utils/searchExtraTools.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../analytics/index.js'
+  logEvent} from '../analytics/index.js'
 import {
   getMaxOutputTokensForModel,
-  queryModelWithStreaming,
-} from '../api/claude.js'
+  queryModelWithStreaming} from '../api/anthropic/index.js'
 import {
   getPromptTooLongTokenGap,
   PROMPT_TOO_LONG_ERROR_MESSAGE,
-  startsWithApiErrorPrefix,
-} from '../api/errors.js'
+  startsWithApiErrorPrefix} from '../api/errors.js'
 import { notifyCompaction } from '../api/promptCacheBreakDetection.js'
 import { getRetryDelay } from '../api/withRetry.js'
 import { logPermissionContextForAnts } from '../internalLogging.js'
 import {
   roughTokenCountEstimation,
-  roughTokenCountEstimationForMessages,
-} from '../tokenEstimation.js'
+  roughTokenCountEstimationForMessages} from '../tokenEstimation.js'
 import type { SDKStatus } from '../../entrypoints/agentSdkTypes.js'
 import { groupMessagesByApiRound } from './grouping.js'
 import {
   getCompactPrompt,
   getCompactUserSummaryMessage,
-  getPartialCompactPrompt,
-} from './prompt.js'
+  getPartialCompactPrompt} from './prompt.js'
 
 export const POST_COMPACT_MAX_FILES_TO_RESTORE = 5
 export const POST_COMPACT_TOKEN_BUDGET = 50_000
@@ -197,9 +182,7 @@ export function stripImagesFromMessages(messages: Message[]): Message[] {
       ...message,
       message: {
         ...message.message,
-        content: newContent,
-      },
-    } as typeof message
+        content: newContent}} as typeof message
   })
 }
 
@@ -384,10 +367,7 @@ export function annotateBoundaryWithPreservedSegment(
       preservedSegment: {
         headUuid: keep[0]!.uuid,
         anchorUuid,
-        tailUuid: keep.at(-1)!.uuid,
-      },
-    },
-  }
+        tailUuid: keep.at(-1)!.uuid}}}
 }
 
 /**
@@ -429,16 +409,14 @@ export async function compactConversation(
 
     context.onCompactProgress?.({
       type: 'hooks_start',
-      hookType: 'pre_compact',
-    })
+      hookType: 'pre_compact'})
 
     // Execute PreCompact hooks
     context.setSDKStatus?.('compacting')
     const hookResult = await executePreCompactHooks(
       {
         trigger: isAutoCompact ? 'auto' : 'manual',
-        customInstructions: customInstructions ?? null,
-      },
+        customInstructions: customInstructions ?? null},
       context.abortController.signal,
     )
     customInstructions = mergeHookInstructions(
@@ -463,8 +441,7 @@ export async function compactConversation(
 
     const compactPrompt = getCompactPrompt(customInstructions)
     const summaryRequest = createUserMessage({
-      content: compactPrompt,
-    })
+      content: compactPrompt})
 
     let messagesToSummarize = messages
     let retryCacheSafeParams = cacheSafeParams
@@ -478,8 +455,7 @@ export async function compactConversation(
         appState,
         context,
         preCompactTokenCount,
-        cacheSafeParams: retryCacheSafeParams,
-      })
+        cacheSafeParams: retryCacheSafeParams})
       summary = getAssistantMessageText(summaryResponse)
       if (!summary?.startsWith(PROMPT_TOO_LONG_ERROR_MESSAGE)) break
 
@@ -496,22 +472,19 @@ export async function compactConversation(
             'prompt_too_long' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           preCompactTokenCount,
           promptCacheSharingEnabled,
-          ptlAttempts,
-        })
+          ptlAttempts})
         throw new Error(ERROR_MESSAGE_PROMPT_TOO_LONG)
       }
       logEvent('tengu_compact_ptl_retry', {
         attempt: ptlAttempts,
         droppedMessages: messagesToSummarize.length - truncated.length,
-        remainingMessages: truncated.length,
-      })
+        remainingMessages: truncated.length})
       messagesToSummarize = truncated
       // The forked-agent path reads from cacheSafeParams.forkContextMessages,
       // not the messages param — thread the truncated set through both paths.
       retryCacheSafeParams = {
         ...retryCacheSafeParams,
-        forkContextMessages: truncated,
-      }
+        forkContextMessages: truncated}
     }
 
     if (!summary) {
@@ -523,8 +496,7 @@ export async function compactConversation(
         reason:
           'no_summary' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         preCompactTokenCount,
-        promptCacheSharingEnabled,
-      })
+        promptCacheSharingEnabled})
       throw new Error(
         `Failed to generate conversation summary - response did not contain valid text content`,
       )
@@ -533,8 +505,7 @@ export async function compactConversation(
         reason:
           'api_error' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         preCompactTokenCount,
-        promptCacheSharingEnabled,
-      })
+        promptCacheSharingEnabled})
       throw new Error(summary)
     }
 
@@ -613,12 +584,10 @@ export async function compactConversation(
 
     context.onCompactProgress?.({
       type: 'hooks_start',
-      hookType: 'session_start',
-    })
+      hookType: 'session_start'})
     // Execute SessionStart hooks after successful compaction
     const hookMessages = await processSessionStartHooks('compact', {
-      model: context.options.mainLoopModel,
-    })
+      model: context.options.mainLoopModel})
 
     // Create the compact boundary marker and summary messages before the
     // event so we can compute the true resulting-context size.
@@ -646,8 +615,7 @@ export async function compactConversation(
           transcriptPath,
         ),
         isCompactSummary: true,
-        isVisibleInTranscriptOnly: true,
-      }),
+        isVisibleInTranscriptOnly: true}),
     ]
 
     // Previously "postCompactTokenCount" — renamed because this is the
@@ -720,8 +688,7 @@ export async function compactConversation(
           logError(error as Error)
           return {}
         }
-      })(),
-    })
+      })()})
 
     // Reset cache read baseline so the post-compact drop isn't flagged as a break
     if (feature('PROMPT_CACHE_BREAK_DETECTION')) {
@@ -747,13 +714,11 @@ export async function compactConversation(
 
     context.onCompactProgress?.({
       type: 'hooks_start',
-      hookType: 'post_compact',
-    })
+      hookType: 'post_compact'})
     const postCompactHookResult = await executePostCompactHooks(
       {
         trigger: isAutoCompact ? 'auto' : 'manual',
-        compactSummary: summary,
-      },
+        compactSummary: summary},
       context.abortController.signal,
     )
 
@@ -773,8 +738,7 @@ export async function compactConversation(
       preCompactTokenCount,
       postCompactTokenCount: compactionCallTotalTokens,
       truePostCompactTokenCount,
-      compactionUsage,
-    }
+      compactionUsage}
   } catch (error) {
     // Only show the error notification for manual /compact.
     // Auto-compact failures are retried on the next turn and the
@@ -840,15 +804,13 @@ export async function partialCompactConversation(
 
     context.onCompactProgress?.({
       type: 'hooks_start',
-      hookType: 'pre_compact',
-    })
+      hookType: 'pre_compact'})
 
     context.setSDKStatus?.('compacting')
     const hookResult = await executePreCompactHooks(
       {
         trigger: 'manual',
-        customInstructions: null,
-      },
+        customInstructions: null},
       context.abortController.signal,
     )
 
@@ -868,15 +830,13 @@ export async function partialCompactConversation(
 
     const compactPrompt = getPartialCompactPrompt(customInstructions, direction)
     const summaryRequest = createUserMessage({
-      content: compactPrompt,
-    })
+      content: compactPrompt})
 
     const failureMetadata = {
       preCompactTokenCount,
       direction:
         direction as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      messagesSummarized: messagesToSummarize.length,
-    }
+      messagesSummarized: messagesToSummarize.length}
 
     // 'up_to' prefix hits cache directly; 'from' sends all (tail wouldn't cache).
     // PTL retry breaks the cache prefix but unblocks the user (CC-1180).
@@ -895,8 +855,7 @@ export async function partialCompactConversation(
         appState: context.getAppState(),
         context,
         preCompactTokenCount,
-        cacheSafeParams: retryCacheSafeParams,
-      })
+        cacheSafeParams: retryCacheSafeParams})
       summary = getAssistantMessageText(summaryResponse)
       if (!summary?.startsWith(PROMPT_TOO_LONG_ERROR_MESSAGE)) break
 
@@ -910,28 +869,24 @@ export async function partialCompactConversation(
           reason:
             'prompt_too_long' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           ...failureMetadata,
-          ptlAttempts,
-        })
+          ptlAttempts})
         throw new Error(ERROR_MESSAGE_PROMPT_TOO_LONG)
       }
       logEvent('tengu_compact_ptl_retry', {
         attempt: ptlAttempts,
         droppedMessages: apiMessages.length - truncated.length,
         remainingMessages: truncated.length,
-        path: 'partial' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+        path: 'partial' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       apiMessages = truncated
       retryCacheSafeParams = {
         ...retryCacheSafeParams,
-        forkContextMessages: truncated,
-      }
+        forkContextMessages: truncated}
     }
     if (!summary) {
       logEvent('tengu_partial_compact_failed', {
         reason:
           'no_summary' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        ...failureMetadata,
-      })
+        ...failureMetadata})
       throw new Error(
         'Failed to generate conversation summary - response did not contain valid text content',
       )
@@ -939,8 +894,7 @@ export async function partialCompactConversation(
       logEvent('tengu_partial_compact_failed', {
         reason:
           'api_error' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        ...failureMetadata,
-      })
+        ...failureMetadata})
       throw new Error(summary)
     }
 
@@ -1008,11 +962,9 @@ export async function partialCompactConversation(
 
     context.onCompactProgress?.({
       type: 'hooks_start',
-      hookType: 'session_start',
-    })
+      hookType: 'session_start'})
     const hookMessages = await processSessionStartHooks('compact', {
-      model: context.options.mainLoopModel,
-    })
+      model: context.options.mainLoopModel})
 
     const postCompactTokenCount = tokenCountFromLastAPIResponse([
       summaryResponse,
@@ -1035,8 +987,7 @@ export async function partialCompactConversation(
       compactionOutputTokens: compactionUsage?.output_tokens,
       compactionCacheReadTokens: compactionUsage?.cache_read_input_tokens ?? 0,
       compactionCacheCreationTokens:
-        compactionUsage?.cache_creation_input_tokens ?? 0,
-    })
+        compactionUsage?.cache_creation_input_tokens ?? 0})
 
     // Progress messages aren't loggable, so forkSessionImpl would null out
     // a logicalParentUuid pointing at one. Both directions skip them.
@@ -1071,11 +1022,8 @@ export async function partialCompactConversation(
               summarizeMetadata: {
                 messagesSummarized: messagesToSummarize.length,
                 userContext: userFeedback,
-                direction,
-              },
-            }
-          : { isVisibleInTranscriptOnly: true as const }),
-      }),
+                direction}}
+          : { isVisibleInTranscriptOnly: true as const })}),
     ]
 
     if (feature('PROMPT_CACHE_BREAK_DETECTION')) {
@@ -1098,13 +1046,11 @@ export async function partialCompactConversation(
 
     context.onCompactProgress?.({
       type: 'hooks_start',
-      hookType: 'post_compact',
-    })
+      hookType: 'post_compact'})
     const postCompactHookResult = await executePostCompactHooks(
       {
         trigger: 'manual',
-        compactSummary: summary,
-      },
+        compactSummary: summary},
       context.abortController.signal,
     )
 
@@ -1126,8 +1072,7 @@ export async function partialCompactConversation(
       userDisplayMessage: postCompactHookResult.userDisplayMessage,
       preCompactTokenCount,
       postCompactTokenCount,
-      compactionUsage,
-    }
+      compactionUsage}
   } catch (error) {
     addErrorNotificationIfNeeded(error, context)
     throw error
@@ -1149,22 +1094,19 @@ function addErrorNotificationIfNeeded(
   ) {
     context.addNotification?.({
       key: 'error-compacting-conversation',
-      text: 'Error compacting conversation',
+      text: t('compactCmd.errorCompactingConversation'),
       priority: 'immediate',
-      color: 'error',
-    })
+      color: 'error'})
   }
 }
 
 export function createCompactCanUseTool(): CanUseToolFn {
   return async () => ({
     behavior: 'deny' as const,
-    message: 'Tool use is not allowed during compaction',
+    message: t('compactCmd.toolUseNotAllowedDuringCompaction'),
     decisionReason: {
       type: 'other' as const,
-      reason: 'compaction agent should only produce text summary',
-    },
-  })
+      reason: 'compaction agent should only produce text summary'}})
 }
 
 async function streamCompactSummary({
@@ -1173,8 +1115,7 @@ async function streamCompactSummary({
   appState,
   context,
   preCompactTokenCount,
-  cacheSafeParams,
-}: {
+  cacheSafeParams}: {
   messages: Message[]
   summaryRequest: UserMessage
   appState: Awaited<ReturnType<ToolUseContext['getAppState']>>
@@ -1235,9 +1176,7 @@ async function streamCompactSummary({
           // this the bar sits at 0% until compact_end).
           overrides: {
             abortController: context.abortController,
-            shareSetResponseLength: true,
-          },
-        })
+            shareSetResponseLength: true}})
         const assistantMsg = getLastAssistantMessage(result.messages)
         const assistantText = assistantMsg
           ? getAssistantMessageText(assistantMsg)
@@ -1263,8 +1202,7 @@ async function streamCompactSummary({
                     (result.totalUsage.cache_read_input_tokens +
                       result.totalUsage.cache_creation_input_tokens +
                       result.totalUsage.input_tokens)
-                  : 0,
-            })
+                  : 0})
           }
           return assistantMsg
         }
@@ -1275,15 +1213,13 @@ async function streamCompactSummary({
         logEvent('tengu_compact_cache_sharing_fallback', {
           reason:
             'no_text_response' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          preCompactTokenCount,
-        })
+          preCompactTokenCount})
       } catch (error) {
         logError(error)
         logEvent('tengu_compact_cache_sharing_fallback', {
           reason:
             'error' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          preCompactTokenCount,
-        })
+          preCompactTokenCount})
       }
     }
 
@@ -1362,9 +1298,7 @@ async function streamCompactSummary({
           agents: context.options.agentDefinitions.activeAgents,
           mcpTools: [],
           effortValue: appState.effortValue,
-          langfuseTrace: context.langfuseTrace,
-        },
-      })
+          langfuseTrace: context.langfuseTrace}})
       const streamIter = streamingGen[Symbol.asyncIterator]()
       let next = await streamIter.next()
 
@@ -1416,11 +1350,9 @@ async function streamCompactSummary({
         logEvent('tengu_compact_streaming_retry', {
           attempt,
           preCompactTokenCount,
-          hasStartedStreaming,
-        })
+          hasStartedStreaming})
         await sleep(getRetryDelay(attempt), context.abortController.signal, {
-          abortError: () => new APIUserAbortError(),
-        })
+          abortError: () => new APIUserAbortError()})
         continue
       }
 
@@ -1435,8 +1367,7 @@ async function streamCompactSummary({
         hasStartedStreaming,
         retryEnabled,
         attempts: attempt,
-        promptCacheSharingEnabled,
-      })
+        promptCacheSharingEnabled})
       throw new Error(ERROR_MESSAGE_INCOMPLETE_RESPONSE)
     }
 
@@ -1490,9 +1421,7 @@ export async function createPostCompactFileAttachments(
         {
           ...toolUseContext,
           fileReadingLimits: {
-            maxTokens: POST_COMPACT_MAX_TOKENS_PER_FILE,
-          },
-        },
+            maxTokens: POST_COMPACT_MAX_TOKENS_PER_FILE}},
         'tengu_post_compact_file_restore_success',
         'tengu_post_compact_file_restore_error',
         'compact',
@@ -1533,8 +1462,7 @@ export function createPlanAttachmentIfNeeded(
   return createAttachmentMessage({
     type: 'plan_file_reference',
     planFilePath,
-    planContent,
-  })
+    planContent})
 }
 
 /**
@@ -1564,8 +1492,7 @@ export function createSkillAttachmentIfNeeded(
       content: truncateToTokens(
         skill.content,
         POST_COMPACT_MAX_TOKENS_PER_SKILL,
-      ),
-    }))
+      )}))
     .filter(skill => {
       const tokens = roughTokenCountEstimation(skill.content)
       if (usedTokens + tokens > POST_COMPACT_SKILLS_TOKEN_BUDGET) {
@@ -1581,8 +1508,7 @@ export function createSkillAttachmentIfNeeded(
 
   return createAttachmentMessage({
     type: 'invoked_skills',
-    skills,
-  })
+    skills})
 }
 
 /**
@@ -1607,8 +1533,7 @@ export async function createPlanModeAttachmentIfNeeded(
     reminderType: 'full',
     isSubAgent: !!context.agentId,
     planFilePath,
-    planExists,
-  })
+    planExists})
 }
 
 /**
@@ -1644,8 +1569,7 @@ export async function createAsyncAgentAttachmentsIfNeeded(
           agent.status === 'running'
             ? (agent.progress?.summary ?? null)
             : (agent.error ?? null),
-        outputFilePath: getTaskOutputPath(agent.agentId),
-      }),
+        outputFilePath: getTaskOutputPath(agent.agentId)}),
     ]
   })
 }

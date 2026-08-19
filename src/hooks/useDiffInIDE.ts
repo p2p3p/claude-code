@@ -8,14 +8,12 @@ import type { PermissionOption } from '../components/permissions/FilePermissionD
 import type {
   MCPServerConnection,
   McpSSEIDEServerConfig,
-  McpWebSocketIDEServerConfig,
-} from '../services/mcp/types.js'
+  McpWebSocketIDEServerConfig} from '../services/mcp/types.js'
 import type { ToolUseContext } from '../Tool.js'
 import type { FileEdit } from '@claude-code-best/builtin-tools/tools/FileEditTool/types.js'
 import {
   getEditsForPatch,
-  getPatchForEdits,
-} from '@claude-code-best/builtin-tools/tools/FileEditTool/utils.js'
+  getPatchForEdits} from '@claude-code-best/builtin-tools/tools/FileEditTool/utils.js'
 import { getGlobalConfig } from '../utils/config.js'
 import { getPatchFromContents } from '../utils/diff.js'
 import { isENOENT } from '../utils/errors.js'
@@ -23,9 +21,9 @@ import {
   callIdeRpc,
   getConnectedIdeClient,
   getConnectedIdeName,
-  hasAccessToIDEExtensionDiffFeature,
-} from '../utils/ide.js'
+  hasAccessToIDEExtensionDiffFeature} from '../utils/ide.js'
 import { WindowsToWSLConverter } from '../utils/idePathConversion.js'
+import { t } from '../utils/i18n/index.js'
 import { logError } from '../utils/log.js'
 import { getPlatform } from '../utils/platform.js'
 
@@ -48,8 +46,7 @@ export function useDiffInIDE({
   toolUseContext,
   filePath,
   edits,
-  editMode,
-}: Props): {
+  editMode}: Props): {
   closeTabInIDE: () => void
   showingDiffInIDE: boolean
   ideName: string
@@ -117,8 +114,7 @@ export function useDiffInIDE({
           { type: 'reject' },
           {
             file_path: filePath,
-            edits: edits,
-          },
+            edits: edits},
         )
         return
       }
@@ -128,8 +124,7 @@ export function useDiffInIDE({
         { type: 'accept-once' },
         {
           file_path: filePath,
-          edits: newEdits,
-        },
+          edits: newEdits},
       )
     } catch (error) {
       logError(error as Error)
@@ -159,8 +154,7 @@ export function useDiffInIDE({
     },
     showingDiffInIDE: shouldShowDiffInIDE && !hasError,
     ideName: ideName,
-    hasError,
-  }
+    hasError}
 }
 
 /**
@@ -179,8 +173,7 @@ export function computeEditsFromContents(
     filePath,
     oldContent,
     newContent,
-    singleHunk,
-  })
+    singleHunk})
 
   if (patch.length === 0) {
     return []
@@ -260,11 +253,10 @@ async function showDiffInIDE(
     const { updatedFile } = getPatchForEdits({
       filePath: oldFilePath,
       fileContents: oldContent,
-      edits,
-    })
+      edits})
 
     if (!ideClient || ideClient.type !== 'connected') {
-      throw new Error('IDE client not available')
+      throw new Error(t('diffInIDE.ideClientNotAvailable'))
     }
     let ideOldPath = oldFilePath
 
@@ -287,8 +279,7 @@ async function showDiffInIDE(
         old_file_path: ideOldPath,
         new_file_path: ideOldPath,
         new_file_contents: updatedFile,
-        tab_name: tabName,
-      },
+        tab_name: tabName},
       ideClient,
     )
 
@@ -300,25 +291,22 @@ async function showDiffInIDE(
       void cleanup()
       return {
         oldContent: oldContent,
-        newContent: data[1].text,
-      }
+        newContent: data[1].text}
     } else if (isClosedMessage(data)) {
       void cleanup()
       return {
         oldContent: oldContent,
-        newContent: updatedFile,
-      }
+        newContent: updatedFile}
     } else if (isRejectedMessage(data)) {
       void cleanup()
       return {
         oldContent: oldContent,
-        newContent: oldContent,
-      }
+        newContent: oldContent}
     }
 
     // Indicates that the tool call completed with none of the expected
     // results. Did the user close the IDE?
-    throw new Error('Not accepted')
+    throw new Error(t('diffInIDE.notAccepted'))
   } catch (error) {
     logError(error as Error)
     void cleanup()
@@ -332,7 +320,7 @@ async function closeTabInIDE(
 ): Promise<void> {
   try {
     if (!ideClient || ideClient.type !== 'connected') {
-      throw new Error('IDE client not available')
+      throw new Error(t('diffInIDE.ideClientNotAvailable'))
     }
 
     // Use direct RPC to close the tab

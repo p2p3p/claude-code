@@ -30,6 +30,7 @@ import { buildTool, type ToolDef } from 'src/Tool.js'
 import { getCwd } from 'src/utils/cwd.js'
 import { getClaudeConfigHomeDir, isEnvTruthy } from 'src/utils/envUtils.js'
 import { getErrnoCode, isENOENT } from 'src/utils/errors.js'
+import { t } from 'src/utils/i18n/index.js'
 import {
   addLineNumbers,
   FILE_NOT_FOUND_CWD_NOTE,
@@ -368,7 +369,7 @@ export const FileReadTool = buildTool({
   getToolUseSummary,
   getActivityDescription(input) {
     const summary = getToolUseSummary(input)
-    return summary ? `Reading ${summary}` : 'Reading file'
+    return summary ? t('toolUI.fileRead.reading', summary) : t('toolUI.fileRead.readingFile')
   },
   isConcurrencySafe() {
     return true
@@ -420,7 +421,7 @@ export const FileReadTool = buildTool({
       if (!parsed) {
         return {
           result: false,
-          message: `Invalid pages parameter: "${pages}". Use formats like "1-5", "3", or "10-20". Pages are 1-indexed.`,
+          message: t('toolUI.fileRead.invalidPages', pages),
           errorCode: 7,
         }
       }
@@ -431,7 +432,7 @@ export const FileReadTool = buildTool({
       if (rangeSize > PDF_MAX_PAGES_PER_READ) {
         return {
           result: false,
-          message: `Page range "${pages}" exceeds maximum of ${PDF_MAX_PAGES_PER_READ} pages per request. Please use a smaller range.`,
+          message: t('toolUI.fileRead.pageRangeExceedsMax', pages, PDF_MAX_PAGES_PER_READ),
           errorCode: 8,
         }
       }
@@ -450,8 +451,7 @@ export const FileReadTool = buildTool({
     if (denyRule !== null) {
       return {
         result: false,
-        message:
-          'File is in a directory that is denied by your permission settings.',
+        message: t('toolUI.fileRead.deniedDirectory'),
         errorCode: 1,
       }
     }
@@ -472,7 +472,7 @@ export const FileReadTool = buildTool({
       if (fileStat.isDirectory()) {
         return {
           result: false,
-          message: `Cannot read '${file_path}': the specified path is an existing directory. Use Bash ls to list files in this directory, or specify a filename path to read a specific file.`,
+          message: t('toolUI.fileRead.isDirectory', file_path),
           errorCode: 10,
         }
       }
@@ -491,7 +491,7 @@ export const FileReadTool = buildTool({
     ) {
       return {
         result: false,
-        message: `This tool cannot read binary files. The file appears to be a binary ${ext} file. Please use appropriate tools for binary file analysis.`,
+        message: t('toolUI.fileRead.binaryFile', ext),
         errorCode: 4,
       }
     }
@@ -501,7 +501,7 @@ export const FileReadTool = buildTool({
     if (isBlockedDevicePath(fullFilePath)) {
       return {
         result: false,
-        message: `Cannot read '${file_path}': this device file would block or produce infinite output.`,
+        message: t('toolUI.fileRead.blockedDevicePath', file_path),
         errorCode: 9,
       }
     }
@@ -653,11 +653,11 @@ export const FileReadTool = buildTool({
 
         const similarFilename = findSimilarFile(fullFilePath)
         const cwdSuggestion = await suggestPathUnderCwd(fullFilePath)
-        let message = `File does not exist. ${FILE_NOT_FOUND_CWD_NOTE} ${getCwd()}.`
+        let message = t('toolUI.fileRead.fileDoesNotExist', FILE_NOT_FOUND_CWD_NOTE, getCwd())
         if (cwdSuggestion) {
-          message += ` Did you mean ${cwdSuggestion}?`
+          message += t('toolUI.fileRead.didYouMean', cwdSuggestion)
         } else if (similarFilename) {
-          message += ` Did you mean ${similarFilename}?`
+          message += t('toolUI.fileRead.didYouMean', similarFilename)
         }
         throw new Error(message)
       }
@@ -835,12 +835,13 @@ async function callInner(
     const cellsJsonBytes = Buffer.byteLength(cellsJson)
     if (cellsJsonBytes > maxSizeBytes) {
       throw new Error(
-        `Notebook content (${formatFileSize(cellsJsonBytes)}) exceeds maximum allowed size (${formatFileSize(maxSizeBytes)}). ` +
-          `Use ${BASH_TOOL_NAME} with jq to read specific portions:\n` +
-          `  cat "${file_path}" | jq '.cells[:20]' # First 20 cells\n` +
-          `  cat "${file_path}" | jq '.cells[100:120]' # Cells 100-120\n` +
-          `  cat "${file_path}" | jq '.cells | length' # Count total cells\n` +
-          `  cat "${file_path}" | jq '.cells[] | select(.cell_type=="code") | .source' # All code sources`,
+        t(
+          'toolUI.fileRead.notebookTooLarge',
+          formatFileSize(cellsJsonBytes),
+          formatFileSize(maxSizeBytes),
+          BASH_TOOL_NAME,
+          file_path,
+        ),
       )
     }
 
@@ -957,9 +958,7 @@ async function callInner(
     const pageCount = await getPDFPageCount(resolvedFilePath)
     if (pageCount !== null && pageCount > PDF_AT_MENTION_INLINE_THRESHOLD) {
       throw new Error(
-        `This PDF has ${pageCount} pages, which is too many to read at once. ` +
-          `Use the pages parameter to read specific page ranges (e.g., pages: "1-5"). ` +
-          `Maximum ${PDF_MAX_PAGES_PER_READ} pages per request.`,
+        t('toolUI.fileRead.pdfTooManyPages', pageCount, PDF_MAX_PAGES_PER_READ),
       )
     }
 
@@ -986,11 +985,7 @@ async function callInner(
     }
 
     if (!isPDFSupported()) {
-      throw new Error(
-        'Reading full PDFs is not supported with this model. Use a newer model (Sonnet 3.5 v2 or later), ' +
-          `or use the pages parameter to read specific page ranges (e.g., pages: "1-5", maximum ${PDF_MAX_PAGES_PER_READ} pages per request). ` +
-          'Page extraction requires poppler-utils: install with `brew install poppler` on macOS or `apt-get install poppler-utils` on Debian/Ubuntu.',
-      )
+      throw new Error(t('toolUI.fileRead.pdfNotSupported', PDF_MAX_PAGES_PER_READ))
     }
 
     const readResult = await readPDF(resolvedFilePath)
@@ -1116,7 +1111,7 @@ export async function readImageWithTokenBudget(
   const originalSize = imageBuffer.length
 
   if (originalSize === 0) {
-    throw new Error(`Image file is empty: ${filePath}`)
+    throw new Error(t('toolUI.fileRead.imageFileEmpty', filePath))
   }
 
   const detectedMediaType = detectImageFormatFromBuffer(imageBuffer)

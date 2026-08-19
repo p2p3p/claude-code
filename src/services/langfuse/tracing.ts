@@ -2,8 +2,7 @@ import { startObservation, LangfuseOtelSpanAttributes } from '@langfuse/tracing'
 import type {
   LangfuseSpan,
   LangfuseGeneration,
-  LangfuseAgent,
-} from '@langfuse/tracing'
+  LangfuseAgent} from '@langfuse/tracing'
 import { isLangfuseEnabled } from './client.js'
 import { sanitizeToolInput, sanitizeToolOutput } from './sanitize.js'
 import { logForDebugging } from 'src/utils/debug.js'
@@ -46,9 +45,7 @@ export function createTrace(params: {
           provider: params.provider,
           model: params.model,
           agentType: 'main',
-          ...(params.querySource && { querySource: params.querySource }),
-        },
-      },
+          ...(params.querySource && { querySource: params.querySource })}},
       { asType: 'agent' },
     ) as RootTrace
     rootSpan.otelSpan.setAttribute(
@@ -79,8 +76,7 @@ const PROVIDER_GENERATION_NAMES: Record<string, string> = {
   foundry: 'ChatFoundry',
   openai: 'ChatOpenAI',
   gemini: 'ChatGoogleGenerativeAI',
-  grok: 'ChatXAI',
-}
+  grok: 'ChatXAI'}
 
 export function recordLLMObservation(
   rootSpan: LangfuseSpan | null,
@@ -129,17 +125,13 @@ export function recordLLMObservation(
         metadata: {
           provider: params.provider,
           model: params.model,
-          ...(params.thinking && { thinking: params.thinking }),
-        },
+          ...(params.thinking && { thinking: params.thinking })},
         ...(params.completionStartTime && {
-          completionStartTime: params.completionStartTime,
-        }),
-      },
+          completionStartTime: params.completionStartTime})},
       {
         asType: 'generation',
         ...(params.startTime && { startTime: params.startTime }),
-        parentSpanContext: rootSpan.otelSpan.spanContext(),
-      },
+        parentSpanContext: rootSpan.otelSpan.spanContext()},
     )
 
     // Propagate session ID and user ID to generation span so Langfuse links it correctly
@@ -168,16 +160,13 @@ export function recordLLMObservation(
         input: params.usage.input_tokens + cacheCreation + cacheRead,
         output: params.usage.output_tokens,
         ...(cacheRead > 0 && { cache_read: cacheRead }),
-        ...(cacheCreation > 0 && { cache_creation: cacheCreation }),
-      },
-    })
+        ...(cacheCreation > 0 && { cache_creation: cacheCreation })}})
 
     gen.end(params.endTime)
     logForDebugging(`[langfuse] LLM observation recorded: ${gen.id}`)
   } catch (e) {
     logForDebugging(`[langfuse] recordLLMObservation failed: ${e}`, {
-      level: 'error',
-    })
+      level: 'error'})
   }
 }
 
@@ -205,14 +194,11 @@ export function recordToolObservation(
         input: sanitizeToolInput(params.toolName, params.input),
         metadata: {
           toolUseId: params.toolUseId,
-          isError: String(params.isError ?? false),
-        },
-      },
+          isError: String(params.isError ?? false)}},
       {
         asType: 'tool',
         ...(params.startTime && { startTime: params.startTime }),
-        parentSpanContext: parentSpan.otelSpan.spanContext(),
-      },
+        parentSpanContext: parentSpan.otelSpan.spanContext()},
     )
 
     // Propagate session ID and user ID to tool span so Langfuse links it correctly
@@ -233,8 +219,7 @@ export function recordToolObservation(
 
     toolObs.update({
       output: sanitizeToolOutput(params.toolName, params.output),
-      ...(params.isError && { level: 'ERROR' as const }),
-    })
+      ...(params.isError && { level: 'ERROR' as const })})
 
     toolObs.end()
     logForDebugging(
@@ -242,8 +227,7 @@ export function recordToolObservation(
     )
   } catch (e) {
     logForDebugging(`[langfuse] recordToolObservation failed: ${e}`, {
-      level: 'error',
-    })
+      level: 'error'})
   }
 }
 
@@ -264,13 +248,10 @@ export function createToolBatchSpan(
         metadata: {
           toolNames: params.toolNames.join(', '),
           toolCount: String(params.toolNames.length),
-          batchIndex: String(params.batchIndex),
-        },
-      },
+          batchIndex: String(params.batchIndex)}},
       {
         asType: 'span',
-        parentSpanContext: rootSpan.otelSpan.spanContext(),
-      },
+        parentSpanContext: rootSpan.otelSpan.spanContext()},
     ) as LangfuseSpan
 
     const sessionId = (rootSpan as unknown as RootTrace)._sessionId
@@ -294,8 +275,7 @@ export function createToolBatchSpan(
     return batchSpan
   } catch (e) {
     logForDebugging(`[langfuse] createToolBatchSpan failed: ${e}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return null
   }
 }
@@ -307,8 +287,7 @@ export function endToolBatchSpan(batchSpan: LangfuseSpan | null): void {
     logForDebugging(`[langfuse] Tool batch span ended: ${batchSpan.id}`)
   } catch (e) {
     logForDebugging(`[langfuse] endToolBatchSpan failed: ${e}`, {
-      level: 'error',
-    })
+      level: 'error'})
   }
 }
 
@@ -331,9 +310,7 @@ export function createSubagentTrace(params: {
           provider: params.provider,
           model: params.model,
           agentType: params.agentType,
-          agentId: params.agentId,
-        },
-      },
+          agentId: params.agentId}},
       { asType: 'agent' },
     ) as RootTrace
     rootSpan.otelSpan.setAttribute(
@@ -355,8 +332,7 @@ export function createSubagentTrace(params: {
     return rootSpan as unknown as LangfuseSpan
   } catch (e) {
     logForDebugging(`[langfuse] createSubagentTrace failed: ${e}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return null
   }
 }
@@ -386,13 +362,10 @@ export function createChildSpan(
         metadata: {
           provider: params.provider,
           model: params.model,
-          querySource: params.querySource,
-        },
-      },
+          querySource: params.querySource}},
       {
         asType: 'span',
-        parentSpanContext: parentSpan.otelSpan.spanContext(),
-      },
+        parentSpanContext: parentSpan.otelSpan.spanContext()},
     ) as LangfuseSpan
 
     // Propagate session ID and user ID from parent
@@ -419,8 +392,7 @@ export function createChildSpan(
     return span
   } catch (e) {
     logForDebugging(`[langfuse] createChildSpan failed: ${e}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return null
   }
 }

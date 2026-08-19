@@ -8,6 +8,7 @@ import {
 import { clearSystemPromptSections } from 'src/constants/systemPromptSections.js'
 import { logEvent } from 'src/services/analytics/index.js'
 import type { Tool } from 'src/Tool.js'
+import { t } from 'src/utils/i18n/index.js'
 import { buildTool, type ToolDef } from 'src/Tool.js'
 import { count } from 'src/utils/array.js'
 import { clearMemoryFileCaches } from 'src/utils/claudemd.js'
@@ -147,10 +148,10 @@ function restoreSessionToOriginalCwd(
 
 export const ExitWorktreeTool: Tool<InputSchema, Output> = buildTool({
   name: EXIT_WORKTREE_TOOL_NAME,
-  searchHint: 'exit a worktree session and return to the original directory',
+  searchHint: t('toolUI.exitWorktree.searchHint'),
   maxResultSizeChars: 100_000,
   async description() {
-    return 'Exits a worktree session created by EnterWorktree and restores the original working directory'
+    return t('toolUI.exitWorktree.description')
   },
   async prompt() {
     return getExitWorktreeToolPrompt()
@@ -162,7 +163,7 @@ export const ExitWorktreeTool: Tool<InputSchema, Output> = buildTool({
     return outputSchema()
   },
   userFacingName() {
-    return 'Exiting worktree'
+    return t('toolUI.exitWorktree.userFacingName')
   },
   shouldDefer: true,
   isDestructive(input) {
@@ -181,8 +182,7 @@ export const ExitWorktreeTool: Tool<InputSchema, Output> = buildTool({
     if (!session) {
       return {
         result: false,
-        message:
-          'No-op: there is no active EnterWorktree session to exit. This tool only operates on worktrees created by EnterWorktree in the current session — it will not touch worktrees created manually or in a previous session. No filesystem changes were made.',
+        message: t('toolUI.exitWorktree.noActiveSession'),
         errorCode: 1,
       }
     }
@@ -195,7 +195,7 @@ export const ExitWorktreeTool: Tool<InputSchema, Output> = buildTool({
       if (summary === null) {
         return {
           result: false,
-          message: `Could not verify worktree state at ${session.worktreePath}. Refusing to remove without explicit confirmation. Re-invoke with discard_changes: true to proceed — or use action: "keep" to preserve the worktree.`,
+          message: t('toolUI.exitWorktree.couldNotVerify', session.worktreePath),
           errorCode: 3,
         }
       }
@@ -204,17 +204,17 @@ export const ExitWorktreeTool: Tool<InputSchema, Output> = buildTool({
         const parts: string[] = []
         if (changedFiles > 0) {
           parts.push(
-            `${changedFiles} uncommitted ${changedFiles === 1 ? 'file' : 'files'}`,
+            t('toolUI.exitWorktree.uncommittedFiles', changedFiles),
           )
         }
         if (commits > 0) {
           parts.push(
-            `${commits} ${commits === 1 ? 'commit' : 'commits'} on ${session.worktreeBranch ?? 'the worktree branch'}`,
+            t('toolUI.exitWorktree.commitsOnBranch', commits, session.worktreeBranch ?? 'the worktree branch'),
           )
         }
         return {
           result: false,
-          message: `Worktree has ${parts.join(' and ')}. Removing will discard this work permanently. Confirm with the user, then re-invoke with discard_changes: true — or use action: "keep" to preserve the worktree.`,
+          message: t('toolUI.exitWorktree.worktreeHasChanges', parts.join(' and ')),
           errorCode: 2,
         }
       }
@@ -229,7 +229,7 @@ export const ExitWorktreeTool: Tool<InputSchema, Output> = buildTool({
     if (!session) {
       // validateInput guards this, but the session is module-level mutable
       // state — defend against a race between validation and execution.
-      throw new Error('Not in a worktree session')
+      throw new Error(t('toolUI.exitWorktree.notInWorktree'))
     }
 
     // Capture before keepWorktree/cleanupWorktree null out currentWorktreeSession.
@@ -269,7 +269,10 @@ export const ExitWorktreeTool: Tool<InputSchema, Output> = buildTool({
       })
 
       const tmuxNote = tmuxSessionName
-        ? ` Tmux session ${tmuxSessionName} is still running; reattach with: tmux attach -t ${tmuxSessionName}`
+        ? t('toolUI.exitWorktree.tmuxNote', tmuxSessionName)
+        : ''
+      const branchSuffix = worktreeBranch
+        ? t('toolUI.exitWorktree.onBranch', worktreeBranch)
         : ''
       return {
         data: {
@@ -278,7 +281,7 @@ export const ExitWorktreeTool: Tool<InputSchema, Output> = buildTool({
           worktreePath,
           worktreeBranch,
           tmuxSessionName,
-          message: `Exited worktree. Your work is preserved at ${worktreePath}${worktreeBranch ? ` on branch ${worktreeBranch}` : ''}. Session is now back in ${originalCwd}.${tmuxNote}`,
+          message: t('toolUI.exitWorktree.exitedWorktree', worktreePath, branchSuffix, originalCwd, tmuxNote),
         },
       }
     }
@@ -298,15 +301,15 @@ export const ExitWorktreeTool: Tool<InputSchema, Output> = buildTool({
 
     const discardParts: string[] = []
     if (commits > 0) {
-      discardParts.push(`${commits} ${commits === 1 ? 'commit' : 'commits'}`)
+      discardParts.push(t('toolUI.exitWorktree.commitsOnBranch', commits, session.worktreeBranch ?? 'the worktree branch'))
     }
     if (changedFiles > 0) {
       discardParts.push(
-        `${changedFiles} uncommitted ${changedFiles === 1 ? 'file' : 'files'}`,
+        t('toolUI.exitWorktree.uncommittedFiles', changedFiles),
       )
     }
     const discardNote =
-      discardParts.length > 0 ? ` Discarded ${discardParts.join(' and ')}.` : ''
+      discardParts.length > 0 ? t('toolUI.exitWorktree.discardParts', discardParts.join(' and ')) : ''
     return {
       data: {
         action: 'remove' as const,
@@ -315,7 +318,7 @@ export const ExitWorktreeTool: Tool<InputSchema, Output> = buildTool({
         worktreeBranch,
         discardedFiles: changedFiles,
         discardedCommits: commits,
-        message: `Exited and removed worktree at ${worktreePath}.${discardNote} Session is now back in ${originalCwd}.`,
+        message: t('toolUI.exitWorktree.removedWorktree', worktreePath, discardNote, originalCwd),
       },
     }
   },

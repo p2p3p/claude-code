@@ -16,8 +16,7 @@ export function shouldDeferBridgeResult({
   hasHandle,
   isConnected,
   lastWrittenIndex,
-  messageCount,
-}: {
+  messageCount}: {
   hasHandle: boolean
   isConnected: boolean
   lastWrittenIndex: number

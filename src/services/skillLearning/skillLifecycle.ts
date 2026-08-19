@@ -4,8 +4,7 @@ import {
   readFile,
   rename,
   rm,
-  writeFile,
-} from 'node:fs/promises'
+  writeFile} from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { clearSkillIndexCache } from '../skillSearch/localSearch.js'
@@ -86,8 +85,7 @@ export async function compareExistingArtifacts(
       score: overlapScore(
         draftTerms,
         terms(`${skill.name} ${skill.description} ${skill.content}`),
-      ),
-    }))
+      )}))
     .filter(item => item.score >= 0.18)
     .sort((a, b) => b.score - a.score)
     .map(item => item.skill)
@@ -125,8 +123,7 @@ export function decideSkillLifecycle(
       targetSkill: deletable,
       reason:
         'Existing skill is low quality, unreferenced, and safe to delete.',
-      confirmed: true,
-    }
+      confirmed: true}
   }
 
   const target = existingSkills[0]
@@ -134,8 +131,7 @@ export function decideSkillLifecycle(
     return {
       type: 'create',
       draft,
-      reason: 'No overlapping active skill found.',
-    }
+      reason: 'No overlapping active skill found.'}
   }
 
   const draftTerms = terms(
@@ -155,8 +151,7 @@ export function decideSkillLifecycle(
       type: 'replace',
       targetSkill: target,
       draft,
-      reason: `New learned skill has high overlap (${score.toFixed(2)}) and higher confidence.`,
-    }
+      reason: `New learned skill has high overlap (${score.toFixed(2)}) and higher confidence.`}
   }
 
   if (score >= 0.35) {
@@ -164,8 +159,7 @@ export function decideSkillLifecycle(
       type: 'merge',
       targetSkill: target,
       patch: buildMergePatch(draft),
-      reason: `Existing skill overlaps with the learned pattern (${score.toFixed(2)}).`,
-    }
+      reason: `Existing skill overlaps with the learned pattern (${score.toFixed(2)}).`}
   }
 
   return { type: 'create', draft, reason: 'Overlap is too low to merge.' }
@@ -193,8 +187,7 @@ export async function applySkillLifecycleDecision(
         return {}
       }
       return {
-        activePath: await writeMergePatch(decision.targetSkill, decision.patch),
-      }
+        activePath: await writeMergePatch(decision.targetSkill, decision.patch)}
     }
     case 'replace': {
       if (!isSkillLearningGenerated(decision.targetSkill)) {
@@ -214,8 +207,7 @@ export async function applySkillLifecycleDecision(
           decision.reason,
           {
             newSkill: decision.draft.name,
-            newPath: predictedNewPath,
-          },
+            newPath: predictedNewPath},
           { ...options, allowHardDelete: true },
         )
         const activePath = await writeLearnedSkill(decision.draft)
@@ -226,8 +218,7 @@ export async function applySkillLifecycleDecision(
         decision.reason,
         {
           newSkill: decision.draft.name,
-          newPath: predictedNewPath,
-        },
+          newPath: predictedNewPath},
         options,
       )
       const activePath = await writeLearnedSkill(decision.draft)
@@ -248,8 +239,7 @@ export async function applySkillLifecycleDecision(
         {
           ...options,
           allowHardDelete:
-            options.allowHardDelete && decision.confirmed !== false,
-        },
+            options.allowHardDelete && decision.confirmed !== false},
       )
   }
 }
@@ -289,8 +279,7 @@ export async function archiveSkill(
       action: 'archive',
       reason,
       replacedAt: (options.now ?? new Date()).toISOString(),
-      recoverable: true,
-    },
+      recoverable: true},
   )
   clearSkillIndexCache()
   return { archivedPath, manifestPath }
@@ -324,8 +313,7 @@ export async function deleteSkill(
     action: 'delete',
     reason,
     replacedAt: (options.now ?? new Date()).toISOString(),
-    recoverable: false,
-  })
+    recoverable: false})
   const tombstonePath = join(
     manifestRoot,
     `${skill.name}-${timestamp(options.now)}.tombstone.json`,
@@ -418,8 +406,7 @@ async function collectSkillFiles(
         name: parseFrontmatter(content, 'name') ?? basename(dirname(full)),
         description: parseFrontmatter(content, 'description') ?? '',
         path: full,
-        content,
-      })
+        content})
     }
   }
 }
@@ -443,8 +430,7 @@ async function collectArtifactFiles(
           parseFrontmatter(content, 'name') ?? entry.name.replace(/\.md$/, ''),
         description: parseFrontmatter(content, 'description') ?? '',
         path: full,
-        content,
-      })
+        content})
     }
   }
 }

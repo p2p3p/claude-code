@@ -27,8 +27,7 @@ import { parsePluginIdentifier } from '../../utils/plugins/pluginIdentifier.js'
 import { escapeXmlAttr } from '../../utils/xml.js'
 import {
   type ChannelAllowlistEntry,
-  getChannelAllowlist,
-} from './channelAllowlist.js'
+  getChannelAllowlist} from './channelAllowlist.js'
 
 export const ChannelMessageNotificationSchema = lazySchema(() =>
   z.object({
@@ -37,9 +36,7 @@ export const ChannelMessageNotificationSchema = lazySchema(() =>
       content: z.string(),
       // Opaque passthrough — thread_id, user, whatever the channel wants the
       // model to see. Rendered as attributes on the <channel> tag.
-      meta: z.record(z.string(), z.string()).optional(),
-    }),
-  }),
+      meta: z.record(z.string(), z.string()).optional()})}),
 )
 
 /**
@@ -62,9 +59,7 @@ export const ChannelPermissionNotificationSchema = lazySchema(() =>
     method: z.literal(CHANNEL_PERMISSION_METHOD),
     params: z.object({
       request_id: z.string(),
-      behavior: z.enum(['allow', 'deny']),
-    }),
-  }),
+      behavior: z.enum(['allow', 'deny'])})}),
 )
 
 /**
@@ -109,11 +104,8 @@ export const ChannelPermissionRequestNotificationSchema: () => AnyObjectSchema =
         channel_context: z
           .object({
             source_server: z.string().optional(),
-            chat_id: z.string().optional(),
-          })
-          .optional(),
-      }),
-    }),
+            chat_id: z.string().optional()})
+          .optional()})}),
   )
 
 /**
@@ -223,8 +215,7 @@ export function gateChannelServer(
     return {
       action: 'skip',
       kind: 'capability',
-      reason: 'server did not declare claude/channel capability',
-    }
+      reason: 'server did not declare claude/channel capability'}
   }
 
   // User-level session opt-in. A server must be explicitly listed in
@@ -235,8 +226,7 @@ export function gateChannelServer(
     return {
       action: 'skip',
       kind: 'session',
-      reason: `server ${serverName} not in --channels list for this session`,
-    }
+      reason: `server ${serverName} not in --channels list for this session`}
   }
 
   if (entry.kind === 'plugin') {
@@ -254,8 +244,7 @@ export function gateChannelServer(
       return {
         action: 'skip',
         kind: 'marketplace',
-        reason: `you asked for plugin:${entry.name}@${entry.marketplace} but the installed ${entry.name} plugin is from ${actual ?? 'an unknown source'}`,
-      }
+        reason: `you asked for plugin:${entry.name}@${entry.marketplace} but the installed ${entry.name} plugin is from ${actual ?? 'an unknown source'}`}
     }
   }
 

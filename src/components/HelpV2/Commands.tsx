@@ -33,8 +33,7 @@ export function Commands({ commands, maxHeight, columns, title, onCancel, emptyM
       .map(cmd => ({
         label: `/${cmd.name}`,
         value: cmd.name,
-        description: truncate(formatDescriptionWithSource(cmd), maxWidth, true),
-      }));
+        description: truncate(formatDescriptionWithSource(cmd), maxWidth, true)}));
   }, [commands, maxWidth]);
 
   return (

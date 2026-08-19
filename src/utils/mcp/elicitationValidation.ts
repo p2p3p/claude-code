@@ -2,15 +2,13 @@ import type {
   EnumSchema,
   MultiSelectEnumSchema,
   PrimitiveSchemaDefinition,
-  StringSchema,
-} from '@modelcontextprotocol/sdk/types.js'
+  StringSchema} from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod/v4'
 import { jsonStringify } from '../slowOperations.js'
 import { plural } from '../stringUtils.js'
 import {
   looksLikeISO8601,
-  parseNaturalLanguageDateTime,
-} from './dateTimeParser.js'
+  parseNaturalLanguageDateTime} from './dateTimeParser.js'
 
 export type ValidationResult = {
   value?: string | number | boolean
@@ -21,21 +19,16 @@ export type ValidationResult = {
 const STRING_FORMATS = {
   email: {
     description: 'email address',
-    example: 'user@example.com',
-  },
+    example: 'user@example.com'},
   uri: {
     description: 'URI',
-    example: 'https://example.com',
-  },
+    example: 'https://example.com'},
   date: {
     description: 'date',
-    example: '2024-03-15',
-  },
+    example: '2024-03-15'},
   'date-time': {
     description: 'date-time',
-    example: '2024-03-15T14:30:00Z',
-  },
-}
+    example: '2024-03-15T14:30:00Z'}}
 
 /**
  * Check if schema is a single-select enum (either legacy `enum` format or new `oneOf` format)
@@ -144,24 +137,20 @@ function getZodSchema(schema: PrimitiveSchemaDefinition): z.ZodTypeAny {
     let stringSchema = z.string()
     if (schema.minLength !== undefined) {
       stringSchema = stringSchema.min(schema.minLength, {
-        message: `Must be at least ${schema.minLength} ${plural(schema.minLength, 'character')}`,
-      })
+        message: `Must be at least ${schema.minLength} ${plural(schema.minLength, 'character')}`})
     }
     if (schema.maxLength !== undefined) {
       stringSchema = stringSchema.max(schema.maxLength, {
-        message: `Must be at most ${schema.maxLength} ${plural(schema.maxLength, 'character')}`,
-      })
+        message: `Must be at most ${schema.maxLength} ${plural(schema.maxLength, 'character')}`})
     }
     switch (schema.format) {
       case 'email':
         stringSchema = stringSchema.email({
-          message: 'Must be a valid email address, e.g. user@example.com',
-        })
+          message: 'Must be a valid email address, e.g. user@example.com'})
         break
       case 'uri':
         stringSchema = stringSchema.url({
-          message: 'Must be a valid URI, e.g. https://example.com',
-        })
+          message: 'Must be a valid URI, e.g. https://example.com'})
         break
       case 'date':
         stringSchema = stringSchema.date(
@@ -172,8 +161,7 @@ function getZodSchema(schema: PrimitiveSchemaDefinition): z.ZodTypeAny {
         stringSchema = stringSchema.datetime({
           offset: true,
           message:
-            'Must be a valid date-time, e.g. 2024-03-15T14:30:00Z, tomorrow at 3pm',
-        })
+            'Must be a valid date-time, e.g. 2024-03-15T14:30:00Z, tomorrow at 3pm'})
         break
       default:
         // No specific format validation
@@ -198,20 +186,17 @@ function getZodSchema(schema: PrimitiveSchemaDefinition): z.ZodTypeAny {
             : `Must be ${typeLabel}`
 
     let numberSchema = z.coerce.number({
-      error: rangeMsg,
-    })
+      error: rangeMsg})
     if (schema.type === 'integer') {
       numberSchema = numberSchema.int({ message: rangeMsg })
     }
     if (schema.minimum !== undefined) {
       numberSchema = numberSchema.min(schema.minimum, {
-        message: rangeMsg,
-      })
+        message: rangeMsg})
     }
     if (schema.maximum !== undefined) {
       numberSchema = numberSchema.max(schema.maximum, {
-        message: rangeMsg,
-      })
+        message: rangeMsg})
     }
     return numberSchema
   }
@@ -233,13 +218,11 @@ export function validateElicitationInput(
     // zodSchema always produces primitive types for elicitation
     return {
       value: parseResult.data as string | number | boolean,
-      isValid: true,
-    }
+      isValid: true}
   }
   return {
     isValid: false,
-    error: parseResult.error.issues.map(e => e.message).join('; '),
-  }
+    error: parseResult.error.issues.map(e => e.message).join('; ')}
 }
 
 const hasStringFormat = (

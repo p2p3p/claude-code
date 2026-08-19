@@ -70,9 +70,7 @@ export function useNotifications(): {
               ...prev,
               notifications: {
                 queue: prev.notifications.queue,
-                current: null,
-              },
-            };
+                current: null}};
           });
           processQueue();
         },
@@ -86,9 +84,7 @@ export function useNotifications(): {
         ...prev,
         notifications: {
           queue: prev.notifications.queue.filter(_ => _ !== next),
-          current: next,
-        },
-      };
+          current: next}};
     });
   }, [setAppState]);
 
@@ -115,9 +111,7 @@ export function useNotifications(): {
                 ...prev,
                 notifications: {
                   queue: prev.notifications.queue.filter(_ => !notif.invalidates?.includes(_.key)),
-                  current: null,
-                },
-              };
+                  current: null}};
             });
             processQueue();
           },
@@ -136,9 +130,7 @@ export function useNotifications(): {
               // Only re-queue the current notification if it's not immediate
               [...(prev.notifications.current ? [prev.notifications.current] : []), ...prev.notifications.queue].filter(
                 _ => _.priority !== 'immediate' && !notif.invalidates?.includes(_.key),
-              ),
-          },
-        }));
+              )}}));
         return; // IMPORTANT: Exit addNotification for immediate notifications
       }
 
@@ -165,9 +157,7 @@ export function useNotifications(): {
                     ...p,
                     notifications: {
                       queue: p.notifications.queue,
-                      current: null,
-                    },
-                  };
+                      current: null}};
                 });
                 processQueue();
               },
@@ -181,9 +171,7 @@ export function useNotifications(): {
               ...prev,
               notifications: {
                 current: folded,
-                queue: prev.notifications.queue,
-              },
-            };
+                queue: prev.notifications.queue}};
           }
 
           // Fold into queued notification if keys match
@@ -196,9 +184,7 @@ export function useNotifications(): {
               ...prev,
               notifications: {
                 current: prev.notifications.current,
-                queue: newQueue,
-              },
-            };
+                queue: newQueue}};
           }
         }
 
@@ -225,9 +211,7 @@ export function useNotifications(): {
                 _ => _.priority !== 'immediate' && !notif.invalidates?.includes(_.key),
               ),
               notif,
-            ],
-          },
-        };
+            ]}};
       });
 
       // Process queue after adding the notification
@@ -255,9 +239,7 @@ export function useNotifications(): {
           ...prev,
           notifications: {
             current: isCurrent ? null : prev.notifications.current,
-            queue: prev.notifications.queue.filter(n => n.key !== key),
-          },
-        };
+            queue: prev.notifications.queue.filter(n => n.key !== key)}};
       });
 
       processQueue();
@@ -282,8 +264,7 @@ const PRIORITIES: Record<Priority, number> = {
   immediate: 0,
   high: 1,
   medium: 2,
-  low: 3,
-};
+  low: 3};
 export function getNext(queue: Notification[]): Notification | undefined {
   if (queue.length === 0) return undefined;
   return queue.reduce((min, n) => (PRIORITIES[n.priority] < PRIORITIES[min.priority] ? n : min));

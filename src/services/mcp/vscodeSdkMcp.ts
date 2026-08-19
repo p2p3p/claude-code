@@ -3,8 +3,7 @@ import { z } from 'zod/v4'
 import { lazySchema } from '../../utils/lazySchema.js'
 import {
   checkStatsigFeatureGate_CACHED_MAY_BE_STALE,
-  getFeatureValue_CACHED_MAY_BE_STALE,
-} from '../analytics/growthbook.js'
+  getFeatureValue_CACHED_MAY_BE_STALE} from '../analytics/growthbook.js'
 import { logEvent } from '../analytics/index.js'
 import type { ConnectedMCPServer, MCPServerConnection } from './types.js'
 
@@ -24,9 +23,7 @@ export const LogEventNotificationSchema = lazySchema(() =>
     method: z.literal('log_event'),
     params: z.object({
       eventName: z.string(),
-      eventData: z.object({}).passthrough(),
-    }),
-  }),
+      eventData: z.object({}).passthrough()})}),
 )
 
 // Store the VSCode MCP client reference for sending notifications
@@ -48,8 +45,7 @@ export function notifyVscodeFileUpdated(
   void vscodeMcpClient.client
     .notification({
       method: 'file_updated',
-      params: { filePath, oldContent, newContent },
-    })
+      params: { filePath, oldContent, newContent }})
     .catch((error: Error) => {
       // Do not throw if the notification failed
       logForDebugging(
@@ -96,8 +92,7 @@ export function setupVscodeSdkMcp(sdkClients: MCPServerConnection[]): void {
       tengu_vscode_cc_auth: getFeatureValue_CACHED_MAY_BE_STALE(
         'tengu_vscode_cc_auth',
         false,
-      ),
-    }
+      )}
     // Tri-state: 'enabled' | 'disabled' | 'opt-in'. Omit if unknown so VSCode
     // fails closed (treats absent as 'disabled').
     const autoModeState = readAutoModeEnabledState()
@@ -106,7 +101,6 @@ export function setupVscodeSdkMcp(sdkClients: MCPServerConnection[]): void {
     }
     void client.client.notification({
       method: 'experiment_gates',
-      params: { gates },
-    })
+      params: { gates }})
   }
 }

@@ -98,8 +98,7 @@ export function createV1ReplTransport(
     reportState: () => {},
     reportMetadata: () => {},
     reportDelivery: () => {},
-    flush: () => Promise.resolve(),
-  }
+    flush: () => Promise.resolve()}
 }
 
 /**
@@ -159,8 +158,7 @@ export async function createV2ReplTransport(opts: {
     ingressToken,
     sessionId,
     initialSequenceNum,
-    getAuthToken,
-  } = opts
+    getAuthToken} = opts
 
   // Auth header builder. If getAuthToken is provided, read from it
   // (per-instance, multi-session safe). Otherwise write ingressToken to
@@ -228,8 +226,7 @@ export async function createV2ReplTransport(opts: {
       // branch, so callers see the logged warning and a false return. We
       // throw to unwind; the uploaders catch it as a send failure.
       throw new Error('epoch superseded')
-    },
-  })
+    }})
 
   // CCRClient's constructor wired sse.setOnEvent → reportDelivery('received').
   // remoteIO.ts additionally sends 'processing'/'processed' via
@@ -365,6 +362,5 @@ export async function createV2ReplTransport(opts: {
           onCloseCb?.(4091) // 4091 = init failure, distinguishable from 4090 epoch mismatch
         },
       )
-    },
-  }
+    }}
 }

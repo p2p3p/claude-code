@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Box, Text, setClipboard, useInput } from '@anthropic/ink';
 import type { ArtifactInfo } from './scanner.js';
 import { openBrowser } from 'src/utils/browser.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props = {
   artifacts: ArtifactInfo[];
@@ -45,18 +46,18 @@ export function ArtifactsMenu({ artifacts, onExit }: Props): React.ReactElement 
   return (
     <Box flexDirection="column" paddingX={1} paddingY={0}>
       <Box marginBottom={1}>
-        <Text bold>Artifacts ({artifacts.length})</Text>
+        <Text bold>{t("cmdSystemUI.artifactsTitle")} ({artifacts.length})</Text>
       </Box>
 
       {artifacts.length === 0 ? (
-        <Text color="subtle">No artifacts uploaded this session. Run /use-artifacts to learn how.</Text>
+        <Text color="subtle">{t('artifacts.noArtifacts')}</Text>
       ) : (
         <Box flexDirection="column">
           {artifacts.map((a, idx) => (
             <ArtifactRow key={a.toolUseId} artifact={a} isSelected={idx === selected} />
           ))}
           <Box marginTop={1}>
-            <Text color="subtle">{'↑/↓ select · Enter open · c copy URL · Esc exit'}</Text>
+            <Text color="subtle">{t('artifacts.navHint')}</Text>
           </Box>
         </Box>
       )}
@@ -86,7 +87,7 @@ function ArtifactRow({ artifact, isSelected }: { artifact: ArtifactInfo; isSelec
       )}
       {artifact.expiresAt ? (
         <Box marginLeft={2}>
-          <Text color="subtle">expires: {artifact.expiresAt}</Text>
+          <Text color="subtle">{t('artifacts.expires')} {artifact.expiresAt}</Text>
         </Box>
       ) : null}
     </Box>

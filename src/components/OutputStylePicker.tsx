@@ -4,6 +4,7 @@ import { getAllOutputStyles, OUTPUT_STYLE_CONFIG, type OutputStyleConfig } from 
 import { Box, Text, Dialog } from '@anthropic/ink';
 import type { OutputStyle } from '../utils/config.js';
 import { getCwd } from '../utils/cwd.js';
+import { t } from '../utils/i18n/index.js';
 import type { OptionWithDescription } from './CustomSelect/select.js';
 import { Select } from './CustomSelect/select.js';
 
@@ -14,8 +15,7 @@ function mapConfigsToOptions(styles: { [styleName: string]: OutputStyleConfig | 
   return Object.entries(styles).map(([style, config]) => ({
     label: config?.name ?? DEFAULT_OUTPUT_STYLE_LABEL,
     value: style,
-    description: config?.description ?? DEFAULT_OUTPUT_STYLE_DESCRIPTION,
-  }));
+    description: config?.description ?? DEFAULT_OUTPUT_STYLE_DESCRIPTION}));
 }
 
 export type OutputStylePickerProps = {
@@ -29,8 +29,7 @@ export function OutputStylePicker({
   initialStyle,
   onComplete,
   onCancel,
-  isStandaloneCommand,
-}: OutputStylePickerProps): React.ReactNode {
+  isStandaloneCommand}: OutputStylePickerProps): React.ReactNode {
   const [styleOptions, setStyleOptions] = useState<OptionWithDescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -60,17 +59,17 @@ export function OutputStylePicker({
 
   return (
     <Dialog
-      title="Preferred output style"
+      title={t('outputStyle.title')}
       onCancel={onCancel}
       hideInputGuide={!isStandaloneCommand}
       hideBorder={!isStandaloneCommand}
     >
       <Box flexDirection="column" gap={1}>
         <Box marginTop={1}>
-          <Text dimColor>This changes how Claude Code communicates with you</Text>
+          <Text dimColor>{t('outputStyle.description')}</Text>
         </Box>
         {isLoading ? (
-          <Text dimColor>Loading output styles…</Text>
+          <Text dimColor>{t('outputStyle.loading')}</Text>
         ) : (
           <Select
             options={styleOptions}

@@ -76,8 +76,7 @@ async function appendSessionLogImpl(
 
       const response = await axios.put(url, entry, {
         headers: requestHeaders,
-        validateStatus: status => status < 500,
-      })
+        validateStatus: status => status < 500})
 
       if (response.status === 200 || response.status === 201) {
         lastUuidMap.set(sessionId, entry.uuid)
@@ -153,16 +152,14 @@ async function appendSessionLogImpl(
       )
       logForDiagnosticsNoPII('error', 'session_persist_fail_status', {
         status: response.status,
-        attempt,
-      })
+        attempt})
     } catch (error) {
       // Network errors, 5xx - retryable
       const axiosError = error as AxiosError<SessionIngressError>
       logError(new Error(`Error persisting session log: ${axiosError.message}`))
       logForDiagnosticsNoPII('error', 'session_persist_fail_status', {
         status: axiosError.status,
-        attempt,
-      })
+        attempt})
     }
 
     if (attempt === MAX_RETRIES) {
@@ -204,8 +201,7 @@ export async function appendSessionLog(
 
   const headers: Record<string, string> = {
     Authorization: `Bearer ${sessionToken}`,
-    'Content-Type': 'application/json',
-  }
+    'Content-Type': 'application/json'}
 
   const sequentialAppend = getOrCreateSequentialAppend(sessionId)
   return sequentialAppend(entry, url, headers)
@@ -252,8 +248,7 @@ export async function getSessionLogsViaOAuth(
   logForDebugging(`[session-ingress] Fetching session logs from: ${url}`)
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
   const result = await fetchSessionLogsFromUrl(sessionId, url, headers)
   return result
 }
@@ -296,8 +291,7 @@ export async function getTeleportEvents(
   const baseUrl = `${getOauthConfig().BASE_API_URL}/v1/code/sessions/${sessionId}/teleport-events`
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   logForDebugging(`[teleport] Fetching events from: ${baseUrl}`)
 
@@ -322,8 +316,7 @@ export async function getTeleportEvents(
         headers,
         params,
         timeout: 20000,
-        validateStatus: status => status < 500,
-      })
+        validateStatus: status => status < 500})
     } catch (e) {
       const err = e as AxiosError
       logError(new Error(`Teleport events fetch failed: ${err.message}`))
@@ -429,8 +422,7 @@ async function fetchSessionLogsFromUrl(
       validateStatus: status => status < 500,
       params: isEnvTruthy(process.env.CLAUDE_AFTER_LAST_COMPACT)
         ? { after_last_compact: true }
-        : undefined,
-    })
+        : undefined})
 
     if (response.status === 200) {
       const data = response.data
@@ -471,15 +463,13 @@ async function fetchSessionLogsFromUrl(
       `Failed to fetch session logs: ${response.status} ${response.statusText}`,
     )
     logForDiagnosticsNoPII('error', 'session_get_fail_status', {
-      status: response.status,
-    })
+      status: response.status})
     return null
   } catch (error) {
     const axiosError = error as AxiosError<SessionIngressError>
     logError(new Error(`Error fetching session logs: ${axiosError.message}`))
     logForDiagnosticsNoPII('error', 'session_get_fail_status', {
-      status: axiosError.status,
-    })
+      status: axiosError.status})
     return null
   }
 }

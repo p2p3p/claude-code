@@ -49,8 +49,7 @@ export function addApiRequestToCache(requestData: unknown): void {
   if (process.env.USER_TYPE !== 'ant') return
   cachedApiRequests.push({
     timestamp: new Date().toISOString(),
-    request: requestData,
-  })
+    request: requestData})
   if (cachedApiRequests.length > MAX_CACHED_REQUESTS) {
     cachedApiRequests.shift()
   }
@@ -153,8 +152,7 @@ export function createDumpPromptsFetch(
       initialized: false,
       messageCountSeen: 0,
       lastInitDataHash: '',
-      lastInitFingerprint: '',
-    }
+      lastInitFingerprint: ''}
     dumpState.set(agentIdOrSessionId, state)
 
     let timestamp: string | undefined

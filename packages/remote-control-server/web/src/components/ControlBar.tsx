@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn, isClosedSessionStatus } from '../lib/utils';
 import { Square, SendHorizonal } from 'lucide-react';
+import { t } from '../../../../../src/utils/i18n/index.js';
 
 interface ControlBarProps {
   sessionId: string;
@@ -47,7 +48,7 @@ export function ControlBar({ sessionId, sessionStatus, activityMode, onSend, onI
           value={text}
           onChange={e => setText(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={closed ? 'Session is closed' : 'Type a message...'}
+          placeholder={closed ? t('rcs.sessionIsClosed') : t('rcs.typeMessage')}
           disabled={closed}
           className="flex-1 rounded-lg border border-border bg-surface-2 px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/20 disabled:opacity-50 transition-colors"
         />
@@ -61,8 +62,8 @@ export function ControlBar({ sessionId, sessionStatus, activityMode, onSend, onI
               : 'bg-brand text-white hover:bg-brand-light',
             closed && 'opacity-50 cursor-not-allowed',
           )}
-          aria-label={working ? 'Stop' : 'Send'}
-          title={closed ? 'Session is closed' : working ? 'Stop' : 'Send'}
+          aria-label={working ? t('rcs.stop') : t('rcs.send')}
+          title={closed ? t('rcs.sessionIsClosed') : working ? t('rcs.stop') : t('rcs.send')}
         >
           {working ? (
             <Square className="h-4.5 w-4.5 fill-current" />

@@ -1,6 +1,7 @@
 import figures from 'figures';
 import * as React from 'react';
 import { useContext } from 'react';
+import { t } from '../../utils/i18n/index.js';
 import { useQueuedMessage } from '../../context/QueuedMessageContext.js';
 import { Box, Text } from '@anthropic/ink';
 import { formatBriefTimestamp } from '../../utils/formatBriefTimestamp.js';
@@ -25,7 +26,7 @@ export function HighlightedThinkingText({ text, useBriefLayout, timestamp }: Pro
     return (
       <Box flexDirection="column" paddingLeft={2}>
         <Box flexDirection="row">
-          <Text color={isQueued ? 'subtle' : 'briefLabelYou'}>You</Text>
+          <Text color={isQueued ? 'subtle' : 'briefLabelYou'}>{t('highlightedThinking.you')}</Text>
           {ts ? <Text dimColor> {ts}</Text> : null}
         </Box>
         <Text color={isQueued ? 'subtle' : 'text'}>{text}</Text>

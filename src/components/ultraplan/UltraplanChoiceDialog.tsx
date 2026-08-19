@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { join } from 'path';
 import { stat, writeFile } from 'fs/promises';
 import figures from 'figures';
@@ -54,8 +55,7 @@ export function UltraplanChoiceDialog({
   memorySelector: _memorySelector,
   getAppState,
   setConversationId,
-  resultDedupState: _resultDedupState,
-}: UltraplanChoiceDialogProps): React.ReactNode {
+  resultDedupState: _resultDedupState}: UltraplanChoiceDialogProps): React.ReactNode {
   useRegisterOverlay('ultraplan-choice');
 
   const setAppState = useSetAppState();
@@ -117,8 +117,7 @@ export function UltraplanChoiceDialog({
               '',
               'The user approved this plan in the remote session. Give them a brief summary, then start implementing.',
             ].join('\n'),
-            mode: 'task-notification',
-          });
+            mode: 'task-notification'});
           break;
         case 'fresh':
           const previousSessionId = getSessionId();
@@ -132,8 +131,7 @@ export function UltraplanChoiceDialog({
             readFileState,
             getAppState,
             setAppState,
-            setConversationId,
-          });
+            setConversationId});
 
           if (transcriptSaved) {
             setMessages(prev => [
@@ -147,8 +145,7 @@ export function UltraplanChoiceDialog({
 
           enqueuePendingNotification({
             value: `Here is the approved implementation plan:\n\n${plan}\n\nImplement this plan.`,
-            mode: 'prompt',
-          });
+            mode: 'prompt'});
           break;
         case 'cancel': {
           const savePath = join(getCwd(), `${getDateStamp()}-ultraplan.md`);
@@ -183,20 +180,17 @@ export function UltraplanChoiceDialog({
   const options: Array<{ label: string; value: ChoiceValue; description: string }> = React.useMemo(
     () => [
       {
-        label: 'Implement here',
+        label: t('ultraplanChoice.labelImplementHere'),
         value: 'here' as const,
-        description: 'Inject plan into the current conversation',
-      },
+        description: t('ultraplanChoice.descInjectPlan')},
       {
-        label: 'Start new session',
+        label: t('ultraplanChoice.labelStartNewSession'),
         value: 'fresh' as const,
-        description: 'Clear conversation and start with only the plan',
-      },
+        description: t('ultraplanChoice.descClearConversation')},
       {
-        label: 'Cancel',
+        label: t('ultraplanChoice.labelCancel'),
         value: 'cancel' as const,
-        description: "Don't implement — save plan and return",
-      },
+        description: t('ultraplanChoice.descDontImplement')},
     ],
     [],
   );
@@ -204,8 +198,8 @@ export function UltraplanChoiceDialog({
   // ── Render ─────────────────────────────────────────────────────────
   return (
     <Dialog
-      title="Ultraplan approved"
-      subtitle="How should the plan be implemented?"
+      title={t('ultraplanchoicedialog.ultraplanApproved')}
+      subtitle={t('ultraplanchoicedialog.howShouldThePlanBeImplemented')}
       onCancel={() => {}}
       hideInputGuide
     >

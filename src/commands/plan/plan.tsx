@@ -10,19 +10,19 @@ import { prepareContextForPlanMode } from '../../utils/permissions/permissionSet
 import { getPlan, getPlanFilePath } from '../../utils/plans.js';
 import { editFileInEditor } from '../../utils/promptEditor.js';
 import { renderToString } from '../../utils/staticRender.js';
+import { t } from '../../utils/i18n/index.js'
 
 function PlanDisplay({
   planContent,
   planPath,
-  editorName,
-}: {
+  editorName}: {
   planContent: string;
   planPath: string;
   editorName: string | undefined;
 }): React.ReactNode {
   return (
     <Box flexDirection="column">
-      <Text bold>Current Plan</Text>
+      <Text bold>{t("cmdSystemUI.planTitle")}</Text>
       <Text dimColor>{planPath}</Text>
       <Box marginTop={1}>
         <Text>{planContent}</Text>
@@ -30,7 +30,7 @@ function PlanDisplay({
       {editorName && (
         <Box marginTop={1}>
           <Text dimColor>&quot;/plan open&quot;</Text>
-          <Text dimColor> to edit this plan in </Text>
+          <Text dimColor>{t('planCmd.editIn')}</Text>
           <Text bold dimColor>
             {editorName}
           </Text>
@@ -57,14 +57,12 @@ export async function call(
       toolPermissionContext: applyPermissionUpdate(prepareContextForPlanMode(prev.toolPermissionContext), {
         type: 'setMode',
         mode: 'plan',
-        destination: 'session',
-      }),
-    }));
+        destination: 'session'})}));
     const description = args.trim();
     if (description && description !== 'open') {
-      onDone('Enabled plan mode', { shouldQuery: true });
+      onDone(t('planCmd.enabledPlanMode'), { shouldQuery: true });
     } else {
-      onDone('Enabled plan mode');
+      onDone(t('planCmd.enabledPlanMode'));
     }
     return null;
   }
@@ -74,7 +72,7 @@ export async function call(
   const planPath = getPlanFilePath();
 
   if (!planContent) {
-    onDone('Already in plan mode. No plan written yet.');
+    onDone(t('planCmd.alreadyInPlanMode'));
     return null;
   }
 
@@ -83,9 +81,9 @@ export async function call(
   if (argList[0] === 'open') {
     const result = await editFileInEditor(planPath);
     if (result.error) {
-      onDone(`Failed to open plan in editor: ${result.error}`);
+      onDone(t('planCmd.failedToOpenPlan', result.error));
     } else {
-      onDone(`Opened plan in editor: ${planPath}`);
+      onDone(t('planCmd.openedPlan', planPath));
     }
     return null;
   }

@@ -3,10 +3,10 @@ import { toString as qrToString } from 'qrcode'
 import {
   BRIDGE_FAILED_INDICATOR,
   BRIDGE_READY_INDICATOR,
-  BRIDGE_SPINNER_FRAMES,
-} from '../constants/figures.js'
+  BRIDGE_SPINNER_FRAMES} from '../constants/figures.js'
 import { stringWidth } from '@anthropic/ink'
 import { logForDebugging } from '../utils/debug.js'
+import { t } from '../utils/i18n/index.js'
 import {
   buildActiveFooterText,
   buildBridgeConnectUrl,
@@ -18,20 +18,17 @@ import {
   TOOL_DISPLAY_EXPIRY_MS,
   timestamp,
   truncatePrompt,
-  wrapWithOsc8Link,
-} from './bridgeStatusUtil.js'
+  wrapWithOsc8Link} from './bridgeStatusUtil.js'
 import type {
   BridgeConfig,
   BridgeLogger,
   SessionActivity,
-  SpawnMode,
-} from './types.js'
+  SpawnMode} from './types.js'
 
 const QR_OPTIONS = {
   type: 'utf8' as const,
   errorCorrectionLevel: 'L' as const,
-  small: true,
-}
+  small: true}
 
 /** Generate a QR code and return its lines. */
 async function generateQr(url: string): Promise<string[]> {
@@ -281,10 +278,10 @@ export function createBridgeLogger(options: {
         ? buildIdleFooterText(url)
         : buildActiveFooterText(url)
       const qrHint = qrVisible
-        ? chalk.dim.italic('space to hide QR code')
-        : chalk.dim.italic('space to show QR code')
+        ? chalk.dim.italic(t('bridgeUI.hideQr'))
+        : chalk.dim.italic(t('bridgeUI.showQr'))
       const toggleHint = spawnModeDisplay
-        ? chalk.dim.italic(' \u00b7 w to toggle spawn mode')
+        ? chalk.dim.italic(t('bridgeUI.toggleSpawnMode'))
         : ''
       writeStatus(`${chalk.dim(footerText)}\n`)
       writeStatus(`${qrHint}${toggleHint}\n`)
@@ -525,6 +522,5 @@ export function createBridgeLogger(options: {
       // early for those states, which would erase the spinner/error.
       if (currentState === 'reconnecting' || currentState === 'failed') return
       renderStatusLine()
-    },
-  }
+    }}
 }

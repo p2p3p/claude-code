@@ -55,6 +55,5 @@ export function parseSlashCommand(input: string): ParsedSlashCommand | null {
   return {
     commandName,
     args,
-    isMcp,
-  }
+    isMcp}
 }

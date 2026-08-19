@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../../utils/i18n/index.js'
 import { Text } from '@anthropic/ink';
 import { BashTool } from '@claude-code-best/builtin-tools/tools/BashTool/BashTool.js';
 import type { PermissionRuleValue } from '../../../utils/permissions/PermissionRule.js';
@@ -25,7 +26,7 @@ export function PermissionRuleDescription({ ruleValue }: RuleSubtitleProps): Rea
           );
         }
       } else {
-        return <Text dimColor>Any Bash command</Text>;
+        return <Text dimColor>{t('permissionruledescription.anyBashCommand')}</Text>;
       }
     }
     default: {

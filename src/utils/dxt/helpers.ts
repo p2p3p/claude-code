@@ -1,4 +1,5 @@
 import type { McpbManifestAny } from '@anthropic-ai/mcpb'
+import { t } from '../i18n/index.js'
 import { errorMessage } from '../errors.js'
 import { jsonParse } from '../slowOperations.js'
 
@@ -28,7 +29,7 @@ export async function validateManifest(
       .filter(Boolean)
       .join('; ')
 
-    throw new Error(`Invalid manifest: ${errorMessages}`)
+    throw new Error(t('dxtHelpers.invalidManifest', errorMessages))
   }
 
   return parseResult.data
@@ -45,7 +46,7 @@ export async function parseAndValidateManifestFromText(
   try {
     manifestJson = jsonParse(manifestText)
   } catch (error) {
-    throw new Error(`Invalid JSON in manifest.json: ${errorMessage(error)}`)
+    throw new Error(t('dxtHelpers.invalidManifestJson', errorMessage(error)))
   }
 
   return validateManifest(manifestJson)

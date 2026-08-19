@@ -9,8 +9,7 @@ import type {
   ClientCapabilities,
   PlanEntry,
   SessionNotification,
-  SessionUpdate,
-} from '@agentclientprotocol/sdk'
+  SessionUpdate} from '@agentclientprotocol/sdk'
 import type { ToolUseCache } from './types.js'
 import { toolInfoFromToolUse } from './toolInfo.js'
 import { toolUpdateFromToolResult } from './toolResults.js'
@@ -60,8 +59,7 @@ export function toAcpNotifications(
           sessionUpdate:
             role === 'assistant' ? 'agent_message_chunk' : 'user_message_chunk',
           ...(options?.messageId ? { messageId: options.messageId } : {}),
-          content: { type: 'text', text },
-        }
+          content: { type: 'text', text }}
         break
       }
 
@@ -71,8 +69,7 @@ export function toAcpNotifications(
         update = {
           sessionUpdate: 'agent_thought_chunk',
           ...(options?.messageId ? { messageId: options.messageId } : {}),
-          content: { type: 'text', text: thinking },
-        }
+          content: { type: 'text', text: thinking }}
         break
       }
 
@@ -88,9 +85,7 @@ export function toAcpNotifications(
             content: {
               type: 'image',
               data: source.data as string,
-              mimeType: source.media_type as string,
-            },
-          }
+              mimeType: source.media_type as string}}
         }
         break
       }
@@ -108,8 +103,7 @@ export function toAcpNotifications(
           type: chunkType as 'tool_use' | 'server_tool_use' | 'mcp_tool_use',
           id: toolUseId,
           name: toolName,
-          input: toolInput,
-        }
+          input: toolInput}
 
         // TodoWrite → plan update
         if (toolName === 'TodoWrite') {
@@ -120,12 +114,10 @@ export function toAcpNotifications(
             const entries: PlanEntry[] = todos.map(todo => ({
               content: todo.content,
               status: normalizePlanStatus(todo.status),
-              priority: 'medium',
-            }))
+              priority: 'medium'}))
             update = {
               sessionUpdate: 'plan',
-              entries,
-            }
+              entries}
           }
         } else {
           // Regular tool call
@@ -139,8 +131,7 @@ export function toAcpNotifications(
             // 'pending' (per ACP v1 ToolCallStatus lifecycle, schema.json:3525).
             update = {
               _meta: {
-                claudeCode: { toolName },
-              },
+                claudeCode: { toolName }},
               toolCallId: toolUseId,
               sessionUpdate: 'tool_call_update',
               status: 'in_progress',
@@ -149,14 +140,12 @@ export function toAcpNotifications(
                 { name: toolName, id: toolUseId, input: toolInput ?? {} },
                 false,
                 options?.cwd,
-              ),
-            }
+              )}
           } else {
             // First encounter — send as tool_call
             update = {
               _meta: {
-                claudeCode: { toolName },
-              },
+                claudeCode: { toolName }},
               toolCallId: toolUseId,
               sessionUpdate: 'tool_call',
               rawInput,
@@ -165,8 +154,7 @@ export function toAcpNotifications(
                 { name: toolName, id: toolUseId, input: toolInput ?? {} },
                 false,
                 options?.cwd,
-              ),
-            }
+              )}
           }
         }
         break
@@ -187,8 +175,7 @@ export function toAcpNotifications(
 
           update = {
             _meta: {
-              claudeCode: { toolName: toolUse.name },
-            },
+              claudeCode: { toolName: toolUse.name }},
             toolCallId: toolUseId,
             sessionUpdate: 'tool_call_update',
             status:
@@ -196,8 +183,7 @@ export function toAcpNotifications(
                 ? 'failed'
                 : 'completed',
             rawOutput: chunk.content,
-            ...toolUpdate,
-          }
+            ...toolUpdate}
         }
         break
       }
@@ -223,9 +209,7 @@ export function toAcpNotifications(
           ...existingMeta,
           claudeCode: {
             ...((existingMeta?.claudeCode as Record<string, unknown>) ?? {}),
-            parentToolUseId: options.parentToolUseId,
-          },
-        }
+            parentToolUseId: options.parentToolUseId}}
       }
       output.push({ sessionId, update })
     }
@@ -264,9 +248,7 @@ export function assistantMessageToAcpNotifications(
         update: {
           sessionUpdate: 'agent_message_chunk',
           ...(options?.messageId ? { messageId: options.messageId } : {}),
-          content: { type: 'text', text: content },
-        },
-      },
+          content: { type: 'text', text: content }}},
     ]
   }
 
@@ -328,8 +310,7 @@ export function streamEventToAcpNotifications(
           clientCapabilities: options?.clientCapabilities,
           parentToolUseId: msg.parent_tool_use_id as string | null | undefined,
           cwd: options?.cwd,
-          messageId: options?.messageId,
-        },
+          messageId: options?.messageId},
       )
     }
     case 'content_block_delta': {
@@ -346,8 +327,7 @@ export function streamEventToAcpNotifications(
           clientCapabilities: options?.clientCapabilities,
           parentToolUseId: msg.parent_tool_use_id as string | null | undefined,
           cwd: options?.cwd,
-          messageId: options?.messageId,
-        },
+          messageId: options?.messageId},
       )
     }
     // No content to emit

@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { t } from '../utils/i18n/index.js'
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useRegisterOverlay } from '../context/overlayContext.js';
@@ -108,8 +109,7 @@ export function QuickOpenDialog({ onDone, onInsert }: Props): React.ReactNode {
     const opened = openFileInExternalEditor(path.resolve(getCwd(), p));
     logEvent('tengu_quick_open_select', {
       result_count: results.length,
-      opened_editor: opened,
-    });
+      opened_editor: opened});
     onDone();
   };
 
@@ -117,15 +117,14 @@ export function QuickOpenDialog({ onDone, onInsert }: Props): React.ReactNode {
     onInsert(mention ? `@${p} ` : `${p} `);
     logEvent('tengu_quick_open_insert', {
       result_count: results.length,
-      mention,
-    });
+      mention});
     onDone();
   };
 
   return (
     <FuzzyPicker
-      title="Quick Open"
-      placeholder="Type to search files…"
+      title={t('quickopendialog.quickOpen')}
+      placeholder={t('quickOpen.typeToSearchFiles')}
       items={results}
       getKey={p => p}
       visibleCount={visibleResults}
@@ -134,14 +133,13 @@ export function QuickOpenDialog({ onDone, onInsert }: Props): React.ReactNode {
       onQueryChange={handleQueryChange}
       onFocus={p => setFocusedPath(p)}
       onSelect={handleOpen}
-      onTab={{ action: 'mention', handler: p => handleInsert(p, true) }}
+      onTab={{ action: t('quickopendialog.mention'), handler: p => handleInsert(p, true) }}
       onShiftTab={{
-        action: 'insert path',
-        handler: p => handleInsert(p, false),
-      }}
+        action: t('quickopendialog.insertPath'),
+        handler: p => handleInsert(p, false)}}
       onCancel={onDone}
-      emptyMessage={q => (q ? 'No matching files' : 'Start typing to search…')}
-      selectAction="open in editor"
+      emptyMessage={q => (q ? t('ui.noMatchingFiles') : t('ui.startTypingSearch'))}
+      selectAction={t('quickopendialog.openInEditor')}
       renderItem={(p, isFocused) => (
         <Text color={isFocused ? 'suggestion' : undefined}>{truncatePathMiddle(p, maxPathWidth)}</Text>
       )}
@@ -150,14 +148,14 @@ export function QuickOpenDialog({ onDone, onInsert }: Props): React.ReactNode {
           <>
             <Text dimColor>
               {truncatePathMiddle(p, previewWidth)}
-              {preview.path !== p ? ' · loading…' : ''}
+              {preview.path !== p ? ` · ${t('quickopendialog.loading')}` : ''}
             </Text>
             {preview.content.split('\n').map((line, i) => (
               <Text key={i}>{highlightMatch(truncateToWidth(line, previewWidth), query)}</Text>
             ))}
           </>
         ) : (
-          <LoadingState message="Loading preview…" dimColor />
+          <LoadingState message={t('quickOpen.loadingPreview')} dimColor />
         )
       }
     />

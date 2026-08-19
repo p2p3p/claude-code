@@ -5,8 +5,7 @@ import type {
   SkillLearningProjectContext as BaseSkillLearningProjectContext,
   SkillObservation as BaseSkillObservation,
   SkillObservationEvent,
-  SkillObservationOutcome,
-} from './types.js'
+  SkillObservationOutcome} from './types.js'
 
 export type { SkillLearningScope, SkillObservation } from './types.js'
 
@@ -67,10 +66,10 @@ const DEFAULT_PURGE_MAX_AGE_DAYS = 30
 const SECRET_REPLACEMENT = '[REDACTED]'
 
 const SECRET_PATTERNS: RegExp[] = [
-  /\b(?:sk|sk-ant|sk-proj|xox[baprs])-[A-Za-z0-9_-]{12,}\b/g,
-  /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g,
+  /\b(?:sk|sk-ant|sk-proj|xox[baprs])-[A-Za-z0-9_-]{12}\b/g,
+  /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2}\b/g,
   /\b(?:api[_-]?key|token|secret|password|authorization)\b\s*[:=]\s*["']?[^"',\s}]+/gi,
-  /\bBearer\s+[A-Za-z0-9._~+/=-]{12,}\b/gi,
+  /\bBearer\s+[A-Za-z0-9._~+/=-]{12}\b/gi,
 ]
 
 export function getSkillLearningRoot(
@@ -136,8 +135,7 @@ export function scrubObservation(
     ...observation,
     toolInput: scrubText(observation.toolInput, maxLength),
     toolOutput: scrubText(observation.toolOutput, maxLength),
-    messageText: scrubText(observation.messageText, maxLength),
-  }
+    messageText: scrubText(observation.messageText, maxLength)}
 
   const hashSource = [
     scrubbed.event,
@@ -149,8 +147,7 @@ export function scrubObservation(
 
   return {
     ...scrubbed,
-    contentHash: hashText(hashSource),
-  }
+    contentHash: hashText(hashSource)}
 }
 
 const MAX_SINGLE_OBSERVATION_BYTES = 64 * 1024
@@ -169,8 +166,7 @@ export async function appendObservation(
     return scrubbed
   }
   await writeFile(filePath, `${serialized}\n`, {
-    flag: 'a',
-  })
+    flag: 'a'})
   return scrubbed
 }
 
@@ -297,8 +293,7 @@ function observationsFromTranscriptEntry(
     projectName: project?.projectName ?? 'global',
     cwd: entry.cwd ?? project?.cwd ?? process.cwd(),
     timestamp: entry.timestamp ?? new Date().toISOString(),
-    source: 'transcript' as const,
-  }
+    source: 'transcript' as const}
 
   const role = entry.message?.role ?? entry.type
   const content = entry.message?.content
@@ -312,8 +307,7 @@ function observationsFromTranscriptEntry(
       toolName: entry.tool_name,
       toolInput: stringifyField(entry.tool_input),
       toolOutput: stringifyField(entry.tool_response),
-      outcome: inferOutcome(entry.tool_response),
-    })
+      outcome: inferOutcome(entry.tool_response)})
   }
 
   if (role === 'user') {
@@ -326,8 +320,7 @@ function observationsFromTranscriptEntry(
           event: 'tool_complete',
           toolName: result.name,
           toolOutput: result.output,
-          outcome: result.isError ? 'failure' : 'success',
-        })
+          outcome: result.isError ? 'failure' : 'success'})
       }
       return observations
     }
@@ -336,8 +329,7 @@ function observationsFromTranscriptEntry(
       ...base,
       id: createObservationId(),
       event: 'user_message',
-      messageText: extractText(content),
-    })
+      messageText: extractText(content)})
     return observations
   }
 
@@ -349,8 +341,7 @@ function observationsFromTranscriptEntry(
         id: createObservationId(),
         event: 'tool_start',
         toolName: toolUse.name,
-        toolInput: toolUse.input,
-      })
+        toolInput: toolUse.input})
     }
 
     const text = extractText(content)
@@ -359,8 +350,7 @@ function observationsFromTranscriptEntry(
         ...base,
         id: createObservationId(),
         event: 'assistant_message',
-        messageText: text,
-      })
+        messageText: text})
     }
   }
 
@@ -393,8 +383,7 @@ function extractToolUses(
     return [
       {
         name: String(record.name ?? 'unknown_tool'),
-        input: stringifyField(record.input),
-      },
+        input: stringifyField(record.input)},
     ]
   })
 }
@@ -411,8 +400,7 @@ function extractToolResults(
       {
         name: String(record.name ?? record.tool_name ?? 'unknown_tool'),
         output: stringifyField(record.content),
-        isError: record.is_error === true,
-      },
+        isError: record.is_error === true},
     ]
   })
 }

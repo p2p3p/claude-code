@@ -3,5 +3,4 @@ export {
   KeybindingProvider,
   useKeybindingContext,
   useOptionalKeybindingContext,
-  useRegisterKeybindingContext,
-} from '@anthropic/ink';
+  useRegisterKeybindingContext} from '@anthropic/ink';

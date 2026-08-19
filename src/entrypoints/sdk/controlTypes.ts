@@ -16,8 +16,7 @@ import type {
   SDKControlCancelRequestSchema,
   SDKControlRequestInnerSchema,
   StdoutMessageSchema,
-  StdinMessageSchema,
-} from './controlSchemas.js'
+  StdinMessageSchema} from './controlSchemas.js'
 import type { SDKPartialAssistantMessageSchema } from './coreSchemas.js'
 
 export type SDKControlRequest = z.infer<

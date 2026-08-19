@@ -81,8 +81,7 @@ function getExtraCertsPathFromConfig(): string | undefined {
     return path
   } catch (error) {
     logForDebugging(`CA certs: Config fallback failed: ${error}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return undefined
   }
 }

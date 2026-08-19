@@ -4,9 +4,10 @@ import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,
 } from 'src/services/analytics/index.js'
-import { queryHaiku } from 'src/services/api/claude.js'
+import { queryHaiku } from 'src/services/api/anthropic/index.js'
 import { AbortError } from 'src/utils/errors.js'
 import { getWebFetchUserAgent } from 'src/utils/http.js'
+import { t } from 'src/utils/i18n/index.js'
 import { logError } from 'src/utils/log.js'
 import {
   isBinaryContentType,
@@ -26,7 +27,7 @@ class EgressBlockedError extends Error {
       JSON.stringify({
         error_type: 'EGRESS_BLOCKED',
         domain,
-        message: `Access to ${domain} is blocked by the network egress proxy.`,
+        message: t('toolUI.webFetch.blockedByProxy', { domain }),
       }),
     )
     this.name = 'EgressBlockedError'
@@ -242,7 +243,7 @@ export async function getWithPermittedRedirects(
   depth = 0,
 ): Promise<AxiosResponse<ArrayBuffer> | RedirectInfo> {
   if (depth > MAX_REDIRECTS) {
-    throw new Error(`Too many redirects (exceeded ${MAX_REDIRECTS})`)
+    throw new Error(t('toolUI.webFetch.tooManyRedirects', { max: MAX_REDIRECTS }))
   }
   try {
     return await axios.get(url, {
@@ -267,7 +268,7 @@ export async function getWithPermittedRedirects(
         'location',
       )
       if (!redirectLocation) {
-        throw new Error('Redirect missing Location header')
+        throw new Error(t('toolUI.webFetch.missingLocationHeader'))
       }
 
       // Resolve relative URLs against the original URL
@@ -329,7 +330,7 @@ export async function getURLMarkdownContent(
   abortController: AbortController,
 ): Promise<FetchedContent | RedirectInfo> {
   if (!validateURL(url)) {
-    throw new Error('Invalid URL')
+    throw new Error(t('toolUI.webFetch.invalidUrlError'))
   }
 
   // Check cache (LRUCache handles TTL automatically)
@@ -447,7 +448,7 @@ export async function fetchContentWithTavily(
   abortController: AbortController,
 ): Promise<FetchedContent | RedirectInfo> {
   if (!validateURL(url)) {
-    throw new Error('Invalid URL')
+    throw new Error(t('toolUI.webFetch.invalidUrlError'))
   }
 
   // Check cache (LRUCache handles TTL automatically)
@@ -468,7 +469,7 @@ export async function fetchContentWithTavily(
   try {
     parsedUrl = new URL(url)
   } catch {
-    throw new Error('Invalid URL')
+    throw new Error(t('toolUI.webFetch.invalidUrlError'))
   }
 
   // Upgrade http to https if needed
@@ -523,7 +524,7 @@ export async function fetchContentWithTavily(
 
   if (!markdownContent.trim()) {
     throw new Error(
-      `Tavily Extract returned empty content for ${url}. The page may require authentication or JavaScript rendering.`,
+      t('toolUI.webFetch.tavilyEmptyContent', { url }),
     )
   }
 
@@ -589,5 +590,5 @@ export async function applyPromptToMarkdown(
       return (contentBlock as { text: string }).text
     }
   }
-  return 'No response from model'
+  return t('toolUI.webFetch.noResponseFromModel')
 }

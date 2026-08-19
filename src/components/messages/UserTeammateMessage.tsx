@@ -4,6 +4,7 @@ import * as React from 'react';
 import { TEAMMATE_MESSAGE_TAG } from '../../constants/xml.js';
 import { Ansi, Box, Text, type TextProps } from '@anthropic/ink';
 import { toInkColor } from '../../utils/ink.js';
+import { t } from '../../utils/i18n/index.js';
 
 import { jsonParse } from '../../utils/slowOperations.js';
 import { isShutdownApproved } from '../../utils/teammateMailbox.js';
@@ -44,8 +45,7 @@ function parseTeammateMessages(text: string): ParsedMessage[] {
         teammateId: match[1],
         color: match[2], // may be undefined
         summary: match[3], // may be undefined
-        content: match[4].trim(),
-      });
+        content: match[4].trim()});
     }
   }
 
@@ -130,7 +130,7 @@ export function UserTeammateMessage({ addMargin, param: { text }, isTranscriptMo
                 <Text color="success">✓</Text>
                 <Text>
                   {' '}
-                  Completed task #{taskCompleted.taskId}
+                  {t('teammateMessage.taskCompleted', taskCompleted.taskId)}
                   {taskCompleted.taskSubject && <Text dimColor> ({taskCompleted.taskSubject})</Text>}
                 </Text>
               </MessageResponse>
@@ -167,8 +167,7 @@ export function TeammateMessageContent({
   inkColor,
   content,
   summary,
-  isTranscriptMode,
-}: TeammateMessageContentProps): React.ReactNode {
+  isTranscriptMode}: TeammateMessageContentProps): React.ReactNode {
   return (
     <Box flexDirection="column" marginTop={1}>
       <Box>

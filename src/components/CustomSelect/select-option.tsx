@@ -46,8 +46,7 @@ export function SelectOption({
   description,
   shouldShowDownArrow,
   shouldShowUpArrow,
-  declareCursor,
-}: SelectOptionProps): React.ReactNode {
+  declareCursor}: SelectOptionProps): React.ReactNode {
   return (
     <ListItem
       isFocused={isFocused}

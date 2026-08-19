@@ -26,8 +26,7 @@ export const InProcessTeammateTask: Task = {
   type: 'in_process_teammate',
   async kill(taskId, setAppState) {
     killInProcessTeammate(taskId, setAppState);
-  },
-};
+  }};
 
 /**
  * Request shutdown for a teammate.
@@ -40,8 +39,7 @@ export function requestTeammateShutdown(taskId: string, setAppState: SetAppState
 
     return {
       ...task,
-      shutdownRequested: true,
-    };
+      shutdownRequested: true};
   });
 }
 
@@ -57,8 +55,7 @@ export function appendTeammateMessage(taskId: string, message: Message, setAppSt
 
     return {
       ...task,
-      messages: appendCappedMessage(task.messages, message),
-    };
+      messages: appendCappedMessage(task.messages, message)};
   });
 }
 
@@ -102,8 +99,7 @@ export function injectUserMessageToTeammate(
     }
 
     const userMessageArgs: Parameters<typeof createUserMessage>[0] = {
-      content: message,
-    };
+      content: message};
     if (options?.origin !== undefined) {
       userMessageArgs.origin = options.origin;
     }
@@ -111,8 +107,7 @@ export function injectUserMessageToTeammate(
     return {
       ...task,
       pendingUserMessages: [...task.pendingUserMessages, pendingMessage],
-      messages: appendCappedMessage(task.messages, createUserMessage(userMessageArgs)),
-    };
+      messages: appendCappedMessage(task.messages, createUserMessage(userMessageArgs))};
   });
   return injected;
 }

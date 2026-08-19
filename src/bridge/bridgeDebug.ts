@@ -130,6 +130,5 @@ export function wrapApiForFaultInjection(
       const f = consume('heartbeatWork')
       if (f) throwFault(f, 'Heartbeat')
       return api.heartbeatWork(envId, workId, token)
-    },
-  }
+    }}
 }

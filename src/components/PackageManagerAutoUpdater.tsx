@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { useInterval } from 'usehooks-ts';
+import { t } from '../utils/i18n/index.js';
 import { Text } from '@anthropic/ink';
 import {
   type AutoUpdaterResult,
   getLatestVersionFromGcs,
   getMaxVersion,
-  shouldSkipVersion,
-} from '../utils/autoUpdater.js';
+  shouldSkipVersion} from '../utils/autoUpdater.js';
 import { isAutoUpdaterDisabled } from '../utils/config.js';
 import { logForDebugging } from '../utils/debug.js';
 import { getPackageManager, type PackageManager } from '../utils/nativeInstaller/packageManagers.js';
@@ -92,7 +92,7 @@ export function PackageManagerAutoUpdater({ verbose }: Props): React.ReactNode {
         ? 'winget upgrade Anthropic.ClaudeCode'
         : packageManager === 'apk'
           ? 'apk upgrade claude-code'
-          : 'your package manager update command';
+          : t('autoupdater.yourPackageManagerCommand');
 
   return (
     <>
@@ -102,7 +102,7 @@ export function PackageManagerAutoUpdater({ verbose }: Props): React.ReactNode {
         </Text>
       )}
       <Text color="warning" wrap="truncate">
-        Update available! Run: <Text bold>{updateCommand}</Text>
+        {t('autoupdater.updateAvailableRun', updateCommand)}
       </Text>
     </>
   );

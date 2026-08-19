@@ -8,8 +8,7 @@ import {
   checkGithubAppInstalled,
   checkHasRemoteEnvironment,
   checkIsInGitRepo,
-  checkNeedsClaudeAiLogin,
-} from './preconditions.js'
+  checkNeedsClaudeAiLogin} from './preconditions.js'
 
 /**
  * Background remote session type for managing teleport sessions
@@ -43,8 +42,7 @@ export type BackgroundRemoteSessionPrecondition =
  * @returns Array of failed preconditions
  */
 export async function checkBackgroundRemoteSessionEligibility({
-  skipBundle = false,
-}: {
+  skipBundle = false}: {
   skipBundle?: boolean
 } = {}): Promise<BackgroundRemoteSessionPrecondition[]> {
   const errors: BackgroundRemoteSessionPrecondition[] = []

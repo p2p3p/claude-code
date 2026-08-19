@@ -9,10 +9,10 @@ import { logEvent } from 'src/services/analytics/index.js'
 import {
   getOriginalCwd,
   getSessionId,
-  setCwdState,
-} from '../bootstrap/state.js'
+  setCwdState} from '../bootstrap/state.js'
 import { generateTaskId } from '../Task.js'
 import { pwd } from './cwd.js'
+import { t } from './i18n/index.js'
 import { logForDebugging } from './debug.js'
 import { errorMessage, isENOENT } from './errors.js'
 import { getFsImplementation } from './fsOperations.js'
@@ -21,8 +21,7 @@ import {
   createAbortedCommand,
   createFailedCommand,
   type ShellCommand,
-  wrapSpawn,
-} from './ShellCommand.js'
+  wrapSpawn} from './ShellCommand.js'
 import { getTaskOutputDir } from './task/diskOutput.js'
 import { TaskOutput } from './task/TaskOutput.js'
 import { which } from './which.js'
@@ -59,8 +58,7 @@ function isExecutable(shellPath: string): boolean {
       // Use execFileSync to avoid shell injection vulnerabilities
       execFileSync(shellPath, ['--version'], {
         timeout: 1000,
-        stdio: 'ignore',
-      })
+        stdio: 'ignore'})
       return true
     } catch {
       return false
@@ -84,8 +82,7 @@ export async function findSuitableShell(): Promise<string> {
     try {
       const whereResult = execFileSync('where.exe', ['bash'], {
         stdio: ['ignore', 'pipe', 'ignore'],
-        encoding: 'utf8',
-      })
+        encoding: 'utf8'})
       const lines = whereResult
         .split(/\r?\n/)
         .map(l => l.trim().toLowerCase())
@@ -167,7 +164,7 @@ export async function findSuitableShell(): Promise<string> {
       'No suitable shell found. Claude CLI requires a Posix shell environment. ' +
       'Please ensure you have a valid shell installed and the SHELL environment variable set.'
     logError(new Error(errorMsg))
-    throw new Error(errorMsg)
+    throw new Error(t('shell.noShellFound'))
   }
 
   return shellPath
@@ -185,15 +182,14 @@ export const getShellConfig = memoize(getShellConfigImpl)
 export const getPsProvider = memoize(async (): Promise<ShellProvider> => {
   const psPath = await getCachedPowerShellPath()
   if (!psPath) {
-    throw new Error('PowerShell is not available')
+    throw new Error(t('shell.noPowerShell'))
   }
   return createPowerShellProvider(psPath)
 })
 
 const resolveProvider: Record<ShellType, () => Promise<ShellProvider>> = {
   bash: async () => (await getShellConfig()).provider,
-  powershell: getPsProvider,
-}
+  powershell: getPsProvider}
 
 export type ExecOptions = {
   timeout?: number
@@ -227,8 +223,7 @@ export async function exec(
     preventCwdChanges,
     shouldUseSandbox,
     shouldAutoBackground,
-    onStdout,
-  } = options ?? {}
+    onStdout} = options ?? {}
   const commandTimeout = timeout || DEFAULT_TIMEOUT
 
   const provider = await resolveProvider[shellType]()
@@ -248,8 +243,7 @@ export async function exec(
     await provider.buildExecCommand(command, {
       id,
       sandboxTmpDir: shouldUseSandbox ? sandboxTmpDir : undefined,
-      useSandbox: shouldUseSandbox ?? false,
-    })
+      useSandbox: shouldUseSandbox ?? false})
 
   let commandString = builtCommand
 
@@ -360,10 +354,8 @@ export async function exec(
         ...envOverrides,
         ...(process.env.USER_TYPE === 'ant'
           ? {
-              CLAUDE_CODE_SESSION_ID: getSessionId(),
-            }
-          : {}),
-      },
+              CLAUDE_CODE_SESSION_ID: getSessionId()}
+          : {})},
       cwd,
       stdio: usePipeMode
         ? ['pipe', 'pipe', 'pipe']
@@ -371,8 +363,7 @@ export async function exec(
       // Don't pass the signal - we'll handle termination ourselves with tree-kill
       detached: provider.detached,
       // Prevent visible console window on Windows (no-op on other platforms)
-      windowsHide: true,
-    })
+      windowsHide: true})
 
     const shellCommand = wrapSpawn(
       childProcess,
@@ -433,8 +424,7 @@ export async function exec(
       if (result && !preventCwdChanges && !result.backgroundTaskId) {
         try {
           let newCwd = readFileSync(nativeCwdFilePath, {
-            encoding: 'utf8',
-          }).trim()
+            encoding: 'utf8'}).trim()
           if (getPlatform() === 'windows') {
             newCwd = posixPathToWindowsPath(newCwd)
           }
@@ -474,8 +464,7 @@ export async function exec(
 
     return createAbortedCommand(undefined, {
       code: 126, // Standard Unix code for execution errors
-      stderr: errorMessage(error),
-    })
+      stderr: errorMessage(error)})
   }
 }
 
@@ -494,7 +483,7 @@ export function setCwd(path: string, relativeTo?: string): void {
     physicalPath = getFsImplementation().realpathSync(resolved)
   } catch (e) {
     if (isENOENT(e)) {
-      throw new Error(`Path "${resolved}" does not exist`)
+      throw new Error(t('shell.pathNotExist', resolved))
     }
     throw e
   }
@@ -503,8 +492,7 @@ export function setCwd(path: string, relativeTo?: string): void {
   if (process.env.NODE_ENV !== 'test') {
     try {
       logEvent('tengu_shell_set_cwd', {
-        success: true,
-      })
+        success: true})
     } catch (_error) {
       // Ignore logging errors to prevent test failures
     }

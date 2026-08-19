@@ -24,8 +24,7 @@ function StatBar({ name, value }: { name: string; value: number }) {
 export function CompanionCard({
   companion,
   lastReaction,
-  onDone,
-}: {
+  onDone}: {
   companion: Companion;
   lastReaction?: string;
   onDone?: (result?: string, options?: { display?: string }) => void;

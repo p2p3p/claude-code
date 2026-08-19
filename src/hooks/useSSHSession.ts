@@ -14,12 +14,10 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { ToolUseConfirm } from '../components/permissions/PermissionRequest.js'
 import {
   createSyntheticAssistantMessage,
-  createToolStub,
-} from '../remote/remotePermissionBridge.js'
+  createToolStub} from '../remote/remotePermissionBridge.js'
 import {
   convertSDKMessage,
-  isSessionEndMessage,
-} from '../remote/sdkMessageAdapter.js'
+  isSessionEndMessage} from '../remote/sdkMessageAdapter.js'
 import type { SSHSession } from '../ssh/createSSHSession.js'
 import type { SSHSessionManager } from '../ssh/SSHSessionManager.js'
 import type { Tool } from '../Tool.js'
@@ -50,8 +48,7 @@ export function useSSHSession({
   setMessages,
   setIsLoading,
   setToolUseConfirmQueue,
-  tools,
-}: UseSSHSessionProps): UseSSHSessionResult {
+  tools}: UseSSHSessionProps): UseSSHSessionResult {
   const isRemoteMode = !!session
 
   const managerRef = useRef<SSHSessionManager | null>(null)
@@ -82,8 +79,7 @@ export function useSSHSession({
         }
 
         const converted = convertSDKMessage(sdkMessage, {
-          convertToolResults: true,
-        })
+          convertToolResults: true})
         if (converted.type === 'message') {
           setMessages(prev => [...prev, converted.message])
         }
@@ -109,8 +105,7 @@ export function useSSHSession({
           message:
             request.description ?? `${request.tool_name} requires permission`,
           suggestions: request.permission_suggestions,
-          blockedPath: request.blocked_path,
-        }
+          blockedPath: request.blocked_path}
 
         const toolUseConfirm: ToolUseConfirm = {
           assistantMessage: syntheticMessage,
@@ -126,8 +121,7 @@ export function useSSHSession({
           onAbort() {
             manager.respondToPermissionRequest(requestId, {
               behavior: 'deny',
-              message: 'User aborted',
-            })
+              message: 'User aborted'})
             setToolUseConfirmQueue(q =>
               q.filter(i => i.toolUseID !== request.tool_use_id),
             )
@@ -135,8 +129,7 @@ export function useSSHSession({
           onAllow(updatedInput) {
             manager.respondToPermissionRequest(requestId, {
               behavior: 'allow',
-              updatedInput,
-            })
+              updatedInput})
             setToolUseConfirmQueue(q =>
               q.filter(i => i.toolUseID !== request.tool_use_id),
             )
@@ -145,14 +138,12 @@ export function useSSHSession({
           onReject(feedback) {
             manager.respondToPermissionRequest(requestId, {
               behavior: 'deny',
-              message: feedback ?? 'User denied permission',
-            })
+              message: feedback ?? 'User denied permission'})
             setToolUseConfirmQueue(q =>
               q.filter(i => i.toolUseID !== request.tool_use_id),
             )
           },
-          async recheckPermission() {},
-        }
+          async recheckPermission() {}}
 
         setToolUseConfirmQueue(q => [...q, toolUseConfirm])
         setIsLoading(false)
@@ -177,8 +168,7 @@ export function useSSHSession({
           content: `SSH connection dropped — reconnecting (attempt ${attempt}/${max})...`,
           timestamp: new Date().toISOString(),
           uuid: randomUUID(),
-          level: 'warning',
-        }
+          level: 'warning'}
         setMessages(prev => [...prev, msg])
       },
       onDisconnected: () => {
@@ -201,8 +191,7 @@ export function useSSHSession({
       },
       onError: error => {
         logForDebugging(`[useSSHSession] error: ${error.message}`)
-      },
-    })
+      }})
 
     managerRef.current = manager
     manager.connect()

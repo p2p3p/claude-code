@@ -25,8 +25,7 @@ export function createSyntheticAssistantMessage(
           type: 'tool_use',
           id: request.tool_use_id,
           name: request.tool_name,
-          input: request.input,
-        },
+          input: request.input},
       ],
       model: '',
       stop_reason: null,
@@ -37,12 +36,9 @@ export function createSyntheticAssistantMessage(
         input_tokens: 0,
         output_tokens: 0,
         cache_creation_input_tokens: 0,
-        cache_read_input_tokens: 0,
-      },
-    } as AssistantMessage['message'],
+        cache_read_input_tokens: 0}} as AssistantMessage['message'],
     requestId: undefined,
-    timestamp: new Date().toISOString(),
-  }
+    timestamp: new Date().toISOString()}
 }
 
 /**
@@ -73,6 +69,5 @@ export function createToolStub(toolName: string): Tool {
     prompt: () => '',
     isReadOnly: () => false,
     isMcp: false,
-    needsPermissions: () => true,
-  } as unknown as Tool
+    needsPermissions: () => true} as unknown as Tool
 }

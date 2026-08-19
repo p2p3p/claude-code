@@ -3,8 +3,7 @@ import memoize from 'lodash-es/memoize.js'
 import { getOauthConfig } from 'src/constants/oauth.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { getClaudeAIOAuthTokens } from 'src/utils/auth.js'
 import { getGlobalConfig, saveGlobalConfig } from 'src/utils/config.js'
 import { logForDebugging } from 'src/utils/debug.js'
@@ -43,8 +42,7 @@ export const fetchClaudeAIMcpConfigsIfEligible = memoize(
         logForDebugging('[claudeai-mcp] Disabled via env var')
         logEvent('tengu_claudeai_mcp_eligibility', {
           state:
-            'disabled_env_var' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            'disabled_env_var' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return {}
       }
 
@@ -53,8 +51,7 @@ export const fetchClaudeAIMcpConfigsIfEligible = memoize(
         logForDebugging('[claudeai-mcp] No access token')
         logEvent('tengu_claudeai_mcp_eligibility', {
           state:
-            'no_oauth_token' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            'no_oauth_token' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return {}
       }
 
@@ -69,8 +66,7 @@ export const fetchClaudeAIMcpConfigsIfEligible = memoize(
         )
         logEvent('tengu_claudeai_mcp_eligibility', {
           state:
-            'missing_scope' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            'missing_scope' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return {}
       }
 
@@ -84,10 +80,8 @@ export const fetchClaudeAIMcpConfigsIfEligible = memoize(
           Authorization: `Bearer ${tokens.accessToken}`,
           'Content-Type': 'application/json',
           'anthropic-beta': MCP_SERVERS_BETA_HEADER,
-          'anthropic-version': '2023-06-01',
-        },
-        timeout: FETCH_TIMEOUT_MS,
-      })
+          'anthropic-version': '2023-06-01'},
+        timeout: FETCH_TIMEOUT_MS})
 
       const configs: Record<string, ScopedMcpServerConfig> = {}
       // Track used normalized names to detect collisions and assign (2), (3), etc. suffixes.
@@ -114,8 +108,7 @@ export const fetchClaudeAIMcpConfigsIfEligible = memoize(
           type: 'claudeai-proxy',
           url: server.url,
           id: server.id,
-          scope: 'claudeai',
-        }
+          scope: 'claudeai'}
       }
 
       logForDebugging(
@@ -123,8 +116,7 @@ export const fetchClaudeAIMcpConfigsIfEligible = memoize(
       )
       logEvent('tengu_claudeai_mcp_eligibility', {
         state:
-          'eligible' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          'eligible' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       return configs
     } catch {
       logForDebugging(`[claudeai-mcp] Fetch failed`)

@@ -8,16 +8,15 @@ import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import type { Tools } from '../../Tool.js';
 import {
   type AgentColorName,
-  setAgentColor,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js';
+  setAgentColor} from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js';
 import {
   type AgentDefinition,
   getActiveAgentsFromList,
   isCustomAgent,
-  isPluginAgent,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js';
+  isPluginAgent} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js';
 import { editFileInEditor } from '../../utils/promptEditor.js';
 import { getActualAgentFilePath, updateAgentFile } from './agentFileUtils.js';
+import { t } from '../../utils/i18n/index.js';
 import { ColorPicker } from './ColorPicker.js';
 import { ModelSelector } from './ModelSelector.js';
 import { ToolSelector } from './ToolSelector.js';
@@ -97,8 +96,7 @@ export function AgentEditor({ agent, tools, onSaved, onBack }: Props): React.Rea
                   ...a,
                   tools: newTools ?? a.tools,
                   color: finalColor,
-                  model: newModel ?? a.model,
-                }
+                  model: newModel ?? a.model}
               : a,
           );
           return {
@@ -106,9 +104,7 @@ export function AgentEditor({ agent, tools, onSaved, onBack }: Props): React.Rea
             agentDefinitions: {
               ...state.agentDefinitions,
               activeAgents: getActiveAgentsFromList(allAgents),
-              allAgents,
-            },
-          };
+              allAgents}};
         });
 
         onSaved(`Updated agent: ${chalk.bold(agent.agentType)}`);
@@ -123,10 +119,10 @@ export function AgentEditor({ agent, tools, onSaved, onBack }: Props): React.Rea
 
   const menuItems = useMemo(
     () => [
-      { label: 'Open in editor', action: handleOpenInEditor },
-      { label: 'Edit tools', action: () => setEditMode('edit-tools') },
-      { label: 'Edit model', action: () => setEditMode('edit-model') },
-      { label: 'Edit color', action: () => setEditMode('edit-color') },
+      { label: t('agentEditor.openInEditor'), action: handleOpenInEditor },
+      { label: t('agentEditor.editTools'), action: () => setEditMode('edit-tools') },
+      { label: t('agentEditor.editModel'), action: () => setEditMode('edit-model') },
+      { label: t('agentEditor.editColor'), action: () => setEditMode('edit-color') },
     ],
     [handleOpenInEditor],
   );

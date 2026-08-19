@@ -3,6 +3,7 @@ import { logEvent } from 'src/services/analytics/index.js';
 import { Box, Link, Newline, Text } from '@anthropic/ink';
 import { gracefulShutdownSync } from '../utils/gracefulShutdown.js';
 import { updateSettingsForSource } from '../utils/settings/settings.js';
+import { t } from '../utils/i18n/index.js';
 import { Select } from './CustomSelect/index.js';
 import { Dialog } from '@anthropic/ink';
 
@@ -33,8 +34,7 @@ export function BypassPermissionsModeDialog({ onAccept }: Props): React.ReactNod
         logEvent('tengu_bypass_permissions_mode_dialog_accept', {});
 
         updateSettingsForSource('userSettings', {
-          skipDangerousModePermissionPrompt: true,
-        });
+          skipDangerousModePermissionPrompt: true});
         onAccept();
         break;
       }
@@ -54,17 +54,15 @@ export function BypassPermissionsModeDialog({ onAccept }: Props): React.ReactNod
   }
 
   return (
-    <Dialog title="WARNING: Claude Code running in Bypass Permissions mode" color="error" onCancel={handleEscape}>
+    <Dialog title={t('bypassPermissions.title')} color="error" onCancel={handleEscape}>
       <Box flexDirection="column" gap={1}>
         <Text>
-          In Bypass Permissions mode, Claude Code will not ask for your approval before running potentially dangerous
-          commands.
+          {t('bypassPermissions.body1')}
           <Newline />
-          This mode should only be used in a sandboxed container/VM that has restricted internet access and can easily
-          be restored if damaged.
+          {t('bypassPermissions.body2')}
         </Text>
         <Text>
-          By proceeding, you accept all responsibility for actions taken while running in Bypass Permissions mode.
+          {t('bypassPermissions.body3')}
         </Text>
 
         <Link url="https://code.claude.com/docs/en/security" />
@@ -72,8 +70,8 @@ export function BypassPermissionsModeDialog({ onAccept }: Props): React.ReactNod
 
       <Select
         options={[
-          { label: 'No, exit', value: 'decline' },
-          { label: 'Yes, I accept', value: 'accept' },
+          { label: t('bypassPermissions.no'), value: 'decline' },
+          { label: t('bypassPermissions.yes'), value: 'accept' },
         ]}
         onChange={value => onChange(value as 'accept' | 'decline')}
       />

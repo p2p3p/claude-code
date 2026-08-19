@@ -10,8 +10,7 @@ import type { ASRResponse } from 'doubaoime-asr'
 import type {
   FinalizeSource,
   VoiceStreamCallbacks,
-  VoiceStreamConnection,
-} from './voiceStreamSTT.js'
+  VoiceStreamConnection} from './voiceStreamSTT.js'
 import { logForDebugging } from '../utils/debug.js'
 import { logError } from '../utils/log.js'
 
@@ -70,8 +69,7 @@ class AudioChunkQueue {
         return new Promise<IteratorResult<Uint8Array>>(resolve => {
           this.waiting = resolve
         })
-      },
-    }
+      }}
   }
 }
 
@@ -114,8 +112,7 @@ export async function connectDoubaoStream(
       ),
     )
     callbacks.onError(`doubaoime-asr package import failed: ${String(err)}`, {
-      fatal: true,
-    })
+      fatal: true})
     return null
   }
 
@@ -161,13 +158,11 @@ export async function connectDoubaoStream(
     },
     isConnected(): boolean {
       return true
-    },
-  }
+    }}
 
   // Start the ASR session in the background
   const config = new ASRConfig({
-    credentialPath: `${homedir()}/.claude/tts/doubao/credentials.json`,
-  })
+    credentialPath: `${homedir()}/.claude/tts/doubao/credentials.json`})
 
   // Ensure credentials are initialized (may auto-generate)
   try {
@@ -179,8 +174,7 @@ export async function connectDoubaoStream(
       ),
     )
     callbacks.onError(`Doubao ASR 凭证初始化失败: ${String(err)}`, {
-      fatal: true,
-    })
+      fatal: true})
     return null
   }
 
@@ -196,8 +190,7 @@ export async function connectDoubaoStream(
     try {
       const audioSource: AsyncIterable<Uint8Array> = queue
       const gen: AsyncGenerator<ASRResponse> = transcribeRealtime(audioSource, {
-        config,
-      })
+        config})
 
       for await (const resp of gen) {
         if (

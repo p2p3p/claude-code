@@ -8,6 +8,7 @@ import type { LocalShellTaskState } from '../../tasks/LocalShellTask/guards.js';
 import { formatDuration, formatFileSize, truncateToWidth } from '../../utils/format.js';
 import { tailFile } from '../../utils/fsOperations.js';
 import { getTaskOutputPath } from '../../utils/task/diskOutput.js';
+import { t } from '../../utils/i18n/index.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
 
 type Props = {
@@ -67,8 +68,7 @@ export function ShellDetailDialog({ shell, onDone, onKillShell, onBack }: Props)
   // Handle additional close actions beyond Dialog's built-in Esc handler
   useKeybindings(
     {
-      'confirm:yes': handleClose,
-    },
+      'confirm:yes': handleClose},
     { context: 'Confirmation' },
   );
 
@@ -93,52 +93,52 @@ export function ShellDetailDialog({ shell, onDone, onKillShell, onBack }: Props)
   return (
     <Box flexDirection="column" tabIndex={0} autoFocus onKeyDown={handleKeyDown}>
       <Dialog
-        title={isMonitor ? 'Monitor details' : 'Shell details'}
+        title={isMonitor ? t('taskDetail.monitorDetailTitle') : t('taskDetail.shellDetailTitle')}
         onCancel={handleClose}
         color="background"
         inputGuide={exitState =>
           exitState.pending ? (
-            <Text>Press {exitState.keyName} again to exit</Text>
+            <Text>{t('common.pressAgain', exitState.keyName)}</Text>
           ) : (
             <Byline>
-              {onBack && <KeyboardShortcutHint shortcut="←" action="go back" />}
-              <KeyboardShortcutHint shortcut="Esc/Enter/Space" action="close" />
-              {shell.status === 'running' && onKillShell && <KeyboardShortcutHint shortcut="x" action="stop" />}
+              {onBack && <KeyboardShortcutHint shortcut="←" action={t('taskDetail.goBack')} />}
+              <KeyboardShortcutHint shortcut="Esc/Enter/Space" action={t('taskDetail.close')} />
+              {shell.status === 'running' && onKillShell && <KeyboardShortcutHint shortcut="x" action={t('taskDetail.stop')} />}
             </Byline>
           )
         }
       >
         <Box flexDirection="column">
           <Text>
-            <Text bold>Status:</Text>{' '}
+            <Text bold>{t('taskDetail.status')}:</Text>{' '}
             {shell.status === 'running' ? (
               <Text color="background">
                 {shell.status}
-                {shell.result?.code !== undefined && ` (exit code: ${shell.result.code})`}
+                {shell.result?.code !== undefined && t('taskDetail.exitCode', shell.result.code)}
               </Text>
             ) : shell.status === 'completed' ? (
               <Text color="success">
                 {shell.status}
-                {shell.result?.code !== undefined && ` (exit code: ${shell.result.code})`}
+                {shell.result?.code !== undefined && t('taskDetail.exitCode', shell.result.code)}
               </Text>
             ) : (
               <Text color="error">
                 {shell.status}
-                {shell.result?.code !== undefined && ` (exit code: ${shell.result.code})`}
+                {shell.result?.code !== undefined && t('taskDetail.exitCode', shell.result.code)}
               </Text>
             )}
           </Text>
           <Text>
-            <Text bold>Runtime:</Text> {formatDuration((shell.endTime ?? Date.now()) - shell.startTime)}
+            <Text bold>{t('taskDetail.runtime')}:</Text> {formatDuration((shell.endTime ?? Date.now()) - shell.startTime)}
           </Text>
           <Text wrap="wrap">
-            <Text bold>{isMonitor ? 'Script:' : 'Command:'}</Text> {displayCommand}
+            <Text bold>{isMonitor ? t('taskDetail.script') : t('taskDetail.command')}:</Text> {displayCommand}
           </Text>
         </Box>
 
         <Box flexDirection="column">
-          <Text bold>Output:</Text>
-          <Suspense fallback={<Text dimColor>Loading output…</Text>}>
+          <Text bold>{t('taskDetail.output')}:</Text>
+          <Suspense fallback={<Text dimColor>{t('taskDetail.loadingOutput')}</Text>}>
             <ShellOutputContent outputPromise={deferredOutputPromise} columns={columns} />
           </Suspense>
         </Box>
@@ -156,7 +156,7 @@ function ShellOutputContent({ outputPromise, columns }: ShellOutputContentProps)
   const { content, bytesTotal } = use(outputPromise);
 
   if (!content) {
-    return <Text dimColor>No output available</Text>;
+    return <Text dimColor>{t('taskDetail.noOutput')}</Text>;
   }
 
   // Find last 10 line boundaries via lastIndexOf
@@ -189,8 +189,8 @@ function ShellOutputContent({ outputPromise, columns }: ShellOutputContentProps)
         ))}
       </Box>
       <Text dimColor italic>
-        {`Showing ${rendered.length} lines`}
-        {isIncomplete ? ` of ${formatFileSize(bytesTotal)}` : ''}
+        {t('taskDetail.showingLines', rendered.length)}
+        {isIncomplete ? t('taskDetail.ofSize', formatFileSize(bytesTotal)) : ''}
       </Text>
     </>
   );

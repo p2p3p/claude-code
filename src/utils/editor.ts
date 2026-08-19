@@ -2,8 +2,7 @@ import {
   type SpawnOptions,
   type SpawnSyncOptions,
   spawn,
-  spawnSync,
-} from 'child_process'
+  spawnSync} from 'child_process'
 import memoize from 'lodash-es/memoize.js'
 import { basename } from 'path'
 import { instances } from '@anthropic/ink'
@@ -139,8 +138,7 @@ export function openFileInExternalEditor(
       const lineArg = useGotoLine ? `+${line} ` : ''
       result = spawnSync(`${editor} ${lineArg}"${filePath}"`, {
         ...syncOpts,
-        shell: true,
-      })
+        shell: true})
     } else {
       // POSIX: spawn directly (no shell), argv array is quote-safe.
       const args = [
@@ -151,8 +149,7 @@ export function openFileInExternalEditor(
     }
     if (result.error) {
       logForDebugging(`editor spawn failed: ${result.error}`, {
-        level: 'error',
-      })
+        level: 'error'})
       return false
     }
     return true

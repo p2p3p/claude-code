@@ -10,9 +10,9 @@ import { getGlobalClaudeFile } from '../../utils/env.js'
 import { isSettingSourceEnabled } from '../../utils/settings/constants.js'
 import {
   getSettings_DEPRECATED,
-  hasSkipDangerousModePermissionPrompt,
-} from '../../utils/settings/settings.js'
+  hasSkipDangerousModePermissionPrompt} from '../../utils/settings/settings.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
+import { t } from '../../utils/i18n/index.js'
 import { getEnterpriseMcpFilePath, getMcpConfigByName } from './config.js'
 import { mcpInfoFromString } from './mcpStringUtils.js'
 import { normalizeNameForMCP } from './normalization.js'
@@ -26,8 +26,7 @@ import {
   type McpStdioServerConfig,
   type McpWebSocketServerConfig,
   type ScopedMcpServerConfig,
-  type ServerResource,
-} from './types.js'
+  type ServerResource} from './types.js'
 
 /**
  * Filters tools by MCP server name
@@ -219,8 +218,7 @@ export function excludeStalePluginClients(
     tools,
     commands,
     resources,
-    stale,
-  }
+    stale}
 }
 
 /**
@@ -260,11 +258,11 @@ export function describeMcpConfigFilePath(scope: ConfigScope): string {
     case 'local':
       return `${getGlobalClaudeFile()} [project: ${getCwd()}]`
     case 'dynamic':
-      return 'Dynamically configured'
+      return t('services.mcpConfDescDynamic')
     case 'enterprise':
       return getEnterpriseMcpFilePath()
     case 'claudeai':
-      return 'claude.ai'
+      return t('services.mcpConfDescClaudeai')
     default:
       return scope
   }
@@ -273,17 +271,17 @@ export function describeMcpConfigFilePath(scope: ConfigScope): string {
 export function getScopeLabel(scope: ConfigScope): string {
   switch (scope) {
     case 'local':
-      return 'Local config (private to you in this project)'
+      return t('services.mcpScopeLocal')
     case 'project':
-      return 'Project config (shared via .mcp.json)'
+      return t('services.mcpScopeProject')
     case 'user':
-      return 'User config (available in all your projects)'
+      return t('services.mcpScopeUser')
     case 'dynamic':
-      return 'Dynamic config (from command line)'
+      return t('services.mcpScopeDynamic')
     case 'enterprise':
-      return 'Enterprise config (managed by your organization)'
+      return t('services.mcpScopeEnterprise')
     case 'claudeai':
-      return 'claude.ai config'
+      return t('services.mcpScopeClaudeai')
     default:
       return scope
   }
@@ -491,8 +489,7 @@ export function extractAgentMcpServers(
           config: { ...serverConfig, name: serverName } as McpServerConfig & {
             name: string
           },
-          sourceAgents: [agent.agentType],
-        })
+          sourceAgents: [agent.agentType]})
       }
     }
   }
@@ -509,32 +506,28 @@ export function extractAgentMcpServers(
         sourceAgents,
         transport: 'stdio',
         command: config.command,
-        needsAuth: false,
-      })
+        needsAuth: false})
     } else if (isSSEConfig(config)) {
       result.push({
         name,
         sourceAgents,
         transport: 'sse',
         url: config.url,
-        needsAuth: true,
-      })
+        needsAuth: true})
     } else if (isHTTPConfig(config)) {
       result.push({
         name,
         sourceAgents,
         transport: 'http',
         url: config.url,
-        needsAuth: true,
-      })
+        needsAuth: true})
     } else if (isWebSocketConfig(config)) {
       result.push({
         name,
         sourceAgents,
         transport: 'ws',
         url: config.url,
-        needsAuth: false,
-      })
+        needsAuth: false})
     }
     // Skip unsupported transport types (sdk, claudeai-proxy, sse-ide, ws-ide)
     // These are internal types not meant for agent MCP server display

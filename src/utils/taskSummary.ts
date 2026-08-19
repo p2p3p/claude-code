@@ -72,8 +72,7 @@ export function maybeGenerateTaskSummary(
     // Fire-and-forget update to session registry
     void updateSessionActivity({
       status,
-      waitingFor,
-    }).catch(err => {
+      waitingFor}).catch(err => {
       logForDebugging(`[taskSummary] updateSessionActivity failed: ${err}`)
     })
   } catch (err) {

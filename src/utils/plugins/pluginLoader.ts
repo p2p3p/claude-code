@@ -42,22 +42,19 @@ import {
   rm,
   rmdir,
   stat,
-  symlink,
-} from 'fs/promises'
+  symlink} from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { basename, dirname, join, relative, resolve, sep } from 'path'
 import { getInlinePlugins } from '../../bootstrap/state.js'
 import {
   BUILTIN_MARKETPLACE_NAME,
-  getBuiltinPlugins,
-} from '../../plugins/builtinPlugins.js'
+  getBuiltinPlugins} from '../../plugins/builtinPlugins.js'
 import type {
   LoadedPlugin,
   PluginComponent,
   PluginError,
   PluginLoadResult,
-  PluginManifest,
-} from '../../types/plugin.js'
+  PluginManifest} from '../../types/plugin.js'
 import { logForDebugging } from '../debug.js'
 import { isEnvTruthy } from '../envUtils.js'
 import {
@@ -65,8 +62,7 @@ import {
   getErrnoPath,
   isENOENT,
   isFsInaccessible,
-  toError,
-} from '../errors.js'
+  toError} from '../errors.js'
 import { execFileNoThrow, execFileNoThrowWithCwd } from '../execFileNoThrow.js'
 import { pathExists } from '../file.js'
 import { getFsImplementation } from '../fsOperations.js'
@@ -78,8 +74,7 @@ import {
   clearPluginSettingsBase,
   getPluginSettingsBase,
   resetSettingsCache,
-  setPluginSettingsBase,
-} from '../settings/settingsCache.js'
+  setPluginSettingsBase} from '../settings/settingsCache.js'
 import type { HooksSettings } from '../settings/types.js'
 import type { HookMatcher } from '../../schemas/hooks.js'
 import { SettingsSchema } from '../settings/types.js'
@@ -95,13 +90,11 @@ import {
   getBlockedMarketplaces,
   getStrictKnownMarketplaces,
   isSourceAllowedByPolicy,
-  isSourceInBlocklist,
-} from './marketplaceHelpers.js'
+  isSourceInBlocklist} from './marketplaceHelpers.js'
 import {
   getMarketplaceCacheOnly,
   getPluginByIdCacheOnly,
-  loadKnownMarketplacesConfigSafe,
-} from './marketplaceManager.js'
+  loadKnownMarketplacesConfigSafe} from './marketplaceManager.js'
 import { getPluginSeedDirs, getPluginsDirectory } from './pluginDirectories.js'
 import { parsePluginIdentifier } from './pluginIdentifier.js'
 import { validatePathWithinBase } from './pluginInstallationHelpers.js'
@@ -112,14 +105,12 @@ import {
   PluginIdSchema,
   PluginManifestSchema,
   type PluginMarketplaceEntry,
-  type PluginSource,
-} from './schemas.js'
+  type PluginSource} from './schemas.js'
 import {
   convertDirectoryToZipInPlace,
   extractZipToDirectory,
   getSessionPluginCachePath,
-  isPluginZipCacheEnabled,
-} from './zipCache.js'
+  isPluginZipCacheEnabled} from './zipCache.js'
 
 /**
  * Get the path where plugin cache is stored
@@ -808,11 +799,9 @@ export async function installFromGitSubdir(
       // parallel with checkout and we avoid waiting on the network for it.
       const [checkout, revParse] = await Promise.all([
         execFileNoThrowWithCwd(gitExe(), ['checkout', 'HEAD'], {
-          cwd: cloneDir,
-        }),
+          cwd: cloneDir}),
         execFileNoThrowWithCwd(gitExe(), ['rev-parse', 'HEAD'], {
-          cwd: cloneDir,
-        }),
+          cwd: cloneDir}),
       ])
       if (checkout.code !== 0) {
         throw new Error(
@@ -939,8 +928,7 @@ export async function cachePlugin(
         case 'npm':
           await installFromNpm(source.package, tempPath, {
             registry: source.registry,
-            version: source.version,
-          })
+            version: source.version})
           break
         case 'github':
           await installFromGitHub(source.repo, tempPath, source.ref, source.sha)
@@ -970,8 +958,7 @@ export async function cachePlugin(
         await rm(tempPath, { recursive: true, force: true })
       } catch (cleanupError) {
         logForDebugging(`Failed to clean up installation: ${cleanupError}`, {
-          level: 'error',
-        })
+          level: 'error'})
       }
     }
     throw error
@@ -996,8 +983,7 @@ export async function cachePlugin(
           .join(', ')
 
         logForDebugging(`Invalid manifest at ${manifestPath}: ${errors}`, {
-          level: 'error',
-        })
+          level: 'error'})
 
         throw new Error(
           `Plugin has an invalid manifest file at ${manifestPath}. Validation errors: ${errors}`,
@@ -1017,8 +1003,7 @@ export async function cachePlugin(
       logForDebugging(
         `Failed to parse manifest at ${manifestPath}: ${errorMsg}`,
         {
-          level: 'error',
-        },
+          level: 'error'},
       )
 
       throw new Error(
@@ -1028,8 +1013,7 @@ export async function cachePlugin(
   } else if (await pathExists(legacyManifestPath)) {
     try {
       const content = await readFile(legacyManifestPath, {
-        encoding: 'utf-8',
-      })
+        encoding: 'utf-8'})
       const parsed = jsonParse(content)
       const result = PluginManifestSchema().safeParse(parsed)
 
@@ -1064,8 +1048,7 @@ export async function cachePlugin(
       logForDebugging(
         `Failed to parse legacy manifest at ${legacyManifestPath}: ${errorMsg}`,
         {
-          level: 'error',
-        },
+          level: 'error'},
       )
 
       throw new Error(
@@ -1075,8 +1058,7 @@ export async function cachePlugin(
   } else {
     manifest = options?.manifest || {
       name: tempName,
-      description: `Plugin cached from ${typeof source === 'string' ? source : source.source}`,
-    }
+      description: `Plugin cached from ${typeof source === 'string' ? source : source.source}`}
   }
 
   const finalName = manifest.name.replace(/[^a-zA-Z0-9-_]/g, '-')
@@ -1094,8 +1076,7 @@ export async function cachePlugin(
   return {
     path: finalPath,
     manifest,
-    ...(gitCommitSha && { gitCommitSha }),
-  }
+    ...(gitCommitSha && { gitCommitSha })}
 }
 
 /**
@@ -1156,8 +1137,7 @@ export async function loadPluginManifest(
     // Return default manifest with provided name and source
     return {
       name: pluginName,
-      description: `Plugin from ${source}`,
-    }
+      description: `Plugin from ${source}`}
   }
 
   try {
@@ -1300,8 +1280,7 @@ async function validatePluginPaths(
         source,
         plugin: pluginName,
         path: fullPath,
-        component,
-      })
+        component})
     }
   }
   return validPaths
@@ -1421,8 +1400,7 @@ export async function createPluginFromPath(
               metadata,
               kind: 'source' as const,
               fullPath,
-              exists: await pathExists(fullPath),
-            }
+              exists: await pathExists(fullPath)}
           }
           if (metadata.content) {
             return { commandName, metadata, kind: 'content' as const }
@@ -1456,8 +1434,7 @@ export async function createPluginFromPath(
             source,
             plugin: manifest.name,
             path: check.fullPath,
-            component: 'commands',
-          })
+            component: 'commands'})
         }
       }
 
@@ -1486,8 +1463,7 @@ export async function createPluginFromPath(
             cmdPath,
             kind: 'path' as const,
             fullPath,
-            exists: await pathExists(fullPath),
-          }
+            exists: await pathExists(fullPath)}
         }),
       )
       const validPaths: string[] = []
@@ -1516,8 +1492,7 @@ export async function createPluginFromPath(
             source,
             plugin: manifest.name,
             path: check.fullPath,
-            component: 'commands',
-          })
+            component: 'commands'})
         }
       }
 
@@ -1635,8 +1610,7 @@ export async function createPluginFromPath(
       logForDebugging(
         `Failed to load hooks for ${manifest.name}: ${errorMsg}`,
         {
-          level: 'error',
-        },
+          level: 'error'},
       )
       logError(toError(error))
       errors.push({
@@ -1644,8 +1618,7 @@ export async function createPluginFromPath(
         source,
         plugin: manifest.name,
         hookPath: standardHooksPath,
-        reason: errorMsg,
-      })
+        reason: errorMsg})
     }
   }
 
@@ -1674,8 +1647,7 @@ export async function createPluginFromPath(
             source,
             plugin: manifest.name,
             path: hookFilePath,
-            component: 'hooks',
-          })
+            component: 'hooks'})
           continue
         }
 
@@ -1701,8 +1673,7 @@ export async function createPluginFromPath(
               source,
               plugin: manifest.name,
               hookPath: hookFilePath,
-              reason: errorMsg,
-            })
+              reason: errorMsg})
           }
           continue
         }
@@ -1730,8 +1701,7 @@ export async function createPluginFromPath(
               source,
               plugin: manifest.name,
               hookPath: hookFilePath,
-              reason: `Failed to merge: ${mergeErrorMsg}`,
-            })
+              reason: `Failed to merge: ${mergeErrorMsg}`})
           }
         } catch (error) {
           const errorMsg = errorMessage(error)
@@ -1745,8 +1715,7 @@ export async function createPluginFromPath(
             source,
             plugin: manifest.name,
             hookPath: hookFilePath,
-            reason: errorMsg,
-          })
+            reason: errorMsg})
         }
       } else if (typeof hookSpec === 'object') {
         // Inline hooks
@@ -1777,8 +1746,7 @@ export async function createPluginFromPath(
 const PluginSettingsSchema = lazySchema(() =>
   SettingsSchema()
     .pick({
-      agent: true,
-    })
+      agent: true})
     .strip(),
 )
 
@@ -1889,8 +1857,7 @@ function mergeHooksSettings(
  * are identical.
  */
 async function loadPluginsFromMarketplaces({
-  cacheOnly,
-}: {
+  cacheOnly}: {
   cacheOnly: boolean
 }): Promise<{
   plugins: LoadedPlugin[]
@@ -1900,8 +1867,7 @@ async function loadPluginsFromMarketplaces({
   // Merge --add-dir plugins at lowest priority; standard settings win on conflict
   const enabledPlugins = {
     ...getAddDirEnabledPlugins(),
-    ...(settings.enabledPlugins || {}),
-  }
+    ...(settings.enabledPlugins || {})}
   const plugins: LoadedPlugin[] = []
   const errors: PluginError[] = []
 
@@ -1997,8 +1963,7 @@ async function loadPluginsFromMarketplaces({
           blockedByBlocklist: strictAllowlist === null,
           allowedSources: (strictAllowlist ?? []).map(s =>
             formatSourceForDisplay(s),
-          ),
-        })
+          )})
         return null
       }
 
@@ -2017,8 +1982,7 @@ async function loadPluginsFromMarketplaces({
           blockedByBlocklist: isBlocked,
           allowedSources: isBlocked
             ? []
-            : allowlist.map(s => formatSourceForDisplay(s)),
-        })
+            : allowlist.map(s => formatSourceForDisplay(s))})
         return null
       }
 
@@ -2031,8 +1995,7 @@ async function loadPluginsFromMarketplaces({
         if (entry) {
           result = {
             entry,
-            marketplaceInstallLocation: marketplaceConfig.installLocation,
-          }
+            marketplaceInstallLocation: marketplaceConfig.installLocation}
         }
       } else {
         result = await getPluginByIdCacheOnly(pluginId)
@@ -2043,8 +2006,7 @@ async function loadPluginsFromMarketplaces({
           type: 'plugin-not-found',
           source: pluginId,
           pluginId: pluginName!,
-          marketplace: marketplaceName!,
-        })
+          marketplace: marketplaceName!})
         return null
       }
 
@@ -2083,8 +2045,7 @@ async function loadPluginsFromMarketplaces({
         type: 'generic-error',
         source: pluginId,
         plugin: pluginId.split('@')[0],
-        error: err.message,
-      })
+        error: err.message})
     }
   }
 
@@ -2121,8 +2082,7 @@ async function loadPluginFromMarketplaceEntryCacheOnly(
         type: 'plugin-cache-miss',
         source: pluginId,
         plugin: entry.name,
-        installPath: marketplaceInstallLocation,
-      })
+        installPath: marketplaceInstallLocation})
       return null
     }
     pluginPath = join(marketplaceDir, entry.source)
@@ -2135,8 +2095,7 @@ async function loadPluginFromMarketplaceEntryCacheOnly(
         type: 'plugin-cache-miss',
         source: pluginId,
         plugin: entry.name,
-        installPath: installPath ?? '(not recorded)',
-      })
+        installPath: installPath ?? '(not recorded)'})
       return null
     }
     pluginPath = installPath
@@ -2154,14 +2113,12 @@ async function loadPluginFromMarketplaceEntryCacheOnly(
       pluginPath = extractDir
     } catch (error) {
       logForDebugging(`Failed to extract plugin ZIP ${pluginPath}: ${error}`, {
-        level: 'error',
-      })
+        level: 'error'})
       errorsOut.push({
         type: 'plugin-cache-miss',
         source: pluginId,
         plugin: entry.name,
-        installPath: pluginPath,
-      })
+        installPath: pluginPath})
       return null
     }
   }
@@ -2216,14 +2173,12 @@ async function loadPluginFromMarketplaceEntry(
     if (!(await pathExists(sourcePluginPath))) {
       const error = new Error(`Plugin path not found: ${sourcePluginPath}`)
       logForDebugging(`Plugin path not found: ${sourcePluginPath}`, {
-        level: 'error',
-      })
+        level: 'error'})
       logError(error)
       errorsOut.push({
         type: 'generic-error',
         source: pluginId,
-        error: `Plugin directory not found at path: ${sourcePluginPath}. Check that the marketplace entry has the correct path.`,
-      })
+        error: `Plugin directory not found at path: ${sourcePluginPath}. Check that the marketplace entry has the correct path.`})
       return null
     }
 
@@ -2328,8 +2283,7 @@ async function loadPluginFromMarketplaceEntry(
         } else {
           // Download to temp location, then copy to versioned cache
           const cached = await cachePlugin(entry.source, {
-            manifest: { name: entry.name },
-          })
+            manifest: { name: entry.name }})
 
           // If the pre-clone version was deterministic (source.sha /
           // entry.version / installedVersion), REUSE it. The post-clone
@@ -2370,14 +2324,12 @@ async function loadPluginFromMarketplaceEntry(
     } catch (error) {
       const errorMsg = errorMessage(error)
       logForDebugging(`Failed to cache plugin ${entry.name}: ${errorMsg}`, {
-        level: 'error',
-      })
+        level: 'error'})
       logError(toError(error))
       errorsOut.push({
         type: 'generic-error',
         source: pluginId,
-        error: `Failed to download/cache plugin ${entry.name}: ${errorMsg}`,
-      })
+        error: `Failed to download/cache plugin ${entry.name}: ${errorMsg}`})
       return null
     }
   }
@@ -2457,8 +2409,7 @@ async function finishLoadingPluginFromPath(
       ...entry,
       id: undefined,
       source: undefined,
-      strict: undefined,
-    } as PluginManifest
+      strict: undefined} as PluginManifest
     plugin.name = plugin.manifest.name
 
     // Process commands from marketplace entry
@@ -2489,8 +2440,7 @@ async function finishLoadingPluginFromPath(
               metadata,
               skip: false as const,
               fullPath,
-              exists: await pathExists(fullPath),
-            }
+              exists: await pathExists(fullPath)}
           }),
         )
         for (const check of checks) {
@@ -2513,8 +2463,7 @@ async function finishLoadingPluginFromPath(
               source: pluginId,
               plugin: entry.name,
               path: check.fullPath,
-              component: 'commands',
-            })
+              component: 'commands'})
           }
         }
 
@@ -2539,8 +2488,7 @@ async function finishLoadingPluginFromPath(
               cmdPath,
               kind: 'path' as const,
               fullPath,
-              exists: await pathExists(fullPath),
-            }
+              exists: await pathExists(fullPath)}
           }),
         )
         const validPaths: string[] = []
@@ -2569,8 +2517,7 @@ async function finishLoadingPluginFromPath(
               source: pluginId,
               plugin: entry.name,
               path: check.fullPath,
-              component: 'commands',
-            })
+              component: 'commands'})
           }
         }
 
@@ -2642,8 +2589,7 @@ async function finishLoadingPluginFromPath(
             source: pluginId,
             plugin: entry.name,
             path: fullPath,
-            component: 'skills',
-          })
+            component: 'skills'})
         }
       }
 
@@ -2704,8 +2650,7 @@ async function finishLoadingPluginFromPath(
     errorsOut.push({
       type: 'generic-error',
       source: pluginId,
-      error: `Plugin ${entry.name} has conflicting manifests: both plugin.json and marketplace entry specify components. Set strict: true in marketplace entry or remove component specs from one location.`,
-    })
+      error: `Plugin ${entry.name} has conflicting manifests: both plugin.json and marketplace entry specify components. Set strict: true in marketplace entry or remove component specs from one location.`})
     return null
   } else if (hasManifest) {
     // Has plugin.json - marketplace can supplement commands/agents/skills/hooks/outputStyles
@@ -2723,8 +2668,7 @@ async function finishLoadingPluginFromPath(
       ) {
         // Object mapping format - merge metadata
         const commandsMetadata: Record<string, CommandMetadata> = {
-          ...(plugin.commandsMetadata || {}),
-        }
+          ...(plugin.commandsMetadata || {})}
         const validPaths: string[] = []
 
         // Parallelize pathExists checks; process results in order.
@@ -2740,8 +2684,7 @@ async function finishLoadingPluginFromPath(
               metadata,
               skip: false as const,
               fullPath,
-              exists: await pathExists(fullPath),
-            }
+              exists: await pathExists(fullPath)}
           }),
         )
         for (const check of checks) {
@@ -2764,8 +2707,7 @@ async function finishLoadingPluginFromPath(
               source: pluginId,
               plugin: entry.name,
               path: check.fullPath,
-              component: 'commands',
-            })
+              component: 'commands'})
           }
         }
 
@@ -2793,8 +2735,7 @@ async function finishLoadingPluginFromPath(
               cmdPath,
               kind: 'path' as const,
               fullPath,
-              exists: await pathExists(fullPath),
-            }
+              exists: await pathExists(fullPath)}
           }),
         )
         const validPaths: string[] = []
@@ -2823,8 +2764,7 @@ async function finishLoadingPluginFromPath(
               source: pluginId,
               plugin: entry.name,
               path: check.fullPath,
-              component: 'commands',
-            })
+              component: 'commands'})
           }
         }
 
@@ -2910,8 +2850,7 @@ async function finishLoadingPluginFromPath(
     if (entry.hooks) {
       plugin.hooksConfig = {
         ...(plugin.hooksConfig || {}),
-        ...(entry.hooks as HooksSettings),
-      }
+        ...(entry.hooks as HooksSettings)}
     }
   }
 
@@ -2951,8 +2890,7 @@ async function loadSessionOnlyPlugins(
           type: 'path-not-found',
           source: `inline[${index}]`,
           path: resolvedPath,
-          component: 'commands',
-        })
+          component: 'commands'})
         continue
       }
 
@@ -2981,8 +2919,7 @@ async function loadSessionOnlyPlugins(
       errors.push({
         type: 'generic-error',
         source: `inline[${index}]`,
-        error: `Failed to load plugin: ${errorMsg}`,
-      })
+        error: `Failed to load plugin: ${errorMsg}`})
     }
   }
 
@@ -3040,8 +2977,7 @@ export function mergePluginSources(sources: {
         type: 'generic-error',
         source: p.source,
         plugin: p.name,
-        error: `--plugin-dir copy of "${p.name}" ignored: plugin is locked by managed settings`,
-      })
+        error: `--plugin-dir copy of "${p.name}" ignored: plugin is locked by managed settings`})
       return false
     }
     return true
@@ -3062,8 +2998,7 @@ export function mergePluginSources(sources: {
   // installed ones for any that slipped past the name filter.
   return {
     plugins: [...sessionPlugins, ...marketplacePlugins, ...sources.builtin],
-    errors,
-  }
+    errors}
 }
 
 /**
@@ -3181,8 +3116,7 @@ async function assemblePluginLoadResult(
     session: sessionResult.plugins,
     marketplace: marketplaceResult.plugins,
     builtin: [...builtinResult.enabled, ...builtinResult.disabled],
-    managedNames: getManagedPluginNames(),
-  })
+    managedNames: getManagedPluginNames()})
   const allErrors = [
     ...marketplaceResult.errors,
     ...sessionResult.errors,
@@ -3209,8 +3143,7 @@ async function assemblePluginLoadResult(
   return {
     enabled: enabledPlugins,
     disabled: allPlugins.filter(p => !p.enabled),
-    errors: allErrors,
-  }
+    errors: allErrors}
 }
 
 /**

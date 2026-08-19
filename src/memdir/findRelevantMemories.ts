@@ -1,15 +1,14 @@
 import { feature } from 'bun:bundle'
 import { logForDebugging } from '../utils/debug.js'
 import { errorMessage } from '../utils/errors.js'
-import { getDefaultSonnetModel } from '../utils/model/model.js'
+import { getDefaultModel } from '../utils/model/model.js'
 import { sideQuery } from '../utils/sideQuery.js'
 import type { LangfuseSpan } from '../services/langfuse/index.js'
 import { jsonParse } from '../utils/slowOperations.js'
 import {
   formatMemoryManifest,
   type MemoryHeader,
-  scanMemoryFiles,
-} from './memoryScan.js'
+  scanMemoryFiles} from './memoryScan.js'
 
 export type RelevantMemory = {
   path: string
@@ -100,14 +99,13 @@ async function selectRelevantMemories(
 
   try {
     const result = await sideQuery({
-      model: getDefaultSonnetModel(),
+      model: getDefaultModel(),
       system: SELECT_MEMORIES_SYSTEM_PROMPT,
       skipSystemPromptPrefix: true,
       messages: [
         {
           role: 'user',
-          content: `Query: ${query}\n\nAvailable memories:\n${manifest}${toolsSection}`,
-        },
+          content: `Query: ${query}\n\nAvailable memories:\n${manifest}${toolsSection}`},
       ],
       max_tokens: 256,
       output_format: {
@@ -115,17 +113,13 @@ async function selectRelevantMemories(
         schema: {
           type: 'object',
           properties: {
-            selected_memories: { type: 'array', items: { type: 'string' } },
-          },
+            selected_memories: { type: 'array', items: { type: 'string' } }},
           required: ['selected_memories'],
-          additionalProperties: false,
-        },
-      },
+          additionalProperties: false}},
       signal,
       querySource: 'memdir_relevance',
       optional: true,
-      parentSpan,
-    })
+      parentSpan})
 
     const textBlock = result.content.find(block => block.type === 'text')
     if (!textBlock || textBlock.type !== 'text') {

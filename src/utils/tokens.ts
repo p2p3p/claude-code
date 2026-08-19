@@ -3,8 +3,7 @@ import { roughTokenCountEstimationForMessages } from '../services/tokenEstimatio
 import type {
   AssistantMessage,
   ContentItem,
-  Message,
-} from '../types/message.js'
+  Message} from '../types/message.js'
 import { SYNTHETIC_MESSAGES, SYNTHETIC_MODEL } from './messages.js'
 import { jsonStringify } from './slowOperations.js'
 
@@ -169,8 +168,7 @@ export function getCurrentUsage(messages: Message[]): {
         input_tokens: usage.input_tokens ?? 0,
         output_tokens: usage.output_tokens ?? 0,
         cache_creation_input_tokens: usage.cache_creation_input_tokens ?? 0,
-        cache_read_input_tokens: usage.cache_read_input_tokens ?? 0,
-      }
+        cache_read_input_tokens: usage.cache_read_input_tokens ?? 0}
     }
   }
   return null

@@ -118,6 +118,5 @@ export function createPowerShellProvider(shellPath: string): ShellProvider {
         env.CLAUDE_CODE_TMPDIR = currentSandboxTmpDir
       }
       return env
-    },
-  }
+    }}
 }

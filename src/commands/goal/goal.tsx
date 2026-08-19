@@ -28,12 +28,12 @@ import {
   MAX_GOAL_TURNS,
   pauseGoal,
   resumeGoal,
-  setGoal,
-} from 'src/services/goal/goalState.js';
+  setGoal} from 'src/services/goal/goalState.js';
 import { persistCurrentGoal, persistGoalClear } from 'src/services/goal/goalStorage.js';
 import type { LocalJSXCommandOnDone } from 'src/types/command.js';
 import { removeByFilter } from 'src/utils/messageQueueManager.js';
 import { GoalReplaceConfirmDialog } from './GoalReplaceConfirmDialog.js';
+import { t } from '../../utils/i18n/index.js'
 
 const MAX_OBJECTIVE_CHARS = 4000;
 const MAX_DISPLAY_CHARS = 80;
@@ -51,20 +51,20 @@ function drainGoalContinuationQueue(): void {
 function formatGoalStatus(): string {
   const goal = getGoal();
   if (!goal) {
-    return 'No active goal. Set one with `/goal <objective>`.';
+    return t('cmdSystemUI.noActiveGoal');
   }
   const tokens = goal.tokenBudget !== null ? `${goal.tokensUsed} / ${goal.tokenBudget}` : `${goal.tokensUsed}`;
   const lines = [
-    `Goal: ${goal.objective}`,
-    `Status: ${formatGoalStatusLabel(goal.status)}`,
-    `Time: ${formatGoalElapsed(goal)}`,
-    `Tokens: ${tokens}`,
-    `Continuation turns: ${goal.turnsExecuted}`,
+    `${t('goalCmd.labelGoal')}${goal.objective}`,
+    `${t('goalCmd.labelStatus')}${formatGoalStatusLabel(goal.status)}`,
+    `${t('goalCmd.labelTime')}${formatGoalElapsed(goal)}`,
+    `${t('goalCmd.labelTokens')}${tokens}`,
+    `${t('goalCmd.labelContinuation')}${goal.turnsExecuted}`,
   ];
 
   if (goal.status === 'max_turns') {
     lines.push(
-      `Hint: Max continuation turns reached (${MAX_GOAL_TURNS}). Run \`/goal continue\` to reset and continue.`,
+      t('goalCmd.maxTurnsHint', MAX_GOAL_TURNS),
     );
   }
 
@@ -75,7 +75,7 @@ function applySetGoal(objective: string): string {
   setGoal(objective);
   incrementGoalTurns();
   persistCurrentGoal();
-  return 'Goal set.';
+  return t('cmdSystemUI.goalResumed');
 }
 
 export async function call(
@@ -98,9 +98,8 @@ export async function call(
       persistGoalClear();
       drainGoalContinuationQueue();
     }
-    onDone(cleared ? 'Goal cleared.' : 'No active goal to clear.', {
-      display: 'system',
-    });
+    onDone(cleared ? t('cmdSystemUI.goalCleared') : t('cmdSystemUI.goalCleared'), {
+      display: 'system'});
     return null;
   }
 
@@ -110,9 +109,8 @@ export async function call(
       persistCurrentGoal();
       drainGoalContinuationQueue();
     }
-    onDone(g ? 'Goal paused.' : 'No active goal to pause.', {
-      display: 'system',
-    });
+    onDone(g ? t('cmdSystemUI.goalPaused') : t('cmdSystemUI.goalPaused'), {
+      display: 'system'});
     return null;
   }
 
@@ -120,17 +118,16 @@ export async function call(
     const current = getGoal();
     if (current?.status === 'max_turns') {
       onDone(
-        `Goal reached max continuation turns (${MAX_GOAL_TURNS}). Run \`/goal continue\` to reset turn counter and continue.`,
+        t('goalCmd.maxTurnsResume', MAX_GOAL_TURNS),
         { display: 'system' },
       );
       return null;
     }
     const g = resumeGoal();
     if (g) persistCurrentGoal();
-    onDone(g ? 'Goal resumed.' : 'No paused goal to resume.', {
+    onDone(g ? t('cmdSystemUI.goalResumed') : t('cmdSystemUI.goalResumed'), {
       display: 'system',
-      shouldQuery: Boolean(g),
-    });
+      shouldQuery: Boolean(g)});
     return null;
   }
 
@@ -139,12 +136,11 @@ export async function call(
     if (g) persistCurrentGoal();
     onDone(
       g
-        ? `Goal continuation counter reset (0/${MAX_GOAL_TURNS}). Continuing...`
-        : 'Current goal is not in max-turns state.',
+        ? t('goalCmd.continueReset', MAX_GOAL_TURNS)
+        : t('goalCmd.notMaxTurns'),
       {
         display: 'system',
-        shouldQuery: Boolean(g),
-      },
+        shouldQuery: Boolean(g)},
     );
     return null;
   }
@@ -155,15 +151,14 @@ export async function call(
       persistCurrentGoal();
       drainGoalContinuationQueue();
     }
-    onDone(g ? 'Goal marked complete.' : 'No active goal to complete.', {
-      display: 'system',
-    });
+    onDone(g ? t('cmdSystemUI.goalComplete') : t('cmdSystemUI.goalComplete'), {
+      display: 'system'});
     return null;
   }
 
   if (trimmed.length > MAX_OBJECTIVE_CHARS) {
     onDone(
-      `Goal objective is too long (${trimmed.length} chars; limit ${MAX_OBJECTIVE_CHARS}). Save the detailed instructions to a file and reference it from a shorter objective.`,
+      t('goalCmd.objectiveTooLong', trimmed.length, MAX_OBJECTIVE_CHARS),
       { display: 'system' },
     );
     return null;
@@ -178,8 +173,7 @@ export async function call(
       display: 'system',
       shouldQuery: true,
       displayArgs: truncateForDisplay(trimmed),
-      metaMessages: [`<goal-objective-updated>\n${trimmed}\n</goal-objective-updated>`],
-    });
+      metaMessages: [`<goal-objective-updated>\n${trimmed}\n</goal-objective-updated>`]});
     return null;
   }
 
@@ -194,13 +188,11 @@ export async function call(
           display: 'system',
           shouldQuery: true,
           displayArgs: truncateForDisplay(trimmed),
-          metaMessages: [`<goal-objective-updated>\n${trimmed}\n</goal-objective-updated>`],
-        });
+          metaMessages: [`<goal-objective-updated>\n${trimmed}\n</goal-objective-updated>`]});
       }}
       onCancel={() => {
-        onDone('Kept the current goal. New objective discarded.', {
-          display: 'system',
-        });
+        onDone(t('cmdSystemUI.noKeepGoal'), {
+          display: 'system'});
       }}
     />
   );

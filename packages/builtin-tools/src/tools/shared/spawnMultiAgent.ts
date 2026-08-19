@@ -11,6 +11,7 @@ import { formatAgentId } from 'src/utils/agentId.js'
 import { getGlobalConfig } from 'src/utils/config.js'
 import { getCwd } from 'src/utils/cwd.js'
 import { logForDebugging } from 'src/utils/debug.js'
+import { t } from 'src/utils/i18n/index.js'
 import { parseUserSpecifiedModel } from 'src/utils/model/model.js'
 import { getTeammateExecutor } from 'src/utils/swarm/backends/registry.js'
 import type {
@@ -172,21 +173,21 @@ async function resolveSpawn(
   context: ToolUseContext,
 ): Promise<ResolvedSpawn> {
   if (!input.name || !input.prompt) {
-    throw new Error('name and prompt are required for spawn operation')
+    throw new Error(t('toolUI.spawnMultiAgent.nameAndPromptRequired'))
   }
 
   const appState = context.getAppState()
   const teamName = input.team_name || appState.teamContext?.teamName
   if (!teamName) {
     throw new Error(
-      'team_name is required for spawn operation. Either provide team_name in input or call TeamCreate first to establish team context.',
+      t('toolUI.spawnMultiAgent.teamNameRequired'),
     )
   }
 
   const teamFile = await readTeamFileAsync(teamName)
   if (!teamFile) {
     throw new Error(
-      `Team "${teamName}" does not exist. Call TeamCreate first to create the team before spawning teammates.`,
+      t('toolUI.spawnMultiAgent.teamDoesNotExist', { teamName }),
     )
   }
 
@@ -311,7 +312,7 @@ async function appendTeamMember(
   const teamFile = await readTeamFileAsync(spawn.teamName)
   if (!teamFile) {
     throw new Error(
-      `Team "${spawn.teamName}" disappeared during teammate spawn.`,
+      t('toolUI.spawnMultiAgent.teamDisappeared', { teamName: spawn.teamName }),
     )
   }
 
@@ -374,7 +375,7 @@ async function handleSpawn(
   })
 
   if (!result.success) {
-    throw new Error(result.error ?? 'Failed to spawn teammate')
+    throw new Error(result.error ?? t('toolUI.spawnMultiAgent.failedToSpawn'))
   }
 
   updateTeamContext(context, spawn, result)

@@ -29,8 +29,7 @@ export function execFileNoThrow(
   options: ExecFileOptions = {
     timeout: 10 * SECONDS_IN_MINUTE * MS_IN_SECOND,
     preserveOutputOnError: true,
-    useCwd: true,
-  },
+    useCwd: true},
 ): Promise<{ stdout: string; stderr: string; code: number; error?: string }> {
   return execFileNoThrowWithCwd(file, args, {
     abortSignal: options.abortSignal,
@@ -39,8 +38,7 @@ export function execFileNoThrow(
     cwd: options.useCwd ? getCwd() : undefined,
     env: options.env,
     stdin: options.stdin,
-    input: options.input,
-  })
+    input: options.input})
 }
 
 type ExecFileWithCwdOptions = {
@@ -98,12 +96,10 @@ export function execFileNoThrowWithCwd(
     maxBuffer,
     shell,
     stdin: finalStdin,
-    input: finalInput,
-  }: ExecFileWithCwdOptions = {
+    input: finalInput}: ExecFileWithCwdOptions = {
     timeout: 10 * SECONDS_IN_MINUTE * MS_IN_SECOND,
     preserveOutputOnError: true,
-    maxBuffer: 1_000_000,
-  },
+    maxBuffer: 1_000_000},
 ): Promise<{ stdout: string; stderr: string; code: number; error?: string }> {
   return new Promise(resolve => {
     // Use execa for cross-platform .bat/.cmd compatibility on Windows
@@ -129,8 +125,7 @@ export function execFileNoThrowWithCwd(
               error: getErrorMessage(
                 result as unknown as ExecaResultWithError,
                 errorCode,
-              ),
-            })
+              )})
           } else {
             void resolve({ stdout: '', stderr: '', code: result.exitCode ?? 1 })
           }
@@ -138,8 +133,7 @@ export function execFileNoThrowWithCwd(
           void resolve({
             stdout: result.stdout,
             stderr: result.stderr,
-            code: 0,
-          })
+            code: 0})
         }
       })
       .catch((error: ExecaError) => {

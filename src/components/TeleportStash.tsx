@@ -6,6 +6,7 @@ import type { GitFileStatus } from '../utils/git.js';
 import { getFileStatus, stashToCleanState } from '../utils/git.js';
 import { Select } from './CustomSelect/index.js';
 import { Spinner } from './Spinner.js';
+import { t } from '../utils/i18n/index.js';
 
 type TeleportStashProps = {
   onStashAndContinue: () => void;
@@ -28,9 +29,8 @@ export function TeleportStash({ onStashAndContinue, onCancel }: TeleportStashPro
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         logForDebugging(`Error getting changed files: ${errorMessage}`, {
-          level: 'error',
-        });
-        setError('Failed to get changed files');
+          level: 'error'});
+        setError(t('teleportStash.failedGetFiles'));
       } finally {
         setLoading(false);
       }
@@ -49,14 +49,13 @@ export function TeleportStash({ onStashAndContinue, onCancel }: TeleportStashPro
         logForDebugging('Successfully stashed changes');
         onStashAndContinue();
       } else {
-        setError('Failed to stash changes');
+        setError(t('teleportStash.failedStash'));
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       logForDebugging(`Error stashing changes: ${errorMessage}`, {
-        level: 'error',
-      });
-      setError('Failed to stash changes');
+        level: 'error'});
+      setError(t('teleportStash.failedStash'));
     } finally {
       setStashing(false);
     }
@@ -75,7 +74,7 @@ export function TeleportStash({ onStashAndContinue, onCancel }: TeleportStashPro
       <Box flexDirection="column" padding={1}>
         <Box marginBottom={1}>
           <Spinner />
-          <Text> Checking git status{figures.ellipsis}</Text>
+          <Text> {t('teleportStash.checkingGit')}</Text>
         </Box>
       </Box>
     );
@@ -85,12 +84,12 @@ export function TeleportStash({ onStashAndContinue, onCancel }: TeleportStashPro
     return (
       <Box flexDirection="column" padding={1}>
         <Text bold color="error">
-          Error: {error}
+          {t('teleportStash.error')}{error}
         </Text>
         <Box marginTop={1}>
-          <Text dimColor>Press </Text>
-          <Text bold>Escape</Text>
-          <Text dimColor> to cancel</Text>
+          <Text dimColor>{t('teleportStash.pressEscape')}</Text>
+          <Text bold>{t('teleportStash.escape')}</Text>
+          <Text dimColor>{t('teleportStash.toCancel')}</Text>
         </Box>
       </Box>
     );
@@ -99,33 +98,33 @@ export function TeleportStash({ onStashAndContinue, onCancel }: TeleportStashPro
   const showFileCount = changedFiles.length > 8;
 
   return (
-    <Dialog title="Working Directory Has Changes" onCancel={onCancel}>
-      <Text>Teleport will switch git branches. The following changes were found:</Text>
+    <Dialog title={t('teleportStash.title')} onCancel={onCancel}>
+      <Text>{t('teleportStash.willSwitch')}</Text>
 
       <Box flexDirection="column" paddingLeft={2}>
         {changedFiles.length > 0 ? (
           showFileCount ? (
-            <Text>{changedFiles.length} files changed</Text>
+            <Text>{changedFiles.length} {t('teleportStash.filesChanged')}</Text>
           ) : (
             changedFiles.map((file: string, index: number) => <Text key={index}>{file}</Text>)
           )
         ) : (
-          <Text dimColor>No changes detected</Text>
+          <Text dimColor>{t('teleportStash.noChanges')}</Text>
         )}
       </Box>
 
-      <Text>Would you like to stash these changes and continue with teleport?</Text>
+      <Text>{t('teleportStash.stashPrompt')}</Text>
 
       {stashing ? (
         <Box>
           <Spinner />
-          <Text> Stashing changes...</Text>
+          <Text> {t('teleportStash.stashing')}</Text>
         </Box>
       ) : (
         <Select
           options={[
-            { label: 'Stash changes and continue', value: 'stash' },
-            { label: 'Exit', value: 'exit' },
+            { label: t('teleportStash.stashAndContinue'), value: 'stash' },
+            { label: t('teleportStash.exit'), value: 'exit' },
           ]}
           onChange={handleSelectChange}
         />

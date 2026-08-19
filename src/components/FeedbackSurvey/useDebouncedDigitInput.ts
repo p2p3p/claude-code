@@ -22,8 +22,7 @@ export function useDebouncedDigitInput<T extends string = string>({
   onDigit,
   enabled = true,
   once = false,
-  debounceMs = DEFAULT_DEBOUNCE_MS,
-}: {
+  debounceMs = DEFAULT_DEBOUNCE_MS}: {
   inputValue: string
   setInputValue: (value: string) => void
   isValidDigit: (char: string) => char is T

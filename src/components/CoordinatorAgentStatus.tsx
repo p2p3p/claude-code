@@ -15,6 +15,7 @@ import { type AppState, useAppState, useSetAppState } from '../state/AppState.js
 import { enterTeammateView, exitTeammateView } from '../state/teammateViewHelpers.js';
 import { isPanelAgentTask, type LocalAgentTaskState } from '../tasks/LocalAgentTask/LocalAgentTask.js';
 import { formatDuration, formatNumber } from '../utils/format.js';
+import { t } from '../utils/i18n/index.js';
 import { evictTerminalTask } from '../utils/task/framework.js';
 import { isTerminalStatus } from './tasks/taskStatusUtils.js';
 
@@ -117,8 +118,7 @@ export function useCoordinatorTaskCount(): number {
 function MainLine({
   isSelected,
   isViewed,
-  onClick,
-}: {
+  onClick}: {
   isSelected?: boolean;
   isViewed?: boolean;
   onClick: () => void;
@@ -130,7 +130,7 @@ function MainLine({
     <Box onClick={onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       <Text dimColor={!isSelected && !isViewed && !hover} bold={isViewed}>
         {prefix}
-        {bullet} main
+        {bullet} {t('coordinatorStatus.main')}
       </Text>
     </Box>
   );
@@ -161,10 +161,10 @@ function AgentLine({ task, name, isSelected, isViewed, onClick }: AgentLineProps
   const lastActivity = task.progress?.lastActivity;
   const arrow = lastActivity ? figures.arrowDown : figures.arrowUp;
 
-  const tokenText = tokenCount !== undefined && tokenCount > 0 ? ` · ${arrow} ${formatNumber(tokenCount)} tokens` : '';
+  const tokenText = tokenCount !== undefined && tokenCount > 0 ? ` · ${arrow} ${t('coordinatorStatus.tokens', formatNumber(tokenCount))}` : '';
 
   const queuedCount = task.pendingMessages.length;
-  const queuedText = queuedCount > 0 ? ` · ${queuedCount} queued` : '';
+  const queuedText = queuedCount > 0 ? ` · ${t('coordinatorStatus.queued', queuedCount)}` : '';
 
   // Precedence: AI summary > static description (no tool-call activity noise)
   const displayDescription = task.progress?.summary || task.description;
@@ -179,7 +179,7 @@ function AgentLine({ task, name, isSelected, isViewed, onClick }: AgentLineProps
   // stays readable even when the row is inactive. Short by convention (the
   // Agent tool prompt asks for "one or two words, lowercase").
   const namePart = name ? `${name}: ` : '';
-  const hintPart = isSelected && !isViewed ? ` · x to ${isRunning ? 'stop' : 'clear'}` : '';
+  const hintPart = isSelected && !isViewed ? t(isRunning ? 'coordinatorStatus.xToStop' : 'coordinatorStatus.xToClear') : '';
   const suffixPart = ` ${sep} ${elapsed}${tokenText}${queuedText}${hintPart}`;
   const availableForDesc =
     columns - stringWidth(prefix) - stringWidth(`${bullet} `) - stringWidth(namePart) - stringWidth(suffixPart);

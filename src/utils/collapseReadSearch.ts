@@ -11,8 +11,7 @@ import {
   type BranchAction,
   type CommitKind,
   detectGitOperation,
-  type PrAction,
-} from '@claude-code-best/builtin-tools/tools/shared/gitOperationTracking.js'
+  type PrAction} from '@claude-code-best/builtin-tools/tools/shared/gitOperationTracking.js'
 import { SEARCH_EXTRA_TOOLS_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/SearchExtraToolsTool/prompt.js'
 import type {
   CollapsedReadSearchGroup,
@@ -21,8 +20,7 @@ import type {
   MessageContent,
   RenderableMessage,
   StopHookInfo,
-  SystemStopHookSummaryMessage,
-} from '../types/message.js'
+  SystemStopHookSummaryMessage} from '../types/message.js'
 
 /**
  * Safely get the first content item from a MessageContent value.
@@ -49,8 +47,7 @@ import {
   isAutoManagedMemoryFile,
   isAutoManagedMemoryPattern,
   isMemoryDirectory,
-  isShellCommandTargetingMemory,
-} from './memoryFileDetection.js'
+  isShellCommandTargetingMemory} from './memoryFileDetection.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const teamMemOps = feature('TEAMMEM')
@@ -179,8 +176,7 @@ export function getSearchExtraToolsOrReadInfo(
       isList: false,
       isREPL: true,
       isMemoryWrite: false,
-      isAbsorbedSilently: true,
-    }
+      isAbsorbedSilently: true}
   }
 
   // Memory file writes/edits are collapsible
@@ -192,8 +188,7 @@ export function getSearchExtraToolsOrReadInfo(
       isList: false,
       isREPL: false,
       isMemoryWrite: true,
-      isAbsorbedSilently: false,
-    }
+      isAbsorbedSilently: false}
   }
 
   // Meta-operations absorbed silently: Snip (context cleanup) and SearchExtraTools
@@ -210,8 +205,7 @@ export function getSearchExtraToolsOrReadInfo(
       isList: false,
       isREPL: false,
       isMemoryWrite: false,
-      isAbsorbedSilently: true,
-    }
+      isAbsorbedSilently: true}
   }
 
   // Fallback to REPL primitives: in REPL mode, Bash/Read/Grep/etc. are
@@ -229,8 +223,7 @@ export function getSearchExtraToolsOrReadInfo(
       isList: false,
       isREPL: false,
       isMemoryWrite: false,
-      isAbsorbedSilently: false,
-    }
+      isAbsorbedSilently: false}
   }
   // The tool's isSearchOrReadCommand method handles its own input validation via safeParse,
   // so passing the raw input is safe. The type assertion is necessary because Tool[] uses
@@ -255,8 +248,7 @@ export function getSearchExtraToolsOrReadInfo(
     ...(tool.isMcp && { mcpServerName: tool.mcpInfo?.serverName }),
     isBash: isFullscreenEnvEnabled()
       ? !isCollapsible && toolName === BASH_TOOL_NAME
-      : undefined,
-  }
+      : undefined}
 }
 
 /**
@@ -291,8 +283,7 @@ export function getSearchOrReadFromContent(
         isMemoryWrite: info.isMemoryWrite,
         isAbsorbedSilently: info.isAbsorbedSilently,
         mcpServerName: info.mcpServerName,
-        isBash: info.isBash,
-      }
+        isBash: info.isBash}
     }
   }
   return null
@@ -709,8 +700,7 @@ function createEmptyGroup(): GroupAccumulator {
     latestDisplayHint: undefined,
     hookTotalMs: 0,
     hookCount: 0,
-    hookInfos: [],
-  }
+    hookInfos: []}
   if (feature('TEAMMEM')) {
     group.teamMemorySearchCount = 0
     group.teamMemoryReadFilePaths = new Set()
@@ -791,8 +781,7 @@ function createCollapsedGroup(
     messages: group.messages,
     displayMessage: firstMsg,
     uuid: `collapsed-${firstMsg.uuid}` as UUID,
-    timestamp: firstMsg.timestamp,
-  }
+    timestamp: firstMsg.timestamp}
   if (feature('TEAMMEM')) {
     result.teamMemorySearchCount = teamMemSearchCount
     result.teamMemoryReadCount = teamMemReadCount

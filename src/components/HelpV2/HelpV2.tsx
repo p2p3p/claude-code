@@ -1,12 +1,12 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { useExitOnCtrlCDWithKeybindings } from 'src/hooks/useExitOnCtrlCDWithKeybindings.js';
 import { useShortcutDisplay } from 'src/keybindings/useShortcutDisplay.js';
 import {
   builtInCommandNames,
   type Command,
   type CommandResultDisplay,
-  INTERNAL_ONLY_COMMANDS,
-} from '../../commands.js';
+  INTERNAL_ONLY_COMMANDS} from '../../commands.js';
 import { useIsInsideModal } from '../../context/modalContext.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { Box, Link, Text, Tab, Tabs, Pane } from '@anthropic/ink';
@@ -46,31 +46,31 @@ export function HelpV2({ onClose, commands }: Props): React.ReactNode {
   const customCommands = commands.filter(cmd => !builtinNames.has(cmd.name) && !cmd.isHidden);
 
   const tabs = [
-    <Tab key="general" title="general">
+    <Tab key="general" title={t('helpv2.generalTab')}>
       <General />
     </Tab>,
   ];
 
   tabs.push(
-    <Tab key="commands" title="commands">
+    <Tab key="commands" title={t('helpv2.commandsTab')}>
       <Commands
         commands={builtinCommands}
         maxHeight={maxHeight}
         columns={columns}
-        title="Browse default commands:"
+        title={t('helpv2.browseDefaultCommands')}
         onCancel={close}
       />
     </Tab>,
   );
 
   tabs.push(
-    <Tab key="custom" title="custom-commands">
+    <Tab key="custom" title={t('helpv2.customCommandsTab')}>
       <Commands
         commands={customCommands}
         maxHeight={maxHeight}
         columns={columns}
-        title="Browse custom commands:"
-        emptyMessage="No custom commands found"
+        title={t('helpv2.browseCustomCommands')}
+        emptyMessage={t('helpv2.noCustomCommandsFound')}
         onCancel={close}
       />
     </Tab>,
@@ -78,12 +78,12 @@ export function HelpV2({ onClose, commands }: Props): React.ReactNode {
 
   if (process.env.USER_TYPE === 'ant' && antOnlyCommands.length > 0) {
     tabs.push(
-      <Tab key="ant-only" title="[ant-only]">
+      <Tab key="ant-only" title={t('helpv2.antOnlyTab')}>
         <Commands
           commands={antOnlyCommands}
           maxHeight={maxHeight}
           columns={columns}
-          title="Browse ant-only commands:"
+          title={t('helpv2.browseAntOnlyCommands')}
           onCancel={close}
         />
       </Tab>,
@@ -102,15 +102,15 @@ export function HelpV2({ onClose, commands }: Props): React.ReactNode {
         </Tabs>
         <Box marginTop={1}>
           <Text>
-            For more help: <Link url="https://code.claude.com/docs/en/overview" />
+            {t('helpv2.forMoreHelp')} <Link url="https://code.claude.com/docs/en/overview" />
           </Text>
         </Box>
         <Box marginTop={1}>
           <Text dimColor>
             {exitState.pending ? (
-              <>Press {exitState.keyName} again to exit</>
+              <>{t('common.pressAgain', exitState.keyName)}</>
             ) : (
-              <Text italic>{dismissShortcut} to cancel</Text>
+              <Text italic>{t('helpv2.toCancel', dismissShortcut)}</Text>
             )}
           </Text>
         </Box>

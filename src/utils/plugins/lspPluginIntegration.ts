@@ -3,8 +3,7 @@ import { join, relative, resolve } from 'path'
 import { z } from 'zod/v4'
 import type {
   LspServerConfig,
-  ScopedLspServerConfig,
-} from '../../services/lsp/types.js'
+  ScopedLspServerConfig} from '../../services/lsp/types.js'
 import { expandEnvVarsInString } from '../../services/mcp/envExpansion.js'
 import type { LoadedPlugin, PluginError } from '../../types/plugin.js'
 import { logForDebugging } from '../debug.js'
@@ -17,8 +16,7 @@ import {
   loadPluginOptions,
   type PluginOptionValues,
   substitutePluginVariables,
-  substituteUserConfigVariables,
-} from './pluginOptionsStorage.js'
+  substituteUserConfigVariables} from './pluginOptionsStorage.js'
 import { LspServerConfigSchema } from './schemas.js'
 
 /**
@@ -79,8 +77,7 @@ export async function loadPluginLspServers(
         plugin: plugin.name,
         serverName: '.lsp.json',
         validationError: result.error.message,
-        source: 'plugin',
-      })
+        source: 'plugin'})
     }
   } catch (error) {
     // .lsp.json is optional, ignore if it doesn't exist
@@ -100,8 +97,7 @@ export async function loadPluginLspServers(
           error instanceof Error
             ? `Failed to parse JSON: ${error.message}`
             : 'Failed to parse JSON file',
-        source: 'plugin',
-      })
+        source: 'plugin'})
     }
   }
 
@@ -152,8 +148,7 @@ async function loadLspServersFromManifest(
           serverName: decl,
           validationError:
             'Invalid path: must be relative and within plugin directory',
-          source: 'plugin',
-        })
+          source: 'plugin'})
         continue
       }
 
@@ -175,8 +170,7 @@ async function loadLspServersFromManifest(
             plugin: pluginName,
             serverName: decl,
             validationError: result.error.message,
-            source: 'plugin',
-          })
+            source: 'plugin'})
         }
       } catch (error) {
         const _errorMsg =
@@ -194,8 +188,7 @@ async function loadLspServersFromManifest(
             error instanceof Error
               ? `Failed to parse JSON: ${error.message}`
               : 'Failed to parse JSON file',
-          source: 'plugin',
-        })
+          source: 'plugin'})
       }
     } else {
       // Inline configs
@@ -211,8 +204,7 @@ async function loadLspServersFromManifest(
             plugin: pluginName,
             serverName,
             validationError: result.error.message,
-            source: 'plugin',
-          })
+            source: 'plugin'})
         }
       }
     }
@@ -266,8 +258,7 @@ export function resolvePluginLspEnvironment(
   const resolvedEnv: Record<string, string> = {
     CLAUDE_PLUGIN_ROOT: plugin.path,
     CLAUDE_PLUGIN_DATA: getPluginDataDir(plugin.source),
-    ...(resolved.env || {}),
-  }
+    ...(resolved.env || {})}
   for (const [key, value] of Object.entries(resolvedEnv)) {
     if (key !== 'CLAUDE_PLUGIN_ROOT' && key !== 'CLAUDE_PLUGIN_DATA') {
       resolvedEnv[key] = resolveValue(value)
@@ -307,8 +298,7 @@ export function addPluginScopeToLspServers(
     scopedServers[scopedName] = {
       ...config,
       scope: 'dynamic', // Use dynamic scope for plugin servers
-      source: pluginName,
-    }
+      source: pluginName}
   }
 
   return scopedServers

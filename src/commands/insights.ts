@@ -9,42 +9,40 @@ import {
   readFile,
   rm,
   unlink,
-  writeFile,
-} from 'fs/promises'
+  writeFile} from 'fs/promises'
 import { tmpdir } from 'os'
 import { extname, join } from 'path'
 import type { Command } from '../commands.js'
-import { queryWithModel } from '../services/api/claude.js'
+import { queryWithModel } from '../services/api/anthropic/index.js'
 import {
   AGENT_TOOL_NAME,
-  LEGACY_AGENT_TOOL_NAME,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/constants.js'
+  LEGACY_AGENT_TOOL_NAME} from '@claude-code-best/builtin-tools/tools/AgentTool/constants.js'
 import type { LogOption } from '../types/logs.js'
 import { getClaudeConfigHomeDir } from '../utils/envUtils.js'
 import { toError } from '../utils/errors.js'
 import { execFileNoThrow } from '../utils/execFileNoThrow.js'
 import { logError } from '../utils/log.js'
 import { extractTextContent } from '../utils/messages.js'
-import { getDefaultOpusModel } from '../utils/model/model.js'
+import { getDefaultModel } from '../utils/model/model.js'
 import {
   getProjectsDir,
   getSessionFilesWithMtime,
   getSessionIdFromLog,
-  loadAllLogsFromSessionFile,
-} from '../utils/sessionStorage.js'
+  loadAllLogsFromSessionFile} from '../utils/sessionStorage.js'
 import { jsonParse, jsonStringify } from '../utils/slowOperations.js'
 import { countCharInString } from '../utils/stringUtils.js'
 import { asSystemPrompt } from '../utils/systemPromptType.js'
 import { escapeXmlAttr as escapeHtml } from '../utils/xml.js'
+import { t } from '../utils/i18n/index.js'
 
 // Model for facet extraction and summarization (Opus - best quality)
 function getAnalysisModel(): string {
-  return getDefaultOpusModel()
+  return getDefaultModel()
 }
 
 // Model for narrative insights (Opus - best quality)
 function getInsightsModel(): string {
-  return getDefaultOpusModel()
+  return getDefaultModel()
 }
 
 // ============================================================================
@@ -345,8 +343,7 @@ const EXTENSION_TO_LANGUAGE: Record<string, string> = {
   '.yml': 'YAML',
   '.sh': 'Shell',
   '.css': 'CSS',
-  '.html': 'HTML',
-}
+  '.html': 'HTML'}
 
 // Label map for cleaning up category names (matching Python reference)
 const LABEL_MAP: Record<string, string> = {
@@ -411,8 +408,7 @@ const LABEL_MAP: Record<string, string> = {
   slightly_helpful: 'Slightly Helpful',
   moderately_helpful: 'Moderately Helpful',
   very_helpful: 'Very Helpful',
-  essential: 'Essential',
-}
+  essential: 'Essential'}
 
 // Lazy getters: getClaudeConfigHomeDir() is memoized and reads process.env.
 // Calling it at module scope would populate the memoize cache before
@@ -723,8 +719,7 @@ function extractToolStats(log: LogOption): {
     linesRemoved,
     filesModified,
     messageHours,
-    userMessageTimestamps,
-  }
+    userMessageTimestamps}
 }
 
 function hasValidDates(log: LogOption): boolean {
@@ -796,8 +791,7 @@ function logToSessionMeta(log: LogOption): SessionMeta {
     lines_removed: stats.linesRemoved,
     files_modified: stats.filesModified.size,
     message_hours: stats.messageHours,
-    user_message_timestamps: stats.userMessageTimestamps,
-  }
+    user_message_timestamps: stats.userMessageTimestamps}
 }
 
 function formatTranscriptForFacets(log: LogOption): string {
@@ -863,9 +857,7 @@ async function summarizeTranscriptChunk(chunk: string): Promise<string> {
         isNonInteractiveSession: true,
         hasAppendSystemPrompt: false,
         mcpTools: [],
-        maxOutputTokensOverride: 500,
-      },
-    })
+        maxOutputTokensOverride: 500}})
 
     const text = extractTextContent(
       result.message.content as readonly { readonly type: string }[],
@@ -943,8 +935,7 @@ async function saveFacets(facets: SessionFacets): Promise<void> {
   const facetPath = join(getFacetsDir(), `${facets.session_id}.json`)
   await writeFile(facetPath, jsonStringify(facets, null, 2), {
     encoding: 'utf-8',
-    mode: 0o600,
-  })
+    mode: 0o600})
 }
 
 async function loadCachedSessionMeta(
@@ -968,8 +959,7 @@ async function saveSessionMeta(meta: SessionMeta): Promise<void> {
   const metaPath = join(getSessionMetaDir(), `${meta.session_id}.json`)
   await writeFile(metaPath, jsonStringify(meta, null, 2), {
     encoding: 'utf-8',
-    mode: 0o600,
-  })
+    mode: 0o600})
 }
 
 async function extractFacetsFromAPI(
@@ -1008,9 +998,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT matching this schema:
         isNonInteractiveSession: true,
         hasAppendSystemPrompt: false,
         mcpTools: [],
-        maxOutputTokensOverride: 4096,
-      },
-    })
+        maxOutputTokensOverride: 4096}})
 
     const text = extractTextContent(
       result.message.content as readonly { readonly type: string }[],
@@ -1114,8 +1102,7 @@ export function detectMultiClauding(
   return {
     overlap_events: multiClaudeSessionPairs.size,
     sessions_involved: sessionsWithOverlaps.size,
-    user_messages_during: messagesDuringMulticlaude.size,
-  }
+    user_messages_during: messagesDuringMulticlaude.size}
 }
 
 function aggregateData(
@@ -1165,9 +1152,7 @@ function aggregateData(
     multi_clauding: {
       overlap_events: 0,
       sessions_involved: 0,
-      user_messages_during: 0,
-    },
-  }
+      user_messages_during: 0}}
 
   const dates: string[] = []
   const allResponseTimes: number[] = []
@@ -1264,8 +1249,7 @@ function aggregateData(
         id: session.session_id.slice(0, 8),
         date: session.start_time.split('T')[0] || '',
         summary: session.summary || session.first_prompt.slice(0, 100),
-        goal: sessionFacets?.underlying_goal,
-      })
+        goal: sessionFacets?.underlying_goal})
     }
   }
 
@@ -1322,8 +1306,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
 }
 
 Include 4-5 areas. Skip internal CC operations.`,
-    maxTokens: 8192,
-  },
+    maxTokens: 8192},
   {
     name: 'interaction_style',
     prompt: `Analyze this Claude Code usage data and describe the user's interaction style.
@@ -1333,8 +1316,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
   "narrative": "2-3 paragraphs analyzing HOW the user interacts with Claude Code. Use second person 'you'. Describe patterns: iterate quickly vs detailed upfront specs? Interrupt often or let Claude run? Include specific examples. Use **bold** for key insights.",
   "key_pattern": "One sentence summary of most distinctive interaction style"
 }`,
-    maxTokens: 8192,
-  },
+    maxTokens: 8192},
   {
     name: 'what_works',
     prompt: `Analyze this Claude Code usage data and identify what's working well for this user. Use second person ("you").
@@ -1348,8 +1330,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
 }
 
 Include 3 impressive workflows.`,
-    maxTokens: 8192,
-  },
+    maxTokens: 8192},
   {
     name: 'friction_analysis',
     prompt: `Analyze this Claude Code usage data and identify friction points for this user. Use second person ("you").
@@ -1363,8 +1344,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
 }
 
 Include 3 friction categories with 2 examples each.`,
-    maxTokens: 8192,
-  },
+    maxTokens: 8192},
   {
     name: 'suggestions',
     prompt: `Analyze this Claude Code usage data and suggest improvements.
@@ -1406,8 +1386,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
 IMPORTANT for claude_md_additions: PRIORITIZE instructions that appear MULTIPLE TIMES in the user data. If user told Claude the same thing in 2+ sessions (e.g., 'always run tests', 'use TypeScript'), that's a PRIME candidate - they shouldn't have to repeat themselves.
 
 IMPORTANT for features_to_try: Pick 2-3 from the CC FEATURES REFERENCE above. Include 2-3 items for each category.`,
-    maxTokens: 8192,
-  },
+    maxTokens: 8192},
   {
     name: 'on_the_horizon',
     prompt: `Analyze this Claude Code usage data and identify future opportunities.
@@ -1421,8 +1400,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
 }
 
 Include 3 opportunities. Think BIG - autonomous workflows, parallel agents, iterating against tests.`,
-    maxTokens: 8192,
-  },
+    maxTokens: 8192},
   ...(process.env.USER_TYPE === 'ant'
     ? [
         {
@@ -1437,8 +1415,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
 }
 
 Include 2-3 improvements based on friction patterns observed.`,
-          maxTokens: 8192,
-        },
+          maxTokens: 8192},
         {
           name: 'model_behavior_improvements',
           prompt: `Analyze this Claude Code usage data and suggest model behavior improvements.
@@ -1451,8 +1428,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
 }
 
 Include 2-3 improvements based on friction patterns observed.`,
-          maxTokens: 8192,
-        },
+          maxTokens: 8192},
       ]
     : []),
   {
@@ -1466,8 +1442,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
 }
 
 Find something genuinely interesting or amusing from the session summaries.`,
-    maxTokens: 8192,
-  },
+    maxTokens: 8192},
 ]
 
 type InsightResults = {
@@ -1561,9 +1536,7 @@ async function generateSectionInsight(
         isNonInteractiveSession: true,
         hasAppendSystemPrompt: false,
         mcpTools: [],
-        maxOutputTokensOverride: section.maxTokens,
-      },
-    })
+        maxOutputTokensOverride: section.maxTokens}})
 
     const text = extractTextContent(
       result.message.content as readonly { readonly type: string }[],
@@ -1627,8 +1600,7 @@ async function generateParallelInsights(
       satisfaction: data.satisfaction,
       friction: data.friction,
       success: data.success,
-      languages: data.languages,
-    },
+      languages: data.languages},
     null,
     2,
   )
@@ -1738,29 +1710,28 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
 SESSION DATA:
 ${fullContext}
 
-## Project Areas (what user works on)
+## ${t('insightsCmd.promptProjectAreas')}
 ${projectAreasText}
 
-## Big Wins (impressive accomplishments)
+## ${t('insightsCmd.promptBigWins')}
 ${bigWinsText}
 
-## Friction Categories (where things go wrong)
+## ${t('insightsCmd.promptFrictionCategories')}
 ${frictionText}
 
-## Features to Try
+## ${t('insightsCmd.promptFeaturesToTry')}
 ${featuresText}
 
-## Usage Patterns to Adopt
+## ${t('insightsCmd.promptUsagePatterns')}
 ${patternsText}
 
-## On the Horizon (ambitious workflows for better models)
+## ${t('insightsCmd.promptOnTheHorizon')}
 ${horizonText}`
 
   const atAGlanceSection: InsightSection = {
     name: 'at_a_glance',
     prompt: atAGlancePrompt,
-    maxTokens: 8192,
-  }
+    maxTokens: 8192}
 
   const atAGlanceResult = await generateSectionInsight(atAGlanceSection, '')
   if (atAGlanceResult.result) {
@@ -1819,7 +1790,7 @@ function generateBarChart(
       .slice(0, maxItems)
   }
 
-  if (entries.length === 0) return '<p class="empty">No data</p>'
+  if (entries.length === 0) return '<p class="empty">' + t('insightsCmd.noData') + '</p>'
 
   const maxVal = Math.max(...entries.map(e => e[1]))
   return entries
@@ -1839,7 +1810,7 @@ function generateBarChart(
 }
 
 function generateResponseTimeHistogram(times: number[]): string {
-  if (times.length === 0) return '<p class="empty">No response time data</p>'
+  if (times.length === 0) return '<p class="empty">' + t('insightsCmd.noResponseTimeData') + '</p>'
 
   // Create buckets (matching Python reference)
   const buckets: Record<string, number> = {
@@ -1849,8 +1820,7 @@ function generateResponseTimeHistogram(times: number[]): string {
     '1-2m': 0,
     '2-5m': 0,
     '5-15m': 0,
-    '>15m': 0,
-  }
+    '>15m': 0}
 
   for (const t of times) {
     if (t < 10) buckets['2-10s'] = (buckets['2-10s'] ?? 0) + 1
@@ -1863,7 +1833,7 @@ function generateResponseTimeHistogram(times: number[]): string {
   }
 
   const maxVal = Math.max(...Object.values(buckets))
-  if (maxVal === 0) return '<p class="empty">No response time data</p>'
+  if (maxVal === 0) return '<p class="empty">' + t('insightsCmd.noResponseTimeData') + '</p>'
 
   return Object.entries(buckets)
     .map(([label, count]) => {
@@ -1878,14 +1848,14 @@ function generateResponseTimeHistogram(times: number[]): string {
 }
 
 function generateTimeOfDayChart(messageHours: number[]): string {
-  if (messageHours.length === 0) return '<p class="empty">No time data</p>'
+  if (messageHours.length === 0) return '<p class="empty">' + t('insightsCmd.noTimeData') + '</p>'
 
   // Group into time periods
   const periods = [
-    { label: 'Morning (6-12)', range: [6, 7, 8, 9, 10, 11] },
-    { label: 'Afternoon (12-18)', range: [12, 13, 14, 15, 16, 17] },
-    { label: 'Evening (18-24)', range: [18, 19, 20, 21, 22, 23] },
-    { label: 'Night (0-6)', range: [0, 1, 2, 3, 4, 5] },
+    { label: t('insightsCmd.morning'), range: [6, 7, 8, 9, 10, 11] },
+    { label: t('insightsCmd.afternoon'), range: [12, 13, 14, 15, 16, 17] },
+    { label: t('insightsCmd.evening'), range: [18, 19, 20, 21, 22, 23] },
+    { label: t('insightsCmd.night'), range: [0, 1, 2, 3, 4, 5] },
   ]
 
   const hourCounts: Record<number, number> = {}
@@ -1895,8 +1865,7 @@ function generateTimeOfDayChart(messageHours: number[]): string {
 
   const periodCounts = periods.map(p => ({
     label: p.label,
-    count: p.range.reduce((sum, h) => sum + (hourCounts[h] || 0), 0),
-  }))
+    count: p.range.reduce((sum, h) => sum + (hourCounts[h] || 0), 0)}))
 
   const maxVal = Math.max(...periodCounts.map(p => p.count)) || 1
 
@@ -1947,10 +1916,10 @@ function generateHtmlReport(
     <div class="at-a-glance">
       <div class="glance-title">At a Glance</div>
       <div class="glance-sections">
-        ${atAGlance.whats_working ? `<div class="glance-section"><strong>What's working:</strong> ${escapeHtmlWithBold(atAGlance.whats_working)} <a href="#section-wins" class="see-more">Impressive Things You Did →</a></div>` : ''}
-        ${atAGlance.whats_hindering ? `<div class="glance-section"><strong>What's hindering you:</strong> ${escapeHtmlWithBold(atAGlance.whats_hindering)} <a href="#section-friction" class="see-more">Where Things Go Wrong →</a></div>` : ''}
-        ${atAGlance.quick_wins ? `<div class="glance-section"><strong>Quick wins to try:</strong> ${escapeHtmlWithBold(atAGlance.quick_wins)} <a href="#section-features" class="see-more">Features to Try →</a></div>` : ''}
-        ${atAGlance.ambitious_workflows ? `<div class="glance-section"><strong>Ambitious workflows:</strong> ${escapeHtmlWithBold(atAGlance.ambitious_workflows)} <a href="#section-horizon" class="see-more">On the Horizon →</a></div>` : ''}
+        ${atAGlance.whats_working ? `<div class="glance-section"><strong>${t('insightsCmd.glanceWhatsWorking')}</strong> ${escapeHtmlWithBold(atAGlance.whats_working)} <a href="#section-wins" class="see-more">${t('insightsCmd.glanceSeeImpressiveThings')}</a></div>` : ''}
+        ${atAGlance.whats_hindering ? `<div class="glance-section"><strong>${t('insightsCmd.glanceWhatsHindering')}</strong> ${escapeHtmlWithBold(atAGlance.whats_hindering)} <a href="#section-friction" class="see-more">${t('insightsCmd.glanceSeeWhereThingsGoWrong')}</a></div>` : ''}
+        ${atAGlance.quick_wins ? `<div class="glance-section"><strong>${t('insightsCmd.glanceQuickWins')}</strong> ${escapeHtmlWithBold(atAGlance.quick_wins)} <a href="#section-features" class="see-more">${t('insightsCmd.glanceSeeFeaturesToTry')}</a></div>` : ''}
+        ${atAGlance.ambitious_workflows ? `<div class="glance-section"><strong>${t('insightsCmd.glanceAmbitiousWorkflows')}</strong> ${escapeHtmlWithBold(atAGlance.ambitious_workflows)} <a href="#section-horizon" class="see-more">${t('insightsCmd.glanceSeeOnTheHorizon')}</a></div>` : ''}
       </div>
     </div>
     `
@@ -1961,7 +1930,7 @@ function generateHtmlReport(
   const projectAreasHtml =
     projectAreas.length > 0
       ? `
-    <h2 id="section-work">What You Work On</h2>
+    <h2 id="section-work">${t('insightsCmd.sectionWhatYouWorkOn')}</h2>
     <div class="project-areas">
       ${projectAreas
         .map(
@@ -1969,7 +1938,7 @@ function generateHtmlReport(
         <div class="project-area">
           <div class="area-header">
             <span class="area-name">${escapeHtml(area.name)}</span>
-            <span class="area-count">~${area.session_count} sessions</span>
+            <span class="area-count">${t('insightsCmd.areaSessionCount', area.session_count)}</span>
           </div>
           <div class="area-desc">${escapeHtml(area.description)}</div>
         </div>
@@ -1984,10 +1953,10 @@ function generateHtmlReport(
   const interactionStyle = insights.interaction_style
   const interactionHtml = interactionStyle?.narrative
     ? `
-    <h2 id="section-usage">How You Use Claude Code</h2>
+    <h2 id="section-usage">${t('insightsCmd.sectionHowYouUseCc')}</h2>
     <div class="narrative">
       ${markdownToHtml(interactionStyle.narrative)}
-      ${interactionStyle.key_pattern ? `<div class="key-insight"><strong>Key pattern:</strong> ${escapeHtml(interactionStyle.key_pattern)}</div>` : ''}
+      ${interactionStyle.key_pattern ? `<div class="key-insight"><strong>${t('insightsCmd.keyPattern')}</strong> ${escapeHtml(interactionStyle.key_pattern)}</div>` : ''}
     </div>
     `
     : ''
@@ -1997,7 +1966,7 @@ function generateHtmlReport(
   const whatWorksHtml =
     whatWorks?.impressive_workflows && whatWorks.impressive_workflows.length > 0
       ? `
-    <h2 id="section-wins">Impressive Things You Did</h2>
+    <h2 id="section-wins">${t('insightsCmd.sectionImpressiveThings')}</h2>
     ${whatWorks.intro ? `<p class="section-intro">${escapeHtml(whatWorks.intro)}</p>` : ''}
     <div class="big-wins">
       ${whatWorks.impressive_workflows
@@ -2019,7 +1988,7 @@ function generateHtmlReport(
   const frictionHtml =
     frictionAnalysis?.categories && frictionAnalysis.categories.length > 0
       ? `
-    <h2 id="section-friction">Where Things Go Wrong</h2>
+    <h2 id="section-friction">${t('insightsCmd.sectionWhereThingsGoWrong')}</h2>
     ${frictionAnalysis.intro ? `<p class="section-intro">${escapeHtml(frictionAnalysis.intro)}</p>` : ''}
     <div class="friction-categories">
       ${frictionAnalysis.categories
@@ -2045,21 +2014,21 @@ function generateHtmlReport(
       suggestions.claude_md_additions &&
       suggestions.claude_md_additions.length > 0
         ? `
-    <h2 id="section-features">Existing CC Features to Try</h2>
+    <h2 id="section-features">${t('insightsCmd.sectionFeaturesToTry')}</h2>
     <div class="claude-md-section">
-      <h3>Suggested CLAUDE.md Additions</h3>
-      <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Just copy this into Claude Code to add it to your CLAUDE.md.</p>
+      <h3>${t('insightsCmd.suggestedClaudeMdAdditions')}</h3>
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">${t('insightsCmd.justCopyIntoCcForClaudeMd')}</p>
       <div class="claude-md-actions">
-        <button class="copy-all-btn" onclick="copyAllCheckedClaudeMd()">Copy All Checked</button>
+        <button class="copy-all-btn" onclick="copyAllCheckedClaudeMd()">${t('insightsCmd.copyAllChecked')}</button>
       </div>
       ${suggestions.claude_md_additions
         .map(
           (add, i) => `
         <div class="claude-md-item">
-          <input type="checkbox" id="cmd-${i}" class="cmd-checkbox" checked data-text="${escapeHtml(add.prompt_scaffold || add.where || 'Add to CLAUDE.md')}\\n\\n${escapeHtml(add.addition)}">
+          <input type="checkbox" id="cmd-${i}" class="cmd-checkbox" checked data-text="${escapeHtml(add.prompt_scaffold || add.where || t('insightsCmd.addToClaudeMd'))}\\n\\n${escapeHtml(add.addition)}">
           <label for="cmd-${i}">
             <code class="cmd-code">${escapeHtml(add.addition)}</code>
-            <button class="copy-btn" onclick="copyCmdItem(${i})">Copy</button>
+            <button class="copy-btn" onclick="copyCmdItem(${i})">${t('insightsCmd.copy')}</button>
           </label>
           <div class="cmd-why">${escapeHtml(add.why)}</div>
         </div>
@@ -2073,7 +2042,7 @@ function generateHtmlReport(
     ${
       suggestions.features_to_try && suggestions.features_to_try.length > 0
         ? `
-    <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Just copy this into Claude Code and it'll set it up for you.</p>
+    <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">${t('insightsCmd.justCopyIntoCcToSetUp')}</p>
     <div class="features-section">
       ${suggestions.features_to_try
         .map(
@@ -2081,7 +2050,7 @@ function generateHtmlReport(
         <div class="feature-card">
           <div class="feature-title">${escapeHtml(feat.feature || '')}</div>
           <div class="feature-oneliner">${escapeHtml(feat.one_liner || '')}</div>
-          <div class="feature-why"><strong>Why for you:</strong> ${escapeHtml(feat.why_for_you || '')}</div>
+          <div class="feature-why"><strong>${t('insightsCmd.whyForYou')}</strong> ${escapeHtml(feat.why_for_you || '')}</div>
           ${
             feat.example_code
               ? `
@@ -2089,7 +2058,7 @@ function generateHtmlReport(
             <div class="feature-example">
               <div class="example-code-row">
                 <code class="example-code">${escapeHtml(feat.example_code)}</code>
-                <button class="copy-btn" onclick="copyText(this)">Copy</button>
+                <button class="copy-btn" onclick="copyText(this)">${t('insightsCmd.copy')}</button>
               </div>
             </div>
           </div>
@@ -2107,8 +2076,8 @@ function generateHtmlReport(
     ${
       suggestions.usage_patterns && suggestions.usage_patterns.length > 0
         ? `
-    <h2 id="section-patterns">New Ways to Use Claude Code</h2>
-    <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Just copy this into Claude Code and it'll walk you through it.</p>
+    <h2 id="section-patterns">${t('insightsCmd.sectionNewWaysToUse')}</h2>
+    <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">${t('insightsCmd.justCopyIntoCcToGuide')}</p>
     <div class="patterns-section">
       ${suggestions.usage_patterns
         .map(
@@ -2121,10 +2090,10 @@ function generateHtmlReport(
             pat.copyable_prompt
               ? `
           <div class="copyable-prompt-section">
-            <div class="prompt-label">Paste into Claude Code:</div>
+            <div class="prompt-label">${t('insightsCmd.pasteIntoClaudeCode')}</div>
             <div class="copyable-prompt-row">
               <code class="copyable-prompt">${escapeHtml(pat.copyable_prompt)}</code>
-              <button class="copy-btn" onclick="copyText(this)">Copy</button>
+              <button class="copy-btn" onclick="copyText(this)">${t('insightsCmd.copy')}</button>
             </div>
           </div>
           `
@@ -2146,7 +2115,7 @@ function generateHtmlReport(
   const horizonHtml =
     horizonData?.opportunities && horizonData.opportunities.length > 0
       ? `
-    <h2 id="section-horizon">On the Horizon</h2>
+    <h2 id="section-horizon">${t('insightsCmd.sectionOnTheHorizon')}</h2>
     ${horizonData.intro ? `<p class="section-intro">${escapeHtml(horizonData.intro)}</p>` : ''}
     <div class="horizon-section">
       ${horizonData.opportunities
@@ -2155,8 +2124,8 @@ function generateHtmlReport(
         <div class="horizon-card">
           <div class="horizon-title">${escapeHtml(opp.title || '')}</div>
           <div class="horizon-possible">${escapeHtml(opp.whats_possible || '')}</div>
-          ${opp.how_to_try ? `<div class="horizon-tip"><strong>Getting started:</strong> ${escapeHtml(opp.how_to_try)}</div>` : ''}
-          ${opp.copyable_prompt ? `<div class="pattern-prompt"><div class="prompt-label">Paste into Claude Code:</div><code>${escapeHtml(opp.copyable_prompt)}</code><button class="copy-btn" onclick="copyText(this)">Copy</button></div>` : ''}
+          ${opp.how_to_try ? `<div class="horizon-tip"><strong>${t('insightsCmd.gettingStarted')}</strong> ${escapeHtml(opp.how_to_try)}</div>` : ''}
+          ${opp.copyable_prompt ? `<div class="pattern-prompt"><div class="prompt-label">${t('insightsCmd.pasteIntoClaudeCode')}</div><code>${escapeHtml(opp.copyable_prompt)}</code><button class="copy-btn" onclick="copyText(this)">${t('insightsCmd.copy')}</button></div>` : ''}
         </div>
       `,
         )
@@ -2177,15 +2146,15 @@ function generateHtmlReport(
   const teamFeedbackHtml =
     ccImprovements.length > 0 || modelImprovements.length > 0
       ? `
-    <h2 id="section-feedback" class="feedback-header">Closing the Loop: Feedback for Other Teams</h2>
-    <p class="feedback-intro">Suggestions for the CC product and model teams based on your usage patterns. Click to expand.</p>
+    <h2 id="section-feedback" class="feedback-header">${t('insightsCmd.closingTheLoop')}</h2>
+    <p class="feedback-intro">${t('insightsCmd.feedbackIntro')}</p>
     ${
       ccImprovements.length > 0
         ? `
     <div class="collapsible-section">
       <div class="collapsible-header" onclick="toggleCollapsible(this)">
         <span class="collapsible-arrow">▶</span>
-        <h3>Product Improvements for CC Team</h3>
+        <h3>${t('insightsCmd.productImprovementsForCc')}</h3>
       </div>
       <div class="collapsible-content">
         <div class="suggestions-section">
@@ -2212,7 +2181,7 @@ function generateHtmlReport(
     <div class="collapsible-section">
       <div class="collapsible-header" onclick="toggleCollapsible(this)">
         <span class="collapsible-arrow">▶</span>
-        <h3>Model Behavior Improvements</h3>
+        <h3>${t('insightsCmd.modelBehaviorImprovements')}</h3>
       </div>
       <div class="collapsible-content">
         <div class="suggestions-section">
@@ -2463,56 +2432,56 @@ function generateHtmlReport(
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Claude Code Insights</title>
+  <title>${t('insightsCmd.htmlTitle')}</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>${css}</style>
 </head>
 <body>
   <div class="container">
-    <h1>Claude Code Insights</h1>
-    <p class="subtitle">${data.total_messages.toLocaleString()} messages across ${data.total_sessions} sessions${data.total_sessions_scanned && data.total_sessions_scanned > data.total_sessions ? ` (${data.total_sessions_scanned.toLocaleString()} total)` : ''} | ${data.date_range.start} to ${data.date_range.end}</p>
+    <h1>${t('insightsCmd.claudeCodeInsights')}</h1>
+    <p class="subtitle">${t('insightsCmd.subtitleMessagesAcross', data.total_messages.toLocaleString(), data.total_sessions)}${data.total_sessions_scanned && data.total_sessions_scanned > data.total_sessions ? ` ${t('insightsCmd.subtitleTotal', data.total_sessions_scanned.toLocaleString())}` : ''} | ${t('insightsCmd.dateRange', data.date_range.start, data.date_range.end)}</p>
 
     ${atAGlanceHtml}
 
     <nav class="nav-toc">
-      <a href="#section-work">What You Work On</a>
-      <a href="#section-usage">How You Use CC</a>
-      <a href="#section-wins">Impressive Things</a>
-      <a href="#section-friction">Where Things Go Wrong</a>
-      <a href="#section-features">Features to Try</a>
-      <a href="#section-patterns">New Usage Patterns</a>
-      <a href="#section-horizon">On the Horizon</a>
-      <a href="#section-feedback">Team Feedback</a>
+      <a href="#section-work">${t('insightsCmd.navWhatYouWorkOn')}</a>
+      <a href="#section-usage">${t('insightsCmd.navHowYouUseCc')}</a>
+      <a href="#section-wins">${t('insightsCmd.navImpressiveThings')}</a>
+      <a href="#section-friction">${t('insightsCmd.navWhereThingsGoWrong')}</a>
+      <a href="#section-features">${t('insightsCmd.navFeaturesToTry')}</a>
+      <a href="#section-patterns">${t('insightsCmd.navNewUsagePatterns')}</a>
+      <a href="#section-horizon">${t('insightsCmd.navOnTheHorizon')}</a>
+      <a href="#section-feedback">${t('insightsCmd.navTeamFeedback')}</a>
     </nav>
 
     <div class="stats-row">
-      <div class="stat"><div class="stat-value">${data.total_messages.toLocaleString()}</div><div class="stat-label">Messages</div></div>
-      <div class="stat"><div class="stat-value">+${data.total_lines_added.toLocaleString()}/-${data.total_lines_removed.toLocaleString()}</div><div class="stat-label">Lines</div></div>
-      <div class="stat"><div class="stat-value">${data.total_files_modified}</div><div class="stat-label">Files</div></div>
-      <div class="stat"><div class="stat-value">${data.days_active}</div><div class="stat-label">Days</div></div>
-      <div class="stat"><div class="stat-value">${data.messages_per_day}</div><div class="stat-label">Msgs/Day</div></div>
+      <div class="stat"><div class="stat-value">${data.total_messages.toLocaleString()}</div><div class="stat-label">${t('insightsCmd.statMessages')}</div></div>
+      <div class="stat"><div class="stat-value">+${data.total_lines_added.toLocaleString()}/-${data.total_lines_removed.toLocaleString()}</div><div class="stat-label">${t('insightsCmd.statLines')}</div></div>
+      <div class="stat"><div class="stat-value">${data.total_files_modified}</div><div class="stat-label">${t('insightsCmd.statFiles')}</div></div>
+      <div class="stat"><div class="stat-value">${data.days_active}</div><div class="stat-label">${t('insightsCmd.statDays')}</div></div>
+      <div class="stat"><div class="stat-value">${data.messages_per_day}</div><div class="stat-label">${t('insightsCmd.statMsgsPerDay')}</div></div>
     </div>
 
     ${projectAreasHtml}
 
     <div class="charts-row">
       <div class="chart-card">
-        <div class="chart-title">What You Wanted</div>
+        <div class="chart-title">${t('insightsCmd.whatYouWanted')}</div>
         ${generateBarChart(data.goal_categories, '#2563eb')}
       </div>
       <div class="chart-card">
-        <div class="chart-title">Top Tools Used</div>
+        <div class="chart-title">${t('insightsCmd.topToolsUsed')}</div>
         ${generateBarChart(data.tool_counts, '#0891b2')}
       </div>
     </div>
 
     <div class="charts-row">
       <div class="chart-card">
-        <div class="chart-title">Languages</div>
+        <div class="chart-title">${t('insightsCmd.languages')}</div>
         ${generateBarChart(data.languages, '#10b981')}
       </div>
       <div class="chart-card">
-        <div class="chart-title">Session Types</div>
+        <div class="chart-title">${t('insightsCmd.sessionTypes')}</div>
         ${generateBarChart(data.session_types || {}, '#8b5cf6')}
       </div>
     </div>
@@ -2521,7 +2490,7 @@ function generateHtmlReport(
 
     <!-- Response Time Distribution -->
     <div class="chart-card" style="margin: 24px 0;">
-      <div class="chart-title">User Response Time Distribution</div>
+      <div class="chart-title">${t('insightsCmd.userResponseTimeDistribution')}</div>
       ${generateResponseTimeHistogram(data.user_response_times)}
       <div style="font-size: 12px; color: #64748b; margin-top: 8px;">
         Median: ${data.median_response_time.toFixed(1)}s &bull; Average: ${data.avg_response_time.toFixed(1)}s
@@ -2530,32 +2499,31 @@ function generateHtmlReport(
 
     <!-- Multi-clauding Section (matching Python reference) -->
     <div class="chart-card" style="margin: 24px 0;">
-      <div class="chart-title">Multi-Clauding (Parallel Sessions)</div>
+      <div class="chart-title">${t('insightsCmd.multiClauding')}</div>
       ${
         data.multi_clauding.overlap_events === 0
           ? `
         <p style="font-size: 14px; color: #64748b; padding: 8px 0;">
-          No parallel session usage detected. You typically work with one Claude Code session at a time.
+          ${t('insightsCmd.noParallelSessionUsage')}
         </p>
       `
           : `
         <div style="display: flex; gap: 24px; margin: 12px 0;">
           <div style="text-align: center;">
             <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">${data.multi_clauding.overlap_events}</div>
-            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Overlap Events</div>
+            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">${t('insightsCmd.overlapEvents')}</div>
           </div>
           <div style="text-align: center;">
             <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">${data.multi_clauding.sessions_involved}</div>
-            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Sessions Involved</div>
+            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">${t('insightsCmd.sessionsInvolved')}</div>
           </div>
           <div style="text-align: center;">
             <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">${data.total_messages > 0 ? Math.round((100 * data.multi_clauding.user_messages_during) / data.total_messages) : 0}%</div>
-            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Of Messages</div>
+            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">${t('insightsCmd.ofMessages')}</div>
           </div>
         </div>
         <p style="font-size: 13px; color: #475569; margin-top: 12px;">
-          You run multiple Claude Code sessions simultaneously. Multi-clauding is detected when sessions
-          overlap in time, suggesting parallel workflows.
+          ${t('insightsCmd.multiClaudingDescription')}
         </p>
       `
       }
@@ -2565,22 +2533,22 @@ function generateHtmlReport(
     <div class="charts-row">
       <div class="chart-card">
         <div class="chart-title" style="display: flex; align-items: center; gap: 12px;">
-          User Messages by Time of Day
+          ${t('insightsCmd.userMessagesByTimeOfDay')}
           <select id="timezone-select" style="font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">
-            <option value="0">PT (UTC-8)</option>
-            <option value="3">ET (UTC-5)</option>
-            <option value="8">London (UTC)</option>
-            <option value="9">CET (UTC+1)</option>
-            <option value="17">Tokyo (UTC+9)</option>
-            <option value="custom">Custom offset...</option>
+            <option value="0">${t('insightsCmd.ptUtc8')}</option>
+            <option value="3">${t('insightsCmd.etUtc5')}</option>
+            <option value="8">${t('insightsCmd.londonUtc')}</option>
+            <option value="9">${t('insightsCmd.cetUtc1')}</option>
+            <option value="17">${t('insightsCmd.tokyoUtc9')}</option>
+            <option value="custom">${t('insightsCmd.customOffset')}</option>
           </select>
-          <input type="number" id="custom-offset" placeholder="UTC offset" style="display: none; width: 80px; font-size: 12px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
+          <input type="number" id="custom-offset" placeholder="${t('insightsCmd.utcOffset')}" style="display: none; width: 80px; font-size: 12px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
         </div>
         ${generateTimeOfDayChart(data.message_hours)}
       </div>
       <div class="chart-card">
-        <div class="chart-title">Tool Errors Encountered</div>
-        ${Object.keys(data.tool_error_categories).length > 0 ? generateBarChart(data.tool_error_categories, '#dc2626') : '<p class="empty">No tool errors</p>'}
+        <div class="chart-title">${t('insightsCmd.toolErrorsEncountered')}</div>
+        ${Object.keys(data.tool_error_categories).length > 0 ? generateBarChart(data.tool_error_categories, '#dc2626') : '<p class="empty">' + t('insightsCmd.noToolErrors') + '</p>'}
       </div>
     </div>
 
@@ -2588,11 +2556,11 @@ function generateHtmlReport(
 
     <div class="charts-row">
       <div class="chart-card">
-        <div class="chart-title">What Helped Most (Claude's Capabilities)</div>
+        <div class="chart-title">${t('insightsCmd.whatHelpedMost')}</div>
         ${generateBarChart(data.success, '#16a34a')}
       </div>
       <div class="chart-card">
-        <div class="chart-title">Outcomes</div>
+        <div class="chart-title">${t('insightsCmd.outcomes')}</div>
         ${generateBarChart(data.outcomes, '#8b5cf6', 6, OUTCOME_ORDER)}
       </div>
     </div>
@@ -2601,11 +2569,11 @@ function generateHtmlReport(
 
     <div class="charts-row">
       <div class="chart-card">
-        <div class="chart-title">Primary Friction Types</div>
+        <div class="chart-title">${t('insightsCmd.primaryFrictionTypes')}</div>
         ${generateBarChart(data.friction, '#dc2626')}
       </div>
       <div class="chart-card">
-        <div class="chart-title">Inferred Satisfaction (model-estimated)</div>
+        <div class="chart-title">${t('insightsCmd.inferredSatisfaction')}</div>
         ${generateBarChart(data.satisfaction, '#eab308', 6, SATISFACTION_ORDER)}
       </div>
     </div>
@@ -2689,8 +2657,7 @@ async function scanAllSessions(): Promise<LiteSessionInfo[]> {
         sessionId,
         path: fileInfo.path,
         mtime: fileInfo.mtime,
-        size: fileInfo.size,
-      })
+        size: fileInfo.size})
     }
     // Yield to event loop every 10 project directories
     if (i % 10 === 9) {
@@ -2741,8 +2708,7 @@ export async function generateUsageReport(options?: {
     const results = await Promise.all(
       batch.map(async sessionInfo => ({
         sessionInfo,
-        cached: await loadCachedSessionMeta(sessionInfo.sessionId),
-      })),
+        cached: await loadCachedSessionMeta(sessionInfo.sessionId)})),
     )
     for (const { sessionInfo, cached } of results) {
       if (cached) {
@@ -2849,8 +2815,7 @@ export async function generateUsageReport(options?: {
   const cachedFacetResults = await Promise.all(
     substantiveMetas.map(async meta => ({
       sessionId: meta.session_id,
-      cached: await loadCachedFacets(meta.session_id),
-    })),
+      cached: await loadCachedFacets(meta.session_id)})),
   )
   for (const { sessionId, cached } of cachedFacetResults) {
     if (cached) {
@@ -2924,16 +2889,14 @@ export async function generateUsageReport(options?: {
   const htmlPath = join(getDataDir(), 'report.html')
   await writeFile(htmlPath, htmlReport, {
     encoding: 'utf-8',
-    mode: 0o600,
-  })
+    mode: 0o600})
 
   return {
     insights,
     htmlPath,
     data: aggregated,
     remoteStats,
-    facets: substantiveFacets,
-  }
+    facets: substantiveFacets}
 }
 
 function safeEntries<V>(
@@ -2953,9 +2916,9 @@ function safeKeys(obj: Record<string, unknown> | undefined | null): string[] {
 const usageReport: Command = {
   type: 'prompt',
   name: 'insights',
-  description: 'Generate a report analyzing your Claude Code sessions',
+  description: t('cmd.descInsights'),
   contentLength: 0, // Dynamic content
-  progressMessage: 'analyzing your sessions',
+  progressMessage: t('insightsCmd.progressAnalyzing'),
   source: 'builtin',
   async getPromptForCommand(args) {
     let collectRemote = false
@@ -3016,13 +2979,13 @@ Then access at: ${s3Url}`
     const sessionLabel =
       data.total_sessions_scanned &&
       data.total_sessions_scanned > data.total_sessions
-        ? `${data.total_sessions_scanned.toLocaleString()} sessions total · ${data.total_sessions} analyzed`
-        : `${data.total_sessions} sessions`
+        ? `${data.total_sessions_scanned.toLocaleString()} ${t('insightsCmd.statsSessionsTotal')} · ${data.total_sessions} ${t('insightsCmd.statsAnalyzed')}`
+        : `${data.total_sessions} ${t('insightsCmd.statsSessions')}`
     const stats = [
       sessionLabel,
-      `${data.total_messages.toLocaleString()} messages`,
+      `${data.total_messages.toLocaleString()} ${t('insightsCmd.statsMessages')}`,
       `${Math.round(data.total_duration_hours)}h`,
-      `${data.git_commits} commits`,
+      `${data.git_commits} ${t('insightsCmd.statsCommits')}`,
     ].join(' · ')
 
     // Build remote host info (ant-only)
@@ -3033,37 +2996,37 @@ Then access at: ${s3Url}`
           .filter(h => h.sessionCount > 0)
           .map(h => h.name)
           .join(', ')
-        remoteInfo = `\n_Collected ${remoteStats.totalCopied} new sessions from: ${hsNames}_\n`
+        remoteInfo = `\n${t('insightsCmd.collectedNewSessions', remoteStats.totalCopied, hsNames)}\n`
       } else if (!collectRemote && hasRemoteHosts) {
         // Suggest using --homespaces if they have remote hosts but didn't use the flag
-        remoteInfo = `\n_Tip: Run \`/insights --homespaces\` to include sessions from your ${remoteHosts.length} running homespace(s)_\n`
+        remoteInfo = `\n${t('insightsCmd.tipHomespaces', remoteHosts.length)}\n`
       }
     }
 
     // Build markdown summary from insights
     const atAGlance = insights.at_a_glance
     const summaryText = atAGlance
-      ? `## At a Glance
+      ? `## ${t('insightsCmd.atAGlanceHeader')}
 
-${atAGlance.whats_working ? `**What's working:** ${atAGlance.whats_working} See _Impressive Things You Did_.` : ''}
+${atAGlance.whats_working ? `**${t('insightsCmd.summaryWhatsWorking')}** ${atAGlance.whats_working} ${t('insightsCmd.summarySeeImpressiveThings')}` : ''}
 
-${atAGlance.whats_hindering ? `**What's hindering you:** ${atAGlance.whats_hindering} See _Where Things Go Wrong_.` : ''}
+${atAGlance.whats_hindering ? `**${t('insightsCmd.summaryWhatsHindering')}** ${atAGlance.whats_hindering} ${t('insightsCmd.summarySeeWhereThingsGoWrong')}` : ''}
 
-${atAGlance.quick_wins ? `**Quick wins to try:** ${atAGlance.quick_wins} See _Features to Try_.` : ''}
+${atAGlance.quick_wins ? `**${t('insightsCmd.summaryQuickWins')}** ${atAGlance.quick_wins} ${t('insightsCmd.summarySeeFeaturesToTry')}` : ''}
 
-${atAGlance.ambitious_workflows ? `**Ambitious workflows:** ${atAGlance.ambitious_workflows} See _On the Horizon_.` : ''}`
-      : '_No insights generated_'
+${atAGlance.ambitious_workflows ? `**${t('insightsCmd.summaryAmbitiousWorkflows')}** ${atAGlance.ambitious_workflows} ${t('insightsCmd.summarySeeOnTheHorizon')}` : ''}`
+      : t('insightsCmd.noInsightsGenerated')
 
-    const header = `# Claude Code Insights
+    const header = `# ${t('insightsCmd.reportHeader')}
 
 ${stats}
-${data.date_range.start} to ${data.date_range.end}
+${t('insightsCmd.dateRange', data.date_range.start, data.date_range.end)}
 ${remoteInfo}
 `
 
     const userSummary = `${header}${summaryText}
 
-Your full shareable insights report is ready: ${reportUrl}${uploadHint}`
+${t('insightsCmd.reportReady')}${reportUrl}${uploadHint}`
 
     // Return prompt for Claude to respond to
     return [
@@ -3084,15 +3047,13 @@ ${userSummary}
 Now output the following message exactly:
 
 <message>
-Your shareable insights report is ready:
+${t('insightsCmd.reportReady')}
 ${reportUrl}${uploadHint}
 
-Want to dig into any section or try one of the suggestions?
-</message>`,
-      },
+${t('insightsCmd.wantToDigIn')}
+</message>`},
     ]
-  },
-}
+  }}
 
 function isValidSessionFacets(obj: unknown): obj is SessionFacets {
   if (!obj || typeof obj !== 'object') return false

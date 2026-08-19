@@ -14,8 +14,7 @@ import {
   tokenSignature,
   getStateFilePath,
   readState,
-  writeStateAtomic,
-} from './cacheStats.js'
+  writeStateAtomic} from './cacheStats.js'
 
 interface MemState {
   signature: string | null
@@ -26,8 +25,7 @@ interface MemState {
 let memState: MemState = {
   signature: null,
   lastResetAt: null,
-  lastHitRate: null,
-}
+  lastHitRate: null}
 
 let sessionId: string | null = null
 
@@ -43,8 +41,7 @@ export async function initCacheStatsState(sid: string): Promise<void> {
   memState = {
     signature: persisted.signature,
     lastResetAt: persisted.lastResetAt,
-    lastHitRate: persisted.lastHitRate,
-  }
+    lastHitRate: persisted.lastHitRate}
 }
 
 /**
@@ -60,8 +57,7 @@ export function onResponse(usage: CacheUsage): MemState {
     memState = {
       signature: sig,
       lastResetAt: Date.now(),
-      lastHitRate: hitRate,
-    }
+      lastHitRate: hitRate}
     // Persist asynchronously; intentionally fire-and-forget
     if (sessionId !== null) {
       const filePath = getStateFilePath(sessionId)
@@ -69,8 +65,7 @@ export function onResponse(usage: CacheUsage): MemState {
         version: 1,
         signature: sig,
         lastResetAt: memState.lastResetAt,
-        lastHitRate: hitRate,
-      }
+        lastHitRate: hitRate}
       void writeStateAtomic(filePath, toWrite)
     }
   }

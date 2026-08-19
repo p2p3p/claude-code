@@ -4,22 +4,19 @@ import { randomUUID } from 'crypto'
 import { getSessionId } from 'src/bootstrap/state.js'
 import {
   LOCAL_COMMAND_STDERR_TAG,
-  LOCAL_COMMAND_STDOUT_TAG,
-} from 'src/constants/xml.js'
+  LOCAL_COMMAND_STDOUT_TAG} from 'src/constants/xml.js'
 import type {
   SDKAssistantMessage,
   SDKCompactBoundaryMessage,
   SDKMessage,
-  SDKRateLimitInfo,
-} from 'src/entrypoints/agentSdkTypes.js'
+  SDKRateLimitInfo} from 'src/entrypoints/agentSdkTypes.js'
 import type { ClaudeAILimits } from 'src/services/claudeAiLimits.js'
 import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/ExitPlanModeTool/constants.js'
 import type {
   AssistantMessage,
   CompactMetadata,
   Message,
-  MessageContent,
-} from 'src/types/message.js'
+  MessageContent} from 'src/types/message.js'
 import type { DeepImmutable } from 'src/types/utils.js'
 import stripAnsi from 'strip-ansi'
 import { createAssistantMessage } from '../messages.js'
@@ -38,8 +35,7 @@ export function toInternalMessages(
             message: message.message,
             uuid: message.uuid,
             requestId: undefined,
-            timestamp: new Date().toISOString(),
-          } as Message,
+            timestamp: new Date().toISOString()} as Message,
         ]
       case 'user':
         return [
@@ -48,8 +44,7 @@ export function toInternalMessages(
             message: message.message,
             uuid: message.uuid ?? randomUUID(),
             timestamp: message.timestamp ?? new Date().toISOString(),
-            isMeta: message.isSynthetic,
-          } as unknown as Message,
+            isMeta: message.isSynthetic} as unknown as Message,
         ]
         // Handle compact boundary messages
         if (message.subtype === 'compact_boundary') {
@@ -64,8 +59,7 @@ export function toInternalMessages(
                 compactMsg.compact_metadata as SDKCompactMetadata,
               ),
               uuid: message.uuid,
-              timestamp: new Date().toISOString(),
-            } as Message,
+              timestamp: new Date().toISOString()} as Message,
           ]
         }
         return []
@@ -90,10 +84,7 @@ export function toSDKCompactMetadata(
       preserved_segment: {
         head_uuid: seg.headUuid,
         anchor_uuid: seg.anchorUuid,
-        tail_uuid: seg.tailUuid,
-      },
-    }),
-  }
+        tail_uuid: seg.tailUuid}})}
 }
 
 /**
@@ -120,10 +111,7 @@ export function fromSDKCompactMetadata(
       preservedSegment: {
         headUuid: seg.head_uuid,
         anchorUuid: seg.anchor_uuid,
-        tailUuid: seg.tail_uuid,
-      },
-    }),
-  }
+        tailUuid: seg.tail_uuid}})}
 }
 
 export function toSDKMessages(messages: Message[]): SDKMessage[] {
@@ -140,8 +128,7 @@ export function toSDKMessages(messages: Message[]): SDKMessage[] {
             session_id: getSessionId(),
             parent_tool_use_id: null,
             uuid: message.uuid,
-            error: message?.error,
-          },
+            error: message?.error},
         ]
       case 'user':
         return [
@@ -159,8 +146,7 @@ export function toSDKMessages(messages: Message[]): SDKMessage[] {
             // without it polluting model context.
             ...(message.toolUseResult !== undefined
               ? { tool_use_result: message.toolUseResult }
-              : {}),
-          },
+              : {})},
         ]
       case 'system':
         if (message.subtype === 'compact_boundary' && message.compactMetadata) {
@@ -172,8 +158,7 @@ export function toSDKMessages(messages: Message[]): SDKMessage[] {
               uuid: message.uuid,
               compact_metadata: toSDKCompactMetadata(
                 message.compactMetadata as CompactMetadata,
-              ),
-            },
+              )},
           ]
         }
         // Only convert local_command messages that contain actual command
@@ -234,8 +219,7 @@ export function localCommandOutputToSDKAssistantMessage(
     message: synthetic.message,
     parent_tool_use_id: null,
     session_id: getSessionId(),
-    uuid,
-  }
+    uuid}
 }
 
 /**
@@ -253,27 +237,19 @@ export function toSDKRateLimitInfo(
     status: limits.status,
     ...(limits.resetsAt !== undefined && { resetsAt: limits.resetsAt }),
     ...(limits.rateLimitType !== undefined && {
-      rateLimitType: limits.rateLimitType,
-    }),
+      rateLimitType: limits.rateLimitType}),
     ...(limits.utilization !== undefined && {
-      utilization: limits.utilization,
-    }),
+      utilization: limits.utilization}),
     ...(limits.overageStatus !== undefined && {
-      overageStatus: limits.overageStatus,
-    }),
+      overageStatus: limits.overageStatus}),
     ...(limits.overageResetsAt !== undefined && {
-      overageResetsAt: limits.overageResetsAt,
-    }),
+      overageResetsAt: limits.overageResetsAt}),
     ...(limits.overageDisabledReason !== undefined && {
-      overageDisabledReason: limits.overageDisabledReason,
-    }),
+      overageDisabledReason: limits.overageDisabledReason}),
     ...(limits.isUsingOverage !== undefined && {
-      isUsingOverage: limits.isUsingOverage,
-    }),
+      isUsingOverage: limits.isUsingOverage}),
     ...(limits.surpassedThreshold !== undefined && {
-      surpassedThreshold: limits.surpassedThreshold,
-    }),
-  }
+      surpassedThreshold: limits.surpassedThreshold})}
 }
 
 /**
@@ -300,8 +276,7 @@ function normalizeAssistantMessageForSDK(
       if (plan) {
         return {
           ...block,
-          input: { ...(block.input as Record<string, unknown>), plan },
-        }
+          input: { ...(block.input as Record<string, unknown>), plan }}
       }
     }
 
@@ -310,6 +285,5 @@ function normalizeAssistantMessageForSDK(
 
   return {
     ...message.message,
-    content: normalizedContent as unknown as MessageContent,
-  }
+    content: normalizedContent as unknown as MessageContent}
 }

@@ -41,9 +41,7 @@ export function collapseTeammateShutdowns(
           timestamp: msg.timestamp,
           attachment: {
             type: 'teammate_shutdown_batch',
-            count,
-          },
-        } as unknown as RenderableMessage)
+            count}} as unknown as RenderableMessage)
       }
     } else {
       result.push(msg)

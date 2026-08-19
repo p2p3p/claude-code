@@ -1,19 +1,16 @@
 import type {
   Base64ImageSource,
-  ImageBlockParam,
-} from '@anthropic-ai/sdk/resources/messages.mjs'
+  ImageBlockParam} from '@anthropic-ai/sdk/resources/messages.mjs'
 import {
   API_IMAGE_MAX_BASE64_SIZE,
   IMAGE_MAX_HEIGHT,
   IMAGE_MAX_WIDTH,
-  IMAGE_TARGET_RAW_SIZE,
-} from '../constants/apiLimits.js'
+  IMAGE_TARGET_RAW_SIZE} from '../constants/apiLimits.js'
 import { logEvent } from '../services/analytics/index.js'
 import {
   getImageProcessor,
   type SharpFunction,
-  type SharpInstance,
-} from '@claude-code-best/builtin-tools/tools/FileReadTool/imageProcessor.js'
+  type SharpInstance} from '@claude-code-best/builtin-tools/tools/FileReadTool/imageProcessor.js'
 import { logForDebugging } from './debug.js'
 import { errorMessage } from './errors.js'
 import { formatFileSize } from './format.js'
@@ -237,9 +234,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
           originalWidth,
           originalHeight,
           displayWidth: width,
-          displayHeight: height,
-        },
-      }
+          displayHeight: height}}
     }
 
     const needsDimensionResize = width > maxWidth || height > maxHeight
@@ -262,9 +257,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
               originalWidth,
               originalHeight,
               displayWidth: width,
-              displayHeight: height,
-            },
-          }
+              displayHeight: height}}
         }
       }
       // Try JPEG compression (lossy but much smaller)
@@ -281,9 +274,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
               originalWidth,
               originalHeight,
               displayWidth: width,
-              displayHeight: height,
-            },
-          }
+              displayHeight: height}}
         }
       }
       // Quality reduction alone wasn't enough, fall through to resize
@@ -308,8 +299,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
     const resizedImageBuffer = await sharp(imageBuffer)
       .resize(width, height, {
         fit: 'inside',
-        withoutEnlargement: true,
-      })
+        withoutEnlargement: true})
       .toBuffer()
 
     // If still too large after resize, try compression
@@ -319,8 +309,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
         const pngCompressed = await sharp(imageBuffer)
           .resize(width, height, {
             fit: 'inside',
-            withoutEnlargement: true,
-          })
+            withoutEnlargement: true})
           .png({ compressionLevel: 9, palette: true })
           .toBuffer()
         if (pngCompressed.length <= targetRawSize) {
@@ -331,9 +320,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
               originalWidth,
               originalHeight,
               displayWidth: width,
-              displayHeight: height,
-            },
-          }
+              displayHeight: height}}
         }
       }
 
@@ -342,8 +329,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
         const compressedBuffer = await sharp(imageBuffer)
           .resize(width, height, {
             fit: 'inside',
-            withoutEnlargement: true,
-          })
+            withoutEnlargement: true})
           .jpeg({ quality })
           .toBuffer()
         if (compressedBuffer.length <= targetRawSize) {
@@ -354,9 +340,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
               originalWidth,
               originalHeight,
               displayWidth: width,
-              displayHeight: height,
-            },
-          }
+              displayHeight: height}}
         }
       }
       // If still too large, resize smaller and compress aggressively
@@ -368,8 +352,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
       const compressedBuffer = await sharp(imageBuffer)
         .resize(smallerWidth, smallerHeight, {
           fit: 'inside',
-          withoutEnlargement: true,
-        })
+          withoutEnlargement: true})
         .jpeg({ quality: 20 })
         .toBuffer()
       logForDebugging(`JPEG compressed buffer size: ${compressedBuffer.length}`)
@@ -380,9 +363,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
           originalWidth,
           originalHeight,
           displayWidth: smallerWidth,
-          displayHeight: smallerHeight,
-        },
-      }
+          displayHeight: smallerHeight}}
     }
 
     return {
@@ -392,9 +373,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
         originalWidth,
         originalHeight,
         displayWidth: width,
-        displayHeight: height,
-      },
-    }
+        displayHeight: height}}
   } catch (error) {
     // Log the error and emit analytics event
     logError(error as Error)
@@ -403,8 +382,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
     logEvent('tengu_image_resize_failed', {
       original_size_bytes: originalSize,
       error_type: errorType,
-      error_message_hash: hashString(errorMsg),
-    })
+      error_message_hash: hashString(errorMsg)})
 
     // Detect actual format from magic bytes instead of trusting extension
     const detected = detectImageFormatFromBuffer(imageBuffer)
@@ -430,8 +408,7 @@ export async function maybeResizeAndDownsampleImageBuffer(
       logEvent('tengu_image_resize_fallback', {
         original_size_bytes: originalSize,
         base64_size_bytes: base64Size,
-        error_type: errorType,
-      })
+        error_type: errorType})
       return { buffer: imageBuffer, mediaType: normalizedExt }
     }
 
@@ -488,11 +465,8 @@ export async function maybeResizeAndDownsampleImageBlock(
         type: 'base64',
         media_type:
           `image/${resized.mediaType}` as Base64ImageSource['media_type'],
-        data: resized.buffer.toString('base64'),
-      },
-    },
-    dimensions: resized.dimensions,
-  }
+        data: resized.buffer.toString('base64')}},
+    dimensions: resized.dimensions}
 }
 
 /**
@@ -530,8 +504,7 @@ export async function compressImageBuffer(
       metadata,
       format,
       maxBytes,
-      originalSize,
-    }
+      originalSize}
 
     // If image is already within size limit, return as-is without processing
     if (originalSize <= maxBytes) {
@@ -569,8 +542,7 @@ export async function compressImageBuffer(
       original_size_bytes: imageBuffer.length,
       max_bytes: maxBytes,
       error_type: errorType,
-      error_message_hash: hashString(errorMsg),
-    })
+      error_message_hash: hashString(errorMsg)})
 
     // If original image is within the requested limit, allow it through
     if (imageBuffer.length <= maxBytes) {
@@ -579,8 +551,7 @@ export async function compressImageBuffer(
       return {
         base64: imageBuffer.toString('base64'),
         mediaType: detected,
-        originalSize: imageBuffer.length,
-      }
+        originalSize: imageBuffer.length}
     }
 
     // Image is too large and compression failed - throw error
@@ -637,9 +608,7 @@ export async function compressImageBlock(
     source: {
       type: 'base64',
       media_type: compressed.mediaType,
-      data: compressed.base64,
-    },
-  }
+      data: compressed.base64}}
 }
 
 // Helper functions for compression pipeline
@@ -654,8 +623,7 @@ function createCompressedImageResult(
     base64: buffer.toString('base64'),
     mediaType:
       `image/${normalizedMediaType}` as Base64ImageSource['media_type'],
-    originalSize,
-  }
+    originalSize}
 }
 
 async function tryProgressiveResizing(
@@ -674,8 +642,7 @@ async function tryProgressiveResizing(
 
     let resizedImage = sharp(context.imageBuffer).resize(newWidth, newHeight, {
       fit: 'inside',
-      withoutEnlargement: true,
-    })
+      withoutEnlargement: true})
 
     // Apply format-specific optimizations
     resizedImage = applyFormatOptimizations(resizedImage, context.format)
@@ -702,8 +669,7 @@ function applyFormatOptimizations(
     case 'png':
       return image.png({
         compressionLevel: 9,
-        palette: true,
-      })
+        palette: true})
     case 'jpeg':
     case 'jpg':
       return image.jpeg({ quality: 80 })
@@ -721,8 +687,7 @@ async function tryPalettePNG(
   const palettePng = await sharp(context.imageBuffer)
     .resize(800, 800, {
       fit: 'inside',
-      withoutEnlargement: true,
-    })
+      withoutEnlargement: true})
     .png({
       compressionLevel: 9,
       palette: true,
@@ -745,8 +710,7 @@ async function tryJPEGConversion(
   const jpegBuffer = await sharp(context.imageBuffer)
     .resize(600, 600, {
       fit: 'inside',
-      withoutEnlargement: true,
-    })
+      withoutEnlargement: true})
     .jpeg({ quality })
     .toBuffer()
 
@@ -764,8 +728,7 @@ async function createUltraCompressedJPEG(
   const ultraCompressedBuffer = await sharp(context.imageBuffer)
     .resize(400, 400, {
       fit: 'inside',
-      withoutEnlargement: true,
-    })
+      withoutEnlargement: true})
     .jpeg({ quality: 20 })
     .toBuffer()
 

@@ -6,8 +6,7 @@ import { getIsRemoteMode } from '../../bootstrap/state.js'
 import {
   useAppState,
   useAppStateStore,
-  useSetAppState,
-} from '../../state/AppState.js'
+  useSetAppState} from '../../state/AppState.js'
 import type { ToolPermissionContext } from '../../Tool.js'
 import { verifyAutoModeGateAccess } from './permissionSetup.js'
 
@@ -77,11 +76,8 @@ export async function checkAndDisableAutoModeIfNeeded(
               key: 'auto-mode-gate-notification',
               text: notification,
               color: 'warning' as const,
-              priority: 'high' as const,
-            },
-          ],
-        },
-      }
+              priority: 'high' as const},
+          ]}}
     })
   }
 }

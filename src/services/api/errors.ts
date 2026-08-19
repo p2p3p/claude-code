@@ -1,53 +1,44 @@
 import {
   APIConnectionError,
   APIConnectionTimeoutError,
-  APIError,
-} from '@anthropic-ai/sdk'
+  APIError} from '@anthropic-ai/sdk'
 import type {
   BetaMessage,
-  BetaStopReason,
-} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
+  BetaStopReason} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
 import { AFK_MODE_BETA_HEADER } from 'src/constants/betas.js'
 import type { SDKAssistantMessageError } from 'src/entrypoints/agentSdkTypes.js'
 import type {
   AssistantMessage,
   Message,
-  UserMessage,
-} from 'src/types/message.js'
+  UserMessage} from 'src/types/message.js'
 import {
   getAnthropicApiKeyWithSource,
   getClaudeAIOAuthTokens,
   getOauthAccountInfo,
-  isClaudeAISubscriber,
-} from 'src/utils/auth.js'
+  isClaudeAISubscriber} from 'src/utils/auth.js'
 import {
   createAssistantAPIErrorMessage,
-  NO_RESPONSE_REQUESTED,
-} from 'src/utils/messages.js'
+  NO_RESPONSE_REQUESTED} from 'src/utils/messages.js'
 import {
   getDefaultMainLoopModelSetting,
-  isNonCustomOpusModel,
-} from 'src/utils/model/model.js'
+  isNonCustomOpusModel} from 'src/utils/model/model.js'
 import { getModelStrings } from 'src/utils/model/modelStrings.js'
 import { getAPIProvider } from 'src/utils/model/providers.js'
 import { getIsNonInteractiveSession } from '../../bootstrap/state.js'
 import {
   API_PDF_MAX_PAGES,
-  PDF_TARGET_RAW_SIZE,
-} from '../../constants/apiLimits.js'
+  PDF_TARGET_RAW_SIZE} from '../../constants/apiLimits.js'
 import { isEnvTruthy } from '../../utils/envUtils.js'
 import { formatFileSize } from '../../utils/format.js'
 import { ImageResizeError } from '../../utils/imageResizer.js'
 import { ImageSizeError } from '../../utils/imageValidation.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../analytics/index.js'
+  logEvent} from '../analytics/index.js'
 import {
   type ClaudeAILimits,
   getRateLimitErrorMessage,
-  type OverageDisabledReason,
-} from '../claudeAiLimits.js'
+  type OverageDisabledReason} from '../claudeAiLimits.js'
 import { shouldProcessRateLimits } from '../rateLimitMocking.js' // Used for /mock-limits command
 import { extractConnectionErrorDetails, formatAPIError } from './errorUtils.js'
 
@@ -91,8 +82,7 @@ export function parsePromptTooLongTokenCounts(rawMessage: string): {
   )
   return {
     actualTokens: match ? parseInt(match[1]!, 10) : undefined,
-    limitTokens: match ? parseInt(match[2]!, 10) : undefined,
-  }
+    limitTokens: match ? parseInt(match[2]!, 10) : undefined}
 }
 
 /**
@@ -374,8 +364,7 @@ function logToolUseToolResultMismatch(
       normalizedMessageCount: messagesForAPI.length,
       originalMessageCount: messages.length,
       normalizedToolUseIndex: normalizedIndex,
-      originalToolUseIndex: originalIndex,
-    })
+      originalToolUseIndex: originalIndex})
   } catch (_) {
     // Ignore errors in debug logging
   }
@@ -438,8 +427,7 @@ export function getAssistantMessageFromError(
   ) {
     return createAssistantAPIErrorMessage({
       content: API_TIMEOUT_ERROR_MESSAGE,
-      error: 'unknown',
-    })
+      error: 'unknown'})
   }
 
   // Check for image size/resize errors (thrown before API call during validation)
@@ -447,8 +435,7 @@ export function getAssistantMessageFromError(
   // but a generic message for SDK users (non-interactive mode)
   if (error instanceof ImageSizeError || error instanceof ImageResizeError) {
     return createAssistantAPIErrorMessage({
-      content: getImageTooLargeErrorMessage(),
-    })
+      content: getImageTooLargeErrorMessage()})
   }
 
   // Check for emergency capacity off switch for Opus PAYG users
@@ -458,8 +445,7 @@ export function getAssistantMessageFromError(
   ) {
     return createAssistantAPIErrorMessage({
       content: CUSTOM_OFF_SWITCH_MESSAGE,
-      error: 'rate_limit',
-    })
+      error: 'rate_limit'})
   }
 
   if (
@@ -482,8 +468,7 @@ export function getAssistantMessageFromError(
       const limits: ClaudeAILimits = {
         status: 'rejected',
         unifiedRateLimitFallbackAvailable: false,
-        isUsingOverage: false,
-      }
+        isUsingOverage: false}
 
       // Extract rate limit information from headers
       const resetHeader = error.headers?.get?.(
@@ -520,8 +505,7 @@ export function getAssistantMessageFromError(
       if (specificErrorMessage) {
         return createAssistantAPIErrorMessage({
           content: specificErrorMessage,
-          error: 'rate_limit',
-        })
+          error: 'rate_limit'})
       }
 
       // If getRateLimitErrorMessage returned null, it means the fallback mechanism
@@ -530,8 +514,7 @@ export function getAssistantMessageFromError(
       // message is still recorded in conversation history for Claude to see.
       return createAssistantAPIErrorMessage({
         content: NO_RESPONSE_REQUESTED,
-        error: 'rate_limit',
-      })
+        error: 'rate_limit'})
     }
 
     // No quota headers — this is NOT a quota limit. Surface what the API actually
@@ -543,8 +526,7 @@ export function getAssistantMessageFromError(
         : 'run /extra-usage to enable, or /model to switch to standard context'
       return createAssistantAPIErrorMessage({
         content: `${API_ERROR_MESSAGE_PREFIX}: Extra usage is required for 1M context · ${hint}`,
-        error: 'rate_limit',
-      })
+        error: 'rate_limit'})
     }
     // SDK's APIError.makeMessage prepends "429 " and JSON-stringifies the body
     // when there's no top-level .message — extract the inner error.message.
@@ -553,8 +535,7 @@ export function getAssistantMessageFromError(
     const detail = innerMessage || stripped
     return createAssistantAPIErrorMessage({
       content: `${API_ERROR_MESSAGE_PREFIX}: Request rejected (429) · ${detail || 'this may be a temporary capacity issue — check status.anthropic.com'}`,
-      error: 'rate_limit',
-    })
+      error: 'rate_limit'})
   }
 
   // Handle prompt too long errors (Vertex returns 413, direct API returns 400)
@@ -569,8 +550,7 @@ export function getAssistantMessageFromError(
     return createAssistantAPIErrorMessage({
       content: PROMPT_TOO_LONG_ERROR_MESSAGE,
       error: 'invalid_request',
-      errorDetails: error.message,
-    })
+      errorDetails: error.message})
   }
 
   // Check for PDF page limit errors
@@ -581,8 +561,7 @@ export function getAssistantMessageFromError(
     return createAssistantAPIErrorMessage({
       content: getPdfTooLargeErrorMessage(),
       error: 'invalid_request',
-      errorDetails: error.message,
-    })
+      errorDetails: error.message})
   }
 
   // Check for password-protected PDF errors
@@ -592,8 +571,7 @@ export function getAssistantMessageFromError(
   ) {
     return createAssistantAPIErrorMessage({
       content: getPdfPasswordProtectedErrorMessage(),
-      error: 'invalid_request',
-    })
+      error: 'invalid_request'})
   }
 
   // Check for invalid PDF errors (e.g., HTML file renamed to .pdf)
@@ -605,8 +583,7 @@ export function getAssistantMessageFromError(
   ) {
     return createAssistantAPIErrorMessage({
       content: getPdfInvalidErrorMessage(),
-      error: 'invalid_request',
-    })
+      error: 'invalid_request'})
   }
 
   // Check for image size errors (e.g., "image exceeds 5 MB maximum: 5316852 bytes > 5242880 bytes")
@@ -618,8 +595,7 @@ export function getAssistantMessageFromError(
   ) {
     return createAssistantAPIErrorMessage({
       content: getImageTooLargeErrorMessage(),
-      errorDetails: error.message,
-    })
+      errorDetails: error.message})
   }
 
   // Check for many-image dimension errors (API enforces stricter 2000px limit for many-image requests)
@@ -634,8 +610,7 @@ export function getAssistantMessageFromError(
         ? 'An image in the conversation exceeds the dimension limit for many-image requests (2000px). Start a new session with fewer images.'
         : 'An image in the conversation exceeds the dimension limit for many-image requests (2000px). Run /compact to remove old images from context, or start a new session.',
       error: 'invalid_request',
-      errorDetails: error.message,
-    })
+      errorDetails: error.message})
   }
 
   // Server rejected the afk-mode beta header (plan does not include auto
@@ -650,8 +625,7 @@ export function getAssistantMessageFromError(
   ) {
     return createAssistantAPIErrorMessage({
       content: 'Auto mode is unavailable for your plan',
-      error: 'invalid_request',
-    })
+      error: 'invalid_request'})
   }
 
   // Check for request too large errors (413 status)
@@ -659,8 +633,7 @@ export function getAssistantMessageFromError(
   if (error instanceof APIError && error.status === 413) {
     return createAssistantAPIErrorMessage({
       content: getRequestTooLargeErrorMessage(),
-      error: 'invalid_request',
-    })
+      error: 'invalid_request'})
   }
 
   // Check for tool_use/tool_result concurrency error
@@ -691,8 +664,7 @@ export function getAssistantMessageFromError(
         : ' Then, use /rewind to recover the conversation.'
       return createAssistantAPIErrorMessage({
         content: baseMessage + rewindInstruction,
-        error: 'invalid_request',
-      })
+        error: 'invalid_request'})
     } else {
       const baseMessage = 'API Error: 400 due to tool use concurrency issues.'
       const rewindInstruction = getIsNonInteractiveSession()
@@ -700,8 +672,7 @@ export function getAssistantMessageFromError(
         : ' Run /rewind to recover the conversation.'
       return createAssistantAPIErrorMessage({
         content: baseMessage + rewindInstruction,
-        error: 'invalid_request',
-      })
+        error: 'invalid_request'})
     }
   }
 
@@ -728,8 +699,7 @@ export function getAssistantMessageFromError(
     return createAssistantAPIErrorMessage({
       content: `API Error: 400 duplicate tool_use ID in conversation history.${rewindInstruction}`,
       error: 'invalid_request',
-      errorDetails: error.message,
-    })
+      errorDetails: error.message})
   }
 
   // Check for invalid model name error for subscription users trying to use Opus
@@ -743,8 +713,7 @@ export function getAssistantMessageFromError(
     return createAssistantAPIErrorMessage({
       content:
         'Claude Opus is not available with the Claude Pro plan. If you have updated your subscription plan recently, run /logout and /login for the plan to take effect.',
-      error: 'invalid_request',
-    })
+      error: 'invalid_request'})
   }
 
   // Check for invalid model name error for Ant users. Claude Code may be
@@ -752,7 +721,7 @@ export function getAssistantMessageFromError(
   // Ants using new or unknown org IDs that haven't been gated in.
   if (
     process.env.USER_TYPE === 'ant' &&
-    !process.env.ANTHROPIC_MODEL &&
+    !process.env.MODEL &&
     error instanceof Error &&
     error.message.toLowerCase().includes('invalid model name')
   ) {
@@ -765,8 +734,7 @@ export function getAssistantMessageFromError(
 
     return createAssistantAPIErrorMessage({
       content: msg,
-      error: 'invalid_request',
-    })
+      error: 'invalid_request'})
   }
 
   if (
@@ -775,8 +743,7 @@ export function getAssistantMessageFromError(
   ) {
     return createAssistantAPIErrorMessage({
       content: CREDIT_BALANCE_TOO_LOW_ERROR_MESSAGE,
-      error: 'billing_error',
-    })
+      error: 'billing_error'})
   }
   // "Organization has been disabled" — commonly a stale ANTHROPIC_API_KEY
   // from a previous employer/project overriding subscription auth. Only handle
@@ -805,8 +772,7 @@ export function getAssistantMessageFromError(
         error: 'invalid_request',
         content: hasStoredOAuth
           ? ORG_DISABLED_ERROR_MESSAGE_ENV_KEY_WITH_OAUTH
-          : ORG_DISABLED_ERROR_MESSAGE_ENV_KEY,
-      })
+          : ORG_DISABLED_ERROR_MESSAGE_ENV_KEY})
     }
   }
 
@@ -818,8 +784,7 @@ export function getAssistantMessageFromError(
     if (isCCRMode()) {
       return createAssistantAPIErrorMessage({
         error: 'authentication_failed',
-        content: CCR_AUTH_ERROR_MESSAGE,
-      })
+        content: CCR_AUTH_ERROR_MESSAGE})
     }
 
     // Check if the API key is from an external source
@@ -831,8 +796,7 @@ export function getAssistantMessageFromError(
       error: 'authentication_failed',
       content: isExternalSource
         ? INVALID_API_KEY_ERROR_MESSAGE_EXTERNAL
-        : INVALID_API_KEY_ERROR_MESSAGE,
-    })
+        : INVALID_API_KEY_ERROR_MESSAGE})
   }
 
   // Check for OAuth token revocation error
@@ -843,8 +807,7 @@ export function getAssistantMessageFromError(
   ) {
     return createAssistantAPIErrorMessage({
       error: 'authentication_failed',
-      content: getTokenRevokedErrorMessage(),
-    })
+      content: getTokenRevokedErrorMessage()})
   }
 
   // Check for OAuth organization not allowed error
@@ -857,8 +820,7 @@ export function getAssistantMessageFromError(
   ) {
     return createAssistantAPIErrorMessage({
       error: 'authentication_failed',
-      content: getOauthOrgNotAllowedErrorMessage(),
-    })
+      content: getOauthOrgNotAllowedErrorMessage()})
   }
 
   // Generic handler for other 401/403 authentication errors
@@ -870,16 +832,14 @@ export function getAssistantMessageFromError(
     if (isCCRMode()) {
       return createAssistantAPIErrorMessage({
         error: 'authentication_failed',
-        content: CCR_AUTH_ERROR_MESSAGE,
-      })
+        content: CCR_AUTH_ERROR_MESSAGE})
     }
 
     return createAssistantAPIErrorMessage({
       error: 'authentication_failed',
       content: getIsNonInteractiveSession()
         ? `Failed to authenticate. ${API_ERROR_MESSAGE_PREFIX}: ${error.message}`
-        : `Please run /login · ${API_ERROR_MESSAGE_PREFIX}: ${error.message}`,
-    })
+        : `Please run /login · ${API_ERROR_MESSAGE_PREFIX}: ${error.message}`})
   }
 
   // Bedrock errors like "403 You don't have access to the model with the specified model ID."
@@ -895,8 +855,7 @@ export function getAssistantMessageFromError(
       content: fallbackSuggestion
         ? `${API_ERROR_MESSAGE_PREFIX} (${model}): ${error.message}. Try ${switchCmd} to switch to ${fallbackSuggestion}.`
         : `${API_ERROR_MESSAGE_PREFIX} (${model}): ${error.message}. Run ${switchCmd} to pick a different model.`,
-      error: 'invalid_request',
-    })
+      error: 'invalid_request'})
   }
 
   // 404 Not Found — usually means the selected model doesn't exist or isn't
@@ -909,28 +868,24 @@ export function getAssistantMessageFromError(
       content: fallbackSuggestion
         ? `The model ${model} is not available on your ${getAPIProvider()} deployment. Try ${switchCmd} to switch to ${fallbackSuggestion}, or ask your admin to enable this model.`
         : `There's an issue with the selected model (${model}). It may not exist or you may not have access to it. Run ${switchCmd} to pick a different model.`,
-      error: 'invalid_request',
-    })
+      error: 'invalid_request'})
   }
 
   // Connection errors (non-timeout) — use formatAPIError for detailed messages
   if (error instanceof APIConnectionError) {
     return createAssistantAPIErrorMessage({
       content: `${API_ERROR_MESSAGE_PREFIX}: ${formatAPIError(error)}`,
-      error: 'unknown',
-    })
+      error: 'unknown'})
   }
 
   if (error instanceof Error) {
     return createAssistantAPIErrorMessage({
       content: `${API_ERROR_MESSAGE_PREFIX}: ${error.message}`,
-      error: 'unknown',
-    })
+      error: 'unknown'})
   }
   return createAssistantAPIErrorMessage({
     content: API_ERROR_MESSAGE_PREFIX,
-    error: 'unknown',
-  })
+    error: 'unknown'})
 }
 
 /**
@@ -938,7 +893,7 @@ export function getAssistantMessageFromError(
  * Returns a model name suggestion, or undefined if no suggestion is applicable.
  */
 function get3PModelFallbackSuggestion(model: string): string | undefined {
-  if (getAPIProvider() === 'firstParty') {
+  if (getAPIProvider() === 'anthropic') {
     return undefined
   }
   // @[MODEL LAUNCH]: Add a fallback suggestion chain for the new model → previous version for 3P
@@ -1205,6 +1160,5 @@ export function getErrorMessageIfRefusal(
 
   return createAssistantAPIErrorMessage({
     content: baseMessage + modelSuggestion,
-    error: 'invalid_request',
-  })
+    error: 'invalid_request'})
 }

@@ -34,9 +34,7 @@ export function createSingleEditDiffConfig(
       {
         old_string: oldString,
         new_string: newString,
-        replace_all: replaceAll,
-      },
+        replace_all: replaceAll},
     ],
-    editMode: 'single',
-  }
+    editMode: 'single'}
 }

@@ -5,24 +5,20 @@ import { logError } from '../log.js'
 import {
   type EditableSettingSource,
   getEnabledSettingSources,
-  type SettingSource,
-} from '../settings/constants.js'
+  type SettingSource} from '../settings/constants.js'
 import {
   getSettingsFilePathForSource,
   getSettingsForSource,
-  updateSettingsForSource,
-} from '../settings/settings.js'
+  updateSettingsForSource} from '../settings/settings.js'
 import type { SettingsJson } from '../settings/types.js'
 import type {
   PermissionBehavior,
   PermissionRule,
   PermissionRuleSource,
-  PermissionRuleValue,
-} from './PermissionRule.js'
+  PermissionRuleValue} from './PermissionRule.js'
 import {
   permissionRuleValueFromString,
-  permissionRuleValueToString,
-} from './permissionRuleParser.js'
+  permissionRuleValueToString} from './permissionRuleParser.js'
 
 /**
  * Returns true if allowManagedPermissionRulesOnly is enabled in managed settings (policySettings).
@@ -105,8 +101,7 @@ function settingsJsonToRules(
         rules.push({
           source,
           ruleBehavior: behavior,
-          ruleValue: permissionRuleValueFromString(ruleString),
-        })
+          ruleValue: permissionRuleValueFromString(ruleString)})
       }
     }
   }
@@ -198,9 +193,7 @@ export function deletePermissionRuleFromSettings(
         ...settingsData.permissions,
         [rule.ruleBehavior]: behaviorArray.filter(
           raw => normalizeEntry(raw) !== ruleString,
-        ),
-      },
-    }
+        )}}
 
     const { error } = updateSettingsForSource(rule.source, updatedSettingsData)
     if (error) {
@@ -217,8 +210,7 @@ export function deletePermissionRuleFromSettings(
 
 function getEmptyPermissionSettingsJson(): SettingsJson {
   return {
-    permissions: {},
-  }
+    permissions: {}}
 }
 
 /**
@@ -229,8 +221,7 @@ function getEmptyPermissionSettingsJson(): SettingsJson {
 export function addPermissionRulesToSettings(
   {
     ruleValues,
-    ruleBehavior,
-  }: {
+    ruleBehavior}: {
     ruleValues: PermissionRuleValue[]
     ruleBehavior: PermissionBehavior
   },
@@ -279,9 +270,7 @@ export function addPermissionRulesToSettings(
       ...settingsData,
       permissions: {
         ...existingPermissions,
-        [ruleBehavior]: [...existingRules, ...newRules],
-      },
-    }
+        [ruleBehavior]: [...existingRules, ...newRules]}}
     const result = updateSettingsForSource(source, updatedSettingsData)
 
     if (result.error) {

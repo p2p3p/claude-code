@@ -48,8 +48,7 @@ export async function classifyBashCommand(
   return {
     matches: false,
     confidence: 'high',
-    reason: 'This feature is disabled',
-  }
+    reason: 'This feature is disabled'}
 }
 
 export async function generateGenericDescription(

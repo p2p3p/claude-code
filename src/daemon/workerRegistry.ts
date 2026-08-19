@@ -2,10 +2,10 @@ import { resolve } from 'path'
 import {
   type HeadlessBridgeOpts,
   BridgeHeadlessPermanentError,
-  runBridgeHeadless,
-} from '../bridge/bridgeMain.js'
+  runBridgeHeadless} from '../bridge/bridgeMain.js'
 import { getClaudeAIOAuthTokens } from '../utils/auth.js'
 import { errorMessage } from '../utils/errors.js'
+import { t } from '../utils/i18n/index.js'
 
 /**
  * Exit codes the supervisor uses to decide retry vs park.
@@ -25,7 +25,7 @@ const EXIT_CODE_TRANSIENT = 1
  */
 export async function runDaemonWorker(kind?: string): Promise<void> {
   if (!kind) {
-    console.error('Error: --daemon-worker requires a worker kind')
+    console.error(t('daemonWorker.requiresWorkerKind'))
     process.exitCode = EXIT_CODE_PERMANENT
     return
   }
@@ -35,7 +35,7 @@ export async function runDaemonWorker(kind?: string): Promise<void> {
       await runRemoteControlWorker()
       break
     default:
-      console.error(`Error: unknown daemon worker kind '${kind}'`)
+      console.error(t('daemonWorker.unknownWorkerKind', kind))
       process.exitCode = EXIT_CODE_PERMANENT
   }
 }
@@ -91,18 +91,17 @@ async function runRemoteControlWorker(): Promise<void> {
       return !!tokens?.accessToken
     },
     log: (s: string) => {
-      console.log(`[remoteControl] ${s}`)
-    },
-  }
+      console.log(t('daemonWorker.remoteControlLog', s))
+    }}
 
   try {
     await runBridgeHeadless(opts, controller.signal)
   } catch (err) {
     if (err instanceof BridgeHeadlessPermanentError) {
-      console.error(`[remoteControl] permanent error: ${err.message}`)
+      console.error(t('daemonWorker.permanentError', err.message))
       process.exitCode = EXIT_CODE_PERMANENT
     } else {
-      console.error(`[remoteControl] transient error: ${errorMessage(err)}`)
+      console.error(t('daemonWorker.transientError', errorMessage(err)))
       process.exitCode = EXIT_CODE_TRANSIENT
     }
   } finally {

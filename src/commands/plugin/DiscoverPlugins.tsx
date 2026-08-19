@@ -23,19 +23,18 @@ import {
   type EmptyMarketplaceReason,
   formatFailureDetails,
   formatMarketplaceLoadingErrors,
-  loadMarketplacesWithGracefulDegradation,
-} from '../../utils/plugins/marketplaceHelpers.js';
+  loadMarketplacesWithGracefulDegradation} from '../../utils/plugins/marketplaceHelpers.js';
 import { loadKnownMarketplacesConfig } from '../../utils/plugins/marketplaceManager.js';
 import { OFFICIAL_MARKETPLACE_NAME } from '../../utils/plugins/officialMarketplace.js';
 import { installPluginFromMarketplace } from '../../utils/plugins/pluginInstallationHelpers.js';
 import { isPluginBlockedByPolicy } from '../../utils/plugins/pluginPolicy.js';
-import { plural } from '../../utils/stringUtils.js';
 import { truncateToWidth } from '../../utils/truncate.js';
 import { findPluginOptionsTarget, PluginOptionsFlow } from './PluginOptionsFlow.js';
 import { PluginTrustWarning } from './PluginTrustWarning.js';
 import { buildPluginDetailsMenuOptions, extractGitHubRepo, type InstallablePlugin } from './pluginDetailsHelpers.js';
 import type { ViewState as ParentViewState } from './types.js';
 import { usePagination } from './usePagination.js';
+import { t } from '../../utils/i18n/index.js';
 
 type Props = {
   error: string | null;
@@ -58,8 +57,7 @@ export function DiscoverPlugins({
   setViewState: setParentViewState,
   onInstallComplete,
   onSearchModeChange,
-  targetPlugin,
-}: Props): React.ReactNode {
+  targetPlugin}: Props): React.ReactNode {
   // View state
   const [viewState, setViewState] = useState<ViewState>('plugin-list');
   const [selectedPlugin, setSelectedPlugin] = useState<InstallablePlugin | null>(null);
@@ -81,13 +79,11 @@ export function DiscoverPlugins({
   const {
     query: searchQuery,
     setQuery: setSearchQuery,
-    cursorOffset: searchCursorOffset,
-  } = useSearchInput({
+    cursorOffset: searchCursorOffset} = useSearchInput({
     isActive: viewState === 'plugin-list' && isSearchMode && !loading,
     onExit: () => {
       setIsSearchMode(false);
-    },
-  });
+    }});
   const isTerminalFocused = useTerminalFocus();
   const { columns: terminalWidth } = useTerminalSize();
 
@@ -111,8 +107,7 @@ export function DiscoverPlugins({
   // Pagination for plugin list (continuous scrolling)
   const pagination = usePagination<InstallablePlugin>({
     totalItems: filteredPlugins.length,
-    selectedIndex,
-  });
+    selectedIndex});
 
   // Reset selection when search query changes
   useEffect(() => {
@@ -153,8 +148,7 @@ export function DiscoverPlugins({
                 // Only block when globally installed (user/managed scope).
                 // Project/local-scope installs don't block — user may want to
                 // promote to user scope so it's available everywhere (gh-29997).
-                isInstalled: isPluginGloballyInstalled(pluginId),
-              });
+                isInstalled: isPluginGloballyInstalled(pluginId)});
             }
           }
         }
@@ -192,8 +186,7 @@ export function DiscoverPlugins({
         if (uninstalledPlugins.length === 0) {
           const reason = await detectEmptyMarketplaceReason({
             configuredMarketplaceCount: configuredCount,
-            failedMarketplaceCount: failures.length,
-          });
+            failedMarketplaceCount: failures.length});
           setEmptyReason(reason);
         }
 
@@ -202,7 +195,7 @@ export function DiscoverPlugins({
         const errorResult = formatMarketplaceLoadingErrors(failures, successCount);
         if (errorResult) {
           if (errorResult.type === 'warning') {
-            setWarning(errorResult.message + '. Showing available plugins.');
+            setWarning(errorResult.message + '. ' + t('pluginUI.showingAvailablePlugins'));
           } else {
             throw new Error(errorResult.message);
           }
@@ -215,19 +208,17 @@ export function DiscoverPlugins({
 
           if (foundPlugin) {
             if (foundPlugin.isInstalled) {
-              setError(
-                `Plugin '${foundPlugin.pluginId}' is already installed. Use '/plugin' to manage existing plugins.`,
-              );
+              setError(t('pluginUI.alreadyInstalled', foundPlugin.pluginId));
             } else {
               setSelectedPlugin(foundPlugin);
               setViewState('plugin-details');
             }
           } else {
-            setError(`Plugin "${targetPlugin}" not found in any marketplace`);
+            setError(t('pluginUI.notFoundInMarketplace', targetPlugin));
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load plugins');
+        setError(err instanceof Error ? err.message : t('pluginUI.failedLoadPlugins'));
       } finally {
         setLoading(false);
       }
@@ -252,8 +243,7 @@ export function DiscoverPlugins({
         pluginId: plugin.pluginId,
         entry: plugin.entry,
         marketplaceName: plugin.marketplaceName,
-        scope: 'user',
-      });
+        scope: 'user'});
 
       if (result.success) {
         successCount++;
@@ -261,8 +251,7 @@ export function DiscoverPlugins({
         failureCount++;
         newFailedPlugins.push({
           name: plugin.entry.name,
-          reason: (result as { success: false; error: string }).error,
-        });
+          reason: (result as { success: false; error: string }).error});
       }
     }
 
@@ -272,17 +261,11 @@ export function DiscoverPlugins({
 
     // Handle installation results
     if (failureCount === 0) {
-      const message =
-        `✓ Installed ${successCount} ${plural(successCount, 'plugin')}. ` + `Run /reload-plugins to activate.`;
-      setResult(message);
+      setResult(t('pluginUI.installedCount', successCount));
     } else if (successCount === 0) {
-      setError(`Failed to install: ${formatFailureDetails(newFailedPlugins, true)}`);
+      setError(t('pluginUI.failedInstall', formatFailureDetails(newFailedPlugins, true)));
     } else {
-      const message =
-        `✓ Installed ${successCount} of ${successCount + failureCount} plugins. ` +
-        `Failed: ${formatFailureDetails(newFailedPlugins, false)}. ` +
-        `Run /reload-plugins to activate successfully installed plugins.`;
-      setResult(message);
+      setResult(t('pluginUI.partialInstall', successCount, successCount + failureCount, formatFailureDetails(newFailedPlugins, false)));
     }
 
     if (successCount > 0) {
@@ -303,8 +286,7 @@ export function DiscoverPlugins({
       pluginId: plugin.pluginId,
       entry: plugin.entry,
       marketplaceName: plugin.marketplaceName,
-      scope,
-    });
+      scope});
 
     if (result.success) {
       const loaded = await findPluginOptionsTarget(plugin.pluginId);
@@ -313,8 +295,7 @@ export function DiscoverPlugins({
         setViewState({
           type: 'plugin-options',
           plugin: loaded,
-          pluginId: plugin.pluginId,
-        });
+          pluginId: plugin.pluginId});
         return;
       }
       setResult(result.message);
@@ -344,8 +325,7 @@ export function DiscoverPlugins({
     },
     {
       context: 'Confirmation',
-      isActive: viewState === 'plugin-details',
-    },
+      isActive: viewState === 'plugin-details'},
   );
 
   // Escape in plugin-list view (not search mode) - exit to parent menu
@@ -356,8 +336,7 @@ export function DiscoverPlugins({
     },
     {
       context: 'Confirmation',
-      isActive: viewState === 'plugin-list' && !isSearchMode,
-    },
+      isActive: viewState === 'plugin-list' && !isSearchMode},
   );
 
   // Handle entering search mode (non-escape keys)
@@ -411,8 +390,7 @@ export function DiscoverPlugins({
               setParentViewState({
                 type: 'manage-plugins',
                 targetPlugin: plugin.entry.name,
-                targetMarketplace: plugin.marketplaceName,
-              });
+                targetMarketplace: plugin.marketplaceName});
             } else {
               setSelectedPlugin(plugin);
               setViewState('plugin-details');
@@ -421,12 +399,10 @@ export function DiscoverPlugins({
             }
           }
         }
-      },
-    },
+      }},
     {
       context: 'Select',
-      isActive: viewState === 'plugin-list' && !isSearchMode,
-    },
+      isActive: viewState === 'plugin-list' && !isSearchMode},
   );
 
   useKeybindings(
@@ -449,12 +425,10 @@ export function DiscoverPlugins({
         if (selectedForInstall.size > 0) {
           void installSelectedPlugins();
         }
-      },
-    },
+      }},
     {
       context: 'Plugin',
-      isActive: viewState === 'plugin-list' && !isSearchMode,
-    },
+      isActive: viewState === 'plugin-list' && !isSearchMode},
   );
 
   // Plugin-details navigation
@@ -496,12 +470,10 @@ export function DiscoverPlugins({
           setViewState('plugin-list');
           setSelectedPlugin(null);
         }
-      },
-    },
+      }},
     {
       context: 'Select',
-      isActive: viewState === 'plugin-details' && !!selectedPlugin,
-    },
+      isActive: viewState === 'plugin-details' && !!selectedPlugin},
   );
 
   if (typeof viewState === 'object' && viewState.type === 'plugin-options') {
@@ -520,13 +492,13 @@ export function DiscoverPlugins({
         onDone={(outcome, detail) => {
           switch (outcome) {
             case 'configured':
-              finish(`✓ Installed and configured ${plugin.name}. Run /reload-plugins to apply.`);
+              finish(t('pluginUI.installedAndConfigured', plugin.name));
               break;
             case 'skipped':
-              finish(`✓ Installed ${plugin.name}. Run /reload-plugins to apply.`);
+              finish(t('pluginUI.installedSimple', plugin.name));
               break;
             case 'error':
-              finish(`Installed but failed to save config: ${detail}`);
+              finish(t('pluginUI.installedConfigError', detail));
               break;
           }
         }}
@@ -536,7 +508,7 @@ export function DiscoverPlugins({
 
   // Loading state
   if (loading) {
-    return <Text>Loading…</Text>;
+    return <Text>{t('pluginUI.loading')}</Text>;
   }
 
   // Error state
@@ -554,13 +526,13 @@ export function DiscoverPlugins({
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Plugin details</Text>
+          <Text bold>{t('pluginUI.pluginDetails')}</Text>
         </Box>
 
         <Box flexDirection="column" marginBottom={1}>
           <Text bold>{selectedPlugin.entry.name}</Text>
-          <Text dimColor>from {selectedPlugin.marketplaceName}</Text>
-          {selectedPlugin.entry.version && <Text dimColor>Version: {selectedPlugin.entry.version}</Text>}
+          <Text dimColor>{t('pluginUI.from')} {selectedPlugin.marketplaceName}</Text>
+          {selectedPlugin.entry.version && <Text dimColor>{t('pluginUI.version')}: {selectedPlugin.entry.version}</Text>}
           {selectedPlugin.entry.description && (
             <Box marginTop={1}>
               <Text>{selectedPlugin.entry.description}</Text>
@@ -569,7 +541,7 @@ export function DiscoverPlugins({
           {selectedPlugin.entry.author && (
             <Box marginTop={1}>
               <Text dimColor>
-                By:{' '}
+                {t('pluginUI.by')}{' '}
                 {typeof selectedPlugin.entry.author === 'string'
                   ? selectedPlugin.entry.author
                   : selectedPlugin.entry.author.name}
@@ -582,7 +554,7 @@ export function DiscoverPlugins({
 
         {installError && (
           <Box marginBottom={1}>
-            <Text color="error">Error: {installError}</Text>
+            <Text color="error">{t('pluginUI.error')}: {installError}</Text>
           </Box>
         )}
 
@@ -592,7 +564,7 @@ export function DiscoverPlugins({
               {detailsMenuIndex === index && <Text>{'> '}</Text>}
               {detailsMenuIndex !== index && <Text>{'  '}</Text>}
               <Text bold={detailsMenuIndex === index}>
-                {isInstalling && option.action.startsWith('install-') ? 'Installing…' : option.label}
+                {isInstalling && option.action.startsWith('install-') ? t('pluginUI.installing') : option.label}
               </Text>
             </Box>
           ))}
@@ -601,8 +573,8 @@ export function DiscoverPlugins({
         <Box marginTop={1}>
           <Text dimColor>
             <Byline>
-              <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description="select" />
-              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+              <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description={t("desc.select")} />
+              <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t("desc.back")} />
             </Byline>
           </Text>
         </Box>
@@ -615,12 +587,12 @@ export function DiscoverPlugins({
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
-          <Text bold>Discover plugins</Text>
+          <Text bold>{t('pluginUI.discoverPluginsTitle')}</Text>
         </Box>
         <EmptyStateMessage reason={emptyReason} />
         <Box marginTop={1}>
           <Text dimColor italic>
-            Esc to go back
+            {t('pluginUI.escGoBack')}
           </Text>
         </Box>
       </Box>
@@ -633,7 +605,7 @@ export function DiscoverPlugins({
   return (
     <Box flexDirection="column">
       <Box>
-        <Text bold>Discover plugins</Text>
+        <Text bold>{t('pluginUI.discoverPluginsTitle')}</Text>
         {pagination.needsPagination && (
           <Text dimColor>
             {' '}
@@ -665,14 +637,14 @@ export function DiscoverPlugins({
       {/* No search results */}
       {filteredPlugins.length === 0 && searchQuery && (
         <Box marginBottom={1}>
-          <Text dimColor>No plugins match &quot;{searchQuery}&quot;</Text>
+          <Text dimColor>{t('pluginUI.noSearchResults', searchQuery)}</Text>
         </Box>
       )}
 
       {/* Scroll up indicator */}
       {pagination.scrollPosition.canScrollUp && (
         <Box>
-          <Text dimColor> {figures.arrowUp} more above</Text>
+          <Text dimColor> {figures.arrowUp}{t('pluginUI.moreAbove')}</Text>
         </Box>
       )}
 
@@ -698,11 +670,11 @@ export function DiscoverPlugins({
                 {isInstallingThis ? figures.ellipsis : isSelectedForInstall ? figures.radioOn : figures.radioOff}{' '}
                 {plugin.entry.name}
                 <Text dimColor> · {plugin.marketplaceName}</Text>
-                {plugin.entry.tags?.includes('community-managed') && <Text dimColor> [Community Managed]</Text>}
+                {plugin.entry.tags?.includes('community-managed') && <Text dimColor> {t('pluginUI.communityManaged')}</Text>}
                 {installCounts && plugin.marketplaceName === OFFICIAL_MARKETPLACE_NAME && (
                   <Text dimColor>
                     {' · '}
-                    {formatInstallCount(installCounts.get(plugin.pluginId) ?? 0)} installs
+                    {t('pluginUI.installCount', formatInstallCount(installCounts.get(plugin.pluginId) ?? 0))}
                   </Text>
                 )}
               </Text>
@@ -719,7 +691,7 @@ export function DiscoverPlugins({
       {/* Scroll down indicator */}
       {pagination.scrollPosition.canScrollDown && (
         <Box>
-          <Text dimColor> {figures.arrowDown} more below</Text>
+          <Text dimColor> {figures.arrowDown}{t('pluginUI.moreBelow')}</Text>
         </Box>
       )}
 
@@ -742,8 +714,7 @@ export function DiscoverPlugins({
 
 function DiscoverPluginsKeyHint({
   hasSelection,
-  canToggle,
-}: {
+  canToggle}: {
   hasSelection: boolean;
   canToggle: boolean;
 }): React.ReactNode {
@@ -756,16 +727,16 @@ function DiscoverPluginsKeyHint({
               action="plugin:install"
               context="Plugin"
               fallback="i"
-              description="install"
+              description={t('desc.install')}
               bold
             />
           )}
-          <Text>type to search</Text>
+          <Text>{t('pluginUI.typeToSearch')}</Text>
           {canToggle && (
-            <ConfigurableShortcutHint action="plugin:toggle" context="Plugin" fallback="Space" description="toggle" />
+            <ConfigurableShortcutHint action="plugin:toggle" context="Plugin" fallback="Space" description={t('desc.toggle')} />
           )}
-          <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description="details" />
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+          <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description={t('desc.details')} />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.back')} />
         </Byline>
       </Text>
     </Box>
@@ -780,44 +751,44 @@ function EmptyStateMessage({ reason }: { reason: EmptyMarketplaceReason | null }
     case 'git-not-installed':
       return (
         <>
-          <Text dimColor>Git is required to install marketplaces.</Text>
-          <Text dimColor>Please install git and restart Claude Code.</Text>
+          <Text dimColor>{t('pluginUI.gitRequired')}</Text>
+          <Text dimColor>{t('pluginUI.installGit')}</Text>
         </>
       );
     case 'all-blocked-by-policy':
       return (
         <>
-          <Text dimColor>Your organization policy does not allow any external marketplaces.</Text>
-          <Text dimColor>Contact your administrator.</Text>
+          <Text dimColor>{t('pluginUI.policyBlocked')}</Text>
+          <Text dimColor>{t('pluginUI.contactAdmin')}</Text>
         </>
       );
     case 'policy-restricts-sources':
       return (
         <>
-          <Text dimColor>Your organization restricts which marketplaces can be added.</Text>
-          <Text dimColor>Switch to the Marketplaces tab to view allowed sources.</Text>
+          <Text dimColor>{t('pluginUI.policyRestricts')}</Text>
+          <Text dimColor>{t('pluginUI.viewAllowedSources')}</Text>
         </>
       );
     case 'all-marketplaces-failed':
       return (
         <>
-          <Text dimColor>Failed to load marketplace data.</Text>
-          <Text dimColor>Check your network connection.</Text>
+          <Text dimColor>{t('pluginUI.loadFailed')}</Text>
+          <Text dimColor>{t('pluginUI.checkNetwork')}</Text>
         </>
       );
     case 'all-plugins-installed':
       return (
         <>
-          <Text dimColor>All available plugins are already installed.</Text>
-          <Text dimColor>Check for new plugins later or add more marketplaces.</Text>
+          <Text dimColor>{t('pluginUI.allPluginsInstalled')}</Text>
+          <Text dimColor>{t('pluginUI.checkLater')}</Text>
         </>
       );
     case 'no-marketplaces-configured':
     default:
       return (
         <>
-          <Text dimColor>No plugins available.</Text>
-          <Text dimColor>Add a marketplace first using the Marketplaces tab.</Text>
+          <Text dimColor>{t('pluginUI.noPlugins')}</Text>
+          <Text dimColor>{t('pluginUI.addMarketplaceHint')}</Text>
         </>
       );
   }

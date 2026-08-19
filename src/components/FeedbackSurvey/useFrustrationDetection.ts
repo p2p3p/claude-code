@@ -53,8 +53,7 @@ export function useFrustrationDetection(
     } else {
       saveGlobalConfig((current: any) => ({
         ...current,
-        transcriptShareDismissed: true,
-      }))
+        transcriptShareDismissed: true}))
       setState('closed')
     }
   }

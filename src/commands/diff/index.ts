@@ -1,8 +1,8 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 export default {
   type: 'local-jsx',
   name: 'diff',
-  description: 'View uncommitted changes and per-turn diffs',
-  load: () => import('./diff.js'),
-} satisfies Command
+  description: t('cmd.descDiff'),
+  load: () => import('./diff.js')} satisfies Command

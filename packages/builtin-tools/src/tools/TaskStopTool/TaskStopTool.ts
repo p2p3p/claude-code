@@ -2,6 +2,7 @@ import { z } from 'zod/v4'
 import type { TaskStateBase } from 'src/Task.js'
 import { buildTool, type ToolDef } from 'src/Tool.js'
 import { stopTask } from 'src/tasks/stopTask.js'
+import { t } from 'src/utils/i18n/index.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import { jsonStringify } from 'src/utils/slowOperations.js'
 import { DESCRIPTION, TASK_STOP_TOOL_NAME } from './prompt.js'
@@ -38,12 +39,12 @@ export type Output = z.infer<OutputSchema>
 
 export const TaskStopTool = buildTool({
   name: TASK_STOP_TOOL_NAME,
-  searchHint: 'kill a running background task',
+  searchHint: t('toolUI.taskStop.searchHint'),
   // KillShell is the deprecated name - kept as alias for backward compatibility
   // with existing transcripts and SDK users
   aliases: ['KillShell'],
   maxResultSizeChars: 100_000,
-  userFacingName: () => (process.env.USER_TYPE === 'ant' ? '' : 'Stop Task'),
+  userFacingName: () => (process.env.USER_TYPE === 'ant' ? '' : t('toolUI.taskStop.userFacingName')),
   get inputSchema(): InputSchema {
     return inputSchema()
   },
@@ -63,7 +64,7 @@ export const TaskStopTool = buildTool({
     if (!id) {
       return {
         result: false,
-        message: 'Missing required parameter: task_id',
+        message: t('toolUI.taskStop.missingTaskId'),
         errorCode: 1,
       }
     }
@@ -74,7 +75,7 @@ export const TaskStopTool = buildTool({
     if (!task) {
       return {
         result: false,
-        message: `No task found with ID: ${id}`,
+        message: t('toolUI.taskStop.noTaskFound', { id }),
         errorCode: 1,
       }
     }
@@ -82,7 +83,7 @@ export const TaskStopTool = buildTool({
     if (task.status !== 'running') {
       return {
         result: false,
-        message: `Task ${id} is not running (status: ${task.status})`,
+        message: t('toolUI.taskStop.notRunning', { id, status: task.status }),
         errorCode: 3,
       }
     }
@@ -90,7 +91,7 @@ export const TaskStopTool = buildTool({
     return { result: true }
   },
   async description() {
-    return `Stop a running background task by ID`
+    return t('toolUI.taskStop.description')
   },
   async prompt() {
     return DESCRIPTION
@@ -111,7 +112,7 @@ export const TaskStopTool = buildTool({
     // Support both task_id and shell_id (deprecated KillShell compat)
     const id = task_id ?? shell_id
     if (!id) {
-      throw new Error('Missing required parameter: task_id')
+      throw new Error(t('toolUI.taskStop.missingTaskId'))
     }
 
     const result = await stopTask(id, {
@@ -121,7 +122,7 @@ export const TaskStopTool = buildTool({
 
     return {
       data: {
-        message: `Successfully stopped task: ${result.taskId} (${result.command})`,
+        message: t('toolUI.taskStop.stoppedSuccessfully', result.taskId, result.command),
         task_id: result.taskId,
         task_type: result.taskType,
         command: result.command,

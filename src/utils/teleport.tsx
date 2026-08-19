@@ -6,8 +6,7 @@ import { getOriginalCwd, getSessionId } from 'src/bootstrap/state.js';
 import { checkGate_CACHED_OR_BLOCKING } from 'src/services/analytics/growthbook.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
 import { isPolicyAllowed } from 'src/services/policyLimits/index.js';
 import { z } from 'zod/v4';
 import { getTeleportErrors, TeleportError, type TeleportLocalErrorType } from '../components/TeleportError.js';
@@ -15,7 +14,7 @@ import { getOauthConfig } from '../constants/oauth.js';
 import type { SDKMessage } from '../entrypoints/agentSdkTypes.js';
 import type { Root } from '@anthropic/ink';
 import { KeybindingSetup } from '../keybindings/KeybindingProviderSetup.js';
-import { queryHaiku } from '../services/api/claude.js';
+import { queryHaiku } from '../services/api/anthropic/index.js';
 import { getSessionLogsViaOAuth, getTeleportEvents } from '../services/api/sessionIngress.js';
 import { getOrganizationUUID } from '../services/oauth/client.js';
 import { AppStateProvider } from '../state/AppState.js';
@@ -25,6 +24,7 @@ import { checkAndRefreshOAuthTokenIfNeeded, getClaudeAIOAuthTokens } from './aut
 import { checkGithubAppInstalled } from './background/remote/preconditions.js';
 import { deserializeMessages, type TeleportRemoteResponse } from './conversationRecovery.js';
 import { getCwd } from './cwd.js';
+import { t } from './i18n/index.js';
 import { logForDebugging } from './debug.js';
 import { detectCurrentRepositoryWithHost, parseGitHubRepository, parseGitRemote } from './detectRepository.js';
 import { isEnvTruthy } from './envUtils.js';
@@ -46,8 +46,7 @@ import {
   type GitSource,
   getBranchFromSession,
   getOAuthHeaders,
-  type SessionResource,
-} from './teleport/api.js';
+  type SessionResource} from './teleport/api.js';
 import { fetchEnvironments } from './teleport/environments.js';
 import { createAndUploadGitBundle } from './teleport/gitBundle.js';
 
@@ -66,11 +65,11 @@ export type TeleportProgressCallback = (step: TeleportProgressStep) => void;
  */
 function createTeleportResumeSystemMessage(branchError: Error | null): SystemMessage {
   if (branchError === null) {
-    return createSystemMessage('Session resumed', 'suggestion');
+    return createSystemMessage(t('teleport.sessionResumed'), 'suggestion');
   }
   const formattedError =
     branchError instanceof TeleportOperationError ? branchError.formattedMessage : branchError.message;
-  return createSystemMessage(`Session resumed without branch: ${formattedError}`, 'warning');
+  return createSystemMessage(t('teleport.sessionResumedWithoutBranch', formattedError), 'warning');
 }
 
 /**
@@ -79,9 +78,8 @@ function createTeleportResumeSystemMessage(branchError: Error | null): SystemMes
  */
 function createTeleportResumeUserMessage() {
   return createUserMessage({
-    content: `This session is being continued from another machine. Application state may have changed. The updated working directory is ${getOriginalCwd()}`,
-    isMeta: true,
-  });
+    content: t('teleport.sessionContinuedFromAnotherMachine', getOriginalCwd()),
+    isMeta: true});
 }
 
 type TeleportToRemoteResponse = {
@@ -132,21 +130,16 @@ async function generateTitleAndBranch(description: string, signal: AbortSignal):
           type: 'object',
           properties: {
             title: { type: 'string' },
-            branch: { type: 'string' },
-          },
+            branch: { type: 'string' }},
           required: ['title', 'branch'],
-          additionalProperties: false,
-        },
-      },
+          additionalProperties: false}},
       signal,
       options: {
         querySource: 'teleport_generate_title',
         agents: [],
         isNonInteractiveSession: false,
         hasAppendSystemPrompt: false,
-        mcpTools: [],
-      },
-    });
+        mcpTools: []}});
 
     // Extract text from the response
     const firstBlock = response.message!.content?.[0] as { type?: string; text?: string } | undefined;
@@ -159,8 +152,7 @@ async function generateTitleAndBranch(description: string, signal: AbortSignal):
     if (parseResult.success) {
       return {
         title: parseResult.data.title || fallbackTitle,
-        branchName: parseResult.data.branch || fallbackBranch,
-      };
+        branchName: parseResult.data.branch || fallbackBranch};
     }
 
     return { title: fallbackTitle, branchName: fallbackBranch };
@@ -179,10 +171,8 @@ export async function validateGitState(): Promise<void> {
   if (!isClean) {
     logEvent('tengu_teleport_error_git_not_clean', {});
     const error = new TeleportOperationError(
-      'Git working directory is not clean. Please commit or stash your changes before using --teleport.',
-      chalk.red(
-        'Error: Git working directory is not clean. Please commit or stash your changes before using --teleport.\n',
-      ),
+      t('teleport.dirtyGitDir'),
+      chalk.red(t('teleport.dirtyGitMsg')),
     );
     throw error;
   }
@@ -286,8 +276,8 @@ async function checkoutBranch(branchName: string): Promise<void> {
   if (checkoutCode !== 0) {
     logEvent('tengu_teleport_error_branch_checkout_failed', {});
     throw new TeleportOperationError(
-      `Failed to checkout branch '${branchName}': ${checkoutStderr}`,
-      chalk.red(`Failed to checkout branch '${branchName}'\n`),
+      `${t('teleport.failedCheckoutBranch', branchName)}: ${checkoutStderr}`,
+      chalk.red(`${t('teleport.failedCheckoutBranch', branchName)}\n`),
     );
   }
 
@@ -388,8 +378,8 @@ export async function validateSessionRepository(sessionData: SessionResource): P
     // Session has no repo requirement
     logForDebugging(
       currentRepo
-        ? 'Session has no associated repository, proceeding without validation'
-        : 'Session has no repo requirement and not in git directory, proceeding',
+        ? t('teleport.noRepoServerSide')
+        : t('teleport.noRepoNotGitDir'),
     );
     return { status: 'no_repo_required' };
   }
@@ -410,8 +400,7 @@ export async function validateSessionRepository(sessionData: SessionResource): P
       status: 'not_in_repo',
       sessionRepo,
       sessionHost: sessionParsed?.host,
-      currentRepo: null,
-    };
+      currentRepo: null};
   }
 
   // Compare both owner/repo and host to avoid cross-instance mismatches.
@@ -429,8 +418,7 @@ export async function validateSessionRepository(sessionData: SessionResource): P
     return {
       status: 'match',
       sessionRepo,
-      currentRepo,
-    };
+      currentRepo};
   }
 
   // Repo mismatch — keep sessionRepo/currentRepo as plain "owner/repo" so
@@ -441,8 +429,7 @@ export async function validateSessionRepository(sessionData: SessionResource): P
     sessionRepo,
     currentRepo,
     sessionHost: sessionParsed?.host,
-    currentHost: currentParsed?.host,
-  };
+    currentHost: currentParsed?.host};
 }
 
 /**
@@ -457,7 +444,7 @@ export async function teleportResumeCodeSession(
   onProgress?: TeleportProgressCallback,
 ): Promise<TeleportRemoteResponse> {
   if (!isPolicyAllowed('allow_remote_sessions')) {
-    throw new Error("Remote sessions are disabled by your organization's policy.");
+    throw new Error(t('teleport.disabledByOrgPolicy'));
   }
 
   logForDebugging(`Resuming code session ID: ${sessionId}`);
@@ -466,10 +453,9 @@ export async function teleportResumeCodeSession(
     const accessToken = getClaudeAIOAuthTokens()?.accessToken;
     if (!accessToken) {
       logEvent('tengu_teleport_resume_error', {
-        error_type: 'no_access_token' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        error_type: 'no_access_token' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       throw new Error(
-        'Claude Code web sessions require authentication with a Claude.ai account. API key authentication is not sufficient. Please run /login to authenticate, or check your authentication status with /status.',
+        t('teleport.requiresAuth'),
       );
     }
 
@@ -477,9 +463,8 @@ export async function teleportResumeCodeSession(
     const orgUUID = await getOrganizationUUID();
     if (!orgUUID) {
       logEvent('tengu_teleport_resume_error', {
-        error_type: 'no_org_uuid' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
-      throw new Error('Unable to get organization UUID for constructing session URL');
+        error_type: 'no_org_uuid' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
+      throw new Error(t('teleport.noOrgUUID'));
     }
 
     // Fetch and validate repository matches before resuming
@@ -494,24 +479,22 @@ export async function teleportResumeCodeSession(
         break;
       case 'not_in_repo': {
         logEvent('tengu_teleport_error_repo_not_in_git_dir_sessions_api', {
-          sessionId: sessionId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        });
+          sessionId: sessionId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
         // Include host for GHE users so they know which instance the repo is on
         const notInRepoDisplay =
           repoValidation.sessionHost && repoValidation.sessionHost.toLowerCase() !== 'github.com'
             ? `${repoValidation.sessionHost}/${repoValidation.sessionRepo}`
             : repoValidation.sessionRepo;
         throw new TeleportOperationError(
-          `You must run claude --teleport ${sessionId} from a checkout of ${notInRepoDisplay}.`,
+          t('teleport.mustRunFromCheckout', sessionId, notInRepoDisplay),
           chalk.red(
-            `You must run claude --teleport ${sessionId} from a checkout of ${chalk.bold(notInRepoDisplay)}.\n`,
+            `${t('teleport.mustRunFromCheckout', sessionId, notInRepoDisplay)}\n`,
           ),
         );
       }
       case 'mismatch': {
         logEvent('tengu_teleport_error_repo_mismatch_sessions_api', {
-          sessionId: sessionId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        });
+          sessionId: sessionId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
         // Only include host prefix when hosts actually differ to disambiguate
         // cross-instance mismatches; for same-host mismatches the host is noise.
         const hostsDiffer =
@@ -526,20 +509,20 @@ export async function teleportResumeCodeSession(
           ? `${repoValidation.currentHost}/${repoValidation.currentRepo}`
           : repoValidation.currentRepo;
         throw new TeleportOperationError(
-          `You must run claude --teleport ${sessionId} from a checkout of ${sessionDisplay}.\nThis repo is ${currentDisplay}.`,
+          t('teleport.repoMismatch', sessionId, sessionDisplay, currentDisplay),
           chalk.red(
-            `You must run claude --teleport ${sessionId} from a checkout of ${chalk.bold(sessionDisplay)}.\nThis repo is ${chalk.bold(currentDisplay)}.\n`,
+            `${t('teleport.repoMismatch', sessionId, sessionDisplay, currentDisplay)}\n`,
           ),
         );
       }
       case 'error':
         throw new TeleportOperationError(
-          repoValidation.errorMessage || 'Failed to validate session repository',
-          chalk.red(`Error: ${repoValidation.errorMessage || 'Failed to validate session repository'}\n`),
+          repoValidation.errorMessage || t('teleport.failedValidateRepo'),
+          chalk.red(`${t('teleport.errorPrefix')}${repoValidation.errorMessage || t('teleport.failedValidateRepo')}\n`),
         );
       default: {
         const _exhaustive: never = repoValidation.status;
-        throw new Error(`Unhandled repo validation status: ${_exhaustive}`);
+        throw new Error(t('teleport.unhandledRepoValidationStatus', _exhaustive));
       }
     }
 
@@ -552,10 +535,9 @@ export async function teleportResumeCodeSession(
     const err = toError(error);
     logError(err);
     logEvent('tengu_teleport_resume_error', {
-      error_type: 'resume_session_id_catch' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      error_type: 'resume_session_id_catch' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
-    throw new TeleportOperationError(err.message, chalk.red(`Error: ${err.message}\n`));
+    throw new TeleportOperationError(err.message, chalk.red(`${t('teleport.errorPrefix')}${err.message}\n`));
   }
 }
 
@@ -571,8 +553,7 @@ async function handleTeleportPrerequisites(root: Root, errorsToIgnore?: Set<Tele
       error_types: Array.from(errors).join(',') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       errors_ignored: Array.from(errorsToIgnore || []).join(
         ',',
-      ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
     // Show TeleportError dialog for user interaction
     await new Promise<void>(resolve => {
@@ -586,8 +567,7 @@ async function handleTeleportPrerequisites(root: Root, errorsToIgnore?: Set<Tele
                 logEvent('tengu_teleport_errors_resolved', {
                   error_types: Array.from(errors).join(
                     ',',
-                  ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-                });
+                  ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
                 void resolve();
               }}
             />
@@ -619,8 +599,7 @@ export async function teleportToRemoteWithErrorHandling(
     initialMessage: description,
     signal,
     branchName,
-    onBundleFail: msg => process.stderr.write(`\n${msg}\n`),
-  });
+    onBundleFail: msg => process.stderr.write(`\n${msg}\n`)});
 }
 
 /**
@@ -661,7 +640,7 @@ export async function teleportFromSessionsAPI(
     logForDebugging(`[teleport] Session logs fetched in ${Date.now() - logsStartTime}ms`);
 
     if (logs === null) {
-      throw new Error('Failed to fetch session logs');
+      throw new Error(t('teleport.failedFetchSessionLogs'));
     }
 
     // Filter to get only transcript messages, excluding sidechain messages
@@ -682,25 +661,23 @@ export async function teleportFromSessionsAPI(
 
     return {
       log: messages,
-      branch,
-    };
+      branch};
   } catch (error) {
     const err = toError(error);
 
     // Handle 404 specifically
     if (axios.isAxiosError(error) && error.response?.status === 404) {
       logEvent('tengu_teleport_error_session_not_found_404', {
-        sessionId: sessionId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        sessionId: sessionId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       throw new TeleportOperationError(
-        `${sessionId} not found.`,
-        `${sessionId} not found.\n${chalk.dim('Run /status in Claude Code to check your account.')}`,
+        t('teleport.sessionNotFound', sessionId),
+        `${t('teleport.sessionNotFound', sessionId)}\n${chalk.dim(t('teleport.sessionNotFoundTip'))}`,
       );
     }
 
     logError(err);
 
-    throw new Error(`Failed to fetch session from Sessions API: ${err.message}`);
+    throw new Error(t('teleport.failedFetchSession', err.message));
   }
 }
 
@@ -726,19 +703,18 @@ export async function pollRemoteSessionEvents(
 ): Promise<PollRemoteSessionResponse> {
   const accessToken = getClaudeAIOAuthTokens()?.accessToken;
   if (!accessToken) {
-    throw new Error('No access token for polling');
+    throw new Error(t('teleport.noAccessTokenForPolling'));
   }
 
   const orgUUID = await getOrganizationUUID();
   if (!orgUUID) {
-    throw new Error('No org UUID for polling');
+    throw new Error(t('teleport.noOrgUUIDForPolling'));
   }
 
   const headers = {
     ...getOAuthHeaders(accessToken),
     'anthropic-beta': 'ccr-byoc-2025-07-29',
-    'x-organization-uuid': orgUUID,
-  };
+    'x-organization-uuid': orgUUID};
   const eventsUrl = `${getOauthConfig().BASE_API_URL}/v1/sessions/${sessionId}/events`;
 
   type EventsResponse = {
@@ -756,16 +732,15 @@ export async function pollRemoteSessionEvents(
     const eventsResponse = await axios.get(eventsUrl, {
       headers,
       params: cursor ? { after_id: cursor } : undefined,
-      timeout: 30000,
-    });
+      timeout: 30000});
 
     if (eventsResponse.status !== 200) {
-      throw new Error(`Failed to fetch session events: ${eventsResponse.statusText}`);
+      throw new Error(t('teleport.failedFetchSessionEvents', eventsResponse.statusText));
     }
 
     const eventsData: EventsResponse = eventsResponse.data;
     if (!eventsData?.data || !Array.isArray(eventsData.data)) {
-      throw new Error('Invalid events response');
+      throw new Error(t('teleport.invalidEventsResponse'));
     }
 
     for (const event of eventsData.data) {
@@ -913,12 +888,10 @@ export async function teleportToRemote(options: {
       const headers = {
         ...getOAuthHeaders(accessToken),
         'anthropic-beta': 'ccr-byoc-2025-07-29',
-        'x-organization-uuid': orgUUID,
-      };
+        'x-organization-uuid': orgUUID};
       const envVars = {
         CLAUDE_CODE_OAUTH_TOKEN: accessToken,
-        ...(options.environmentVariables ?? {}),
-      };
+        ...(options.environmentVariables ?? {})};
 
       // Bundle mode: upload local working tree (uncommitted changes via
       // refs/seed/stash), container clones from the bundle. No GitHub.
@@ -930,8 +903,7 @@ export async function teleportToRemote(options: {
           {
             oauthToken: accessToken,
             sessionId: getSessionId(),
-            baseUrl: getOauthConfig().BASE_API_URL,
-          },
+            baseUrl: getOauthConfig().BASE_API_URL},
           { signal },
         );
         if (!bundle.success) {
@@ -944,30 +916,26 @@ export async function teleportToRemote(options: {
           size_bytes: bundle.bundleSizeBytes,
           scope: bundle.scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           has_wip: bundle.hasWip,
-          reason: 'explicit_env_bundle' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        });
+          reason: 'explicit_env_bundle' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       } else {
         const repoInfo = await detectCurrentRepositoryWithHost();
         if (repoInfo) {
           gitSource = {
             type: 'git_repository',
             url: `https://${repoInfo.host}/${repoInfo.owner}/${repoInfo.name}`,
-            revision: options.branchName,
-          };
+            revision: options.branchName};
         }
       }
 
       const requestBody = {
-        title: options.title || options.description || 'Remote task',
+        title: options.title || options.description || t('teleport.remoteTask'),
         events: [],
         session_context: {
           sources: gitSource ? [gitSource] : [],
           ...(seedBundleFileId && { seed_bundle_file_id: seedBundleFileId }),
           outcomes: [],
-          environment_variables: envVars,
-        },
-        environment_id: options.environmentId,
-      };
+          environment_variables: envVars},
+        environment_id: options.environmentId};
       logForDebugging(
         `[teleportToRemote] explicit env ${options.environmentId}, ${Object.keys(envVars).length} env vars, ${seedBundleFileId ? `bundle=${seedBundleFileId}` : `source=${gitSource?.url ?? 'none'}@${options.branchName ?? 'default'}`}`,
       );
@@ -983,8 +951,7 @@ export async function teleportToRemote(options: {
       }
       return {
         id: sessionData.id,
-        title: sessionData.title || requestBody.title,
-      };
+        title: sessionData.title || requestBody.title};
     }
 
     let gitSource: GitSource | null = null;
@@ -1015,7 +982,7 @@ export async function teleportToRemote(options: {
       sessionBranch = options.reuseOutcomeBranch;
     } else {
       const generated = await generateTitleAndBranch(
-        options.description || initialMessage || 'Background task',
+        options.description || initialMessage || t('teleport.backgroundTask'),
         signal,
       );
       sessionTitle = options.title || generated.title;
@@ -1078,9 +1045,7 @@ export async function teleportToRemote(options: {
         // The revision specifies which ref to checkout as the base branch
         revision,
         ...(options.reuseOutcomeBranch && {
-          allow_unrestricted_git_push: true,
-        }),
-      };
+          allow_unrestricted_git_push: true})};
       // type: 'github' is used for all GitHub-compatible hosts (github.com and GHE).
       // The CLI can't distinguish GHE from non-GitHub hosts (GitLab, Bitbucket)
       // client-side — the backend validates the URL against configured GHE instances
@@ -1090,9 +1055,7 @@ export async function teleportToRemote(options: {
         git_info: {
           type: 'github',
           repo: `${owner}/${name}`,
-          branches: [sessionBranch],
-        },
-      };
+          branches: [sessionBranch]}};
     }
 
     // Bundle fallback. Only try bundle if GitHub wasn't viable, the gate is
@@ -1106,31 +1069,30 @@ export async function teleportToRemote(options: {
         {
           oauthToken: accessToken,
           sessionId: getSessionId(),
-          baseUrl: getOauthConfig().BASE_API_URL,
-        },
+          baseUrl: getOauthConfig().BASE_API_URL},
         { signal },
       );
       if (!bundle.success) {
         const failBundle = bundle as { success: false; error: string; failReason?: string };
         logError(new Error(`Bundle upload failed: ${failBundle.error}`));
         // Only steer users to GitHub setup when there's a remote to clone from.
-        const setup = repoInfo ? '. Please setup GitHub on https://claude.ai/code' : '';
+        const setup = repoInfo ? t('teleport.bundleSetupHint') : '';
         let msg: string;
         switch (failBundle.failReason) {
           case 'empty_repo':
-            msg = 'Repository has no commits — run `git add . && git commit -m "initial"` then retry';
+            msg = t('teleport.noCommits');
             break;
           case 'too_large':
-            msg = `Repo is too large to teleport${setup}`;
+            msg = `${t('teleport.bundleTooLarge')}${setup}`;
             break;
           case 'git_error':
-            msg = `Failed to create git bundle (${failBundle.error})${setup}`;
+            msg = `${t('teleport.bundleGitError', failBundle.error)}${setup}`;
             break;
           case undefined:
-            msg = `Bundle upload failed: ${failBundle.error}${setup}`;
+            msg = `${t('teleport.bundleUploadFailed', failBundle.error)}${setup}`;
             break;
           default: {
-            msg = `Bundle upload failed: ${failBundle.error}`;
+            msg = `${t('teleport.bundleUploadFailed', failBundle.error)}`;
           }
         }
         options.onBundleFail?.(msg);
@@ -1141,8 +1103,7 @@ export async function teleportToRemote(options: {
         size_bytes: bundle.bundleSizeBytes,
         scope: bundle.scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         has_wip: bundle.hasWip,
-        reason: sourceReason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        reason: sourceReason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     }
 
     logEvent('tengu_teleport_source_decision', {
@@ -1151,8 +1112,7 @@ export async function teleportToRemote(options: {
         ? 'github'
         : seedBundleFileId
           ? 'bundle'
-          : 'empty') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+          : 'empty') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
     if (!gitSource && !seedBundleFileId) {
       logForDebugging('[teleportToRemote] No repository detected — session will have an empty sandbox');
@@ -1225,8 +1185,7 @@ export async function teleportToRemote(options: {
     const headers = {
       ...getOAuthHeaders(accessToken),
       'anthropic-beta': 'ccr-byoc-2025-07-29',
-      'x-organization-uuid': orgUUID,
-    };
+      'x-organization-uuid': orgUUID};
 
     const sessionContext = {
       sources: gitSource ? [gitSource] : [],
@@ -1235,8 +1194,7 @@ export async function teleportToRemote(options: {
       model: options.model ?? getMainLoopModel(),
       ...(options.reuseOutcomeBranch && { reuse_outcome_branches: true }),
       ...(options.githubPr && { github_pr: options.githubPr }),
-      ...(options.source && { source: options.source }),
-    };
+      ...(options.source && { source: options.source })};
 
     // CreateCCRSessionPayload has no permission_mode field — a top-level
     // body entry is silently dropped by the proto parser server-side.
@@ -1253,10 +1211,7 @@ export async function teleportToRemote(options: {
           request: {
             subtype: 'set_permission_mode',
             mode: options.permissionMode,
-            ultraplan: options.ultraplan,
-          },
-        },
-      });
+            ultraplan: options.ultraplan}}});
     }
     if (initialMessage) {
       events.push({
@@ -1268,18 +1223,14 @@ export async function teleportToRemote(options: {
           parent_tool_use_id: null,
           message: {
             role: 'user',
-            content: initialMessage,
-          },
-        },
-      });
+            content: initialMessage}}});
     }
 
     const requestBody = {
       title: options.ultraplan ? `ultraplan: ${sessionTitle}` : sessionTitle,
       events,
       session_context: sessionContext,
-      environment_id: environmentId,
-    };
+      environment_id: environmentId};
 
     logForDebugging(`Creating session with payload: ${jsonStringify(requestBody, null, 2)}`);
 
@@ -1308,8 +1259,7 @@ export async function teleportToRemote(options: {
     logForDebugging(`Successfully created remote session: ${sessionData.id}`);
     return {
       id: sessionData.id,
-      title: sessionData.title || requestBody.title,
-    };
+      title: sessionData.title || requestBody.title};
   } catch (error) {
     const err = toError(error);
     logError(err);
@@ -1333,8 +1283,7 @@ export async function archiveRemoteSession(sessionId: string, timeout = 10_000):
   const headers = {
     ...getOAuthHeaders(accessToken),
     'anthropic-beta': 'ccr-byoc-2025-07-29',
-    'x-organization-uuid': orgUUID,
-  };
+    'x-organization-uuid': orgUUID};
   const url = `${getOauthConfig().BASE_API_URL}/v1/sessions/${sessionId}/archive`;
   try {
     const resp = await axios.post(url, {}, { headers, timeout, validateStatus: s => s < 500 });

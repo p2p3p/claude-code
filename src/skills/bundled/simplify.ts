@@ -64,6 +64,5 @@ export function registerSimplifySkill(): void {
         prompt += `\n\n## Additional Focus\n\n${args}`
       }
       return [{ type: 'text', text: prompt }]
-    },
-  })
+    }})
 }

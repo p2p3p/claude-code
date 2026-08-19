@@ -1,8 +1,8 @@
 import type { Command } from '../../commands.js'
 import {
   checkCachedPassesEligibility,
-  getCachedReferrerReward,
-} from '../../services/api/referral.js'
+  getCachedReferrerReward} from '../../services/api/referral.js'
+import { t } from '../../utils/i18n/index.js'
 
 export default {
   type: 'local-jsx',
@@ -10,13 +10,12 @@ export default {
   get description() {
     const reward = getCachedReferrerReward()
     if (reward) {
-      return 'Share a free week of Claude Code with friends and earn extra usage'
+      return t('passesCmd.descShareEarn')
     }
-    return 'Share a free week of Claude Code with friends'
+    return t('passesCmd.descShare')
   },
   get isHidden() {
     const { eligible, hasCache } = checkCachedPassesEligibility()
     return !eligible || !hasCache
   },
-  load: () => import('./passes.js'),
-} satisfies Command
+  load: () => import('./passes.js')} satisfies Command

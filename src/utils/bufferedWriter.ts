@@ -11,8 +11,7 @@ export function createBufferedWriter({
   flushIntervalMs = 1000,
   maxBufferSize = 100,
   maxBufferBytes = Infinity,
-  immediateMode = false,
-}: {
+  immediateMode = false}: {
   writeFn: WriteFn
   flushIntervalMs?: number
   maxBufferSize?: number
@@ -95,6 +94,5 @@ export function createBufferedWriter({
     flush,
     dispose(): void {
       flush()
-    },
-  }
+    }}
 }

@@ -3,25 +3,23 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
-  writeFileSync,
-} from 'node:fs'
+  writeFileSync} from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { Command, LocalCommandResult } from '../../types/command.js'
 import {
   getSessionId,
   getSessionProjectDir,
-  getOriginalCwd,
-} from '../../bootstrap/state.js'
+  getOriginalCwd} from '../../bootstrap/state.js'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
 import { sanitizePath } from '../../utils/path.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 
 import * as childProcess from 'node:child_process'
 import { promisify } from 'node:util'
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * Sanitizes an error message before surfacing it to the user:
@@ -53,39 +51,32 @@ function execFileAsync(
 const SECRET_PATTERNS: Array<{ pattern: RegExp; replacement: string }> = [
   // Anthropic / OpenAI-style API keys
   {
-    pattern: /\b(sk-ant-[A-Za-z0-9_-]{20,})/g,
-    replacement: '[REDACTED_ANTHROPIC_KEY]',
-  },
+    pattern: /\b(sk-ant-[A-Za-z0-9_-]{20})/g,
+    replacement: '[REDACTED_ANTHROPIC_KEY]'},
   {
-    pattern: /\b(sk-[A-Za-z0-9_-]{20,})/g,
-    replacement: '[REDACTED_API_KEY]',
-  },
+    pattern: /\b(sk-[A-Za-z0-9_-]{20})/g,
+    replacement: '[REDACTED_API_KEY]'},
   // Bearer / Authorization tokens
   {
-    pattern: /\b(Bearer\s+)[A-Za-z0-9._~+/-]{20,}/gi,
-    replacement: '$1[REDACTED_TOKEN]',
-  },
+    pattern: /\b(Bearer\s+)[A-Za-z0-9._~+/-]{20}/gi,
+    replacement: '$1[REDACTED_TOKEN]'},
   // Generic: key/token/secret/password followed by = or : and a value
   {
     pattern:
-      /("(?:api[_-]?key|token|secret|password|passwd|auth)["\s]*[:=]\s*")[^"]{8,}"/gi,
-    replacement: '$1[REDACTED]"',
-  },
+      /("(?:api[_-]?key|token|secret|password|passwd|auth)["\s]*[:=]\s*")[^"]{8}"/gi,
+    replacement: '$1[REDACTED]"'},
   // AWS-style access keys
   {
     pattern: /\b(AKIA[A-Z0-9]{16})\b/g,
-    replacement: '[REDACTED_AWS_KEY]',
-  },
+    replacement: '[REDACTED_AWS_KEY]'},
   // GitHub personal access tokens (ghp_*, gho_*, ghs_*, ghr_*)
   {
-    pattern: /\b(gh[a-z]_[A-Za-z0-9_]{36,})/g,
-    replacement: '[REDACTED_GH_TOKEN]',
-  },
+    pattern: /\b(gh[a-z]_[A-Za-z0-9_]{36})/g,
+    replacement: '[REDACTED_GH_TOKEN]'},
   // Slack bot tokens (xoxb-*)
   {
-    pattern: /\b(xoxb-[A-Za-z0-9-]{30,})/g,
-    replacement: '[REDACTED_SLACK_TOKEN]',
-  },
+    pattern: /\b(xoxb-[A-Za-z0-9-]{30})/g,
+    replacement: '[REDACTED_SLACK_TOKEN]'},
   // NOTE: We intentionally do NOT redact generic ≥32-char hex strings because
   // they match legitimate git commit SHAs and base64 content, producing
   // garbled share output. Token detection is limited to prefixed patterns above.
@@ -188,7 +179,7 @@ async function uploadToGist(
   )
   const url = result.stdout.trim()
   if (!url.startsWith('https://')) {
-    throw new Error(`Unexpected gh gist output: ${url}`)
+    throw new Error(t('shareCmd.unexpectedGistOutput', url))
   }
   return url
 }
@@ -205,7 +196,7 @@ async function uploadTo0x0(filePath: string): Promise<string> {
   )
   const url = result.stdout.trim()
   if (!url.startsWith('https://') && !url.startsWith('http://')) {
-    throw new Error(`0x0.st returned unexpected output: ${url.slice(0, 100)}`)
+    throw new Error(t('shareCmd.unexpected0x0Output', url.slice(0, 100)))
   }
   return url
 }
@@ -241,23 +232,20 @@ function parseShareArgs(args: string): ShareOptions {
       maskSecrets: false,
       summaryOnly: false,
       allowPublicFallback: false,
-      valid: false,
-    }
+      valid: false}
   }
   return {
     isPublic: parts.includes('--public'),
     maskSecrets: parts.includes('--mask-secrets'),
     summaryOnly: parts.includes('--summary-only'),
     allowPublicFallback: parts.includes('--allow-public-fallback'),
-    valid: true,
-  }
+    valid: true}
 }
 
 const share: Command = {
   type: 'local',
   name: 'share',
-  description:
-    'Upload the current session log to GitHub Gist. Flags: --public, --private (default), --mask-secrets, --summary-only, --allow-public-fallback',
+  description: t('cmd.descShare'),
   isHidden: false,
   isEnabled: () => true,
   supportsNonInteractive: true,
@@ -268,16 +256,7 @@ const share: Command = {
       if (!opts.valid) {
         return {
           type: 'text',
-          value: [
-            'Usage: /share [--public|--private] [--mask-secrets] [--summary-only] [--allow-public-fallback]',
-            '',
-            '  --public               Create a public Gist (default: secret)',
-            '  --private              Create a secret Gist (default)',
-            '  --mask-secrets         Redact API keys, tokens, and secrets before uploading',
-            '  --summary-only         Upload a summary (first 200 chars per turn) instead of full log',
-            '  --allow-public-fallback  Fall back to 0x0.st if gh gist fails',
-          ].join('\n'),
-        }
+          value: t('shareCmd.usage')}
       }
 
       const sessionId = getSessionId()
@@ -292,53 +271,48 @@ const share: Command = {
         ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         summary_only: String(
           opts.summaryOnly,
-        ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+        ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
       if (!existsSync(logPath)) {
         logEvent('tengu_share_failed', {
           reason:
-            'log_not_found' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            'log_not_found' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return {
           type: 'text',
           value: [
-            '## Session log not found',
+            t('shareCmd.sessionLogNotFound'),
             '',
-            `Session: ${sessionId}`,
-            `Expected path: \`${logPath}\``,
+            t('shareCmd.session', sessionId),
+            t('shareCmd.expectedPath', logPath),
             '',
-            'The session log may not have been written yet. Try sending at least one message first.',
-          ].join('\n'),
-        }
+            t('shareCmd.logNotWrittenYet'),
+          ].join('\n')}
       }
 
       const hasGh = await ghAvailable()
       if (!hasGh && !opts.allowPublicFallback) {
         logEvent('tengu_share_failed', {
           reason:
-            'gh_not_installed' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            'gh_not_installed' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return {
           type: 'text',
           value: [
-            '## Share session log',
+            t('shareCmd.shareSessionLog'),
             '',
-            `Session: ${sessionId}`,
-            `Log file: \`${logPath}\``,
+            t('shareCmd.session', sessionId),
+            t('shareCmd.logFile', logPath),
             '',
-            'To upload to GitHub Gist automatically, install the `gh` CLI:',
+            t('shareCmd.installGhCli'),
             '  https://cli.github.com/',
             '',
-            'Then run:',
-            `  \`gh gist create "${logPath}" --secret --filename claude-session.jsonl\``,
+            t('shareCmd.thenRun'),
+            t('shareCmd.runGhCommand', logPath),
             '',
-            'Or use `--allow-public-fallback` to upload to 0x0.st instead.',
+            t('shareCmd.orUseFallback'),
             '',
-            '_Privacy note: the JSONL contains everything typed in this session,_',
-            '_including tool outputs. Review before sharing._',
-          ].join('\n'),
-        }
+            t('shareCmd.privacyNote1'),
+            t('shareCmd.privacyNote2'),
+          ].join('\n')}
       }
 
       // Prepare the content to upload
@@ -348,8 +322,7 @@ const share: Command = {
         if (!uploadContent) {
           return {
             type: 'text',
-            value: 'No conversation content found in session log.',
-          }
+            value: t('shareCmd.noConversationContent')}
         }
       } else {
         uploadContent = readFileSync(logPath, 'utf8')
@@ -371,7 +344,7 @@ const share: Command = {
         const msg = sanitizeErrorMessage(
           writeErr instanceof Error ? writeErr.message : String(writeErr),
         )
-        return { type: 'text', value: `Failed to prepare share file: ${msg}` }
+        return { type: 'text', value: t('shareCmd.failedPrepare', msg) }
       }
 
       try {
@@ -399,49 +372,43 @@ const share: Command = {
             ? 'public'
             : 'private') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           method:
-            method as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            method as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return {
           type: 'text',
           value: [
-            '## Session shared',
+            t('shareCmd.sessionShared'),
             '',
-            `URL:        ${url}`,
-            `Session:    ${sessionId}`,
-            `Visibility: ${opts.isPublic ? 'public' : 'secret'}`,
-            `Method:     ${method}`,
-            opts.summaryOnly ? 'Content:    summary only (truncated)' : '',
-            opts.maskSecrets ? 'Secrets:    masked before upload' : '',
+            t('shareCmd.urlLabel', url),
+            t('shareCmd.session', sessionId),
+            t('shareCmd.visibility', opts.isPublic ? 'public' : 'secret'),
+            t('shareCmd.method', method),
+            opts.summaryOnly ? t('shareCmd.contentSummaryOnly') : '',
+            opts.maskSecrets ? t('shareCmd.secretsMasked') : '',
             '',
-            '_Privacy note: the JSONL contains everything typed in this session._',
+            t('shareCmd.privacyNote'),
           ]
             .filter(l => l !== '')
-            .join('\n'),
-        }
+            .join('\n')}
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err)
         logEvent('tengu_share_failed', {
           reason:
-            'upload_error' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            'upload_error' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return {
           type: 'text',
           value: [
-            '## Failed to share session',
+            t('shareCmd.failedShare'),
             '',
-            `Error: ${msg}`,
+            t('shareCmd.errorLabel', msg),
             '',
             hasGh
-              ? 'Make sure you are logged in: `gh auth login`'
-              : 'Install the `gh` CLI: https://cli.github.com/',
-            `Log file: \`${logPath}\``,
-          ].join('\n'),
-        }
+              ? t('shareCmd.makeSureLoggedIn')
+              : t('shareCmd.installGhCliHint'),
+            t('shareCmd.logFile', logPath),
+          ].join('\n')}
       } finally {
         rmSync(tmpDir, { recursive: true, force: true })
       }
-    },
-  }),
-}
+    }})}
 
 export default share

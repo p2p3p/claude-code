@@ -4,7 +4,7 @@ import { writeToStdout } from 'src/utils/process.js';
 import { Box, color, Text, useTheme, Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
 import { addMcpConfig, getAllMcpConfigs } from '../services/mcp/config.js';
 import type { ConfigScope, McpServerConfig, ScopedMcpServerConfig } from '../services/mcp/types.js';
-import { plural } from '../utils/stringUtils.js';
+import { t } from '../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { SelectMulti } from './CustomSelect/SelectMulti.js';
 
@@ -55,10 +55,10 @@ export function MCPServerDesktopImportDialog({ servers, scope, onDone }: Props):
     (importedCount: number) => {
       if (importedCount > 0) {
         writeToStdout(
-          `\n${color('success', theme)(`Successfully imported ${importedCount} MCP ${plural(importedCount, 'server')} to ${scope} config.`)}\n`,
+          `\n${color('success', theme)(t('mcpDesktopImport.importedSuccess', importedCount, scope))}\n`,
         );
       } else {
-        writeToStdout('\nNo servers were imported.');
+        writeToStdout(t('mcpDesktopImport.noServersImported'));
       }
       onDone();
 
@@ -75,25 +75,23 @@ export function MCPServerDesktopImportDialog({ servers, scope, onDone }: Props):
   return (
     <>
       <Dialog
-        title="Import MCP Servers from Claude Desktop"
-        subtitle={`Found ${serverNames.length} MCP ${plural(serverNames.length, 'server')} in Claude Desktop.`}
+        title={t('mcpDesktopImport.title')}
+        subtitle={t('mcpDesktopImport.foundServers', serverNames.length)}
         color="success"
         onCancel={handleEscCancel}
         hideInputGuide
       >
         {collisions.length > 0 && (
           <Text color="warning">
-            Note: Some servers already exist with the same name. If selected, they will be imported with a numbered
-            suffix.
+            {t('mcpDesktopImport.collisionNote')}
           </Text>
         )}
-        <Text>Please select the servers you want to import:</Text>
+        <Text>{t('mcpDesktopImport.selectPrompt')}</Text>
 
         <SelectMulti
           options={serverNames.map(server => ({
-            label: `${server}${collisions.includes(server) ? ' (already exists)' : ''}`,
-            value: server,
-          }))}
+            label: `${server}${collisions.includes(server) ? ` ${t('mcpDesktopImport.alreadyExists')}` : ''}`,
+            value: server}))}
           defaultValue={serverNames.filter(name => !collisions.includes(name))} // Only preselect non-colliding servers
           onSubmit={onSubmit}
           onCancel={handleEscCancel}
@@ -103,9 +101,9 @@ export function MCPServerDesktopImportDialog({ servers, scope, onDone }: Props):
       <Box paddingX={1}>
         <Text dimColor italic>
           <Byline>
-            <KeyboardShortcutHint shortcut="Space" action="select" />
-            <KeyboardShortcutHint shortcut="Enter" action="confirm" />
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+            <KeyboardShortcutHint shortcut="Space" action={t('shortcutHint.select')} />
+            <KeyboardShortcutHint shortcut="Enter" action={t('shortcutHint.confirm')} />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
           </Byline>
         </Text>
       </Box>

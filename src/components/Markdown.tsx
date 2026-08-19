@@ -46,8 +46,7 @@ function cachedLexer(content: string): Token[] {
         type: 'paragraph',
         raw: content,
         text: content,
-        tokens: [{ type: 'text', raw: content, text: content }],
-      } as Token,
+        tokens: [{ type: 'text', raw: content, text: content }]} as Token,
     ];
   }
   const key = hashContent(content);

@@ -69,8 +69,7 @@ export class LanBeacon extends EventEmitter {
     this.announce = {
       ...announce,
       proto: 'claude-pipe-v1',
-      ts: Date.now(),
-    }
+      ts: Date.now()}
   }
 
   /**

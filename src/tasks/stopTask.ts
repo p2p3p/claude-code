@@ -1,6 +1,7 @@
 // Shared logic for stopping a running task.
 // Used by TaskStopTool (LLM-invoked) and SDK stop_task control request.
 
+import { t } from '../utils/i18n/index.js'
 import type { AppState } from '../state/AppState.js'
 import type { TaskStateBase } from '../Task.js'
 import { getTaskByType } from '../tasks.js'
@@ -44,12 +45,12 @@ export async function stopTask(
   const task = appState.tasks?.[taskId] as TaskStateBase | undefined
 
   if (!task) {
-    throw new StopTaskError(`No task found with ID: ${taskId}`, 'not_found')
+    throw new StopTaskError(t('stopTask.notFound', taskId), 'not_found')
   }
 
   if (task.status !== 'running') {
     throw new StopTaskError(
-      `Task ${taskId} is not running (status: ${task.status})`,
+      t('stopTask.notRunning', taskId, task.status),
       'not_running',
     )
   }
@@ -57,7 +58,7 @@ export async function stopTask(
   const taskImpl = getTaskByType(task.type)
   if (!taskImpl) {
     throw new StopTaskError(
-      `Unsupported task type: ${task.type}`,
+      t('stopTask.unsupportedType', task.type),
       'unsupported_type',
     )
   }
@@ -79,9 +80,7 @@ export async function stopTask(
         ...prev,
         tasks: {
           ...prev.tasks,
-          [taskId]: { ...prevTask, notified: true },
-        },
-      }
+          [taskId]: { ...prevTask, notified: true }}}
     })
     // Suppressing the XML notification also suppresses print.ts's parsed
     // task_notification SDK event — emit it directly so SDK consumers see
@@ -89,8 +88,7 @@ export async function stopTask(
     if (suppressed) {
       emitTaskTerminatedSdk(taskId, 'stopped', {
         toolUseId: task.toolUseId,
-        summary: task.description,
-      })
+        summary: task.description})
     }
   }
 

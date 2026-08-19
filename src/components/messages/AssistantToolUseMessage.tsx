@@ -8,6 +8,7 @@ import { Box, Text, stringWidth, useTheme } from '@anthropic/ink';
 import { useAppStateMaybeOutsideOfProvider } from '../../state/AppState.js';
 import { findToolByName, type Tool, type ToolProgressData, type Tools } from '../../Tool.js';
 import type { ProgressMessage } from '../../types/message.js';
+import { t } from '../../utils/i18n/index.js';
 import { useIsClassifierChecking } from '../../utils/classifierApprovalsHook.js';
 import { logError } from '../../utils/log.js';
 import type { buildMessageLookups } from '../../utils/messages.js';
@@ -46,8 +47,7 @@ export function AssistantToolUseMessage({
   inProgressToolCallCount,
   lookups,
   isTranscriptMode,
-  defaultCollapsed,
-}: Props): React.ReactNode {
+  defaultCollapsed}: Props): React.ReactNode {
   const terminalSize = useTerminalSize();
   const [theme] = useTheme();
   const bg = useSelectedMessageBg();
@@ -80,8 +80,7 @@ export function AssistantToolUseMessage({
       input,
       userFacingToolName: tool.userFacingName(data),
       userFacingToolNameBackgroundColor: tool.userFacingNameBackgroundColor?.(data),
-      isTransparentWrapper: tool.isTransparentWrapper?.() ?? false,
-    };
+      isTransparentWrapper: tool.isTransparentWrapper?.() ?? false};
   }, [tools, param]);
 
   if (!parsed) {
@@ -173,12 +172,12 @@ export function AssistantToolUseMessage({
           (isClassifierChecking ? (
             <MessageResponse height={1}>
               <Text dimColor>
-                {isAutoClassifier ? 'Auto classifier checking\u2026' : 'Bash classifier checking\u2026'}
+                {isAutoClassifier ? t('ui.autoClassifierChecking') : t('ui.bashClassifierChecking')}
               </Text>
             </MessageResponse>
           ) : isWaitingForPermission ? (
             <MessageResponse height={1}>
-              <Text dimColor>Waiting for permission…</Text>
+              <Text dimColor>{t('assistantToolUse.waitingForPermission')}</Text>
             </MessageResponse>
           ) : (
             renderToolUseProgressMessage(
@@ -190,8 +189,7 @@ export function AssistantToolUseMessage({
               {
                 verbose,
                 inProgressToolCallCount,
-                isTranscriptMode,
-              },
+                isTranscriptMode},
               terminalSize,
             )
           ))}
@@ -227,8 +225,7 @@ function renderToolUseProgressMessage(
   {
     verbose,
     inProgressToolCallCount,
-    isTranscriptMode,
-  }: {
+    isTranscriptMode}: {
     verbose: boolean;
     inProgressToolCallCount?: number;
     isTranscriptMode?: boolean;
@@ -246,8 +243,7 @@ function renderToolUseProgressMessage(
         verbose,
         terminalSize,
         inProgressToolCallCount: inProgressToolCallCount ?? 1,
-        isTranscriptMode,
-      }) ?? null;
+        isTranscriptMode}) ?? null;
     return (
       <>
         <SentryErrorBoundary>

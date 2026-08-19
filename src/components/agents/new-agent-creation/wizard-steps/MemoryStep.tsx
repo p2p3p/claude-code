@@ -4,8 +4,8 @@ import { useKeybinding } from '../../../../keybindings/useKeybinding.js';
 import { isAutoMemoryEnabled } from '../../../../memdir/paths.js';
 import {
   type AgentMemoryScope,
-  loadAgentMemoryPrompt,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/agentMemory.js';
+  loadAgentMemoryPrompt} from '@claude-code-best/builtin-tools/tools/AgentTool/agentMemory.js';
+import { t } from '../../../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { Select } from '../../../CustomSelect/select.js';
 import { useWizard } from '../../../wizard/index.js';
@@ -29,21 +29,19 @@ export function MemoryStep(): ReactNode {
   const memoryOptions: MemoryOption[] = isUserScope
     ? [
         {
-          label: 'User scope (~/.claude/agent-memory/) (Recommended)',
-          value: 'user',
-        },
-        { label: 'None (no persistent memory)', value: 'none' },
-        { label: 'Project scope (.claude/agent-memory/)', value: 'project' },
-        { label: 'Local scope (.claude/agent-memory-local/)', value: 'local' },
+          label: t('agentMemoryStep.userScopeRecommended'),
+          value: 'user'},
+        { label: t('agentMemoryStep.none'), value: 'none' },
+        { label: t('agentMemoryStep.projectScope'), value: 'project' },
+        { label: t('agentMemoryStep.localScope'), value: 'local' },
       ]
     : [
         {
-          label: 'Project scope (.claude/agent-memory/) (Recommended)',
-          value: 'project',
-        },
-        { label: 'None (no persistent memory)', value: 'none' },
-        { label: 'User scope (~/.claude/agent-memory/)', value: 'user' },
-        { label: 'Local scope (.claude/agent-memory-local/)', value: 'local' },
+          label: t('agentMemoryStep.projectScopeRecommended'),
+          value: 'project'},
+        { label: t('agentMemoryStep.none'), value: 'none' },
+        { label: t('agentMemoryStep.userScope'), value: 'user' },
+        { label: t('agentMemoryStep.localScope'), value: 'local' },
       ];
 
   const handleSelect = (value: string): void => {
@@ -60,21 +58,19 @@ export function MemoryStep(): ReactNode {
             getSystemPrompt:
               isAutoMemoryEnabled() && memory && agentType
                 ? () => wizardData.systemPrompt! + '\n\n' + loadAgentMemoryPrompt(agentType, memory)
-                : () => wizardData.systemPrompt!,
-          }
-        : undefined,
-    });
+                : () => wizardData.systemPrompt!}
+        : undefined});
     goNext();
   };
 
   return (
     <WizardDialogLayout
-      subtitle="Configure agent memory"
+      subtitle={t('memorystep.configureAgentMemory')}
       footerText={
         <Byline>
-          <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
-          <KeyboardShortcutHint shortcut="Enter" action="select" />
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="go back" />
+          <KeyboardShortcutHint shortcut="↑↓" action={t('shortcutHint.navigate')} />
+          <KeyboardShortcutHint shortcut="Enter" action={t('shortcutHint.select')} />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.goBack')} />
         </Byline>
       }
     >

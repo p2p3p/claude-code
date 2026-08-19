@@ -19,8 +19,7 @@ export {
   HooksSchema,
   type HooksSettings,
   type HttpHook,
-  type PromptHook,
-} from '../../schemas/hooks.js'
+  type PromptHook} from '../../schemas/hooks.js'
 
 // Also import for use within this file
 import { type HookCommand, HooksSchema } from '../../schemas/hooks.js'
@@ -32,6 +31,64 @@ import { count } from '../array.js'
 export const EnvironmentVariablesSchema = lazySchema(() =>
   z.record(z.string(), z.coerce.string()),
 )
+
+/**
+ * A single platform entry in an API key group. A platform is identified by its
+ * base URL (different base URL = different platform). Keys sharing the same
+ * base URL are merged into the same platform. Each platform carries its own
+ * model mapping because different platforms expose different models.
+ */
+export const EnvPlatformSchema = lazySchema(() =>
+  z
+    .object({
+      baseUrl: z.string().describe('Base URL of the platform API endpoint'),
+      keys: z
+        .array(z.string())
+        .describe('API keys for this platform, rotated on 401'),
+      model: z.string().describe('Model name used on this platform'),
+      cachedModels: z
+        .array(z.string())
+        .optional()
+        .describe('Cached /v1/models response from this platform')})
+)
+
+/**
+ * API key groups per compatibility layer, keyed by the settings provider name
+ * ('openai' | 'gemini' | 'grok' | 'anthropic' — note 'anthropic' is the
+ * custom-platform modelType, which getAPIProvider() reports as 'firstParty').
+ * The active platform with its current key is written into process.env at
+ * request time so the existing single-key code paths keep working unchanged.
+ */
+export const EnvSubEntrySchema = lazySchema(() =>
+  z
+    .object({
+      email: z.string().describe('Account email for identification'),
+      model: z.string().describe('Default model name')})
+    .describe('Subscription account entry (ChatGPT OAuth / Claude OAuth)'),
+)
+
+export const EnvSchema = lazySchema(() =>
+  z
+    .object({
+      openai: z.array(EnvPlatformSchema()).optional().describe('OpenAI-compatible platforms (incl. China providers)'),
+      gemini: z.array(EnvPlatformSchema()).optional().describe('Gemini platforms'),
+      grok: z.array(EnvPlatformSchema()).optional().describe('Grok platforms'),
+      anthropic: z.array(EnvPlatformSchema()).optional().describe('Anthropic-compatible platforms (custom base URL)'),
+      'chatgpt-sub': z.array(EnvSubEntrySchema()).optional().describe('ChatGPT subscription accounts (Codex OAuth)'),
+      'claude-sub': z.array(EnvSubEntrySchema()).optional().describe('Claude AI OAuth subscription accounts'),
+      current: z
+        .object({
+          layer: z.string().describe('Compatibility layer: openai | gemini | anthropic | chatgpt-sub | claude-sub'),
+          account: z.string().describe('Platform baseUrl for API layers, email for subscription layers')})
+        .optional()
+        .describe('Current active account: single source of truth for which layer+account is active')})
+    .passthrough(),
+)
+
+export type EnvProviderKey = 'openai' | 'gemini' | 'grok' | 'anthropic' | 'chatgpt-sub' | 'claude-sub'
+export type EnvPlatform = z.infer<ReturnType<typeof EnvPlatformSchema>>
+export type EnvSubEntry = z.infer<ReturnType<typeof EnvSubEntrySchema>>
+export type EnvConfig = z.infer<ReturnType<typeof EnvSchema>>
 
 /**
  * Schema for permissions section
@@ -66,14 +123,12 @@ export const PermissionsSchema = lazySchema(() =>
             disableAutoMode: z
               .enum(['disable'])
               .optional()
-              .describe('Disable auto mode'),
-          }
+              .describe('Disable auto mode')}
         : {}),
       additionalDirectories: z
         .array(z.string())
         .optional()
-        .describe('Additional directories to include in the permission scope'),
-    })
+        .describe('Additional directories to include in the permission scope')})
     .passthrough(),
 )
 
@@ -97,8 +152,7 @@ export const ExtraKnownMarketplaceSchema = lazySchema(() =>
       .optional()
       .describe(
         'Whether to automatically update this marketplace and its installed plugins on startup',
-      ),
-  }),
+      )}),
 )
 
 /**
@@ -145,8 +199,7 @@ export const AllowedMcpServerEntrySchema = lazySchema(() =>
       },
       {
         message:
-          'Entry must have exactly one of "serverName", "serverCommand", or "serverUrl"',
-      },
+          'Entry must have exactly one of "serverName", "serverCommand", or "serverUrl"'},
     ),
 )
 
@@ -194,8 +247,7 @@ export const DeniedMcpServerEntrySchema = lazySchema(() =>
       },
       {
         message:
-          'Entry must have exactly one of "serverName", "serverCommand", or "serverUrl"',
-      },
+          'Entry must have exactly one of "serverName", "serverCommand", or "serverUrl"'},
     ),
 )
 
@@ -293,19 +345,16 @@ export const SettingsSchema = lazySchema(() =>
                   .describe(
                     'Fixed loopback callback port for the IdP OIDC login. ' +
                       'Only needed if the IdP does not honor RFC 8252 port-any matching.',
-                  ),
-              })
+                  )})
               .optional()
               .describe(
                 'XAA (SEP-990) IdP connection. Configure once; all XAA-enabled MCP servers reuse this.',
-              ),
-          }
+              )}
         : {}),
       fileSuggestion: z
         .object({
           type: z.literal('command'),
-          command: z.string(),
-        })
+          command: z.string()})
         .optional()
         .describe('Custom file suggestion configuration for @ mentions'),
       respectGitignore: z
@@ -323,9 +372,6 @@ export const SettingsSchema = lazySchema(() =>
         .describe(
           'Number of days to retain chat transcripts (default: 30). Setting to 0 disables session persistence entirely: no transcripts are written and existing transcripts are deleted at startup.',
         ),
-      env: EnvironmentVariablesSchema()
-        .optional()
-        .describe('Environment variables to set for Claude Code sessions'),
       // Attribution for commits and PRs
       attribution: z
         .object({
@@ -342,8 +388,7 @@ export const SettingsSchema = lazySchema(() =>
             .describe(
               'Attribution text for pull request descriptions. ' +
                 'Empty string hides attribution.',
-            ),
-        })
+            )})
         .optional()
         .describe(
           'Customize attribution text for commits and PRs. ' +
@@ -370,12 +415,20 @@ export const SettingsSchema = lazySchema(() =>
         .optional()
         .describe(
           'API provider type. "anthropic" uses the Anthropic API (default), "openai" uses the OpenAI Chat Completions API, "gemini" uses the Gemini API, and "grok" uses the xAI Grok API (OpenAI-compatible). ' +
-            'When set to "openai", configure OPENAI_API_KEY, OPENAI_BASE_URL, and OPENAI_MODEL. When set to "gemini", configure GEMINI_API_KEY and optional GEMINI_BASE_URL. When set to "grok", configure GROK_API_KEY (or XAI_API_KEY), optional GROK_BASE_URL, GROK_MODEL, and GROK_MODEL_MAP.',
+            'Set via /login or env block (BASE_URL, API_KEY, MODEL).',
         ),
       model: z
         .string()
         .optional()
         .describe('Override the default model used by Claude Code'),
+      env: EnvSchema()
+        .optional()
+        .describe(
+          'API key groups per compatibility layer. Each group holds a list of ' +
+            'platforms (distinct base URLs). Keys within a platform are rotated ' +
+            'automatically on 401. The active platform applies its base URL, key, ' +
+            'and model mapping to process.env at request time.',
+        ),
       // Enterprise allowlist of models
       availableModels: z
         .array(z.string())
@@ -451,8 +504,7 @@ export const SettingsSchema = lazySchema(() =>
             .describe(
               'Directories to include when creating worktrees, via git sparse-checkout (cone mode). ' +
                 'Dramatically faster in large monorepos — only the listed paths are written to disk.',
-            ),
-        })
+            )})
         .optional()
         .describe('Git worktree configuration for --worktree flag.'),
       // Whether to disable all hooks and statusLine
@@ -552,8 +604,7 @@ export const SettingsSchema = lazySchema(() =>
           type: z.literal('command'),
           command: z.string(),
           padding: z.number().optional(),
-          refreshInterval: z.number().optional(),
-        })
+          refreshInterval: z.number().optional()})
         .optional()
         .describe('Custom status line display configuration'),
       // Toggle for the fork's built-in status line (BuiltinStatusLine + CachePill).
@@ -564,6 +615,12 @@ export const SettingsSchema = lazySchema(() =>
         .describe(
           'Whether to render the fork built-in status line (model + ctx + 5h/7d limits + cost + cache pill). Toggled with /statusline.',
         ),
+      // Fullscreen (alternate-screen) mode toggle.
+      // Default false → no fullscreen unless user enables it.
+      fullscreenEnabled: z
+        .boolean()
+        .optional()
+        .describe('Whether to enable flicker-free fullscreen TUI mode.'),
       // Enabled plugins using marketplace-first format
       enabledPlugins: z
         .record(
@@ -598,8 +655,7 @@ export const SettingsSchema = lazySchema(() =>
                 path: [key, 'source', 'name'],
                 message:
                   `Settings-sourced marketplace name must match its extraKnownMarketplaces key ` +
-                  `(got key "${key}" but source.name "${entry.source.name}")`,
-              })
+                  `(got key "${key}" but source.name "${entry.source.name}")`})
             }
           }
         })
@@ -649,12 +705,10 @@ export const SettingsSchema = lazySchema(() =>
         .string()
         .optional()
         .describe('Controls the output style for assistant responses'),
-      language: z
+      preferredLanguage: z
         .string()
         .optional()
-        .describe(
-          'Preferred language for Claude responses and voice dictation (e.g., "japanese", "spanish")',
-        ),
+        .describe('Preferred language — controls both AI response and UI language (auto/en/zh)'),
       skipWebFetchPreflight: z
         .boolean()
         .optional()
@@ -725,8 +779,7 @@ export const SettingsSchema = lazySchema(() =>
       spinnerVerbs: z
         .object({
           mode: z.enum(['append', 'replace']),
-          verbs: z.array(z.string()),
-        })
+          verbs: z.array(z.string())})
         .optional()
         .describe(
           'Customize spinner verbs. mode: "append" adds verbs to defaults, "replace" uses only your verbs.',
@@ -734,8 +787,7 @@ export const SettingsSchema = lazySchema(() =>
       spinnerTipsOverride: z
         .object({
           excludeDefault: z.boolean().optional(),
-          tips: z.array(z.string()),
-        })
+          tips: z.array(z.string())})
         .optional()
         .describe(
           'Override spinner tips. tips: array of tip strings. excludeDefault: if true, only show custom tips (default: false).',
@@ -848,8 +900,7 @@ export const SettingsSchema = lazySchema(() =>
               .optional()
               .describe(
                 'Non-sensitive option values from plugin manifest userConfig, keyed by option name. Sensitive values go to secure storage instead.',
-              ),
-          }),
+              )}),
         )
         .optional()
         .describe(
@@ -860,8 +911,7 @@ export const SettingsSchema = lazySchema(() =>
           defaultEnvironmentId: z
             .string()
             .optional()
-            .describe('Default environment ID to use for remote sessions'),
-        })
+            .describe('Default environment ID to use for remote sessions')})
         .optional()
         .describe('Remote session configuration'),
       autoUpdatesChannel: z
@@ -875,8 +925,7 @@ export const SettingsSchema = lazySchema(() =>
               .optional()
               .describe(
                 'Prevent claude-cli:// protocol handler registration with the OS',
-              ),
-          }
+              )}
         : {}),
       minimumVersion: z
         .string()
@@ -898,8 +947,7 @@ export const SettingsSchema = lazySchema(() =>
               .optional()
               .describe(
                 'Enable AI-based classification for Bash(prompt:...) permission rules',
-              ),
-          }
+              )}
         : {}),
       ...(feature('PROACTIVE') || feature('KAIROS')
         ? {
@@ -921,8 +969,7 @@ export const SettingsSchema = lazySchema(() =>
                 'Maximum duration in milliseconds that the Sleep tool can sleep for. ' +
                   'Set to -1 for indefinite sleep (waits for user input). ' +
                   'Useful for limiting idle time in remote/managed environments.',
-              ),
-          }
+              )}
         : {}),
       ...(feature('VOICE_MODE')
         ? {
@@ -935,8 +982,7 @@ export const SettingsSchema = lazySchema(() =>
               .optional()
               .describe(
                 'Voice STT backend: "anthropic" (default) or "doubao" (Doubao ASR)',
-              ),
-          }
+              )}
         : {}),
       ...(feature('KAIROS')
         ? {
@@ -951,8 +997,7 @@ export const SettingsSchema = lazySchema(() =>
               .optional()
               .describe(
                 'Display name for the assistant, shown in the claude.ai session list',
-              ),
-          }
+              )}
         : {}),
       // Teams/Enterprise opt-IN for channel notifications. Default OFF.
       // MCP servers that declare the claude/channel capability can push
@@ -978,8 +1023,7 @@ export const SettingsSchema = lazySchema(() =>
         .array(
           z.object({
             marketplace: z.string(),
-            plugin: z.string(),
-          }),
+            plugin: z.string()}),
         )
         .optional()
         .describe(
@@ -995,8 +1039,7 @@ export const SettingsSchema = lazySchema(() =>
               .optional()
               .describe(
                 'Default transcript view: chat (SendUserMessage checkpoints only) or transcript (full)',
-              ),
-          }
+              )}
         : {}),
       prefersReducedMotion: z
         .boolean()
@@ -1061,19 +1104,16 @@ export const SettingsSchema = lazySchema(() =>
                 ...(process.env.USER_TYPE === 'ant'
                   ? {
                       // Back-compat alias for ant users; external users use soft_deny
-                      deny: z.array(z.string()).optional(),
-                    }
+                      deny: z.array(z.string()).optional()}
                   : {}),
                 environment: z
                   .array(z.string())
                   .optional()
                   .describe(
                     'Entries for the auto mode classifier environment section',
-                  ),
-              })
+                  )})
               .optional()
-              .describe('Auto mode classifier prompt customization'),
-          }
+              .describe('Auto mode classifier prompt customization')}
         : {}),
       disableAutoMode: z
         .enum(['disable'])
@@ -1110,8 +1150,7 @@ export const SettingsSchema = lazySchema(() =>
                   'Supports tilde expansion (e.g. ~/projects). ' +
                   'If not specified, defaults to the remote user home directory. ' +
                   'Can be overridden by the [dir] positional argument in `claude ssh <config> [dir]`.',
-              ),
-          }),
+              )}),
         )
         .optional()
         .describe(
@@ -1143,6 +1182,12 @@ export const SettingsSchema = lazySchema(() =>
         .describe(
           'Whether to show cache hit rate warnings in the message flow when the rate falls below cacheThreshold. Default: true.',
         ),
+      maxApiRetries: z
+        .union([z.number().int().min(0), z.enum(['off', 'always'])])
+        .optional()
+        .describe(
+          'Maximum number of API retry attempts on transient errors. Set to 0 to disable, "off" to disable, "always" to retry indefinitely. Default: 15.',
+        ),
       pluginTrustMessage: z
         .string()
         .optional()
@@ -1169,8 +1214,7 @@ export const SettingsSchema = lazySchema(() =>
           'Workspace API key (sk-ant-api03-*) saved via /login UI. ' +
             'Stored in plaintext — keep this file gitignored and restrict its permissions. ' +
             'ANTHROPIC_API_KEY environment variable takes precedence when both are set.',
-        ),
-    })
+        )})
     .passthrough(),
 )
 

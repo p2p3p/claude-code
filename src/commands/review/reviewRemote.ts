@@ -10,11 +10,11 @@
  */
 
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.js'
+import { t } from '../../utils/i18n/index.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import { fetchUltrareviewQuota } from '../../services/api/ultrareviewQuota.js'
 import { fetchUtilization } from '../../services/api/usage.js'
 import type { ToolUseContext } from '../../Tool.js'
@@ -23,8 +23,7 @@ import {
   formatPreconditionError,
   getRemoteTaskSessionUrl,
   registerRemoteAgentTask,
-  type BackgroundRemoteSessionPrecondition,
-} from '../../tasks/RemoteAgentTask/RemoteAgentTask.js'
+  type BackgroundRemoteSessionPrecondition} from '../../tasks/RemoteAgentTask/RemoteAgentTask.js'
 import { isEnterpriseSubscriber, isTeamSubscriber } from '../../utils/auth.js'
 import { detectCurrentRepositoryWithHost } from '../../utils/detectRepository.js'
 import { execFileNoThrow } from '../../utils/execFileNoThrow.js'
@@ -72,8 +71,7 @@ export async function checkOverageGate(): Promise<OverageGate> {
   if (quota.reviews_remaining > 0) {
     return {
       kind: 'proceed',
-      billingNote: ` This is free ultrareview ${quota.reviews_used + 1} of ${quota.reviews_limit}.`,
-    }
+      billingNote: t('ultrareview.freeReviewBilling', quota.reviews_used + 1, quota.reviews_limit)}
   }
 
   // Utilization fetch failed (transient network error, timeout, etc.) —
@@ -109,8 +107,7 @@ export async function checkOverageGate(): Promise<OverageGate> {
 
   return {
     kind: 'proceed',
-    billingNote: ' This review bills as Extra Usage.',
-  }
+    billingNote: t('ultrareview.billingNote')}
 }
 
 /**
@@ -146,16 +143,14 @@ export async function launchRemoteReview(
           .map(e => e.type)
           .join(
             ',',
-          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       const reasons = (blockers as BackgroundRemoteSessionPrecondition[])
         .map(formatPreconditionError)
         .join('\n')
       return [
         {
           type: 'text',
-          text: `Ultrareview cannot launch:\n${reasons}`,
-        },
+          text: t('ultrareview.cannotLaunch', reasons)},
       ]
     }
   }
@@ -201,9 +196,7 @@ export async function launchRemoteReview(
       posInt(raw?.total_wallclock_minutes, 22, 27),
     ),
     ...(process.env.BUGHUNTER_DEV_BUNDLE_B64 && {
-      BUGHUNTER_DEV_BUNDLE_B64: process.env.BUGHUNTER_DEV_BUNDLE_B64,
-    }),
-  }
+      BUGHUNTER_DEV_BUNDLE_B64: process.env.BUGHUNTER_DEV_BUNDLE_B64})}
 
   let session
   let command
@@ -224,9 +217,7 @@ export async function launchRemoteReview(
       environmentVariables: {
         BUGHUNTER_PR_NUMBER: prNumber,
         BUGHUNTER_REPOSITORY: `${repo.owner}/${repo.name}`,
-        ...commonEnvVars,
-      },
-    })
+        ...commonEnvVars}})
     command = `/ultrareview ${prNumber}`
     target = `${repo.owner}/${repo.name}#${prNumber}`
   } else {
@@ -248,8 +239,7 @@ export async function launchRemoteReview(
       return [
         {
           type: 'text',
-          text: `Could not find merge-base with ${baseBranch}. Make sure you're in a git repo with a ${baseBranch} branch.`,
-        },
+          text: t('ultrareview.noMergeBase', baseBranch)},
       ]
     }
 
@@ -265,8 +255,7 @@ export async function launchRemoteReview(
       return [
         {
           type: 'text',
-          text: `No changes against the ${baseBranch} fork point. Make some commits or stage files first.`,
-        },
+          text: t('ultrareview.noChanges', baseBranch)},
       ]
     }
 
@@ -278,16 +267,13 @@ export async function launchRemoteReview(
       environmentId: CODE_REVIEW_ENV_ID,
       environmentVariables: {
         BUGHUNTER_BASE_BRANCH: mergeBaseSha,
-        ...commonEnvVars,
-      },
-    })
+        ...commonEnvVars}})
     if (!session) {
       logEvent('tengu_review_remote_teleport_failed', {})
       return [
         {
           type: 'text',
-          text: 'Repo is too large. Push a PR and use `/ultrareview <PR#>` instead.',
-        },
+          text: t('ultrareview.repoTooLarge')},
       ]
     }
     command = '/ultrareview'
@@ -303,8 +289,7 @@ export async function launchRemoteReview(
     session,
     command,
     context,
-    isRemoteReview: true,
-  })
+    isRemoteReview: true})
   logEvent('tengu_review_remote_launched', {})
   const sessionUrl = getRemoteTaskSessionUrl(session.id)
   // Concise — the tool-output block is visible to the user, so the model
@@ -313,7 +298,6 @@ export async function launchRemoteReview(
   return [
     {
       type: 'text',
-      text: `Ultrareview launched for ${target} (~10–20 min, runs in the cloud). Track: ${sessionUrl}${resolvedBillingNote} Findings arrive via task-notification. Briefly acknowledge the launch to the user without repeating the target or URL — both are already visible in the tool output above.`,
-    },
+      text: t('ultrareview.launchedText', target, sessionUrl, resolvedBillingNote)},
   ]
 }

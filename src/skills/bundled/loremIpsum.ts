@@ -249,8 +249,7 @@ export function registerLoremIpsumSkill(): void {
         return [
           {
             type: 'text',
-            text: 'Invalid token count. Please provide a positive number (e.g., /lorem-ipsum 10000).',
-          },
+            text: 'Invalid token count. Please provide a positive number (e.g., /lorem-ipsum 10000).'},
         ]
       }
 
@@ -263,8 +262,7 @@ export function registerLoremIpsumSkill(): void {
         return [
           {
             type: 'text',
-            text: `Requested ${targetTokens} tokens, but capped at 500,000 for safety.\n\n${generateLoremIpsum(cappedTokens)}`,
-          },
+            text: `Requested ${targetTokens} tokens, but capped at 500,000 for safety.\n\n${generateLoremIpsum(cappedTokens)}`},
         ]
       }
 
@@ -274,9 +272,7 @@ export function registerLoremIpsumSkill(): void {
       return [
         {
           type: 'text',
-          text: loremText,
-        },
+          text: loremText},
       ]
-    },
-  })
+    }})
 }

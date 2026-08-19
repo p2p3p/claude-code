@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto'
 import { getClaudeConfigHomeDir } from '../utils/envUtils.js'
 import { isProcessRunning } from '../utils/genericProcessUtils.js'
 import { jsonParse } from '../utils/slowOperations.js'
+import { t } from '../utils/i18n/index.js'
 import { selectEngine } from './bg/engines/index.js'
 import type { SessionEntry } from './bg/engine.js'
 
@@ -78,31 +79,29 @@ export async function psHandler(_args: string[]): Promise<void> {
   const sessions = await listLiveSessions()
 
   if (sessions.length === 0) {
-    console.log('No active sessions.')
+    console.log(t('cli.noActiveSessions'))
     return
   }
 
-  console.log(
-    `${sessions.length} active session${sessions.length > 1 ? 's' : ''}:\n`,
-  )
+  console.log(t('cli.activeSessions', sessions.length) + ':\n')
 
   for (const s of sessions) {
     const engineType = resolveSessionEngine(s)
     const parts: string[] = [
-      `  PID: ${s.pid}`,
-      `  Kind: ${s.kind}`,
-      `  Engine: ${engineType}`,
-      `  Session: ${s.sessionId}`,
-      `  CWD: ${s.cwd}`,
+      `  ${t('cli.sessionPid')} ${s.pid}`,
+      `  ${t('cli.sessionKind')} ${s.kind}`,
+      `  ${t('cli.sessionEngine')} ${engineType}`,
+      `  ${t('cli.sessionId')} ${s.sessionId}`,
+      `  ${t('cli.sessionCwd')} ${s.cwd}`,
     ]
 
-    if (s.name) parts.push(`  Name: ${s.name}`)
-    if (s.startedAt) parts.push(`  Started: ${formatTime(s.startedAt)}`)
-    if (s.status) parts.push(`  Status: ${s.status}`)
-    if (s.waitingFor) parts.push(`  Waiting for: ${s.waitingFor}`)
-    if (s.bridgeSessionId) parts.push(`  Bridge: ${s.bridgeSessionId}`)
-    if (s.tmuxSessionName) parts.push(`  Tmux: ${s.tmuxSessionName}`)
-    if (s.logPath) parts.push(`  Log: ${s.logPath}`)
+    if (s.name) parts.push(`  ${t('cli.sessionName')} ${s.name}`)
+    if (s.startedAt) parts.push(`  ${t('cli.sessionStarted')} ${formatTime(s.startedAt)}`)
+    if (s.status) parts.push(`  ${t('cli.sessionStatus')} ${s.status}`)
+    if (s.waitingFor) parts.push(`  ${t('cli.sessionWaitingFor')} ${s.waitingFor}`)
+    if (s.bridgeSessionId) parts.push(`  ${t('cli.sessionBridge')} ${s.bridgeSessionId}`)
+    if (s.tmuxSessionName) parts.push(`  ${t('cli.sessionTmux')} ${s.tmuxSessionName}`)
+    if (s.logPath) parts.push(`  ${t('cli.sessionLog')} ${s.logPath}`)
 
     console.log(parts.join('\n'))
     console.log()
@@ -117,13 +116,13 @@ export async function logsHandler(target: string | undefined): Promise<void> {
 
   if (!target) {
     if (sessions.length === 0) {
-      console.log('No active sessions.')
+      console.log(t('cli.noActiveSessions'))
       return
     }
     if (sessions.length === 1) {
       target = sessions[0]!.sessionId
     } else {
-      console.log('Multiple sessions active. Specify one:')
+      console.log(t('cli.multipleSessionsActive'))
       for (const s of sessions) {
         const label = s.name ? `${s.name} (${s.sessionId})` : s.sessionId
         console.log(`  ${label}  PID=${s.pid}`)
@@ -134,13 +133,13 @@ export async function logsHandler(target: string | undefined): Promise<void> {
 
   const session = findSession(sessions, target)
   if (!session) {
-    console.error(`Session not found: ${target}`)
+    console.error(t('cli.sessionNotFound', target))
     process.exitCode = 1
     return
   }
 
   if (!session.logPath) {
-    console.log(`No log path recorded for session ${session.sessionId}`)
+    console.log(t('cli.noLogPathForSession', session.sessionId))
     return
   }
 
@@ -148,7 +147,7 @@ export async function logsHandler(target: string | undefined): Promise<void> {
     const content = await readFile(session.logPath, 'utf-8')
     process.stdout.write(content)
   } catch (e) {
-    console.error(`Failed to read log file: ${session.logPath}`)
+    console.error(t('cli.failedToReadLog', session.logPath))
     console.error(e instanceof Error ? e.message : String(e))
     process.exitCode = 1
   }
@@ -168,15 +167,13 @@ export async function attachHandler(target: string | undefined): Promise<void> {
       s => s.tmuxSessionName || s.engine === 'detached',
     )
     if (bgSessions.length === 0) {
-      console.log(
-        'No background sessions to attach to. Start one with `claude daemon bg`.',
-      )
+      console.log(t('cli.noBackgroundSessions'))
       return
     }
     if (bgSessions.length === 1) {
       target = bgSessions[0]!.sessionId
     } else {
-      console.log('Multiple background sessions. Specify one:')
+      console.log(t('cli.multipleBackgroundSessions'))
       for (const s of bgSessions) {
         const label = s.name ? `${s.name} (${s.sessionId})` : s.sessionId
         const engineType = resolveSessionEngine(s)
@@ -188,7 +185,7 @@ export async function attachHandler(target: string | undefined): Promise<void> {
 
   const session = findSession(sessions, target)
   if (!session) {
-    console.error(`Session not found: ${target}`)
+    console.error(t('cli.sessionNotFound', target))
     process.exitCode = 1
     return
   }
@@ -200,9 +197,7 @@ export async function attachHandler(target: string | undefined): Promise<void> {
       const { TmuxEngine } = await import('./bg/engines/tmux.js')
       const tmux = new TmuxEngine()
       if (!(await tmux.available())) {
-        console.error(
-          'tmux is no longer available. Cannot attach to tmux session.',
-        )
+        console.error(t('cli.tmuxNotAvailable'))
         process.exitCode = 1
         return
       }
@@ -226,10 +221,10 @@ export async function killHandler(target: string | undefined): Promise<void> {
 
   if (!target) {
     if (sessions.length === 0) {
-      console.log('No active sessions to kill.')
+      console.log(t('cli.noActiveSessionsToKill'))
       return
     }
-    console.log('Specify a session to kill:')
+    console.log(t('cli.specifySessionToKill'))
     for (const s of sessions) {
       const label = s.name ? `${s.name} (${s.sessionId})` : s.sessionId
       console.log(`  ${label}  PID=${s.pid}`)
@@ -239,17 +234,17 @@ export async function killHandler(target: string | undefined): Promise<void> {
 
   const session = findSession(sessions, target)
   if (!session) {
-    console.error(`Session not found: ${target}`)
+    console.error(t('cli.sessionNotFound', target))
     process.exitCode = 1
     return
   }
 
-  console.log(`Killing session ${session.sessionId} (PID: ${session.pid})...`)
+  console.log(t('cli.killingSession', session.sessionId, session.pid))
 
   try {
     process.kill(session.pid, 'SIGTERM')
   } catch {
-    console.log('Session already exited.')
+    console.log(t('cli.sessionAlreadyExited'))
     return
   }
 
@@ -258,12 +253,12 @@ export async function killHandler(target: string | undefined): Promise<void> {
   if (isProcessRunning(session.pid)) {
     try {
       process.kill(session.pid, 'SIGKILL')
-      console.log('Session force-killed.')
+      console.log(t('cli.sessionForceKilled'))
     } catch {
-      console.log('Session exited during grace period.')
+      console.log(t('cli.sessionExitedGracePeriod'))
     }
   } else {
-    console.log('Session stopped.')
+    console.log(t('cli.sessionStopped'))
   }
 
   const pidFile = join(getSessionsDir(), `${session.pid}.json`)
@@ -288,17 +283,11 @@ export async function handleBgStart(args: string[]): Promise<void> {
     !engine.supportsInteractiveInput &&
     !filteredArgs.some(a => a === '-p' || a === '--print' || a === '--pipe')
   ) {
-    console.error(
-      'Error: Background sessions with detached engine require -p/--print flag.\n' +
-        'The detached engine has no terminal for interactive input.\n\n' +
-        'Usage:\n' +
-        '  claude daemon bg -p "your prompt here"\n' +
-        '  echo "prompt" | claude daemon bg --pipe',
-    )
+    console.error(t('cli.bgDetachedError'))
     if (process.platform !== 'win32') {
       console.error(
-        '\nAlternatively, install tmux for interactive background sessions:\n' +
-          `  ${process.platform === 'darwin' ? 'brew install tmux' : 'sudo apt install tmux'}`,
+        '\n' +
+          t('cli.bgInstallTmux').replace('{installCmd}', process.platform === 'darwin' ? t('cli.bgInstallTmuxDarwin') : t('cli.bgInstallTmuxLinux')),
       )
     }
     process.exitCode = 1
@@ -319,18 +308,15 @@ export async function handleBgStart(args: string[]): Promise<void> {
       args: filteredArgs,
       env: { ...process.env },
       logPath,
-      cwd: process.cwd(),
-    })
+      cwd: process.cwd()})
 
-    console.log(`Background session started: ${result.sessionName}`)
-    console.log(`  Engine: ${result.engineUsed}`)
-    console.log(`  Log: ${result.logPath}`)
+    console.log(t('cli.bgSessionStarted', result.sessionName))
+    console.log(`  ${t('cli.bgEngine')} ${result.engineUsed}`)
+    console.log(`  ${t('cli.bgLog')} ${result.logPath}`)
     console.log()
-    console.log(
-      `Use \`claude daemon attach ${result.sessionName}\` to reconnect.`,
-    )
-    console.log(`Use \`claude daemon status\` to check status.`)
-    console.log(`Use \`claude daemon kill ${result.sessionName}\` to stop.`)
+    console.log(t('cli.bgAttachHint', result.sessionName))
+    console.log(t('cli.bgStatusHint'))
+    console.log(t('cli.bgKillHint', result.sessionName))
   } catch (e) {
     console.error(e instanceof Error ? e.message : String(e))
     process.exitCode = 1

@@ -4,8 +4,7 @@ import type { Tools } from '../../Tool.js'
 import {
   getToolIndex,
   searchTools,
-  type SearchExtraToolsResult,
-} from './toolIndex.js'
+  type SearchExtraToolsResult} from './toolIndex.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { extractQueryFromMessages } from '../skillSearch/prefetch.js'
 
@@ -70,8 +69,7 @@ function toDiscoveryResult(r: SearchExtraToolsResult): ToolDiscoveryResult {
     score: r.score,
     isMcp: r.isMcp,
     isDeferred: r.isDeferred,
-    inputSchema: r.inputSchema,
-  }
+    inputSchema: r.inputSchema}
 }
 
 export function buildToolDiscoveryAttachment(
@@ -87,8 +85,7 @@ export function buildToolDiscoveryAttachment(
     trigger,
     queryText: queryText.slice(0, 200),
     durationMs,
-    indexSize,
-  } as Attachment
+    indexSize} as Attachment
 }
 
 export async function startSearchExtraToolsPrefetch(

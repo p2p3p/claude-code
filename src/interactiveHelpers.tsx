@@ -9,8 +9,7 @@ import {
   setAllowedChannels,
   setHasDevChannels,
   setSessionTrustAccepted,
-  setStatsStore,
-} from './bootstrap/state.js';
+  setStatsStore} from './bootstrap/state.js';
 import type { Command } from './commands.js';
 import { createStatsStore, type StatsStore } from './context/stats.js';
 import { getSystemContext } from './context.js';
@@ -29,14 +28,12 @@ import { normalizeApiKeyForConfig } from './utils/authPortable.js';
 import {
   getExternalClaudeMdIncludes,
   getMemoryFiles,
-  shouldShowClaudeMdExternalIncludesWarning,
-} from './utils/claudemd.js';
+  shouldShowClaudeMdExternalIncludesWarning} from './utils/claudemd.js';
 import {
   checkHasTrustDialogAccepted,
   getCustomApiKeyStatus,
   getGlobalConfig,
-  saveGlobalConfig,
-} from './utils/config.js';
+  saveGlobalConfig} from './utils/config.js';
 import { updateDeepLinkTerminalPreference } from './utils/deepLink/terminalPreference.js';
 import { isEnvTruthy, isRunningOnHomespace } from './utils/envUtils.js';
 import { type FpsMetrics, FpsTracker } from './utils/fpsTracker.js';
@@ -51,8 +48,7 @@ export function completeOnboarding(): void {
   saveGlobalConfig(current => ({
     ...current,
     hasCompletedOnboarding: true,
-    lastOnboardingVersion: MACRO.VERSION,
-  }));
+    lastOnboardingVersion: MACRO.VERSION}));
 }
 export function showDialog<T = void>(root: Root, renderer: (done: (result: T) => void) => React.ReactNode): Promise<T> {
   return new Promise<T>(resolve => {
@@ -338,8 +334,7 @@ export function getRenderContext(exitOnCtrlC: boolean): {
               total: event.durationMs,
               ...event.phases,
               rss: process.memoryUsage.rss(),
-              cpu: process.cpuUsage(),
-            }) + '\n';
+              cpu: process.cpuUsage()}) + '\n';
           // eslint-disable-next-line custom-rules/no-sync-fs -- bench-only, sync so no frames dropped on exit
           appendFileSync(frameTimingLogPath, line);
         }
@@ -357,12 +352,9 @@ export function getRenderContext(exitOnCtrlC: boolean): {
             logEvent('tengu_flicker', {
               desiredHeight: flicker.desiredHeight,
               actualHeight: flicker.availableHeight,
-              reason: flicker.reason,
-            } as unknown as Record<string, boolean | number | undefined>);
+              reason: flicker.reason} as unknown as Record<string, boolean | number | undefined>);
           }
           lastFlickerTime = now;
         }
-      },
-    },
-  };
+      }}};
 }

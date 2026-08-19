@@ -4,24 +4,21 @@ import {
   readdir,
   rename,
   unlink,
-  writeFile,
-} from 'node:fs/promises'
+  writeFile} from 'node:fs/promises'
 import { randomBytes } from 'node:crypto'
 import { dirname, join } from 'node:path'
 import {
   getSkillLearningRoot,
   type ObservationStoreOptions,
   type SkillLearningProjectContext,
-  type SkillLearningScope,
-} from './observationStore.js'
+  type SkillLearningScope} from './observationStore.js'
 import {
   clampConfidence,
   isContradictingInstinct,
   normalizeInstinct,
   parseInstinct,
   serializeInstinct,
-  type StoredInstinct,
-} from './instinctParser.js'
+  type StoredInstinct} from './instinctParser.js'
 
 let upsertQueue: Promise<unknown> = Promise.resolve()
 
@@ -125,8 +122,7 @@ async function doUpsertInstinct(
       ...(incoming.observationIds ?? []),
     ],
     updatedAt: now,
-    status: nextStatus,
-  })
+    status: nextStatus})
 
   return saveInstinct(merged, options)
 }
@@ -174,8 +170,7 @@ export async function decayInstinctConfidence(
       normalizeInstinct({
         ...instinct,
         confidence: nextConfidence,
-        updatedAt: new Date(now).toISOString(),
-      }),
+        updatedAt: new Date(now).toISOString()}),
       options,
     )
     decayed += 1
@@ -203,8 +198,7 @@ export async function updateConfidence(
   const updated = normalizeInstinct({
     ...target,
     confidence: clampConfidence(target.confidence + delta),
-    updatedAt: new Date().toISOString(),
-  })
+    updatedAt: new Date().toISOString()})
   return saveInstinct(updated, options)
 }
 

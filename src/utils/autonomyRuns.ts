@@ -10,8 +10,7 @@ import {
   commitPreparedAutonomyTurn,
   prepareAutonomyTurnPrompt,
   type AutonomyTriggerKind,
-  type HeartbeatAuthorityTask,
-} from './autonomyAuthority.js'
+  type HeartbeatAuthorityTask} from './autonomyAuthority.js'
 import { getCwd } from './cwd.js'
 import {
   DEFAULT_AUTONOMY_OWNER_KEY,
@@ -25,12 +24,10 @@ import {
   startManagedAutonomyFlow,
   type AutonomyFlowRecord,
   type AutonomyFlowSyncMode,
-  type ManagedAutonomyFlowStepDefinition,
-} from './autonomyFlows.js'
+  type ManagedAutonomyFlowStepDefinition} from './autonomyFlows.js'
 import {
   retainActiveFirst,
-  withAutonomyPersistenceLock,
-} from './autonomyPersistence.js'
+  withAutonomyPersistenceLock} from './autonomyPersistence.js'
 import { getFsImplementation } from './fsOperations.js'
 import { isProcessRunning } from './genericProcessUtils.js'
 import { logError } from './log.js'
@@ -168,8 +165,7 @@ function normalizePersistedRunRecord(
     ...run,
     runtime: run.runtime === 'flow_step' ? 'flow_step' : 'automatic',
     currentDir: run.currentDir ?? run.rootDir,
-    ownerKey: run.ownerKey ?? DEFAULT_AUTONOMY_OWNER_KEY,
-  }
+    ownerKey: run.ownerKey ?? DEFAULT_AUTONOMY_OWNER_KEY}
 }
 
 export function resolveAutonomyRunsPath(
@@ -185,8 +181,7 @@ export async function listAutonomyRuns(
     const raw = (await getFsImplementation().readFile(
       resolveAutonomyRunsPath(rootDir),
       {
-        encoding: 'utf-8',
-      },
+        encoding: 'utf-8'},
     )) as string
     const parsed = JSON.parse(raw) as { runs?: unknown[] }
     if (!Array.isArray(parsed.runs)) {
@@ -223,8 +218,7 @@ async function writeAutonomyRuns(
     path,
     `${JSON.stringify(
       {
-        runs: selectPersistedAutonomyRuns(runs),
-      } satisfies AutonomyRunsFile,
+        runs: selectPersistedAutonomyRuns(runs)} satisfies AutonomyRunsFile,
       null,
       2,
     )}\n`,
@@ -305,8 +299,7 @@ function failAutonomyRunRecord(
     ...run,
     status: 'failed',
     endedAt: nowMs,
-    error,
-  }
+    error}
 }
 
 function recoverStaleActiveAutonomyRun(
@@ -326,8 +319,7 @@ async function syncFailedManagedFlowForRun(
       runId: run.runId,
       error: run.error ?? 'Autonomy run failed.',
       rootDir,
-      nowMs: run.endedAt,
-    })
+      nowMs: run.endedAt})
   }
 }
 
@@ -384,14 +376,12 @@ function buildAutonomyRunRecord(
           parentFlowKey: params.flow.flowKey,
           parentFlowSyncMode: params.flow.syncMode,
           flowStepId: params.flow.stepId,
-          flowStepName: params.flow.stepName,
-        }
+          flowStepName: params.flow.stepName}
       : {}),
     promptPreview: truncatePromptPreview(params.prompt),
     createdAt,
     ownerProcessId: process.pid,
-    ownerSessionId: getSessionId(),
-  }
+    ownerSessionId: getSessionId()}
 }
 
 async function persistAutonomyRunRecord(
@@ -416,8 +406,7 @@ async function persistAutonomyRunRecord(
           !matchesActiveAutonomyRunSource(run, {
             trigger: record.trigger,
             sourceId,
-            ownerKey: record.ownerKey,
-          })
+            ownerKey: record.ownerKey})
         ) {
           continue
         }
@@ -476,8 +465,7 @@ async function queueManagedFlowStepRunForRecord(
       stepIndex: stepIndex >= 0 ? stepIndex : 0,
       runId: record.runId,
       rootDir,
-      nowMs: record.createdAt,
-    })
+      nowMs: record.createdAt})
   }
 }
 
@@ -578,14 +566,12 @@ async function createOrRecoverManagedFlowStepCommand(params: {
         basePrompt: buildManagedFlowStepPrompt(flow, stepIndex),
         trigger: 'managed-flow-step',
         rootDir,
-        currentDir: params.currentDir ?? flow.currentDir,
-      })
+        currentDir: params.currentDir ?? flow.currentDir})
       const origin = {
         kind: 'autonomy',
         trigger: 'managed-flow-step',
         runId: run.runId,
-        ...(run.sourceId ? { sourceId: run.sourceId } : {}),
-      } as unknown as MessageOrigin
+        ...(run.sourceId ? { sourceId: run.sourceId } : {})} as unknown as MessageOrigin
       return {
         value,
         mode: 'prompt',
@@ -601,9 +587,7 @@ async function createOrRecoverManagedFlowStepCommand(params: {
           sourceLabel: run.sourceLabel,
           ...(run.parentFlowId ? { flowId: run.parentFlowId } : {}),
           ...(run.flowStepId ? { flowStepId: run.flowStepId } : {}),
-          ...(run.flowStepName ? { flowStepName: run.flowStepName } : {}),
-        },
-      }
+          ...(run.flowStepName ? { flowStepName: run.flowStepName } : {})}}
     }
     return null
   }
@@ -625,9 +609,7 @@ async function createOrRecoverManagedFlowStepCommand(params: {
       syncMode: 'managed',
       ownerKey: flow.ownerKey,
       stepId: step.stepId,
-      stepName: step.name,
-    },
-  })
+      stepName: step.name}})
 }
 
 async function queueCurrentManagedFlowStepCommand(params: {
@@ -659,14 +641,12 @@ export async function startManagedAutonomyFlowFromHeartbeatTask(params: {
     steps: params.task.steps.map<ManagedAutonomyFlowStepDefinition>(step => ({
       name: step.name,
       prompt: step.prompt,
-      ...(step.waitFor ? { waitFor: step.waitFor } : {}),
-    })),
+      ...(step.waitFor ? { waitFor: step.waitFor } : {})})),
     rootDir,
     currentDir,
     ownerKey: params.ownerKey,
     sourceId: `heartbeat:${params.task.name}`,
-    sourceLabel: params.task.name,
-  })
+    sourceLabel: params.task.name})
   if (!started) {
     return null
   }
@@ -675,8 +655,7 @@ export async function startManagedAutonomyFlowFromHeartbeatTask(params: {
     rootDir,
     currentDir,
     priority: params.priority,
-    workload: params.workload,
-  })
+    workload: params.workload})
 }
 
 export async function markAutonomyRunRunning(
@@ -693,8 +672,7 @@ export async function markAutonomyRunRunning(
             status: 'running',
             startedAt: nowMs ?? Date.now(),
             ownerProcessId: process.pid,
-            ownerSessionId: getSessionId(),
-          }
+            ownerSessionId: getSessionId()}
         : null,
     rootDir,
   )
@@ -703,8 +681,7 @@ export async function markAutonomyRunRunning(
       flowId: updated.parentFlowId,
       runId: updated.runId,
       rootDir,
-      nowMs: updated.startedAt,
-    })
+      nowMs: updated.startedAt})
   }
   return updated
 }
@@ -722,8 +699,7 @@ export async function markAutonomyRunCompleted(
             ...current,
             status: 'completed',
             endedAt: nowMs ?? Date.now(),
-            error: undefined,
-          }
+            error: undefined}
         : null,
     rootDir,
   )
@@ -732,8 +708,7 @@ export async function markAutonomyRunCompleted(
       flowId: updated.parentFlowId,
       runId: updated.runId,
       rootDir,
-      nowMs: updated.endedAt,
-    })
+      nowMs: updated.endedAt})
   }
   return updated
 }
@@ -772,8 +747,7 @@ export async function markAutonomyRunCancelled(
             ...current,
             status: 'cancelled',
             endedAt: nowMs ?? Date.now(),
-            error: undefined,
-          }
+            error: undefined}
         : null,
     rootDir,
   )
@@ -782,8 +756,7 @@ export async function markAutonomyRunCancelled(
       flowId: updated.parentFlowId,
       runId: updated.runId,
       rootDir,
-      nowMs: updated.endedAt,
-    })
+      nowMs: updated.endedAt})
   }
   return updated
 }
@@ -809,8 +782,7 @@ export async function finalizeAutonomyRunCompleted(params: {
     rootDir: params.rootDir,
     currentDir: params.currentDir ?? updated.currentDir,
     priority: params.priority,
-    workload: params.workload,
-  })
+    workload: params.workload})
   return next ? [next] : []
 }
 
@@ -849,24 +821,21 @@ export async function resumeManagedAutonomyFlowPrompt(params: {
   const resumed = await resumeManagedAutonomyFlow({
     flowId: params.flowId,
     rootDir: params.rootDir,
-    nowMs: params.nowMs,
-  })
+    nowMs: params.nowMs})
   if (!resumed) {
     return recoverManagedAutonomyFlowPrompt({
       flowId: params.flowId,
       rootDir: params.rootDir,
       currentDir: params.currentDir,
       priority: params.priority,
-      workload: params.workload,
-    })
+      workload: params.workload})
   }
   return createOrRecoverManagedFlowStepCommand({
     flowId: resumed.flow.flowId,
     rootDir: params.rootDir,
     currentDir: params.currentDir ?? resumed.flow.currentDir,
     priority: params.priority,
-    workload: params.workload,
-  })
+    workload: params.workload})
 }
 
 export async function createAutonomyQueuedPrompt(params: {
@@ -888,8 +857,7 @@ export async function createAutonomyQueuedPrompt(params: {
     basePrompt: params.basePrompt,
     trigger: params.trigger,
     rootDir,
-    currentDir,
-  })
+    currentDir})
   if (params.shouldCreate && !params.shouldCreate()) {
     return null
   }
@@ -902,8 +870,7 @@ export async function createAutonomyQueuedPrompt(params: {
     ownerKey: params.ownerKey,
     workload: params.workload,
     priority: params.priority,
-    flow: params.flow,
-  })
+    flow: params.flow})
 }
 
 export async function createAutonomyQueuedPromptIfNoActiveSource(params: {
@@ -929,8 +896,7 @@ export async function createAutonomyQueuedPromptIfNoActiveSource(params: {
       trigger: params.trigger,
       sourceId: params.sourceId,
       rootDir,
-      ownerKey: params.ownerKey,
-    })
+      ownerKey: params.ownerKey})
   ) {
     return null
   }
@@ -938,8 +904,7 @@ export async function createAutonomyQueuedPromptIfNoActiveSource(params: {
     basePrompt: params.basePrompt,
     trigger: params.trigger,
     rootDir,
-    currentDir,
-  })
+    currentDir})
   if (params.shouldCreate && !params.shouldCreate()) {
     return null
   }
@@ -951,8 +916,7 @@ export async function createAutonomyQueuedPromptIfNoActiveSource(params: {
     sourceLabel: params.sourceLabel,
     ownerKey: params.ownerKey,
     workload: params.workload,
-    priority: params.priority,
-  })
+    priority: params.priority})
 }
 
 export async function commitAutonomyQueuedPrompt(params: {
@@ -1015,8 +979,7 @@ async function commitAutonomyQueuedPromptInternal(
     sourceId: params.sourceId,
     sourceLabel: params.sourceLabel,
     ownerKey: params.ownerKey,
-    flow: params.flow,
-  }
+    flow: params.flow}
   const useDedup = skipWhenActiveSource && Boolean(params.sourceId)
   const run = await createAutonomyRunCore(runParams, useDedup)
   if (!run) {
@@ -1027,8 +990,7 @@ async function commitAutonomyQueuedPromptInternal(
     kind: 'autonomy',
     trigger: params.prepared.trigger,
     runId: run.runId,
-    ...(params.sourceId ? { sourceId: params.sourceId } : {}),
-  } as unknown as MessageOrigin
+    ...(params.sourceId ? { sourceId: params.sourceId } : {})} as unknown as MessageOrigin
 
   return {
     value,
@@ -1045,9 +1007,7 @@ async function commitAutonomyQueuedPromptInternal(
       sourceLabel: params.sourceLabel,
       ...(run.parentFlowId ? { flowId: run.parentFlowId } : {}),
       ...(run.flowStepId ? { flowStepId: run.flowStepId } : {}),
-      ...(run.flowStepName ? { flowStepName: run.flowStepName } : {}),
-    },
-  }
+      ...(run.flowStepName ? { flowStepName: run.flowStepName } : {})}}
 }
 
 export async function createProactiveAutonomyCommands(params: {
@@ -1064,8 +1024,7 @@ export async function createProactiveAutonomyCommands(params: {
     basePrompt: params.basePrompt,
     trigger: 'proactive-tick',
     rootDir,
-    currentDir,
-  })
+    currentDir})
   if (params.shouldCreate && !params.shouldCreate()) {
     return []
   }
@@ -1076,8 +1035,7 @@ export async function createProactiveAutonomyCommands(params: {
       rootDir,
       currentDir,
       workload: params.workload,
-      priority: params.priority,
-    }),
+      priority: params.priority}),
   ]
 
   for (const task of prepared.dueHeartbeatTasks) {
@@ -1092,8 +1050,7 @@ export async function createProactiveAutonomyCommands(params: {
       rootDir,
       currentDir,
       priority: params.priority,
-      workload: params.workload,
-    })
+      workload: params.workload})
     if (flowCommand) {
       commands.push(flowCommand)
     }
@@ -1108,8 +1065,7 @@ export function formatAutonomyRunsStatus(runs: AutonomyRunRecord[]): string {
     running: 0,
     completed: 0,
     failed: 0,
-    cancelled: 0,
-  }
+    cancelled: 0}
   for (const run of runs) {
     counts[run.status] += 1
   }

@@ -38,8 +38,7 @@ export function logForDiagnosticsNoPII(
     timestamp: new Date().toISOString(),
     level,
     event,
-    data: data ?? {},
-  }
+    data: data ?? {}}
 
   const fs = getFsImplementation()
   const line = jsonStringify(entry) + '\n'
@@ -82,13 +81,11 @@ export async function withDiagnosticsTiming<T>(
     const additionalData = getData ? getData(result) : {}
     logForDiagnosticsNoPII('info', `${event}_completed`, {
       duration_ms: Date.now() - startTime,
-      ...additionalData,
-    })
+      ...additionalData})
     return result
   } catch (error) {
     logForDiagnosticsNoPII('error', `${event}_failed`, {
-      duration_ms: Date.now() - startTime,
-    })
+      duration_ms: Date.now() - startTime})
     throw error
   }
 }

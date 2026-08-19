@@ -20,8 +20,7 @@ type XDGOptions = {
 function resolveOptions(options?: XDGOptions): { env: EnvLike; home: string } {
   return {
     env: options?.env ?? process.env,
-    home: options?.homedir ?? process.env.HOME ?? osHomedir(),
-  }
+    home: options?.homedir ?? process.env.HOME ?? osHomedir()}
 }
 
 function joinPortable(base: string, ...parts: string[]): string {

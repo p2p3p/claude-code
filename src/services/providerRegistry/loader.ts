@@ -20,32 +20,28 @@ export const DEFAULT_PROVIDERS: ProviderConfig[] = [
     baseUrl: 'https://api.cerebras.ai/v1',
     apiKeyEnv: 'CEREBRAS_API_KEY',
     defaultModel: 'llama-3.3-70b',
-    compatRule: 'cerebras',
-  },
+    compatRule: 'cerebras'},
   {
     id: 'groq',
     kind: 'openai-compat',
     baseUrl: 'https://api.groq.com/openai/v1',
     apiKeyEnv: 'GROQ_API_KEY',
     defaultModel: 'llama-3.3-70b-versatile',
-    compatRule: 'groq',
-  },
+    compatRule: 'groq'},
   {
     id: 'qwen',
     kind: 'openai-compat',
     baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
     apiKeyEnv: 'DASHSCOPE_API_KEY',
     defaultModel: 'qwen-max',
-    compatRule: 'strict-openai',
-  },
+    compatRule: 'strict-openai'},
   {
     id: 'deepseek',
     kind: 'openai-compat',
     baseUrl: 'https://api.deepseek.com/v1',
     apiKeyEnv: 'DEEPSEEK_API_KEY',
     defaultModel: 'deepseek-chat',
-    compatRule: 'deepseek',
-  },
+    compatRule: 'deepseek'},
 ]
 
 /**

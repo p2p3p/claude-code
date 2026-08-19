@@ -82,8 +82,7 @@ async function buildHeaders(): Promise<Record<string, string>> {
   return {
     'x-api-key': apiKey,
     'anthropic-version': '2023-06-01',
-    'content-type': 'application/json',
-  }
+    'content-type': 'application/json'}
 }
 
 /**
@@ -198,8 +197,7 @@ export async function listSkills(): Promise<Skill[]> {
   return withRetry(async () => {
     const headers = await buildHeaders()
     const response = await axios.get<ListSkillsResponse>(skillsBaseUrl(), {
-      headers,
-    })
+      headers})
     return response.data.data ?? []
   })
 }
@@ -242,8 +240,7 @@ export async function createSkill(name: string, body: string): Promise<Skill> {
     const headers = await buildHeaders()
     const requestBody: CreateSkillBody = { name, body }
     const response = await axios.post<Skill>(skillsBaseUrl(), requestBody, {
-      headers,
-    })
+      headers})
     return response.data
   })
 }

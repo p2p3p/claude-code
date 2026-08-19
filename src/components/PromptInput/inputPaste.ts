@@ -25,8 +25,7 @@ export function maybeTruncateMessageForInput(
   if (text.length <= TRUNCATION_THRESHOLD) {
     return {
       truncatedText: text,
-      placeholderContent: '',
-    }
+      placeholderContent: ''}
   }
 
   // Calculate how much text to keep from start and end
@@ -50,8 +49,7 @@ export function maybeTruncateMessageForInput(
 
   return {
     truncatedText,
-    placeholderContent,
-  }
+    placeholderContent}
 }
 
 function formatTruncatedTextRef(id: number, numLines: number): string {
@@ -83,8 +81,5 @@ export function maybeTruncateInput(
       [nextPasteId]: {
         id: nextPasteId,
         type: 'text',
-        content: placeholderContent,
-      },
-    },
-  }
+        content: placeholderContent}}}
 }

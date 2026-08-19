@@ -6,8 +6,7 @@
 import {
   type ParseEntry,
   parse as shellQuoteParse,
-  quote as shellQuoteQuote,
-} from 'shell-quote'
+  quote as shellQuoteQuote} from 'shell-quote'
 import { logError } from '../log.js'
 import { jsonStringify } from '../slowOperations.js'
 
@@ -39,8 +38,7 @@ export function tryParseShellCommand(
     }
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown parse error',
-    }
+      error: error instanceof Error ? error.message : 'Unknown parse error'}
   }
 }
 
@@ -89,8 +87,7 @@ export function tryQuoteShellArgs(args: unknown[]): ShellQuoteResult {
     }
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown quote error',
-    }
+      error: error instanceof Error ? error.message : 'Unknown quote error'}
   }
 }
 

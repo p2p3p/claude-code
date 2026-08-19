@@ -17,7 +17,6 @@ export function useNpmDeprecationNotification(): void {
       key: 'npm-deprecation-warning',
       text: NPM_DEPRECATION_MESSAGE,
       color: 'warning',
-      priority: 'high',
-    };
+      priority: 'high'};
   });
 }

@@ -6,8 +6,7 @@ import { executeNotificationHooks } from '../utils/hooks.js'
 import { logError } from '../utils/log.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from './analytics/index.js'
+  logEvent} from './analytics/index.js'
 
 export type NotificationOptions = {
   message: string
@@ -31,8 +30,7 @@ export async function sendNotification(
       channel as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     method_used:
       methodUsed as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    term: env.terminal as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+    term: env.terminal as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 }
 
 const DEFAULT_TITLE = 'Claude Code'

@@ -4,6 +4,7 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { Box, Text } from '@anthropic/ink';
 import { useKeybindings } from '../keybindings/useKeybinding.js';
 import { logEvent } from '../services/analytics/index.js';
+import { t } from '../utils/i18n/index.js';
 import type { NormalizedUserMessage, RenderableMessage } from '../types/message.js';
 import { isEmptyMessageText, SYNTHETIC_MESSAGES } from '../utils/messages.js';
 
@@ -108,9 +109,7 @@ const PRIMARY_INPUT: Record<string, PrimaryInput> = {
   Agent: { label: 'prompt', extract: str('prompt') },
   Tmux: {
     label: 'command',
-    extract: i => (Array.isArray(i.args) ? `tmux ${i.args.join(' ')}` : undefined),
-  },
-};
+    extract: i => (Array.isArray(i.args) ? `tmux ${i.args.join(' ')}` : undefined)}};
 
 // Only AgentTool has renderGroupedToolUse — Edit/Bash/etc. stay as assistant tool_use blocks.
 export function toolCallOf(msg: NavigableMessage): { name: string; input: Record<string, unknown> } | undefined {
@@ -145,24 +144,21 @@ function action<const T extends NavigableType, const K extends string>(a: {
 export const MESSAGE_ACTIONS = [
   action({
     key: 'enter',
-    label: s => (s.expanded ? 'collapse' : 'expand'),
+    label: s => (s.expanded ? t('shortcutHint.collapse') : t('shortcutHint.expand')),
     types: ['grouped_tool_use', 'collapsed_read_search', 'attachment', 'system'],
     stays: true,
     // Empty — `stays` handled inline by dispatch.
-    run: () => {},
-  }),
+    run: () => {}}),
   action({
     key: 'enter',
-    label: 'edit',
+    label: () => t('shortcutHint.edit'),
     types: ['user'],
-    run: (m, c) => void c.edit(m),
-  }),
+    run: (m, c) => void c.edit(m)}),
   action({
     key: 'c',
-    label: 'copy',
+    label: () => t('shortcutHint.copy'),
     types: NAVIGABLE_TYPES,
-    run: (m, c) => c.copy(copyTextOf(m)),
-  }),
+    run: (m, c) => c.copy(copyTextOf(m))}),
   action({
     key: 'p',
     // `!` safe: applies() guarantees toolName ∈ PRIMARY_INPUT.
@@ -174,8 +170,7 @@ export const MESSAGE_ACTIONS = [
       if (!tc) return;
       const val = PRIMARY_INPUT[tc.name]?.extract(tc.input);
       if (val) c.copy(val);
-    },
-  }),
+    }}),
 ] as const;
 
 function isApplicable(a: (typeof MESSAGE_ACTIONS)[number], c: MessageActionsState): boolean {
@@ -236,8 +231,7 @@ export function useMessageActions(
       'messageActions:escape': () => setCursor(c => (c?.expanded ? { ...c, expanded: false } : null)),
       // ctrl+c skips the collapse step — from expanded-during-streaming, two-stage
       // would mean 3 presses to interrupt (collapse→null→cancel).
-      'messageActions:ctrlc': () => setCursor(null),
-    };
+      'messageActions:ctrlc': () => setCursor(null)};
     for (const key of new Set(MESSAGE_ACTIONS.map(a => a.key))) {
       h[`messageActions:${key}`] = () => {
         const c = cursorRef.current;
@@ -268,8 +262,7 @@ export function useMessageActions(
 // Must mount inside <KeybindingSetup>.
 export function MessageActionsKeybindings({
   handlers,
-  isActive,
-}: {
+  isActive}: {
   handlers: Record<string, () => void>;
   isActive: boolean;
 }): null {
@@ -302,11 +295,11 @@ export function MessageActionsBar({ cursor }: { cursor: MessageActionsState }): 
           {figures.arrowUp}
           {figures.arrowDown}
         </Text>
-        <Text dimColor> navigate · </Text>
+        <Text dimColor> {t('shortcutHint.navigate')} · </Text>
         <Text bold dimColor={false}>
           esc
         </Text>
-        <Text dimColor> back</Text>
+        <Text dimColor> {t('shortcutHint.back')}</Text>
       </Box>
     </Box>
   );

@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import { extractMcpToolDisplayName, getMcpDisplayName } from '../../services/mcp/mcpStringUtils.js';
 import type { Tool } from '../../Tool.js';
+import { t } from '../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Dialog } from '@anthropic/ink';
 import type { ServerInfo } from './types.js';
@@ -36,14 +37,12 @@ export function MCPToolDetailView({ tool, server, onBack }: Props): React.ReactN
               alwaysAllowRules: {},
               alwaysDenyRules: {},
               alwaysAskRules: {},
-              isBypassPermissionsModeAvailable: false,
-            },
-            tools: [],
-          },
+              isBypassPermissionsModeAvailable: false},
+            tools: []},
         );
         setToolDescription(desc);
       } catch {
-        setToolDescription('Failed to load description');
+        setToolDescription(t('mcptooldetailview.failedToLoadDescription'));
       }
     }
     void loadDescription();
@@ -52,9 +51,9 @@ export function MCPToolDetailView({ tool, server, onBack }: Props): React.ReactN
   const titleContent = (
     <>
       {displayName}
-      {isReadOnly && <Text color="success"> [read-only]</Text>}
-      {isDestructive && <Text color="error"> [destructive]</Text>}
-      {isOpenWorld && <Text dimColor> [open-world]</Text>}
+      {isReadOnly && <Text color="success">{t('mcptooldetailview.readOnly')}</Text>}
+      {isDestructive && <Text color="error">{t('mcptooldetailview.destructive')}</Text>}
+      {isOpenWorld && <Text dimColor>{t('mcptooldetailview.openWorld')}</Text>}
     </>
   );
 
@@ -65,26 +64,26 @@ export function MCPToolDetailView({ tool, server, onBack }: Props): React.ReactN
       onCancel={onBack}
       inputGuide={exitState =>
         exitState.pending ? (
-          <Text>Press {exitState.keyName} again to exit</Text>
+          <Text>{t('common.pressAgain', exitState.keyName)}</Text>
         ) : (
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="go back" />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.goBack')} />
         )
       }
     >
       <Box flexDirection="column">
         <Box>
-          <Text bold>Tool name: </Text>
+          <Text bold>{t('mcptooldetailview.toolName')} </Text>
           <Text dimColor>{toolName}</Text>
         </Box>
 
         <Box>
-          <Text bold>Full name: </Text>
+          <Text bold>{t('mcptooldetailview.fullName')} </Text>
           <Text dimColor>{tool.name}</Text>
         </Box>
 
         {toolDescription && (
           <Box flexDirection="column" marginTop={1}>
-            <Text bold>Description:</Text>
+            <Text bold>{t('mcptooldetailview.description')}</Text>
             <Text wrap="wrap">{toolDescription}</Text>
           </Box>
         )}
@@ -93,7 +92,7 @@ export function MCPToolDetailView({ tool, server, onBack }: Props): React.ReactN
           tool.inputJSONSchema.properties &&
           Object.keys(tool.inputJSONSchema.properties).length > 0 && (
             <Box flexDirection="column" marginTop={1}>
-              <Text bold>Parameters:</Text>
+              <Text bold>{t('mcptooldetailview.parameters')}</Text>
               <Box marginLeft={2} flexDirection="column">
                 {Object.entries(tool.inputJSONSchema.properties).map(([key, value]) => {
                   const required = tool.inputJSONSchema?.required as string[] | undefined;
@@ -101,7 +100,7 @@ export function MCPToolDetailView({ tool, server, onBack }: Props): React.ReactN
                   return (
                     <Text key={key}>
                       • {key}
-                      {isRequired && <Text dimColor> (required)</Text>}:{' '}
+                      {isRequired && <Text dimColor>{t('mcptooldetailview.required')}</Text>}:{' '}
                       <Text dimColor>
                         {typeof value === 'object' && value && 'type' in value ? String(value.type) : 'unknown'}
                       </Text>

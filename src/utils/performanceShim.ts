@@ -37,8 +37,7 @@ function mark(name: string): PerformanceMark {
     name,
     entryType: 'mark',
     startTime: marks.get(name)!,
-    duration: 0,
-  } as PerformanceMark
+    duration: 0} as PerformanceMark
 }
 
 function measure(
@@ -84,16 +83,14 @@ function getEntriesByType(type: string): PerformanceEntryLike[] {
       name,
       entryType: 'mark',
       startTime,
-      duration: 0,
-    }))
+      duration: 0}))
   }
   if (type === 'measure') {
     return [...measures.values()].map(m => ({
       name: m.name,
       entryType: 'measure',
       startTime: m.startTime,
-      duration: m.duration,
-    }))
+      duration: m.duration}))
   }
   return []
 }
@@ -151,8 +148,7 @@ const shim = {
   },
   toJSON() {
     return original.toJSON()
-  },
-} as unknown as typeof performance
+  }} as unknown as typeof performance
 
 /**
  * Install the shim onto globalThis.performance. Safe to call multiple times.

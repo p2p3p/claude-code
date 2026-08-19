@@ -17,15 +17,13 @@ import type { AgentId } from '../../types/ids.js'
 import { logForDebugging } from '../../utils/debug.js'
 import {
   type CacheSafeParams,
-  runForkedAgent,
-} from '../../utils/forkedAgent.js'
+  runForkedAgent} from '../../utils/forkedAgent.js'
 import { logError } from '../../utils/log.js'
 import { getAgentTranscript } from '../../utils/sessionStorage.js'
 import { buildSummaryContext } from './summaryContext.js'
 import {
   buildSummaryPrompt,
-  createSummaryPromptMessage,
-} from './summaryPrompt.js'
+  createSummaryPromptMessage} from './summaryPrompt.js'
 
 const SUMMARY_INTERVAL_MS = 30_000
 
@@ -109,8 +107,7 @@ export function startAgentSummarization(
       // Build fork params with current messages
       const forkParams: CacheSafeParams = {
         ...baseParams,
-        forkContextMessages: summaryContext.messages,
-      }
+        forkContextMessages: summaryContext.messages}
 
       logForDebuggingImpl(
         `[AgentSummary] Forking for summary, ${summaryContext.messages.length} messages in context`,
@@ -123,8 +120,7 @@ export function startAgentSummarization(
       const canUseTool = async () => ({
         behavior: 'deny' as const,
         message: 'No tools needed for summary',
-        decisionReason: { type: 'other' as const, reason: 'summary only' },
-      })
+        decisionReason: { type: 'other' as const, reason: 'summary only' }})
 
       // DO NOT set maxOutputTokens here. The fork piggybacks on the main
       // thread's prompt cache by sending identical cache-key params (system,
@@ -144,8 +140,7 @@ export function startAgentSummarization(
         querySource: 'agent_summary',
         forkLabel: 'agent_summary',
         overrides: { abortController: summaryAbortController },
-        skipTranscript: true,
-      })
+        skipTranscript: true})
 
       if (stopped) return
 

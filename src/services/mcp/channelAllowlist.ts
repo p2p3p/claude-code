@@ -30,8 +30,7 @@ const ChannelAllowlistSchema = lazySchema(() =>
   z.array(
     z.object({
       marketplace: z.string(),
-      plugin: z.string(),
-    }),
+      plugin: z.string()}),
   ),
 )
 

@@ -1,27 +1,23 @@
 import {
   createFileJournalStore,
   type ProgressEvent,
-  type WorkflowPorts,
-} from '@claude-code-best/workflow-engine'
+  type WorkflowPorts} from '@claude-code-best/workflow-engine'
 import { logForDebugging } from '../utils/debug.js'
 import { getProjectRoot } from '../bootstrap/state.js'
 import { getRunsDir } from './persistence.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import {
   completeWorkflowTask,
   failWorkflowTask,
   killWorkflowTask,
-  registerLocalWorkflowTask,
-} from '../tasks/LocalWorkflowTask/LocalWorkflowTask.js'
+  registerLocalWorkflowTask} from '../tasks/LocalWorkflowTask/LocalWorkflowTask.js'
 import {
   buildHostBundle,
   makeHostHandle,
   readHostBundle,
-  type WorkflowHostBundle,
-} from './hostHandle.js'
+  type WorkflowHostBundle} from './hostHandle.js'
 import { buildRegistry } from './registry.js'
 import type { ProgressBus } from './progress/bus.js'
 import type { ProgressStore } from './progress/store.js'
@@ -59,8 +55,7 @@ function makeHostFactory(): WorkflowPorts['hostFactory'] {
       // (the agent gets its own cwd via the toolUseContext inside the host bundle).
       cwd: getProjectRoot(),
       budgetTotal: null, // turn-level budget injection point (read from settings in the future)
-      ...(ctx.toolUseId ? { toolUseId: ctx.toolUseId } : {}),
-    }
+      ...(ctx.toolUseId ? { toolUseId: ctx.toolUseId } : {})}
   }
 }
 
@@ -83,8 +78,7 @@ export function createWorkflowPorts(opts: {
       logEvent('tengu_workflow_done', {
         status: e.status === 'completed' ? 0 : e.status === 'failed' ? 1 : 2,
         runId:
-          e.runId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          e.runId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     }
   })
 
@@ -101,8 +95,7 @@ export function createWorkflowPorts(opts: {
         workflowFile: regOpts.workflowFile ?? '',
         summary: regOpts.summary,
         ...(regOpts.toolUseId ? { toolUseId: regOpts.toolUseId } : {}),
-        abortController,
-      })
+        abortController})
       const runId = regOpts.runId ?? taskId
       bindings.set(runId, {
         runId,
@@ -110,8 +103,7 @@ export function createWorkflowPorts(opts: {
         setAppState,
         abortController,
         workflowName: regOpts.workflowName,
-        agentAbortControllers: new Map(),
-      })
+        agentAbortControllers: new Map()})
       logForDebugging(
         `workflow task registered: ${runId} (${regOpts.workflowName})`,
       )
@@ -171,8 +163,7 @@ export function createWorkflowPorts(opts: {
     },
     pendingAction() {
       return null // v1: skip/retry not wired (seam retained)
-    },
-  }
+    }}
 
   return {
     hostFactory: makeHostFactory(),
@@ -183,20 +174,16 @@ export function createWorkflowPorts(opts: {
         throw new Error(
           'workflow agentRunner fallback reached — agentAdapterRegistry must be set on ports',
         )
-      },
-    },
+      }},
     progressEmitter: {
       emit(event) {
         opts.bus.emit(event) // → store reducer + telemetry
-      },
-    },
+      }},
     taskRegistrar,
     journalStore: createFileJournalStore(runsDir),
     permissionGate: { isAborted: () => false }, // engine uses ctx.signal to check abort
     logger: {
       debug: msg => logForDebugging(msg),
       warn: msg => logForDebugging(`[workflow warn] ${msg}`),
-      event: name => logForDebugging(`workflow event: ${name}`),
-    },
-  }
+      event: name => logForDebugging(`workflow event: ${name}`)}}
 }

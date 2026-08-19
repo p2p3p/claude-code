@@ -45,8 +45,7 @@ export function useBuddyNotification(): void {
       key: 'buddy-teaser',
       jsx: <RainbowText text="/buddy" />,
       priority: 'immediate',
-      timeoutMs: 15_000,
-    });
+      timeoutMs: 15_000});
     return () => removeNotification('buddy-teaser');
   }, [addNotification, removeNotification]);
 }

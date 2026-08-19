@@ -3,8 +3,7 @@ import {
   hasShellQuoteSingleQuoteBug,
   type ParseEntry,
   quote,
-  tryParseShellCommand,
-} from './shellQuote.js'
+  tryParseShellCommand} from './shellQuote.js'
 
 /**
  * Rearranges a command with pipes to place stdin redirect after the first command.

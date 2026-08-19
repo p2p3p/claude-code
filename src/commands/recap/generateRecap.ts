@@ -16,8 +16,7 @@ import { getLastCacheSafeParams } from '../../utils/cacheSafeParamsSlot.js'
 import { runForkedAgent } from '../../utils/forkedAgent.js'
 import {
   createUserMessage,
-  getAssistantMessageText,
-} from '../../utils/messages.js'
+  getAssistantMessageText} from '../../utils/messages.js'
 
 // Matches the official G$9 constant in v2.1.123:
 // "lead with goal + current task, then one next action, ≤40 words, no markdown"
@@ -69,15 +68,13 @@ export async function generateRecap(signal: AbortSignal): Promise<RecapResult> {
       canUseTool: async () => ({
         behavior: 'deny' as const,
         message: 'Recap cannot use tools',
-        decisionReason: { type: 'other' as const, reason: 'away_summary' },
-      }),
+        decisionReason: { type: 'other' as const, reason: 'away_summary' }}),
       overrides: { abortController: inner },
       querySource: 'away_summary',
       forkLabel: 'away_summary',
       maxTurns: 1,
       skipCacheWrite: true,
-      skipTranscript: true,
-    })
+      skipTranscript: true})
 
     if (signal.aborted) {
       return { kind: 'aborted' }
@@ -90,8 +87,7 @@ export async function generateRecap(signal: AbortSignal): Promise<RecapResult> {
     if (errorMsg) {
       return {
         kind: 'api-error',
-        text: getAssistantMessageText(errorMsg) ?? '',
-      }
+        text: getAssistantMessageText(errorMsg) ?? ''}
     }
 
     // Extract the assistant text from the last assistant message

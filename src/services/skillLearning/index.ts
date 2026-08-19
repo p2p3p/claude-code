@@ -3,8 +3,7 @@ export * from './evolution.js'
 export {
   createInstinct,
   parseInstinct,
-  serializeInstinct,
-} from './instinctParser.js'
+  serializeInstinct} from './instinctParser.js'
 export * from './learningPolicy.js'
 export {
   exportInstincts,
@@ -13,15 +12,13 @@ export {
   prunePendingInstincts,
   saveInstinct,
   updateConfidence,
-  upsertInstinct,
-} from './instinctStore.js'
+  upsertInstinct} from './instinctStore.js'
 export {
   appendObservation,
   ingestTranscript,
   readObservations,
   scrubObservation,
-  scrubText,
-} from './observationStore.js'
+  scrubText} from './observationStore.js'
 export * from './promotion.js'
 export * from './projectContext.js'
 export * from './runtimeObserver.js'

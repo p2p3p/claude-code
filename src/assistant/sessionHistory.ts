@@ -37,9 +37,7 @@ export async function createHistoryAuthCtx(
     headers: {
       ...getOAuthHeaders(accessToken),
       'anthropic-beta': 'ccr-byoc-2025-07-29',
-      'x-organization-uuid': orgUUID,
-    },
-  }
+      'x-organization-uuid': orgUUID}}
 }
 
 async function fetchPage(
@@ -52,8 +50,7 @@ async function fetchPage(
       headers: ctx.headers,
       params,
       timeout: 15000,
-      validateStatus: () => true,
-    })
+      validateStatus: () => true})
     .catch(() => null)
   if (!resp || resp.status !== 200) {
     logForDebugging(`[${label}] HTTP ${resp?.status ?? 'error'}`)
@@ -62,8 +59,7 @@ async function fetchPage(
   return {
     events: Array.isArray(resp.data.data) ? resp.data.data : [],
     firstId: resp.data.first_id,
-    hasMore: resp.data.has_more,
-  }
+    hasMore: resp.data.has_more}
 }
 
 /**

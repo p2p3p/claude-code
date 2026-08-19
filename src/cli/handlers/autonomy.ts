@@ -4,28 +4,23 @@ import {
   formatAutonomyFlowsStatus,
   getAutonomyFlowById,
   listAutonomyFlows,
-  requestManagedAutonomyFlowCancel,
-} from '../../utils/autonomyFlows.js'
+  requestManagedAutonomyFlowCancel} from '../../utils/autonomyFlows.js'
 import {
   formatAutonomyRunsList,
   formatAutonomyRunsStatus,
   listAutonomyRuns,
   markAutonomyRunCancelled,
-  resumeManagedAutonomyFlowPrompt,
-} from '../../utils/autonomyRuns.js'
+  resumeManagedAutonomyFlowPrompt} from '../../utils/autonomyRuns.js'
 import {
   formatAutonomyDeepStatus,
   formatAutonomyDeepStatusSections,
-  type AutonomyDeepStatusSectionId,
-} from '../../utils/autonomyStatus.js'
+  type AutonomyDeepStatusSectionId} from '../../utils/autonomyStatus.js'
 import {
-  AUTONOMY_USAGE,
-  parseAutonomyArgs,
-} from '../../utils/autonomyCommandSpec.js'
+  parseAutonomyArgs} from '../../utils/autonomyCommandSpec.js'
 import {
   enqueuePendingNotification,
-  removeByFilter,
-} from '../../utils/messageQueueManager.js'
+  removeByFilter} from '../../utils/messageQueueManager.js'
+import { t } from '../../utils/i18n/index.js'
 
 export function parseAutonomyLimit(raw?: string | number): number {
   const parsed = typeof raw === 'number' ? raw : Number.parseInt(raw ?? '', 10)
@@ -66,7 +61,7 @@ export async function getAutonomyDeepSectionText(
   const sections = await formatAutonomyDeepStatusSections({ runs, flows })
   const section = sections.find(item => item.id === sectionId)
   if (!section) {
-    return `Autonomy deep status section not found: ${sectionId}`
+    return t('autonomy.deepSectionNotFound', sectionId)
   }
   return [`# ${section.title}`, section.content].join('\n')
 }
@@ -131,13 +126,12 @@ export async function cancelAutonomyFlowText(
 ): Promise<string> {
   const cancelled = await requestManagedAutonomyFlowCancel({
     flowId,
-    rootDir: options?.rootDir,
-  })
+    rootDir: options?.rootDir})
   if (!cancelled) {
-    return 'Autonomy flow not found.'
+    return t('autonomy.flowNotFound')
   }
   if (!cancelled.accepted) {
-    return `Autonomy flow ${flowId} is already terminal (${cancelled.flow.status}).`
+    return t('autonomy.flowAlreadyTerminal', flowId, cancelled.flow.status)
   }
 
   let removedCount = 0
@@ -157,8 +151,8 @@ export async function cancelAutonomyFlowText(
   }
 
   return cancelled.flow.status === 'running'
-    ? `Cancellation requested for flow ${flowId}. The current step is still running, and no new steps will be started.`
-    : `Cancelled flow ${flowId}. Removed ${removedCount} queued step(s).`
+    ? t('autonomy.cancellationRequested', flowId)
+    : t('autonomy.cancelledFlow', flowId, removedCount)
 }
 
 export async function autonomyFlowCancelHandler(flowId: string): Promise<void> {
@@ -176,23 +170,22 @@ export async function resumeAutonomyFlowText(
   const command = await resumeManagedAutonomyFlowPrompt({
     flowId,
     rootDir: options?.rootDir,
-    currentDir: options?.currentDir,
-  })
+    currentDir: options?.currentDir})
   if (!command) {
-    return 'Autonomy flow is not waiting or was not found.'
+    return t('autonomy.flowNotWaiting')
   }
 
   if (options?.enqueueInMemory) {
     enqueuePendingNotification(command)
-    return `Queued the next managed step for flow ${flowId}.`
+    return t('autonomy.queuedNextStep', flowId)
   }
 
   const runId = command.autonomy?.runId ?? 'unknown'
   return [
-    `Prepared the next managed step for flow ${flowId}.`,
-    `Run ID: ${runId}`,
+    t('autonomy.preparedNextStep', flowId),
+    t('autonomy.runId', runId),
     '',
-    'Prompt:',
+    t('autonomy.prompt'),
     typeof command.value === 'string' ? command.value : String(command.value),
   ].join('\n')
 }
@@ -221,13 +214,11 @@ export async function getAutonomyCommandText(
       return getAutonomyFlowText(parsed.flowId)
     case 'flow-cancel':
       return cancelAutonomyFlowText(parsed.flowId, {
-        removeQueuedInMemory: options?.removeQueuedInMemory,
-      })
+        removeQueuedInMemory: options?.removeQueuedInMemory})
     case 'flow-resume':
       return resumeAutonomyFlowText(parsed.flowId, {
-        enqueueInMemory: options?.enqueueInMemory,
-      })
+        enqueueInMemory: options?.enqueueInMemory})
     case 'usage':
-      return AUTONOMY_USAGE
+      return t('autonomy.usage')
   }
 }

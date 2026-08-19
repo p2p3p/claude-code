@@ -3,8 +3,7 @@ import {
   dequeue,
   dequeueAllMatching,
   hasCommandsInQueue,
-  peek,
-} from './messageQueueManager.js'
+  peek} from './messageQueueManager.js'
 
 type ProcessQueueParams = {
   executeInput: (commands: QueuedCommand[]) => Promise<void>
@@ -56,8 +55,7 @@ function isSlashCommand(cmd: QueuedCommand): boolean {
  * @returns result with processed status
  */
 export function processQueueIfReady({
-  executeInput,
-}: ProcessQueueParams): ProcessQueueResult {
+  executeInput}: ProcessQueueParams): ProcessQueueResult {
   // This processor runs on the REPL main thread between turns. Skip anything
   // addressed to a subagent — an unfiltered peek() returning a subagent
   // notification would set targetMode, dequeueAllMatching would find nothing

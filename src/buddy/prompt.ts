@@ -30,7 +30,6 @@ export function getCompanionIntroAttachment(
     {
       type: 'companion_intro',
       name: companion.name,
-      species: companion.species,
-    },
+      species: companion.species},
   ]
 }

@@ -7,8 +7,7 @@ import {
   WORKFLOW_DIR_NAME,
   type WorkflowHostContext,
   type WorkflowInput,
-  type WorkflowPorts,
-} from '@claude-code-best/workflow-engine'
+  type WorkflowPorts} from '@claude-code-best/workflow-engine'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { getProjectRoot } from '../bootstrap/state.js'
@@ -19,8 +18,7 @@ import {
   attachRunStatePersistence,
   getRunsDir,
   listPersistedRuns,
-  readRunState,
-} from './persistence.js'
+  readRunState} from './persistence.js'
 
 /**
  * How many newest persisted runs to hydrate into the store on panel open. Tuned to cover a normal
@@ -32,8 +30,7 @@ import { createProgressBus } from './progress/bus.js'
 import {
   createProgressStoreFromBus,
   type ProgressStore,
-  type RunProgress,
-} from './progress/store.js'
+  type RunProgress} from './progress/store.js'
 import { createWorkflowPorts } from './ports.js'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import type { ToolUseContext } from '../Tool.js'
@@ -135,8 +132,7 @@ export function makeService(
     // cwdOverride is for tests only: inject a temp directory (avoids inline persistence writing to the real project directory).
     cwd: cwdOverride ?? getProjectRoot(),
     budgetTotal: null, // turn-level budget injection point (in future read from settings)
-    toolUseId: toolUseContext.toolUseId,
-  })
+    toolUseId: toolUseContext.toolUseId})
 
   async function resolveSource(input: {
     script?: string
@@ -158,8 +154,7 @@ export function makeService(
       return {
         script: await readFile(input.scriptPath, 'utf-8'),
         workflowFile: input.scriptPath,
-        workflowName,
-      }
+        workflowName}
     }
     if (input.name) {
       const dir = join(getProjectRoot(), WORKFLOW_DIR_NAME)
@@ -172,8 +167,7 @@ export function makeService(
       return {
         script: found.content,
         workflowFile: found.path,
-        workflowName: input.name,
-      }
+        workflowName: input.name}
     }
     throw new Error('One of script, name, or scriptPath must be provided')
   }
@@ -200,8 +194,7 @@ export function makeService(
           ...(workflowFile ? { workflowFile } : {}),
           ...(input.description ? { summary: input.description } : {}),
           ...(host.toolUseId ? { toolUseId: host.toolUseId } : {}),
-          ...(input.resumeFromRunId ? { runId: input.resumeFromRunId } : {}),
-        },
+          ...(input.resumeFromRunId ? { runId: input.resumeFromRunId } : {})},
         host.handle,
       )
 
@@ -236,8 +229,7 @@ export function makeService(
         ...(input.maxConcurrency !== undefined
           ? { maxConcurrency: input.maxConcurrency }
           : {}),
-        ...(input.resumeFromRunId ? { resume: true } : {}),
-      })
+        ...(input.resumeFromRunId ? { resume: true } : {})})
         .then(result => {
           if (result.status === 'completed') {
             ports.taskRegistrar.complete(runId)
@@ -252,8 +244,7 @@ export function makeService(
       logForDebugging(`workflow launched: ${runId} (${workflowName})`)
       return {
         runId,
-        ...(persistedScriptPath ? { scriptPath: persistedScriptPath } : {}),
-      }
+        ...(persistedScriptPath ? { scriptPath: persistedScriptPath } : {})}
     },
 
     kill(runId) {
@@ -313,8 +304,7 @@ export function makeService(
       return listNamedWorkflows(
         workflowDir ?? join(getProjectRoot(), WORKFLOW_DIR_NAME),
       )
-    },
-  }
+    }}
 }
 
 /** For tests: reset the singleton (avoid cross-case contamination). */

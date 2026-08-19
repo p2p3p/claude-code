@@ -108,8 +108,7 @@ export function parseAnsi(text: string): ParsedLine[] {
                 currentColor = {
                   r: codes[k + 2]!,
                   g: codes[k + 3]!,
-                  b: codes[k + 4]!,
-                }
+                  b: codes[k + 4]!}
                 k += 4
               }
             }
@@ -180,8 +179,7 @@ function get256Color(index: number): AnsiColor {
     return {
       r: r === 0 ? 0 : 55 + r * 40,
       g: g === 0 ? 0 : 55 + g * 40,
-      b: b === 0 ? 0 : 55 + b * 40,
-    }
+      b: b === 0 ? 0 : 55 + b * 40}
   }
 
   // Grayscale (232-255)
@@ -215,8 +213,7 @@ export function ansiToSvg(
     paddingX = 24,
     paddingY = 24,
     backgroundColor = `rgb(${DEFAULT_BG.r}, ${DEFAULT_BG.g}, ${DEFAULT_BG.b})`,
-    borderRadius = 8,
-  } = options
+    borderRadius = 8} = options
 
   const lines = parseAnsi(ansiText)
 

@@ -3,25 +3,21 @@ import { queryDaemonStatus } from '../daemon/state.js'
 import { listLiveSessions } from '../cli/bg.js'
 import {
   type AutonomyFlowRecord,
-  formatAutonomyFlowsStatus,
-} from './autonomyFlows.js'
+  formatAutonomyFlowsStatus} from './autonomyFlows.js'
 import {
   type AutonomyRunRecord,
-  formatAutonomyRunsStatus,
-} from './autonomyRuns.js'
+  formatAutonomyRunsStatus} from './autonomyRuns.js'
 import { getTeamsDir } from './envUtils.js'
 import {
   isAutoModeGateEnabled,
-  getAutoModeUnavailableReason,
-} from './permissions/permissionSetup.js'
+  getAutoModeUnavailableReason} from './permissions/permissionSetup.js'
 import { cronToHuman } from './cron.js'
 import { listAllCronTasks, nextCronRunMs } from './cronTasks.js'
 import { getTeammateStatuses } from './teamDiscovery.js'
 import { listTasks } from './tasks.js'
 import {
   formatRemoteTriggerAuditStatus,
-  listRemoteTriggerAuditRecords,
-} from './remoteTriggerAudit.js'
+  listRemoteTriggerAuditRecords} from './remoteTriggerAudit.js'
 import { formatWorkflowRunsStatus, listWorkflowRuns } from './workflowRuns.js'
 import { formatPipeRegistryStatus } from './pipeStatus.js'
 import { formatRemoteControlLocalStatus } from './remoteControlStatus.js'
@@ -150,59 +146,48 @@ function formatAutoModeSection(): string {
 export async function formatAutonomyDeepStatusSections({
   runs,
   flows,
-  nowMs = Date.now(),
-}: DeepStatusParams): Promise<AutonomyDeepStatusSection[]> {
+  nowMs = Date.now()}: DeepStatusParams): Promise<AutonomyDeepStatusSection[]> {
   return Promise.all([
     Promise.resolve({
       id: 'auto-mode' as const,
       title: 'Auto Mode',
-      content: formatAutoModeSection(),
-    }),
+      content: formatAutoModeSection()}),
     Promise.resolve({
       id: 'runs' as const,
       title: 'Runs',
-      content: formatAutonomyRunsStatus(runs),
-    }),
+      content: formatAutonomyRunsStatus(runs)}),
     Promise.resolve({
       id: 'flows' as const,
       title: 'Flows',
-      content: formatAutonomyFlowsStatus(flows),
-    }),
+      content: formatAutonomyFlowsStatus(flows)}),
     formatCronSection(nowMs).then(content => ({
       id: 'cron' as const,
       title: 'Cron',
-      content,
-    })),
+      content})),
     listWorkflowRuns().then(runs => ({
       id: 'workflow-runs' as const,
       title: 'Workflow Runs',
-      content: formatWorkflowRunsStatus(runs),
-    })),
+      content: formatWorkflowRunsStatus(runs)})),
     formatTeamsSection().then(content => ({
       id: 'teams' as const,
       title: 'Teams',
-      content,
-    })),
+      content})),
     formatPipeRegistryStatus().then(content => ({
       id: 'pipes' as const,
       title: 'Pipes',
-      content,
-    })),
+      content})),
     formatRuntimeSection().then(content => ({
       id: 'runtime' as const,
       title: 'Runtime',
-      content,
-    })),
+      content})),
     Promise.resolve({
       id: 'remote-control' as const,
       title: 'Remote Control',
-      content: formatRemoteControlLocalStatus(),
-    }),
+      content: formatRemoteControlLocalStatus()}),
     listRemoteTriggerAuditRecords().then(records => ({
       id: 'remote-trigger' as const,
       title: 'RemoteTrigger',
-      content: formatRemoteTriggerAuditStatus(records),
-    })),
+      content: formatRemoteTriggerAuditStatus(records)})),
   ])
 }
 

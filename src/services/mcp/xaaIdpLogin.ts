@@ -8,13 +8,11 @@
 
 import {
   exchangeAuthorization,
-  startAuthorization,
-} from '@modelcontextprotocol/sdk/client/auth.js'
+  startAuthorization} from '@modelcontextprotocol/sdk/client/auth.js'
 import {
   type OAuthClientInformation,
   type OpenIdProviderDiscoveryMetadata,
-  OpenIdProviderDiscoveryMetadataSchema,
-} from '@modelcontextprotocol/sdk/shared/auth.js'
+  OpenIdProviderDiscoveryMetadataSchema} from '@modelcontextprotocol/sdk/shared/auth.js'
 import { randomBytes } from 'crypto'
 import { createServer, type Server } from 'http'
 import { parse } from 'url'
@@ -117,9 +115,7 @@ function saveIdpIdToken(
     ...existing,
     mcpXaaIdp: {
       ...existing.mcpXaaIdp,
-      [issuerKey(idpIssuer)]: { idToken, expiresAt },
-    },
-  })
+      [issuerKey(idpIssuer)]: { idToken, expiresAt }}})
 }
 
 /**
@@ -166,9 +162,7 @@ export function saveIdpClientSecret(
     ...existing,
     mcpXaaIdpConfig: {
       ...existing.mcpXaaIdpConfig,
-      [issuerKey(idpIssuer)]: { clientSecret },
-    },
-  })
+      [issuerKey(idpIssuer)]: { clientSecret }}})
 }
 
 /**
@@ -207,8 +201,7 @@ export async function discoverOidc(
   // eslint-disable-next-line eslint-plugin-n/no-unsupported-features/node-builtins
   const res = await fetch(url, {
     headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(IDP_REQUEST_TIMEOUT_MS),
-  })
+    signal: AbortSignal.timeout(IDP_REQUEST_TIMEOUT_MS)})
   if (!res.ok) {
     throw new Error(
       `XAA IdP: OIDC discovery failed: HTTP ${res.status} at ${url}`,
@@ -417,8 +410,7 @@ export async function acquireIdpIdToken(
   const state = randomBytes(32).toString('base64url')
   const clientInformation: OAuthClientInformation = {
     client_id: idpClientId,
-    ...(opts.idpClientSecret ? { client_secret: opts.idpClientSecret } : {}),
-  }
+    ...(opts.idpClientSecret ? { client_secret: opts.idpClientSecret } : {})}
 
   const { authorizationUrl, codeVerifier } = await startAuthorization(
     idpIssuer,
@@ -427,8 +419,7 @@ export async function acquireIdpIdToken(
       clientInformation,
       redirectUrl: redirectUri,
       scope: 'openid',
-      state,
-    },
+      state},
   )
 
   // Open the browser only after the socket is actually bound — listen() is
@@ -460,9 +451,7 @@ export async function acquireIdpIdToken(
       // eslint-disable-next-line eslint-plugin-n/no-unsupported-features/node-builtins
       fetch(url, {
         ...init,
-        signal: AbortSignal.timeout(IDP_REQUEST_TIMEOUT_MS),
-      }),
-  })
+        signal: AbortSignal.timeout(IDP_REQUEST_TIMEOUT_MS)})})
   if (!tokens.id_token) {
     throw new Error(
       'XAA IdP: token response missing id_token (check scope=openid)',

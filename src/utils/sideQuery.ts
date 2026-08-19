@@ -3,47 +3,45 @@ import type { BetaToolUnion } from '@anthropic-ai/sdk/resources/beta/messages.js
 import {
   getLastApiCompletionTimestamp,
   getSessionId,
-  setLastApiCompletionTimestamp,
-} from '../bootstrap/state.js'
+  setLastApiCompletionTimestamp} from '../bootstrap/state.js'
 import { STRUCTURED_OUTPUTS_BETA_HEADER } from '../constants/betas.js'
 import type { QuerySource } from '../constants/querySource.js'
 import {
   getAttributionHeader,
-  getCLISyspromptPrefix,
-} from '../constants/system.js'
+  getCLISyspromptPrefix} from '../constants/system.js'
 import { logEvent } from '../services/analytics/index.js'
 import type { AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS } from '../services/analytics/metadata.js'
-import { getAPIMetadata } from '../services/api/claude.js'
-import { getAnthropicClient } from '../services/api/client.js'
+import { getAPIMetadata } from '../services/api/anthropic/index.js'
+import { getAnthropicClient } from '../services/api/anthropic/client.js'
 import {
   createTrace,
   createChildSpan,
   endTrace,
-  recordLLMObservation,
-} from '../services/langfuse/index.js'
+  recordLLMObservation} from '../services/langfuse/index.js'
 import type { LangfuseSpan } from '../services/langfuse/index.js'
 import {
   convertMessagesToLangfuse,
   convertOutputToLangfuse,
-  convertToolsToLangfuse,
-} from '../services/langfuse/convert.js'
+  convertToolsToLangfuse} from '../services/langfuse/convert.js'
 import { getModelBetas, modelSupportsStructuredOutputs } from './betas.js'
 import { logForDebugging } from './debug.js'
 import { errorMessage } from './errors.js'
 import { getAPIProvider } from './model/providers.js'
+import {
+  ensureApiKeyGroupEnv,
+  toKeyGroupProviderKey} from '../accounts/index.js'
 import { normalizeModelStringForAPI } from './model/model.js'
 import { getOpenAIClient } from '../services/api/openai/client.js'
 import { getGrokClient } from '../services/api/grok/client.js'
-import { isChatGPTAuthEnabled } from '../services/api/openai/chatgptAuth.js'
+import { getGeminiBaseUrl, getGeminiModelPath } from '../services/api/gemini/client.js'
+import { isChatGPTAuthMode } from './model/chatgptModels.js'
 import {
   adaptResponsesStreamToAnthropic,
   buildResponsesRequest,
-  createChatGPTResponsesStream,
-} from '../services/api/openai/responsesAdapter.js'
+  createChatGPTResponsesStream} from '../services/api/openai/responsesAdapter.js'
 import {
   formatOpenAIPromptCacheKey,
-  getOfficialOpenAIPromptCacheKey,
-} from '../services/api/openai/openaiShared.js'
+  getOfficialOpenAIPromptCacheKey} from '../services/api/openai/openaiShared.js'
 import {
   anthropicMessagesToOpenAI,
   resolveOpenAIModel,
@@ -53,8 +51,7 @@ import {
   resolveGeminiModel,
   anthropicToolsToGemini,
   anthropicToolChoiceToGemini,
-  normalizeOpenAIUsage,
-} from '@ant/model-provider'
+  normalizeOpenAIUsage} from '@ant/model-provider'
 import type { SystemPrompt } from './systemPromptType.js'
 import type { BetaRawMessageStreamEvent } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
 
@@ -189,10 +186,15 @@ export async function sideQuery(opts: SideQueryOptions): Promise<BetaMessage> {
     skipSystemPromptPrefix,
     temperature,
     thinking,
-    stop_sequences,
-  } = opts
+    stop_sequences} = opts
 
   const provider = getAPIProvider()
+  // Sync the active key-group entry into env before any side-query request so
+  // multi-key groups work for background queries too. No-op when unconfigured.
+  {
+    const groupProvider = toKeyGroupProviderKey(provider)
+    if (groupProvider) ensureApiKeyGroupEnv(groupProvider)
+  }
   if (provider === 'openai' || provider === 'grok') {
     return sideQueryViaOpenAICompatible(opts)
   }
@@ -203,8 +205,7 @@ export async function sideQuery(opts: SideQueryOptions): Promise<BetaMessage> {
   const client = await getAnthropicClient({
     maxRetries,
     model,
-    source: 'side_query',
-  })
+    source: 'side_query'})
   const betas = [...getModelBetas(model)]
   // Add structured-outputs beta if using output_format and provider supports it
   if (
@@ -229,9 +230,7 @@ export async function sideQuery(opts: SideQueryOptions): Promise<BetaMessage> {
             type: 'text' as const,
             text: getCLISyspromptPrefix({
               isNonInteractive: false,
-              hasAppendSystemPrompt: false,
-            }),
-          },
+              hasAppendSystemPrompt: false})},
         ]),
     ...(Array.isArray(system)
       ? system
@@ -246,8 +245,7 @@ export async function sideQuery(opts: SideQueryOptions): Promise<BetaMessage> {
   } else if (thinking !== undefined) {
     thinkingConfig = {
       type: 'enabled',
-      budget_tokens: Math.min(thinking, max_tokens - 1),
-    }
+      budget_tokens: Math.min(thinking, max_tokens - 1)}
   }
 
   const normalizedModel = normalizeModelStringForAPI(model)
@@ -274,8 +272,7 @@ export async function sideQuery(opts: SideQueryOptions): Promise<BetaMessage> {
         sessionId: getSessionId(),
         model: normalizedModel,
         provider,
-        querySource: opts.querySource,
-      })
+        querySource: opts.querySource})
     : opts.querySource === 'auto_mode'
       ? null
       : createTrace({
@@ -283,8 +280,7 @@ export async function sideQuery(opts: SideQueryOptions): Promise<BetaMessage> {
           model: normalizedModel,
           provider,
           name: traceName,
-          querySource: opts.querySource,
-        })
+          querySource: opts.querySource})
 
   let response: BetaMessage
   try {
@@ -301,8 +297,7 @@ export async function sideQuery(opts: SideQueryOptions): Promise<BetaMessage> {
         ...(stop_sequences && { stop_sequences }),
         ...(thinkingConfig && { thinking: thinkingConfig }),
         ...(betas.length > 0 && { betas }),
-        metadata: getAPIMetadata(),
-      },
+        metadata: getAPIMetadata()},
       { signal },
     )
   } catch (error) {
@@ -331,21 +326,18 @@ export async function sideQuery(opts: SideQueryOptions): Promise<BetaMessage> {
     uncachedInputTokens: response.usage.cache_creation_input_tokens ?? 0,
     durationMsIncludingRetries: now - start,
     timeSinceLastApiCallMs:
-      lastCompletion !== null ? now - lastCompletion : undefined,
-  })
+      lastCompletion !== null ? now - lastCompletion : undefined})
   setLastApiCompletionTimestamp(now)
 
   // Record LLM observation in Langfuse (no-op if not configured).
   // Wrap SDK types into the internal message format expected by converters.
   const wrappedInput = messages.map(m => ({
     type: m.role === 'assistant' ? ('assistant' as const) : ('user' as const),
-    message: { role: m.role, content: m.content },
-  })) as unknown as Parameters<typeof convertMessagesToLangfuse>[0]
+    message: { role: m.role, content: m.content }})) as unknown as Parameters<typeof convertMessagesToLangfuse>[0]
   const wrappedOutput = [
     {
       type: 'assistant' as const,
-      message: { role: 'assistant' as const, content: response.content },
-    },
+      message: { role: 'assistant' as const, content: response.content }},
   ] as unknown as Parameters<typeof convertOutputToLangfuse>[0]
   recordLLMObservation(langfuseTrace, {
     model: normalizedModel,
@@ -361,8 +353,7 @@ export async function sideQuery(opts: SideQueryOptions): Promise<BetaMessage> {
       cache_creation_input_tokens:
         response.usage.cache_creation_input_tokens ?? undefined,
       cache_read_input_tokens:
-        response.usage.cache_read_input_tokens ?? undefined,
-    },
+        response.usage.cache_read_input_tokens ?? undefined},
     startTime: new Date(start),
     endTime: new Date(),
     ...(tools && { tools: convertToolsToLangfuse(tools as unknown[]) }),
@@ -371,11 +362,7 @@ export async function sideQuery(opts: SideQueryOptions): Promise<BetaMessage> {
         thinking: {
           type: thinkingConfig.type,
           ...(thinkingConfig.type === 'enabled' && {
-            budgetTokens: thinkingConfig.budget_tokens,
-          }),
-        },
-      }),
-  })
+            budgetTokens: thinkingConfig.budget_tokens})}})})
   endTrace(langfuseTrace)
 
   return response
@@ -396,8 +383,7 @@ async function collectAnthropicStreamToBetaMessage(
     input_tokens: 0,
     output_tokens: 0,
     cache_creation_input_tokens: 0,
-    cache_read_input_tokens: 0,
-  }
+    cache_read_input_tokens: 0}
   const contentBlocks: Record<number, Record<string, unknown>> = {}
 
   for await (const event of stream) {
@@ -412,8 +398,7 @@ async function collectAnthropicStreamToBetaMessage(
             cache_creation_input_tokens:
               event.message.usage.cache_creation_input_tokens ?? 0,
             cache_read_input_tokens:
-              event.message.usage.cache_read_input_tokens ?? 0,
-          }
+              event.message.usage.cache_read_input_tokens ?? 0}
         }
         break
       }
@@ -427,8 +412,7 @@ async function collectAnthropicStreamToBetaMessage(
           contentBlocks[event.index] = {
             ...cb,
             thinking: '',
-            signature: '',
-          }
+            signature: ''}
         } else {
           contentBlocks[event.index] = { ...cb }
         }
@@ -523,20 +507,17 @@ async function collectAnthropicStreamToBetaMessage(
           type: 'tool_use' as const,
           id: String(block.id ?? `toolu_${index}`),
           name: String(block.name ?? ''),
-          input: parsed,
-        }
+          input: parsed}
       }
       if (block.type === 'thinking') {
         return {
           type: 'thinking' as const,
           thinking: String(block.thinking ?? ''),
-          signature: String(block.signature ?? ''),
-        }
+          signature: String(block.signature ?? '')}
       }
       return {
         type: 'text' as const,
-        text: String(block.text ?? ''),
-      }
+        text: String(block.text ?? '')}
     })
 
   // Forced tool_choice classifiers care about tool_use blocks, not stop_reason
@@ -553,14 +534,13 @@ async function collectAnthropicStreamToBetaMessage(
     model,
     stop_reason: stopReason,
     stop_sequence: null,
-    usage,
-  } as BetaMessage
+    usage} as BetaMessage
 }
 
 /**
  * ChatGPT OAuth side query via the Codex Responses API.
  *
- * Must not use getOpenAIClient() — that path only reads OPENAI_API_KEY and
+ * Must not use getOpenAIClient() — that path only reads API_KEY and
  * yields 401 under OPENAI_AUTH_MODE=chatgpt (no API key configured).
  */
 async function sideQueryViaChatGPTResponses(
@@ -579,13 +559,11 @@ async function sideQueryViaChatGPTResponses(
     messages: openaiMessages,
     tools: openaiTools ?? [],
     toolChoice: openaiToolChoice,
-    promptCacheKey: formatOpenAIPromptCacheKey(getSessionId()),
-  })
+    promptCacheKey: formatOpenAIPromptCacheKey(getSessionId())})
 
   const rawStream = await createChatGPTResponsesStream({
     request,
-    signal: opts.signal ?? new AbortController().signal,
-  })
+    signal: opts.signal ?? new AbortController().signal})
   const adapted = adaptResponsesStreamToAnthropic(rawStream, openaiModel)
   const betaMessage = await collectAnthropicStreamToBetaMessage(
     adapted,
@@ -607,8 +585,7 @@ async function sideQueryViaChatGPTResponses(
     uncachedInputTokens: betaMessage.usage.input_tokens,
     durationMsIncludingRetries: now - start,
     timeSinceLastApiCallMs:
-      lastCompletion !== null ? now - lastCompletion : undefined,
-  })
+      lastCompletion !== null ? now - lastCompletion : undefined})
   setLastApiCompletionTimestamp(now)
 
   return betaMessage
@@ -640,8 +617,7 @@ async function sideQueryViaOpenAICompatible(
     tool_choice,
     max_tokens = 1024,
     temperature,
-    signal,
-  } = opts
+    signal} = opts
 
   const provider = getAPIProvider()
   const normalizedModel = normalizeModelStringForAPI(model)
@@ -675,7 +651,7 @@ async function sideQueryViaOpenAICompatible(
     : undefined
 
   // ChatGPT subscription auth: use Responses API + OAuth, never empty API key.
-  if (provider === 'openai' && isChatGPTAuthEnabled()) {
+  if (provider === 'openai' && isChatGPTAuthMode()) {
     return sideQueryViaChatGPTResponses(
       opts,
       openaiModel,
@@ -697,12 +673,11 @@ async function sideQueryViaOpenAICompatible(
   const requestParams: Record<string, unknown> = {
     model: openaiModel,
     messages: openaiMessages,
-    max_tokens,
-  }
+    max_tokens}
   const promptCacheKey =
     provider === 'openai'
       ? getOfficialOpenAIPromptCacheKey(
-          process.env.OPENAI_BASE_URL,
+          process.env.BASE_URL,
           getSessionId(),
         )
       : undefined
@@ -741,8 +716,7 @@ async function sideQueryViaOpenAICompatible(
           type: 'tool_use',
           id: tc.id ?? `toolu_${Date.now()}`,
           name: fn.name,
-          input: JSON.parse(fn.arguments || '{}'),
-        })
+          input: JSON.parse(fn.arguments || '{}')})
       }
     }
   }
@@ -764,8 +738,7 @@ async function sideQueryViaOpenAICompatible(
     cacheWriteTokens:
       promptCacheKey && typeof details?.cache_write_tokens === 'number'
         ? details.cache_write_tokens
-        : 0,
-  })
+        : 0})
 
   const now = Date.now()
   const requestId = response.id
@@ -783,8 +756,7 @@ async function sideQueryViaOpenAICompatible(
     uncachedInputTokens: usage.cache_creation_input_tokens,
     durationMsIncludingRetries: now - start,
     timeSinceLastApiCallMs:
-      lastCompletion !== null ? now - lastCompletion : undefined,
-  })
+      lastCompletion !== null ? now - lastCompletion : undefined})
   setLastApiCompletionTimestamp(now)
 
   const stopReason =
@@ -802,8 +774,7 @@ async function sideQueryViaOpenAICompatible(
     model: openaiModel,
     stop_reason: stopReason as BetaMessage['stop_reason'],
     stop_sequence: null,
-    usage,
-  } as BetaMessage
+    usage} as BetaMessage
 }
 
 /**
@@ -822,8 +793,7 @@ async function sideQueryViaGemini(
     tool_choice,
     max_tokens = 1024,
     temperature,
-    signal,
-  } = opts
+    signal} = opts
 
   const normalizedModel = normalizeModelStringForAPI(model)
   const geminiModel = resolveGeminiModel(normalizedModel)
@@ -849,8 +819,7 @@ async function sideQueryViaGemini(
     if (text) {
       contents.push({
         role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text }],
-      })
+        parts: [{ text }]})
     }
   }
 
@@ -869,13 +838,8 @@ async function sideQueryViaGemini(
     ? anthropicToolChoiceToGemini(tool_choice)
     : undefined
 
-  const baseUrl = (
-    process.env.GEMINI_BASE_URL ||
-    'https://generativelanguage.googleapis.com/v1beta'
-  ).replace(/\/+$/, '')
-  const modelPath = geminiModel.startsWith('models/')
-    ? geminiModel
-    : `models/${geminiModel}`
+  const baseUrl = getGeminiBaseUrl()
+  const modelPath = getGeminiModelPath(geminiModel)
   const url = `${baseUrl}/${modelPath}:generateContent`
 
   const body: Record<string, unknown> = {
@@ -883,18 +847,13 @@ async function sideQueryViaGemini(
     ...(systemInstruction && { systemInstruction }),
     ...(geminiTools && geminiTools.length > 0 && { tools: geminiTools }),
     ...(geminiToolConfig && {
-      toolConfig: { functionCallingConfig: geminiToolConfig },
-    }),
+      toolConfig: { functionCallingConfig: geminiToolConfig }}),
     ...(temperature !== undefined && {
-      generationConfig: { temperature },
-    }),
+      generationConfig: { temperature }}),
     ...(max_tokens !== undefined && {
       generationConfig: {
         ...(temperature !== undefined && { temperature }),
-        maxOutputTokens: max_tokens,
-      },
-    }),
-  }
+        maxOutputTokens: max_tokens}})}
 
   // Merge generationConfig if both temperature and max_tokens are set
   if (temperature !== undefined && max_tokens !== undefined) {
@@ -907,11 +866,9 @@ async function sideQueryViaGemini(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-goog-api-key': process.env.GEMINI_API_KEY || '',
-    },
+      'x-goog-api-key': process.env.API_KEY || ''},
     body: JSON.stringify(body),
-    signal,
-  })
+    signal})
 
   if (!res.ok) {
     const errorBody = await res.text()
@@ -957,8 +914,7 @@ async function sideQueryViaGemini(
           type: 'tool_use',
           id: `toolu_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
           name: part.functionCall.name ?? '',
-          input: part.functionCall.args ?? {},
-        })
+          input: part.functionCall.args ?? {}})
       }
     }
   }
@@ -978,8 +934,7 @@ async function sideQueryViaGemini(
     uncachedInputTokens: geminiResponse.usageMetadata?.promptTokenCount ?? 0,
     durationMsIncludingRetries: now - start,
     timeSinceLastApiCallMs:
-      lastCompletion !== null ? now - lastCompletion : undefined,
-  })
+      lastCompletion !== null ? now - lastCompletion : undefined})
   setLastApiCompletionTimestamp(now)
 
   const stopReason =
@@ -999,7 +954,5 @@ async function sideQueryViaGemini(
     stop_sequence: null,
     usage: {
       input_tokens: geminiResponse.usageMetadata?.promptTokenCount ?? 0,
-      output_tokens: geminiResponse.usageMetadata?.candidatesTokenCount ?? 0,
-    },
-  } as BetaMessage
+      output_tokens: geminiResponse.usageMetadata?.candidatesTokenCount ?? 0}} as BetaMessage
 }

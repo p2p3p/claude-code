@@ -7,6 +7,7 @@ import { SpinnerGlyph } from '../../components/Spinner/SpinnerGlyph.js';
 import { DOWN_ARROW, UP_ARROW } from '../../constants/figures.js';
 import { getSystemPrompt } from '../../constants/prompts.js';
 import { useModalOrTerminalSize } from '../../context/modalContext.js';
+import { t } from '../../utils/i18n/index.js';
 import { getSystemContext, getUserContext } from '../../context.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { type KeyboardEvent, type ScrollBoxHandle, ScrollBox } from '@anthropic/ink';
@@ -107,7 +108,7 @@ function BtwSideQuestion({ question, context, onDone }: BtwComponentProps): Reac
           ) : (
             <Box>
               <SpinnerGlyph frame={frame} messageColor="warning" />
-              <Text color="warning">Answering...</Text>
+              <Text color="warning">{t('btw.answering')}</Text>
             </Box>
           )}
         </ScrollBox>
@@ -115,7 +116,7 @@ function BtwSideQuestion({ question, context, onDone }: BtwComponentProps): Reac
       {(response || error) && (
         <Box marginTop={1}>
           <Text dimColor>
-            {UP_ARROW}/{DOWN_ARROW} to scroll · Space, Enter, or Escape to dismiss
+            {t('btw.dismissHint')}
           </Text>
         </Box>
       )}
@@ -155,8 +156,7 @@ async function buildCacheSafeParams(context: ProcessUserInputContext): Promise<C
       userContext: saved.userContext,
       systemContext: saved.systemContext,
       toolUseContext: context,
-      forkContextMessages,
-    };
+      forkContextMessages};
   }
   const [rawSystemPrompt, userContext, systemContext] = await Promise.all([
     getSystemPrompt(context.options.tools, context.options.mainLoopModel, [], context.options.mcpClients),
@@ -168,8 +168,7 @@ async function buildCacheSafeParams(context: ProcessUserInputContext): Promise<C
     userContext,
     systemContext,
     toolUseContext: context,
-    forkContextMessages,
-  };
+    forkContextMessages};
 }
 
 export async function call(
@@ -180,14 +179,13 @@ export async function call(
   const question = args?.trim();
 
   if (!question) {
-    onDone('Usage: /btw <your question>', { display: 'system' });
+    onDone(t('btw.usage'), { display: 'system' });
     return null;
   }
 
   saveGlobalConfig(current => ({
     ...current,
-    btwUseCount: current.btwUseCount + 1,
-  }));
+    btwUseCount: current.btwUseCount + 1}));
 
   return <BtwSideQuestion question={question} context={context} onDone={onDone} />;
 }

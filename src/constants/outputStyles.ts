@@ -51,8 +51,7 @@ export const OUTPUT_STYLE_CONFIG: OutputStyles = {
 You should be clear and educational, providing helpful explanations while remaining focused on the task. Balance educational content with task completion. When providing insights, you may exceed typical length constraints, but remain focused and relevant.
 
 # Explanatory Style Active
-${EXPLANATORY_FEATURE_PROMPT}`,
-  },
+${EXPLANATORY_FEATURE_PROMPT}`},
   Learning: {
     name: 'Learning',
     source: 'built-in',
@@ -130,9 +129,7 @@ ${figures.bullet} **Learn by Doing**
 Share one insight connecting their code to broader patterns or system effects. Avoid praise or repetition.
 
 ## Insights
-${EXPLANATORY_FEATURE_PROMPT}`,
-  },
-}
+${EXPLANATORY_FEATURE_PROMPT}`}}
 
 export const getAllOutputStyles = memoize(async function getAllOutputStyles(
   cwd: string,
@@ -142,8 +139,7 @@ export const getAllOutputStyles = memoize(async function getAllOutputStyles(
 
   // Start with built-in modes
   const allStyles = {
-    ...OUTPUT_STYLE_CONFIG,
-  }
+    ...OUTPUT_STYLE_CONFIG}
 
   const managedStyles = customStyles.filter(
     style => style.source === 'policySettings',
@@ -166,8 +162,7 @@ export const getAllOutputStyles = memoize(async function getAllOutputStyles(
         prompt: style.prompt,
         source: style.source,
         keepCodingInstructions: style.keepCodingInstructions,
-        forceForPlugin: style.forceForPlugin,
-      }
+        forceForPlugin: style.forceForPlugin}
     }
   }
 

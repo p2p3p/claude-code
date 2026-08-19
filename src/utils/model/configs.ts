@@ -13,8 +13,7 @@ export const CLAUDE_3_7_SONNET_CONFIG = {
   foundry: 'claude-3-7-sonnet',
   openai: 'claude-3-7-sonnet-20250219',
   gemini: 'claude-3-7-sonnet-20250219',
-  grok: 'claude-3-7-sonnet-20250219',
-} as const satisfies ModelConfig
+  grok: 'claude-3-7-sonnet-20250219'} as const satisfies ModelConfig
 
 export const CLAUDE_3_5_V2_SONNET_CONFIG = {
   firstParty: 'claude-3-5-sonnet-20241022',
@@ -23,8 +22,7 @@ export const CLAUDE_3_5_V2_SONNET_CONFIG = {
   foundry: 'claude-3-5-sonnet',
   openai: 'claude-3-5-sonnet-20241022',
   gemini: 'claude-3-5-sonnet-20241022',
-  grok: 'claude-3-5-sonnet-20241022',
-} as const satisfies ModelConfig
+  grok: 'claude-3-5-sonnet-20241022'} as const satisfies ModelConfig
 
 export const CLAUDE_3_5_HAIKU_CONFIG = {
   firstParty: 'claude-3-5-haiku-20241022',
@@ -33,8 +31,7 @@ export const CLAUDE_3_5_HAIKU_CONFIG = {
   foundry: 'claude-3-5-haiku',
   openai: 'claude-3-5-haiku-20241022',
   gemini: 'claude-3-5-haiku-20241022',
-  grok: 'claude-3-5-haiku-20241022',
-} as const satisfies ModelConfig
+  grok: 'claude-3-5-haiku-20241022'} as const satisfies ModelConfig
 
 export const CLAUDE_HAIKU_4_5_CONFIG = {
   firstParty: 'claude-haiku-4-5-20251001',
@@ -43,8 +40,7 @@ export const CLAUDE_HAIKU_4_5_CONFIG = {
   foundry: 'claude-haiku-4-5',
   openai: 'claude-haiku-4-5-20251001',
   gemini: 'claude-haiku-4-5-20251001',
-  grok: 'claude-haiku-4-5-20251001',
-} as const satisfies ModelConfig
+  grok: 'claude-haiku-4-5-20251001'} as const satisfies ModelConfig
 
 export const CLAUDE_SONNET_4_CONFIG = {
   firstParty: 'claude-sonnet-4-20250514',
@@ -53,8 +49,7 @@ export const CLAUDE_SONNET_4_CONFIG = {
   foundry: 'claude-sonnet-4',
   openai: 'claude-sonnet-4-20250514',
   gemini: 'claude-sonnet-4-20250514',
-  grok: 'claude-sonnet-4-20250514',
-} as const satisfies ModelConfig
+  grok: 'claude-sonnet-4-20250514'} as const satisfies ModelConfig
 
 export const CLAUDE_SONNET_4_5_CONFIG = {
   firstParty: 'claude-sonnet-4-5-20250929',
@@ -63,8 +58,7 @@ export const CLAUDE_SONNET_4_5_CONFIG = {
   foundry: 'claude-sonnet-4-5',
   openai: 'claude-sonnet-4-5-20250929',
   gemini: 'claude-sonnet-4-5-20250929',
-  grok: 'claude-sonnet-4-5-20250929',
-} as const satisfies ModelConfig
+  grok: 'claude-sonnet-4-5-20250929'} as const satisfies ModelConfig
 
 export const CLAUDE_OPUS_4_CONFIG = {
   firstParty: 'claude-opus-4-20250514',
@@ -73,8 +67,7 @@ export const CLAUDE_OPUS_4_CONFIG = {
   foundry: 'claude-opus-4',
   openai: 'claude-opus-4-20250514',
   gemini: 'claude-opus-4-20250514',
-  grok: 'claude-opus-4-20250514',
-} as const satisfies ModelConfig
+  grok: 'claude-opus-4-20250514'} as const satisfies ModelConfig
 
 export const CLAUDE_OPUS_4_1_CONFIG = {
   firstParty: 'claude-opus-4-1-20250805',
@@ -83,8 +76,7 @@ export const CLAUDE_OPUS_4_1_CONFIG = {
   foundry: 'claude-opus-4-1',
   openai: 'claude-opus-4-1-20250805',
   gemini: 'claude-opus-4-1-20250805',
-  grok: 'claude-opus-4-1-20250805',
-} as const satisfies ModelConfig
+  grok: 'claude-opus-4-1-20250805'} as const satisfies ModelConfig
 
 export const CLAUDE_OPUS_4_5_CONFIG = {
   firstParty: 'claude-opus-4-5-20251101',
@@ -93,8 +85,7 @@ export const CLAUDE_OPUS_4_5_CONFIG = {
   foundry: 'claude-opus-4-5',
   openai: 'claude-opus-4-5-20251101',
   gemini: 'claude-opus-4-5-20251101',
-  grok: 'claude-opus-4-5-20251101',
-} as const satisfies ModelConfig
+  grok: 'claude-opus-4-5-20251101'} as const satisfies ModelConfig
 
 export const CLAUDE_OPUS_4_6_CONFIG = {
   firstParty: 'claude-opus-4-6',
@@ -103,8 +94,7 @@ export const CLAUDE_OPUS_4_6_CONFIG = {
   foundry: 'claude-opus-4-6',
   openai: 'claude-opus-4-6',
   gemini: 'claude-opus-4-6',
-  grok: 'claude-opus-4-6',
-} as const satisfies ModelConfig
+  grok: 'claude-opus-4-6'} as const satisfies ModelConfig
 
 export const CLAUDE_OPUS_4_7_CONFIG = {
   firstParty: 'claude-opus-4-7',
@@ -113,8 +103,7 @@ export const CLAUDE_OPUS_4_7_CONFIG = {
   foundry: 'claude-opus-4-7',
   openai: 'claude-opus-4-7',
   gemini: 'claude-opus-4-7',
-  grok: 'claude-opus-4-7',
-} as const satisfies ModelConfig
+  grok: 'claude-opus-4-7'} as const satisfies ModelConfig
 
 export const CLAUDE_SONNET_4_6_CONFIG = {
   firstParty: 'claude-sonnet-4-6',
@@ -123,8 +112,7 @@ export const CLAUDE_SONNET_4_6_CONFIG = {
   foundry: 'claude-sonnet-4-6',
   openai: 'claude-sonnet-4-6',
   gemini: 'claude-sonnet-4-6',
-  grok: 'claude-sonnet-4-6',
-} as const satisfies ModelConfig
+  grok: 'claude-sonnet-4-6'} as const satisfies ModelConfig
 
 // @[MODEL LAUNCH]: Register the new config here.
 export const ALL_MODEL_CONFIGS = {
@@ -139,8 +127,7 @@ export const ALL_MODEL_CONFIGS = {
   opus41: CLAUDE_OPUS_4_1_CONFIG,
   opus45: CLAUDE_OPUS_4_5_CONFIG,
   opus46: CLAUDE_OPUS_4_6_CONFIG,
-  opus47: CLAUDE_OPUS_4_7_CONFIG,
-} as const satisfies Record<string, ModelConfig>
+  opus47: CLAUDE_OPUS_4_7_CONFIG} as const satisfies Record<string, ModelConfig>
 
 export type ModelKey = keyof typeof ALL_MODEL_CONFIGS
 

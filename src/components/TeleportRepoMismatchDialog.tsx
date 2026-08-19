@@ -5,6 +5,7 @@ import { removePathFromRepo, validateRepoAtPath } from '../utils/githubRepoPathM
 import { Select } from './CustomSelect/index.js';
 import { Dialog } from '@anthropic/ink';
 import { Spinner } from './Spinner.js';
+import { t } from '../utils/i18n/index.js';
 
 type Props = {
   targetRepo: string;
@@ -17,8 +18,7 @@ export function TeleportRepoMismatchDialog({
   targetRepo,
   initialPaths,
   onSelectPath,
-  onCancel,
-}: Props): React.ReactNode {
+  onCancel}: Props): React.ReactNode {
   const [availablePaths, setAvailablePaths] = useState<string[]>(initialPaths);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [validating, setValidating] = useState(false);
@@ -46,7 +46,7 @@ export function TeleportRepoMismatchDialog({
       setAvailablePaths(updatedPaths);
       setValidating(false);
 
-      setErrorMessage(`${getDisplayPath(value)} no longer contains the correct repository. Select another path.`);
+      setErrorMessage(`${getDisplayPath(value)} ${t('teleportRepoMismatch.noLongerContains')}`);
     },
     [targetRepo, availablePaths, onSelectPath, onCancel],
   );
@@ -55,29 +55,28 @@ export function TeleportRepoMismatchDialog({
     ...availablePaths.map(path => ({
       label: (
         <Text>
-          Use <Text bold>{getDisplayPath(path)}</Text>
+          {t('teleportRepoMismatch.use')}<Text bold>{getDisplayPath(path)}</Text>
         </Text>
       ),
-      value: path,
-    })),
-    { label: 'Cancel', value: 'cancel' },
+      value: path})),
+    { label: t('teleportRepoMismatch.cancel'), value: 'cancel' },
   ];
 
   return (
-    <Dialog title="Teleport to Repo" onCancel={onCancel} color="background">
+    <Dialog title={t('teleportRepoMismatch.title')} onCancel={onCancel} color="background">
       {availablePaths.length > 0 ? (
         <>
           <Box flexDirection="column" gap={1}>
             {errorMessage && <Text color="error">{errorMessage}</Text>}
             <Text>
-              Open Claude Code in <Text bold>{targetRepo}</Text>:
+              {t('teleportRepoMismatch.openIn')}<Text bold>{targetRepo}</Text>:
             </Text>
           </Box>
 
           {validating ? (
             <Box>
               <Spinner />
-              <Text> Validating repository…</Text>
+              <Text> {t('teleportRepoMismatch.validating')}</Text>
             </Box>
           ) : (
             <Select options={options} onChange={value => void handleChange(value)} />
@@ -86,7 +85,7 @@ export function TeleportRepoMismatchDialog({
       ) : (
         <Box flexDirection="column" gap={1}>
           {errorMessage && <Text color="error">{errorMessage}</Text>}
-          <Text dimColor>Run claude --teleport from a checkout of {targetRepo}</Text>
+          <Text dimColor>{t('teleportRepoMismatch.runFrom')}{targetRepo}</Text>
         </Box>
       )}
     </Dialog>

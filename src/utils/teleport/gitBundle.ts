@@ -12,8 +12,7 @@
 import { stat, unlink } from 'fs/promises'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import { type FilesApiConfig, uploadFile } from '../../services/api/filesApi.js'
 import { getCwd } from '../cwd.js'
@@ -68,8 +67,7 @@ async function _bundleWithFallback(
     return {
       ok: false,
       error: `git bundle create --all failed (${allResult.code}): ${allResult.stderr.slice(0, 200)}`,
-      failReason: 'git_error',
-    }
+      failReason: 'git_error'}
   }
 
   const { size: allSize } = await stat(bundlePath)
@@ -86,8 +84,7 @@ async function _bundleWithFallback(
     return {
       ok: false,
       error: `git bundle create HEAD failed (${headResult.code}): ${headResult.stderr.slice(0, 200)}`,
-      failReason: 'git_error',
-    }
+      failReason: 'git_error'}
   }
 
   const { size: headSize } = await stat(bundlePath)
@@ -111,8 +108,7 @@ async function _bundleWithFallback(
     return {
       ok: false,
       error: `git commit-tree failed (${commitTree.code}): ${commitTree.stderr.slice(0, 200)}`,
-      failReason: 'git_error',
-    }
+      failReason: 'git_error'}
   }
   const squashedSha = commitTree.stdout.trim()
   await execFileNoThrowWithCwd(
@@ -129,8 +125,7 @@ async function _bundleWithFallback(
     return {
       ok: false,
       error: `git bundle create refs/seed/root failed (${squashResult.code}): ${squashResult.stderr.slice(0, 200)}`,
-      failReason: 'git_error',
-    }
+      failReason: 'git_error'}
   }
   const { size: squashSize } = await stat(bundlePath)
   if (squashSize <= maxBytes) {
@@ -141,8 +136,7 @@ async function _bundleWithFallback(
     ok: false,
     error:
       'Repo is too large to bundle. Please setup GitHub on https://claude.ai/code',
-    failReason: 'too_large',
-  }
+    failReason: 'too_large'}
 }
 
 // Bundle the repo and upload to Files API; return file_id for
@@ -163,8 +157,7 @@ export async function createAndUploadGitBundle(
   // Runs before the empty-repo check so it's never skipped by an early return.
   for (const ref of ['refs/seed/stash', 'refs/seed/root']) {
     await execFileNoThrowWithCwd(gitExe(), ['update-ref', '-d', ref], {
-      cwd: gitRoot,
-    })
+      cwd: gitRoot})
   }
 
   // `git bundle create` refuses to create an empty bundle (exit 128), and
@@ -179,13 +172,11 @@ export async function createAndUploadGitBundle(
   if (refCheck.code === 0 && refCheck.stdout.trim() === '') {
     logEvent('tengu_ccr_bundle_upload', {
       outcome:
-        'empty_repo' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'empty_repo' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return {
       success: false,
       error: 'Repository has no commits yet',
-      failReason: 'empty_repo',
-    }
+      failReason: 'empty_repo'}
   }
 
   // stash create writes a dangling commit — doesn't touch refs/stash or
@@ -240,29 +231,24 @@ export async function createAndUploadGitBundle(
       logEvent('tengu_ccr_bundle_upload', {
         outcome:
           failedBundle.failReason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        max_bytes: maxBytes,
-      })
+        max_bytes: maxBytes})
       return {
         success: false,
         error: failedBundle.error,
-        failReason: failedBundle.failReason,
-      }
+        failReason: failedBundle.failReason}
     }
 
     // Fixed relativePath so CCR can locate it.
     const upload = await uploadFile(bundlePath, '_source_seed.bundle', config, {
-      signal: opts?.signal,
-    })
+      signal: opts?.signal})
 
     if (!upload.success) {
       logEvent('tengu_ccr_bundle_upload', {
         outcome:
-          'failed' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          'failed' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       return {
         success: false,
-        error: (upload as { success: false; error: string }).error,
-      }
+        error: (upload as { success: false; error: string }).error}
     }
 
     logForDebugging(
@@ -274,15 +260,13 @@ export async function createAndUploadGitBundle(
       size_bytes: upload.size,
       scope:
         bundle.scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      has_wip: hasWip,
-    })
+      has_wip: hasWip})
     return {
       success: true,
       fileId: upload.fileId,
       bundleSizeBytes: upload.size,
       scope: bundle.scope,
-      hasWip,
-    }
+      hasWip}
   } finally {
     try {
       await unlink(bundlePath)
@@ -293,8 +277,7 @@ export async function createAndUploadGitBundle(
     // update-ref -d on a missing ref exits 0.
     for (const ref of ['refs/seed/stash', 'refs/seed/root']) {
       await execFileNoThrowWithCwd(gitExe(), ['update-ref', '-d', ref], {
-        cwd: gitRoot,
-      })
+        cwd: gitRoot})
     }
   }
 }

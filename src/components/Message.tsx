@@ -5,8 +5,7 @@ import type {
   TextBlockParam,
   ThinkingBlockParam,
   ToolResultBlockParam,
-  ToolUseBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs';
+  ToolUseBlockParam} from '@anthropic-ai/sdk/resources/index.mjs';
 import * as React from 'react';
 import type { Command } from '../commands.js';
 import { useTerminalSize } from '../hooks/useTerminalSize.js';
@@ -20,8 +19,7 @@ import type {
   GroupedToolUseMessage as GroupedToolUseMessageType,
   NormalizedUserMessage,
   ProgressMessage,
-  SystemMessage,
-} from '../types/message.js';
+  SystemMessage} from '../types/message.js';
 import { type AdvisorBlock, isAdvisorBlock } from '../utils/advisor.js';
 import { isFullscreenEnvEnabled } from '../utils/fullscreen.js';
 import { logError } from '../utils/log.js';
@@ -98,8 +96,7 @@ function MessageImpl({
   isUserContinuation = false,
   lastThinkingBlockId,
   latestBashOutputUUID,
-  shouldCollapseDiffs,
-}: Props): React.ReactNode {
+  shouldCollapseDiffs}: Props): React.ReactNode {
   switch (message.type) {
     case 'attachment':
       return (
@@ -289,8 +286,7 @@ function UserMessage({
   isUserContinuation,
   lookups,
   isTranscriptMode,
-  shouldCollapseDiffs,
-}: {
+  shouldCollapseDiffs}: {
   message: NormalizedUserMessage;
   addMargin: boolean;
   tools: Tools;
@@ -358,8 +354,7 @@ function AssistantMessageBlock({
   onOpenRateLimitOptions,
   thinkingBlockId,
   lastThinkingBlockId,
-  advisorModel,
-}: {
+  advisorModel}: {
   param:
     | BetaContentBlock
     | ConnectorTextBlock

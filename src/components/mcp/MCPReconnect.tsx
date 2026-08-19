@@ -4,6 +4,7 @@ import type { CommandResultDisplay } from '../../commands.js';
 import { Box, color, Text, useTheme } from '@anthropic/ink';
 import { useMcpReconnect } from '../../services/mcp/MCPConnectionManager.js';
 import { useAppStateStore } from '../../state/AppState.js';
+import { t } from '../../utils/i18n/index.js';
 import { Spinner } from '../Spinner.js';
 
 type Props = {
@@ -26,9 +27,9 @@ export function MCPReconnect({ serverName, onComplete }: Props): React.ReactNode
         // reconnectMcpServer updates mcp.clients via onConnectionAttempt.
         const server = store.getState().mcp.clients.find(c => c.name === serverName);
         if (!server) {
-          setError(`MCP server "${serverName}" not found`);
+          setError(t('mcpReconnect.serverNotFound', serverName));
           setIsReconnecting(false);
-          onComplete(`MCP server "${serverName}" not found`);
+          onComplete(t('mcpReconnect.serverNotFound', serverName));
           return;
         }
 
@@ -38,19 +39,19 @@ export function MCPReconnect({ serverName, onComplete }: Props): React.ReactNode
         switch (result.client.type) {
           case 'connected':
             setIsReconnecting(false);
-            onComplete(`Successfully reconnected to ${serverName}`);
+            onComplete(t('mcpReconnect.authSuccessfulConnected', serverName));
             break;
           case 'needs-auth':
-            setError(`${serverName} requires authentication`);
+            setError(t('mcpReconnect.requiresAuth', serverName));
             setIsReconnecting(false);
-            onComplete(`${serverName} requires authentication. Use /mcp to authenticate.`);
+            onComplete(t('mcpReconnect.requiresAuth', serverName) + ' ' + t('mcpReconnect.useMcpToAuthenticate'));
             break;
           case 'pending':
           case 'failed':
           case 'disabled':
-            setError(`Failed to reconnect to ${serverName}`);
+            setError(t('reconnect.failedToReconnect', serverName));
             setIsReconnecting(false);
-            onComplete(`Failed to reconnect to ${serverName}`);
+            onComplete(t('reconnect.failedToReconnect', serverName));
             break;
         }
       } catch (err) {
@@ -58,7 +59,7 @@ export function MCPReconnect({ serverName, onComplete }: Props): React.ReactNode
         const errorMessage = err instanceof Error ? err.message : String(err);
         setError(errorMessage);
         setIsReconnecting(false);
-        onComplete(`Error: ${errorMessage}`);
+        onComplete(t('mcpReconnect.errorPrefix', errorMessage));
       }
     }
 
@@ -69,11 +70,11 @@ export function MCPReconnect({ serverName, onComplete }: Props): React.ReactNode
     return (
       <Box flexDirection="column" gap={1} padding={1}>
         <Text color="text">
-          Reconnecting to <Text bold>{serverName}</Text>
+          {t('mcpReconnect.reconnectingTo')}<Text bold>{serverName}</Text>
         </Text>
         <Box>
           <Spinner />
-          <Text> Establishing connection to MCP server</Text>
+          <Text> {t('mcpReconnect.establishingConnection')}</Text>
         </Box>
       </Box>
     );
@@ -84,9 +85,9 @@ export function MCPReconnect({ serverName, onComplete }: Props): React.ReactNode
       <Box flexDirection="column" gap={1} padding={1}>
         <Box>
           <Text>{color('error', theme)(figures.cross)} </Text>
-          <Text color="error">Failed to reconnect to {serverName}</Text>
+          <Text color="error">{t('reconnect.failedToReconnect', serverName)}</Text>
         </Box>
-        <Text dimColor>Error: {error}</Text>
+        <Text dimColor>{t('reconnect.errorPrefix', error)}</Text>
       </Box>
     );
   }

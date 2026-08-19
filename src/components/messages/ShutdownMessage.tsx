@@ -1,12 +1,12 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, Text } from '@anthropic/ink';
 import {
   isShutdownApproved,
   isShutdownRejected,
   isShutdownRequest,
   type ShutdownRejectedMessage,
-  type ShutdownRequestMessage,
-} from '../../utils/teammateMailbox.js';
+  type ShutdownRequestMessage} from '../../utils/teammateMailbox.js';
 
 type ShutdownRequestProps = {
   request: ShutdownRequestMessage;
@@ -21,12 +21,12 @@ export function ShutdownRequestDisplay({ request }: ShutdownRequestProps): React
       <Box borderStyle="round" borderColor="warning" flexDirection="column" paddingX={1} paddingY={1}>
         <Box marginBottom={1}>
           <Text color="warning" bold>
-            Shutdown request from {request.from}
+            {t('shutdownmessage.shutdownRequestFrom', request.from)}
           </Text>
         </Box>
         {request.reason && (
           <Box>
-            <Text>Reason: {request.reason}</Text>
+            <Text>{t('shutdownmessage.reason')} {request.reason}</Text>
           </Box>
         )}
       </Box>
@@ -46,7 +46,7 @@ export function ShutdownRejectedDisplay({ response }: ShutdownRejectedProps): Re
     <Box flexDirection="column" marginY={1}>
       <Box borderStyle="round" borderColor="subtle" flexDirection="column" paddingX={1} paddingY={1}>
         <Text color="subtle" bold>
-          Shutdown rejected by {response.from}
+          {t('shutdownmessage.shutdownRejectedBy', response.from)}
         </Text>
         <Box
           marginTop={1}
@@ -56,10 +56,10 @@ export function ShutdownRejectedDisplay({ response }: ShutdownRejectedProps): Re
           borderRight={false}
           paddingX={1}
         >
-          <Text>Reason: {response.reason}</Text>
+          <Text>{t('shutdownmessage.reason')} {response.reason}</Text>
         </Box>
         <Box marginTop={1}>
-          <Text dimColor>Teammate is continuing to work. You may request shutdown again later.</Text>
+          <Text dimColor>{t('shutdownmessage.teammateIsContinuingToWorkYouMayRequestShutdownAgainLater')}</Text>
         </Box>
       </Box>
     </Box>

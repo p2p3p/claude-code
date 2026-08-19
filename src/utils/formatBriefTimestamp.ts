@@ -29,16 +29,14 @@ export function formatBriefTimestamp(
   if (daysAgo === 0) {
     return d.toLocaleTimeString(locale, {
       hour: 'numeric',
-      minute: '2-digit',
-    })
+      minute: '2-digit'})
   }
 
   if (daysAgo > 0 && daysAgo < 7) {
     return d.toLocaleString(locale, {
       weekday: 'long',
       hour: 'numeric',
-      minute: '2-digit',
-    })
+      minute: '2-digit'})
   }
 
   return d.toLocaleString(locale, {
@@ -46,8 +44,7 @@ export function formatBriefTimestamp(
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
-    minute: '2-digit',
-  })
+    minute: '2-digit'})
 }
 
 /**

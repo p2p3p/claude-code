@@ -11,8 +11,7 @@ import { resolveAntModel } from './model/antModels.js'
 import { getAntModelOverrideConfig } from './model/antModels.js'
 import {
   isChatGPTAuthMode,
-  isChatGPTCodexReasoningModel,
-} from './model/chatgptModels.js'
+  isChatGPTCodexReasoningModel} from './model/chatgptModels.js'
 
 export type { EffortLevel }
 
@@ -68,7 +67,7 @@ export function modelSupportsEffort(model: string): boolean {
   // Default to true for unknown model strings on 1P.
   // Do not default to true for 3P as they have different formats for their
   // model strings (ex. anthropics/claude-code#30795)
-  return getAPIProvider() === 'firstParty'
+  return getAPIProvider() === 'anthropic'
 }
 
 // Effort max/xhigh restrictions removed — all models that support effort
@@ -287,8 +286,7 @@ const OPUS_DEFAULT_EFFORT_CONFIG_DEFAULT: OpusDefaultEffortConfig = {
   enabled: true,
   dialogTitle: 'We recommend medium effort for Opus',
   dialogDescription:
-    'Effort determines how long Claude thinks for when completing your task. We recommend medium effort for most tasks to balance speed and intelligence and maximize rate limits. Use ultrathink to trigger high effort when needed.',
-}
+    'Effort determines how long Claude thinks for when completing your task. We recommend medium effort for most tasks to balance speed and intelligence and maximize rate limits. Use ultrathink to trigger high effort when needed.'}
 
 export function getOpusDefaultEffortConfig(): OpusDefaultEffortConfig {
   const config = getFeatureValue_CACHED_MAY_BE_STALE(
@@ -297,8 +295,7 @@ export function getOpusDefaultEffortConfig(): OpusDefaultEffortConfig {
   )
   return {
     ...OPUS_DEFAULT_EFFORT_CONFIG_DEFAULT,
-    ...config,
-  }
+    ...config}
 }
 
 // @[MODEL LAUNCH]: Update the default effort levels for new models

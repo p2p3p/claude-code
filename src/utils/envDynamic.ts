@@ -147,5 +147,4 @@ export const envDynamic = {
   getIsBubblewrapSandbox,
   isMuslEnvironment,
   getTerminalWithJetBrainsDetectionAsync,
-  initJetBrainsDetection,
-}
+  initJetBrainsDetection}

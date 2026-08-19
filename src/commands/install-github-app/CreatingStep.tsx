@@ -1,5 +1,6 @@
 import { Box, Text } from '@anthropic/ink';
 import type { Workflow } from './types.js';
+import { t } from '../../utils/i18n/index.js';
 
 interface CreatingStepProps {
   currentWorkflowInstallStep: number;
@@ -16,27 +17,32 @@ export function CreatingStep({
   useExistingSecret,
   secretName,
   skipWorkflow = false,
-  selectedWorkflows,
-}: CreatingStepProps) {
+  selectedWorkflows}: CreatingStepProps) {
   const progressSteps = skipWorkflow
     ? [
-        'Getting repository information',
-        secretExists && useExistingSecret ? 'Using existing API key secret' : `Setting up ${secretName} secret`,
+        t('installGithub.gettingRepoInfo'),
+        secretExists && useExistingSecret
+          ? t('installGithub.usingExistingSecret')
+          : t('installGithub.settingUpSecret', secretName),
       ]
     : [
-        'Getting repository information',
-        'Creating branch',
-        selectedWorkflows.length > 1 ? 'Creating workflow files' : 'Creating workflow file',
-        secretExists && useExistingSecret ? 'Using existing API key secret' : `Setting up ${secretName} secret`,
-        'Opening pull request page',
+        t('installGithub.gettingRepoInfo'),
+        t('installGithub.creatingBranch'),
+        selectedWorkflows.length > 1
+          ? t('installGithub.creatingWorkflowFiles')
+          : t('installGithub.creatingWorkflowFile'),
+        secretExists && useExistingSecret
+          ? t('installGithub.usingExistingSecret')
+          : t('installGithub.settingUpSecret', secretName),
+        t('installGithub.openingPrPage'),
       ];
 
   return (
     <>
       <Box flexDirection="column" borderStyle="round" paddingX={1}>
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>Install GitHub App</Text>
-          <Text dimColor>Create GitHub Actions workflow</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
+          <Text dimColor>{t('installGithub.createWorkflow')}</Text>
         </Box>
         {progressSteps.map((stepText, index) => {
           let status: 'completed' | 'in-progress' | 'pending' = 'pending';

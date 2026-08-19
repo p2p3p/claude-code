@@ -7,6 +7,7 @@ import type { Message } from '../../types/message.js';
 import { getCwd } from '../../utils/cwd.js';
 import { renderMessagesToPlainText } from '../../utils/exportRenderer.js';
 import { writeFileSync_DEPRECATED } from '../../utils/slowOperations.js';
+import { t } from '../../utils/i18n/index.js';
 
 function formatTimestamp(date: Date): string {
   const year = date.getFullYear();
@@ -78,12 +79,11 @@ export async function call(
     try {
       writeFileSync_DEPRECATED(filepath, content, {
         encoding: 'utf-8',
-        flush: true,
-      });
-      onDone(`Conversation exported to: ${filepath}`);
+        flush: true});
+      onDone(t('exportCmd.exportedTo', filepath));
       return null;
     } catch (error) {
-      onDone(`Failed to export conversation: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      onDone(t('exportCmd.failedToExport', error instanceof Error ? error.message : 'Unknown error'));
       return null;
     }
   }

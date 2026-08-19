@@ -8,6 +8,7 @@ import * as React from 'react';
 import { ConfigurableShortcutHint } from '../../components/ConfigurableShortcutHint.js';
 import { Box, Byline, Text } from '@anthropic/ink';
 import type { PluginMarketplaceEntry } from '../../utils/plugins/schemas.js';
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * Represents a plugin available for installation from a marketplace
@@ -52,23 +53,21 @@ export function buildPluginDetailsMenuOptions(
   githubRepo: string | null,
 ): PluginDetailsMenuOption[] {
   const options: PluginDetailsMenuOption[] = [
-    { label: 'Install for you (user scope)', action: 'install-user' },
+    { label: t('pluginUI.installUser'), action: 'install-user' },
     {
-      label: 'Install for all collaborators on this repository (project scope)',
-      action: 'install-project',
-    },
+      label: t('pluginUI.installProject'),
+      action: 'install-project'},
     {
-      label: 'Install for you, in this repo only (local scope)',
-      action: 'install-local',
-    },
+      label: t('pluginUI.installLocal'),
+      action: 'install-local'},
   ];
   if (hasHomepage) {
-    options.push({ label: 'Open homepage', action: 'homepage' });
+    options.push({ label: t('pluginUI.openHomepage'), action: 'homepage' });
   }
   if (githubRepo) {
-    options.push({ label: 'View on GitHub', action: 'github' });
+    options.push({ label: t('pluginUI.viewOnGitHub'), action: 'github' });
   }
-  options.push({ label: 'Back to plugin list', action: 'back' });
+  options.push({ label: t('pluginUI.back'), action: 'back' });
   return options;
 }
 
@@ -85,13 +84,13 @@ export function PluginSelectionKeyHint({ hasSelection }: { hasSelection: boolean
               action="plugin:install"
               context="Plugin"
               fallback="i"
-              description="install"
+              description={t('desc.install')}
               bold
             />
           )}
-          <ConfigurableShortcutHint action="plugin:toggle" context="Plugin" fallback="Space" description="toggle" />
-          <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description="details" />
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+          <ConfigurableShortcutHint action="plugin:toggle" context="Plugin" fallback="Space" description={t('desc.toggle')} />
+          <ConfigurableShortcutHint action="select:accept" context="Select" fallback="Enter" description={t('desc.details')} />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.back')} />
         </Byline>
       </Text>
     </Box>

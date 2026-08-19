@@ -5,6 +5,7 @@ import { Dialog } from '@anthropic/ink';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js';
 import { logEvent } from '../../services/analytics/index.js';
 import { useClaudeAiLimits } from '../../services/claudeAiLimitsHook.js';
+import { t } from '../../utils/i18n/index.js';
 import type { ToolUseContext } from '../../Tool.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { getOauthAccountInfo, getRateLimitTier, getSubscriptionType } from '../../utils/auth.js';
@@ -63,29 +64,26 @@ function RateLimitOptionsMenu({ onDone, context }: RateLimitOptionsMenuProps): R
 
         let label: string;
         if (needsToRequestFromAdmin) {
-          label = isOverageState ? 'Request more' : 'Request extra usage';
+          label = isOverageState ? t('cmdUI.rlRequest') : t('cmdUI.rlRequestExtra');
         } else {
-          label = hasExtraUsageEnabled ? 'Add funds to continue with extra usage' : 'Switch to extra usage';
+          label = hasExtraUsageEnabled ? t('cmdUI.rlAddFunds') : t('cmdUI.rlSwitchExtra');
         }
 
         actionOptions.push({
           label,
-          value: 'extra-usage',
-        });
+          value: 'extra-usage'});
       }
     }
 
     if (!isMax20x && !isTeamOrEnterprise && upgrade.isEnabled()) {
       actionOptions.push({
-        label: 'Upgrade your plan',
-        value: 'upgrade',
-      });
+        label: t('rateLimitOptions.upgradePlan'),
+        value: 'upgrade'});
     }
 
     const cancelOption: OptionWithDescription<RateLimitOptionsMenuOptionType> = {
-      label: 'Stop and wait for limit to reset',
-      value: 'cancel',
-    };
+      label: t('rateLimitOptions.stopAndWait'),
+      value: 'cancel'};
 
     if (buyFirst) {
       return [...actionOptions, cancelOption];
@@ -130,7 +128,7 @@ function RateLimitOptionsMenu({ onDone, context }: RateLimitOptionsMenuProps): R
   }
 
   return (
-    <Dialog title="What do you want to do?" onCancel={handleCancel} color="suggestion">
+    <Dialog title={t('rateLimitOptions.whatDoYouWantToDo')} onCancel={handleCancel} color="suggestion">
       <Select<RateLimitOptionsMenuOptionType>
         options={options}
         onChange={handleSelect}

@@ -1,8 +1,7 @@
 import type {
   ComputerUseHostAdapter,
   Logger,
-  LoggerDetail,
-} from '@ant/computer-use-mcp/types'
+  LoggerDetail} from '@ant/computer-use-mcp/types'
 import { format } from 'util'
 import { logForDebugging } from '../debug.js'
 import { COMPUTER_USE_MCP_SERVER_NAME } from './common.js'
@@ -42,8 +41,7 @@ function checkAccessibilityJXA(): boolean {
         'tell application "System Events" to get name of every process whose background only is false',
       ],
       stdout: 'pipe',
-      stderr: 'pipe',
-    })
+      stderr: 'pipe'})
     return result.exitCode === 0
   } catch {
     return false
@@ -56,8 +54,7 @@ function checkScreenRecordingJXA(): boolean {
     const result = Bun.spawnSync({
       cmd: ['screencapture', '-x', '-R', '0,0,1,1', '/dev/null'],
       stdout: 'pipe',
-      stderr: 'pipe',
-    })
+      stderr: 'pipe'})
     return result.exitCode === 0
   } catch {
     return false
@@ -79,8 +76,7 @@ export function getComputerUseHostAdapter(): ComputerUseHostAdapter {
     logger: new DebugLogger(),
     executor: createCliExecutor({
       getMouseAnimationEnabled: () => getChicagoSubGates().mouseAnimation,
-      getHideBeforeActionEnabled: () => getChicagoSubGates().hideBeforeAction,
-    }),
+      getHideBeforeActionEnabled: () => getChicagoSubGates().hideBeforeAction}),
     ensureOsPermissions: async () => {
       if (process.platform !== 'darwin') return { granted: true }
       const cu = requireComputerUseSwift()
@@ -112,7 +108,6 @@ export function getComputerUseHostAdapter(): ComputerUseHostAdapter {
     // sharp-compatible and async-only. Returning null → validation skipped,
     // click proceeds — the designed fallback per `PixelCompareResult.skipped`.
     // The sub-gate defaults to false anyway.
-    cropRawPatch: () => null,
-  }
+    cropRawPatch: () => null}
   return cached
 }

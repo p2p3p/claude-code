@@ -10,8 +10,7 @@ import { toTaggedId } from './taggedId.js'
 const METRICS_CARDINALITY_DEFAULTS = {
   OTEL_METRICS_INCLUDE_SESSION_ID: true,
   OTEL_METRICS_INCLUDE_VERSION: false,
-  OTEL_METRICS_INCLUDE_ACCOUNT_UUID: true,
-}
+  OTEL_METRICS_INCLUDE_ACCOUNT_UUID: true}
 
 function shouldIncludeAttribute(
   envVar: keyof typeof METRICS_CARDINALITY_DEFAULTS,
@@ -31,8 +30,7 @@ export function getTelemetryAttributes(): Attributes {
   const sessionId = getSessionId()
 
   const attributes: Attributes = {
-    'user.id': userId,
-  }
+    'user.id': userId}
 
   if (shouldIncludeAttribute('OTEL_METRICS_INCLUDE_SESSION_ID')) {
     attributes['session.id'] = sessionId

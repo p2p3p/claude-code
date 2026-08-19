@@ -46,8 +46,7 @@ export function checkCrossProjectResume(
       isCrossProject: true,
       isSameRepoWorktree: false,
       command,
-      projectPath: log.projectPath,
-    }
+      projectPath: log.projectPath}
   }
 
   // Check if log.projectPath is under a worktree of the same repo
@@ -59,8 +58,7 @@ export function checkCrossProjectResume(
     return {
       isCrossProject: true,
       isSameRepoWorktree: true,
-      projectPath: log.projectPath,
-    }
+      projectPath: log.projectPath}
   }
 
   // Different repo - generate cd command
@@ -70,6 +68,5 @@ export function checkCrossProjectResume(
     isCrossProject: true,
     isSameRepoWorktree: false,
     command,
-    projectPath: log.projectPath,
-  }
+    projectPath: log.projectPath}
 }

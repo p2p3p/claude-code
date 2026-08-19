@@ -4,18 +4,15 @@ import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/grow
 import {
   getIsNonInteractiveSession,
   getKairosActive,
-  preferThirdPartyAuthentication,
-} from '../bootstrap/state.js'
+  preferThirdPartyAuthentication} from '../bootstrap/state.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import {
   getAnthropicApiKey,
   getClaudeAIOAuthTokens,
   handleOAuth401Error,
-  hasProfileScope,
-} from './auth.js'
+  hasProfileScope} from './auth.js'
 import { isInBundledMode } from './bundledMode.js'
 import { getGlobalConfig, saveGlobalConfig } from './config.js'
 import { logForDebugging } from './debug.js'
@@ -24,15 +21,13 @@ import {
   getDefaultMainLoopModelSetting,
   isOpus1mMergeEnabled,
   type ModelSetting,
-  parseUserSpecifiedModel,
-} from './model/model.js'
+  parseUserSpecifiedModel} from './model/model.js'
 import { getAPIProvider } from './model/providers.js'
 import { isEssentialTrafficOnly } from './privacyLevel.js'
 import {
   getInitialSettings,
   getSettingsForSource,
-  updateSettingsForSource,
-} from './settings/settings.js'
+  updateSettingsForSource} from './settings/settings.js'
 import { createSignal } from './signal.js'
 
 export function isFastModeEnabled(): boolean {
@@ -110,7 +105,7 @@ export function getFastModeUnavailableReason(): string | null {
   }
 
   // Only available for 1P (not Bedrock/Vertex/Foundry)
-  if (getAPIProvider() !== 'firstParty') {
+  if (getAPIProvider() !== 'anthropic') {
     const reason = 'Fast mode is not available on Bedrock, Vertex, or Foundry'
     logForDebugging(`Fast mode unavailable: ${reason}`)
     return reason
@@ -230,8 +225,7 @@ export function triggerFastModeCooldown(
   logEvent('tengu_fast_mode_fallback_triggered', {
     cooldown_duration_ms: cooldownDurationMs,
     cooldown_reason:
-      reason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      reason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
   cooldownTriggered.emit(resetTimestamp, reason)
 }
 
@@ -252,8 +246,7 @@ export function handleFastModeRejectedByAPI(): void {
   updateSettingsForSource('userSettings', { fastMode: undefined })
   saveGlobalConfig(current => ({
     ...current,
-    penguinModeOrgEnabled: false,
-  }))
+    penguinModeOrgEnabled: false}))
   orgFastModeChange.emit(false)
 }
 
@@ -302,15 +295,13 @@ export function handleFastModeOverageRejection(reason: string | null): void {
   )
   logEvent('tengu_fast_mode_overage_rejected', {
     overage_disabled_reason: (reason ??
-      'unknown') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      'unknown') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
   // Disable fast mode permanently unless the user has ran out of credits
   if (!isOutOfCreditsReason(reason)) {
     updateSettingsForSource('userSettings', { fastMode: undefined })
     saveGlobalConfig(current => ({
       ...current,
-      penguinModeOrgEnabled: false,
-    }))
+      penguinModeOrgEnabled: false}))
   }
   overageRejection.emit(message)
 }
@@ -375,8 +366,7 @@ async function fetchFastModeStatus(
     'accessToken' in auth
       ? {
           Authorization: `Bearer ${auth.accessToken}`,
-          'anthropic-beta': OAUTH_BETA_HEADER,
-        }
+          'anthropic-beta': OAUTH_BETA_HEADER}
       : { 'x-api-key': auth.apiKey }
 
   const response = await axios.get<FastModeResponse>(endpoint, { headers })
@@ -494,8 +484,7 @@ export async function prefetchFastModeStatus(): Promise<void> {
         ? { status: 'enabled' }
         : {
             status: 'disabled',
-            reason: status.disabled_reason ?? 'preference',
-          }
+            reason: status.disabled_reason ?? 'preference'}
       if (previousEnabled !== status.enabled) {
         // When org disables fast mode, permanently turn off the user's fast mode setting
         if (!status.enabled) {
@@ -503,8 +492,7 @@ export async function prefetchFastModeStatus(): Promise<void> {
         }
         saveGlobalConfig(current => ({
           ...current,
-          penguinModeOrgEnabled: status.enabled,
-        }))
+          penguinModeOrgEnabled: status.enabled}))
         orgFastModeChange.emit(status.enabled)
       }
       logForDebugging(

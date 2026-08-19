@@ -7,6 +7,7 @@ import {
   logEvent,
 } from 'src/services/analytics/index.js'
 import { getWebFetchUserAgent } from 'src/utils/http.js'
+import { t } from 'src/utils/i18n/index.js'
 import { isValidKey } from 'src/utils/localValidate.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import { getRuleByContentsForToolName } from 'src/utils/permissions/permissions.js'
@@ -125,7 +126,7 @@ function hashKey(key: string): string {
 
 export const VaultHttpFetchTool = buildTool({
   name: VAULT_HTTP_FETCH_TOOL_NAME,
-  searchHint: 'authenticated HTTPS request using a vault-stored secret',
+  searchHint: t('toolUI.vaultHttpFetch.searchHint'),
   // Response cap matches axios maxContentLength; toolResultStorage will spill
   // anything larger to a file ref.
   maxResultSizeChars: RESPONSE_BODY_CAP_BYTES,
@@ -150,7 +151,7 @@ export const VaultHttpFetchTool = buildTool({
   requiresUserInteraction() {
     return true
   },
-  userFacingName: () => 'Vault HTTP',
+  userFacingName: () => t('toolUI.vaultHttpFetch.userFacingName'),
   async description() {
     return DESCRIPTION
   },
@@ -168,7 +169,7 @@ export const VaultHttpFetchTool = buildTool({
     if (!isValidKey(input.vault_auth_key)) {
       return {
         behavior: 'deny',
-        message: `Invalid vault_auth_key '${input.vault_auth_key}'`,
+        message: t('toolUI.vaultHttpFetch.invalidVaultAuthKey', input.vault_auth_key),
         decisionReason: { type: 'other', reason: 'invalid_key' },
       }
     }
@@ -176,7 +177,7 @@ export const VaultHttpFetchTool = buildTool({
     if (!isHttps(input.url)) {
       return {
         behavior: 'deny',
-        message: `Only https:// URLs are allowed (got: ${input.url})`,
+        message: t('toolUI.vaultHttpFetch.onlyHttpsAllowed', input.url),
         decisionReason: { type: 'other', reason: 'non_https_url' },
       }
     }
@@ -184,7 +185,7 @@ export const VaultHttpFetchTool = buildTool({
     if (input.auth_scheme === 'custom' && !input.auth_header_name) {
       return {
         behavior: 'deny',
-        message: 'auth_scheme=custom requires auth_header_name',
+        message: t('toolUI.vaultHttpFetch.customRequiresHeader'),
         decisionReason: { type: 'other', reason: 'missing_required_field' },
       }
     }
@@ -235,7 +236,7 @@ export const VaultHttpFetchTool = buildTool({
     if (denyRule) {
       return {
         behavior: 'deny',
-        message: `Denied by rule: VaultHttpFetch(${denyRule.ruleValue.ruleContent ?? ruleContent})`,
+        message: t('toolUI.vaultHttpFetch.deniedByRule', denyRule.ruleValue.ruleContent ?? ruleContent),
         decisionReason: { type: 'rule', rule: denyRule },
       }
     }
@@ -259,7 +260,14 @@ export const VaultHttpFetchTool = buildTool({
     // bypassPermissions mode also routes here.
     return {
       behavior: 'ask',
-      message: `Allow VaultHttpFetch using key '${input.vault_auth_key}' to ${input.method ?? 'GET'} ${input.url} (host: ${targetHost})? Reason: ${input.reason}`,
+      message: t(
+        'toolUI.vaultHttpFetch.askPermission',
+        input.vault_auth_key,
+        input.method ?? 'GET',
+        input.url,
+        targetHost,
+        input.reason,
+      ),
       decisionReason: {
         type: 'other',
         reason: 'no_persistent_allow_for_key_host_pair',
@@ -269,7 +277,7 @@ export const VaultHttpFetchTool = buildTool({
   async call(input: Input, _context) {
     // Defensive: enforce HTTPS at runtime (checkPermissions also enforces).
     if (!isHttps(input.url)) {
-      return { data: { error: 'Only https:// URLs allowed' } }
+      return { data: { error: t('toolUI.vaultHttpFetch.onlyHttpsError') } }
     }
 
     // Retrieve secret. In-memory only; never assigned to any output field.
@@ -286,12 +294,12 @@ export const VaultHttpFetchTool = buildTool({
           input.vault_auth_key,
         ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       })
-      return { data: { error: 'Vault unlock failed' } }
+      return { data: { error: t('toolUI.vaultHttpFetch.vaultUnlockFailed') } }
     }
     if (!secret) {
       return {
         data: {
-          error: `Vault key '${input.vault_auth_key}' not found`,
+          error: t('toolUI.vaultHttpFetch.vaultKeyNotFound', input.vault_auth_key),
         },
       }
     }
@@ -324,7 +332,7 @@ export const VaultHttpFetchTool = buildTool({
         // honest if the permission pipeline ever changes.
         if (!input.auth_header_name) {
           return {
-            data: { error: 'auth_scheme=custom requires auth_header_name' },
+            data: { error: t('toolUI.vaultHttpFetch.customRequiresHeader') },
           }
         }
         headers[input.auth_header_name] = secret
@@ -334,7 +342,7 @@ export const VaultHttpFetchTool = buildTool({
         // updating this switch becomes a compile-time error.
         const _exhaustive: never = scheme
         void _exhaustive
-        return { data: { error: 'Unknown auth_scheme' } }
+        return { data: { error: t('toolUI.vaultHttpFetch.unknownAuthScheme') } }
       }
     }
     if (input.body !== undefined) {

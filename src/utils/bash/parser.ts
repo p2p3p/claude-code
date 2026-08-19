@@ -4,8 +4,7 @@ import { logForDebugging } from '../debug.js'
 import {
   ensureParserInitialized,
   getParserModule,
-  type TsNode,
-} from './bashParser.js'
+  type TsNode} from './bashParser.js'
 
 export type Node = TsNode
 
@@ -119,16 +118,14 @@ export async function parseCommandRaw(
       if (result === null) {
         logEvent('tengu_tree_sitter_parse_abort', {
           cmdLength: command.length,
-          panic: false,
-        })
+          panic: false})
         return PARSE_ABORTED
       }
       return result
     } catch {
       logEvent('tengu_tree_sitter_parse_abort', {
         cmdLength: command.length,
-        panic: true,
-      })
+        panic: true})
       return PARSE_ABORTED
     }
   }

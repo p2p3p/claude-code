@@ -42,12 +42,10 @@ export function initLangfuse(): boolean {
           | 'batched'
           | 'immediate'
           | undefined) ?? 'batched',
-      timeout: parseInt(process.env.LANGFUSE_TIMEOUT ?? '5', 10),
-    })
+      timeout: parseInt(process.env.LANGFUSE_TIMEOUT ?? '5', 10)})
 
     provider = new BasicTracerProvider({
-      spanProcessors: [processor],
-    })
+      spanProcessors: [processor]})
 
     setLangfuseTracerProvider(provider)
 

@@ -14,8 +14,7 @@ import { getTeammateColor } from '../teammate.js'
 import {
   createIdleNotification,
   getLastPeerDmSummary,
-  writeToMailbox,
-} from '../teammateMailbox.js'
+  writeToMailbox} from '../teammateMailbox.js'
 import { readTeamFile, setMemberActive } from './teamHelpers.js'
 
 /**
@@ -67,14 +66,11 @@ export function initializeTeammateHooks(
             rules: [
               {
                 toolName: allowedPath.toolName,
-                ruleContent,
-              },
+                ruleContent},
             ],
             behavior: 'allow',
-            destination: 'session',
-          },
-        ),
-      }))
+            destination: 'session'},
+        )}))
     }
   }
 
@@ -108,14 +104,12 @@ export function initializeTeammateHooks(
       // Must await to ensure the write completes before process shutdown
       const notification = createIdleNotification(agentName, {
         idleReason: 'available',
-        summary: getLastPeerDmSummary(messages),
-      })
+        summary: getLastPeerDmSummary(messages)})
       await writeToMailbox(leadAgentName, {
         from: agentName,
         text: jsonStringify(notification),
         timestamp: new Date().toISOString(),
-        color: getTeammateColor(),
-      })
+        color: getTeammateColor()})
       logForDebugging(
         `[TeammateInit] Sent idle notification to leader ${leadAgentName}`,
       )
@@ -123,7 +117,6 @@ export function initializeTeammateHooks(
     },
     'Failed to send idle notification to team leader',
     {
-      timeout: 10000,
-    },
+      timeout: 10000},
   )
 }

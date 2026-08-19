@@ -4,6 +4,7 @@ import { getTheme } from '../../../utils/theme.js';
 import { env } from '../../../utils/env.js';
 import { shouldShowAlwaysAllowOptions } from '../../../utils/permissions/permissionsLoader.js';
 import { truncateToLines } from '../../../utils/stringUtils.js';
+import { t } from '../../../utils/i18n/index.js';
 import { logUnaryEvent } from '../../../utils/unaryLogging.js';
 import { PermissionDialog } from '../PermissionDialog.js';
 import { PermissionPrompt, type PermissionPromptOption } from '../PermissionPrompt.js';
@@ -21,8 +22,7 @@ export function MonitorPermissionRequest({
   toolUseConfirm,
   onDone,
   onReject,
-  workerBadge,
-}: PermissionRequestProps): React.ReactNode {
+  workerBadge}: PermissionRequestProps): React.ReactNode {
   const [themeName] = useTheme();
   const theme = getTheme(themeName);
 
@@ -36,26 +36,23 @@ export function MonitorPermissionRequest({
   const options: PermissionPromptOption<OptionValue>[] = useMemo(() => {
     const opts: PermissionPromptOption<OptionValue>[] = [
       {
-        label: 'Yes',
+        label: t('permGeneral.yes'),
         value: 'yes',
-        feedbackConfig: { type: 'accept' as const },
-      },
+        feedbackConfig: { type: 'accept' as const }},
     ];
     if (showAlwaysAllowOptions) {
       opts.push({
         label: (
           <Text>
-            Yes, and don{'\u2019'}t ask again for <Text bold>{toolUseConfirm.tool.name}</Text> commands
+            {t('permGeneral.yesDontAskMonitor', toolUseConfirm.tool.name)}
           </Text>
         ),
-        value: 'yes-dont-ask-again',
-      });
+        value: 'yes-dont-ask-again'});
     }
     opts.push({
-      label: 'No',
+      label: t('permGeneral.no'),
       value: 'no',
-      feedbackConfig: { type: 'reject' as const },
-    });
+      feedbackConfig: { type: 'reject' as const }});
     return opts;
   }, [showAlwaysAllowOptions, toolUseConfirm.tool.name]);
 
@@ -69,9 +66,7 @@ export function MonitorPermissionRequest({
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id ?? '',
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
           toolUseConfirm.onAllow(toolUseConfirm.input, [], feedback);
           onDone();
           break;
@@ -82,16 +77,13 @@ export function MonitorPermissionRequest({
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id ?? '',
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
           toolUseConfirm.onAllow(toolUseConfirm.input, [
             {
               type: 'addRules',
               rules: [{ toolName: toolUseConfirm.tool.name }],
               behavior: 'allow',
-              destination: 'localSettings',
-            },
+              destination: 'localSettings'},
           ]);
           onDone();
           break;
@@ -102,9 +94,7 @@ export function MonitorPermissionRequest({
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id ?? '',
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
           toolUseConfirm.onReject(feedback);
           onReject();
           onDone();
@@ -121,16 +111,14 @@ export function MonitorPermissionRequest({
       metadata: {
         language_name: 'none',
         message_id: toolUseConfirm.assistantMessage.message.id ?? '',
-        platform: env.platform,
-      },
-    });
+        platform: env.platform}});
     toolUseConfirm.onReject();
     onReject();
     onDone();
   }, [toolUseConfirm, onDone, onReject]);
 
   return (
-    <PermissionDialog title="Monitor" workerBadge={workerBadge}>
+    <PermissionDialog title={t('permGeneral.monitor')} workerBadge={workerBadge}>
       <Box flexDirection="column" gap={1}>
         <Box flexDirection="column">
           <Text bold color={theme.permission as any}>

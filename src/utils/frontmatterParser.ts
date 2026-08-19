@@ -137,8 +137,7 @@ export function parseFrontmatter(
     // No frontmatter found
     return {
       frontmatter: {},
-      content: markdown,
-    }
+      content: markdown}
   }
 
   const frontmatterText = match[1] || ''
@@ -170,8 +169,7 @@ export function parseFrontmatter(
 
   return {
     frontmatter,
-    content,
-  }
+    content}
 }
 
 /**
@@ -320,8 +318,7 @@ export function coerceDescriptionToString(
     ? `${pluginName}:${componentName}`
     : (componentName ?? 'unknown')
   logForDebugging(`Description invalid for ${source} - omitting`, {
-    level: 'warn',
-  })
+    level: 'warn'})
   return null
 }
 

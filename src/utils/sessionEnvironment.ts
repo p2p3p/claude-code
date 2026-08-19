@@ -147,8 +147,7 @@ const HOOK_ENV_PRIORITY: Record<string, number> = {
   setup: 0,
   sessionstart: 1,
   cwdchanged: 2,
-  filechanged: 3,
-}
+  filechanged: 3}
 const HOOK_ENV_REGEX =
   /^(setup|sessionstart|cwdchanged|filechanged)-hook-(\d+)\.sh$/
 

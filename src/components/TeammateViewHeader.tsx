@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../utils/i18n/index.js';
 import { Box, Text, KeyboardShortcutHint } from '@anthropic/ink';
 import { toInkColor } from '../utils/ink.js';
 import { useAppState } from '../state/AppState.js';
@@ -23,13 +24,13 @@ export function TeammateViewHeader(): React.ReactNode {
     <OffscreenFreeze>
       <Box flexDirection="column" marginBottom={1}>
         <Box>
-          <Text>Viewing </Text>
+          <Text>{t('teammateViewHeader.viewing')}</Text>
           <Text color={nameColor} bold>
             @{viewedTeammate.identity.agentName}
           </Text>
           <Text dimColor>
             {' · '}
-            <KeyboardShortcutHint shortcut="esc" action="return" />
+            <KeyboardShortcutHint shortcut="esc" action={t('shortcutHint.return')} />
           </Text>
         </Box>
         <Text dimColor>{viewedTeammate.prompt}</Text>

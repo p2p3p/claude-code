@@ -8,6 +8,7 @@ import { registerAsyncAgent } from 'src/tasks/LocalAgentTask/LocalAgentTask.js'
 import { assembleToolPool } from 'src/tools.js'
 import { filterParentToolsForFork } from 'src/utils/agentToolFilter.js'
 import { asAgentId } from 'src/types/ids.js'
+import { t } from 'src/utils/i18n/index.js'
 import { runWithAgentContext } from 'src/utils/agentContext.js'
 import { runWithCwdOverride } from 'src/utils/cwd.js'
 import { logForDebugging } from 'src/utils/debug.js'
@@ -66,7 +67,7 @@ export async function resumeAgentBackground({
     readAgentMetadata(asAgentId(agentId)),
   ])
   if (!transcript) {
-    throw new Error(`No transcript found for agent ID: ${agentId}`)
+    throw new Error(t('toolUI.agent.noTranscriptFound', { agentId }))
   }
   const resumedMessages = filterWhitespaceOnlyAssistantMessages(
     filterOrphanedThinkingOnlyMessages(
@@ -143,7 +144,7 @@ export async function resumeAgentBackground({
     }
     if (!forkParentSystemPrompt) {
       throw new Error(
-        'Cannot resume fork agent: unable to reconstruct parent system prompt',
+        t('toolUI.agent.cannotResumeForkAgent'),
       )
     }
   }

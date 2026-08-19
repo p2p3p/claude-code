@@ -1,4 +1,5 @@
 import type { TextBlockParam } from '@anthropic-ai/sdk/resources/index.mjs';
+import { t } from '../../utils/i18n/index.js'
 import React, { useContext } from 'react';
 import { ERROR_MESSAGE_USER_ABORT } from 'src/services/compact/compact.js';
 import { isRateLimitErrorMessage } from 'src/services/rateLimitMessages.js';
@@ -15,11 +16,10 @@ import {
   ORG_DISABLED_ERROR_MESSAGE_ENV_KEY_WITH_OAUTH,
   PROMPT_TOO_LONG_ERROR_MESSAGE,
   startsWithApiErrorPrefix,
-  TOKEN_REVOKED_ERROR_MESSAGE,
-} from '../../services/api/errors.js';
+  TOKEN_REVOKED_ERROR_MESSAGE} from '../../services/api/errors.js';
 import { isEmptyMessageText, NO_RESPONSE_REQUESTED } from '../../utils/messages.js';
 import { getUpgradeMessage } from '../../utils/model/contextWindowUpgradeCheck.js';
-import { getDefaultSonnetModel, renderModelName } from '../../utils/model/model.js';
+import { getDefaultModel, renderModelName } from '../../utils/model/model.js';
 import { isMacOsKeychainLocked } from '../../utils/secureStorage/macOsKeychainStorage.js';
 import { CtrlOToExpand } from '../CtrlOToExpand.js';
 import { InterruptedByUser } from '../InterruptedByUser.js';
@@ -46,7 +46,7 @@ function InvalidApiKeyMessage(): React.ReactNode {
     <MessageResponse>
       <Box flexDirection="column">
         <Text color="error">{INVALID_API_KEY_ERROR_MESSAGE}</Text>
-        {isKeychainLocked && <Text dimColor>· Run in another terminal: security unlock-keychain</Text>}
+        {isKeychainLocked && <Text dimColor>{t('assistanttextmessage.unlockKeychain')}</Text>}
       </Box>
     </MessageResponse>
   );
@@ -57,8 +57,7 @@ export function AssistantTextMessage({
   addMargin,
   shouldShowDot,
   verbose,
-  onOpenRateLimitOptions,
-}: Props): React.ReactNode {
+  onOpenRateLimitOptions}: Props): React.ReactNode {
   const isSelected = useContext(MessageActionsSelectedContext);
   if (isEmptyMessageText(text)) {
     return null;
@@ -81,7 +80,7 @@ export function AssistantTextMessage({
       return (
         <MessageResponse height={1}>
           <Text color="error">
-            Context limit reached · /compact or /clear to continue
+            {t('assistanttextmessage.contextLimitReached')}
             {upgradeHint ? ` · ${upgradeHint}` : ''}
           </Text>
         </MessageResponse>
@@ -92,7 +91,7 @@ export function AssistantTextMessage({
       return (
         <MessageResponse height={1}>
           <Text color="error">
-            Credit balance too low &middot; Add funds: https://platform.claude.com/settings/billing
+            {t('assistanttextmessage.creditBalanceTooLow')}
           </Text>
         </MessageResponse>
       );
@@ -136,10 +135,9 @@ export function AssistantTextMessage({
       return (
         <MessageResponse>
           <Box flexDirection="column" gap={1}>
-            <Text color="error">We are experiencing high demand for Opus 4.</Text>
+            <Text color="error">{t('assistanttextmessage.weAreExperiencingHighDemandForOpus4')}</Text>
             <Text>
-              To continue immediately, use /model to switch to {renderModelName(getDefaultSonnetModel())} and continue
-              coding.
+              {t('assistanttextmessage.switchToSonnet', renderModelName(getDefaultModel()))}
             </Text>
           </Box>
         </MessageResponse>
@@ -161,7 +159,7 @@ export function AssistantTextMessage({
             <Box flexDirection="column">
               <Text color="error">
                 {text === API_ERROR_MESSAGE_PREFIX
-                  ? `${API_ERROR_MESSAGE_PREFIX}: Please wait a moment and try again.`
+                  ? t('assistanttextmessage.apiErrorRetry', API_ERROR_MESSAGE_PREFIX)
                   : truncated
                     ? text.slice(0, MAX_API_ERROR_CHARS) + '…'
                     : text}

@@ -20,7 +20,7 @@
  * - Feature-flagged: `SKILL_SEARCH_INTENT_ENABLED=1` to opt in.
  */
 
-import { queryHaiku } from '../api/claude.js'
+import { queryHaiku } from '../api/anthropic/index.js'
 import { asSystemPrompt } from '../../utils/systemPromptType.js'
 import { logForDebugging } from '../../utils/debug.js'
 
@@ -132,9 +132,7 @@ async function callHaiku(query: string): Promise<string> {
         agents: [],
         isNonInteractiveSession: true,
         hasAppendSystemPrompt: false,
-        mcpTools: [],
-      },
-    })
+        mcpTools: []}})
     const text = extractResponseText(response?.message?.content)
     return sanitizeKeywords(text)
   } catch (error) {

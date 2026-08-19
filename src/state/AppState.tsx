@@ -5,11 +5,11 @@ import { useSettingsChange } from '../hooks/useSettingsChange.js';
 import { logForDebugging } from '../utils/debug.js';
 import {
   createDisabledBypassPermissionsContext,
-  isBypassPermissionsModeDisabled,
-} from '../utils/permissions/permissionSetup.js';
+  isBypassPermissionsModeDisabled} from '../utils/permissions/permissionSetup.js';
 import { applySettingsChange } from '../utils/settings/applySettingsChange.js';
 import type { SettingSource } from '../utils/settings/constants.js';
 import { createStore } from './store.js';
+import { registerAppStateSetter } from '../bootstrap/state.js';
 
 // DCE: voice context is ant-only. External builds get a noop provider that
 // still wraps children in VoiceContext so useVoiceState never throws.
@@ -23,8 +23,7 @@ const VoiceProvider: (props: { children: React.ReactNode }) => React.ReactNode =
         voiceError: null as string | null,
         voiceInterimTranscript: '',
         voiceAudioLevels: [] as number[],
-        voiceWarmingUp: false,
-      });
+        voiceWarmingUp: false});
       return ({ children }: { children: React.ReactNode }) => (
         <VoiceContext.Provider value={noopStore}>{children}</VoiceContext.Provider>
       );
@@ -43,8 +42,7 @@ export {
   getDefaultAppState,
   IDLE_SPECULATION_STATE,
   type SpeculationResult,
-  type SpeculationState,
-} from './AppStateStore.js';
+  type SpeculationState} from './AppStateStore.js';
 
 export const AppStoreContext = React.createContext<AppStateStore | null>(null);
 
@@ -68,6 +66,12 @@ export function AppStateProvider({ children, initialState, onChangeAppState }: P
   // via useSyncExternalStore in useAppState(selector).
   const [store] = useState(() => createStore<AppState>(initialState ?? getDefaultAppState(), onChangeAppState));
 
+  // Register the store setter so non-React layers (e.g. keyRotation.activatePlatform)
+  // can reset runtime state like mainLoopModel after a platform switch.
+  useEffect(() => {
+    registerAppStateSetter(store.setState);
+  }, [store]);
+
   // Check on mount if bypass mode should be disabled
   // This handles the race condition where remote settings load BEFORE this component mounts,
   // meaning the settings change notification was sent when no listeners were subscribed.
@@ -79,8 +83,7 @@ export function AppStateProvider({ children, initialState, onChangeAppState }: P
       logForDebugging('Disabling bypass permissions mode on mount (remote settings loaded before mount)');
       store.setState(prev => ({
         ...prev,
-        toolPermissionContext: createDisabledBypassPermissionsContext(prev.toolPermissionContext),
-      }));
+        toolPermissionContext: createDisabledBypassPermissionsContext(prev.toolPermissionContext)}));
     }
   }, []);
 

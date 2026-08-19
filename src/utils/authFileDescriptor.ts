@@ -3,8 +3,7 @@ import {
   getApiKeyFromFd,
   getOauthTokenFromFd,
   setApiKeyFromFd,
-  setOauthTokenFromFd,
-} from '../bootstrap/state.js'
+  setOauthTokenFromFd} from '../bootstrap/state.js'
 import { logForDebugging } from './debug.js'
 import { isEnvTruthy } from './envUtils.js'
 import { errorMessage, isENOENT } from './errors.js'
@@ -99,8 +98,7 @@ function getCredentialFromFd({
   wellKnownPath,
   label,
   getCached,
-  setCached,
-}: {
+  setCached}: {
   envVar: string
   wellKnownPath: string
   label: string
@@ -143,8 +141,7 @@ function getCredentialFromFd({
     const token = fsOps.readFileSync(fdPath, { encoding: 'utf8' }).trim()
     if (!token) {
       logForDebugging(`File descriptor contained empty ${label}`, {
-        level: 'error',
-      })
+        level: 'error'})
       setCached(null)
       return null
     }
@@ -176,8 +173,7 @@ export function getOAuthTokenFromFileDescriptor(): string | null {
     wellKnownPath: CCR_OAUTH_TOKEN_PATH,
     label: 'OAuth token',
     getCached: getOauthTokenFromFd,
-    setCached: setOauthTokenFromFd,
-  })
+    setCached: setOauthTokenFromFd})
 }
 
 /**
@@ -191,6 +187,5 @@ export function getApiKeyFromFileDescriptor(): string | null {
     wellKnownPath: CCR_API_KEY_PATH,
     label: 'API key',
     getCached: getApiKeyFromFd,
-    setCached: setApiKeyFromFd,
-  })
+    setCached: setApiKeyFromFd})
 }

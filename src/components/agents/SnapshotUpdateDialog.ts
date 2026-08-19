@@ -1,4 +1,5 @@
 import React from 'react'
+import { t } from '../../utils/i18n/index.js'
 import { Dialog, Text } from '@anthropic/ink'
 import type { AgentMemoryScope } from '@claude-code-best/builtin-tools/tools/AgentTool/agentMemory.js'
 import { Select } from '../CustomSelect/index.js'
@@ -20,8 +21,7 @@ export function SnapshotUpdateDialog({
   scope,
   snapshotTimestamp,
   onComplete,
-  onCancel,
-}: SnapshotUpdateDialogProps): React.ReactElement {
+  onCancel}: SnapshotUpdateDialogProps): React.ReactElement {
   const children = [
     React.createElement(
       Text,
@@ -33,47 +33,34 @@ export function SnapshotUpdateDialog({
       defaultFocusValue: 'merge',
       options: [
         {
-          label: 'Merge snapshot into current memory',
+          label: t('snapshotUpdate.mergeSnapshot'),
           value: 'merge',
           description:
-            'Keep current memory and ask Claude to merge in the snapshot changes.',
-        },
+            'Keep current memory and ask Claude to merge in the snapshot changes.'},
         {
-          label: 'Keep current memory',
+          label: t('snapshotUpdate.keepCurrent'),
           value: 'keep',
           description:
-            'Ignore this snapshot update and continue with current memory.',
-        },
+            'Ignore this snapshot update and continue with current memory.'},
         {
-          label: 'Replace with snapshot',
+          label: t('snapshotUpdate.replaceWithSnapshot'),
           value: 'replace',
           description:
-            'Overwrite current memory files with the snapshot contents.',
-        },
+            'Overwrite current memory files with the snapshot contents.'},
       ],
-      onChange: onComplete as (value: unknown) => void,
-    }),
+      onChange: onComplete as (value: unknown) => void}),
   ]
   return React.createElement(Dialog, {
-    title: 'Agent memory snapshot update',
-    subtitle: `A newer ${scope} memory snapshot is available for ${agentType}.`,
+    title: t('snapshotUpdate.title'),
+    subtitle: t('snapshot.newerSnapshot', scope, agentType),
     onCancel,
     color: 'warning' as const,
-    children,
-  })
+    children})
 }
 
 export function buildMergePrompt(
   agentType: string,
   scope: AgentMemoryScope,
 ): string {
-  return `A newer ${scope} persistent memory snapshot is available for the "${agentType}" agent.
-
-Please merge the snapshot update into the current ${scope} agent memory before continuing:
-- Preserve useful current memory entries.
-- Incorporate newer or more accurate information from the snapshot.
-- Resolve duplicates or conflicts in favor of the most current, specific information.
-- Keep the memory concise and relevant to future runs of this agent.
-
-After merging, continue with the user's request.`
+  return t('snapshot.mergePrompt', scope, agentType)
 }

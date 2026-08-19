@@ -82,23 +82,20 @@ export function parseScheduleArgs(args: string): ScheduleArgs {
       return {
         action: 'invalid',
         reason:
-          'create requires a cron expression and prompt, e.g. create "0 9 * * 1" Run weekly standup',
-      }
+          'create requires a cron expression and prompt, e.g. create "0 9 * * 1" Run weekly standup'}
     }
     const parsed = splitCronAndPrompt(rest)
     if (!parsed) {
       return {
         action: 'invalid',
         reason:
-          'create requires 5 cron fields followed by a prompt, e.g. create "0 9 * * 1" Run weekly standup',
-      }
+          'create requires 5 cron fields followed by a prompt, e.g. create "0 9 * * 1" Run weekly standup'}
     }
     const { cron, prompt } = parsed
     if (!isValidCronExpression(cron)) {
       return {
         action: 'invalid',
-        reason: `Invalid cron expression: "${cron}". Expected 5 fields (minute hour day month weekday).`,
-      }
+        reason: `Invalid cron expression: "${cron}". Expected 5 fields (minute hour day month weekday).`}
     }
     /* istanbul ignore next -- prompt is non-empty by construction from splitCronAndPrompt */
     if (!prompt.trim()) {
@@ -114,8 +111,7 @@ export function parseScheduleArgs(args: string): ScheduleArgs {
       return {
         action: 'invalid',
         reason:
-          'update requires an id, field, and value, e.g. update trg_123 enabled false',
-      }
+          'update requires an id, field, and value, e.g. update trg_123 enabled false'}
     }
     const id = parts[0]
     const field = parts[1] ?? ''
@@ -160,22 +156,19 @@ export function parseScheduleArgs(args: string): ScheduleArgs {
     if (!rest) {
       return {
         action: 'invalid',
-        reason: `${subCmd} requires a trigger id`,
-      }
+        reason: `${subCmd} requires a trigger id`}
     }
     const id = rest.split(/\s+/)[0]
     /* istanbul ignore next */
     if (!id) {
       return {
         action: 'invalid',
-        reason: `${subCmd} requires a trigger id`,
-      }
+        reason: `${subCmd} requires a trigger id`}
     }
     return { action: subCmd as 'enable' | 'disable', id }
   }
 
   return {
     action: 'invalid',
-    reason: `Unknown sub-command "${subCmd}". ${USAGE}`,
-  }
+    reason: `Unknown sub-command "${subCmd}". ${USAGE}`}
 }

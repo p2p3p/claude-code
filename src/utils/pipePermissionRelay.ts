@@ -4,8 +4,7 @@ import type { ToolUseConfirm } from '../components/permissions/PermissionRequest
 import type {
   PipeMessage,
   PipePermissionRequestPayload,
-  PipePermissionResponsePayload,
-} from './pipeTransport.js'
+  PipePermissionResponsePayload} from './pipeTransport.js'
 import type { PermissionUpdate } from './permissions/PermissionUpdateSchema.js'
 
 type PendingPipePermission = {
@@ -61,8 +60,7 @@ export function tryRelayPipePermissionRequest(
     description: toolUseConfirm.description,
     input: toolUseConfirm.input as Record<string, unknown>,
     permissionResult: toolUseConfirm.permissionResult,
-    permissionPromptStartTimeMs: toolUseConfirm.permissionPromptStartTimeMs,
-  }
+    permissionPromptStartTimeMs: toolUseConfirm.permissionPromptStartTimeMs}
 
   pendingPipePermissions.set(requestId, { onResponse })
   send({ type: 'permission_request', data: JSON.stringify(payload) })
@@ -89,8 +87,7 @@ export function cancelPipePermissionRequest(
   pending.onResponse({
     requestId,
     behavior: 'deny',
-    feedback: reason ?? 'Permission request was cancelled by main.',
-  })
+    feedback: reason ?? 'Permission request was cancelled by main.'})
   return true
 }
 
@@ -111,8 +108,7 @@ export function notifyPipePermissionCancel(
   if (!send) return
   send({
     type: 'permission_cancel',
-    data: JSON.stringify({ requestId, reason }),
-  })
+    data: JSON.stringify({ requestId, reason })})
 }
 
 export function clearPendingPipePermissions(
@@ -155,8 +151,7 @@ export function makePipePermissionResponsePayload(
         (permissionUpdatesOrContentBlocks as PermissionUpdate[] | undefined) ??
         [],
       feedback,
-      contentBlocks,
-    }
+      contentBlocks}
   }
 
   return {
@@ -165,6 +160,5 @@ export function makePipePermissionResponsePayload(
     feedback: updatedInputOrFeedback as string | undefined,
     contentBlocks: permissionUpdatesOrContentBlocks as
       | ContentBlockParam[]
-      | undefined,
-  }
+      | undefined}
 }

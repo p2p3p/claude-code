@@ -2,8 +2,7 @@ import type {
   ClientCapabilities,
   SessionModeState,
   SessionModelState,
-  SessionConfigOption,
-} from '@agentclientprotocol/sdk'
+  SessionConfigOption} from '@agentclientprotocol/sdk'
 import type { QueryEngine } from '../../../QueryEngine.js'
 import type { Command } from '../../../types/command.js'
 import type { AppState } from '../../../state/AppStateStore.js'

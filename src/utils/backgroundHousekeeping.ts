@@ -14,8 +14,7 @@ import { getIsInteractive, getLastInteractionTime } from '../bootstrap/state.js'
 import {
   cleanupNpmCacheForAnthropicPackages,
   cleanupOldMessageFilesInBackground,
-  cleanupOldVersionsThrottled,
-} from './cleanup.js'
+  cleanupOldVersionsThrottled} from './cleanup.js'
 import { cleanupOldVersions } from './nativeInstaller/index.js'
 import { autoUpdateMarketplacesAndPluginsInBackground } from './plugins/pluginAutoupdate.js'
 

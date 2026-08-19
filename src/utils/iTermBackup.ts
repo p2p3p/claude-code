@@ -7,8 +7,7 @@ import { logError } from './log.js'
 export function markITerm2SetupComplete(): void {
   saveGlobalConfig(current => ({
     ...current,
-    iterm2SetupInProgress: false,
-  }))
+    iterm2SetupInProgress: false}))
 }
 
 function getIterm2RecoveryInfo(): {
@@ -18,8 +17,7 @@ function getIterm2RecoveryInfo(): {
   const config = getGlobalConfig()
   return {
     inProgress: config.iterm2SetupInProgress ?? false,
-    backupPath: config.iterm2BackupPath || null,
-  }
+    backupPath: config.iterm2BackupPath || null}
 }
 
 function getITerm2PlistPath(): string {

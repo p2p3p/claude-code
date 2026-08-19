@@ -2,8 +2,7 @@ import { feature } from 'bun:bundle'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   getModeFromInput,
-  getValueFromInput,
-} from '../components/PromptInput/inputModes.js'
+  getValueFromInput} from '../components/PromptInput/inputModes.js'
 import { makeHistoryReader } from '../history.js'
 import { KeyboardEvent, useInput } from '@anthropic/ink'
 // backward-compat bridge until consumers wire handleKeyDown to <Box onKeyDown>
@@ -211,16 +210,14 @@ export function useHistorySearch(
     if (historyQuery.length === 0) {
       onAcceptHistory({
         display: originalInput,
-        pastedContents: originalPastedContents,
-      })
+        pastedContents: originalPastedContents})
     } else if (historyMatch) {
       const mode = getModeFromInput(historyMatch.display)
       const value = getValueFromInput(historyMatch.display)
       onModeChange(mode)
       onAcceptHistory({
         display: value,
-        pastedContents: historyMatch.pastedContents,
-      })
+        pastedContents: historyMatch.pastedContents})
     }
     reset()
   }, [
@@ -236,8 +233,7 @@ export function useHistorySearch(
   // Gated off under HISTORY_PICKER — the modal dialog owns ctrl+r there.
   useKeybinding('history:search', handleStartSearch, {
     context: 'Global',
-    isActive: feature('HISTORY_PICKER') ? false : !isSearching,
-  })
+    isActive: feature('HISTORY_PICKER') ? false : !isSearching})
 
   // History search context keybindings (only active when searching)
   const historySearchHandlers = useMemo(
@@ -245,15 +241,13 @@ export function useHistorySearch(
       'historySearch:next': handleNextMatch,
       'historySearch:accept': handleAccept,
       'historySearch:cancel': handleCancel,
-      'historySearch:execute': handleExecute,
-    }),
+      'historySearch:execute': handleExecute}),
     [handleNextMatch, handleAccept, handleCancel, handleExecute],
   )
 
   useKeybindings(historySearchHandlers, {
     context: 'HistorySearch',
-    isActive: isSearching,
-  })
+    isActive: isSearching})
 
   // Handle backspace when query is empty (cancels search)
   // This is a conditional behavior that doesn't fit the keybinding model
@@ -297,6 +291,5 @@ export function useHistorySearch(
     setHistoryQuery,
     historyMatch,
     historyFailedMatch,
-    handleKeyDown,
-  }
+    handleKeyDown}
 }

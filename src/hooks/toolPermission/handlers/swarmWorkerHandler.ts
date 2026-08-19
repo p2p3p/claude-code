@@ -9,8 +9,7 @@ import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpda
 import {
   createPermissionRequest,
   isSwarmWorker,
-  sendPermissionRequestViaMailbox,
-} from '../../../utils/swarm/permissionSync.js'
+  sendPermissionRequestViaMailbox} from '../../../utils/swarm/permissionSync.js'
 import { registerPermissionCallback } from '../../useSwarmPermissionPoller.js'
 import type { PermissionContext } from '../PermissionContext.js'
 import { createResolveOnce } from '../PermissionContext.js'
@@ -61,8 +60,7 @@ async function handleSwarmWorkerPermission(
     const clearPendingRequest = (): void =>
       ctx.toolUseContext.setAppState(prev => ({
         ...prev,
-        pendingWorkerRequest: null,
-      }))
+        pendingWorkerRequest: null}))
 
     const decision = await new Promise<PermissionDecision>(resolve => {
       const { resolve: resolveOnce, claim } = createResolveOnce(resolve)
@@ -73,8 +71,7 @@ async function handleSwarmWorkerPermission(
         toolUseId: ctx.toolUseID,
         input: ctx.input,
         description,
-        permissionSuggestions: suggestions,
-      })
+        permissionSuggestions: suggestions})
 
       // Register callback BEFORE sending the request to avoid race condition
       // where leader responds before callback is registered
@@ -112,12 +109,10 @@ async function handleSwarmWorkerPermission(
 
           ctx.logDecision({
             decision: 'reject',
-            source: { type: 'user_reject', hasFeedback: !!feedback },
-          })
+            source: { type: 'user_reject', hasFeedback: !!feedback }})
 
           resolveOnce(ctx.cancelAndAbort(feedback, undefined, contentBlocks))
-        },
-      })
+        }})
 
       // Now that callback is registered, send the request to the leader
       void sendPermissionRequestViaMailbox(request)
@@ -128,9 +123,7 @@ async function handleSwarmWorkerPermission(
         pendingWorkerRequest: {
           toolName: ctx.tool.name,
           toolUseId: ctx.toolUseID,
-          description,
-        },
-      }))
+          description}}))
 
       // If the abort signal fires while waiting for the leader response,
       // resolve the promise with a cancel decision so it does not hang.

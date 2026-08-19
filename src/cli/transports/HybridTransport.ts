@@ -1,5 +1,6 @@
 import axios, { type AxiosError } from 'axios'
 import type { StdoutMessage } from 'src/entrypoints/sdk/controlTypes.js'
+import { t } from '../../utils/i18n/index.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { rcLog } from '../../bridge/rcDebugLog.js'
 import { logForDiagnosticsNoPII } from '../../utils/diagLogs.js'
@@ -7,8 +8,7 @@ import { getSessionIngressAuthToken } from '../../utils/sessionIngressAuth.js'
 import { SerialBatchEventUploader } from './SerialBatchEventUploader.js'
 import {
   WebSocketTransport,
-  type WebSocketTransportOptions,
-} from './WebSocketTransport.js'
+  type WebSocketTransportOptions} from './WebSocketTransport.js'
 
 const BATCH_FLUSH_INTERVAL_MS = 100
 // Per-attempt POST timeout. Bounds how long a single stuck POST can block
@@ -97,13 +97,11 @@ export class HybridTransport extends WebSocketTransport {
           'cli_hybrid_batch_dropped_max_failures',
           {
             batchSize,
-            failures,
-          },
+            failures},
         )
         onBatchDropped?.(batchSize, failures)
       },
-      send: batch => this.postOnce(batch),
-    })
+      send: batch => this.postOnce(batch)})
     logForDebugging(`HybridTransport: POST URL = ${this.postUrl}`)
     logForDiagnosticsNoPII('info', 'cli_hybrid_transport_initialized')
   }
@@ -210,8 +208,7 @@ export class HybridTransport extends WebSocketTransport {
 
     const headers: Record<string, string> = {
       Authorization: `Bearer ${sessionToken}`,
-      'Content-Type': 'application/json',
-    }
+      'Content-Type': 'application/json'}
 
     let response
     try {
@@ -221,8 +218,7 @@ export class HybridTransport extends WebSocketTransport {
         {
           headers,
           validateStatus: () => true,
-          timeout: POST_TIMEOUT_MS,
-        },
+          timeout: POST_TIMEOUT_MS},
       )
     } catch (error) {
       const axiosError = error as AxiosError
@@ -250,8 +246,7 @@ export class HybridTransport extends WebSocketTransport {
         `HybridTransport: POST returned ${response.status} (permanent), dropping`,
       )
       logForDiagnosticsNoPII('warn', 'cli_hybrid_post_client_error', {
-        status: response.status,
-      })
+        status: response.status})
       return
     }
 
@@ -260,9 +255,8 @@ export class HybridTransport extends WebSocketTransport {
       `HybridTransport: POST returned ${response.status} (retryable)`,
     )
     logForDiagnosticsNoPII('warn', 'cli_hybrid_post_retryable_error', {
-      status: response.status,
-    })
-    throw new Error(`POST failed with ${response.status}`)
+      status: response.status})
+    throw new Error(t('hybridTransport.postFailed', response.status))
   }
 }
 

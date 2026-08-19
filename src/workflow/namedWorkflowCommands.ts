@@ -1,8 +1,7 @@
 import { join } from 'node:path'
 import {
   listNamedWorkflows,
-  WORKFLOW_DIR_NAME,
-} from '@claude-code-best/workflow-engine'
+  WORKFLOW_DIR_NAME} from '@claude-code-best/workflow-engine'
 import type { Command } from '../types/command.js'
 import { getProjectRoot } from '../bootstrap/state.js'
 
@@ -26,9 +25,7 @@ export async function getWorkflowCommands(
       return [
         {
           type: 'text',
-          text: `Run the "${name}" workflow now by calling the Workflow tool with name="${name}".${argText}`,
-        },
+          text: `Run the "${name}" workflow now by calling the Workflow tool with name="${name}".${argText}`},
       ]
-    },
-  }))
+    }}))
 }

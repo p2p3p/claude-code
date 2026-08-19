@@ -7,6 +7,7 @@ import { getMemoryScopeDisplay } from '@claude-code-best/builtin-tools/tools/Age
 import type { AgentDefinition } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js';
 import { truncateToWidth } from '../../../../utils/format.js';
 import { getAgentModelDisplay } from '../../../../utils/model/agent.js';
+import { t } from '../../../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
@@ -45,53 +46,52 @@ export function ConfirmStep({ tools, existingAgents, onSave, onSaveAndEdit, erro
 
   const getToolsDisplay = (toolNames: string[] | undefined): string => {
     // undefined means "all tools" per PR semantic
-    if (toolNames === undefined) return 'All tools';
-    if (toolNames.length === 0) return 'None';
-    if (toolNames.length === 1) return toolNames[0] || 'None';
-    if (toolNames.length === 2) return toolNames.join(' and ');
-    return `${toolNames.slice(0, -1).join(', ')}, and ${toolNames[toolNames.length - 1]}`;
+    if (toolNames === undefined) return t('confirmstep.allTools');
+    if (toolNames.length === 0) return t('confirmstep.none');
+    if (toolNames.length === 1) return toolNames[0] || t('confirmstep.none');
+    if (toolNames.length === 2) return toolNames.join(t('confirmstep.and'));
+    return t('confirmstep.andLast', toolNames.slice(0, -1).join(', '), toolNames[toolNames.length - 1]);
   };
 
   // Compute memory display outside JSX
   const memoryDisplayElement = isAutoMemoryEnabled() ? (
     <Text>
-      <Text bold>Memory</Text>: {getMemoryScopeDisplay(agent.memory)}
+      <Text bold>{t('confirmstep.memory')}</Text>: {getMemoryScopeDisplay(agent.memory)}
     </Text>
   ) : null;
 
   return (
     <WizardDialogLayout
-      subtitle="Confirm and save"
+      subtitle={t('confirmstep.confirmAndSave')}
       footerText={
         <Byline>
-          <KeyboardShortcutHint shortcut="s/Enter" action="save" />
-          <KeyboardShortcutHint shortcut="e" action="edit in your editor" />
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+          <KeyboardShortcutHint shortcut="s/Enter" action={t('shortcutHint.save')} />
+          <KeyboardShortcutHint shortcut="e" action={t('shortcutHint.editInYourEditor')} />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
         </Byline>
       }
     >
       <Box flexDirection="column" tabIndex={0} autoFocus onKeyDown={handleKeyDown}>
         <Text>
-          <Text bold>Name</Text>: {agent.agentType}
+          <Text bold>{t('confirmstep.name')}</Text>: {agent.agentType}
         </Text>
         <Text>
-          <Text bold>Location</Text>:{' '}
+          <Text bold>{t('confirmstep.location')}</Text>:{' '}
           {getNewRelativeAgentFilePath({
             source: wizardData.location!,
-            agentType: agent.agentType,
-          })}
+            agentType: agent.agentType})}
         </Text>
         <Text>
-          <Text bold>Tools</Text>: {getToolsDisplay(agent.tools)}
+          <Text bold>{t('confirmstep.tools')}</Text>: {getToolsDisplay(agent.tools)}
         </Text>
         <Text>
-          <Text bold>Model</Text>: {getAgentModelDisplay(agent.model)}
+          <Text bold>{t('confirmstep.model')}</Text>: {getAgentModelDisplay(agent.model)}
         </Text>
         {memoryDisplayElement}
 
         <Box marginTop={1}>
           <Text>
-            <Text bold>Description</Text> (tells Claude when to use this agent):
+            <Text bold>{t('confirmstep.description')}</Text> (tells Claude when to use this agent):
           </Text>
         </Box>
         <Box marginLeft={2} marginTop={1}>
@@ -100,7 +100,7 @@ export function ConfirmStep({ tools, existingAgents, onSave, onSaveAndEdit, erro
 
         <Box marginTop={1}>
           <Text>
-            <Text bold>System prompt</Text>:
+            <Text bold>{t('confirmstep.systemPrompt')}</Text>:
           </Text>
         </Box>
         <Box marginLeft={2} marginTop={1}>
@@ -109,7 +109,7 @@ export function ConfirmStep({ tools, existingAgents, onSave, onSaveAndEdit, erro
 
         {validation.warnings.length > 0 && (
           <Box marginTop={1} flexDirection="column">
-            <Text color="warning">Warnings:</Text>
+            <Text color="warning">{t('confirmstep.warnings')}</Text>
             {validation.warnings.map((warning, i) => (
               <Text key={i} dimColor>
                 {' '}
@@ -121,7 +121,7 @@ export function ConfirmStep({ tools, existingAgents, onSave, onSaveAndEdit, erro
 
         {validation.errors.length > 0 && (
           <Box marginTop={1} flexDirection="column">
-            <Text color="error">Errors:</Text>
+            <Text color="error">{t('confirmstep.errors')}</Text>
             {validation.errors.map((err, i) => (
               <Text key={i} color="error">
                 {' '}
@@ -139,7 +139,7 @@ export function ConfirmStep({ tools, existingAgents, onSave, onSaveAndEdit, erro
 
         <Box marginTop={2}>
           <Text color="success">
-            Press <Text bold>s</Text> or <Text bold>Enter</Text> to save, <Text bold>e</Text> to save and edit
+            Press <Text bold>s</Text> or <Text bold>{t('confirmstep.enter')}</Text> to save, <Text bold>e</Text> to save and edit
           </Text>
         </Box>
       </Box>

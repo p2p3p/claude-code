@@ -193,6 +193,5 @@ export function registerSkillifySkill(): void {
         .replace('{{userDescriptionBlock}}', userDescriptionBlock)
 
       return [{ type: 'text', text: prompt }]
-    },
-  })
+    }})
 }

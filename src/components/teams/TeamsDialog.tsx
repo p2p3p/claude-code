@@ -15,12 +15,12 @@ import { logForDebugging } from '../../utils/debug.js';
 import { execFileNoThrow } from '../../utils/execFileNoThrow.js';
 import { truncateToWidth } from '../../utils/format.js';
 import { getNextPermissionMode } from '../../utils/permissions/getNextPermissionMode.js';
+import { t } from '../../utils/i18n/index.js';
 import {
   getModeColor,
   type PermissionMode,
   permissionModeFromString,
-  permissionModeSymbol,
-} from '../../utils/permissions/PermissionMode.js';
+  permissionModeSymbol} from '../../utils/permissions/PermissionMode.js';
 import { jsonStringify } from '../../utils/slowOperations.js';
 import { IT2_COMMAND, isInsideTmuxSync } from '../../utils/swarm/backends/detection.js';
 import { ensureBackendsRegistered, getBackendByType, getCachedBackend } from '../../utils/swarm/backends/registry.js';
@@ -32,8 +32,7 @@ import { getTeammateStatuses, type TeammateStatus, type TeamSummary } from '../.
 import {
   createModeSetRequestMessage,
   sendShutdownRequestToMailbox,
-  writeToMailbox,
-} from '../../utils/teammateMailbox.js';
+  writeToMailbox} from '../../utils/teammateMailbox.js';
 import { Dialog } from '@anthropic/ink';
 import ThemedText from '../design-system/ThemedText.js';
 
@@ -60,8 +59,7 @@ export function TeamsDialog({ initialTeams, onDone }: Props): React.ReactNode {
   const firstTeamName = initialTeams?.[0]?.name ?? '';
   const [dialogLevel, setDialogLevel] = useState<DialogLevel>({
     type: 'teammateList',
-    teamName: firstTeamName,
-  });
+    teamName: firstTeamName});
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -133,8 +131,7 @@ export function TeamsDialog({ initialTeams, onDone }: Props): React.ReactNode {
         setDialogLevel({
           type: 'teammateDetail',
           teamName: dialogLevel.teamName,
-          memberName: teammateStatuses[selectedIndex].name,
-        });
+          memberName: teammateStatuses[selectedIndex].name});
       } else if (dialogLevel.type === 'teammateDetail' && currentTeammate) {
         // View output - switch to tmux pane
         void viewTeammateOutput(
@@ -301,7 +298,7 @@ type TeamDetailViewProps = {
 };
 
 function TeamDetailView({ teamName, teammates, selectedIndex, onCancel }: TeamDetailViewProps): React.ReactNode {
-  const subtitle = `${teammates.length} ${teammates.length === 1 ? 'teammate' : 'teammates'}`;
+  const subtitle = t('teamsdialog.subtitle', teammates.length);
   // Check if the backend supports hide/show
   const supportsHideShow = getCachedBackend()?.supportsHideShow ?? false;
   // Get the display text for the cycle mode shortcut
@@ -309,9 +306,9 @@ function TeamDetailView({ teamName, teammates, selectedIndex, onCancel }: TeamDe
 
   return (
     <>
-      <Dialog title={`Team ${teamName}`} subtitle={subtitle} onCancel={onCancel} color="background" hideInputGuide>
+      <Dialog title={t('teamsdialog.title', teamName)} subtitle={subtitle} onCancel={onCancel} color="background" hideInputGuide>
         {teammates.length === 0 ? (
-          <Text dimColor>No teammates</Text>
+          <Text dimColor>{t('teamsdialog.noTeammates')}</Text>
         ) : (
           <Box flexDirection="column">
             {teammates.map((teammate, index) => (
@@ -322,10 +319,10 @@ function TeamDetailView({ teamName, teammates, selectedIndex, onCancel }: TeamDe
       </Dialog>
       <Box marginLeft={1}>
         <Text dimColor>
-          {figures.arrowUp}/{figures.arrowDown} select · Enter view · k kill · s shutdown · p prune idle
-          {supportsHideShow && ' · h hide/show · H hide/show all'}
+          {figures.arrowUp}/{figures.arrowDown} {t('teamsdialog.helpSelect')} · {t('teamsdialog.helpView')} · k {t('teamsdialog.helpKill')} · s {t('teamsdialog.helpShutdown')} · p {t('teamsdialog.helpPruneIdle')}
+          {supportsHideShow && ` · h ${t('teamsdialog.helpHideShow')} · H ${t('teamsdialog.helpHideShowAll')}`}
           {' · '}
-          {cycleModeShortcut} sync cycle modes for all · Esc close
+          {cycleModeShortcut} {t('teamsdialog.helpSyncCycleModes')} · {t('teamsdialog.helpEscClose')}
         </Text>
       </Box>
     </>
@@ -423,7 +420,7 @@ function TeammateDetailView({ teammate, teamName, onCancel }: TeammateDetailView
         {/* Tasks section */}
         {teammateTasks.length > 0 && (
           <Box flexDirection="column">
-            <Text bold>Tasks</Text>
+            <Text bold>{t('teamsdialog.tasks')}</Text>
             {teammateTasks.map(task => (
               <Text key={task.id} color={task.status === 'completed' ? 'success' : undefined}>
                 {task.status === 'completed' ? figures.tick : '◼'} {task.subject}
@@ -435,10 +432,10 @@ function TeammateDetailView({ teammate, teamName, onCancel }: TeammateDetailView
         {/* Prompt section */}
         {teammate.prompt && (
           <Box flexDirection="column">
-            <Text bold>Prompt</Text>
+            <Text bold>{t('teamsdialog.prompt')}</Text>
             <Text>
               {promptExpanded ? teammate.prompt : truncateToWidth(teammate.prompt, 80)}
-              {stringWidth(teammate.prompt) > 80 && !promptExpanded && <Text dimColor> (p to expand)</Text>}
+              {stringWidth(teammate.prompt) > 80 && !promptExpanded && <Text dimColor> {t('shortcutHint.pToExpand')}</Text>}
             </Text>
           </Box>
         )}
@@ -497,8 +494,7 @@ async function killTeammate(
       ...prev,
       teamContext: {
         ...prev.teamContext,
-        teammates: remainingTeammates,
-      },
+        teammates: remainingTeammates},
       inbox: {
         messages: [
           ...prev.inbox.messages,
@@ -507,14 +503,10 @@ async function killTeammate(
             from: 'system',
             text: jsonStringify({
               type: 'teammate_terminated',
-              message: notificationMessage,
-            }),
+              message: notificationMessage}),
             timestamp: new Date().toISOString(),
-            status: 'pending' as const,
-          },
-        ],
-      },
-    };
+            status: 'pending' as const},
+        ]}};
   });
   logForDebugging(`[TeamsDialog] Removed ${teammateId} from teamContext`);
 }
@@ -573,15 +565,13 @@ function sendModeChangeToTeammate(teammateName: string, teamName: string, target
   // Also send message so teammate updates their local permission context
   const message = createModeSetRequestMessage({
     mode: targetMode,
-    from: 'team-lead',
-  });
+    from: 'team-lead'});
   void writeToMailbox(
     teammateName,
     {
       from: 'team-lead',
       text: jsonStringify(message),
-      timestamp: new Date().toISOString(),
-    },
+      timestamp: new Date().toISOString()},
     teamName,
   );
   logForDebugging(`[TeamsDialog] Sent mode change to ${teammateName}: ${targetMode}`);
@@ -595,8 +585,7 @@ function cycleTeammateMode(teammate: TeammateStatus, teamName: string, isBypassA
   const context = {
     ...getEmptyToolPermissionContext(),
     mode: currentMode,
-    isBypassPermissionsModeAvailable: isBypassAvailable,
-  };
+    isBypassPermissionsModeAvailable: isBypassAvailable};
   const nextMode = getNextPermissionMode(context);
   sendModeChangeToTeammate(teammate.name, teamName, nextMode);
 }
@@ -619,29 +608,25 @@ function cycleAllTeammateModes(teammates: TeammateStatus[], teamName: string, is
     : getNextPermissionMode({
         ...getEmptyToolPermissionContext(),
         mode: modes[0] ?? 'default',
-        isBypassPermissionsModeAvailable: isBypassAvailable,
-      });
+        isBypassPermissionsModeAvailable: isBypassAvailable});
 
   // Batch update config.json in a single atomic operation
   const modeUpdates = teammates.map(t => ({
     memberName: t.name,
-    mode: targetMode,
-  }));
+    mode: targetMode}));
   setMultipleMemberModes(teamName, modeUpdates);
 
   // Send mailbox messages to each teammate
   for (const teammate of teammates) {
     const message = createModeSetRequestMessage({
       mode: targetMode,
-      from: 'team-lead',
-    });
+      from: 'team-lead'});
     void writeToMailbox(
       teammate.name,
       {
         from: 'team-lead',
         text: jsonStringify(message),
-        timestamp: new Date().toISOString(),
-      },
+        timestamp: new Date().toISOString()},
       teamName,
     );
   }

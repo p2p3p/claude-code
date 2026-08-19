@@ -1,5 +1,6 @@
 import type { LocalCommandCall } from '../../types/command.js'
 import { getPipeIpc } from '../../utils/pipeTransport.js'
+import { t } from '../../utils/i18n/index.js'
 
 export const call: LocalCommandCall = async (args, context) => {
   const currentState = context.getAppState()
@@ -7,8 +8,7 @@ export const call: LocalCommandCall = async (args, context) => {
   if (getPipeIpc(currentState).role !== 'master') {
     return {
       type: 'text',
-      value: 'Not in master mode. Use /attach <pipe-name> first.',
-    }
+      value: t('historyCmd.notInMasterMode')}
   }
 
   const parts = args.trim().split(/\s+/)
@@ -18,20 +18,18 @@ export const call: LocalCommandCall = async (args, context) => {
     // Show list of connected sub sessions
     const slaveNames = Object.keys(getPipeIpc(currentState).slaves)
     if (slaveNames.length === 0) {
-      return { type: 'text', value: 'No sub sessions connected.' }
+      return { type: 'text', value: t('historyCmd.noSubSessions') }
     }
     return {
       type: 'text',
-      value: `Usage: /history <pipe-name>\nConnected sub sessions: ${slaveNames.join(', ')}`,
-    }
+      value: t('historyCmd.usageWithSessions', slaveNames.join(', '))}
   }
 
   const slave = getPipeIpc(currentState).slaves[targetName]
   if (!slave) {
     return {
       type: 'text',
-      value: `Not attached to "${targetName}". Use /status to see connected sub sessions.`,
-    }
+      value: t('historyCmd.notAttached', targetName)}
   }
 
   // Parse --last N
@@ -49,12 +47,11 @@ export const call: LocalCommandCall = async (args, context) => {
   if (entries.length === 0) {
     return {
       type: 'text',
-      value: `No session history for "${targetName}" yet.`,
-    }
+      value: t('historyCmd.noSessionHistory', targetName)}
   }
 
   const lines: string[] = [
-    `Session history for "${targetName}" (${entries.length}/${slave.history.length} entries):`,
+    t('historyCmd.sessionHistoryHeader', targetName, entries.length, slave.history.length),
     '',
   ]
 
@@ -74,19 +71,19 @@ export const call: LocalCommandCall = async (args, context) => {
 function formatEntryType(type: string): string {
   switch (type) {
     case 'prompt':
-      return '[PROMPT]'
+      return t('historyCmd.typePrompt')
     case 'prompt_ack':
-      return '[ACK]   '
+      return t('historyCmd.typePromptAck')
     case 'stream':
-      return '[AI]    '
+      return t('historyCmd.typeStream')
     case 'tool_start':
-      return '[TOOL>] '
+      return t('historyCmd.typeToolStart')
     case 'tool_result':
-      return '[TOOL<] '
+      return t('historyCmd.typeToolResult')
     case 'done':
-      return '[DONE]  '
+      return t('historyCmd.typeDone')
     case 'error':
-      return '[ERROR] '
+      return t('historyCmd.typeError')
     default:
       return `[${type}]`
   }

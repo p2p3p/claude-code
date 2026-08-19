@@ -2,8 +2,7 @@ import type {
   ElicitRequestFormParams,
   ElicitRequestURLParams,
   ElicitResult,
-  PrimitiveSchemaDefinition,
-} from '@modelcontextprotocol/sdk/types.js';
+  PrimitiveSchemaDefinition} from '@modelcontextprotocol/sdk/types.js';
 import figures from 'figures';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRegisterOverlay } from '../../context/overlayContext.js';
@@ -23,8 +22,8 @@ import {
   isEnumSchema,
   isMultiSelectEnumSchema,
   validateElicitationInput,
-  validateElicitationInputAsync,
-} from '../../utils/mcp/elicitationValidation.js';
+  validateElicitationInputAsync} from '../../utils/mcp/elicitationValidation.js';
+import { t } from '../../utils/i18n/index.js';
 import { plural } from '../../utils/stringUtils.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
@@ -81,8 +80,7 @@ function formatDateDisplay(isoValue: string, schema: PrimitiveSchemaDefinition):
         day: 'numeric',
         hour: 'numeric',
         minute: '2-digit',
-        timeZoneName: 'short',
-      });
+        timeZoneName: 'short'});
     }
     // date-only: parse as local date to avoid timezone shift
     const parts = isoValue.split('-');
@@ -92,8 +90,7 @@ function formatDateDisplay(isoValue: string, schema: PrimitiveSchemaDefinition):
         weekday: 'short',
         year: 'numeric',
         month: 'short',
-        day: 'numeric',
-      });
+        day: 'numeric'});
     }
     return isoValue;
   } catch {
@@ -111,8 +108,7 @@ export function ElicitationDialog({ event, onResponse, onWaitingDismiss }: Props
 
 function ElicitationFormDialog({
   event,
-  onResponse,
-}: {
+  onResponse}: {
   event: ElicitationRequestEvent;
   onResponse: Props['onResponse'];
 }): React.ReactNode {
@@ -171,8 +167,7 @@ function ElicitationFormDialog({
     return Object.entries(requestedSchema.properties).map(([name, schema]) => ({
       name,
       schema,
-      isRequired: requiredFields.includes(name),
-    }));
+      isRequired: requiredFields.includes(name)}));
   }, [requestedSchema]);
 
   const [currentFieldIndex, setCurrentFieldIndex] = useState<number | undefined>(hasFields ? 0 : undefined);
@@ -196,8 +191,7 @@ function ElicitationFormDialog({
   const resolveAbortRef = useRef<Map<string, AbortController>>(new Map());
   const enumTypeaheadRef = useRef({
     buffer: '',
-    timer: undefined as ReturnType<typeof setTimeout> | undefined,
-  });
+    timer: undefined as ReturnType<typeof setTimeout> | undefined});
 
   // Clear pending debounce/typeahead timers and abort in-flight async
   // validations on unmount so they don't fire against an unmounted component
@@ -229,7 +223,7 @@ function ElicitationFormDialog({
   const isEditingTextField = currentFieldIsText && !focusedButton;
 
   useRegisterOverlay('elicitation');
-  useNotifyAfterTimeout('Claude Code needs your input', 'elicitation_dialog');
+  useNotifyAfterTimeout(t('elicitationDialog.needsYourInput'), 'elicitation_dialog');
 
   // Sync textInputValue when the focused field changes
   const syncTextInput = useCallback(
@@ -327,7 +321,7 @@ function ElicitationFormDialog({
       return next;
     });
     // Clear "required" error when a value is provided
-    if (value !== undefined && validationErrors[fieldName] === 'This field is required') {
+    if (value !== undefined && validationErrors[fieldName] === t('elicitationDialog.fieldRequired')) {
       updateValidationError(fieldName);
     }
   }
@@ -491,8 +485,7 @@ function ElicitationFormDialog({
     },
     {
       context: 'Settings',
-      isActive: !!currentField && !focusedButton && !expandedAccordion,
-    },
+      isActive: !!currentField && !focusedButton && !expandedAccordion},
   );
 
   useInput(
@@ -632,7 +625,7 @@ function ElicitationFormDialog({
           const requiredFields = requestedSchema.required || [];
           for (const fieldName of requiredFields) {
             if (formValues[fieldName] === undefined) {
-              updateValidationError(fieldName, 'This field is required');
+              updateValidationError(fieldName, t('elicitationDialog.fieldRequired'));
             }
           }
           const firstBadIndex = schemaFields.findIndex(
@@ -1050,28 +1043,28 @@ function ElicitationFormDialog({
       isCancelActive={(!currentField || !!focusedButton) && !expandedAccordion}
       inputGuide={exitState =>
         exitState.pending ? (
-          <Text>Press {exitState.keyName} again to exit</Text>
+          <Text>{t('common.pressAgain', exitState.keyName)}</Text>
         ) : (
           <Byline>
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
-            <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
-            {currentField && <KeyboardShortcutHint shortcut="Backspace" action="unset" />}
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
+            <KeyboardShortcutHint shortcut="↑↓" action={t('shortcutHint.navigate')} />
+            {currentField && <KeyboardShortcutHint shortcut="Backspace" action={t('shortcutHint.unset')} />}
             {currentField && currentField.schema.type === 'boolean' && (
-              <KeyboardShortcutHint shortcut="Space" action="toggle" />
+              <KeyboardShortcutHint shortcut="Space" action={t('shortcutHint.toggle')} />
             )}
             {currentField &&
               isEnumSchema(currentField.schema) &&
               (expandedAccordion ? (
-                <KeyboardShortcutHint shortcut="Space" action="select" />
+                <KeyboardShortcutHint shortcut="Space" action={t('shortcutHint.select')} />
               ) : (
-                <KeyboardShortcutHint shortcut="→" action="expand" />
+                <KeyboardShortcutHint shortcut="→" action={t('shortcutHint.expand')} />
               ))}
             {currentField &&
               isMultiSelectEnumSchema(currentField.schema) &&
               (expandedAccordion ? (
-                <KeyboardShortcutHint shortcut="Space" action="toggle" />
+                <KeyboardShortcutHint shortcut="Space" action={t('shortcutHint.toggle')} />
               ) : (
-                <KeyboardShortcutHint shortcut="→" action="expand" />
+                <KeyboardShortcutHint shortcut="→" action={t('shortcutHint.expand')} />
               ))}
           </Byline>
         )
@@ -1105,8 +1098,7 @@ function ElicitationFormDialog({
 function ElicitationURLDialog({
   event,
   onResponse,
-  onWaitingDismiss,
-}: {
+  onWaitingDismiss}: {
   event: ElicitationRequestEvent;
   onResponse: Props['onResponse'];
   onWaitingDismiss: Props['onWaitingDismiss'];
@@ -1119,7 +1111,7 @@ function ElicitationURLDialog({
   const [focusedButton, setFocusedButton] = useState<'accept' | 'decline' | 'open' | 'action' | 'cancel'>('accept');
   const showCancel = waitingState?.showCancel ?? false;
 
-  useNotifyAfterTimeout('Claude Code needs your input', 'elicitation_url_dialog');
+  useNotifyAfterTimeout(t('elicitationDialog.needsYourInput'), 'elicitation_url_dialog');
   useRegisterOverlay('elicitation-url');
 
   // Keep refs in sync for use in abort handler (avoids re-registering listener)
@@ -1211,7 +1203,7 @@ function ElicitationURLDialog({
   });
 
   if (phase === 'waiting') {
-    const actionLabel = waitingState?.actionLabel ?? 'Continue without waiting';
+    const actionLabel = waitingState?.actionLabel ?? t('elicitationDialog.continueWithoutWaiting');
     return (
       <Dialog
         title={`MCP server \u201c${serverName}\u201d \u2014 waiting for completion`}
@@ -1221,16 +1213,16 @@ function ElicitationURLDialog({
         isCancelActive
         inputGuide={exitState =>
           exitState.pending ? (
-            <Text>Press {exitState.keyName} again to exit</Text>
+            <Text>{t('common.pressAgain', exitState.keyName)}</Text>
           ) : (
             <Byline>
               <ConfigurableShortcutHint
                 action="confirm:no"
                 context="Confirmation"
                 fallback="Esc"
-                description="cancel"
+                description={t('desc.cancel')}
               />
-              <KeyboardShortcutHint shortcut="\u2190\u2192" action="switch" />
+              <KeyboardShortcutHint shortcut="\u2190\u2192" action={t('shortcutHint.switch')} />
             </Byline>
           )
         }
@@ -1245,7 +1237,7 @@ function ElicitationURLDialog({
           </Box>
           <Box marginBottom={1}>
             <Text dimColor italic>
-              Waiting for the server to confirm completion…
+              {t('elicitationDialog.waitingForConfirmation')}
             </Text>
           </Box>
           <Box>
@@ -1293,11 +1285,11 @@ function ElicitationURLDialog({
       isCancelActive
       inputGuide={exitState =>
         exitState.pending ? (
-          <Text>Press {exitState.keyName} again to exit</Text>
+          <Text>{t('common.pressAgain', exitState.keyName)}</Text>
         ) : (
           <Byline>
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
-            <KeyboardShortcutHint shortcut="\u2190\u2192" action="switch" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
+            <KeyboardShortcutHint shortcut="\u2190\u2192" action={t('shortcutHint.switch')} />
           </Byline>
         )
       }

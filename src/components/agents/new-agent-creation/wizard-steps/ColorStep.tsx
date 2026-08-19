@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 import { Box, Byline, KeyboardShortcutHint } from '@anthropic/ink';
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js';
 import type { AgentColorName } from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js';
+import { t } from '../../../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
@@ -25,20 +26,18 @@ export function ColorStep(): ReactNode {
         tools: wizardData.selectedTools,
         ...(wizardData.selectedModel ? { model: wizardData.selectedModel } : {}),
         ...(color ? { color: color as AgentColorName } : {}),
-        source: wizardData.location!,
-      },
-    });
+        source: wizardData.location!}});
     goNext();
   };
 
   return (
     <WizardDialogLayout
-      subtitle="Choose background color"
+      subtitle={t('colorstep.chooseBackgroundColor')}
       footerText={
         <Byline>
-          <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
-          <KeyboardShortcutHint shortcut="Enter" action="select" />
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="go back" />
+          <KeyboardShortcutHint shortcut="↑↓" action={t('shortcutHint.navigate')} />
+          <KeyboardShortcutHint shortcut="Enter" action={t('shortcutHint.select')} />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.goBack')} />
         </Byline>
       }
     >

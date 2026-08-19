@@ -3,6 +3,7 @@ import * as React from 'react';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { type Notification, useNotifications } from 'src/context/notifications.js';
 import { logEvent } from 'src/services/analytics/index.js';
+import { t } from '../../utils/i18n/index.js';
 import { useAppState } from 'src/state/AppState.js';
 import { useVoiceState } from '../../context/voice.js';
 import type { VerificationStatus } from '../../hooks/useApiKeyVerification.js';
@@ -66,8 +67,7 @@ export function Notifications({
   ideSelection,
   mcpClients,
   isInputWrapped = false,
-  isNarrow = false,
-}: Props): ReactNode {
+  isNarrow = false}: Props): ReactNode {
   const tokenUsage = useMemo(() => {
     const messagesForTokenCount = getMessagesAfterCompactBoundary(messages);
     return tokenCountFromLastAPIResponse(messagesForTokenCount);
@@ -91,8 +91,7 @@ export function Notifications({
         text,
         color: isError ? 'error' : undefined,
         priority: isError ? 'medium' : 'low',
-        timeoutMs: isError ? 8000 : 5000,
-      });
+        timeoutMs: isError ? 8000 : 5000});
     });
     return () => setEnvHookNotifier(null);
   }, [addNotification]);
@@ -127,13 +126,12 @@ export function Notifications({
               action="chat:externalEditor"
               context="Chat"
               fallback="ctrl+g"
-              description={`edit in ${toIDEDisplayName(editor)}`}
+              description={t('desc.editIn', toIDEDisplayName(editor))}
             />
           </Text>
         ),
         priority: 'immediate',
-        timeoutMs: 5000,
-      });
+        timeoutMs: 5000});
     } else {
       removeNotification('external-editor-hint');
     }
@@ -169,8 +167,7 @@ function NotificationContent({
   debug,
   verbose,
   tokenUsage,
-  mainLoopModel,
-}: {
+  mainLoopModel}: {
   ideSelection: IDESelection | undefined;
   mcpClients?: MCPServerConnection[];
   notifications: {
@@ -235,14 +232,14 @@ function NotificationContent({
       {isInOverageMode && !isTeamOrEnterprise && (
         <Box>
           <Text dimColor wrap="truncate">
-            Now using extra usage
+            {t('feed.nowUsingExtraUsage')}
           </Text>
         </Box>
       )}
       {apiKeyHelperSlow && (
         <Box>
           <Text color="warning" wrap="truncate">
-            apiKeyHelper is taking a while{' '}
+            {t('feed.apiKeyHelperSlow')}{' '}
           </Text>
           <Text dimColor wrap="truncate">
             ({apiKeyHelperSlow})
@@ -253,22 +250,22 @@ function NotificationContent({
         <Box>
           <Text color="error" wrap="truncate">
             {isEnvTruthy(process.env.CLAUDE_CODE_REMOTE)
-              ? 'Authentication error · Try again'
-              : 'Not logged in · Run /login'}
+              ? t('feed.authError')
+              : t('feed.notLoggedIn')}
           </Text>
         </Box>
       )}
       {debug && (
         <Box>
           <Text color="warning" wrap="truncate">
-            Debug mode
+            {t('feed.debugMode')}
           </Text>
         </Box>
       )}
       {apiKeyStatus !== 'invalid' && apiKeyStatus !== 'missing' && verbose && (
         <Box>
           <Text dimColor wrap="truncate">
-            {tokenUsage} tokens
+            {t('feed.tokenUsage', tokenUsage)}
           </Text>
         </Box>
       )}

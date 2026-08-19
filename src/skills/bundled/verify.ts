@@ -25,6 +25,5 @@ export function registerVerifySkill(): void {
         parts.push(`## User Request\n\n${args}`)
       }
       return [{ type: 'text', text: parts.join('\n\n') }]
-    },
-  })
+    }})
 }

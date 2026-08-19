@@ -1,6 +1,7 @@
 import type { Command } from '../../../commands.js';
 import type { MCPServerConnection, ServerResource } from '../../../services/mcp/types.js';
 import type { Tool } from '../../../Tool.js';
+import { t } from '../../../utils/i18n/index.js';
 
 export interface ReconnectResult {
   message: string;
@@ -22,27 +23,23 @@ export function handleReconnectResult(
   switch (result.client.type) {
     case 'connected':
       return {
-        message: `Reconnected to ${serverName}.`,
-        success: true,
-      };
+        message: t('mcpReconnect.reconnected', serverName),
+        success: true};
 
     case 'needs-auth':
       return {
-        message: `${serverName} requires authentication. Use the 'Authenticate' option.`,
-        success: false,
-      };
+        message: t('mcpReconnect.requiresAuthOption', serverName),
+        success: false};
 
     case 'failed':
       return {
-        message: `Failed to reconnect to ${serverName}.`,
-        success: false,
-      };
+        message: t('reconnect.failedToReconnect', serverName),
+        success: false};
 
     default:
       return {
-        message: `Unknown result when reconnecting to ${serverName}.`,
-        success: false,
-      };
+        message: t('mcpReconnect.unknownResult', serverName),
+        success: false};
   }
 }
 
@@ -51,5 +48,5 @@ export function handleReconnectResult(
  */
 export function handleReconnectError(error: unknown, serverName: string): string {
   const errorMessage = error instanceof Error ? error.message : String(error);
-  return `Error reconnecting to ${serverName}: ${errorMessage}`;
+  return t('mcpErrors.reconnectError', serverName, errorMessage);
 }

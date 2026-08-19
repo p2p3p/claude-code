@@ -1,18 +1,17 @@
 import capitalize from 'lodash-es/capitalize.js';
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import { t } from '../utils/i18n/index.js';
 import { has1mContext } from '../utils/context.js';
 import { useExitOnCtrlCDWithKeybindings } from 'src/hooks/useExitOnCtrlCDWithKeybindings.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
 import {
   FAST_MODE_MODEL_DISPLAY,
   isFastModeAvailable,
   isFastModeCooldown,
-  isFastModeEnabled,
-} from 'src/utils/fastMode.js';
+  isFastModeEnabled} from 'src/utils/fastMode.js';
 import { Box, Text } from '@anthropic/ink';
 import { useKeybindings } from '../keybindings/useKeybinding.js';
 import { useAppState, useSetAppState } from '../state/AppState.js';
@@ -24,14 +23,12 @@ import {
   modelSupportsMaxEffort,
   modelSupportsXhighEffort,
   resolvePickerEffortPersistence,
-  toPersistableEffort,
-} from '../utils/effort.js';
+  toPersistableEffort} from '../utils/effort.js';
 import {
   getDefaultMainLoopModel,
   type ModelSetting,
   modelDisplayString,
-  parseUserSpecifiedModel,
-} from '../utils/model/model.js';
+  parseUserSpecifiedModel} from '../utils/model/model.js';
 import { getModelOptions } from '../utils/model/modelOptions.js';
 import { getSettingsForSource, updateSettingsForSource } from '../utils/settings/settings.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
@@ -67,8 +64,7 @@ export function ModelPicker({
   isStandaloneCommand,
   showFastModeNotice,
   headerText,
-  skipSettingsWrite,
-}: Props): React.ReactNode {
+  skipSettingsWrite}: Props): React.ReactNode {
   const setAppState = useSetAppState();
   const exitState = useExitOnCtrlCDWithKeybindings();
   const maxVisible = 10;
@@ -118,8 +114,7 @@ export function ModelPicker({
         {
           value: initial,
           label: modelDisplayString(initial),
-          description: 'Current model',
-        },
+          description: t('modelPicker.currentModel')},
       ];
     }
     return modelOptions;
@@ -129,8 +124,7 @@ export function ModelPicker({
     () =>
       optionsWithInitial.map(opt => ({
         ...opt,
-        value: opt.value === null ? NO_PREFERENCE : opt.value,
-      })),
+        value: opt.value === null ? NO_PREFERENCE : opt.value})),
     [optionsWithInitial],
   );
   const initialFocusValue = useMemo(
@@ -187,15 +181,13 @@ export function ModelPicker({
     {
       'modelPicker:decreaseEffort': () => handleCycleEffort('left'),
       'modelPicker:increaseEffort': () => handleCycleEffort('right'),
-      'modelPicker:toggle1M': () => handleToggle1M(),
-    },
+      'modelPicker:toggle1M': () => handleToggle1M()},
     { context: 'ModelPicker' },
   );
 
   function handleSelect(value: string): void {
     logEvent('tengu_model_command_menu_effort', {
-      effort: effort as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      effort: effort as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     if (!skipSettingsWrite) {
       // Prior comes from userSettings on disk — NOT merged settings (which
       // includes project/policy layers that must not leak into the user's
@@ -236,16 +228,15 @@ export function ModelPicker({
       <Box flexDirection="column">
         <Box marginBottom={1} flexDirection="column">
           <Text color="remember" bold>
-            Select model
+            {t('modelPicker.selectModel')}
           </Text>
           <Text dimColor>
             {headerText ??
-              'Choose a model for this and future sessions. Use ← → to adjust effort, Space to toggle 1M context.'}
+              t('modelPicker.chooseModel')}
           </Text>
           {sessionModel && (
             <Text dimColor>
-              Currently using {modelDisplayString(sessionModel)} for this session (set by plan mode). Selecting a model
-              will undo this.
+              {t('modelPicker.currentlyUsing', modelDisplayString(sessionModel))}
             </Text>
           )}
         </Box>
@@ -264,7 +255,7 @@ export function ModelPicker({
           </Box>
           {hiddenCount > 0 && (
             <Box paddingLeft={3}>
-              <Text dimColor>and {hiddenCount} more…</Text>
+              <Text dimColor>{t('modelPicker.andMore', hiddenCount)}</Text>
             </Box>
           )}
         </Box>
@@ -272,25 +263,25 @@ export function ModelPicker({
         <Box marginBottom={1} flexDirection="column">
           {focusedSupportsEffort ? (
             <Text dimColor>
-              <EffortLevelIndicator effort={displayEffort} /> {capitalize(displayEffort)} effort
-              {displayEffort === focusedDefaultEffort ? ` (default)` : ``} <Text color="subtle">← → to adjust</Text>
+              <EffortLevelIndicator effort={displayEffort} /> {t('modelPicker.effortLabel', capitalize(displayEffort))}
+              {displayEffort === focusedDefaultEffort ? ` ${t('modelPicker.effortDefault')}` : ``} <Text color="subtle">{t('modelPicker.effortAdjust')}</Text>
             </Text>
           ) : (
             <Text color="subtle">
-              <EffortLevelIndicator effort={undefined} /> Effort not supported
-              {focusedModelName ? ` for ${focusedModelName}` : ''}
+              <EffortLevelIndicator effort={undefined} /> {t('modelPicker.effortNotSupported')}
+              {focusedModelName ? t('modelPicker.forModel', focusedModelName) : ''}
             </Text>
           )}
           {is1MMarked ? (
             <Text dimColor>
-              <EffortLevelIndicator effort={'high'} /> 1M context on
-              <Text color="subtle"> · Space to toggle</Text>
+              <EffortLevelIndicator effort={'high'} /> {t('modelPicker.contextOn')}
+              <Text color="subtle">{t('modelPicker.spaceToToggle')}</Text>
             </Text>
           ) : (
             <Text color="subtle">
-              <EffortLevelIndicator effort={undefined} /> 1M context off
-              {focusedModelName ? ` for ${focusedModelName}` : ''}
-              <Text color="subtle"> · Space to toggle</Text>
+              <EffortLevelIndicator effort={undefined} /> {t('modelPicker.contextOff')}
+              {focusedModelName ? t('modelPicker.forModel', focusedModelName) : ''}
+              <Text color="subtle">{t('modelPicker.spaceToToggle')}</Text>
             </Text>
           )}
         </Box>
@@ -299,14 +290,13 @@ export function ModelPicker({
           showFastModeNotice ? (
             <Box marginBottom={1}>
               <Text dimColor>
-                Fast mode is <Text bold>ON</Text> and available with {FAST_MODE_MODEL_DISPLAY} only (/fast). Switching
-                to other models turn off fast mode.
+                {t('modelPicker.fastModeOn').replace('{model}', FAST_MODE_MODEL_DISPLAY)}
               </Text>
             </Box>
           ) : isFastModeAvailable() && !isFastModeCooldown() ? (
             <Box marginBottom={1}>
               <Text dimColor>
-                Use <Text bold>/fast</Text> to turn on Fast mode ({FAST_MODE_MODEL_DISPLAY} only).
+                {t('modelPicker.useFastMode').replace('{model}', FAST_MODE_MODEL_DISPLAY)}
               </Text>
             </Box>
           ) : null
@@ -316,11 +306,11 @@ export function ModelPicker({
       {isStandaloneCommand && (
         <Text dimColor italic>
           {exitState.pending ? (
-            <>Press {exitState.keyName} again to exit</>
+            <>{t('common.pressAgain', exitState.keyName)}</>
           ) : (
             <Byline>
-              <KeyboardShortcutHint shortcut="Enter" action="confirm" />
-              <ConfigurableShortcutHint action="select:cancel" context="Select" fallback="Esc" description="exit" />
+              <KeyboardShortcutHint shortcut="Enter" action={t('shortcutHint.confirm')} />
+              <ConfigurableShortcutHint action="select:cancel" context="Select" fallback="Esc" description={t('desc.exit')} />
             </Byline>
           )}
         </Text>

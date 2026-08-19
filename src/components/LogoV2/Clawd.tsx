@@ -38,8 +38,7 @@ const POSES: Record<ClawdPose, Segments> = {
   default: { r1L: ' ▐', r1E: '▛███▜', r1R: '▌', r2L: '▝▜', r2R: '▛▘' },
   'look-left': { r1L: ' ▐', r1E: '▟███▟', r1R: '▌', r2L: '▝▜', r2R: '▛▘' },
   'look-right': { r1L: ' ▐', r1E: '▙███▙', r1R: '▌', r2L: '▝▜', r2R: '▛▘' },
-  'arms-up': { r1L: '▗▟', r1E: '▛███▜', r1R: '▙▖', r2L: ' ▜', r2R: '▛ ' },
-};
+  'arms-up': { r1L: '▗▟', r1E: '▛███▜', r1R: '▙▖', r2L: ' ▜', r2R: '▛ ' }};
 
 // Apple Terminal uses a bg-fill trick (see below), so only eye poses make
 // sense. Arm poses fall back to default.
@@ -47,8 +46,7 @@ const APPLE_EYES: Record<ClawdPose, string> = {
   default: ' ▗   ▖ ',
   'look-left': ' ▘   ▘ ',
   'look-right': ' ▝   ▝ ',
-  'arms-up': ' ▗   ▖ ',
-};
+  'arms-up': ' ▗   ▖ '};
 
 export function Clawd({ pose = 'default' }: Props = {}): React.ReactNode {
   if (env.terminal === 'Apple_Terminal') {

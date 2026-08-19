@@ -7,8 +7,6 @@ const alias: CommandSpec = {
     name: 'definition',
     description: 'Alias definition in the form name=value',
     isOptional: true,
-    isVariadic: true,
-  },
-}
+    isVariadic: true}}
 
 export default alias

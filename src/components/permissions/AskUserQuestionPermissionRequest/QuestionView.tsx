@@ -2,10 +2,10 @@ import figures from 'figures';
 import React, { useCallback, useState } from 'react';
 import { type KeyboardEvent, Box, Text } from '@anthropic/ink';
 import { useAppState } from '../../../state/AppState.js';
+import { t } from '../../../utils/i18n/index.js';
 import type {
   Question,
-  QuestionOption,
-} from '@claude-code-best/builtin-tools/tools/AskUserQuestionTool/AskUserQuestionTool.js';
+  QuestionOption} from '@claude-code-best/builtin-tools/tools/AskUserQuestionTool/AskUserQuestionTool.js';
 import type { PastedContent } from '../../../utils/config.js';
 import { getExternalEditor } from '../../../utils/editor.js';
 import { toIDEDisplayName } from '../../../utils/ide.js';
@@ -71,8 +71,7 @@ export function QuestionView({
   onFinishPlanInterview,
   onImagePaste,
   pastedContents,
-  onRemoveImage,
-}: Props): React.ReactNode {
+  onRemoveImage}: Props): React.ReactNode {
   const isInPlanMode = useAppState(s => s.toolPermissionContext.mode) === 'plan';
   const [isFooterFocused, setIsFooterFocused] = useState(false);
   const [footerIndex, setFooterIndex] = useState(0);
@@ -151,8 +150,7 @@ export function QuestionView({
     type: 'text' as const,
     value: opt.label,
     label: opt.label,
-    description: opt.description,
-  }));
+    description: opt.description}));
 
   const questionText = question.question;
   const questionState = questionStates[questionText];
@@ -174,13 +172,12 @@ export function QuestionView({
   const otherOption: OptionWithDescription<string> = {
     type: 'input' as const,
     value: '__other__',
-    label: 'Other',
-    placeholder: question.multiSelect ? 'Type something' : 'Type something.',
+    label: t('questionView.other'),
+    placeholder: question.multiSelect ? t('questionView.typeSomething') : t('questionView.typeSomethingPeriod'),
     initialValue: questionState?.textInputValue ?? '',
     onChange: (value: string) => {
       onUpdateQuestionState(questionText, { textInputValue: value }, question.multiSelect ?? false);
-    },
-  };
+    }};
 
   const options = [...textOptions, otherOption];
 
@@ -292,7 +289,7 @@ export function QuestionView({
                 <Text> </Text>
               )}
               <Text color={isFooterFocused && footerIndex === 0 ? 'suggestion' : undefined}>
-                {options.length + 1}. Chat about this
+                {options.length + 1}. {t('preview.chatAboutThis')}
               </Text>
             </Box>
             {isInPlanMode && (
@@ -303,22 +300,23 @@ export function QuestionView({
                   <Text> </Text>
                 )}
                 <Text color={isFooterFocused && footerIndex === 1 ? 'suggestion' : undefined}>
-                  {options.length + 2}. Skip interview and plan immediately
+                  {options.length + 2}. {t('preview.skipInterview')}
                 </Text>
               </Box>
             )}
           </Box>
           <Box marginTop={1}>
             <Text color="inactive" dimColor>
-              Enter to select ·{' '}
+              {t('preview.enterToSelect')}
               {questions.length === 1 ? (
                 <>
-                  {figures.arrowUp}/{figures.arrowDown} to navigate
+                  {figures.arrowUp}/{figures.arrowDown} {t('preview.arrowNav')}
                 </>
               ) : (
-                'Tab/Arrow keys to navigate'
+                t('preview.tabNav')
               )}
-              {isOtherFocused && editorName && <> · ctrl+g to edit in {editorName}</>} · Esc to cancel
+              {isOtherFocused && editorName && <>{t('preview.ctrlGToEdit', editorName)}</>}
+              {t('preview.escCancel')}
             </Text>
           </Box>
         </Box>

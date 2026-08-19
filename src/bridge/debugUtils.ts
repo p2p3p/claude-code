@@ -1,7 +1,6 @@
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import { logForDebugging } from '../utils/debug.js'
 import { errorMessage } from '../utils/errors.js'
 import { jsonStringify } from '../utils/slowOperations.js'
@@ -136,6 +135,5 @@ export function logBridgeSkip(
   logEvent('tengu_bridge_repl_skipped', {
     reason:
       reason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    ...(v2 !== undefined && { v2 }),
-  })
+    ...(v2 !== undefined && { v2 })})
 }

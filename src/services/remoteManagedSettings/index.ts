@@ -19,34 +19,29 @@ import { getOauthConfig, OAUTH_BETA_HEADER } from '../../constants/oauth.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
   getAnthropicApiKeyWithSource,
-  getClaudeAIOAuthTokens,
-} from '../../utils/auth.js'
+  getClaudeAIOAuthTokens} from '../../utils/auth.js'
 import { registerCleanup } from '../../utils/cleanupRegistry.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { classifyAxiosError, getErrnoCode } from '../../utils/errors.js'
 import { settingsChangeDetector } from '../../utils/settings/changeDetector.js'
 import {
   type SettingsJson,
-  SettingsSchema,
-} from '../../utils/settings/types.js'
+  SettingsSchema} from '../../utils/settings/types.js'
 import { sleep } from '../../utils/sleep.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
 import { getRetryDelay } from '../api/withRetry.js'
 import {
   checkManagedSettingsSecurity,
-  handleSecurityCheckResult,
-} from './securityCheck.jsx'
+  handleSecurityCheckResult} from './securityCheck.jsx'
 import { isRemoteManagedSettingsEligible, resetSyncCache } from './syncCache.js'
 import {
   getRemoteManagedSettingsSyncFromCache,
   getSettingsPath,
-  setSessionCache,
-} from './syncCacheState.js'
+  setSessionCache} from './syncCacheState.js'
 import {
   type RemoteManagedSettingsFetchResult,
-  RemoteManagedSettingsResponseSchema,
-} from './types.js'
+  RemoteManagedSettingsResponseSchema} from './types.js'
 
 // Constants
 const SETTINGS_TIMEOUT_MS = 10000 // 10 seconds for settings fetch
@@ -172,14 +167,11 @@ function getRemoteSettingsAuthHeaders(): {
   // Wrap in try-catch because getAnthropicApiKeyWithSource throws in CI/test environments
   try {
     const { key: apiKey } = getAnthropicApiKeyWithSource({
-      skipRetrievingKeyFromApiKeyHelper: true,
-    })
+      skipRetrievingKeyFromApiKeyHelper: true})
     if (apiKey) {
       return {
         headers: {
-          'x-api-key': apiKey,
-        },
-      }
+          'x-api-key': apiKey}}
     }
   } catch {
     // No API key available - continue to check OAuth
@@ -191,15 +183,12 @@ function getRemoteSettingsAuthHeaders(): {
     return {
       headers: {
         Authorization: `Bearer ${oauthTokens.accessToken}`,
-        'anthropic-beta': OAUTH_BETA_HEADER,
-      },
-    }
+        'anthropic-beta': OAUTH_BETA_HEADER}}
   }
 
   return {
     headers: {},
-    error: 'No authentication available',
-  }
+    error: 'No authentication available'}
 }
 
 /**
@@ -260,15 +249,13 @@ async function fetchRemoteManagedSettings(
       return {
         success: false,
         error: `Authentication required for remote settings`,
-        skipRetry: true,
-      }
+        skipRetry: true}
     }
 
     const endpoint = getRemoteManagedSettingsEndpoint()
     const headers: Record<string, string> = {
       ...authHeaders.headers,
-      'User-Agent': getClaudeCodeUserAgent(),
-    }
+      'User-Agent': getClaudeCodeUserAgent()}
 
     // Add If-None-Match header for ETag-based caching
     if (cachedChecksum) {
@@ -281,8 +268,7 @@ async function fetchRemoteManagedSettings(
       // Allow 204, 304, and 404 responses without treating them as errors.
       // 204/404 are returned when no settings exist for the user or the feature flag is off.
       validateStatus: status =>
-        status === 200 || status === 204 || status === 304 || status === 404,
-    })
+        status === 200 || status === 204 || status === 304 || status === 404})
 
     // Handle 304 Not Modified - cached version is still valid
     if (response.status === 304) {
@@ -290,8 +276,7 @@ async function fetchRemoteManagedSettings(
       return {
         success: true,
         settings: null, // Signal that cache is valid
-        checksum: cachedChecksum,
-      }
+        checksum: cachedChecksum}
     }
 
     // Handle 204 No Content / 404 Not Found - no settings exist or feature flag is off.
@@ -301,8 +286,7 @@ async function fetchRemoteManagedSettings(
       return {
         success: true,
         settings: {},
-        checksum: undefined,
-      }
+        checksum: undefined}
     }
 
     const parsed = RemoteManagedSettingsResponseSchema().safeParse(
@@ -314,8 +298,7 @@ async function fetchRemoteManagedSettings(
       )
       return {
         success: false,
-        error: 'Invalid remote settings format',
-      }
+        error: 'Invalid remote settings format'}
     }
 
     // Full validation of settings structure
@@ -326,16 +309,14 @@ async function fetchRemoteManagedSettings(
       )
       return {
         success: false,
-        error: 'Invalid settings structure',
-      }
+        error: 'Invalid settings structure'}
     }
 
     logForDebugging('Remote settings: Fetched successfully')
     return {
       success: true,
       settings: settingsValidation.data,
-      checksum: parsed.data.checksum,
-    }
+      checksum: parsed.data.checksum}
   } catch (error) {
     const { kind, status, message } = classifyAxiosError(error)
     if (status === 404) {
@@ -348,8 +329,7 @@ async function fetchRemoteManagedSettings(
         return {
           success: false,
           error: 'Not authorized for remote settings',
-          skipRetry: true,
-        }
+          skipRetry: true}
       case 'timeout':
         return { success: false, error: 'Remote settings request timeout' }
       case 'network':
@@ -370,8 +350,7 @@ async function saveSettings(settings: SettingsJson): Promise<void> {
     const handle = await open(path, 'w', 0o600)
     try {
       await handle.writeFile(jsonStringify(settings, null, 2), {
-        encoding: 'utf-8',
-      })
+        encoding: 'utf-8'})
       await handle.datasync()
     } finally {
       await handle.close()

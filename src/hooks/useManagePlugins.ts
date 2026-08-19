@@ -3,14 +3,14 @@ import type { Command } from '../commands.js'
 import { useNotifications } from '../context/notifications.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import { reinitializeLspServerManager } from '../services/lsp/manager.js'
 import { useAppState, useSetAppState } from '../state/AppState.js'
 import type { AgentDefinition } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import { count } from '../utils/array.js'
 import { logForDebugging } from '../utils/debug.js'
 import { logForDiagnosticsNoPII } from '../utils/diagLogs.js'
+import { t } from '../utils/i18n/index.js'
 import { toError } from '../utils/errors.js'
 import { logError } from '../utils/log.js'
 import { loadPluginAgents } from '../utils/plugins/loadPluginAgents.js'
@@ -36,8 +36,7 @@ import type { PluginLoadResult } from '../types/plugin.js'
  * mental model. See Outline: declarative-settings-hXHBMDIf4b PR 5c.
  */
 export function useManagePlugins({
-  enabled = true,
-}: {
+  enabled = true}: {
   enabled?: boolean
 } = {}) {
   const setAppState = useSetAppState()
@@ -63,10 +62,9 @@ export function useManagePlugins({
       if (Object.keys(flagged).length > 0) {
         addNotification({
           key: 'plugin-delisted-flagged',
-          text: 'Plugins flagged. Check /plugins',
+          text: t('notif.managePlugins.flagged'),
           color: 'warning',
-          priority: 'high',
-        })
+          priority: 'high'})
       }
 
       // Load commands, agents, and hooks with individual error handling
@@ -82,8 +80,7 @@ export function useManagePlugins({
         errors.push({
           type: 'generic-error',
           source: 'plugin-commands',
-          error: `Failed to load plugin commands: ${errorMessage}`,
-        })
+          error: `Failed to load plugin commands: ${errorMessage}`})
       }
 
       try {
@@ -94,8 +91,7 @@ export function useManagePlugins({
         errors.push({
           type: 'generic-error',
           source: 'plugin-agents',
-          error: `Failed to load plugin agents: ${errorMessage}`,
-        })
+          error: `Failed to load plugin agents: ${errorMessage}`})
       }
 
       try {
@@ -106,8 +102,7 @@ export function useManagePlugins({
         errors.push({
           type: 'generic-error',
           source: 'plugin-hooks',
-          error: `Failed to load plugin hooks: ${errorMessage}`,
-        })
+          error: `Failed to load plugin hooks: ${errorMessage}`})
       }
 
       // Load MCP server configs per plugin to get an accurate count.
@@ -176,9 +171,7 @@ export function useManagePlugins({
             enabled,
             disabled,
             commands,
-            errors: mergedErrors,
-          },
-        }
+            errors: mergedErrors}}
       })
 
       logForDebugging(
@@ -228,8 +221,7 @@ export function useManagePlugins({
                 .join(
                   ',',
                 ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS)
-            : undefined,
-      }
+            : undefined}
     } catch (error) {
       // Only plugin loading errors should reach here - log for monitoring
       const errorObj = toError(error)
@@ -244,8 +236,7 @@ export function useManagePlugins({
         const newError = {
           type: 'generic-error' as const,
           source: 'plugin-system',
-          error: errorObj.message,
-        }
+          error: errorObj.message}
         return {
           ...prevState,
           plugins: {
@@ -253,9 +244,7 @@ export function useManagePlugins({
             enabled: [],
             disabled: [],
             commands: [],
-            errors: [...existingLspErrors, newError],
-          },
-        }
+            errors: [...existingLspErrors, newError]}}
       })
 
       return {
@@ -270,8 +259,7 @@ export function useManagePlugins({
         mcp_count: 0,
         lsp_count: 0,
         load_failed: true,
-        ant_enabled_names: undefined,
-      }
+        ant_enabled_names: undefined}
     }
   }, [setAppState, addNotification])
 
@@ -282,14 +270,11 @@ export function useManagePlugins({
       const { ant_enabled_names, ...baseMetrics } = metrics
       const allMetrics = {
         ...baseMetrics,
-        has_custom_plugin_cache_dir: !!process.env.CLAUDE_CODE_PLUGIN_CACHE_DIR,
-      }
+        has_custom_plugin_cache_dir: !!process.env.CLAUDE_CODE_PLUGIN_CACHE_DIR}
       logEvent('tengu_plugins_loaded', {
         ...allMetrics,
         ...(ant_enabled_names !== undefined && {
-          enabled_names: ant_enabled_names,
-        }),
-      })
+          enabled_names: ant_enabled_names})})
       logForDiagnosticsNoPII('info', 'tengu_plugins_loaded', allMetrics)
     })
   }, [initialPluginLoad, enabled])
@@ -304,10 +289,9 @@ export function useManagePlugins({
     if (!enabled || !needsRefresh) return
     addNotification({
       key: 'plugin-reload-pending',
-      text: 'Plugins changed. Run /reload-plugins to activate.',
+      text: t('notif.managePlugins.reloadPending'),
       color: 'suggestion',
-      priority: 'low',
-    })
+      priority: 'low'})
     // Do NOT auto-refresh. Do NOT reset needsRefresh — /reload-plugins
     // consumes it via refreshActivePlugins().
   }, [enabled, needsRefresh, addNotification])

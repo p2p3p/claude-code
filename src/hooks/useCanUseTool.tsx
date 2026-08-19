@@ -4,24 +4,21 @@ import * as React from 'react';
 import { useCallback } from 'react';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
 import { sanitizeToolNameForAnalytics } from 'src/services/analytics/metadata.js';
 import type { ToolUseConfirm } from '../components/permissions/PermissionRequest.js';
 import { Text } from '@anthropic/ink';
 import type { ToolPermissionContext, Tool as ToolType, ToolUseContext } from '../Tool.js';
 import {
   consumeSpeculativeClassifierCheck,
-  peekSpeculativeClassifierCheck,
-} from '@claude-code-best/builtin-tools/tools/BashTool/bashPermissions.js';
+  peekSpeculativeClassifierCheck} from '@claude-code-best/builtin-tools/tools/BashTool/bashPermissions.js';
 import { BASH_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/BashTool/toolName.js';
 import type { AssistantMessage } from '../types/message.js';
 import { recordAutoModeDenial } from '../utils/autoModeDenials.js';
 import {
   clearClassifierChecking,
   setClassifierApproval,
-  setYoloClassifierApproval,
-} from '../utils/classifierApprovals.js';
+  setYoloClassifierApproval} from '../utils/classifierApprovals.js';
 import { logForDebugging } from '../utils/debug.js';
 import { AbortError } from '../utils/errors.js';
 import { logError } from '../utils/log.js';
@@ -77,8 +74,7 @@ function useCanUseTool(
                 // Note: input contains code/filepaths, only log for ants
                 input: jsonStringify(input) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                 messageID: ctx.messageId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-                isMcp: tool.isMcp ?? false,
-              });
+                isMcp: tool.isMcp ?? false});
             }
 
             // Has permissions to use tool, granted in config
@@ -97,8 +93,7 @@ function useCanUseTool(
 
               resolve(
                 ctx.buildAllow(result.updatedInput ?? input, {
-                  decisionReason: result.decisionReason,
-                }),
+                  decisionReason: result.decisionReason}),
               );
               return;
             }
@@ -107,8 +102,7 @@ function useCanUseTool(
             const description = await tool.description(input as never, {
               isNonInteractiveSession: toolUseContext.options.isNonInteractiveSession,
               toolPermissionContext: appState.toolPermissionContext,
-              tools: toolUseContext.options.tools,
-            });
+              tools: toolUseContext.options.tools});
 
             if (ctx.resolveIfAborted(resolve)) return;
 
@@ -121,8 +115,7 @@ function useCanUseTool(
                     input,
                     toolUseContext,
                     messageId: ctx.messageId!,
-                    toolUseID,
-                  },
+                    toolUseID},
                   { decision: 'reject', source: 'config' },
                 );
                 if (
@@ -134,8 +127,7 @@ function useCanUseTool(
                     toolName: tool.name,
                     display: description,
                     reason: result.decisionReason.reason ?? '',
-                    timestamp: Date.now(),
-                  });
+                    timestamp: Date.now()});
                   toolUseContext.addNotification?.({
                     key: 'auto-mode-denied',
                     priority: 'immediate',
@@ -144,8 +136,7 @@ function useCanUseTool(
                         <Text color="error">{tool.userFacingName(input).toLowerCase()} denied by auto mode</Text>
                         <Text dimColor> · /permissions</Text>
                       </>
-                    ),
-                  });
+                    )});
                 }
                 resolve(result);
                 return;
@@ -159,13 +150,11 @@ function useCanUseTool(
                     ctx,
                     ...(feature('BASH_CLASSIFIER')
                       ? {
-                          pendingClassifierCheck: result.pendingClassifierCheck,
-                        }
+                          pendingClassifierCheck: result.pendingClassifierCheck}
                       : {}),
                     updatedInput: result.updatedInput,
                     suggestions: result.suggestions,
-                    permissionMode: appState.toolPermissionContext.mode,
-                  });
+                    permissionMode: appState.toolPermissionContext.mode});
                   if (coordinatorDecision) {
                     resolve(coordinatorDecision);
                     return;
@@ -185,12 +174,10 @@ function useCanUseTool(
                   description,
                   ...(feature('BASH_CLASSIFIER')
                     ? {
-                        pendingClassifierCheck: result.pendingClassifierCheck,
-                      }
+                        pendingClassifierCheck: result.pendingClassifierCheck}
                     : {}),
                   updatedInput: result.updatedInput,
-                  suggestions: result.suggestions,
-                });
+                  suggestions: result.suggestions});
                 if (swarmDecision) {
                   resolve(swarmDecision);
                   return;
@@ -209,8 +196,7 @@ function useCanUseTool(
                     const raceResult = await Promise.race([
                       speculativePromise.then(r => ({
                         type: 'result' as const,
-                        result: r,
-                      })),
+                        result: r})),
                       new Promise<{ type: 'timeout' }>(res =>
                         // eslint-disable-next-line no-restricted-syntax -- resolves with a value, not void
                         setTimeout(res, 2000, { type: 'timeout' as const }),
@@ -235,16 +221,13 @@ function useCanUseTool(
 
                       ctx.logDecision({
                         decision: 'accept',
-                        source: { type: 'classifier' },
-                      });
+                        source: { type: 'classifier' }});
                       resolve(
                         ctx.buildAllow(result.updatedInput ?? (input as Record<string, unknown>), {
                           decisionReason: {
                             type: 'classifier' as const,
                             classifier: 'bash_allow' as const,
-                            reason: `Allowed by prompt rule: "${raceResult.result.matchedDescription}"`,
-                          },
-                        }),
+                            reason: `Allowed by prompt rule: "${raceResult.result.matchedDescription}"`}}),
                       );
                       return;
                     }
@@ -261,8 +244,7 @@ function useCanUseTool(
                     awaitAutomatedChecksBeforeDialog: appState.toolPermissionContext.awaitAutomatedChecksBeforeDialog,
                     bridgeCallbacks: feature('BRIDGE_MODE') ? appState.replBridgePermissionCallbacks : undefined,
                     channelCallbacks:
-                      feature('KAIROS') || feature('KAIROS_CHANNELS') ? appState.channelPermissionCallbacks : undefined,
-                  },
+                      feature('KAIROS') || feature('KAIROS_CHANNELS') ? appState.channelPermissionCallbacks : undefined},
                   resolve,
                 );
 

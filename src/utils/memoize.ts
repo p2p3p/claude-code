@@ -54,8 +54,7 @@ export function memoizeWithTTL<Args extends unknown[], Result>(
       cache.set(key, {
         value,
         timestamp: now,
-        refreshing: false,
-      })
+        refreshing: false})
       return value
     }
 
@@ -80,8 +79,7 @@ export function memoizeWithTTL<Args extends unknown[], Result>(
             cache.set(key, {
               value: newValue,
               timestamp: Date.now(),
-              refreshing: false,
-            })
+              refreshing: false})
           }
         })
         .catch(e => {
@@ -100,8 +98,7 @@ export function memoizeWithTTL<Args extends unknown[], Result>(
 
   // Add cache clear method
   memoized.cache = {
-    clear: () => cache.clear(),
-  }
+    clear: () => cache.clear()}
 
   return memoized
 }
@@ -151,8 +148,7 @@ export function memoizeWithTTLAsync<Args extends unknown[], Result>(
           cache.set(key, {
             value: result,
             timestamp: now,
-            refreshing: false,
-          })
+            refreshing: false})
         }
         return result
       } finally {
@@ -184,8 +180,7 @@ export function memoizeWithTTLAsync<Args extends unknown[], Result>(
             cache.set(key, {
               value: newValue,
               timestamp: Date.now(),
-              refreshing: false,
-            })
+              refreshing: false})
           }
         })
         .catch(e => {
@@ -211,8 +206,7 @@ export function memoizeWithTTLAsync<Args extends unknown[], Result>(
     clear: () => {
       cache.clear()
       inFlight.clear()
-    },
-  }
+    }}
 
   return memoized as ((...args: Args) => Promise<Result>) & {
     cache: { clear: () => void }
@@ -240,8 +234,7 @@ export function memoizeWithLRU<
   maxCacheSize: number = 100,
 ): LRUMemoizedFunction<Args, Result> {
   const cache = new LRUCache<string, Result>({
-    max: maxCacheSize,
-  })
+    max: maxCacheSize})
 
   const memoized = (...args: Args): Result => {
     const key = cacheFn(...args)
@@ -262,8 +255,7 @@ export function memoizeWithLRU<
     delete: (key: string) => cache.delete(key),
     // peek() avoids updating recency — we only want to observe, not promote
     get: (key: string) => cache.peek(key),
-    has: (key: string) => cache.has(key),
-  }
+    has: (key: string) => cache.has(key)}
 
   return memoized
 }

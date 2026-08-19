@@ -9,8 +9,7 @@ import {
   resetKillAccumulation,
   resetYankState,
   updateYankLength,
-  yankPop,
-} from '../utils/Cursor.js'
+  yankPop} from '../utils/Cursor.js'
 import { useTerminalSize } from './useTerminalSize.js'
 
 type UseSearchInputOptions = {
@@ -88,8 +87,7 @@ export function useSearchInput({
   columns,
   passthroughCtrlKeys = [],
   initialQuery = '',
-  backspaceExitsOnEmpty = true,
-}: UseSearchInputOptions): UseSearchInputReturn {
+  backspaceExitsOnEmpty = true}: UseSearchInputOptions): UseSearchInputReturn {
   const { columns: terminalColumns } = useTerminalSize()
   const effectiveColumns = columns ?? terminalColumns
   const [query, setQueryState] = useState(initialQuery)

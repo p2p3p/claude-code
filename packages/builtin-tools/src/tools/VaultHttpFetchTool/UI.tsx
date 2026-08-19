@@ -5,6 +5,7 @@ import { OutputLine } from 'src/components/shell/OutputLine.js';
 import type { ToolProgressData } from 'src/Tool.js';
 import type { ProgressMessage } from 'src/types/message.js';
 import { jsonStringify } from 'src/utils/slowOperations.js';
+import { t } from 'src/utils/i18n/index.js';
 import type { Output } from './VaultHttpFetchTool.js';
 
 // H6 fix: second `options` parameter matches Tool interface contract.
@@ -25,7 +26,7 @@ export function renderToolUseMessage(
   const key = input.vault_auth_key ?? '?';
   const url = input.url ?? '';
   // Show key NAME (already required to be non-secret); no secret value involved.
-  return `${method} ${url} (vault: ${key})`;
+  return t('toolUI.vaultHttpFetch.toolUseMessage', method, url, key);
 }
 
 export function renderToolResultMessage(
@@ -39,7 +40,7 @@ export function renderToolResultMessage(
   if (output.error) {
     return (
       <MessageResponse height={1}>
-        <Text color="error">VaultHttpFetch: {output.error}</Text>
+        <Text color="error">{t('toolUI.vaultHttpFetch.error', output.error)}</Text>
       </MessageResponse>
     );
   }

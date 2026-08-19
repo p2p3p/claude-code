@@ -7,8 +7,7 @@ import {
   NotFoundError,
   APIError,
   APIConnectionError,
-  AuthenticationError,
-} from '@anthropic-ai/sdk'
+  AuthenticationError} from '@anthropic-ai/sdk'
 import { getModelStrings } from './modelStrings.js'
 
 // Cache valid models to avoid repeated API calls
@@ -31,8 +30,7 @@ export async function validateModel(
   if (!isModelAllowed(normalizedModel)) {
     return {
       valid: false,
-      error: `Model '${normalizedModel}' is not in the list of available models`,
-    }
+      error: `Model '${normalizedModel}' is not in the list of available models`}
   }
 
   // Check if it's a known alias (these are always valid)
@@ -41,8 +39,8 @@ export async function validateModel(
     return { valid: true }
   }
 
-  // Check if it matches ANTHROPIC_CUSTOM_MODEL_OPTION (pre-validated by the user)
-  if (normalizedModel === process.env.ANTHROPIC_CUSTOM_MODEL_OPTION) {
+  // Check if it matches CUSTOM_MODEL_OPTION (pre-validated by the user)
+  if (normalizedModel === process.env.CUSTOM_MODEL_OPTION) {
     return { valid: true }
   }
 
@@ -65,12 +63,9 @@ export async function validateModel(
             {
               type: 'text',
               text: 'Hi',
-              cache_control: { type: 'ephemeral' },
-            },
-          ],
-        },
-      ],
-    })
+              cache_control: { type: 'ephemeral' }},
+          ]},
+      ]})
 
     // If we got here, the model is valid
     validModelCache.set(normalizedModel, true)
@@ -90,8 +85,7 @@ function handleValidationError(
     const suggestion = fallback ? `. Try '${fallback}' instead` : ''
     return {
       valid: false,
-      error: `Model '${modelName}' not found${suggestion}`,
-    }
+      error: `Model '${modelName}' not found${suggestion}`}
   }
 
   // For other API errors, provide context-specific messages
@@ -99,15 +93,13 @@ function handleValidationError(
     if (error instanceof AuthenticationError) {
       return {
         valid: false,
-        error: 'Authentication failed. Please check your API credentials.',
-      }
+        error: 'Authentication failed. Please check your API credentials.'}
     }
 
     if (error instanceof APIConnectionError) {
       return {
         valid: false,
-        error: 'Network error. Please check your internet connection.',
-      }
+        error: 'Network error. Please check your internet connection.'}
     }
 
     // Check error body for model-specific errors
@@ -132,8 +124,7 @@ function handleValidationError(
   const errorMessage = error instanceof Error ? error.message : String(error)
   return {
     valid: false,
-    error: `Unable to validate model: ${errorMessage}`,
-  }
+    error: `Unable to validate model: ${errorMessage}`}
 }
 
 // @[MODEL LAUNCH]: Add a fallback suggestion chain for the new model → previous version
@@ -141,7 +132,7 @@ function handleValidationError(
  * Suggest a fallback model for 3P users when the selected model is unavailable.
  */
 function get3PFallbackSuggestion(model: string): string | undefined {
-  if (getAPIProvider() === 'firstParty') {
+  if (getAPIProvider() === 'anthropic') {
     return undefined
   }
   const lowerModel = model.toLowerCase()

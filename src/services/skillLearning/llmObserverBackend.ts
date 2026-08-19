@@ -1,17 +1,15 @@
-import { queryHaiku } from '../api/claude.js'
+import { queryHaiku } from '../api/anthropic/index.js'
 import { asSystemPrompt } from '../../utils/systemPromptType.js'
 import { getSkillLearningConfig } from './config.js'
 import type { InstinctCandidate } from './instinctParser.js'
 import type { StoredSkillObservation } from './observationStore.js'
 import type {
   ObserverBackend,
-  ObserverBackendContext,
-} from './observerBackend.js'
+  ObserverBackendContext} from './observerBackend.js'
 import {
   INSTINCT_DOMAINS,
   type InstinctDomain,
-  type SkillLearningScope,
-} from './types.js'
+  type SkillLearningScope} from './types.js'
 
 /**
  * LLM-based observer backend.
@@ -72,8 +70,7 @@ export const llmObserverBackend: ObserverBackend = {
     ctx?: ObserverBackendContext,
   ): Promise<InstinctCandidate[]> {
     return analyseWithHaiku(observations, ctx)
-  },
-}
+  }}
 
 async function analyseWithHaiku(
   observations: StoredSkillObservation[],
@@ -102,9 +99,7 @@ async function analyseWithHaiku(
         agents: [],
         isNonInteractiveSession: true,
         hasAppendSystemPrompt: false,
-        mcpTools: [],
-      },
-    })
+        mcpTools: []}})
     // Success: reset failure counter.
     consecutiveFailures = 0
     responseText = extractResponseText(response.message?.content)
@@ -254,8 +249,7 @@ function normaliseCandidate(
     projectId: ctx?.project?.projectId,
     projectName: ctx?.project?.projectName,
     evidence,
-    observationIds,
-  }
+    observationIds}
 }
 
 function stringField(value: unknown, maxLength: number): string | undefined {

@@ -9,8 +9,7 @@ import {
   getMacOsKeychainStorageServiceName,
   getUsername,
   KEYCHAIN_CACHE_TTL_MS,
-  keychainCacheState,
-} from './macOsKeychainHelpers.js'
+  keychainCacheState} from './macOsKeychainHelpers.js'
 import type { SecureStorage, SecureStorageData } from './types.js'
 
 // `security -i` reads stdin with a 4096-byte fgets() buffer (BUFSIZ on darwin).
@@ -56,8 +55,7 @@ export const macOsKeychainStorage = {
     // explicit invalidation (logout, delete) still reads through.
     if (prev.data !== null) {
       logForDebugging('[keychain] read failed; serving stale cache', {
-        level: 'warn',
-      })
+        level: 'warn'})
       keychainCacheState.cache = { data: prev.data, cachedAt: Date.now() }
       return prev.data
     }
@@ -81,8 +79,7 @@ export const macOsKeychainStorage = {
         // Stale-while-error — mirror read() above.
         if (data === null && prev.data !== null) {
           logForDebugging('[keychain] readAsync failed; serving stale cache', {
-            level: 'warn',
-          })
+            level: 'warn'})
         }
         const next = data ?? prev.data
         keychainCacheState.cache = { data: next, cachedAt: Date.now() }
@@ -122,8 +119,7 @@ export const macOsKeychainStorage = {
         result = execaSync('security', ['-i'], {
           input: command,
           stdio: ['pipe', 'pipe', 'pipe'],
-          reject: false,
-        })
+          reject: false})
       } else {
         logForDebugging(
           `Keychain payload (${jsonString.length}B JSON) exceeds security -i stdin limit; using argv`,
@@ -172,8 +168,7 @@ export const macOsKeychainStorage = {
     } catch (_e) {
       return false
     }
-  },
-} satisfies SecureStorage
+  }} satisfies SecureStorage
 
 async function doReadAsync(): Promise<SecureStorageData | null> {
   try {
@@ -219,8 +214,7 @@ export function isMacOsKeychainLocked(): boolean {
   try {
     const result = execaSync('security', ['show-keychain-info'], {
       reject: false,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    })
+      stdio: ['ignore', 'pipe', 'pipe']})
     // Exit code 36 indicates the keychain is locked
     keychainLockedCache = result.exitCode === 36
   } catch {

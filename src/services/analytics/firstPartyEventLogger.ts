@@ -2,12 +2,10 @@ import type { AnyValueMap, Logger, logs } from '@opentelemetry/api-logs'
 import { resourceFromAttributes } from '@opentelemetry/resources'
 import {
   BatchLogRecordProcessor,
-  LoggerProvider,
-} from '@opentelemetry/sdk-logs'
+  LoggerProvider} from '@opentelemetry/sdk-logs'
 import {
   ATTR_SERVICE_NAME,
-  ATTR_SERVICE_VERSION,
-} from '@opentelemetry/semantic-conventions'
+  ATTR_SERVICE_VERSION} from '@opentelemetry/semantic-conventions'
 import { randomUUID } from 'crypto'
 import { isEqual } from 'lodash-es'
 import { getOrCreateUserID } from '../../utils/config.js'
@@ -162,8 +160,7 @@ async function logEventTo1PAsync(
     // Enrich with core metadata at log time (similar to Statsig pattern)
     const coreMetadata = await getEventMetadata({
       model: metadata.model,
-      betas: metadata.betas,
-    })
+      betas: metadata.betas})
 
     // Build attributes - OTel supports nested objects natively via AnyValueMap
     // Cast through unknown since our nested objects are structurally compatible
@@ -174,8 +171,7 @@ async function logEventTo1PAsync(
       // Pass objects directly - no JSON serialization needed
       core_metadata: coreMetadata,
       user_metadata: getCoreUserData(true),
-      event_metadata: metadata,
-    } as unknown as AnyValueMap
+      event_metadata: metadata} as unknown as AnyValueMap
 
     // Add user_id if available
     const userId = getOrCreateUserID()
@@ -193,8 +189,7 @@ async function logEventTo1PAsync(
     // Emit log record
     firstPartyEventLogger.emit({
       body: eventName,
-      attributes,
-    })
+      attributes})
   } catch (e) {
     if (process.env.NODE_ENV === 'development') {
       throw e
@@ -277,13 +272,10 @@ export function logGrowthBookExperimentTo1P(
     ...(organizationUuid && { organization_uuid: organizationUuid }),
     ...(data.userAttributes && {
       session_id: data.userAttributes.sessionId,
-      user_attributes: jsonStringify(data.userAttributes),
-    }),
+      user_attributes: jsonStringify(data.userAttributes)}),
     ...(data.experimentMetadata && {
-      experiment_metadata: jsonStringify(data.experimentMetadata),
-    }),
-    environment: getEnvironmentForGrowthBook(),
-  }
+      experiment_metadata: jsonStringify(data.experimentMetadata)}),
+    environment: getEnvironmentForGrowthBook()}
 
   if (process.env.USER_TYPE === 'ant') {
     logForDebugging(
@@ -293,8 +285,7 @@ export function logGrowthBookExperimentTo1P(
 
   firstPartyEventLogger.emit({
     body: 'growthbook_experiment',
-    attributes,
-  })
+    attributes})
 }
 
 const DEFAULT_LOGS_EXPORT_INTERVAL_MS = 10000
@@ -343,8 +334,7 @@ export function initialize1PEventLogging(): void {
   const platform = getPlatform()
   const attributes: Record<string, string> = {
     [ATTR_SERVICE_NAME]: 'claude-code',
-    [ATTR_SERVICE_VERSION]: MACRO.VERSION,
-  }
+    [ATTR_SERVICE_VERSION]: MACRO.VERSION}
 
   // Add WSL-specific attributes if running on WSL
   if (platform === 'wsl') {
@@ -366,18 +356,15 @@ export function initialize1PEventLogging(): void {
     maxAttempts: batchConfig.maxAttempts,
     path: batchConfig.path,
     baseUrl: batchConfig.baseUrl,
-    isKilled: () => isSinkKilled('firstParty'),
-  })
+    isKilled: () => isSinkKilled('firstParty')})
   firstPartyEventLoggerProvider = new LoggerProvider({
     resource,
     processors: [
       new BatchLogRecordProcessor(eventLoggingExporter, {
         scheduledDelayMillis,
         maxExportBatchSize,
-        maxQueueSize,
-      }),
-    ],
-  })
+        maxQueueSize}),
+    ]})
 
   // Initialize event logger from our internal provider (NOT from global API)
   // IMPORTANT: We must get the logger from our local provider, not logs.getLogger()

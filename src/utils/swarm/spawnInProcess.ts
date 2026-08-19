@@ -21,8 +21,7 @@ import type { AppState } from '../../state/AppState.js'
 import { createTaskStateBase, generateTaskId } from '../../Task.js'
 import type {
   InProcessTeammateTaskState,
-  TeammateIdentity,
-} from '../../tasks/InProcessTeammateTask/types.js'
+  TeammateIdentity} from '../../tasks/InProcessTeammateTask/types.js'
 import { createAbortController } from '../abortController.js'
 import { markAutonomyRunFailed } from '../autonomyRuns.js'
 import { formatAgentId } from '../agentId.js'
@@ -33,14 +32,12 @@ import { evictTaskOutput } from '../task/diskOutput.js'
 import {
   evictTerminalTask,
   registerTask,
-  STOPPED_DISPLAY_MS,
-} from '../task/framework.js'
+  STOPPED_DISPLAY_MS} from '../task/framework.js'
 import { createTeammateContext } from '../teammateContext.js'
 import {
   isPerfettoTracingEnabled,
   registerAgent as registerPerfettoAgent,
-  unregisterAgent as unregisterPerfettoAgent,
-} from '../telemetry/perfettoTracing.js'
+  unregisterAgent as unregisterPerfettoAgent} from '../telemetry/perfettoTracing.js'
 import { removeMemberByAgentId } from './teamHelpers.js'
 
 type SetAppStateFn = (updater: (prev: AppState) => AppState) => void
@@ -132,8 +129,7 @@ export async function spawnInProcessTeammate(
       teamName,
       color,
       planModeRequired,
-      parentSessionId,
-    }
+      parentSessionId}
 
     // Create teammate context for AsyncLocalStorage
     // This will be used by runWithTeammateContext() during agent execution
@@ -144,8 +140,7 @@ export async function spawnInProcessTeammate(
       color,
       planModeRequired,
       parentSessionId,
-      abortController,
-    })
+      abortController})
 
     // Register agent in Perfetto trace for hierarchy visualization
     if (isPerfettoTracingEnabled()) {
@@ -200,8 +195,7 @@ export async function spawnInProcessTeammate(
       agentId,
       taskId,
       abortController,
-      teammateContext,
-    }
+      teammateContext}
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error during spawn'
@@ -211,8 +205,7 @@ export async function spawnInProcessTeammate(
     return {
       success: false,
       agentId,
-      error: errorMessage,
-    }
+      error: errorMessage}
   }
 }
 
@@ -262,8 +255,7 @@ export function killInProcessTeammate(
               runId: message.autonomyRunId,
               ...(message.autonomyRootDir
                 ? { rootDir: message.autonomyRootDir }
-                : {}),
-            },
+                : {})},
           ]
         : [],
     )
@@ -286,8 +278,7 @@ export function killInProcessTeammate(
       const { [agentId]: _, ...remainingTeammates } = prev.teamContext.teammates
       updatedTeamContext = {
         ...prev.teamContext,
-        teammates: remainingTeammates,
-      }
+        teammates: remainingTeammates}
     }
 
     return {
@@ -308,10 +299,7 @@ export function killInProcessTeammate(
           inProgressToolUseIDs: undefined,
           abortController: undefined,
           unregisterCleanup: undefined,
-          currentWorkAbortController: undefined,
-        },
-      },
-    }
+          currentWorkAbortController: undefined}}}
   })
 
   // Remove from team file (outside state updater to avoid file I/O in callback)
@@ -334,8 +322,7 @@ export function killInProcessTeammate(
     // double-emit after seeing status:killed.
     emitTaskTerminatedSdk(taskId, 'stopped', {
       toolUseId,
-      summary: description,
-    })
+      summary: description})
     setTimeout(
       evictTerminalTask.bind(null, taskId, setAppState),
       STOPPED_DISPLAY_MS,

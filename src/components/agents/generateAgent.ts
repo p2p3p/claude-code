@@ -1,28 +1,26 @@
 import type { ContentBlock } from '@anthropic-ai/sdk/resources/index.mjs'
 import { getUserContext } from 'src/context.js'
-import { queryModelWithoutStreaming } from 'src/services/api/claude.js'
+import { queryModelWithoutStreaming } from 'src/services/api/anthropic/index.js'
 import { getEmptyToolPermissionContext } from 'src/Tool.js'
 import { AGENT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/AgentTool/constants.js'
 import { prependUserContext } from 'src/utils/api.js'
 import {
   createUserMessage,
-  normalizeMessagesForAPI,
-} from 'src/utils/messages.js'
+  normalizeMessagesForAPI} from 'src/utils/messages.js'
 import type { ModelName } from 'src/utils/model/model.js'
 import { isAutoMemoryEnabled } from '../../memdir/paths.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import {
   createTrace,
   endTrace,
-  isLangfuseEnabled,
-} from '../../services/langfuse/index.js'
+  isLangfuseEnabled} from '../../services/langfuse/index.js'
 import { getSessionId } from '../../bootstrap/state.js'
 import { getAPIProvider } from '../../utils/model/providers.js'
 import { jsonParse } from '../../utils/slowOperations.js'
 import { asSystemPrompt } from '../../utils/systemPromptType.js'
+import { t } from '../../utils/i18n/index.js'
 
 type GeneratedAgent = {
   identifier: string
@@ -158,8 +156,7 @@ export async function generateAgent(
         sessionId: getSessionId(),
         model,
         provider: getAPIProvider(),
-        name: 'agent-creation',
-      })
+        name: 'agent-creation'})
     : null
 
   const response = await queryModelWithoutStreaming({
@@ -177,9 +174,7 @@ export async function generateAgent(
       hasAppendSystemPrompt: false,
       querySource: 'agent_creation',
       mcpTools: [],
-      langfuseTrace,
-    },
-  })
+      langfuseTrace}})
 
   endTrace(langfuseTrace)
 
@@ -196,23 +191,21 @@ export async function generateAgent(
   } catch {
     const jsonMatch = responseText.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
-      throw new Error('No JSON object found in response')
+      throw new Error(t('generateAgent.noJsonObject'))
     }
     parsed = jsonParse(jsonMatch[0])
   }
 
   if (!parsed.identifier || !parsed.whenToUse || !parsed.systemPrompt) {
-    throw new Error('Invalid agent configuration generated')
+    throw new Error(t('generateAgent.invalidConfig'))
   }
 
   logEvent('tengu_agent_definition_generated', {
     agent_identifier:
-      parsed.identifier as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      parsed.identifier as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
   return {
     identifier: parsed.identifier,
     whenToUse: parsed.whenToUse,
-    systemPrompt: parsed.systemPrompt,
-  }
+    systemPrompt: parsed.systemPrompt}
 }

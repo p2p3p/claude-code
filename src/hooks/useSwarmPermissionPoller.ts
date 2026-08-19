@@ -15,14 +15,12 @@ import { logForDebugging } from '../utils/debug.js'
 import { errorMessage } from '../utils/errors.js'
 import {
   type PermissionUpdate,
-  permissionUpdateSchema,
-} from '../utils/permissions/PermissionUpdateSchema.js'
+  permissionUpdateSchema} from '../utils/permissions/PermissionUpdateSchema.js'
 import {
   isSwarmWorker,
   type PermissionResponse,
   pollForResponse,
-  removeWorkerResponse,
-} from '../utils/swarm/permissionSync.js'
+  removeWorkerResponse} from '../utils/swarm/permissionSync.js'
 import { getAgentName, getTeamName } from '../utils/teammate.js'
 
 const POLL_INTERVAL_MS = 500

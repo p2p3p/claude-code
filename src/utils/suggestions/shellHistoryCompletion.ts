@@ -110,8 +110,7 @@ export async function getShellHistoryCompletion(
     if (command.startsWith(input) && command !== input) {
       return {
         fullCommand: command,
-        suffix: command.slice(input.length),
-      }
+        suffix: command.slice(input.length)}
     }
   }
 

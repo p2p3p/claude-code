@@ -3,6 +3,7 @@ import { getOriginalCwd } from '../../bootstrap/state.js';
 import { Box, Text, useTheme } from '@anthropic/ink';
 import { sanitizeToolNameForAnalytics } from '../../services/analytics/metadata.js';
 import { env } from '../../utils/env.js';
+import { t } from '../../utils/i18n/index.js';
 import { shouldShowAlwaysAllowOptions } from '../../utils/permissions/permissionsLoader.js';
 import { truncateToLines } from '../../utils/stringUtils.js';
 import { logUnaryEvent } from '../../utils/unaryLogging.js';
@@ -19,8 +20,7 @@ export function FallbackPermissionRequest({
   onDone,
   onReject,
   verbose: _verbose,
-  workerBadge,
-}: PermissionRequestProps): React.ReactNode {
+  workerBadge}: PermissionRequestProps): React.ReactNode {
   const [theme] = useTheme();
   // TODO: Avoid these special cases
   const originalUserFacingName = toolUseConfirm.tool.userFacingName(toolUseConfirm.input as never);
@@ -31,8 +31,7 @@ export function FallbackPermissionRequest({
   const unaryEvent = useMemo<UnaryEvent>(
     () => ({
       completion_type: 'tool_use_single',
-      language_name: 'none',
-    }),
+      language_name: 'none'}),
     [],
   );
 
@@ -48,9 +47,7 @@ export function FallbackPermissionRequest({
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id!,
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
           toolUseConfirm.onAllow(toolUseConfirm.input, [], feedback);
           onDone();
           break;
@@ -61,21 +58,17 @@ export function FallbackPermissionRequest({
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id!,
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
 
           toolUseConfirm.onAllow(toolUseConfirm.input, [
             {
               type: 'addRules',
               rules: [
                 {
-                  toolName: toolUseConfirm.tool.name,
-                },
+                  toolName: toolUseConfirm.tool.name},
               ],
               behavior: 'allow',
-              destination: 'localSettings',
-            },
+              destination: 'localSettings'},
           ]);
           onDone();
           break;
@@ -87,9 +80,7 @@ export function FallbackPermissionRequest({
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id!,
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
           toolUseConfirm.onReject(feedback);
           onReject();
           onDone();
@@ -106,9 +97,7 @@ export function FallbackPermissionRequest({
       metadata: {
         language_name: 'none',
         message_id: toolUseConfirm.assistantMessage.message.id!,
-        platform: env.platform,
-      },
-    });
+        platform: env.platform}});
     toolUseConfirm.onReject();
     onReject();
     onDone();
@@ -119,29 +108,25 @@ export function FallbackPermissionRequest({
   const options = useMemo((): PermissionPromptOption<FallbackOptionValue>[] => {
     const result: PermissionPromptOption<FallbackOptionValue>[] = [
       {
-        label: 'Yes',
+        label: t('permGeneral.yes'),
         value: 'yes',
-        feedbackConfig: { type: 'accept' },
-      },
+        feedbackConfig: { type: 'accept' }},
     ];
 
     if (showAlwaysAllowOptions) {
       result.push({
         label: (
           <Text>
-            Yes, and don&apos;t ask again for <Text bold>{userFacingName}</Text> commands in{' '}
-            <Text bold>{originalCwd}</Text>
+            {t('permGeneral.yesDontAsk', userFacingName, originalCwd)}
           </Text>
         ),
-        value: 'yes-dont-ask-again',
-      });
+        value: 'yes-dont-ask-again'});
     }
 
     result.push({
-      label: 'No',
+      label: t('permGeneral.no'),
       value: 'no',
-      feedbackConfig: { type: 'reject' },
-    });
+      feedbackConfig: { type: 'reject' }});
 
     return result;
   }, [userFacingName, originalCwd, showAlwaysAllowOptions]);
@@ -149,18 +134,17 @@ export function FallbackPermissionRequest({
   const toolAnalyticsContext = useMemo(
     (): ToolAnalyticsContext => ({
       toolName: sanitizeToolNameForAnalytics(toolUseConfirm.tool.name),
-      isMcp: toolUseConfirm.tool.isMcp ?? false,
-    }),
+      isMcp: toolUseConfirm.tool.isMcp ?? false}),
     [toolUseConfirm.tool.name, toolUseConfirm.tool.isMcp],
   );
 
   return (
-    <PermissionDialog title="Tool use" workerBadge={workerBadge}>
+    <PermissionDialog title={t('permGeneral.toolUse')} workerBadge={workerBadge}>
       <Box flexDirection="column" paddingX={2} paddingY={1}>
         <Text>
           {userFacingName}(
           {toolUseConfirm.tool.renderToolUseMessage(toolUseConfirm.input as never, { theme, verbose: true })})
-          {originalUserFacingName.endsWith(' (MCP)') ? <Text dimColor> (MCP)</Text> : ''}
+          {originalUserFacingName.endsWith(' (MCP)') ? <Text dimColor>{t('fallbackPermissionRequest.mcpSuffix')}</Text> : ''}
         </Text>
         <Text dimColor>{truncateToLines(toolUseConfirm.description, 3)}</Text>
       </Box>

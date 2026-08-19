@@ -1,11 +1,11 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const fork = {
   type: 'local-jsx',
   name: 'fork',
-  description: 'Fork the current session into a new sub-agent',
+  description: t('cmd.descFork'),
   argumentHint: '<prompt>',
-  load: () => import('./fork.js'),
-} satisfies Command
+  load: () => import('./fork.js')} satisfies Command
 
 export default fork

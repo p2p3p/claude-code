@@ -10,13 +10,11 @@ import {
   fetchResourcesForClient,
   fetchToolsForClient,
   getMcpToolsCommandsAndResources,
-  reconnectMcpServerImpl,
-} from './client.js'
+  reconnectMcpServerImpl} from './client.js'
 import type {
   MCPServerConnection,
   ScopedMcpServerConfig,
-  ServerResource,
-} from './types.js'
+  ServerResource} from './types.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const fetchMcpSkillsForClient = feature('MCP_SKILLS')
@@ -33,22 +31,19 @@ const clearSkillIndexCache = feature('EXPERIMENTAL_SKILL_SEARCH')
 import {
   PromptListChangedNotificationSchema,
   ResourceListChangedNotificationSchema,
-  ToolListChangedNotificationSchema,
-} from '@modelcontextprotocol/sdk/types.js'
+  ToolListChangedNotificationSchema} from '@modelcontextprotocol/sdk/types.js'
 import omit from 'lodash-es/omit.js'
 import reject from 'lodash-es/reject.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import {
   dedupClaudeAiMcpServers,
   doesEnterpriseMcpConfigExist,
   filterMcpServersByPolicy,
   getClaudeCodeMcpConfigs,
   isMcpServerDisabled,
-  setMcpServerEnabled,
-} from 'src/services/mcp/config.js'
+  setMcpServerEnabled} from 'src/services/mcp/config.js'
 import type { AppState } from 'src/state/AppState.js'
 import type { PluginError } from 'src/types/plugin.js'
 import { logForDebugging } from 'src/utils/debug.js'
@@ -57,9 +52,9 @@ import { useNotifications } from '../../context/notifications.js'
 import {
   useAppState,
   useAppStateStore,
-  useSetAppState,
-} from '../../state/AppState.js'
+  useSetAppState} from '../../state/AppState.js'
 import { errorMessage } from '../../utils/errors.js'
+import { t } from '../../utils/i18n/index.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
 import { logMCPDebug, logMCPError } from '../../utils/log.js'
 import { enqueue } from '../../utils/messageQueueManager.js'
@@ -69,17 +64,14 @@ import {
   ChannelPermissionNotificationSchema,
   findChannelEntry,
   gateChannelServer,
-  wrapChannelMessage,
-} from './channelNotification.js'
+  wrapChannelMessage} from './channelNotification.js'
 import {
   type ChannelPermissionCallbacks,
   createChannelPermissionCallbacks,
-  isChannelPermissionRelayEnabled,
-} from './channelPermissions.js'
+  isChannelPermissionRelayEnabled} from './channelPermissions.js'
 import {
   clearClaudeAIMcpConfigsCache,
-  fetchClaudeAIMcpConfigsIfEligible,
-} from './claudeai.js'
+  fetchClaudeAIMcpConfigsIfEligible} from './claudeai.js'
 import { registerElicitationHandler } from './elicitationHandler.js'
 import { getMcpPrefix } from './mcpStringUtils.js'
 import { commandBelongsToServer, excludeStalePluginClients } from './utils.js'
@@ -125,9 +117,7 @@ function addErrorsToAppState(
       ...prevState,
       plugins: {
         ...prevState.plugins,
-        errors: [...prevState.plugins.errors, ...uniqueNewErrors],
-      },
-    }
+        errors: [...prevState.plugins.errors, ...uniqueNewErrors]}}
   })
 }
 
@@ -274,16 +264,14 @@ export function useManageMCPConnections(
                 ...mcp.resources,
                 ...(resources.length > 0
                   ? { [client.name]: resources }
-                  : omit(mcp.resources, client.name)),
-              }
+                  : omit(mcp.resources, client.name))}
 
         mcp = {
           ...mcp,
           clients: updatedClients,
           tools: updatedTools,
           commands: updatedCommands,
-          resources: updatedResources,
-        }
+          resources: updatedResources}
       }
 
       return { ...prevState, mcp }
@@ -312,8 +300,7 @@ export function useManageMCPConnections(
       client,
       tools,
       commands,
-      resources,
-    }: {
+      resources}: {
       client: MCPServerConnection
       tools: Tool[]
       commands: Command[]
@@ -388,8 +375,7 @@ export function useManageMCPConnections(
                     ...client,
                     type: 'pending',
                     reconnectAttempt: attempt,
-                    maxReconnectAttempts: MAX_RECONNECT_ATTEMPTS,
-                  })
+                    maxReconnectAttempts: MAX_RECONNECT_ATTEMPTS})
 
                   const reconnectStartTime = Date.now()
                   try {
@@ -497,8 +483,7 @@ export function useManageMCPConnections(
               entry_kind:
                 entry?.kind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               is_dev: entry?.dev ?? false,
-              plugin: pluginId,
-            })
+              plugin: pluginId})
           }
           switch (gate.action) {
             case 'register':
@@ -517,16 +502,14 @@ export function useManageMCPConnections(
                     entry_kind:
                       entry?.kind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                     is_dev: entry?.dev ?? false,
-                    plugin: pluginId,
-                  })
+                    plugin: pluginId})
                   enqueue({
                     mode: 'prompt',
                     value: wrapChannelMessage(client.name, content, meta),
                     priority: 'next',
                     isMeta: true,
                     origin: { kind: 'channel', server: client.name } as any,
-                    skipSlashCommands: true,
-                  })
+                    skipSlashCommands: true})
                 },
               )
               // Permission-reply handler — separate event, separate
@@ -590,19 +573,18 @@ export function useManageMCPConnections(
                 // since it already names the mismatch.
                 const text =
                   gate.kind === 'disabled'
-                    ? 'Channels are not currently available'
+                    ? t('mcp.channelsNotAvailable')
                     : gate.kind === 'auth'
-                      ? 'Channels require claude.ai authentication · run /login'
+                      ? t('mcp.channelsRequiresAuth')
                       : gate.kind === 'policy'
-                        ? 'Channels are not enabled for your org · have an administrator set channelsEnabled: true in managed settings'
+                        ? t('mcp.channelsNotEnabled')
                         : gate.reason
                 addNotification({
                   key: `channels-blocked-${gate.kind}`,
                   priority: 'high',
                   text,
                   color: 'warning',
-                  timeoutMs: 12000,
-                })
+                  timeoutMs: 12000})
               }
               break
           }
@@ -631,21 +613,18 @@ export function useManageMCPConnections(
                         logEvent('tengu_mcp_list_changed', {
                           type: 'tools' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                           previousCount: previousTools.length,
-                          newCount,
-                        })
+                          newCount})
                       },
                       () => {
                         logEvent('tengu_mcp_list_changed', {
                           type: 'tools' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-                          newCount,
-                        })
+                          newCount})
                       },
                     )
                   } else {
                     logEvent('tengu_mcp_list_changed', {
                       type: 'tools' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-                      newCount,
-                    })
+                      newCount})
                   }
                   updateServer({ ...client, tools: newTools })
                 } catch (error) {
@@ -667,8 +646,7 @@ export function useManageMCPConnections(
                   `Received prompts/list_changed notification, refreshing prompts`,
                 )
                 logEvent('tengu_mcp_list_changed', {
-                  type: 'prompts' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-                })
+                  type: 'prompts' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
                 try {
                   // Skills come from resources, not prompts — don't invalidate their
                   // cache here. fetchMcpSkillsForClient returns the cached result.
@@ -681,8 +659,7 @@ export function useManageMCPConnections(
                   ])
                   updateServer({
                     ...client,
-                    commands: [...mcpPrompts, ...mcpSkills],
-                  })
+                    commands: [...mcpPrompts, ...mcpSkills]})
                   // MCP skills changed — invalidate skill-search index so
                   // next discovery rebuilds with the new set.
                   clearSkillIndexCache?.()
@@ -705,8 +682,7 @@ export function useManageMCPConnections(
                   `Received resources/list_changed notification, refreshing resources`,
                 )
                 logEvent('tengu_mcp_list_changed', {
-                  type: 'resources' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-                })
+                  type: 'resources' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
                 try {
                   fetchResourcesForClient.cache.delete(client.name)
                   if (feature('MCP_SKILLS')) {
@@ -725,8 +701,7 @@ export function useManageMCPConnections(
                     updateServer({
                       ...client,
                       resources: newResources,
-                      commands: [...mcpPrompts, ...mcpSkills],
-                    })
+                      commands: [...mcpPrompts, ...mcpSkills]})
                     // MCP skills changed — invalidate skill-search index so
                     // next discovery rebuilds with the new set.
                     clearSkillIndexCache?.()
@@ -815,8 +790,7 @@ export function useManageMCPConnections(
             type: isMcpServerDisabled(name)
               ? ('disabled' as const)
               : ('pending' as const),
-            config,
-          }))
+            config}))
 
         if (newClients.length === 0 && stale.length === 0) {
           return prevState
@@ -827,9 +801,7 @@ export function useManageMCPConnections(
           mcp: {
             ...prevState.mcp,
             ...mcpWithoutStale,
-            clients: [...mcpWithoutStale.clients, ...newClients],
-          },
-        }
+            clients: [...mcpWithoutStale.clients, ...newClients]}}
       })
     }
 
@@ -927,16 +899,13 @@ export function useManageMCPConnections(
                 type: isMcpServerDisabled(name)
                   ? ('disabled' as const)
                   : ('pending' as const),
-                config,
-              }))
+                config}))
             if (newClients.length === 0) return prevState
             return {
               ...prevState,
               mcp: {
                 ...prevState.mcp,
-                clients: [...prevState.mcp.clients, ...newClients],
-              },
-            }
+                clients: [...prevState.mcp.clients, ...newClients]}}
           })
 
           // Now start connecting (only enabled servers)
@@ -965,8 +934,7 @@ export function useManageMCPConnections(
         project: 0,
         user: 0,
         plugin: 0,
-        claudeai: 0,
-      }
+        claudeai: 0}
       // Ant-only: collect stdio command basenames to correlate with RSS/FPS
       // metrics. Stdio servers like rust-analyzer can be heavy and we want to
       // know which ones correlate with poor session performance.
@@ -996,10 +964,8 @@ export function useManageMCPConnections(
                 .sort()
                 .join(
                   ',',
-                ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            }
-          : {}),
-      })
+                ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
+          : {})})
     }
 
     void loadAndConnectMcpConfigs()
@@ -1043,7 +1009,7 @@ export function useManageMCPConnections(
         .getState()
         .mcp.clients.find(c => c.name === serverName)
       if (!client) {
-        throw new Error(`MCP server ${serverName} not found`)
+        throw new Error(t('mcp.serverNotFoundNoQuotes', serverName))
       }
 
       // Cancel any pending automatic reconnection attempt
@@ -1071,7 +1037,7 @@ export function useManageMCPConnections(
         .getState()
         .mcp.clients.find(c => c.name === serverName)
       if (!client) {
-        throw new Error(`MCP server ${serverName} not found`)
+        throw new Error(t('mcp.serverNotFoundNoQuotes', serverName))
       }
 
       const isCurrentlyDisabled = client.type === 'disabled'
@@ -1097,8 +1063,7 @@ export function useManageMCPConnections(
         updateServer({
           name: serverName,
           type: 'disabled',
-          config: client.config,
-        })
+          config: client.config})
       } else {
         // Enabling: persist enabled state to disk first
         setMcpServerEnabled(serverName, true)
@@ -1107,8 +1072,7 @@ export function useManageMCPConnections(
         updateServer({
           name: serverName,
           type: 'pending',
-          config: client.config,
-        })
+          config: client.config})
 
         // Reconnect the server
         const result = await reconnectMcpServerImpl(serverName, client.config)
@@ -1125,11 +1089,11 @@ export function useManageMCPConnections(
 function getTransportDisplayName(type: string): string {
   switch (type) {
     case 'http':
-      return 'HTTP'
+      return t('mcp.transportHTTP')
     case 'ws':
     case 'ws-ide':
-      return 'WebSocket'
+      return t('mcp.transportWebSocket')
     default:
-      return 'SSE'
+      return t('mcp.transportSSE')
   }
 }

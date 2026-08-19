@@ -79,8 +79,7 @@ export function initSentry(): void {
     beforeSendTransaction(_event) {
       // Don't send performance transactions for now — errors only
       return null
-    },
-  })
+    }})
 
   initialized = true
   logForDebugging('[sentry] Initialized successfully')

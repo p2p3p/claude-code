@@ -8,6 +8,7 @@ import { type ChildProcess, spawn, spawnSync } from 'child_process'
 import { readFile } from 'fs/promises'
 import { logForDebugging } from '../utils/debug.js'
 import { isEnvTruthy, isRunningOnHomespace } from '../utils/envUtils.js'
+import { t } from '../utils/i18n/index.js'
 import { logError } from '../utils/log.js'
 import { getPlatform } from '../utils/platform.js'
 
@@ -55,8 +56,7 @@ function hasCommand(cmd: string): boolean {
   // code is irrelevant — an unrecognized --version still means cmd exists.
   const result = spawnSync(cmd, ['--version'], {
     stdio: 'ignore',
-    timeout: 3000,
-  })
+    timeout: 3000})
   return result.error === undefined
 }
 
@@ -154,8 +154,7 @@ function detectPackageManager(): PackageManagerInfo | null {
       return {
         cmd: 'brew',
         args: ['install', 'sox'],
-        displayCommand: 'brew install sox',
-      }
+        displayCommand: 'brew install sox'}
     }
     return null
   }
@@ -165,22 +164,19 @@ function detectPackageManager(): PackageManagerInfo | null {
       return {
         cmd: 'sudo',
         args: ['apt-get', 'install', '-y', 'sox'],
-        displayCommand: 'sudo apt-get install sox',
-      }
+        displayCommand: 'sudo apt-get install sox'}
     }
     if (hasCommand('dnf')) {
       return {
         cmd: 'sudo',
         args: ['dnf', 'install', '-y', 'sox'],
-        displayCommand: 'sudo dnf install sox',
-      }
+        displayCommand: 'sudo dnf install sox'}
     }
     if (hasCommand('pacman')) {
       return {
         cmd: 'sudo',
         args: ['pacman', '-S', '--noconfirm', 'sox'],
-        displayCommand: 'sudo pacman -S sox',
-      }
+        displayCommand: 'sudo pacman -S sox'}
     }
   }
 
@@ -203,8 +199,7 @@ export async function checkVoiceDependencies(): Promise<{
     return {
       available: false,
       missing: ['Voice mode requires the native audio module (not loaded)'],
-      installCommand: null,
-    }
+      installCommand: null}
   }
 
   // On Linux, arecord (ALSA utils) is a valid fallback recording backend
@@ -222,8 +217,7 @@ export async function checkVoiceDependencies(): Promise<{
   return {
     available: missing.length === 0,
     missing,
-    installCommand: pm?.displayCommand ?? null,
-  }
+    installCommand: pm?.displayCommand ?? null}
 }
 
 // ─── Recording availability ──────────────────────────────────────────
@@ -262,8 +256,7 @@ export async function checkRecordingAvailability(): Promise<RecordingAvailabilit
     return {
       available: false,
       reason:
-        'Voice mode requires microphone access, but no audio device is available in this environment.\n\nTo use voice mode, run Claude Code locally instead.',
-    }
+        t('voiceCmd.noAudioDevice')}
   }
 
   // Native audio module (cpal) handles everything on macOS, Linux, and Windows
@@ -277,12 +270,10 @@ export async function checkRecordingAvailability(): Promise<RecordingAvailabilit
     return {
       available: false,
       reason:
-        'Voice recording requires the native audio module, which could not be loaded.',
-    }
+        t('voiceCmd.nativeModuleFailed')}
   }
 
-  const wslNoAudioReason =
-    'Voice mode could not access an audio device in WSL.\n\nWSL2 with WSLg (Windows 11) provides audio via PulseAudio — if you are on Windows 10 or WSL1, run Claude Code in native Windows instead.'
+  const wslNoAudioReason = t('voiceCmd.wslNoAudio')
 
   // On Linux (including WSL), probe arecord. hasCommand() is insufficient:
   // the binary can exist while the device open() fails (WSL1, Win10-WSL2,
@@ -319,9 +310,8 @@ export async function checkRecordingAvailability(): Promise<RecordingAvailabilit
     return {
       available: false,
       reason: pm
-        ? `Voice mode requires SoX for audio recording. Install it with: ${pm.displayCommand}`
-        : 'Voice mode requires SoX for audio recording. Install SoX manually:\n  macOS: brew install sox\n  Ubuntu/Debian: sudo apt-get install sox\n  Fedora: sudo dnf install sox',
-    }
+        ? t('voiceCmd.installSoXWithCmd', pm.displayCommand)
+        : t('voiceCmd.installSoXManual')}
   }
 
   return { available: true, reason: null }
@@ -439,8 +429,7 @@ function startSoxRecording(
   }
 
   const child = spawn('rec', args, {
-    stdio: ['pipe', 'pipe', 'pipe'],
-  })
+    stdio: ['pipe', 'pipe', 'pipe']})
 
   activeRecorder = child
 
@@ -486,8 +475,7 @@ function startArecordRecording(
   ]
 
   const child = spawn('arecord', args, {
-    stdio: ['pipe', 'pipe', 'pipe'],
-  })
+    stdio: ['pipe', 'pipe', 'pipe']})
 
   activeRecorder = child
 

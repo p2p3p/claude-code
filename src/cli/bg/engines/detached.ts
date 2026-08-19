@@ -1,12 +1,12 @@
 import { closeSync, mkdirSync, openSync } from 'fs'
 import { dirname } from 'path'
+import { t } from '../../../utils/i18n/index.js'
 import { buildCliLaunch, spawnCli } from '../../../utils/cliLaunch.js'
 import type {
   BgEngine,
   BgStartOptions,
   BgStartResult,
-  SessionEntry,
-} from '../engine.js'
+  SessionEntry} from '../engine.js'
 import { tailLog } from '../tail.js'
 
 export class DetachedEngine implements BgEngine {
@@ -27,15 +27,12 @@ export class DetachedEngine implements BgEngine {
         ...opts.env,
         CLAUDE_CODE_SESSION_KIND: 'bg',
         CLAUDE_CODE_SESSION_NAME: opts.sessionName,
-        CLAUDE_CODE_SESSION_LOG: opts.logPath,
-      } as NodeJS.ProcessEnv,
-    })
+        CLAUDE_CODE_SESSION_LOG: opts.logPath} as NodeJS.ProcessEnv})
 
     const child = spawnCli(launch, {
       detached: true,
       stdio: ['ignore', logFd, logFd],
-      cwd: opts.cwd,
-    })
+      cwd: opts.cwd})
 
     child.unref()
     closeSync(logFd)
@@ -46,13 +43,12 @@ export class DetachedEngine implements BgEngine {
       pid,
       sessionName: opts.sessionName,
       logPath: opts.logPath,
-      engineUsed: 'detached',
-    }
+      engineUsed: 'detached'}
   }
 
   async attach(session: SessionEntry): Promise<void> {
     if (!session.logPath) {
-      throw new Error(`Session ${session.sessionId} has no log path.`)
+      throw new Error(t('detachedEngine.noLogPath', session.sessionId))
     }
     await tailLog(session.logPath)
   }

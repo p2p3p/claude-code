@@ -4,14 +4,12 @@ import {
   getAutoMemPath,
   getMemoryBaseDir,
   isAutoMemoryEnabled,
-  isAutoMemPath,
-} from '../memdir/paths.js'
+  isAutoMemPath} from '../memdir/paths.js'
 import { isAgentMemoryPath } from '@claude-code-best/builtin-tools/tools/AgentTool/agentMemory.js'
 import { getClaudeConfigHomeDir } from './envUtils.js'
 import {
   posixPathToWindowsPath,
-  windowsPathToPosixPath,
-} from './windowsPaths.js'
+  windowsPathToPosixPath} from './windowsPaths.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const teamMemPaths = feature('TEAMMEM')

@@ -15,12 +15,10 @@ import { writeToStdout } from '../utils/process.js'
 import { getSessionIngressAuthToken } from '../utils/sessionIngressAuth.js'
 import {
   setSessionMetadataChangedListener,
-  setSessionStateChangedListener,
-} from '../utils/sessionState.js'
+  setSessionStateChangedListener} from '../utils/sessionState.js'
 import {
   setInternalEventReader,
-  setInternalEventWriter,
-} from '../utils/sessionStorage.js'
+  setInternalEventWriter} from '../utils/sessionStorage.js'
 import { ndjsonSafeStringify } from './ndjsonSafeStringify.js'
 import { StructuredIO } from './structuredIO.js'
 import { CCRClient, CCRInitError } from './transports/ccrClient.js'
@@ -58,8 +56,7 @@ export class RemoteIO extends StructuredIO {
       headers['Authorization'] = `Bearer ${sessionToken}`
     } else {
       logForDebugging('[remote-io] No session ingress token available', {
-        level: 'error',
-      })
+        level: 'error'})
     }
 
     // Add environment runner version if available (set by Environment Manager)
@@ -128,8 +125,7 @@ export class RemoteIO extends StructuredIO {
       this.restoredWorkerState = init.catch(() => null)
       init.catch((error: unknown) => {
         logForDiagnosticsNoPII('error', 'cli_worker_lifecycle_init_failed', {
-          reason: error instanceof CCRInitError ? error.reason : 'unknown',
-        })
+          reason: error instanceof CCRInitError ? error.reason : 'unknown'})
         logError(
           new Error(`CCRClient initialization failed: ${errorMessage(error)}`),
         )
@@ -154,8 +150,7 @@ export class RemoteIO extends StructuredIO {
 
       const LIFECYCLE_TO_DELIVERY = {
         started: 'processing',
-        completed: 'processed',
-      } as const
+        completed: 'processed'} as const
       setCommandLifecycleListener((uuid, state) => {
         this.ccrClient?.reportDelivery(uuid, LIFECYCLE_TO_DELIVERY[state])
       })

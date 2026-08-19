@@ -129,8 +129,7 @@ export function buildCliLaunch(
     execPath: EXEC_PATH,
     args,
     env,
-    windowsHide: IS_WINDOWS,
-  }
+    windowsHide: IS_WINDOWS}
 }
 
 /**
@@ -152,8 +151,7 @@ export function spawnCli(
   return spawn(spec.execPath, spec.args, {
     ...spawnOpts,
     env: { ...spec.env, ...(spawnOpts.env as NodeJS.ProcessEnv) },
-    windowsHide: spec.windowsHide,
-  })
+    windowsHide: spec.windowsHide})
 }
 
 /**

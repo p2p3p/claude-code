@@ -5,6 +5,7 @@ import {
 } from 'src/services/mcp/client.js'
 import { buildTool, type ToolDef } from 'src/Tool.js'
 import { errorMessage } from 'src/utils/errors.js'
+import { t } from 'src/utils/i18n/index.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import { logMCPError } from 'src/utils/log.js'
 import { jsonStringify } from 'src/utils/slowOperations.js'
@@ -72,7 +73,10 @@ export const ListMcpResourcesTool = buildTool({
 
     if (targetServer && clientsToProcess.length === 0) {
       throw new Error(
-        `Server "${targetServer}" not found. Available servers: ${mcpClients.map(c => c.name).join(', ')}`,
+        t('toolUI.listMcpResources.serverNotFound', {
+          server: targetServer,
+          available: mcpClients.map(c => c.name).join(', '),
+        }),
       )
     }
 

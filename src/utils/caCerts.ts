@@ -87,8 +87,7 @@ export const getCACertificates = memoize((): string[] | undefined => {
   if (extraCertsPath) {
     try {
       const extraCert = getFsImplementation().readFileSync(extraCertsPath, {
-        encoding: 'utf8',
-      })
+        encoding: 'utf8'})
       certs.push(extraCert)
       logForDebugging(
         `CA certs: Appended extra certificates from NODE_EXTRA_CA_CERTS (${extraCertsPath})`,

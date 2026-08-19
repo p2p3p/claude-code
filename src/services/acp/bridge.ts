@@ -20,10 +20,8 @@ export type { ToolUseCache, SessionUsage } from './bridge/types.js'
 export { toolInfoFromToolUse } from './bridge/toolInfo.js'
 export {
   toolUpdateFromToolResult,
-  toolUpdateFromEditToolResponse,
-} from './bridge/toolResults.js'
+  toolUpdateFromEditToolResponse} from './bridge/toolResults.js'
 export {
   nextSdkMessageOrAbort,
   forwardSessionUpdates,
-  replayHistoryMessages,
-} from './bridge/forwarding.js'
+  replayHistoryMessages} from './bridge/forwarding.js'

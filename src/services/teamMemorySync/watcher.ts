@@ -13,23 +13,20 @@ import { mkdir, stat } from 'fs/promises'
 import { join } from 'path'
 import {
   getTeamMemPath,
-  isTeamMemoryEnabled,
-} from '../../memdir/teamMemPaths.js'
+  isTeamMemoryEnabled} from '../../memdir/teamMemPaths.js'
 import { registerCleanup } from '../../utils/cleanupRegistry.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { errorMessage } from '../../utils/errors.js'
 import { getGithubRepo } from '../../utils/git.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../analytics/index.js'
+  logEvent} from '../analytics/index.js'
 import {
   createSyncState,
   isTeamMemorySyncAvailable,
   pullTeamMemory,
   pushTeamMemory,
-  type SyncState,
-} from './index.js'
+  type SyncState} from './index.js'
 import type { TeamMemorySyncPushResult } from './types.js'
 
 const DEBOUNCE_MS = 2000 // Wait 2s after last change before pushing
@@ -98,8 +95,7 @@ async function executePush(): Promise<void> {
       )
     } else if (!result.success) {
       logForDebugging(`team-memory-watcher: push failed: ${result.error}`, {
-        level: 'warn',
-      })
+        level: 'warn'})
       if (isPermanentFailure(result) && pushSuppressedReason === null) {
         pushSuppressedReason =
           result.httpStatus !== undefined
@@ -112,14 +108,12 @@ async function executePush(): Promise<void> {
         logEvent('tengu_team_mem_push_suppressed', {
           reason:
             pushSuppressedReason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          ...(result.httpStatus && { status: result.httpStatus }),
-        })
+          ...(result.httpStatus && { status: result.httpStatus })})
       }
     }
   } catch (e) {
     logForDebugging(`team-memory-watcher: push error: ${errorMessage(e)}`, {
-      level: 'warn',
-    })
+      level: 'warn'})
   } finally {
     pushInProgress = false
     currentPushPromise = null
@@ -213,8 +207,7 @@ async function startFileWatcher(teamDir: string): Promise<void> {
       )
     })
     logForDebugging(`team-memory-watcher: watching ${teamDir}`, {
-      level: 'debug',
-    })
+      level: 'debug'})
   } catch (err) {
     // fs.watch throws synchronously on ENOENT (race: dir deleted between
     // mkdir and watch) or EACCES. watcherStarted is already true above,
@@ -300,8 +293,7 @@ export async function startTeamMemoryWatcher(): Promise<void> {
     initial_files_pulled: initialFilesPulled,
     // Kept for dashboard continuity; now always true when this event fires.
     watcher_started: true,
-    server_has_content: serverHasContent,
-  })
+    server_has_content: serverHasContent})
 }
 
 /**

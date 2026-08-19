@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, Text, Link } from '@anthropic/ink';
 import { Select } from '../CustomSelect/select.js';
 import { Dialog } from '../design-system/Dialog.js';
@@ -67,8 +68,7 @@ export function UltraplanLaunchDialog({ onChoice }: UltraplanLaunchDialogProps):
             ...prev,
             replBridgeEnabled: false,
             replBridgeExplicit: false,
-            replBridgeOutboundOnly: false,
-          };
+            replBridgeOutboundOnly: false};
         });
       }
 
@@ -92,15 +92,14 @@ export function UltraplanLaunchDialog({ onChoice }: UltraplanLaunchDialogProps):
 
   const options = [
     {
-      label: 'Run ultraplan',
+      label: t('ultraplanLaunch.runUltraplan'),
       value: 'run' as const,
-      description: runDescription,
-    },
-    { label: 'Not now', value: 'cancel' as const },
+      description: runDescription},
+    { label: t('ultraplanLaunch.notNow'), value: 'cancel' as const },
   ];
 
   return (
-    <Dialog title="Run ultraplan in the cloud?" subtitle={dialogConfig.timeEstimate} onCancel={handleCancel}>
+    <Dialog title={t('ultraplanlaunchdialog.runUltraplanInTheCloud')} subtitle={dialogConfig.timeEstimate} onCancel={handleCancel}>
       <Box flexDirection="column" gap={1}>
         <Box flexDirection="column">
           <Text dimColor>{dialogConfig.dialogBody}</Text>
@@ -114,7 +113,7 @@ export function UltraplanLaunchDialog({ onChoice }: UltraplanLaunchDialogProps):
 
         {/* Pipeline description (hidden when bridge will be disconnected) */}
         <Text dimColor>
-          {isBridgeEnabled ? 'This will disable Remote Control for this session.' : dialogConfig.dialogPipeline}
+          {isBridgeEnabled ? t('ui.disableRemoteControl') : dialogConfig.dialogPipeline}
         </Text>
 
         <Select options={options} onChange={handleChoice} />

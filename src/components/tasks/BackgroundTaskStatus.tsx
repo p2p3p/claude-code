@@ -9,12 +9,12 @@ import { isPanelAgentTask } from 'src/tasks/LocalAgentTask/LocalAgentTask.js';
 import { getPillLabel, pillNeedsCta } from 'src/tasks/pillLabel.js';
 import { type BackgroundTaskState, isBackgroundTask, type TaskState } from 'src/tasks/types.js';
 import { calculateHorizontalScrollWindow } from 'src/utils/horizontalScroll.js';
+import { t } from 'src/utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import {
   AGENT_COLOR_TO_THEME_COLOR,
   AGENT_COLORS,
-  type AgentColorName,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js';
+  type AgentColorName} from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js';
 import type { Theme } from '../../utils/theme.js';
 import { KeyboardShortcutHint } from '@anthropic/ink';
 import { shouldHideTasksFooter } from './taskStatusUtils.js';
@@ -32,8 +32,7 @@ export function BackgroundTaskStatus({
   isViewingTeammate,
   teammateFooterIndex = 0,
   isLeaderIdle = false,
-  onOpenDialog,
-}: Props): React.ReactNode {
+  onOpenDialog}: Props): React.ReactNode {
   const setAppState = useSetAppState();
   const { columns } = useTerminalSize();
   const tasks = useAppState(s => s.tasks);
@@ -73,15 +72,13 @@ export function BackgroundTaskStatus({
       name: 'main',
       color: undefined as keyof Theme | undefined,
       isIdle: isLeaderIdle,
-      taskId: undefined as string | undefined,
-    };
+      taskId: undefined as string | undefined};
 
     const teammatePills = teammateEntries.map(t => ({
       name: t.identity.agentName,
       color: getAgentThemeColor(t.identity.color),
       isIdle: t.isIdle,
-      taskId: t.id,
-    }));
+      taskId: t.id}));
 
     // Only sort teammates when not selecting to avoid reordering during navigation
     if (!tasksSelected) {
@@ -159,7 +156,7 @@ export function BackgroundTaskStatus({
         {showRightArrow && <Text dimColor> {figures.arrowRight}</Text>}
         <Text dimColor>
           {' · '}
-          <KeyboardShortcutHint shortcut="shift + ↓" action="expand" />
+          <KeyboardShortcutHint shortcut="shift + ↓" action={t('shortcutHint.expand')} />
         </Text>
       </>
     );
@@ -180,7 +177,7 @@ export function BackgroundTaskStatus({
       <SummaryPill selected={tasksSelected} onClick={onOpenDialog}>
         {getPillLabel(runningTasks)}
       </SummaryPill>
-      {pillNeedsCta(runningTasks) && <Text dimColor> · {figures.arrowDown} to view</Text>}
+      {pillNeedsCta(runningTasks) && <Text dimColor>{t('pillLabel.ctaView')}</Text>}
     </>
   );
 }
@@ -241,8 +238,7 @@ function AgentPill({ name, color, isSelected, isViewed, isIdle, onClick }: Agent
 function SummaryPill({
   selected,
   onClick,
-  children,
-}: {
+  children}: {
   selected: boolean;
   onClick?: () => void;
   children: React.ReactNode;

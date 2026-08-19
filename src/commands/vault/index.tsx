@@ -1,12 +1,12 @@
 import { getGlobalConfig } from '../../utils/config.js';
 import type { Command } from '../../types/command.js';
+import { t } from '../../utils/i18n/index.js'
 
 const vaultCommand: Command = {
   type: 'local-jsx',
   name: 'vault',
   aliases: ['vaults'],
-  description:
-    'Manage remote secret vaults and credentials for cloud agents. Requires Claude Pro/Max/Team subscription.',
+  description: t('cmd.descVault'),
   // REPL markdown renderer strips `<...>` as HTML tags — use uppercase.
   argumentHint:
     'list | create NAME | get ID | archive ID | add-credential VAULT_ID KEY VALUE | archive-credential VAULT_ID CRED_ID',
@@ -22,7 +22,6 @@ const vaultCommand: Command = {
   load: async () => {
     const m = await import('./launchVault.js');
     return { call: m.callVault };
-  },
-};
+  }};
 
 export default vaultCommand;

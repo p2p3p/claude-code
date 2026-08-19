@@ -14,8 +14,7 @@ const DEFAULT_STATE: VoiceState = {
   voiceError: null,
   voiceInterimTranscript: '',
   voiceAudioLevels: [],
-  voiceWarmingUp: false,
-};
+  voiceWarmingUp: false};
 
 type VoiceStore = Store<VoiceState>;
 

@@ -3,8 +3,7 @@ import { useAppState } from 'src/state/AppState.js'
 import { useKeybindings } from '../../../keybindings/useKeybinding.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../../services/analytics/index.js'
+  logEvent} from '../../../services/analytics/index.js'
 import { sanitizeToolNameForAnalytics } from '../../../services/analytics/metadata.js'
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js'
 import type { CompletionType } from '../../../utils/unaryLogging.js'
@@ -13,12 +12,10 @@ import {
   type FileOperationType,
   getFilePermissionOptions,
   type PermissionOption,
-  type PermissionOptionWithLabel,
-} from './permissionOptions.js'
+  type PermissionOptionWithLabel} from './permissionOptions.js'
 import {
   PERMISSION_HANDLERS,
-  type PermissionHandlerParams,
-} from './usePermissionHandler.js'
+  type PermissionHandlerParams} from './usePermissionHandler.js'
 
 export interface ToolInput {
   [key: string]: unknown
@@ -58,8 +55,7 @@ export function useFilePermissionDialog<T extends ToolInput>({
   onDone,
   onReject,
   parseInput,
-  operationType = 'write',
-}: UseFilePermissionDialogProps<T>): UseFilePermissionDialogResult<T> {
+  operationType = 'write'}: UseFilePermissionDialogProps<T>): UseFilePermissionDialogResult<T> {
   const toolPermissionContext = useAppState(s => s.toolPermissionContext)
   const [acceptFeedback, setAcceptFeedback] = useState('')
   const [rejectFeedback, setRejectFeedback] = useState('')
@@ -80,8 +76,7 @@ export function useFilePermissionDialog<T extends ToolInput>({
         onRejectFeedbackChange: setRejectFeedback,
         onAcceptFeedbackChange: setAcceptFeedback,
         yesInputMode,
-        noInputMode,
-      }),
+        noInputMode}),
     [filePath, toolPermissionContext, operationType, yesInputMode, noInputMode],
   )
 
@@ -97,8 +92,7 @@ export function useFilePermissionDialog<T extends ToolInput>({
         onReject,
         completionType,
         languageName,
-        operationType,
-      }
+        operationType}
 
       // Override the input in toolUseConfirm to pass the parsed input
       const originalOnAllow = toolUseConfirm.onAllow
@@ -118,8 +112,7 @@ export function useFilePermissionDialog<T extends ToolInput>({
           option.type === 'accept-once'
             ? yesFeedbackModeEntered
             : noFeedbackModeEntered,
-        scope: option.type === 'accept-session' ? option.scope : undefined,
-      })
+        scope: option.type === 'accept-session' ? option.scope : undefined})
     },
     [
       filePath,
@@ -172,8 +165,7 @@ export function useFilePermissionDialog<T extends ToolInput>({
         toolName: sanitizeToolNameForAnalytics(
           toolUseConfirm.tool.name,
         ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        isMcp: toolUseConfirm.tool.isMcp ?? false,
-      }
+        isMcp: toolUseConfirm.tool.isMcp ?? false}
 
       if (value === 'yes') {
         if (yesInputMode) {
@@ -207,6 +199,5 @@ export function useFilePermissionDialog<T extends ToolInput>({
     setFocusedOption: handleFocusedOptionChange,
     handleInputModeToggle,
     yesInputMode,
-    noInputMode,
-  }
+    noInputMode}
 }

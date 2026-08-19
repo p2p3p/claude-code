@@ -203,8 +203,7 @@ function readFileInRangeFast(
     totalBytes: Buffer.byteLength(text, 'utf8'),
     readBytes: Buffer.byteLength(content, 'utf8'),
     mtimeMs,
-    ...(truncatedByBytes ? { truncatedByBytes: true } : {}),
-  }
+    ...(truncatedByBytes ? { truncatedByBytes: true } : {})}
 }
 
 // ---------------------------------------------------------------------------
@@ -350,8 +349,7 @@ function streamOnEnd(this: StreamState): void {
       totalBytes: this.totalBytesRead,
       readBytes: Buffer.byteLength(content, 'utf8'),
       mtimeMs,
-      ...(truncated ? { truncatedByBytes: true } : {}),
-    })
+      ...(truncated ? { truncatedByBytes: true } : {})})
   })
 }
 
@@ -368,8 +366,7 @@ function readFileInRangeStreaming(
       stream: createReadStream(filePath, {
         encoding: 'utf8',
         highWaterMark: 512 * 1024,
-        ...(signal ? { signal } : undefined),
-      }),
+        ...(signal ? { signal } : undefined)}),
       offset,
       endLine: maxLines !== undefined ? offset + maxLines : Infinity,
       maxBytes,
@@ -383,8 +380,7 @@ function readFileInRangeStreaming(
       partial: '',
       isFirstChunk: true,
       resolveMtime: () => {},
-      mtimeReady: null as unknown as Promise<number>,
-    }
+      mtimeReady: null as unknown as Promise<number>}
     state.mtimeReady = new Promise<number>(r => {
       state.resolveMtime = r
     })

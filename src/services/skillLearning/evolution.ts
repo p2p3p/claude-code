@@ -2,18 +2,15 @@ import type { Instinct } from './instinctParser.js'
 import { shouldGenerateSkillFromInstincts } from './learningPolicy.js'
 import {
   generateSkillDraft,
-  type SkillGeneratorOptions,
-} from './skillGenerator.js'
+  type SkillGeneratorOptions} from './skillGenerator.js'
 import {
   generateCommandDraft,
   type CommandGeneratorOptions,
-  type LearnedCommandDraft,
-} from './commandGenerator.js'
+  type LearnedCommandDraft} from './commandGenerator.js'
 import {
   generateAgentDraft,
   type AgentGeneratorOptions,
-  type LearnedAgentDraft,
-} from './agentGenerator.js'
+  type LearnedAgentDraft} from './agentGenerator.js'
 import { getSkillLearningConfig } from './config.js'
 import type { LearnedSkillDraft } from './types.js'
 
@@ -58,8 +55,7 @@ export function clusterInstincts(instincts: Instinct[]): EvolutionCandidate[] {
         trigger: group[0]?.trigger ?? 'learned pattern',
         domain: group[0]?.domain ?? 'project',
         instincts: group,
-        averageConfidence: Number(averageConfidence.toFixed(2)),
-      }
+        averageConfidence: Number(averageConfidence.toFixed(2))}
     })
     .sort((a, b) => b.averageConfidence - a.averageConfidence)
 }
@@ -101,8 +97,7 @@ export function generateSkillCandidates(
     .map(candidate =>
       generateSkillDraft(candidate.instincts, {
         ...options,
-        scope: candidate.instincts[0]?.scope ?? 'project',
-      }),
+        scope: candidate.instincts[0]?.scope ?? 'project'}),
     )
 }
 
@@ -119,8 +114,7 @@ export function generateCommandCandidates(
     .map(candidate =>
       generateCommandDraft(candidate.instincts, {
         ...options,
-        scope: candidate.instincts[0]?.scope ?? 'project',
-      }),
+        scope: candidate.instincts[0]?.scope ?? 'project'}),
     )
 }
 
@@ -137,8 +131,7 @@ export function generateAgentCandidates(
     .map(candidate =>
       generateAgentDraft(candidate.instincts, {
         ...options,
-        scope: candidate.instincts[0]?.scope ?? 'project',
-      }),
+        scope: candidate.instincts[0]?.scope ?? 'project'}),
     )
 }
 

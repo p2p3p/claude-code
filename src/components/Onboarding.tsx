@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
 import { setupTerminal, shouldOfferTerminalSetup } from '../commands/terminalSetup/terminalSetup.js';
 import { useExitOnCtrlCDWithKeybindings } from '../hooks/useExitOnCtrlCDWithKeybindings.js';
 import { Box, Link, Newline, Text, useTheme } from '@anthropic/ink';
@@ -12,10 +11,11 @@ import { normalizeApiKeyForConfig } from '../utils/authPortable.js';
 import { getCustomApiKeyStatus } from '../utils/config.js';
 import { env } from '../utils/env.js';
 import { isRunningOnHomespace } from '../utils/envUtils.js';
+import { t } from '../utils/i18n/index.js';
 import { PreflightStep } from '../utils/preflightChecks.js';
 import type { ThemeSetting } from '../utils/theme.js';
 import { ApproveApiKey } from './ApproveApiKey.js';
-import { ConsoleOAuthFlow } from './ConsoleOAuthFlow.js';
+import { ConsoleOAuthFlow } from '../accounts/ui/ConsoleOAuthFlow.js';
 import { Select } from './CustomSelect/select.js';
 import { WelcomeV2 } from './LogoV2/WelcomeV2.js';
 import { PressEnterToContinue } from './PressEnterToContinue.js';
@@ -41,8 +41,7 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
 
   useEffect(() => {
     logEvent('tengu_began_setup', {
-      oauthEnabled,
-    });
+      oauthEnabled});
   }, [oauthEnabled]);
 
   function goToNextStep() {
@@ -52,8 +51,7 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
 
       logEvent('tengu_onboarding_step', {
         oauthEnabled,
-        stepId: steps[nextIndex]?.id as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        stepId: steps[nextIndex]?.id as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     } else {
       onDone();
     }
@@ -72,7 +70,7 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
       <ThemePicker
         onThemeSelect={handleThemeSelection}
         showIntroText={true}
-        helpText="To change this later, run /theme"
+        helpText={t('theme.helpText')}
         hideEscToCancel={true}
         skipExitHandling={true} // Skip exit handling as Onboarding already handles it
       />
@@ -81,26 +79,20 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
 
   const securityStep = (
     <Box flexDirection="column" gap={1} paddingLeft={1}>
-      <Text bold>Before you start, keep in mind:</Text>
+      <Text bold>{t('onboarding.securityTitle')}</Text>
       <Box flexDirection="column" width={70}>
-        {/**
-         * OrderedList misnumbers items when rendering conditionally,
-         * so put all items in the if/else
-         */}
         <OrderedList>
           <OrderedList.Item>
-            <Text>Always review changes before accepting</Text>
+            <Text>{t('onboarding.alwaysReview')}</Text>
             <Text dimColor wrap="wrap">
-              Claude can make mistakes — especially when running commands
-              <Newline />
-              or editing files. You stay in control of every action.
+              {t('onboarding.alwaysReviewDesc')}
               <Newline />
             </Text>
           </OrderedList.Item>
           <OrderedList.Item>
-            <Text>Only use Claude Code on projects you trust</Text>
+            <Text>{t('onboarding.onlyUseTrusted')}</Text>
             <Text dimColor wrap="wrap">
-              Untrusted code could contain prompt injection attacks.
+              {t('onboarding.onlyUseTrustedDesc')}
               <Newline />
               <Link url="https://code.claude.com/docs/en/security" />
             </Text>
@@ -139,8 +131,7 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
   if (apiKeyNeedingApproval) {
     steps.push({
       id: 'api-key',
-      component: <ApproveApiKey customApiKeyTruncated={apiKeyNeedingApproval} onDone={handleApiKeyDone} />,
-    });
+      component: <ApproveApiKey customApiKeyTruncated={apiKeyNeedingApproval} onDone={handleApiKeyDone} />});
   }
 
   if (oauthEnabled) {
@@ -150,8 +141,7 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
         <SkippableStep skip={skipOAuth} onSkip={goToNextStep}>
           <ConsoleOAuthFlow onDone={goToNextStep} />
         </SkippableStep>
-      ),
-    });
+      )});
   }
 
   steps.push({ id: 'security', component: securityStep });
@@ -161,26 +151,23 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
       id: 'terminal-setup',
       component: (
         <Box flexDirection="column" gap={1} paddingLeft={1}>
-          <Text bold>Use Claude Code&apos;s terminal setup?</Text>
+          <Text bold>{t('onboarding.useTerminalSetup')}</Text>
           <Box flexDirection="column" width={70} gap={1}>
             <Text>
-              For the optimal coding experience, enable the recommended settings
+              {t('onboarding.terminalSetupDesc')}
               <Newline />
-              for your terminal:{' '}
               {env.terminal === 'Apple_Terminal'
-                ? 'Option+Enter for newlines and visual bell'
-                : 'Shift+Enter for newlines'}
+                ? t('onboarding.terminalSetupOptApple')
+                : t('onboarding.terminalSetupOptShift')}
             </Text>
             <Select
               options={[
                 {
-                  label: 'Yes, use recommended settings',
-                  value: 'install',
-                },
+                  label: t('onboarding.yesRecommended'),
+                  value: 'install'},
                 {
-                  label: 'No, maybe later with /terminal-setup',
-                  value: 'no',
-                },
+                  label: t('onboarding.noLater'),
+                  value: 'no'},
               ]}
               onChange={value => {
                 if (value === 'install') {
@@ -195,12 +182,11 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
               onCancel={() => goToNextStep()}
             />
             <Text dimColor>
-              {exitState.pending ? <>Press {exitState.keyName} again to exit</> : <>Enter to confirm · Esc to skip</>}
+              {exitState.pending ? <>{t('common.pressAgain', exitState.keyName)}</> : <>{t('onboarding.enterConfirm')} · {t('onboarding.escSkip')}</>}
             </Text>
           </Box>
         </Box>
-      ),
-    });
+      )});
   }
 
   const currentStep = steps[currentStepIndex];
@@ -221,22 +207,18 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
 
   useKeybindings(
     {
-      'confirm:yes': handleSecurityContinue,
-    },
+      'confirm:yes': handleSecurityContinue},
     {
       context: 'Confirmation',
-      isActive: currentStep?.id === 'security',
-    },
+      isActive: currentStep?.id === 'security'},
   );
 
   useKeybindings(
     {
-      'confirm:no': handleTerminalSetupSkip,
-    },
+      'confirm:no': handleTerminalSetupSkip},
     {
       context: 'Confirmation',
-      isActive: currentStep?.id === 'terminal-setup',
-    },
+      isActive: currentStep?.id === 'terminal-setup'},
   );
 
   return (
@@ -246,7 +228,7 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
         {currentStep?.component}
         {exitState.pending && (
           <Box padding={1}>
-            <Text dimColor>Press {exitState.keyName} again to exit</Text>
+            <Text dimColor>{t('common.pressAgain', exitState.keyName)}</Text>
           </Box>
         )}
       </Box>
@@ -257,8 +239,7 @@ export function Onboarding({ onDone }: Props): React.ReactNode {
 export function SkippableStep({
   skip,
   onSkip,
-  children,
-}: {
+  children}: {
   skip: boolean;
   onSkip(): void;
   children: React.ReactNode;

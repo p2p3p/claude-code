@@ -8,8 +8,7 @@ import {
   getIsScrollDraining,
   getLastMainRequestId,
   getSessionId,
-  isSessionPersistenceDisabled,
-} from '../bootstrap/state.js'
+  isSessionPersistenceDisabled} from '../bootstrap/state.js'
 import {
   DISABLE_KITTY_KEYBOARD,
   DISABLE_MODIFY_OTHER_KEYS,
@@ -23,14 +22,12 @@ import {
   CLEAR_TERMINAL_TITLE,
   instances,
   supportsTabStatus,
-  wrapForMultiplexer,
-} from '@anthropic/ink'
+  wrapForMultiplexer} from '@anthropic/ink'
 import { shutdownDatadog } from '../services/analytics/datadog.js'
 import { shutdown1PEventLogging } from '../services/analytics/firstPartyEventLogger.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import type { AppState } from '../state/AppState.js'
 import { runCleanupFunctions } from './cleanupRegistry.js'
 import { logForDebugging } from './debug.js'
@@ -282,8 +279,7 @@ export const setupGracefulShutdown = memoize(() => {
         if (!process.stdout.writable || !process.stdin.readable) {
           clearInterval(orphanCheckInterval)
           logForDiagnosticsNoPII('info', 'shutdown_signal', {
-            signal: 'orphan_detected',
-          })
+            signal: 'orphan_detected'})
           void gracefulShutdown(129)
         }
       }, 30_000) // Check every 30 seconds
@@ -296,12 +292,10 @@ export const setupGracefulShutdown = memoize(() => {
   process.on('uncaughtException', error => {
     logForDiagnosticsNoPII('error', 'uncaught_exception', {
       error_name: error.name,
-      error_message: error.message.slice(0, 2000),
-    })
+      error_message: error.message.slice(0, 2000)})
     logEvent('tengu_uncaught_exception', {
       error_name:
-        error.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        error.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
   })
 
   // Log unhandled promise rejections for container observability and analytics
@@ -317,14 +311,12 @@ export const setupGracefulShutdown = memoize(() => {
         ? {
             error_name: reason.name,
             error_message: reason.message.slice(0, 2000),
-            error_stack: reason.stack?.slice(0, 4000),
-          }
+            error_stack: reason.stack?.slice(0, 4000)}
         : { error_message: String(reason).slice(0, 2000) }
     logForDiagnosticsNoPII('error', 'unhandled_rejection', errorInfo)
     logEvent('tengu_unhandled_rejection', {
       error_name:
-        errorName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        errorName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
   })
 })
 
@@ -468,8 +460,7 @@ export async function gracefulShutdown(
     await executeSessionEndHooks(reason, {
       ...options,
       signal: AbortSignal.timeout(sessionEndTimeoutMs),
-      timeoutMs: sessionEndTimeoutMs,
-    })
+      timeoutMs: sessionEndTimeoutMs})
   } catch {
     // Ignore SessionEnd hook exceptions (including AbortError on timeout)
   }
@@ -489,8 +480,7 @@ export async function gracefulShutdown(
       scope:
         'session_end' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       last_request_id:
-        lastRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        lastRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
   }
 
   // Flush analytics — capped at 500ms. Previously unbounded: the 1P exporter

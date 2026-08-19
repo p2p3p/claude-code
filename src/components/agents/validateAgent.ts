@@ -2,9 +2,9 @@ import type { Tools } from '../../Tool.js'
 import { resolveAgentTools } from '@claude-code-best/builtin-tools/tools/AgentTool/agentToolUtils.js'
 import type {
   AgentDefinition,
-  CustomAgentDefinition,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
+  CustomAgentDefinition} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import { getAgentSourceDisplayName } from './utils.js'
+import { t } from '../../utils/i18n/index.js'
 
 export type AgentValidationResult = {
   isValid: boolean
@@ -14,19 +14,19 @@ export type AgentValidationResult = {
 
 export function validateAgentType(agentType: string): string | null {
   if (!agentType) {
-    return 'Agent type is required'
+    return t('validateAgent.typeRequired')
   }
 
   if (!/^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$/.test(agentType)) {
-    return 'Agent type must start and end with alphanumeric characters and contain only letters, numbers, and hyphens'
+    return t('validateAgent.typeInvalidChars')
   }
 
   if (agentType.length < 3) {
-    return 'Agent type must be at least 3 characters long'
+    return t('validateAgent.typeTooShort')
   }
 
   if (agentType.length > 50) {
-    return 'Agent type must be less than 50 characters'
+    return t('validateAgent.typeTooLong')
   }
 
   return null
@@ -42,7 +42,7 @@ export function validateAgent(
 
   // Validate agent type
   if (!agent.agentType) {
-    errors.push('Agent type is required')
+    errors.push(t('validateAgent.typeRequired'))
   } else {
     const typeError = validateAgentType(agent.agentType)
     if (typeError) {
@@ -55,31 +55,31 @@ export function validateAgent(
     )
     if (duplicate) {
       errors.push(
-        `Agent type "${agent.agentType}" already exists in ${getAgentSourceDisplayName(duplicate.source)}`,
+        t('validateAgent.typeExists', agent.agentType, getAgentSourceDisplayName(duplicate.source)),
       )
     }
   }
 
   // Validate description
   if (!agent.whenToUse) {
-    errors.push('Description (description) is required')
+    errors.push(t('validateAgent.descriptionRequired'))
   } else if (agent.whenToUse.length < 10) {
     warnings.push(
-      'Description should be more descriptive (at least 10 characters)',
+      t('validateAgent.descriptionTooShort'),
     )
   } else if (agent.whenToUse.length > 5000) {
-    warnings.push('Description is very long (over 5000 characters)')
+    warnings.push(t('validateAgent.descriptionTooLong'))
   }
 
   // Validate tools
   if (agent.tools !== undefined && !Array.isArray(agent.tools)) {
-    errors.push('Tools must be an array')
+    errors.push(t('validateAgent.toolsMustBeArray'))
   } else {
     if (agent.tools === undefined) {
-      warnings.push('Agent has access to all tools')
+      warnings.push(t('validateAgent.allTools'))
     } else if (agent.tools.length === 0) {
       warnings.push(
-        'No tools selected - agent will have very limited capabilities',
+        t('validateAgent.noTools'),
       )
     }
 
@@ -87,23 +87,22 @@ export function validateAgent(
     const resolvedTools = resolveAgentTools(agent, availableTools, false)
 
     if (resolvedTools.invalidTools.length > 0) {
-      errors.push(`Invalid tools: ${resolvedTools.invalidTools.join(', ')}`)
+      errors.push(t('validateAgent.invalidTools', resolvedTools.invalidTools.join(', ')))
     }
   }
 
   // Validate system prompt
   const systemPrompt = agent.getSystemPrompt()
   if (!systemPrompt) {
-    errors.push('System prompt is required')
+    errors.push(t('validateAgent.systemPromptRequired'))
   } else if (systemPrompt.length < 20) {
-    errors.push('System prompt is too short (minimum 20 characters)')
+    errors.push(t('validateAgent.systemPromptTooShort'))
   } else if (systemPrompt.length > 10000) {
-    warnings.push('System prompt is very long (over 10,000 characters)')
+    warnings.push(t('validateAgent.systemPromptTooLong'))
   }
 
   return {
     isValid: errors.length === 0,
     errors,
-    warnings,
-  }
+    warnings}
 }

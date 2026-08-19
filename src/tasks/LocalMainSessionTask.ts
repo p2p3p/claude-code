@@ -9,6 +9,7 @@
  * This reuses the LocalAgentTask state structure since the behavior is similar.
  */
 
+import { t } from '../utils/i18n/index.js'
 import type { UUID } from 'crypto'
 import { randomBytes } from 'crypto'
 import {
@@ -17,23 +18,20 @@ import {
   SUMMARY_TAG,
   TASK_ID_TAG,
   TASK_NOTIFICATION_TAG,
-  TOOL_USE_ID_TAG,
-} from '../constants/xml.js'
+  TOOL_USE_ID_TAG} from '../constants/xml.js'
 import { type QueryParams, query } from '../query.js'
 import { roughTokenCountEstimation } from '../services/tokenEstimation.js'
 import type { SetAppState } from '../Task.js'
 import { createTaskStateBase } from '../Task.js'
 import type {
   AgentDefinition,
-  CustomAgentDefinition,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
+  CustomAgentDefinition} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import { asAgentId } from '../types/ids.js'
 import type { Message } from '../types/message.js'
 import { createAbortController } from '../utils/abortController.js'
 import {
   runWithAgentContext,
-  type SubagentContext,
-} from '../utils/agentContext.js'
+  type SubagentContext} from '../utils/agentContext.js'
 import { registerCleanup } from '../utils/cleanupRegistry.js'
 import { logForDebugging } from '../utils/debug.js'
 import { logError } from '../utils/log.js'
@@ -41,13 +39,11 @@ import { enqueuePendingNotification } from '../utils/messageQueueManager.js'
 import { emitTaskTerminatedSdk } from '../utils/sdkEventQueue.js'
 import {
   getAgentTranscriptPath,
-  recordSidechainTranscript,
-} from '../utils/sessionStorage.js'
+  recordSidechainTranscript} from '../utils/sessionStorage.js'
 import {
   evictTaskOutput,
   getTaskOutputPath,
-  initTaskOutputAsSymlink,
-} from '../utils/task/diskOutput.js'
+  initTaskOutputAsSymlink} from '../utils/task/diskOutput.js'
 import { registerTask, updateTaskState } from '../utils/task/framework.js'
 import type { LocalAgentTaskState } from './LocalAgentTask/LocalAgentTask.js'
 
@@ -63,8 +59,7 @@ const DEFAULT_MAIN_SESSION_AGENT: CustomAgentDefinition = {
   agentType: 'main-session',
   whenToUse: 'Main session query',
   source: 'userSettings',
-  getSystemPrompt: () => '',
-}
+  getSystemPrompt: () => ''}
 
 /**
  * Generate a unique task ID for main session tasks.
@@ -141,8 +136,7 @@ export function registerMainSessionTask(
     isBackgrounded: true, // Already backgrounded
     pendingMessages: [],
     retain: false,
-    diskLoaded: false,
-  }
+    diskLoaded: false}
 
   logForDebugging(
     `[LocalMainSessionTask] Registering task ${taskId} with description: ${description}`,
@@ -188,8 +182,7 @@ export function completeMainSessionTask(
       ...task,
       status: success ? 'completed' : 'failed',
       endTime: Date.now(),
-      messages: task.messages?.length ? [task.messages.at(-1)!] : undefined,
-    }
+      messages: task.messages?.length ? [task.messages.at(-1)!] : undefined}
   })
 
   void evictTaskOutput(taskId)
@@ -212,12 +205,10 @@ export function completeMainSessionTask(
     // enqueueMainSessionNotification's check-and-set.
     updateTaskState<LocalMainSessionTaskState>(taskId, setAppState, task => ({
       ...task,
-      notified: true,
-    }))
+      notified: true}))
     emitTaskTerminatedSdk(taskId, success ? 'completed' : 'failed', {
       toolUseId,
-      summary: 'Background session',
-    })
+      summary: t('localMainSession.backgroundSession')})
   }
 }
 
@@ -296,9 +287,7 @@ export function foregroundMainSessionTask(
       tasks: {
         ...prev.tasks,
         ...(restorePrev && { [prevId]: { ...prevTask, isBackgrounded: true } }),
-        [taskId]: { ...task, isBackgrounded: false },
-      },
-    }
+        [taskId]: { ...task, isBackgrounded: false }}}
   })
 
   return taskMessages
@@ -343,8 +332,7 @@ export function startBackgroundSession({
   queryParams,
   description,
   setAppState,
-  agentDefinition,
-}: {
+  agentDefinition}: {
   messages: Message[]
   queryParams: Omit<QueryParams, 'messages'>
   description: string
@@ -372,8 +360,7 @@ export function startBackgroundSession({
     agentId: taskId,
     agentType: 'subagent',
     subagentName: 'main-session',
-    isBuiltIn: true,
-  }
+    isBuiltIn: true}
 
   void runWithAgentContext(agentContext, async () => {
     try {
@@ -385,8 +372,7 @@ export function startBackgroundSession({
 
       for await (const event of query({
         messages: bgMessages,
-        ...queryParams,
-      })) {
+        ...queryParams})) {
         if (abortSignal.aborted) {
           // Aborted mid-stream — completeMainSessionTask won't be reached.
           // chat:killAgents path already marked notified + emitted; stopTask path did not.
@@ -401,8 +387,7 @@ export function startBackgroundSession({
           )
           if (!alreadyNotified) {
             emitTaskTerminatedSdk(taskId, 'stopped', {
-              summary: description,
-            })
+              summary: description})
           }
           return
         }
@@ -440,8 +425,7 @@ export function startBackgroundSession({
               toolCount++
               const activity: ToolActivity = {
                 toolName: block.name ?? '',
-                input: block.input as Record<string, unknown>,
-              }
+                input: block.input as Record<string, unknown>}
               recentActivities.push(activity)
               if (recentActivities.length > MAX_RECENT_ACTIVITIES) {
                 recentActivities.shift()
@@ -473,12 +457,8 @@ export function startBackgroundSession({
                   recentActivities:
                     prevProgress?.toolUseCount === toolCount
                       ? prevProgress.recentActivities
-                      : [...recentActivities],
-                },
-                messages: bgMessages,
-              },
-            },
-          }
+                      : [...recentActivities]},
+                messages: bgMessages}}}
         })
       }
 

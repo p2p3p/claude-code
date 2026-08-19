@@ -10,8 +10,7 @@ import {
   normalize,
   relative,
   resolve,
-  sep,
-} from 'path'
+  sep} from 'path'
 import { logEvent } from 'src/services/analytics/index.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { getCwd } from '../utils/cwd.js'
@@ -20,8 +19,7 @@ import { isENOENT, isFsInaccessible } from './errors.js'
 import {
   detectEncodingForResolvedPath,
   detectLineEndingsForString,
-  type LineEndingType,
-} from './fileRead.js'
+  type LineEndingType} from './fileRead.js'
 import { fileReadCache } from './fileReadCache.js'
 import { getFsImplementation, safeResolvePath } from './fsOperations.js'
 import { logError } from './log.js'
@@ -107,8 +105,7 @@ export function detectFileEncoding(filePath: string): BufferEncoding {
       logForDebugging(
         `detectFileEncoding failed for expected reason: ${error.code}`,
         {
-          level: 'debug',
-        },
+          level: 'debug'},
       )
     } else {
       logError(error)
@@ -290,8 +287,7 @@ export function isCompactLinePrefixEnabled(): boolean {
 export function addLineNumbers({
   content,
   // 1-indexed
-  startLine,
-}: {
+  startLine}: {
   content: string
   startLine: number
 }): string {
@@ -413,8 +409,7 @@ export function writeFileSyncAndFlush_DEPRECATED(
       mode?: number
     } = {
       encoding: options.encoding,
-      flush: true,
-    }
+      flush: true}
     // Only set mode in writeFileSync for new files to ensure atomic permission setting
     if (!targetExists && options.mode !== undefined) {
       writeOptions.mode = options.mode
@@ -438,8 +433,7 @@ export function writeFileSyncAndFlush_DEPRECATED(
     logForDebugging(`File ${targetPath} written atomically`)
   } catch (atomicError) {
     logForDebugging(`Failed to write file atomically: ${atomicError}`, {
-      level: 'error',
-    })
+      level: 'error'})
     logEvent('tengu_atomic_write_error', {})
 
     // Clean up temp file on error
@@ -459,8 +453,7 @@ export function writeFileSyncAndFlush_DEPRECATED(
         mode?: number
       } = {
         encoding: options.encoding,
-        flush: true,
-      }
+        flush: true}
       // Only set mode for new files
       if (!targetExists && options.mode !== undefined) {
         fallbackOptions.mode = options.mode

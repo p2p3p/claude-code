@@ -8,6 +8,7 @@
 import type { GoalState, GoalStatus } from '../../types/logs.js'
 import { getSessionId } from '../../bootstrap/state.js'
 import { logForDebugging } from '../../utils/debug.js'
+import { t } from '../../utils/i18n/index.js'
 
 export const BLOCKED_CONSECUTIVE_THRESHOLD = 3
 export const MAX_GOAL_TURNS = 150
@@ -51,12 +52,10 @@ export function setGoal(
     lastBlockReason: null,
     createdAt: now,
     updatedAt: now,
-    turnsExecuted: 0,
-  }
+    turnsExecuted: 0}
   goals.set(id, state)
   goalLog('SET', `objective="${objective.slice(0, 80)}"`, {
-    tokenBudget: state.tokenBudget,
-  })
+    tokenBudget: state.tokenBudget})
   return state
 }
 
@@ -154,8 +153,7 @@ export function completeGoal(sessionId?: string): GoalState | null {
   goal.updatedAt = now
   goalLog('COMPLETE', `goal achieved`, {
     tokensUsed: goal.tokensUsed,
-    turns: goal.turnsExecuted,
-  })
+    turns: goal.turnsExecuted})
   return goal
 }
 
@@ -203,8 +201,7 @@ export function incrementGoalTurns(sessionId?: string): number {
   goal.updatedAt = Date.now()
   goalLog('TURN', `#${goal.turnsExecuted}/${MAX_GOAL_TURNS}`, {
     status: goal.status,
-    tokensUsed: goal.tokensUsed,
-  })
+    tokensUsed: goal.tokensUsed})
   return goal.turnsExecuted
 }
 
@@ -278,18 +275,18 @@ export function formatGoalElapsed(goal: GoalState): string {
 export function formatGoalStatusLabel(status: GoalStatus): string {
   switch (status) {
     case 'active':
-      return 'Active'
+      return t('goalState.statusActive')
     case 'paused':
-      return 'Paused'
+      return t('goalState.statusPaused')
     case 'blocked':
-      return 'Blocked'
+      return t('goalState.statusBlocked')
     case 'budget_limited':
-      return 'Budget Limited'
+      return t('goalState.statusBudgetLimited')
     case 'usage_limited':
-      return 'Usage Limited'
+      return t('goalState.statusUsageLimited')
     case 'max_turns':
-      return 'Max Turns Reached'
+      return t('goalState.statusMaxTurns')
     case 'complete':
-      return 'Complete'
+      return t('goalState.statusComplete')
   }
 }

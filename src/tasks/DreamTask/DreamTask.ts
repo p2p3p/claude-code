@@ -67,8 +67,7 @@ export function registerDreamTask(
     filesTouched: [],
     turns: [],
     abortController: opts.abortController,
-    priorMtime: opts.priorMtime,
-  }
+    priorMtime: opts.priorMtime}
   registerTask(task, setAppState)
   return id
 }
@@ -98,8 +97,7 @@ export function addDreamTurn(
         newTouched.length > 0
           ? [...task.filesTouched, ...newTouched]
           : task.filesTouched,
-      turns: task.turns.slice(-(MAX_TURNS - 1)).concat(turn),
-    }
+      turns: task.turns.slice(-(MAX_TURNS - 1)).concat(turn)}
   })
 }
 
@@ -115,8 +113,7 @@ export function completeDreamTask(
     status: 'completed',
     endTime: Date.now(),
     notified: true,
-    abortController: undefined,
-  }))
+    abortController: undefined}))
 }
 
 export function failDreamTask(taskId: string, setAppState: SetAppState): void {
@@ -125,8 +122,7 @@ export function failDreamTask(taskId: string, setAppState: SetAppState): void {
     status: 'failed',
     endTime: Date.now(),
     notified: true,
-    abortController: undefined,
-  }))
+    abortController: undefined}))
 }
 
 export const DreamTask: Task = {
@@ -144,8 +140,7 @@ export const DreamTask: Task = {
         status: 'killed',
         endTime: Date.now(),
         notified: true,
-        abortController: undefined,
-      }
+        abortController: undefined}
     })
     // Rewind the lock mtime so the next session can retry. Same path as the
     // fork-failure catch in autoDream.ts. If updateTaskState was a no-op
@@ -153,5 +148,4 @@ export const DreamTask: Task = {
     if (priorMtime !== undefined) {
       await rollbackConsolidationLock(priorMtime)
     }
-  },
-}
+  }}

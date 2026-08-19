@@ -4,10 +4,10 @@ import type { Readable } from 'stream'
 import treeKill from 'tree-kill'
 import { generateTaskId } from '../Task.js'
 import { formatDuration } from './format.js'
+import { t } from './i18n/index.js'
 import {
   MAX_TASK_OUTPUT_BYTES,
-  MAX_TASK_OUTPUT_BYTES_DISPLAY,
-} from './task/diskOutput.js'
+  MAX_TASK_OUTPUT_BYTES_DISPLAY} from './task/diskOutput.js'
 import { TaskOutput } from './task/TaskOutput.js'
 
 export type ExecResult = {
@@ -263,8 +263,7 @@ class ShellCommandImpl implements ShellCommand {
   #createResultPromise(): Promise<ExecResult> {
     this.#boundAbortHandler = this.#abortHandler.bind(this)
     this.#abortSignal.addEventListener('abort', this.#boundAbortHandler, {
-      once: true,
-    })
+      once: true})
 
     // Use 'exit' not 'close': 'close' waits for stdio to close, which includes
     // grandchild processes that inherit file descriptors (e.g. `sleep 30 &`).
@@ -300,8 +299,7 @@ class ShellCommandImpl implements ShellCommand {
       stdout,
       stderr: this.taskOutput.getStderr(),
       interrupted: code === SIGKILL,
-      backgroundTaskId: this.#backgroundTaskId,
-    }
+      backgroundTaskId: this.#backgroundTaskId}
 
     if (this.taskOutput.stdoutToFile && !this.#backgroundTaskId) {
       if (this.taskOutput.outputFileRedundant) {
@@ -317,12 +315,12 @@ class ShellCommandImpl implements ShellCommand {
 
     if (this.#killedForSize) {
       result.stderr = prependStderr(
-        `Background command killed: output file exceeded ${MAX_TASK_OUTPUT_BYTES_DISPLAY}`,
+        t('toolUI.bash.killedForSize', MAX_TASK_OUTPUT_BYTES_DISPLAY),
         result.stderr,
       )
     } else if (code === SIGTERM) {
       result.stderr = prependStderr(
-        `Command timed out after ${formatDuration(this.#timeout)}`,
+        t('toolUI.bash.timedOut', formatDuration(this.#timeout)),
         result.stderr,
       )
     }
@@ -419,10 +417,9 @@ class AbortedShellCommand implements ShellCommand {
     this.result = Promise.resolve({
       code: opts?.code ?? 145,
       stdout: '',
-      stderr: opts?.stderr ?? 'Command aborted before execution',
+      stderr: opts?.stderr ?? t('toolUI.bash.commandAbortedBeforeExec'),
       interrupted: true,
-      backgroundTaskId: opts?.backgroundTaskId,
-    })
+      backgroundTaskId: opts?.backgroundTaskId})
   }
 
   background(): boolean {
@@ -440,8 +437,7 @@ export function createAbortedCommand(
 ): ShellCommand {
   return new AbortedShellCommand({
     backgroundTaskId,
-    ...opts,
-  })
+    ...opts})
 }
 
 export function createFailedCommand(preSpawnError: string): ShellCommand {
@@ -453,13 +449,11 @@ export function createFailedCommand(preSpawnError: string): ShellCommand {
       stdout: '',
       stderr: preSpawnError,
       interrupted: false,
-      preSpawnError,
-    }),
+      preSpawnError}),
     taskOutput,
     background(): boolean {
       return false
     },
     kill(): void {},
-    cleanup(): void {},
-  }
+    cleanup(): void {}}
 }

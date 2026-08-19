@@ -26,6 +26,7 @@ import type {
   UserMessage,
 } from 'src/types/message.js'
 import { logForDebugging } from 'src/utils/debug.js'
+import { t } from 'src/utils/i18n/index.js'
 import type { PermissionDecision } from 'src/utils/permissions/PermissionResult.js'
 import { getRuleByContentsForTool } from 'src/utils/permissions/permissions.js'
 import {
@@ -334,7 +335,7 @@ export type Output = z.input<OutputSchema>
 
 export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
   name: SKILL_TOOL_NAME,
-  searchHint: 'invoke a slash-command skill',
+  searchHint: t('toolUI.skill.searchHint'),
   maxResultSizeChars: 100_000,
   get inputSchema(): InputSchema {
     return inputSchema()
@@ -343,7 +344,7 @@ export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
     return outputSchema()
   },
 
-  description: async ({ skill }) => `Execute skill: ${skill}`,
+  description: async ({ skill }) => t('toolUI.skill.description', skill),
 
   prompt: async () => getPrompt(getProjectRoot()),
 
@@ -361,7 +362,7 @@ export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
     if (!trimmed) {
       return {
         result: false,
-        message: `Invalid skill format: ${skill}`,
+        message: t('toolUI.skill.invalidFormat', skill),
         errorCode: 1,
       }
     }
@@ -390,7 +391,7 @@ export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
         if (!meta) {
           return {
             result: false,
-            message: `Remote skill ${slug} was not discovered in this session. Use DiscoverSkills to find remote skills first.`,
+            message: t('toolUI.skill.remoteSkillNotDiscovered', slug),
             errorCode: 6,
           }
         }
@@ -407,7 +408,7 @@ export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
     if (!foundCommand) {
       return {
         result: false,
-        message: `Unknown skill: ${normalizedCommandName}`,
+        message: t('toolUI.skill.unknownSkill', normalizedCommandName),
         errorCode: 2,
       }
     }
@@ -416,7 +417,7 @@ export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
     if (foundCommand.disableModelInvocation) {
       return {
         result: false,
-        message: `Skill ${normalizedCommandName} cannot be used with ${SKILL_TOOL_NAME} tool due to disable-model-invocation`,
+        message: t('toolUI.skill.cannotUseWithTool', normalizedCommandName, SKILL_TOOL_NAME),
         errorCode: 4,
       }
     }
@@ -425,7 +426,7 @@ export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
     if (foundCommand.type !== 'prompt') {
       return {
         result: false,
-        message: `Skill ${normalizedCommandName} is not a prompt-based skill`,
+        message: t('toolUI.skill.notPromptBased', normalizedCommandName),
         errorCode: 5,
       }
     }
@@ -480,7 +481,7 @@ export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
       if (ruleMatches(ruleContent)) {
         return {
           behavior: 'deny',
-          message: `Skill execution blocked by permission rules`,
+          message: t('toolUI.skill.blockedByRules'),
           decisionReason: {
             type: 'rule',
             rule,
@@ -573,7 +574,7 @@ export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
     // Default behavior: ask user for permission
     return {
       behavior: 'ask',
-      message: `Execute skill: ${commandName}`,
+      message: t('toolUI.skill.executeSkill', commandName),
       decisionReason: undefined,
       suggestions,
       updatedInput: { skill, args },
@@ -647,7 +648,7 @@ export const SkillTool: Tool<InputSchema, Output, Progress> = buildTool({
     )
 
     if (!processedCommand.shouldQuery) {
-      throw new Error('Command processing failed')
+      throw new Error(t('toolUI.skill.commandProcessingFailed'))
     }
 
     // Extract metadata from the command
@@ -985,7 +986,7 @@ async function executeRemoteSkill(
   const meta = getDiscoveredRemoteSkill(slug)
   if (!meta) {
     throw new Error(
-      `Remote skill ${slug} was not discovered in this session. Use DiscoverSkills to find remote skills first.`,
+      t('toolUI.skill.remoteSkillNotDiscovered', slug),
     )
   }
 
@@ -1002,7 +1003,7 @@ async function executeRemoteSkill(
       urlScheme,
       error: msg,
     })
-    throw new Error(`Failed to load remote skill ${slug}: ${msg}`)
+    throw new Error(t('toolUI.skill.failedToLoadRemote', slug, msg))
   }
 
   const {

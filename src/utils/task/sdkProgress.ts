@@ -27,10 +27,8 @@ export function emitTaskProgress(params: {
     usage: {
       total_tokens: params.totalTokens,
       tool_uses: params.toolUses,
-      duration_ms: Date.now() - params.startTime,
-    },
+      duration_ms: Date.now() - params.startTime},
     last_tool_name: params.lastToolName,
     summary: params.summary,
-    workflow_progress: params.workflowProgress,
-  })
+    workflow_progress: params.workflowProgress})
 }

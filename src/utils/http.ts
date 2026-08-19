@@ -8,8 +8,7 @@ import {
   getAnthropicApiKey,
   getClaudeAIOAuthTokens,
   handleOAuth401Error,
-  isClaudeAISubscriber,
-} from './auth.js'
+  isClaudeAISubscriber} from './auth.js'
 import { getClaudeCodeUserAgent } from './userAgent.js'
 import { getWorkload } from './workloadContext.js'
 
@@ -72,15 +71,12 @@ export function getAuthHeaders(): AuthHeaders {
     if (!oauthTokens?.accessToken) {
       return {
         headers: {},
-        error: 'No OAuth token available',
-      }
+        error: 'No OAuth token available'}
     }
     return {
       headers: {
         Authorization: `Bearer ${oauthTokens.accessToken}`,
-        'anthropic-beta': OAUTH_BETA_HEADER,
-      },
-    }
+        'anthropic-beta': OAUTH_BETA_HEADER}}
   }
   // TODO: this will fail if the API key is being set to an LLM Gateway key
   // should we try to query keychain / credentials for a valid Anthropic key?
@@ -88,14 +84,11 @@ export function getAuthHeaders(): AuthHeaders {
   if (!apiKey) {
     return {
       headers: {},
-      error: 'No API key available',
-    }
+      error: 'No API key available'}
   }
   return {
     headers: {
-      'x-api-key': apiKey,
-    },
-  }
+      'x-api-key': apiKey}}
 }
 
 /**

@@ -5,7 +5,7 @@ import type { BalanceProvider } from './types.js'
  * DeepSeek exposes balance at `GET /user/balance`.
  *
  * Enabled when:
- *   - OPENAI_BASE_URL points at api.deepseek.com, OR
+ *   - BASE_URL points at api.deepseek.com, OR
  *   - DEEPSEEK_API_KEY is set (explicit opt-in).
  *
  * Response shape:
@@ -13,14 +13,14 @@ import type { BalanceProvider } from './types.js'
  */
 
 function getBaseUrl(): string | null {
-  const url = process.env.OPENAI_BASE_URL
+  const url = process.env.BASE_URL
   if (url && /\bapi\.deepseek\.com\b/i.test(url)) return url.replace(/\/+$/, '')
   if (process.env.DEEPSEEK_API_KEY) return 'https://api.deepseek.com'
   return null
 }
 
 function getApiKey(): string | null {
-  return process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || null
+  return process.env.API_KEY || null
 }
 
 export const deepseekBalanceProvider: BalanceProvider = {
@@ -41,10 +41,8 @@ export const deepseekBalanceProvider: BalanceProvider = {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${key}`,
-          Accept: 'application/json',
-        },
-        signal,
-      })
+          Accept: 'application/json'},
+        signal})
     } catch {
       return null
     }
@@ -79,7 +77,5 @@ export const deepseekBalanceProvider: BalanceProvider = {
     return {
       currency,
       remaining,
-      updatedAt: Math.floor(Date.now() / 1000),
-    }
-  },
-}
+      updatedAt: Math.floor(Date.now() / 1000)}
+  }}

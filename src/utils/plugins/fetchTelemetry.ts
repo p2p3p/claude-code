@@ -14,8 +14,7 @@
 
 import {
   logEvent,
-  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS as SafeString,
-} from '../../services/analytics/index.js'
+  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS as SafeString} from '../../services/analytics/index.js'
 import { OFFICIAL_MARKETPLACE_NAME } from './officialMarketplace.js'
 
 export type PluginFetchSource =
@@ -91,8 +90,7 @@ export function logPluginFetch(
     is_official: urlOrSpec ? isOfficialRepo(urlOrSpec) : false,
     outcome: outcome as SafeString,
     duration_ms: Math.round(durationMs),
-    ...(errorKind && { error_kind: errorKind as SafeString }),
-  })
+    ...(errorKind && { error_kind: errorKind as SafeString })})
 }
 
 /**

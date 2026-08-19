@@ -12,8 +12,7 @@ import type {
   AttachmentMessage,
   Message,
   RequestStartEvent,
-  StreamEvent,
-} from '../../types/message.js'
+  StreamEvent} from '../../types/message.js'
 import { createAbortController } from '../abortController.js'
 import { createAttachmentMessage } from '../attachments.js'
 import { createCombinedAbortSignal } from '../combinedAbortSignal.js'
@@ -31,8 +30,7 @@ import {
   addArgumentsToPrompt,
   createStructuredOutputTool,
   hookResponseSchema,
-  registerStructuredOutputEnforcement,
-} from './hookHelpers.js'
+  registerStructuredOutputEnforcement} from './hookHelpers.js'
 import { clearSessionHooks } from './sessionHooks.js'
 
 type QueryMessage = Message | StreamEvent | RequestStartEvent
@@ -154,8 +152,7 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
           tools,
           mainLoopModel: model,
           isNonInteractiveSession: true,
-          thinkingConfig: { type: 'disabled' as const },
-        },
+          thinkingConfig: { type: 'disabled' as const }},
         setInProgressToolUseIDs: () => {},
         getAppState() {
           const appState = toolUseContext.getAppState()
@@ -169,12 +166,8 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
               mode: 'dontAsk' as const,
               alwaysAllowRules: {
                 ...appState.toolPermissionContext.alwaysAllowRules,
-                session: [...existingSessionRules, `Read(/${transcriptPath})`],
-              },
-            },
-          }
-        },
-      }
+                session: [...existingSessionRules, `Read(/${transcriptPath})`]}}}
+        }}
 
       // Register a session-level stop hook to enforce structured output
       registerStructuredOutputEnforcement(
@@ -194,8 +187,7 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
         systemContext: {},
         canUseTool: hasPermissionsToUseTool,
         toolUseContext: agentToolUseContext,
-        querySource: 'hook_agent',
-      })) {
+        querySource: 'hook_agent'})) {
         // Process stream events to update response length in the spinner
         handleMessageFromStream(
           message,
@@ -263,12 +255,10 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
             durationMs: Date.now() - hookStartTime,
             turnCount,
             agentName:
-              agentName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          })
+              agentName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
           return {
             hook,
-            outcome: 'cancelled',
-          }
+            outcome: 'cancelled'}
         }
 
         // For other cases (e.g., agent finished without calling structured output tool),
@@ -279,12 +269,10 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
           turnCount,
           errorType: 1, // 1 = no structured output
           agentName:
-            agentName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            agentName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return {
           hook,
-          outcome: 'cancelled',
-        }
+          outcome: 'cancelled'}
       }
 
       // Return result based on structured output
@@ -297,9 +285,7 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
           outcome: 'blocking',
           blockingError: {
             blockingError: `Agent hook condition was not met: ${structuredOutputResult.reason}`,
-            command: hook.prompt,
-          },
-        }
+            command: hook.prompt}}
       }
 
       // Condition was met
@@ -308,8 +294,7 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
         durationMs: Date.now() - hookStartTime,
         turnCount,
         agentName:
-          agentName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          agentName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       return {
         hook,
         outcome: 'success',
@@ -318,9 +303,7 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
           hookName,
           toolUseID: effectiveToolUseID,
           hookEvent,
-          content: '',
-        }),
-      }
+          content: ''})}
     } catch (error) {
       parentTimeoutSignal.removeEventListener('abort', onParentTimeout)
       cleanupCombinedSignal()
@@ -328,8 +311,7 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
       if (combinedSignal.aborted) {
         return {
           hook,
-          outcome: 'cancelled',
-        }
+          outcome: 'cancelled'}
       }
       throw error
     }
@@ -340,8 +322,7 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
       durationMs: Date.now() - hookStartTime,
       errorType: 2, // 2 = general error
       agentName:
-        agentName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        agentName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return {
       hook,
       outcome: 'non_blocking_error',
@@ -352,8 +333,6 @@ When done, return your result using the ${SYNTHETIC_OUTPUT_TOOL_NAME} tool with:
         hookEvent,
         stderr: `Error executing agent hook: ${errorMsg}`,
         stdout: '',
-        exitCode: 1,
-      }),
-    }
+        exitCode: 1})}
   }
 }

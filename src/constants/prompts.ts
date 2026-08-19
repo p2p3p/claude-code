@@ -6,12 +6,13 @@ import { getCwd } from '../utils/cwd.js'
 import { getIsNonInteractiveSession } from '../bootstrap/state.js'
 import { getCurrentWorktreeSession } from '../utils/worktree.js'
 import { getSessionStartDate } from './common.js'
-import { getInitialSettings } from '../utils/settings/settings.js'
+import { getGlobalConfig } from '../utils/config.js'
+import { getResolvedLanguage } from '../utils/language.js'
+import { t } from '../utils/i18n/index.js'
 import { isPoorModeActive } from '../commands/poor/poorMode.js'
 import {
   AGENT_TOOL_NAME,
-  VERIFICATION_AGENT_TYPE,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/constants.js'
+  VERIFICATION_AGENT_TYPE} from '@claude-code-best/builtin-tools/tools/AgentTool/constants.js'
 import { FILE_WRITE_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileWriteTool/prompt.js'
 import { FILE_READ_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileReadTool/prompt.js'
 import { FILE_EDIT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileEditTool/constants.js'
@@ -23,29 +24,25 @@ import { BASH_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/BashTool/t
 import { POWERSHELL_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/PowerShellTool/toolName.js'
 import {
   getCanonicalName,
-  getMarketingNameForModel,
-} from '../utils/model/model.js'
+  getMarketingNameForModel} from '../utils/model/model.js'
 import { getSkillToolCommands } from 'src/commands.js'
 import { SKILL_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/SkillTool/constants.js'
 import { EXECUTE_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/ExecuteTool/constants.js'
 import { getOutputStyleConfig } from './outputStyles.js'
 import type {
   MCPServerConnection,
-  ConnectedMCPServer,
-} from '../services/mcp/types.js'
+  ConnectedMCPServer} from '../services/mcp/types.js'
 import { GLOB_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/GlobTool/prompt.js'
 import { GREP_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/GrepTool/prompt.js'
 import { hasEmbeddedSearchTools } from 'src/utils/embeddedTools.js'
 import { ASK_USER_QUESTION_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/AskUserQuestionTool/prompt.js'
 import {
   EXPLORE_AGENT,
-  EXPLORE_AGENT_MIN_QUERIES,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/built-in/exploreAgent.js'
+  EXPLORE_AGENT_MIN_QUERIES} from '@claude-code-best/builtin-tools/tools/AgentTool/built-in/exploreAgent.js'
 import { areExplorePlanAgentsEnabled } from '@claude-code-best/builtin-tools/tools/AgentTool/builtInAgents.js'
 import {
   isScratchpadEnabled,
-  getScratchpadDir,
-} from '../utils/permissions/filesystem.js'
+  getScratchpadDir} from '../utils/permissions/filesystem.js'
 import { isEnvTruthy } from '../utils/envUtils.js'
 import { isReplModeEnabled } from '@claude-code-best/builtin-tools/tools/REPLTool/constants.js'
 import { feature } from 'bun:bundle'
@@ -55,8 +52,7 @@ import { isForkSubagentEnabled } from '@claude-code-best/builtin-tools/tools/Age
 import {
   systemPromptSection,
   DANGEROUS_uncachedSystemPromptSection,
-  resolveSystemPromptSections,
-} from './systemPromptSections.js'
+  resolveSystemPromptSections} from './systemPromptSections.js'
 import { SLEEP_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/SleepTool/prompt.js'
 import { TICK_TAG } from './xml.js'
 import { logForDebugging } from '../utils/debug.js'
@@ -121,8 +117,7 @@ const FRONTIER_MODEL_NAME = 'Claude Opus 4.7'
 const CLAUDE_LATEST_MODEL_IDS = {
   opus: 'claude-opus-4-7',
   sonnet: 'claude-sonnet-4-6',
-  haiku: 'claude-haiku-4-5-20251001',
-}
+  haiku: 'claude-haiku-4-5-20251001'}
 
 function getHooksSection(): string {
   return `Users may configure 'hooks', shell commands that execute in response to events like tool calls, in settings. Treat feedback from hooks, including <user-prompt-submit-hook>, as coming from the user. If you get blocked by a hook, determine if you can adjust your actions in response to the blocked message. If not, ask the user to check their hooks configuration.`
@@ -139,13 +134,26 @@ function getAntModelOverrideSection(): string | null {
   return getAntModelOverrideConfig()?.defaultSystemPromptSuffix || null
 }
 
+// Tracks the language used in the last generated system prompt, so an
+// in-session config change (/lang or editing the config file) emits a
+// prominent "language changed" signal to the model on the next turn.
+let lastPromptLanguage: string | undefined
+
 function getLanguageSection(
   languagePreference: string | undefined,
 ): string | null {
   if (!languagePreference) return null
 
-  return `# Language
-Always respond in ${languagePreference}. Use ${languagePreference} for all explanations, comments, and communications with the user. Technical terms and code identifiers should remain in their original form.`
+  const name = t('systemprompt.languageName', languagePreference)
+  const section = t('systemprompt.languageSection', name)
+
+  const changedFrom = lastPromptLanguage
+  lastPromptLanguage = languagePreference
+  if (changedFrom && changedFrom !== languagePreference) {
+    const prevName = t('systemprompt.languageName', changedFrom)
+    return `${t('systemprompt.languageChanged', prevName, name)}\n\n${section}`
+  }
+  return section
 }
 
 function getOutputStyleSection(
@@ -439,7 +447,6 @@ export async function getSystemPrompt(
     computeSimpleEnvInfo(model, additionalWorkingDirectories),
   ])
 
-  const settings = getInitialSettings()
   const enabledTools = new Set(tools.map(_ => _.name))
 
   if (
@@ -454,7 +461,7 @@ ${CYBER_RISK_INSTRUCTION}`,
       getSystemRemindersSection(),
       await loadMemoryPrompt(),
       envInfo,
-      getLanguageSection(settings.language),
+      getLanguageSection(getResolvedLanguage()),
       // When delta enabled, instructions are announced via persisted
       // mcp_instructions_delta attachments (attachments.ts) instead.
       isMcpInstructionsDeltaEnabled()
@@ -477,9 +484,6 @@ ${CYBER_RISK_INSTRUCTION}`,
     ),
     systemPromptSection('env_info_simple', () =>
       computeSimpleEnvInfo(model, additionalWorkingDirectories),
-    ),
-    systemPromptSection('language', () =>
-      getLanguageSection(settings.language),
     ),
     systemPromptSection('output_style', () =>
       getOutputStyleSection(outputStyleConfig),
@@ -519,6 +523,13 @@ ${CYBER_RISK_INSTRUCTION}`,
     ...(feature('KAIROS') || feature('KAIROS_BRIEF')
       ? [systemPromptSection('brief', () => getBriefSection())]
       : []),
+    // Language instruction at the very end — recompute every turn so it tracks
+    // user's in-session language switch (/lang). Must NOT be cached.
+    DANGEROUS_uncachedSystemPromptSection(
+      'language',
+      () => getLanguageSection(getResolvedLanguage()),
+      'Language changes via /lang must take effect immediately in the system prompt',
+    ),
   ]
 
   const resolvedDynamicSections =

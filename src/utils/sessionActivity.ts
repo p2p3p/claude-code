@@ -31,8 +31,7 @@ function startHeartbeatTimer(): void {
   clearIdleTimer()
   heartbeatTimer = setInterval(() => {
     logForDiagnosticsNoPII('debug', 'session_keepalive_heartbeat', {
-      refcount,
-    })
+      refcount})
     if (isEnvTruthy(process.env.CLAUDE_CODE_REMOTE_SEND_KEEPALIVES)) {
       activityCallback?.()
     }
@@ -108,8 +107,7 @@ export function startSessionActivity(reason: SessionActivityReason): void {
         oldest_activity_ms:
           refcount > 0 && oldestActivityStartedAt !== null
             ? Date.now() - oldestActivityStartedAt
-            : null,
-      })
+            : null})
     })
   }
 }

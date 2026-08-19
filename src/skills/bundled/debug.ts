@@ -39,8 +39,7 @@ export function registerDebugSkill(): void {
         try {
           const { buffer, bytesRead } = await fd.read({
             buffer: Buffer.alloc(readSize),
-            position: startOffset,
-          })
+            position: startOffset})
           const tail = buffer
             .toString('utf-8', 0, bytesRead)
             .split('\n')
@@ -98,6 +97,5 @@ Remember that settings are in:
 5. Suggest concrete fixes or next steps
 `
       return [{ type: 'text', text: prompt }]
-    },
-  })
+    }})
 }

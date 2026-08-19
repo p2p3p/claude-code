@@ -73,16 +73,14 @@ export function parseLocalVaultArgs(args: string): LocalVaultArgs {
     if (HYPHEN_LIKE_PREFIX_REGEX.test(key)) {
       return {
         action: 'invalid',
-        reason: `Key name must not start with "-" or a hyphen-like character (reserved for flags). ${USAGE}`,
-      }
+        reason: `Key name must not start with "-" or a hyphen-like character (reserved for flags). ${USAGE}`}
     }
     // D4: value is tokens[2..] joined, not substring math (handles keys with repeated substrings)
     const rest = tokens.slice(2).join(' ')
     if (!rest) {
       return {
         action: 'invalid',
-        reason: `set requires a value. ${USAGE}`,
-      }
+        reason: `set requires a value. ${USAGE}`}
     }
     return { action: 'set', key, value: rest }
   }
@@ -107,14 +105,12 @@ export function parseLocalVaultArgs(args: string): LocalVaultArgs {
     if (!key) {
       return {
         action: 'invalid',
-        reason: `delete requires a key name. ${USAGE}`,
-      }
+        reason: `delete requires a key name. ${USAGE}`}
     }
     return { action: 'delete', key }
   }
 
   return {
     action: 'invalid',
-    reason: `Unknown sub-command "${subCmd}". ${USAGE}`,
-  }
+    reason: `Unknown sub-command "${subCmd}". ${USAGE}`}
 }

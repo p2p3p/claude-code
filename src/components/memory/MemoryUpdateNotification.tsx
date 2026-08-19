@@ -1,6 +1,7 @@
 import { homedir } from 'os';
 import { relative } from 'path';
 import React from 'react';
+import { t } from '../../utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import { getCwd } from '../../utils/cwd.js';
 
@@ -26,7 +27,7 @@ export function MemoryUpdateNotification({ memoryPath }: { memoryPath: string })
 
   return (
     <Box flexDirection="column" flexGrow={1}>
-      <Text color="text">Memory updated in {displayPath} · /memory to edit</Text>
+      <Text color="text">{t('ui.memoryUpdatedIn', displayPath)}</Text>
     </Box>
   );
 }

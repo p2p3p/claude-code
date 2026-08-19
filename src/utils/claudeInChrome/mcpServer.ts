@@ -3,8 +3,7 @@ import {
   createClaudeForChromeMcpServer,
   type Logger,
   type LoggerDetail,
-  type PermissionMode,
-} from '@ant/claude-for-chrome-mcp'
+  type PermissionMode} from '@ant/claude-for-chrome-mcp'
 import { initializeAnalyticsSink } from '../../services/analytics/sink.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { format } from 'util'
@@ -13,8 +12,7 @@ import { shutdown1PEventLogging } from '../../services/analytics/firstPartyEvent
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 
 import { getClaudeAIOAuthTokens } from '../auth.js'
 import { enableConfigs, getGlobalConfig, saveGlobalConfig } from '../config.js'
@@ -22,6 +20,7 @@ import { logForDebugging } from '../debug.js'
 import { isEnvTruthy } from '../envUtils.js'
 import { sideQuery } from '../sideQuery.js'
 import { getAllSocketPaths, getSecureSocketPath } from './common.js'
+import { t } from '../i18n/index.js'
 
 const EXTENSION_DOWNLOAD_URL = 'https://claude.ai/chrome'
 const BUG_REPORT_URL =
@@ -110,12 +109,10 @@ export function createChromeContext(
     getSocketPaths: getAllSocketPaths,
     clientTypeId: 'claude-code',
     onAuthenticationError: () => {
-      logger.warn(
-        'Authentication error occurred. Please ensure you are logged into the Claude browser extension with the same claude.ai account as Claude Code.',
-      )
+      logger.warn(t('claudeInChrome.authError'))
     },
     onToolCallDisconnected: () => {
-      return `Browser extension is not connected. Please ensure the Claude browser extension is installed and running (${EXTENSION_DOWNLOAD_URL}), and that you are logged into claude.ai with the same account as Claude Code. If this is your first time connecting to Chrome, you may need to restart Chrome for the installation to take effect. If you continue to experience issues, please report a bug: ${BUG_REPORT_URL}`
+      return t('claudeInChrome.notConnected', EXTENSION_DOWNLOAD_URL, BUG_REPORT_URL)
     },
     onExtensionPaired: (deviceId: string, name: string) => {
       saveGlobalConfig(config => {
@@ -129,9 +126,7 @@ export function createChromeContext(
           ...config,
           chromeExtension: {
             pairedDeviceId: deviceId,
-            pairedDeviceName: name,
-          },
-        }
+            pairedDeviceName: name}}
       })
       logger.info(`Paired with "${name}" (${deviceId.slice(0, 8)})`)
     },
@@ -147,9 +142,7 @@ export function createChromeContext(
         getOAuthToken: async () => {
           return getClaudeAIOAuthTokens()?.accessToken ?? ''
         },
-        ...(isLocalBridge() && { devUserId: 'dev_user_local' }),
-      },
-    }),
+        ...(isLocalBridge() && { devUserId: 'dev_user_local' })}}),
     ...(initialPermissionMode && { initialPermissionMode }),
     // Wire inference for the browser_task tool — the chrome-mcp server runs
     // a lightning-mode agent loop in Node and calls the extension's
@@ -197,8 +190,7 @@ export function createChromeContext(
           signal: req.signal,
           skipSystemPromptPrefix: true,
           tools: [],
-          querySource: 'chrome_mcp',
-        })
+          querySource: 'chrome_mcp'})
         // BetaContentBlock is TextBlock | ThinkingBlock | ToolUseBlock | ...
         // Only text blocks carry the model's command output.
         const textBlocks: Array<{ type: 'text'; text: string }> = []
@@ -212,11 +204,8 @@ export function createChromeContext(
           stop_reason: response.stop_reason,
           usage: {
             input_tokens: response.usage.input_tokens,
-            output_tokens: response.usage.output_tokens,
-          },
-        }
-      },
-    }),
+            output_tokens: response.usage.output_tokens}}
+      }}),
     trackEvent: (eventName, metadata) => {
       const safeMetadata: {
         [key: string]:
@@ -243,8 +232,7 @@ export function createChromeContext(
         }
       }
       logEvent(eventName, safeMetadata)
-    },
-  }
+    }}
 }
 
 export async function runClaudeInChromeMcpServer(): Promise<void> {

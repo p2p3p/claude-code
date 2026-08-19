@@ -18,8 +18,7 @@
 
 import {
   discoverAuthorizationServerMetadata,
-  discoverOAuthProtectedResourceMetadata,
-} from '@modelcontextprotocol/sdk/client/auth.js'
+  discoverOAuthProtectedResourceMetadata} from '@modelcontextprotocol/sdk/client/auth.js'
 import type { FetchLike } from '@modelcontextprotocol/sdk/shared/transport.js'
 import { z } from 'zod/v4'
 import { lazySchema } from '../../utils/lazySchema.js'
@@ -105,8 +104,7 @@ const TokenExchangeResponseSchema = lazySchema(() =>
     // z.coerce tolerates IdPs that send expires_in as a string (common in
     // PHP-backed IdPs) — technically non-conformant JSON but widespread.
     expires_in: z.coerce.number().optional(),
-    scope: z.string().optional(),
-  }),
+    scope: z.string().optional()}),
 )
 
 const JwtBearerResponseSchema = lazySchema(() =>
@@ -117,8 +115,7 @@ const JwtBearerResponseSchema = lazySchema(() =>
     token_type: z.string().default('Bearer'),
     expires_in: z.coerce.number().optional(),
     scope: z.string().optional(),
-    refresh_token: z.string().optional(),
-  }),
+    refresh_token: z.string().optional()}),
 )
 
 // ─── Layer 2: Discovery ─────────────────────────────────────────────────────
@@ -160,8 +157,7 @@ export async function discoverProtectedResource(
   }
   return {
     resource: prm.resource,
-    authorization_servers: prm.authorization_servers,
-  }
+    authorization_servers: prm.authorization_servers}
 }
 
 export type AuthorizationServerMetadata = {
@@ -180,8 +176,7 @@ export async function discoverAuthorizationServer(
   opts?: { fetchFn?: FetchLike },
 ): Promise<AuthorizationServerMetadata> {
   const meta = await discoverAuthorizationServerMetadata(asUrl, {
-    fetchFn: opts?.fetchFn ?? defaultFetch,
-  })
+    fetchFn: opts?.fetchFn ?? defaultFetch})
   if (!meta?.issuer || !meta.token_endpoint) {
     throw new Error(
       `XAA: AS metadata discovery failed: no valid metadata at ${asUrl}`,
@@ -205,8 +200,7 @@ export async function discoverAuthorizationServer(
     token_endpoint: meta.token_endpoint,
     grant_types_supported: meta.grant_types_supported,
     token_endpoint_auth_methods_supported:
-      meta.token_endpoint_auth_methods_supported,
-  }
+      meta.token_endpoint_auth_methods_supported}
 }
 
 // ─── Layer 2: Exchange ──────────────────────────────────────────────────────
@@ -248,8 +242,7 @@ export async function requestJwtAuthorizationGrant(opts: {
     resource: opts.resource,
     subject_token: opts.idToken,
     subject_token_type: ID_TOKEN_TYPE,
-    client_id: opts.clientId,
-  })
+    client_id: opts.clientId})
   if (opts.clientSecret) {
     params.set('client_secret', opts.clientSecret)
   }
@@ -260,8 +253,7 @@ export async function requestJwtAuthorizationGrant(opts: {
   const res = await fetchFn(opts.tokenEndpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params,
-  })
+    body: params})
   if (!res.ok) {
     const body = redactTokens(await res.text()).slice(0, 200)
     // 4xx → id_token rejected (invalid_grant etc.), clear cache.
@@ -305,8 +297,7 @@ export async function requestJwtAuthorizationGrant(opts: {
   return {
     jwtAuthGrant: result.access_token,
     expiresIn: result.expires_in,
-    scope: result.scope,
-  }
+    scope: result.scope}
 }
 
 export type XaaTokenResult = {
@@ -348,15 +339,13 @@ export async function exchangeJwtAuthGrant(opts: {
 
   const params = new URLSearchParams({
     grant_type: JWT_BEARER_GRANT,
-    assertion: opts.assertion,
-  })
+    assertion: opts.assertion})
   if (opts.scope) {
     params.set('scope', opts.scope)
   }
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-  }
+    'Content-Type': 'application/x-www-form-urlencoded'}
   if (authMethod === 'client_secret_basic') {
     const basicAuth = Buffer.from(
       `${encodeURIComponent(opts.clientId)}:${encodeURIComponent(opts.clientSecret)}`,
@@ -370,8 +359,7 @@ export async function exchangeJwtAuthGrant(opts: {
   const res = await fetchFn(opts.tokenEndpoint, {
     method: 'POST',
     headers,
-    body: params,
-  })
+    body: params})
   if (!res.ok) {
     const body = redactTokens(await res.text()).slice(0, 200)
     throw new Error(`XAA: jwt-bearer grant failed: HTTP ${res.status}: ${body}`)
@@ -492,8 +480,7 @@ export async function performCrossAppAccess(
     idToken: config.idpIdToken,
     clientId: config.idpClientId,
     clientSecret: config.idpClientSecret,
-    fetchFn,
-  })
+    fetchFn})
   logMCPDebug(serverName, `XAA: ID-JAG obtained`)
 
   logMCPDebug(serverName, `XAA: exchanging ID-JAG for access_token at AS`)
@@ -503,8 +490,7 @@ export async function performCrossAppAccess(
     clientId: config.clientId,
     clientSecret: config.clientSecret,
     authMethod,
-    fetchFn,
-  })
+    fetchFn})
   logMCPDebug(serverName, `XAA: access_token obtained`)
 
   return { ...tokens, authorizationServerUrl: asMeta.issuer }

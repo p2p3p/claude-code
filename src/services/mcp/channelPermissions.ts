@@ -235,6 +235,5 @@ export function createChannelPermissionCallbacks(): ChannelPermissionCallbacks {
       pending.delete(key)
       resolver({ behavior, fromServer })
       return true
-    },
-  }
+    }}
 }

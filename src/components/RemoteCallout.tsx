@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
+import { t } from '../utils/i18n/index.js'
 import { isBridgeEnabled } from '../bridge/bridgeEnabled.js';
 import { Box, Text } from '@anthropic/ink';
 import { getClaudeAIOAuthTokens } from '../utils/auth.js';
@@ -35,19 +36,17 @@ export function RemoteCallout({ onDone }: Props): React.ReactNode {
 
   const options: OptionWithDescription<RemoteCalloutSelection>[] = [
     {
-      label: 'Enable Remote Control for this session',
-      description: 'Opens a secure connection to claude.ai.',
-      value: 'enable',
-    },
+      label: t('remoteCallout.labelEnable'),
+      description: t('remoteCallout.descOpenConnection'),
+      value: 'enable'},
     {
-      label: 'Never mind',
-      description: 'You can always enable it later with /remote-control.',
-      value: 'dismiss',
-    },
+      label: t('remoteCallout.labelNeverMind'),
+      description: t('remoteCallout.descEnableLater'),
+      value: 'dismiss'},
   ];
 
   return (
-    <PermissionDialog title="Remote Control">
+    <PermissionDialog title={t('remotecallout.remoteControl')}>
       <Box flexDirection="column" paddingX={2} paddingY={1}>
         <Box marginBottom={1} flexDirection="column">
           <Text>
@@ -55,7 +54,7 @@ export function RemoteCallout({ onDone }: Props): React.ReactNode {
             pick up where you left off on any device.
           </Text>
           <Text> </Text>
-          <Text>You can disconnect remote access anytime by running /remote-control again.</Text>
+          <Text>{t('remotecallout.youCanDisconnectRemoteAccessAnytimeByRunningRemoteControlAgain')}</Text>
         </Box>
         <Box>
           <Select options={options} onChange={handleSelect} onCancel={handleCancel} />

@@ -5,14 +5,14 @@ import { useMcpToggleEnabled } from '../../services/mcp/MCPConnectionManager.js'
 import { useAppState } from '../../state/AppState.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { PluginSettings } from '../plugin/PluginSettings.js';
+import { t } from '../../utils/i18n/index.js';
 
 // TODO: This is a hack to get the context value from toggleMcpServer (useContext only works in a component)
 // Ideally, all MCP state and functions would be in global state.
 function MCPToggle({
   action,
   target,
-  onComplete,
-}: {
+  onComplete}: {
   action: 'enable' | 'disable';
   target: string;
   onComplete: (result: string) => void;
@@ -35,8 +35,8 @@ function MCPToggle({
     if (toToggle.length === 0) {
       onComplete(
         target === 'all'
-          ? `All MCP servers are already ${isEnabling ? 'enabled' : 'disabled'}`
-          : `MCP server "${target}" not found`,
+          ? t('cmdUI.mcpAllEnabled')
+          : t('cmdUI.mcpNotFound', target),
       );
       return;
     }
@@ -47,8 +47,8 @@ function MCPToggle({
 
     onComplete(
       target === 'all'
-        ? `${isEnabling ? 'Enabled' : 'Disabled'} ${toToggle.length} MCP server(s)`
-        : `MCP server "${target}" ${isEnabling ? 'enabled' : 'disabled'}`,
+        ? t('cmdUI.mcpToggleCount', isEnabling ? 'Enabled' : 'Disabled', toToggle.length)
+        : isEnabling ? t('cmdUI.mcpEnabled', target) : t('cmdUI.mcpDisabled', target),
     );
   }, [action, target, mcpClients, toggleMcpServer, onComplete]);
 

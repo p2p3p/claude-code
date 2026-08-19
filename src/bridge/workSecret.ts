@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { t } from '../utils/i18n/index.js'
 import { jsonParse, jsonStringify } from '../utils/slowOperations.js'
 import type { WorkSecret } from './types.js'
 
@@ -13,7 +14,7 @@ export function decodeWorkSecret(secret: string): WorkSecret {
     parsed.version !== 1
   ) {
     throw new Error(
-      `Unsupported work secret version: ${parsed && typeof parsed === 'object' && 'version' in parsed ? parsed.version : 'unknown'}`,
+      t('workSecret.unsupportedVersion', parsed && typeof parsed === 'object' && 'version' in parsed ? parsed.version : 'unknown'),
     )
   }
   const obj = parsed as Record<string, unknown>
@@ -21,12 +22,10 @@ export function decodeWorkSecret(secret: string): WorkSecret {
     typeof obj.session_ingress_token !== 'string' ||
     obj.session_ingress_token.length === 0
   ) {
-    throw new Error(
-      'Invalid work secret: missing or empty session_ingress_token',
-    )
+    throw new Error(t('workSecret.missingSessionToken'))
   }
   if (typeof obj.api_base_url !== 'string') {
-    throw new Error('Invalid work secret: missing api_base_url')
+    throw new Error(t('workSecret.missingApiBaseUrl'))
   }
   return parsed as WorkSecret
 }
@@ -105,10 +104,8 @@ export async function registerWorker(
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-      },
-      timeout: 10_000,
-    },
+        'anthropic-version': '2023-06-01'},
+      timeout: 10_000},
   )
   // protojson serializes int64 as a string to avoid JS number precision loss;
   // the Go side may also return a number depending on encoder settings.
@@ -120,7 +117,7 @@ export async function registerWorker(
     !Number.isSafeInteger(epoch)
   ) {
     throw new Error(
-      `registerWorker: invalid worker_epoch in response: ${jsonStringify(response.data)}`,
+      t('workSecret.invalidWorkerEpoch', jsonStringify(response.data)),
     )
   }
   return epoch

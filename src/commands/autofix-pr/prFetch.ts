@@ -8,8 +8,7 @@ import { spawn } from 'node:child_process'
 import {
   type AutofixOutcomeProbeResult,
   type PrViewPayload,
-  summariseAutofixOutcome,
-} from './prOutcomeCheck.js'
+  summariseAutofixOutcome} from './prOutcomeCheck.js'
 
 export interface AutofixOutcomeProbeInput {
   owner: string
@@ -56,8 +55,7 @@ export async function checkPrAutofixOutcome(
     owner,
     repo,
     prNumber,
-    initialHeadSha,
-  })
+    initialHeadSha})
 }
 
 /**

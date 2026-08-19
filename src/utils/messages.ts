@@ -10,15 +10,13 @@ import type {
   ThinkingBlockParam,
   ToolResultBlockParam,
   ToolUseBlock,
-  ToolUseBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+  ToolUseBlockParam} from '@anthropic-ai/sdk/resources/index.mjs'
 import { randomUUID, type UUID } from 'crypto'
 import isObject from 'lodash-es/isObject.js'
 import last from 'lodash-es/last.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { sanitizeToolNameForAnalytics } from 'src/services/analytics/metadata.js'
 import type { AgentId } from 'src/types/ids.js'
 import { companionIntroText } from '../buddy/prompt.js'
@@ -27,15 +25,13 @@ import { OUTPUT_STYLE_CONFIG } from '../constants/outputStyles.js'
 import { isAutoMemoryEnabled } from '../memdir/paths.js'
 import {
   checkStatsigFeatureGate_CACHED_MAY_BE_STALE,
-  getFeatureValue_CACHED_MAY_BE_STALE,
-} from '../services/analytics/growthbook.js'
+  getFeatureValue_CACHED_MAY_BE_STALE} from '../services/analytics/growthbook.js'
 import {
   getImageTooLargeErrorMessage,
   getPdfInvalidErrorMessage,
   getPdfPasswordProtectedErrorMessage,
   getPdfTooLargeErrorMessage,
-  getRequestTooLargeErrorMessage,
-} from '../services/api/errors.js'
+  getRequestTooLargeErrorMessage} from '../services/api/errors.js'
 import type { AnyObject, Progress } from '../Tool.js'
 import { isConnectorTextBlock } from '../types/connectorText.js'
 import type {
@@ -70,8 +66,7 @@ import type {
   SystemTurnDurationMessage,
   TombstoneMessage,
   ToolUseSummaryMessage,
-  UserMessage,
-} from '../types/message.js'
+  UserMessage} from '../types/message.js'
 import { isAdvisorBlock } from './advisor.js'
 import { isAgentSwarmsEnabled } from './agentSwarmsEnabled.js'
 import { count } from './array.js'
@@ -79,8 +74,7 @@ import {
   type Attachment,
   type HookAttachment,
   type HookPermissionDecisionAttachment,
-  memoryHeader,
-} from './attachments.js'
+  memoryHeader} from './attachments.js'
 import { quote } from './bash/shellQuote.js'
 import { formatNumber, formatTokens } from './format.js'
 import { getPewterLedgerVariant } from './planModeV2.js'
@@ -98,12 +92,10 @@ import type {
   BetaMessage,
   BetaRedactedThinkingBlock,
   BetaThinkingBlock,
-  BetaToolUseBlock,
-} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
+  BetaToolUseBlock} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
 import type {
   HookEvent,
-  SDKAssistantMessageError,
-} from 'src/entrypoints/agentSdkTypes.js'
+  SDKAssistantMessageError} from 'src/entrypoints/agentSdkTypes.js'
 import { EXPLORE_AGENT } from '@claude-code-best/builtin-tools/tools/AgentTool/built-in/exploreAgent.js'
 import { PLAN_AGENT } from '@claude-code-best/builtin-tools/tools/AgentTool/built-in/planAgent.js'
 import { areExplorePlanAgentsEnabled } from '@claude-code-best/builtin-tools/tools/AgentTool/builtInAgents.js'
@@ -114,8 +106,7 @@ import { ExitPlanModeV2Tool } from '@claude-code-best/builtin-tools/tools/ExitPl
 import { FileEditTool } from '@claude-code-best/builtin-tools/tools/FileEditTool/FileEditTool.js'
 import {
   FILE_READ_TOOL_NAME,
-  MAX_LINES_TO_READ,
-} from '@claude-code-best/builtin-tools/tools/FileReadTool/prompt.js'
+  MAX_LINES_TO_READ} from '@claude-code-best/builtin-tools/tools/FileReadTool/prompt.js'
 import { FileWriteTool } from '@claude-code-best/builtin-tools/tools/FileWriteTool/FileWriteTool.js'
 import { GLOB_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/GlobTool/prompt.js'
 import { GREP_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/GrepTool/prompt.js'
@@ -127,19 +118,16 @@ import {
   COMMAND_MESSAGE_TAG,
   COMMAND_NAME_TAG,
   LOCAL_COMMAND_CAVEAT_TAG,
-  LOCAL_COMMAND_STDOUT_TAG,
-} from '../constants/xml.js'
+  LOCAL_COMMAND_STDOUT_TAG} from '../constants/xml.js'
 import { DiagnosticTrackingService } from '../services/diagnosticTracking.js'
 import {
   findToolByName,
   type Tool,
   type Tools,
-  toolMatchesName,
-} from '../Tool.js'
+  toolMatchesName} from '../Tool.js'
 import {
   FileReadTool,
-  type Output as FileReadToolOutput,
-} from '@claude-code-best/builtin-tools/tools/FileReadTool/FileReadTool.js'
+  type Output as FileReadToolOutput} from '@claude-code-best/builtin-tools/tools/FileReadTool/FileReadTool.js'
 import { SEND_MESSAGE_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/SendMessageTool/constants.js'
 import { TASK_CREATE_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/TaskCreateTool/constants.js'
 import { TASK_OUTPUT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/TaskOutputTool/constants.js'
@@ -158,8 +146,7 @@ import { normalizeLegacyToolName } from './permissions/permissionRuleParser.js'
 import {
   getPlanModeV2AgentCount,
   getPlanModeV2ExploreAgentCount,
-  isPlanModeInterviewPhaseEnabled,
-} from './planModeV2.js'
+  isPlanModeInterviewPhaseEnabled} from './planModeV2.js'
 import { escapeRegExp } from './stringUtils.js'
 import { isTodoV2Enabled } from './tasks.js'
 
@@ -171,8 +158,7 @@ function getTeammateMailbox(): typeof import('./teammateMailbox.js') {
 
 import {
   isToolReferenceBlock,
-  isSearchExtraToolsEnabledOptimistic,
-} from './searchExtraTools.js'
+  isSearchExtraToolsEnabledOptimistic} from './searchExtraTools.js'
 
 const MEMORY_CORRECTION_HINT =
   "\n\nNote: The user's next message may contain a correction or preference. Pay close attention — if they explain what went wrong or how they'd prefer you to work, consider saving that to memory for future sessions."
@@ -371,13 +357,10 @@ function baseCreateAssistantMessage({
     service_tier: null,
     cache_creation: {
       ephemeral_1h_input_tokens: 0,
-      ephemeral_5m_input_tokens: 0,
-    },
+      ephemeral_5m_input_tokens: 0},
     inference_geo: null,
     iterations: null,
-    speed: null,
-  },
-}: {
+    speed: null}}: {
   content: BetaContentBlock[]
   isApiErrorMessage?: boolean
   apiError?: AssistantMessage['apiError']
@@ -400,22 +383,19 @@ function baseCreateAssistantMessage({
       type: 'message',
       usage,
       content: content as ContentBlock[],
-      context_management: null,
-    },
+      context_management: null},
     requestId: undefined,
     apiError,
     error,
     errorDetails,
     isApiErrorMessage,
-    isVirtual,
-  }
+    isVirtual}
 }
 
 export function createAssistantMessage({
   content,
   usage,
-  isVirtual,
-}: {
+  isVirtual}: {
   content: string | BetaContentBlock[]
   usage?: Usage
   isVirtual?: true
@@ -426,21 +406,18 @@ export function createAssistantMessage({
         ? [
             {
               type: 'text' as const,
-              text: content === '' ? NO_CONTENT_MESSAGE : content,
-            } as BetaContentBlock, // NOTE: citations field is not supported in Bedrock API
+              text: content === '' ? NO_CONTENT_MESSAGE : content} as BetaContentBlock, // NOTE: citations field is not supported in Bedrock API
           ]
         : content,
     usage,
-    isVirtual,
-  })
+    isVirtual})
 }
 
 export function createAssistantAPIErrorMessage({
   content,
   apiError,
   error,
-  errorDetails,
-}: {
+  errorDetails}: {
   content: string
   apiError?: AssistantMessage['apiError']
   error?: SDKAssistantMessageError
@@ -450,14 +427,12 @@ export function createAssistantAPIErrorMessage({
     content: [
       {
         type: 'text' as const,
-        text: content === '' ? NO_CONTENT_MESSAGE : content,
-      } as BetaContentBlock, // NOTE: citations field is not supported in Bedrock API
+        text: content === '' ? NO_CONTENT_MESSAGE : content} as BetaContentBlock, // NOTE: citations field is not supported in Bedrock API
     ],
     isApiErrorMessage: true,
     apiError,
     error,
-    errorDetails,
-  })
+    errorDetails})
 }
 
 export function createUserMessage({
@@ -474,8 +449,7 @@ export function createUserMessage({
   imagePasteIds,
   sourceToolAssistantUUID,
   permissionMode,
-  origin,
-}: {
+  origin}: {
   content: string | ContentBlockParam[]
   isMeta?: true
   isVisibleInTranscriptOnly?: true
@@ -520,15 +494,13 @@ export function createUserMessage({
     imagePasteIds,
     sourceToolAssistantUUID,
     permissionMode,
-    origin,
-  }
+    origin}
   return m
 }
 
 export function prepareUserContent({
   inputString,
-  precedingInputBlocks,
-}: {
+  precedingInputBlocks}: {
   inputString: string
   precedingInputBlocks: ContentBlockParam[]
 }): string | ContentBlockParam[] {
@@ -540,14 +512,12 @@ export function prepareUserContent({
     ...precedingInputBlocks,
     {
       text: inputString,
-      type: 'text',
-    },
+      type: 'text'},
   ]
 }
 
 export function createUserInterruptionMessage({
-  toolUse = false,
-}: {
+  toolUse = false}: {
   toolUse?: boolean
 }): UserMessage {
   const content = toolUse ? INTERRUPT_MESSAGE_FOR_TOOL_USE : INTERRUPT_MESSAGE
@@ -556,10 +526,8 @@ export function createUserInterruptionMessage({
     content: [
       {
         type: 'text',
-        text: content,
-      },
-    ],
-  })
+        text: content},
+    ]})
 }
 
 /**
@@ -569,8 +537,7 @@ export function createUserInterruptionMessage({
 export function createSyntheticUserCaveatMessage(): UserMessage {
   return createUserMessage({
     content: `<${LOCAL_COMMAND_CAVEAT_TAG}>Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.</${LOCAL_COMMAND_CAVEAT_TAG}>`,
-    isMeta: true,
-  })
+    isMeta: true})
 }
 
 /**
@@ -598,16 +565,14 @@ export function createModelSwitchBreadcrumbs(
     createSyntheticUserCaveatMessage(),
     createUserMessage({ content: formatCommandInputTags('model', modelArg) }),
     createUserMessage({
-      content: `<${LOCAL_COMMAND_STDOUT_TAG}>Set model to ${resolvedDisplay}</${LOCAL_COMMAND_STDOUT_TAG}>`,
-    }),
+      content: `<${LOCAL_COMMAND_STDOUT_TAG}>Set model to ${resolvedDisplay}</${LOCAL_COMMAND_STDOUT_TAG}>`}),
   ]
 }
 
 export function createProgressMessage<P extends Progress>({
   toolUseID,
   parentToolUseID,
-  data,
-}: {
+  data}: {
   toolUseID: string
   parentToolUseID: string
   data: P
@@ -618,8 +583,7 @@ export function createProgressMessage<P extends Progress>({
     toolUseID,
     parentToolUseID,
     uuid: randomUUID(),
-    timestamp: new Date().toISOString(),
-  }
+    timestamp: new Date().toISOString()}
 }
 
 export function createToolResultStopMessage(
@@ -629,8 +593,7 @@ export function createToolResultStopMessage(
     type: 'tool_result',
     content: CANCEL_MESSAGE,
     is_error: true,
-    tool_use_id: toolUseID,
-  }
+    tool_use_id: toolUseID}
 }
 
 export function extractTag(html: string, tagName: string): string | null {
@@ -771,16 +734,14 @@ export function normalizeMessages(messages: Message[]): NormalizedMessage[] {
             message: {
               ...aMsg.message,
               content: [_],
-              context_management: aMsg.message.context_management ?? null,
-            },
+              context_management: aMsg.message.context_management ?? null},
             isMeta: message.isMeta,
             isVirtual: message.isVirtual,
             requestId: message.requestId,
             uuid,
             error: message?.error,
             isApiErrorMessage: message.isApiErrorMessage,
-            advisorModel: message.advisorModel,
-          } as NormalizedAssistantMessage
+            advisorModel: message.advisorModel} as NormalizedAssistantMessage
         })
       }
       case 'attachment':
@@ -799,9 +760,7 @@ export function normalizeMessages(messages: Message[]): NormalizedMessage[] {
               uuid,
               message: {
                 ...uMsg.message,
-                content: [{ type: 'text', text: uMsg.message.content }],
-              },
-            } as NormalizedMessage,
+                content: [{ type: 'text', text: uMsg.message.content }]}} as NormalizedMessage,
           ]
         }
         isNewChain = isNewChain || (uMsg.message.content?.length ?? 0) > 1
@@ -831,10 +790,8 @@ export function normalizeMessages(messages: Message[]): NormalizedMessage[] {
                   : undefined,
               timestamp: uMsg.timestamp as string | undefined,
               imagePasteIds: imageId !== undefined ? [imageId] : undefined,
-              origin: uMsg.origin as MessageOrigin | undefined,
-            }),
-            uuid: isNewChain ? deriveUUID(uMsg.uuid, index) : uMsg.uuid,
-          } as NormalizedMessage
+              origin: uMsg.origin as MessageOrigin | undefined}),
+            uuid: isNewChain ? deriveUUID(uMsg.uuid, index) : uMsg.uuid} as NormalizedMessage
         })
       }
       default:
@@ -913,8 +870,7 @@ export function reorderMessagesInUI(
             toolUse: null,
             preHooks: [],
             toolResult: null,
-            postHooks: [],
-          })
+            postHooks: []})
         }
         toolUseGroups.get(toolUseID)!.toolUse = message
       }
@@ -932,8 +888,7 @@ export function reorderMessagesInUI(
           toolUse: null,
           preHooks: [],
           toolResult: null,
-          postHooks: [],
-        })
+          postHooks: []})
       }
       toolUseGroups.get(toolUseID)!.preHooks.push(message)
       continue
@@ -952,8 +907,7 @@ export function reorderMessagesInUI(
           toolUse: null,
           preHooks: [],
           toolResult: null,
-          postHooks: [],
-        })
+          postHooks: []})
       }
       toolUseGroups.get(toolUseID)!.toolResult = message
       continue
@@ -970,8 +924,7 @@ export function reorderMessagesInUI(
           toolUse: null,
           preHooks: [],
           toolResult: null,
-          postHooks: [],
-        })
+          postHooks: []})
       }
       toolUseGroups.get(toolUseID)!.postHooks.push(message)
     }
@@ -1397,8 +1350,7 @@ export function buildMessageLookups(
     toolUseByToolUseID,
     normalizedMessageCount: normalizedMessages.length,
     resolvedToolUseIDs,
-    erroredToolUseIDs,
-  }
+    erroredToolUseIDs}
 }
 
 /**
@@ -1641,8 +1593,7 @@ export const EMPTY_LOOKUPS: MessageLookups = {
   toolUseByToolUseID: new Map(),
   normalizedMessageCount: 0,
   resolvedToolUseIDs: new Set(),
-  erroredToolUseIDs: new Set(),
-}
+  erroredToolUseIDs: new Set()}
 
 /**
  * Shared empty Set singleton. Reused on bail-out paths to avoid allocating
@@ -1705,10 +1656,8 @@ export function buildSubagentLookups(
       ...EMPTY_LOOKUPS,
       toolUseByToolUseID,
       resolvedToolUseIDs,
-      toolResultByToolUseID,
-    },
-    inProgressToolUseIDs,
-  }
+      toolResultByToolUseID},
+    inProgressToolUseIDs}
 }
 
 /**
@@ -1895,19 +1844,14 @@ function stripUnavailableToolReferencesFromUserMessage(
             content: [
               {
                 type: 'text' as const,
-                text: '[Tool references removed - tools no longer available]',
-              },
-            ],
-          }
+                text: '[Tool references removed - tools no longer available]'},
+            ]}
         }
 
         return {
           ...block,
-          content: filteredContent,
-        }
-      }),
-    },
-  }
+          content: filteredContent}
+      })}}
 }
 
 /**
@@ -1930,9 +1874,7 @@ function appendMessageTagToUserMessage(message: UserMessage): UserMessage {
       ...message,
       message: {
         ...message.message,
-        content: content + tag,
-      },
-    }
+        content: content + tag}}
   }
 
   if (!Array.isArray(content) || content.length === 0) {
@@ -1955,16 +1897,13 @@ function appendMessageTagToUserMessage(message: UserMessage): UserMessage {
   const textBlock = newContent[lastTextIdx] as TextBlockParam
   newContent[lastTextIdx] = {
     ...textBlock,
-    text: textBlock.text + tag,
-  }
+    text: textBlock.text + tag}
 
   return {
     ...message,
     message: {
       ...message.message,
-      content: newContent as typeof content,
-    },
-  }
+      content: newContent as typeof content}}
 }
 
 /**
@@ -2012,19 +1951,14 @@ export function stripToolReferenceBlocksFromUserMessage(
             content: [
               {
                 type: 'text' as const,
-                text: '[Tool references removed - tool search not enabled]',
-              },
-            ],
-          }
+                text: '[Tool references removed - tool search not enabled]'},
+            ]}
         }
 
         return {
           ...block,
-          content: filteredContent,
-        }
-      }),
-    },
-  }
+          content: filteredContent}
+      })}}
 }
 
 /**
@@ -2069,11 +2003,8 @@ export function stripCallerFieldFromAssistantMessage(
           type: 'tool_use' as const,
           id: toolUse.id,
           name: toolUse.name,
-          input: toolUse.input,
-        }
-      }),
-    },
-  }
+          input: toolUse.input}
+      })}}
 }
 
 /**
@@ -2106,8 +2037,7 @@ function ensureSystemReminderWrap(msg: UserMessage): UserMessage {
     if (content.startsWith('<system-reminder>')) return msg
     return {
       ...msg,
-      message: { ...msg.message, content: wrapInSystemReminder(content) },
-    }
+      message: { ...msg.message, content: wrapInSystemReminder(content) }}
   }
   let changed = false
   const newContent = content.map(b => {
@@ -2173,8 +2103,7 @@ function smooshSystemReminderSiblings(
     ]
     return {
       ...msg,
-      message: { ...msg.message, content: newContent },
-    }
+      message: { ...msg.message, content: newContent }}
   })
 }
 
@@ -2273,9 +2202,7 @@ function relocateToolReferenceSiblings(
       ...msg,
       message: {
         ...msg.message,
-        content: content.filter(b => b.type !== 'text'),
-      },
-    }
+        content: content.filter(b => b.type !== 'text')}}
     const target = result[targetIdx] as UserMessage
     result[targetIdx] = {
       ...target,
@@ -2284,9 +2211,7 @@ function relocateToolReferenceSiblings(
         content: [
           ...(target.message.content as ContentBlockParam[]),
           ...textSiblings,
-        ],
-      },
-    }
+        ]}}
   }
 
   return result
@@ -2312,8 +2237,7 @@ export function normalizeMessagesForAPI(
     [getPdfPasswordProtectedErrorMessage()]: new Set(['document']),
     [getPdfInvalidErrorMessage()]: new Set(['document']),
     [getImageTooLargeErrorMessage()]: new Set(['image']),
-    [getRequestTooLargeErrorMessage()]: new Set(['document', 'image']),
-  }
+    [getRequestTooLargeErrorMessage()]: new Set(['document', 'image'])}
 
   // Walk the reordered messages to build a targeted strip map:
   // userMessageUUID → set of block types to strip from that message.
@@ -2388,8 +2312,7 @@ export function normalizeMessagesForAPI(
           const userMsg = createUserMessage({
             content: message.content as string | ContentBlockParam[],
             uuid: message.uuid,
-            timestamp: message.timestamp as string,
-          })
+            timestamp: message.timestamp as string})
           const lastMessage = last(result)
           if (lastMessage?.type === 'user') {
             result[result.length - 1] = mergeUserMessages(lastMessage, userMsg)
@@ -2436,9 +2359,7 @@ export function normalizeMessagesForAPI(
                   ...normalizedMessage,
                   message: {
                     ...normalizedMessage.message,
-                    content: filtered,
-                  },
-                }
+                    content: filtered}}
               }
             }
           }
@@ -2485,9 +2406,7 @@ export function normalizeMessagesForAPI(
                   content: [
                     ...contentAfterStrip,
                     { type: 'text', text: TOOL_REFERENCE_TURN_BOUNDARY },
-                  ],
-                },
-              }
+                  ]}}
             }
           }
 
@@ -2538,8 +2457,7 @@ export function normalizeMessagesForAPI(
                     return {
                       ...block,
                       name: canonicalName,
-                      input: normalizedInput,
-                    }
+                      input: normalizedInput}
                   }
 
                   // When tool search is NOT enabled, strip tool-search-only fields
@@ -2553,13 +2471,10 @@ export function normalizeMessagesForAPI(
                     type: 'tool_use' as const,
                     id: toolUseBlk.id,
                     name: canonicalName,
-                    input: normalizedInput,
-                  }
+                    input: normalizedInput}
                 }
                 return block
-              }),
-            },
-          }
+              })}}
 
           // Find a previous assistant message with the same message ID and merge.
           // Walk backwards, skipping different-ID assistants, since concurrent
@@ -2707,9 +2622,7 @@ export function mergeUserMessagesAndToolResults(
       ...a.message,
       content: hoistToolResults(
         mergeUserContentBlocks(lastContent, currentContent),
-      ),
-    },
-  }
+      )}}
 }
 
 export function mergeAssistantMessages(
@@ -2723,9 +2636,7 @@ export function mergeAssistantMessages(
       content: [
         ...(Array.isArray(a.message.content) ? a.message.content : []),
         ...(Array.isArray(b.message.content) ? b.message.content : []),
-      ] as ContentBlockParam[] | ContentBlock[],
-    },
-  }
+      ] as ContentBlockParam[] | ContentBlock[]}}
 }
 
 function isToolResultMessage(msg: Message): boolean {
@@ -2766,9 +2677,7 @@ export function mergeUserMessages(a: UserMessage, b: UserMessage): UserMessage {
           ...a.message,
           content: hoistToolResults(
             joinTextAtSeam(lastContent, currentContent),
-          ),
-        },
-      }
+          )}}
     }
   }
   return {
@@ -2778,9 +2687,7 @@ export function mergeUserMessages(a: UserMessage, b: UserMessage): UserMessage {
     uuid: a.isMeta ? b.uuid : a.uuid,
     message: {
       ...a.message,
-      content: hoistToolResults(joinTextAtSeam(lastContent, currentContent)),
-    },
-  }
+      content: hoistToolResults(joinTextAtSeam(lastContent, currentContent))}}
 }
 
 function mergeAdjacentUserMessages(
@@ -3017,8 +2924,7 @@ export function normalizeContentFromAPI(
             // PII-tagged proto column exists for it yet.
             logEvent('tengu_tool_input_json_parse_fail', {
               toolName: sanitizeToolNameForAnalytics(contentBlock.name),
-              inputLen: contentBlock.input.length,
-            })
+              inputLen: contentBlock.input.length})
             if (process.env.USER_TYPE === 'ant') {
               logForDebugging(
                 `tool input JSON parse fail: ${contentBlock.input.slice(0, 200)}`,
@@ -3050,14 +2956,12 @@ export function normalizeContentFromAPI(
 
         return {
           ...contentBlock,
-          input: normalizedInput,
-        }
+          input: normalizedInput}
       }
       case 'text':
         if (contentBlock.text.trim().length === 0) {
           logEvent('tengu_model_whitespace_response', {
-            length: contentBlock.text.length,
-          })
+            length: contentBlock.text.length})
         }
         // Return the block as-is to preserve exact content for prompt caching.
         // Empty text blocks are handled at the display layer and must not be
@@ -3075,8 +2979,7 @@ export function normalizeContentFromAPI(
             ...contentBlock,
             input: (safeParseJSON(contentBlock.input) ?? {}) as {
               [key: string]: unknown
-            },
-          }
+            }}
         }
         return contentBlock
       default:
@@ -3336,8 +3239,7 @@ export function handleMessageFromStream(
         onStreamingThinking?.(() => ({
           thinking: tb.thinking,
           isStreaming: false,
-          streamingEndedAt: Date.now(),
-        }))
+          streamingEndedAt: Date.now()}))
       }
     }
     // Clear streaming text NOW so the render can switch displayedMessages
@@ -3416,8 +3318,7 @@ export function handleMessageFromStream(
             {
               index,
               contentBlock,
-              unparsedToolInput: '',
-            },
+              unparsedToolInput: ''},
           ])
           return
         }
@@ -3457,8 +3358,7 @@ export function handleMessageFromStream(
               ..._.filter(_ => _ !== element),
               {
                 ...element,
-                unparsedToolInput: element.unparsedToolInput + delta,
-              },
+                unparsedToolInput: element.unparsedToolInput + delta},
             ]
           })
           return
@@ -3498,17 +3398,14 @@ export function wrapMessagesInSystemReminder(
         ...msg,
         message: {
           ...msg.message,
-          content: wrapInSystemReminder(msg.message.content),
-        },
-      }
+          content: wrapInSystemReminder(msg.message.content)}}
     } else if (Array.isArray(msg.message.content)) {
       // For array content, wrap text blocks in system-reminder
       const wrappedContent = msg.message.content.map(block => {
         if (block.type === 'text') {
           return {
             ...block,
-            text: wrapInSystemReminder(block.text),
-          }
+            text: wrapInSystemReminder(block.text)}
         }
         return block
       })
@@ -3516,9 +3413,7 @@ export function wrapMessagesInSystemReminder(
         ...msg,
         message: {
           ...msg.message,
-          content: wrappedContent,
-        },
-      }
+          content: wrappedContent}}
     }
     return msg
   })
@@ -3851,8 +3746,7 @@ export function normalizeAttachmentForAPI(
           content: getTeammateMailbox().formatTeammateMessages(
             attachment.messages,
           ),
-          isMeta: true,
-        }),
+          isMeta: true}),
       ]
     }
     if (attachment.type === 'team_context') {
@@ -3884,8 +3778,7 @@ Read the team config to discover your teammates' names. Check the task list peri
 }
 \`\`\`
 </system-reminder>`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ]
     }
   }
@@ -3929,8 +3822,7 @@ Read the team config to discover your teammates' names. Check the task list peri
           ]
             .filter(Boolean)
             .join('\n\n'),
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
   }
@@ -3946,8 +3838,7 @@ Read the team config to discover your teammates' names. Check the task list peri
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `The following tools were discovered as relevant to your task. To invoke them, you MUST use ExecuteExtraTool — this is the only way to call these tools. Do not read source code or reason about whether they are callable; just call ExecuteExtraTool({"tool_name": "<name>", "params": {...}}) directly.\n\n${lines.join('\n')}`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
   }
@@ -3958,21 +3849,18 @@ Read the team config to discover your teammates' names. Check the task list peri
       return wrapMessagesInSystemReminder([
         createToolUseMessage(BashTool.name, {
           command: `ls ${quote([attachment.path])}`,
-          description: `Lists files in ${attachment.path}`,
-        }),
+          description: `Lists files in ${attachment.path}`}),
         createToolResultMessage(BashTool, {
           stdout: attachment.content,
           stderr: '',
-          interrupted: false,
-        }),
+          interrupted: false}),
       ])
     }
     case 'edited_text_file':
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `Note: ${attachment.filename} was modified, either by the user or by a linter. This change was intentional, so make sure to take it into account as you proceed (ie. don't revert it unless the user asks you to). Don't tell the user this, since they are already aware. Here are the relevant changes (shown with line numbers):\n${attachment.snippet}`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     case 'file': {
       const fileContent = attachment.content as FileReadToolOutput
@@ -3980,16 +3868,14 @@ Read the team config to discover your teammates' names. Check the task list peri
         case 'image': {
           return wrapMessagesInSystemReminder([
             createToolUseMessage(FileReadTool.name, {
-              file_path: attachment.filename,
-            }),
+              file_path: attachment.filename}),
             createToolResultMessage(FileReadTool, fileContent),
           ])
         }
         case 'text': {
           return wrapMessagesInSystemReminder([
             createToolUseMessage(FileReadTool.name, {
-              file_path: attachment.filename,
-            }),
+              file_path: attachment.filename}),
             createToolResultMessage(FileReadTool, fileContent),
             ...(attachment.truncated
               ? [
@@ -4004,8 +3890,7 @@ Read the team config to discover your teammates' names. Check the task list peri
         case 'notebook': {
           return wrapMessagesInSystemReminder([
             createToolUseMessage(FileReadTool.name, {
-              file_path: attachment.filename,
-            }),
+              file_path: attachment.filename}),
             createToolResultMessage(FileReadTool, fileContent),
           ])
         }
@@ -4013,8 +3898,7 @@ Read the team config to discover your teammates' names. Check the task list peri
           // PDFs are handled via supplementalContent in the tool result
           return wrapMessagesInSystemReminder([
             createToolUseMessage(FileReadTool.name, {
-              file_path: attachment.filename,
-            }),
+              file_path: attachment.filename}),
             createToolResultMessage(FileReadTool, fileContent),
           ])
         }
@@ -4025,8 +3909,7 @@ Read the team config to discover your teammates' names. Check the task list peri
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `Note: ${attachment.filename} was read before the last conversation was summarized, but the contents are too large to include. Use ${FileReadTool.name} tool if you need to access it.`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'pdf_reference': {
@@ -4038,8 +3921,7 @@ Read the team config to discover your teammates' names. Check the task list peri
             `to read specific page ranges (e.g., pages: "1-5"). Do NOT call ${FILE_READ_TOOL_NAME} without the pages parameter ` +
             `or it will fail. Start by reading the first few pages to understand the structure, then read more as needed. ` +
             `Maximum 20 pages per request.`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'selected_lines_in_ide': {
@@ -4053,24 +3935,21 @@ Read the team config to discover your teammates' names. Check the task list peri
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `The user selected the lines ${attachment.lineStart} to ${attachment.lineEnd} from ${attachment.filename}:\n${content}\n\nThis may or may not be related to the current task.`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'opened_file_in_ide': {
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `The user opened the file ${attachment.filename} in the IDE. This may or may not be related to the current task.`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'plan_file_reference': {
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `A plan file exists from plan mode at: ${attachment.planFilePath}\n\nPlan contents:\n\n${attachment.planContent}\n\nIf this plan is relevant to the current work and not already complete, continue working on it.`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'invoked_skills': {
@@ -4088,8 +3967,7 @@ Read the team config to discover your teammates' names. Check the task list peri
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `The following skills were invoked in this session. Continue to follow these guidelines:\n\n${skillsContent}`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'todo_reminder': {
@@ -4105,8 +3983,7 @@ Read the team config to discover your teammates' names. Check the task list peri
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: message,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'task_reminder': {
@@ -4125,16 +4002,14 @@ Read the team config to discover your teammates' names. Check the task list peri
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: message,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'nested_memory': {
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `Contents of ${attachment.content.path}:\n\n${attachment.content.content}`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'relevant_memories': {
@@ -4147,8 +4022,7 @@ Read the team config to discover your teammates' names. Check the task list peri
           const header = m.header ?? memoryHeader(m.path, m.mtimeMs)
           return createUserMessage({
             content: `${header}\n\n${m.content}`,
-            isMeta: true,
-          })
+            isMeta: true})
         }),
       )
     }
@@ -4164,8 +4038,7 @@ Read the team config to discover your teammates' names. Check the task list peri
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `The following skills are available for use with the Skill tool:\n\n${attachment.content}`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'queued_command': {
@@ -4200,8 +4073,7 @@ Read the team config to discover your teammates' names. Check the task list peri
         const content: ContentBlockParam[] = [
           {
             type: 'text',
-            text: wrapCommandText(textContent, origin),
-          },
+            text: wrapCommandText(textContent, origin)},
           ...imageBlocks,
         ]
 
@@ -4210,8 +4082,7 @@ Read the team config to discover your teammates' names. Check the task list peri
             content,
             ...metaProp,
             origin,
-            uuid: attachment.source_uuid,
-          }),
+            uuid: attachment.source_uuid}),
         ])
       }
 
@@ -4221,8 +4092,7 @@ Read the team config to discover your teammates' names. Check the task list peri
           content: wrapCommandText(String(attachment.prompt), origin),
           ...metaProp,
           origin,
-          uuid: attachment.source_uuid,
-        }),
+          uuid: attachment.source_uuid}),
       ])
     }
     case 'output_style': {
@@ -4236,8 +4106,7 @@ Read the team config to discover your teammates' names. Check the task list peri
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `${outputStyle.name} output style is active. Remember to follow the specific guidelines for this style.`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'diagnostics': {
@@ -4250,8 +4119,7 @@ Read the team config to discover your teammates' names. Check the task list peri
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `<new-diagnostics>The following new diagnostic issues were detected:\n\n${diagnosticSummary}</new-diagnostics>`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'plan_mode': {
@@ -4312,8 +4180,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
         return wrapMessagesInSystemReminder([
           createUserMessage({
             content: `<mcp-resource server="${attachment.server}" uri="${attachment.uri}">(No content)</mcp-resource>`,
-            isMeta: true,
-          }),
+            isMeta: true}),
         ])
       }
 
@@ -4327,16 +4194,13 @@ You have exited auto mode. The user may now want to interact more directly. You 
             transformedBlocks.push(
               {
                 type: 'text',
-                text: 'Full contents of resource:',
-              },
+                text: 'Full contents of resource:'},
               {
                 type: 'text',
-                text: item.text,
-              },
+                text: item.text},
               {
                 type: 'text',
-                text: 'Do NOT read this resource again unless you think it may have changed, since you already have the full contents.',
-              },
+                text: 'Do NOT read this resource again unless you think it may have changed, since you already have the full contents.'},
             )
           } else if ('blob' in item) {
             // Skip binary content including images
@@ -4346,8 +4210,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
                 : 'application/octet-stream'
             transformedBlocks.push({
               type: 'text',
-              text: `[Binary content: ${mimeType}]`,
-            })
+              text: `[Binary content: ${mimeType}]`})
           }
         }
       }
@@ -4357,8 +4220,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
         return wrapMessagesInSystemReminder([
           createUserMessage({
             content: transformedBlocks,
-            isMeta: true,
-          }),
+            isMeta: true}),
         ])
       } else {
         logMCPDebug(
@@ -4369,8 +4231,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
         return wrapMessagesInSystemReminder([
           createUserMessage({
             content: `<mcp-resource server="${attachment.server}" uri="${attachment.uri}">(No displayable content)</mcp-resource>`,
-            isMeta: true,
-          }),
+            isMeta: true}),
         ])
       }
     }
@@ -4378,8 +4239,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `The user has expressed a desire to invoke the agent "${attachment.agentType}". Please invoke the agent appropriately, passing in the required context to it. `,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'task_status': {
@@ -4394,8 +4254,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
             content: wrapInSystemReminder(
               `Task "${attachment.description}" (${attachment.taskId}) was stopped by the user.`,
             ),
-            isMeta: true,
-          }),
+            isMeta: true}),
         ]
       }
 
@@ -4420,8 +4279,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
         return [
           createUserMessage({
             content: wrapInSystemReminder(parts.join(' ')),
-            isMeta: true,
-          }),
+            isMeta: true}),
         ]
       }
 
@@ -4450,8 +4308,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
       return [
         createUserMessage({
           content: wrapInSystemReminder(messageParts.join(' ')),
-          isMeta: true,
-        }),
+          isMeta: true}),
       ]
     }
     case 'async_hook_response': {
@@ -4470,8 +4327,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
         messages.push(
           createUserMessage({
             content: response.systemMessage as string | ContentBlockParam[],
-            isMeta: true,
-          }),
+            isMeta: true}),
         )
       }
 
@@ -4486,8 +4342,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
             content: response.hookSpecificOutput.additionalContext as
               | string
               | ContentBlockParam[],
-            isMeta: true,
-          }),
+            isMeta: true}),
         )
       }
 
@@ -4501,8 +4356,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
           content: wrapInSystemReminder(
             `Token usage: ${attachment.used}/${attachment.total}; ${attachment.remaining} remaining`,
           ),
-          isMeta: true,
-        }),
+          isMeta: true}),
       ]
     case 'budget_usd':
       return [
@@ -4510,8 +4364,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
           content: wrapInSystemReminder(
             `USD budget: $${attachment.used}/$${attachment.total}; $${attachment.remaining} remaining`,
           ),
-          isMeta: true,
-        }),
+          isMeta: true}),
       ]
     case 'output_token_usage': {
       const turnText =
@@ -4523,8 +4376,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
           content: wrapInSystemReminder(
             `Output tokens \u2014 turn: ${turnText} \u00b7 session: ${formatNumber(attachment.session)}`,
           ),
-          isMeta: true,
-        }),
+          isMeta: true}),
       ]
     }
     case 'hook_blocking_error':
@@ -4533,8 +4385,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
           content: wrapInSystemReminder(
             `${attachment.hookName} hook blocking error from command: "${attachment.blockingError.command}": ${attachment.blockingError.blockingError}`,
           ),
-          isMeta: true,
-        }),
+          isMeta: true}),
       ]
     case 'hook_success':
       if (
@@ -4551,8 +4402,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
           content: wrapInSystemReminder(
             `${attachment.hookName} hook success: ${attachment.content}`,
           ),
-          isMeta: true,
-        }),
+          isMeta: true}),
       ]
     case 'hook_additional_context': {
       if (attachment.content.length === 0) {
@@ -4563,8 +4413,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
           content: wrapInSystemReminder(
             `${attachment.hookName} hook additional context: ${attachment.content.join('\n')}`,
           ),
-          isMeta: true,
-        }),
+          isMeta: true}),
       ]
     }
     case 'hook_stopped_continuation':
@@ -4573,16 +4422,14 @@ You have exited auto mode. The user may now want to interact more directly. You 
           content: wrapInSystemReminder(
             `${attachment.hookName} hook stopped continuation: ${attachment.message}`,
           ),
-          isMeta: true,
-        }),
+          isMeta: true}),
       ]
     case 'compaction_reminder': {
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content:
             'Auto-compact is enabled. When the context window is nearly full, older messages will be automatically summarized so you can continue working seamlessly. There is no need to stop or rush \u2014 you have unlimited context through automatic compaction.',
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'context_efficiency': {
@@ -4593,8 +4440,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
         return wrapMessagesInSystemReminder([
           createUserMessage({
             content: SNIP_NUDGE_TEXT,
-            isMeta: true,
-          }),
+            isMeta: true}),
         ])
       }
       return []
@@ -4603,16 +4449,14 @@ You have exited auto mode. The user may now want to interact more directly. You 
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `The date has changed. Today's date is now ${attachment.newDate}. DO NOT mention this to the user explicitly because they are already aware.`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'ultrathink_effort': {
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: `The user has requested reasoning effort level: ${attachment.level}. Apply this to the current turn.`,
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'deferred_tools_delta': {
@@ -4673,8 +4517,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
       return wrapMessagesInSystemReminder([
         createUserMessage({
           content: companionIntroText(attachment.name, attachment.species),
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
     }
     case 'verify_plan_reminder': {
@@ -4739,8 +4582,7 @@ function createToolResultMessage<Output>(
     ) {
       return createUserMessage({
         content: result.content as ContentBlockParam[],
-        isMeta: true,
-      })
+        isMeta: true})
     }
 
     // For string content, use raw string — jsonStringify would escape \n→\\n,
@@ -4752,13 +4594,11 @@ function createToolResultMessage<Output>(
         : jsonStringify(result.content)
     return createUserMessage({
       content: `Result of calling the ${tool.name} tool:\n${contentStr}`,
-      isMeta: true,
-    })
+      isMeta: true})
   } catch {
     return createUserMessage({
       content: `Result of calling the ${tool.name} tool: Error`,
-      isMeta: true,
-    })
+      isMeta: true})
   }
 }
 
@@ -4768,8 +4608,7 @@ function createToolUseMessage(
 ): UserMessage {
   return createUserMessage({
     content: `Called the ${toolName} tool with the following input: ${jsonStringify(input)}`,
-    isMeta: true,
-  })
+    isMeta: true})
 }
 
 export function createSystemMessage(
@@ -4787,8 +4626,7 @@ export function createSystemMessage(
     uuid: randomUUID(),
     toolUseID,
     level,
-    ...(preventContinuation && { preventContinuation }),
-  }
+    ...(preventContinuation && { preventContinuation })}
 }
 
 export function createPermissionRetryMessage(
@@ -4802,8 +4640,7 @@ export function createPermissionRetryMessage(
     level: 'info',
     isMeta: false,
     timestamp: new Date().toISOString(),
-    uuid: randomUUID(),
-  }
+    uuid: randomUUID()}
 }
 
 export function createBridgeStatusMessage(
@@ -4818,8 +4655,7 @@ export function createBridgeStatusMessage(
     upgradeNudge,
     isMeta: false,
     timestamp: new Date().toISOString(),
-    uuid: randomUUID(),
-  }
+    uuid: randomUUID()}
 }
 
 export function createScheduledTaskFireMessage(
@@ -4831,8 +4667,7 @@ export function createScheduledTaskFireMessage(
     content,
     isMeta: false,
     timestamp: new Date().toISOString(),
-    uuid: randomUUID(),
-  }
+    uuid: randomUUID()}
 }
 
 export function createStopHookSummaryMessage(
@@ -4861,8 +4696,7 @@ export function createStopHookSummaryMessage(
     uuid: randomUUID(),
     toolUseID,
     hookLabel: hookLabel ?? '',
-    totalDurationMs,
-  }
+    totalDurationMs}
 }
 
 export function createTurnDurationMessage(
@@ -4880,8 +4714,7 @@ export function createTurnDurationMessage(
     messageCount,
     timestamp: new Date().toISOString(),
     uuid: randomUUID(),
-    isMeta: false,
-  }
+    isMeta: false}
 }
 
 export function createAwaySummaryMessage(
@@ -4893,8 +4726,7 @@ export function createAwaySummaryMessage(
     content,
     timestamp: new Date().toISOString(),
     uuid: randomUUID(),
-    isMeta: false,
-  }
+    isMeta: false}
 }
 
 export function createMemorySavedMessage(
@@ -4906,8 +4738,7 @@ export function createMemorySavedMessage(
     writtenPaths,
     timestamp: new Date().toISOString(),
     uuid: randomUUID(),
-    isMeta: false,
-  }
+    isMeta: false}
 }
 
 export function createAgentsKilledMessage(): SystemAgentsKilledMessage {
@@ -4916,8 +4747,7 @@ export function createAgentsKilledMessage(): SystemAgentsKilledMessage {
     subtype: 'agents_killed',
     timestamp: new Date().toISOString(),
     uuid: randomUUID(),
-    isMeta: false,
-  }
+    isMeta: false}
 }
 
 export function createApiMetricsMessage(metrics: {
@@ -4949,8 +4779,7 @@ export function createApiMetricsMessage(metrics: {
     configWriteCount: metrics.configWriteCount,
     timestamp: new Date().toISOString(),
     uuid: randomUUID(),
-    isMeta: false,
-  }
+    isMeta: false}
 }
 
 export function createCommandInputMessage(
@@ -4963,8 +4792,7 @@ export function createCommandInputMessage(
     level: 'info',
     timestamp: new Date().toISOString(),
     uuid: randomUUID(),
-    isMeta: false,
-  }
+    isMeta: false}
 }
 
 export function createCompactBoundaryMessage(
@@ -4986,12 +4814,9 @@ export function createCompactBoundaryMessage(
       trigger,
       preTokens,
       userContext,
-      messagesSummarized,
-    },
+      messagesSummarized},
     ...(lastPreCompactMessageUuid && {
-      logicalParentUuid: lastPreCompactMessageUuid,
-    }),
-  }
+      logicalParentUuid: lastPreCompactMessageUuid})}
 }
 
 export function createMicrocompactBoundaryMessage(
@@ -5017,9 +4842,7 @@ export function createMicrocompactBoundaryMessage(
       preTokens,
       tokensSaved,
       compactedToolIds,
-      clearedAttachmentUUIDs,
-    },
-  }
+      clearedAttachmentUUIDs}}
 }
 
 export function createSystemAPIErrorMessage(
@@ -5038,8 +4861,7 @@ export function createSystemAPIErrorMessage(
     retryAttempt,
     maxRetries,
     timestamp: new Date().toISOString(),
-    uuid: randomUUID(),
-  }
+    uuid: randomUUID()}
 }
 
 /**
@@ -5266,8 +5088,7 @@ function filterTrailingThinkingFromLastAssistant(
     messageUUID:
       lastMessage.uuid as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     blocksRemoved: content.length - lastValidIndex - 1,
-    remainingBlocks: lastValidIndex + 1,
-  })
+    remainingBlocks: lastValidIndex + 1})
 
   // Insert placeholder if all blocks were thinking
   const filteredContent =
@@ -5280,9 +5101,7 @@ function filterTrailingThinkingFromLastAssistant(
     ...lastMessage,
     message: {
       ...lastMessage.message,
-      content: filteredContent,
-    },
-  }
+      content: filteredContent}}
   return result
 }
 
@@ -5350,8 +5169,7 @@ export function filterWhitespaceOnlyAssistantMessages(
       hasChanges = true
       logEvent('tengu_filtered_whitespace_only_assistant', {
         messageUUID:
-          message.uuid as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          message.uuid as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       return false
     }
 
@@ -5417,8 +5235,7 @@ function ensureNonEmptyAssistantContent(
       logEvent('tengu_fixed_empty_assistant_content', {
         messageUUID:
           message.uuid as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        messageIndex: index,
-      })
+        messageIndex: index})
 
       return {
         ...message,
@@ -5426,9 +5243,7 @@ function ensureNonEmptyAssistantContent(
           ...message.message,
           content: [
             { type: 'text' as const, text: NO_CONTENT_MESSAGE, citations: [] },
-          ],
-        },
-      }
+          ]}}
     }
 
     return message
@@ -5510,8 +5325,7 @@ export function filterOrphanedThinkingOnlyMessages(
         msg.uuid as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       messageId: msg.message
         ?.id as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      blockCount: content.length,
-    })
+      blockCount: content.length})
     return false
   })
 
@@ -5552,8 +5366,7 @@ export function stripSignatureBlocks(messages: Message[]): Message[] {
     changed = true
     return {
       ...msg,
-      message: { ...msg.message, content: filtered },
-    } as typeof msg
+      message: { ...msg.message, content: filtered }} as typeof msg
   })
 
   return changed ? result : messages
@@ -5572,8 +5385,7 @@ export function createToolUseSummaryMessage(
     summary,
     precedingToolUseIds,
     uuid: randomUUID(),
-    timestamp: new Date().toISOString(),
-  }
+    timestamp: new Date().toISOString()}
 }
 
 /**
@@ -5646,15 +5458,13 @@ export function ensureToolResultPairing(
                 ? [
                     {
                       type: 'text' as const,
-                      text: '[Orphaned tool result removed due to conversation resume]',
-                    },
+                      text: '[Orphaned tool result removed due to conversation resume]'},
                   ]
                 : null
           if (content !== null) {
             result.push({
               ...msg,
-              message: { ...msg.message, content },
-            })
+              message: { ...msg.message, content }})
           }
           continue
         }
@@ -5726,15 +5536,13 @@ export function ensureToolResultPairing(
       finalContent.push({
         type: 'text' as const,
         text: '[Tool use interrupted]',
-        citations: [],
-      })
+        citations: []})
     }
 
     const assistantMsg = assistantContentChanged
       ? {
           ...msg,
-          message: { ...msg.message, content: finalContent },
-        }
+          message: { ...msg.message, content: finalContent }}
       : msg
 
     result.push(assistantMsg)
@@ -5797,8 +5605,7 @@ export function ensureToolResultPairing(
       type: 'tool_result' as const,
       tool_use_id: id,
       content: SYNTHETIC_TOOL_RESULT_PLACEHOLDER,
-      is_error: true,
-    }))
+      is_error: true}))
 
     if (nextMsg?.type === 'user') {
       // Next message is already a user message - patch it
@@ -5810,8 +5617,7 @@ export function ensureToolResultPairing(
         : [
             {
               type: 'text' as const,
-              text: (nextUserMsg.message.content as string | undefined) ?? '',
-            },
+              text: (nextUserMsg.message.content as string | undefined) ?? ''},
           ]
 
       // Strip orphaned tool_results and dedupe duplicate tool_result IDs
@@ -5841,9 +5647,7 @@ export function ensureToolResultPairing(
           ...nextUserMsg,
           message: {
             ...nextUserMsg.message,
-            content: patchedContent,
-          },
-        }
+            content: patchedContent}}
         i++
         // Prepending synthetics to existing content can produce a
         // [tool_result, text] sibling the smoosh inside normalize never saw
@@ -5867,8 +5671,7 @@ export function ensureToolResultPairing(
         result.push(
           createUserMessage({
             content: NO_CONTENT_MESSAGE,
-            isMeta: true,
-          }),
+            isMeta: true}),
         )
       }
     } else {
@@ -5877,8 +5680,7 @@ export function ensureToolResultPairing(
         result.push(
           createUserMessage({
             content: syntheticBlocks,
-            isMeta: true,
-          }),
+            isMeta: true}),
         )
       }
     }
@@ -5938,8 +5740,7 @@ export function ensureToolResultPairing(
       repairedMessageCount: result.length,
       messageTypes: messageTypes.join(
         '; ',
-      ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+      ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     logError(
       new Error(
         `ensureToolResultPairing: repaired missing tool_result blocks (${messages.length} -> ${result.length} messages). Message structure: ${messageTypes.join('; ')}`,
@@ -5980,8 +5781,7 @@ export function stripAdvisorBlocks(
       filtered.push({
         type: 'text' as const,
         text: '[Advisor response]',
-        citations: [],
-      })
+        citations: []})
     }
     return { ...msg, message: { ...msg.message, content: filtered } }
   })

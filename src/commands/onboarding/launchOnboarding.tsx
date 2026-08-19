@@ -2,12 +2,12 @@ import * as React from 'react';
 import { Box, Pane, Text, useTheme } from '@anthropic/ink';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js';
+  logEvent} from '../../services/analytics/index.js';
 import type { LocalJSXCommandCall } from '../../types/command.js';
 import { ThemePicker } from '../../components/ThemePicker.js';
 import { getGlobalConfig, saveCurrentProjectConfig, saveGlobalConfig } from '../../utils/config.js';
 import type { ThemeSetting } from '../../utils/theme.js';
+import { t } from '../../utils/i18n/index.js';
 
 /**
  * /onboarding [subcommand]
@@ -61,9 +61,9 @@ function ThemeSubcommand({ onDone }: { onDone: (msg: string) => void }): React.R
         onThemeSelect={(setting: ThemeSetting) => {
           setTheme(setting);
           logEvent('tengu_onboarding_step', { stepId: meta('theme') });
-          onDone(`Theme set to ${setting}.`);
+          onDone(t('theme.themeSetTo', setting));
         }}
-        onCancel={() => onDone('Theme picker dismissed.')}
+        onCancel={() => onDone(t('theme.themePickerDismissed'))}
         skipExitHandling={true}
       />
     </Pane>
@@ -73,31 +73,27 @@ function ThemeSubcommand({ onDone }: { onDone: (msg: string) => void }): React.R
 function StatusView({
   theme,
   hasCompletedOnboarding,
-  lastOnboardingVersion,
-}: {
+  lastOnboardingVersion}: {
   theme: string;
   hasCompletedOnboarding: boolean;
   lastOnboardingVersion: string;
 }): React.ReactNode {
   return (
     <Box flexDirection="column" paddingLeft={1}>
-      <Text bold>Onboarding status</Text>
+      <Text bold>{t('misc.onboardingStatus')}</Text>
       <Text>
-        - Theme: <Text bold>{theme}</Text>
+        {t('misc.themeLabel')} <Text bold>{theme}</Text>
       </Text>
       <Text>
-        - Onboarding completed:{' '}
+        {t('misc.onboardingCompleted')}{' '}
         <Text bold color={hasCompletedOnboarding ? 'success' : 'warning'}>
-          {hasCompletedOnboarding ? 'yes' : 'no'}
+          {hasCompletedOnboarding ? t('common.yes') : t('common.no')}
         </Text>
       </Text>
       <Text>
-        - Last onboarding version: <Text bold>{lastOnboardingVersion}</Text>
+        {t('misc.lastOnboardingVersion')} <Text bold>{lastOnboardingVersion}</Text>
       </Text>
-      <Text dimColor>
-        Run /onboarding (no args) to re-run the full flow, or /onboarding theme | trust | model | mcp for a specific
-        step.
-      </Text>
+      <Text dimColor>{t('misc.onboardingStatusHint')}</Text>
     </Box>
   );
 }
@@ -107,8 +103,7 @@ export const callOnboarding: LocalJSXCommandCall = async (onDone, _context, args
   logEvent('tengu_onboarding_step', { stepId: meta(`slash_${sub}`) });
 
   if (unknownArg !== undefined) {
-    onDone(
-      `Unknown /onboarding subcommand: \`${unknownArg}\`.\n` + `Valid: full | theme | trust | model | mcp | status`,
+    onDone(t('misc.unknownSubcommand', unknownArg),
       { display: 'system' },
     );
     return null;
@@ -121,33 +116,22 @@ export const callOnboarding: LocalJSXCommandCall = async (onDone, _context, args
   if (sub === 'trust') {
     saveCurrentProjectConfig(current => ({
       ...current,
-      hasTrustDialogAccepted: false,
-    }));
-    onDone(
-      'Workspace trust cleared for the current project. ' + 'The trust dialog will appear on the next `claude` launch.',
+      hasTrustDialogAccepted: false}));
+    onDone(t('misc.workspaceTrustCleared'),
       { display: 'system' },
     );
     return null;
   }
 
   if (sub === 'model') {
-    onDone(
-      'Run `/model` to pick the AI model. ' +
-        'Onboarding does not own the model picker; this entry exists for ' +
-        'discoverability only.',
+    onDone(t('misc.runModelPick'),
       { display: 'system' },
     );
     return null;
   }
 
   if (sub === 'mcp') {
-    onDone(
-      'MCP server setup:\n' +
-        '  - `/mcp` — list configured MCP servers\n' +
-        '  - `claude mcp add <name> <command>` — add a server (in your shell)\n' +
-        '  - `claude mcp remove <name>` — remove a server\n' +
-        'Servers also load from `.mcp.json` in the workspace and from ' +
-        '`~/.claude.json` globally.',
+    onDone(t('misc.mcpHelp'),
       { display: 'system' },
     );
     return null;
@@ -172,19 +156,7 @@ export const callOnboarding: LocalJSXCommandCall = async (onDone, _context, args
   // the prompt — not safe to mount inside an active REPL session.
   saveGlobalConfig(current => ({
     ...current,
-    hasCompletedOnboarding: false,
-  }));
-  onDone(
-    'Onboarding flag cleared. The full first-run setup ' +
-      '(theme, OAuth/API key, security notes, terminal-setup) ' +
-      'will run on the next `claude` launch.\n\n' +
-      'For individual steps in this session, use:\n' +
-      '  /onboarding theme   — re-pick theme inline\n' +
-      '  /onboarding trust   — re-confirm workspace trust on next launch\n' +
-      '  /onboarding model   — open /model picker\n' +
-      '  /onboarding mcp     — show MCP setup hints\n' +
-      '  /onboarding status  — show current onboarding state',
-    { display: 'system' },
-  );
+    hasCompletedOnboarding: false}));
+  onDone(t('misc.onboardingFullCleared'), { display: 'system' });
   return null;
 };

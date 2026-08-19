@@ -43,17 +43,16 @@ import {
   type SetSessionModelResponse,
   type SetSessionConfigOptionRequest,
   type SetSessionConfigOptionResponse,
-  type ClientCapabilities,
-} from '@agentclientprotocol/sdk'
+  type ClientCapabilities} from '@agentclientprotocol/sdk'
 import { unlink } from 'node:fs/promises'
 import type { Message } from '../../../types/message.js'
 import { sanitizeTitle } from '../utils.js'
 import { listSessionsImpl } from '../../../utils/listSessionsImpl.js'
 import {
   resolveSessionFilePath,
-  canonicalizePath,
-} from '../../../utils/sessionStoragePortable.js'
+  canonicalizePath} from '../../../utils/sessionStoragePortable.js'
 import { getOriginalCwd } from '../../../bootstrap/state.js'
+import { t } from '../../../utils/i18n/index.js'
 import type { AcpSession } from './sessionTypes.js'
 
 // ── Agent class ───────────────────────────────────────────────────
@@ -103,8 +102,7 @@ export class AcpAgent implements Agent {
                   ).MACRO as Record<string, unknown>
                 ).VERSION ?? '0.0.0',
               )
-            : '0.0.0',
-      },
+            : '0.0.0'},
       agentCapabilities: {
         _meta: {
           claudeCode: {
@@ -112,19 +110,15 @@ export class AcpAgent implements Agent {
             // session/fork is UNSTABLE — not part of stable v1 SessionCapabilities.
             // Advertise via _meta namespace per extensibility.mdx "Advertising
             // Custom Capabilities" instead of the standard sessionCapabilities map.
-            forkSession: true,
-          },
-        },
+            forkSession: true}},
         // image:false — promptToQueryInput() does not parse ContentBlock::Image
         // blocks yet. Re-enable only after multimodal query input support lands.
         promptCapabilities: {
           image: false,
-          embeddedContext: true,
-        },
+          embeddedContext: true},
         mcpCapabilities: {
           http: true,
-          sse: true,
-        },
+          sse: true},
         loadSession: true,
         sessionCapabilities: {
           list: {},
@@ -134,10 +128,7 @@ export class AcpAgent implements Agent {
           // SDK 0.19.0's SessionCapabilities type predates this field — clients
           // implementing the RFD read `sessionCapabilities.delete`, so we
           // advertise it at the standard path via type augmentation.
-          ...({ delete: {} } as { delete: Record<string, never> }),
-        },
-      },
-    }
+          ...({ delete: {} } as { delete: Record<string, never> })}}}
   }
 
   // ── authenticate ──────────────────────────────────────────────
@@ -190,7 +181,7 @@ export class AcpAgent implements Agent {
     // any client-supplied cursor rather than silently accepting it.
     if (params.cursor !== undefined && params.cursor !== null) {
       throw new Error(
-        'Pagination cursor not supported: listSessions returns all results in a single page.',
+        t('acpAgent.paginationNotSupported'),
       )
     }
 
@@ -204,8 +195,7 @@ export class AcpAgent implements Agent {
     const canonicalRequested = await canonicalizePath(requestedCwd)
 
     const candidates = await listSessionsImpl({
-      dir: requestedCwd,
-    })
+      dir: requestedCwd})
 
     const sessions = []
     for (const candidate of candidates) {
@@ -225,8 +215,7 @@ export class AcpAgent implements Agent {
         sessionId: candidate.sessionId,
         cwd: candidate.cwd,
         ...(title ? { title } : {}),
-        updatedAt: new Date(candidate.lastModified).toISOString(),
-      })
+        updatedAt: new Date(candidate.lastModified).toISOString()})
     }
 
     return { sessions }
@@ -245,8 +234,7 @@ export class AcpAgent implements Agent {
       {
         cwd: params.cwd,
         mcpServers: params.mcpServers ?? [],
-        _meta: params._meta,
-      },
+        _meta: params._meta},
       { initialMessages },
     )
     this.scheduleAvailableCommandsUpdate(response.sessionId)
@@ -260,7 +248,7 @@ export class AcpAgent implements Agent {
   ): Promise<CloseSessionResponse> {
     const session = this.sessions.get(params.sessionId)
     if (!session) {
-      throw new Error('Session not found')
+      throw new Error(t('acpAgent.sessionNotFound'))
     }
     await this.teardownSession(params.sessionId)
     return {}
@@ -302,7 +290,7 @@ export class AcpAgent implements Agent {
     if (method === 'session/delete') {
       const sessionId = params.sessionId
       if (typeof sessionId !== 'string' || sessionId.length === 0) {
-        throw new Error('session/delete requires a non-empty sessionId')
+        throw new Error(t('acpAgent.deleteRequiresSessionId'))
       }
       return this.unstable_deleteSession({ sessionId })
     }
@@ -340,7 +328,7 @@ export class AcpAgent implements Agent {
   ): Promise<SetSessionModeResponse> {
     const session = this.sessions.get(params.sessionId)
     if (!session) {
-      throw new Error('Session not found')
+      throw new Error(t('acpAgent.sessionNotFound'))
     }
 
     this.applySessionMode(params.sessionId, params.modeId)
@@ -352,9 +340,7 @@ export class AcpAgent implements Agent {
       sessionId: params.sessionId,
       update: {
         sessionUpdate: 'current_mode_update',
-        currentModeId: params.modeId,
-      },
-    })
+        currentModeId: params.modeId}})
     await this.updateConfigOption(params.sessionId, 'mode', params.modeId)
     return {}
   }
@@ -366,7 +352,7 @@ export class AcpAgent implements Agent {
   ): Promise<SetSessionModelResponse> {
     const session = this.sessions.get(params.sessionId)
     if (!session) {
-      throw new Error('Session not found')
+      throw new Error(t('acpAgent.sessionNotFound'))
     }
     // Store the raw value — QueryEngine.submitMessage() calls
     // parseUserSpecifiedModel() to resolve aliases (e.g. "sonnet" → "glm-5.1-turbo")
@@ -389,16 +375,13 @@ export class AcpAgent implements Agent {
       .map(cmd => ({
         name: cmd.name,
         description: cmd.description,
-        input: cmd.argumentHint ? { hint: cmd.argumentHint } : undefined,
-      }))
+        input: cmd.argumentHint ? { hint: cmd.argumentHint } : undefined}))
 
     await this.conn.sessionUpdate({
       sessionId,
       update: {
         sessionUpdate: 'available_commands_update',
-        availableCommands,
-      },
-    })
+        availableCommands}})
   }
 
   private scheduleAvailableCommandsUpdate(sessionId: string): void {

@@ -96,6 +96,5 @@ export function updateOpenAIUsage(
       delta.cache_read_input_tokens !== undefined &&
       delta.cache_read_input_tokens > 0
         ? delta.cache_read_input_tokens
-        : current.cache_read_input_tokens,
-  }
+        : current.cache_read_input_tokens}
 }

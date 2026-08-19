@@ -111,13 +111,13 @@ export async function initUpstreamProxy(opts?: {
 
   setNonDumpable()
 
-  // CCR injects ANTHROPIC_BASE_URL via StartupContext (sessionExecutor.ts /
+  // CCR injects BASE_URL via StartupContext (sessionExecutor.ts /
   // sessionHandler.ts). getOauthConfig() is wrong here: it keys off
   // USER_TYPE + USE_{LOCAL,STAGING}_OAUTH, none of which the container sets,
   // so it always returned the prod URL and the CA fetch 404'd.
   const baseUrl =
     opts?.ccrBaseUrl ??
-    process.env.ANTHROPIC_BASE_URL ??
+    process.env.BASE_URL ??
     'https://api.anthropic.com'
   const caBundlePath =
     opts?.caBundlePath ?? join(homedir(), '.ccr', 'ca-bundle.crt')
@@ -139,8 +139,7 @@ export async function initUpstreamProxy(opts?: {
     // fails, a supervisor restart can retry with the token still on disk.
     await unlink(tokenPath).catch(() => {
       logForDebugging('[upstreamproxy] token file unlink failed', {
-        level: 'warn',
-      })
+        level: 'warn'})
     })
   } catch (err) {
     logForDebugging(
@@ -194,8 +193,7 @@ export function getUpstreamProxyEnv(): Record<string, string> {
     SSL_CERT_FILE: state.caBundlePath,
     NODE_EXTRA_CA_CERTS: state.caBundlePath,
     REQUESTS_CA_BUNDLE: state.caBundlePath,
-    CURL_CA_BUNDLE: state.caBundlePath,
-  }
+    CURL_CA_BUNDLE: state.caBundlePath}
 }
 
 /** Test-only: reset module state between test cases. */
@@ -230,17 +228,14 @@ function setNonDumpable(): void {
     const lib = ffi.dlopen('libc.so.6', {
       prctl: {
         args: ['int', 'u64', 'u64', 'u64', 'u64'],
-        returns: 'int',
-      },
-    } as const)
+        returns: 'int'}} as const)
     const PR_SET_DUMPABLE = 4
     const rc = lib.symbols.prctl(PR_SET_DUMPABLE, 0n, 0n, 0n, 0n)
     if (rc !== 0) {
       logForDebugging(
         '[upstreamproxy] prctl(PR_SET_DUMPABLE,0) returned nonzero',
         {
-          level: 'warn',
-        },
+          level: 'warn'},
       )
     }
   } catch (err) {
@@ -261,8 +256,7 @@ async function downloadCaBundle(
     const resp = await fetch(`${baseUrl}/v1/code/upstreamproxy/ca-cert`, {
       // Bun has no default fetch timeout — a hung endpoint would block CLI
       // startup forever. 5s is generous for a small PEM.
-      signal: AbortSignal.timeout(5000),
-    })
+      signal: AbortSignal.timeout(5000)})
     if (!resp.ok) {
       logForDebugging(
         `[upstreamproxy] ca-cert fetch ${resp.status}; proxy disabled`,

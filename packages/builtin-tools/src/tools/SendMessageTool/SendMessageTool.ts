@@ -17,6 +17,7 @@ import { logForDebugging } from 'src/utils/debug.js'
 import { errorMessage } from 'src/utils/errors.js'
 import { truncate } from 'src/utils/format.js'
 import { gracefulShutdown } from 'src/utils/gracefulShutdown.js'
+import { t } from 'src/utils/i18n/index.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import { parseAddress } from 'src/utils/peerAddress.js'
 import { semanticBoolean } from 'src/utils/semanticBoolean.js'
@@ -208,7 +209,7 @@ async function handleMessage(
   return {
     data: {
       success: true,
-      message: `Message sent to ${recipientName}'s inbox`,
+      message: t('toolUI.sendMessage.messageSent', recipientName),
       routing: {
         sender: senderName,
         senderColor,
@@ -230,22 +231,18 @@ async function handleBroadcast(
   const teamName = getTeamName(appState.teamContext)
 
   if (!teamName) {
-    throw new Error(
-      'Not in a team context. Create a team with Teammate spawnTeam first, or set CLAUDE_CODE_TEAM_NAME.',
-    )
+    throw new Error(t('toolUI.sendMessage.notInTeam'))
   }
 
   const teamFile = await readTeamFileAsync(teamName)
   if (!teamFile) {
-    throw new Error(`Team "${teamName}" does not exist`)
+    throw new Error(t('toolUI.sendMessage.teamNotExist', teamName))
   }
 
   const senderName =
     getAgentName() || (isTeammate() ? 'teammate' : TEAM_LEAD_NAME)
   if (!senderName) {
-    throw new Error(
-      'Cannot broadcast: sender name is required. Set CLAUDE_CODE_AGENT_NAME.',
-    )
+    throw new Error(t('toolUI.sendMessage.senderNameRequired'))
   }
 
   const senderColor = getTeammateColor()
@@ -262,7 +259,7 @@ async function handleBroadcast(
     return {
       data: {
         success: true,
-        message: 'No teammates to broadcast to (you are the only team member)',
+        message: t('toolUI.sendMessage.noTeammatesToBroadcast'),
         recipients: [],
       },
     }
@@ -285,7 +282,7 @@ async function handleBroadcast(
   return {
     data: {
       success: true,
-      message: `Message broadcast to ${recipients.length} teammate(s): ${recipients.join(', ')}`,
+      message: t('toolUI.sendMessage.broadcastSent', recipients.length, recipients.join(', ')),
       recipients,
       routing: {
         sender: senderName,
@@ -328,7 +325,7 @@ async function handleShutdownRequest(
   return {
     data: {
       success: true,
-      message: `Shutdown request sent to ${targetName}. Request ID: ${requestId}`,
+      message: t('toolUI.sendMessage.shutdownRequestSent', targetName, requestId),
       request_id: requestId,
       target: targetName,
     },
@@ -410,7 +407,7 @@ async function handleShutdownApproval(
         return {
           data: {
             success: true,
-            message: `Shutdown approved (fallback path). Agent ${agentName} is now exiting.`,
+            message: t('toolUI.sendMessage.shutdownApprovedFallback', agentName),
             request_id: requestId,
           },
         }
@@ -425,7 +422,7 @@ async function handleShutdownApproval(
   return {
     data: {
       success: true,
-      message: `Shutdown approved. Sent confirmation to team-lead. Agent ${agentName} is now exiting.`,
+      message: t('toolUI.sendMessage.shutdownApprovedSent', agentName),
       request_id: requestId,
     },
   }
@@ -458,7 +455,7 @@ async function handleShutdownRejection(
   return {
     data: {
       success: true,
-      message: `Shutdown rejected. Reason: "${reason}". Continuing to work.`,
+      message: t('toolUI.sendMessage.shutdownRejected', reason),
       request_id: requestId,
     },
   }
@@ -473,9 +470,7 @@ async function handlePlanApproval(
   const teamName = appState.teamContext?.teamName
 
   if (!isTeamLead(appState.teamContext)) {
-    throw new Error(
-      'Only the team lead can approve plans. Teammates cannot approve their own or other plans.',
-    )
+    throw new Error(t('toolUI.sendMessage.onlyLeadCanApprove'))
   }
 
   const leaderMode = appState.toolPermissionContext.mode
@@ -502,7 +497,7 @@ async function handlePlanApproval(
   return {
     data: {
       success: true,
-      message: `Plan approved for ${recipientName}. They will receive the approval and can proceed with implementation.`,
+      message: t('toolUI.sendMessage.planApproved', recipientName),
       request_id: requestId,
     },
   }
@@ -518,9 +513,7 @@ async function handlePlanRejection(
   const teamName = appState.teamContext?.teamName
 
   if (!isTeamLead(appState.teamContext)) {
-    throw new Error(
-      'Only the team lead can reject plans. Teammates cannot reject their own or other plans.',
-    )
+    throw new Error(t('toolUI.sendMessage.onlyLeadCanReject'))
   }
 
   const rejectionResponse = {
@@ -544,7 +537,7 @@ async function handlePlanRejection(
   return {
     data: {
       success: true,
-      message: `Plan rejected for ${recipientName} with feedback: "${feedback}"`,
+      message: t('toolUI.sendMessage.planRejected', recipientName, feedback),
       request_id: requestId,
     },
   }
@@ -553,12 +546,11 @@ async function handlePlanRejection(
 export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
   buildTool({
     name: SEND_MESSAGE_TOOL_NAME,
-    searchHint:
-      'send message to teammate agent, broadcast, inter-agent communication, swarm messaging, agent coordination',
+    searchHint: t('toolUI.sendMessage.searchHint'),
     maxResultSizeChars: 100_000,
 
     userFacingName() {
-      return 'SendMessage'
+      return t('toolUI.sendMessage.userFacingName')
     },
 
     get inputSchema(): InputSchema {
@@ -624,7 +616,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
       if (feature('UDS_INBOX') && parseAddress(input.to).scheme === 'bridge') {
         return {
           behavior: 'ask' as const,
-          message: `Send a message to Remote Control session ${input.to}? It arrives as a user prompt on the receiving Claude (possibly another machine) via Anthropic's servers.`,
+          message: t('toolUI.sendMessage.remoteControlAsk', input.to),
           decisionReason: {
             type: 'safetyCheck',
             reason:
@@ -636,7 +628,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
       if (feature('LAN_PIPES') && parseAddress(input.to).scheme === 'tcp') {
         return {
           behavior: 'ask' as const,
-          message: `Send a message to LAN peer ${input.to}? This connects directly over TCP to a machine on your local network.`,
+          message: t('toolUI.sendMessage.lanPeerAsk', input.to),
           decisionReason: {
             type: 'safetyCheck',
             reason: 'Cross-machine LAN message requires explicit user consent',
@@ -651,7 +643,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
       if (input.to.trim().length === 0) {
         return {
           result: false,
-          message: 'to must not be empty',
+          message: t('toolUI.sendMessage.toMustNotBeEmpty'),
           errorCode: 9,
         }
       }
@@ -664,23 +656,21 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
       ) {
         return {
           result: false,
-          message: 'address target must not be empty',
+          message: t('toolUI.sendMessage.addressTargetMustNotBeEmpty'),
           errorCode: 9,
         }
       }
       if (addr.scheme === 'uds' && hasInlineUdsToken(input.to)) {
         return {
           result: false,
-          message:
-            'uds addresses must not include inline auth tokens; use the ListPeers address',
+          message: t('toolUI.sendMessage.udsNoInlineToken'),
           errorCode: 9,
         }
       }
       if (input.to.includes('@')) {
         return {
           result: false,
-          message:
-            'to must be a bare teammate name or "*" — there is only one team per session',
+          message: t('toolUI.sendMessage.toMustBeBareName'),
           errorCode: 9,
         }
       }
@@ -691,8 +681,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
         if (typeof input.message !== 'string') {
           return {
             result: false,
-            message:
-              'structured messages cannot be sent cross-session — only plain text',
+            message: t('toolUI.sendMessage.structuredCrossSession'),
             errorCode: 9,
           }
         }
@@ -703,8 +692,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
         if (!getReplBridgeHandle() || !isReplBridgeActive()) {
           return {
             result: false,
-            message:
-              'Remote Control is not connected — cannot send to a bridge: target. Reconnect with /remote-control first.',
+            message: t('toolUI.sendMessage.rcNotConnected'),
             errorCode: 9,
           }
         }
@@ -728,7 +716,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
         if (!input.summary || input.summary.trim().length === 0) {
           return {
             result: false,
-            message: 'summary is required when message is a string',
+            message: t('toolUI.sendMessage.summaryRequired'),
             errorCode: 9,
           }
         }
@@ -738,15 +726,14 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
       if (input.to === '*') {
         return {
           result: false,
-          message: 'structured messages cannot be broadcast (to: "*")',
+          message: t('toolUI.sendMessage.structuredNoBroadcast'),
           errorCode: 9,
         }
       }
       if (feature('UDS_INBOX') && parseAddress(input.to).scheme !== 'other') {
         return {
           result: false,
-          message:
-            'structured messages cannot be sent cross-session — only plain text',
+          message: t('toolUI.sendMessage.structuredCrossSession'),
           errorCode: 9,
         }
       }
@@ -757,7 +744,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
       ) {
         return {
           result: false,
-          message: `shutdown_response must be sent to "${TEAM_LEAD_NAME}"`,
+          message: t('toolUI.sendMessage.shutdownResponseToLead', TEAM_LEAD_NAME),
           errorCode: 9,
         }
       }
@@ -769,7 +756,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
       ) {
         return {
           result: false,
-          message: 'reason is required when rejecting a shutdown request',
+          message: t('toolUI.sendMessage.reasonRequiredReject'),
           errorCode: 9,
         }
       }
@@ -805,8 +792,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
           return {
             data: {
               success: false,
-              message:
-                'uds addresses must not include inline auth tokens; use the ListPeers address',
+              message: t('toolUI.sendMessage.udsNoInlineToken'),
             },
           }
         }
@@ -823,7 +809,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
             return {
               data: {
                 success: false,
-                message: `Remote Control disconnected before send — cannot deliver to ${input.to}`,
+                message: t('toolUI.sendMessage.rcDisconnected', input.to),
               },
             }
           }
@@ -840,8 +826,8 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
             data: {
               success: result.ok,
               message: result.ok
-                ? `”${preview}” → ${input.to}`
-                : `Failed to send to ${input.to}: ${result.error ?? 'unknown'}`,
+                ? t('toolUI.sendMessage.sendSuccess', preview, input.to)
+                : t('toolUI.sendMessage.sendFailed', input.to, result.error ?? 'unknown'),
             },
           }
         }
@@ -857,14 +843,14 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
             return {
               data: {
                 success: true,
-                message: `”${preview}” → ${recipient}`,
+                message: t('toolUI.sendMessage.sendSuccess', preview, recipient),
               },
             }
           } catch (e) {
             return {
               data: {
                 success: false,
-                message: `Failed to send to ${recipient}: ${errorMessage(e)}`,
+                message: t('toolUI.sendMessage.sendFailed', recipient, errorMessage(e)),
               },
             }
           }
@@ -879,7 +865,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
             return {
               data: {
                 success: false,
-                message: `Invalid TCP target format: ${addr.target}. Expected host:port`,
+                message: t('toolUI.sendMessage.invalidTcpTarget', addr.target),
               },
             }
           }
@@ -892,14 +878,14 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
             return {
               data: {
                 success: true,
-                message: `”${preview}” → ${input.to} (TCP ${ep.host}:${ep.port})`,
+                message: t('toolUI.sendMessage.tcpSendSuccess', preview, input.to, ep.host, ep.port),
               },
             }
           } catch (e) {
             return {
               data: {
                 success: false,
-                message: `Failed to send via TCP to ${input.to}: ${errorMessage(e)}`,
+                message: t('toolUI.sendMessage.tcpSendFailed', input.to, errorMessage(e)),
               },
             }
           }
@@ -924,7 +910,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
               return {
                 data: {
                   success: true,
-                  message: `Message queued for delivery to ${input.to} at its next tool round.`,
+                  message: t('toolUI.sendMessage.messageQueued', input.to),
                 },
               }
             }
@@ -942,14 +928,14 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
               return {
                 data: {
                   success: true,
-                  message: `Agent "${input.to}" was stopped (${task.status}); resumed it in the background with your message. You'll be notified when it finishes. Output: ${result.outputFile}`,
+                  message: t('toolUI.sendMessage.agentResumedStopped', input.to, task.status, result.outputFile),
                 },
               }
             } catch (e) {
               return {
                 data: {
                   success: false,
-                  message: `Agent "${input.to}" is stopped (${task.status}) and could not be resumed: ${errorMessage(e)}`,
+                  message: t('toolUI.sendMessage.agentResumeFailed', input.to, task.status, errorMessage(e)),
                 },
               }
             }
@@ -971,14 +957,14 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
               return {
                 data: {
                   success: true,
-                  message: `Agent "${input.to}" had no active task; resumed from transcript in the background with your message. You'll be notified when it finishes. Output: ${result.outputFile}`,
+                  message: t('toolUI.sendMessage.agentResumedTranscript', input.to, result.outputFile),
                 },
               }
             } catch (e) {
               return {
                 data: {
                   success: false,
-                  message: `Agent "${input.to}" is registered but has no transcript to resume. It may have been cleaned up. (${errorMessage(e)})`,
+                  message: t('toolUI.sendMessage.agentNoTranscript', input.to, errorMessage(e)),
                 },
               }
             }
@@ -994,7 +980,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
       }
 
       if (input.to === '*') {
-        throw new Error('structured messages cannot be broadcast')
+        throw new Error(t('toolUI.sendMessage.structuredNoBroadcastCall'))
       }
 
       switch (input.message.type) {
@@ -1019,7 +1005,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
           return handlePlanRejection(
             input.to,
             input.message.request_id,
-            input.message.feedback ?? 'Plan needs revision',
+            input.message.feedback ?? t('toolUI.sendMessage.defaultRevisionFeedback'),
             context,
           )
       }

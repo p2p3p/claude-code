@@ -144,8 +144,7 @@ export const GitHubActionsMetadata: MessageFns<GitHubActionsMetadata> = {
         : '',
       repository_owner_id: isSet(object.repository_owner_id)
         ? globalThis.String(object.repository_owner_id)
-        : '',
-    }
+        : ''}
   },
 
   toJSON(message: GitHubActionsMetadata): unknown {
@@ -175,8 +174,7 @@ export const GitHubActionsMetadata: MessageFns<GitHubActionsMetadata> = {
     message.repository_id = object.repository_id ?? ''
     message.repository_owner_id = object.repository_owner_id ?? ''
     return message
-  },
-}
+  }}
 
 function createBaseEnvironmentMetadata(): EnvironmentMetadata {
   return {
@@ -214,8 +212,7 @@ function createBaseEnvironmentMetadata(): EnvironmentMetadata {
     linux_distro_version: '',
     linux_kernel: '',
     vcs: '',
-    platform_raw: '',
-  }
+    platform_raw: ''}
 }
 
 export const EnvironmentMetadata: MessageFns<EnvironmentMetadata> = {
@@ -319,8 +316,7 @@ export const EnvironmentMetadata: MessageFns<EnvironmentMetadata> = {
       vcs: isSet(object.vcs) ? globalThis.String(object.vcs) : '',
       platform_raw: isSet(object.platform_raw)
         ? globalThis.String(object.platform_raw)
-        : '',
-    }
+        : ''}
   },
 
   toJSON(message: EnvironmentMetadata): unknown {
@@ -487,16 +483,14 @@ export const EnvironmentMetadata: MessageFns<EnvironmentMetadata> = {
     message.vcs = object.vcs ?? ''
     message.platform_raw = object.platform_raw ?? ''
     return message
-  },
-}
+  }}
 
 function createBaseSlackContext(): SlackContext {
   return {
     slack_team_id: '',
     is_enterprise_install: false,
     trigger: '',
-    creation_method: '',
-  }
+    creation_method: ''}
 }
 
 export const SlackContext: MessageFns<SlackContext> = {
@@ -511,8 +505,7 @@ export const SlackContext: MessageFns<SlackContext> = {
       trigger: isSet(object.trigger) ? globalThis.String(object.trigger) : '',
       creation_method: isSet(object.creation_method)
         ? globalThis.String(object.creation_method)
-        : '',
-    }
+        : ''}
   },
 
   toJSON(message: SlackContext): unknown {
@@ -546,8 +539,7 @@ export const SlackContext: MessageFns<SlackContext> = {
     message.trigger = object.trigger ?? ''
     message.creation_method = object.creation_method ?? ''
     return message
-  },
-}
+  }}
 
 function createBaseClaudeCodeInternalEvent(): ClaudeCodeInternalEvent {
   return {
@@ -579,8 +571,7 @@ function createBaseClaudeCodeInternalEvent(): ClaudeCodeInternalEvent {
     team_name: '',
     skill_name: '',
     plugin_name: '',
-    marketplace_name: '',
-  }
+    marketplace_name: ''}
 }
 
 export const ClaudeCodeInternalEvent: MessageFns<ClaudeCodeInternalEvent> = {
@@ -664,8 +655,7 @@ export const ClaudeCodeInternalEvent: MessageFns<ClaudeCodeInternalEvent> = {
         : '',
       marketplace_name: isSet(object.marketplace_name)
         ? globalThis.String(object.marketplace_name)
-        : '',
-    }
+        : ''}
   },
 
   toJSON(message: ClaudeCodeInternalEvent): unknown {
@@ -808,8 +798,7 @@ export const ClaudeCodeInternalEvent: MessageFns<ClaudeCodeInternalEvent> = {
     message.plugin_name = object.plugin_name ?? ''
     message.marketplace_name = object.marketplace_name ?? ''
     return message
-  },
-}
+  }}
 
 type Builtin =
   | Date

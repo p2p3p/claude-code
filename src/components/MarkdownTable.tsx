@@ -49,8 +49,7 @@ function wrapText(text: string, width: number, options?: { hard?: boolean }): st
   const wrapped = wrapAnsi(trimmedText, width, {
     hard: options?.hard ?? false,
     trim: false,
-    wordWrap: true,
-  });
+    wordWrap: true});
   // Filter out empty lines that result from trailing newlines or
   // multiple consecutive newlines in the source content.
   const lines = wrapped.split('\n').filter(line => line.length > 0);
@@ -74,8 +73,7 @@ function wrapText(text: string, width: number, options?: { hard?: boolean }): st
 export const MarkdownTable = React.memo(function MarkdownTable({
   token,
   highlight,
-  forceWidth,
-}: Props): React.ReactNode {
+  forceWidth}: Props): React.ReactNode {
   const [theme] = useTheme();
   const { columns: actualTerminalWidth } = useTerminalSize();
   const terminalWidth = forceWidth ?? actualTerminalWidth;
@@ -178,8 +176,7 @@ export const MarkdownTable = React.memo(function MarkdownTable({
     if (cached !== undefined) return cached;
     const formatted = formatCell(tokens);
     const lines = wrapText(formatted, columnWidths[colIndex]!, {
-      hard: needsHardWrap,
-    });
+      hard: needsHardWrap});
     wrapCache.set(tokens, lines);
     return lines;
   }
@@ -235,8 +232,7 @@ export const MarkdownTable = React.memo(function MarkdownTable({
     const [left, mid, cross, right] = {
       top: ['┌', '─', '┬', '┐'],
       middle: ['├', '─', '┼', '┤'],
-      bottom: ['└', '─', '┴', '┘'],
-    }[type] as [string, string, string, string];
+      bottom: ['└', '─', '┴', '┘']}[type] as [string, string, string, string];
 
     let line = left;
     columnWidths.forEach((width, colIndex) => {

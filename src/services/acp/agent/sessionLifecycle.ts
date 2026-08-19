@@ -9,10 +9,10 @@
  */
 import { type UUID } from 'node:crypto'
 import { dirname } from 'node:path'
+import { t } from '../../../utils/i18n/index.js'
 import type {
   NewSessionRequest,
-  NewSessionResponse,
-} from '@agentclientprotocol/sdk'
+  NewSessionResponse} from '@agentclientprotocol/sdk'
 import type { Message } from '../../../types/message.js'
 import { deserializeMessages } from '../../../utils/conversationRecovery.js'
 import { getLastSessionLog } from '../../../utils/sessionStorage.js'
@@ -28,8 +28,7 @@ import { isPermissionMode } from './permissionMode.js'
 import {
   getConnection,
   readClientCapabilities,
-  syncSessionConfigState,
-} from './internalAccessors.js'
+  syncSessionConfigState} from './internalAccessors.js'
 
 // ── getOrCreateSession ───────────────────────────────────────────
 
@@ -54,8 +53,7 @@ async function getOrCreateSession(
       cwd: params.cwd,
       mcpServers: params.mcpServers as
         | Array<{ name: string; [key: string]: unknown }>
-        | undefined,
-    })
+        | undefined})
     if (fingerprint === existingSession.sessionFingerprint) {
       const resolved = await resolveSessionFilePath(
         params.sessionId,
@@ -77,8 +75,7 @@ async function getOrCreateSession(
         // Carry models over on reconnect so the client keeps its model selector
         // populated (standard clients gate supportsModelSelection on this field).
         models: existingSession.models,
-        configOptions: existingSession.configOptions,
-      }
+        configOptions: existingSession.configOptions}
     }
 
     await this.teardownSession(params.sessionId)
@@ -111,8 +108,7 @@ async function getOrCreateSession(
     {
       cwd: params.cwd,
       mcpServers: params.mcpServers ?? [],
-      _meta: params._meta,
-    },
+      _meta: params._meta},
     { sessionId: params.sessionId, initialMessages },
   )
 
@@ -136,8 +132,7 @@ async function getOrCreateSession(
     modes: response.modes,
     // createSession already returns models; pass it through. Same reason as above.
     models: response.models,
-    configOptions: response.configOptions,
-  }
+    configOptions: response.configOptions}
 }
 
 // ── teardownSession ──────────────────────────────────────────────
@@ -197,7 +192,7 @@ function applySessionMode(
   modeId: string,
 ): void {
   if (!isPermissionMode(modeId)) {
-    throw new Error(`Invalid mode: ${modeId}`)
+    throw new Error(t('acpAgent.invalidMode', modeId))
   }
   const session = this.sessions.get(sessionId)
   if (session) {
@@ -205,21 +200,20 @@ function applySessionMode(
       modeId === 'bypassPermissions' &&
       !session.appState.toolPermissionContext.isBypassPermissionsModeAvailable
     ) {
-      throw new Error(`Mode not available: ${modeId}`)
+      throw new Error(t('acpAgent.modeNotAvailable', modeId))
     }
     const isAvailable = session.modes.availableModes.some(
       mode => mode.id === modeId,
     )
     if (!isAvailable) {
-      throw new Error(`Mode not available: ${modeId}`)
+      throw new Error(t('acpAgent.modeNotAvailable', modeId))
     }
 
     session.modes = { ...session.modes, currentModeId: modeId }
     // Sync mode to appState so the permission pipeline sees the correct mode
     session.appState.toolPermissionContext = {
       ...session.appState.toolPermissionContext,
-      mode: modeId as PermissionMode,
-    }
+      mode: modeId as PermissionMode}
   }
 }
 
@@ -250,9 +244,7 @@ async function updateConfigOption(
     sessionId,
     update: {
       sessionUpdate: 'config_option_update',
-      configOptions: session.configOptions,
-    },
-  })
+      configOptions: session.configOptions}})
 }
 
 // ── Prototype attachment ─────────────────────────────────────────
@@ -262,5 +254,4 @@ Object.assign(AcpAgent.prototype, {
   teardownSession,
   replaySessionHistory,
   applySessionMode,
-  updateConfigOption,
-})
+  updateConfigOption})

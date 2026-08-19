@@ -1,12 +1,4 @@
-export type APIProvider =
-  | 'firstParty'
-  | 'bedrock'
-  | 'vertex'
-  | 'foundry'
-  | 'openai'
-  | 'gemini'
-  | 'grok'
-
-export function isThirdPartyAPIProvider(provider: APIProvider): boolean {
-  return provider !== 'firstParty'
-}
+// Provider classification now lives in the accounts domain.
+// Kept as a thin re-export for compatibility.
+export {
+  type APIProvider} from '../../accounts/model/provider.js'

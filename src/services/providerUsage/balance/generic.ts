@@ -1,3 +1,4 @@
+import { t } from '../../../utils/i18n/index.js'
 import type { ProviderBalance } from '../types.js'
 import type { BalanceProvider } from './types.js'
 
@@ -40,16 +41,16 @@ const PRIVATE_IP_RE =
 function assertSafeBalanceUrl(raw: string): URL {
   const parsed = new URL(raw)
   if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-    throw new Error(`unsupported protocol: ${parsed.protocol}`)
+    throw new Error(t('balanceGeneric.unsupportedProtocol', parsed.protocol))
   }
   if (
     parsed.protocol === 'http:' &&
     !['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname)
   ) {
-    throw new Error(`http only allowed for localhost, got ${parsed.hostname}`)
+    throw new Error(t('balanceGeneric.httpLocalhostOnly', parsed.hostname))
   }
   if (PRIVATE_IP_RE.test(parsed.hostname)) {
-    throw new Error(`private/reserved IP not allowed: ${parsed.hostname}`)
+    throw new Error(t('balanceGeneric.privateIpNotAllowed', parsed.hostname))
   }
   return parsed
 }
@@ -77,8 +78,8 @@ export const genericBalanceProvider: BalanceProvider = {
     // If that URL is untrusted, your provider key leaks. Prefer CLAUDE_CODE_BALANCE_KEY.
     const key =
       process.env.CLAUDE_CODE_BALANCE_KEY ||
-      process.env.OPENAI_API_KEY ||
-      process.env.ANTHROPIC_API_KEY ||
+      process.env.API_KEY ||
+      process.env.API_KEY ||
       ''
     const path = process.env.CLAUDE_CODE_BALANCE_JSON_PATH || 'balance'
     const currency = process.env.CLAUDE_CODE_BALANCE_CURRENCY || 'USD'
@@ -89,10 +90,8 @@ export const genericBalanceProvider: BalanceProvider = {
         method: 'GET',
         headers: {
           Accept: 'application/json',
-          ...(key ? { Authorization: `Bearer ${key}` } : {}),
-        },
-        signal,
-      })
+          ...(key ? { Authorization: `Bearer ${key}` } : {})},
+        signal})
     } catch {
       return null
     }
@@ -112,7 +111,5 @@ export const genericBalanceProvider: BalanceProvider = {
     return {
       currency,
       remaining,
-      updatedAt: Math.floor(Date.now() / 1000),
-    }
-  },
-}
+      updatedAt: Math.floor(Date.now() / 1000)}
+  }}

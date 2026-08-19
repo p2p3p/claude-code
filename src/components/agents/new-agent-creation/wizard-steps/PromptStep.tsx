@@ -2,6 +2,7 @@ import { type ReactNode, useCallback, useState } from 'react';
 import { Box, Byline, KeyboardShortcutHint, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js';
 import { editPromptInEditor } from '../../../../utils/promptEditor.js';
+import { t } from '../../../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import TextInput from '../../../TextInput.js';
 import { useWizard } from '../../../wizard/index.js';
@@ -26,8 +27,7 @@ export function PromptStep(): ReactNode {
   }, [systemPrompt]);
 
   useKeybinding('chat:externalEditor', handleExternalEditor, {
-    context: 'Chat',
-  });
+    context: 'Chat'});
 
   const handleSubmit = (): void => {
     const trimmedPrompt = systemPrompt.trim();
@@ -43,31 +43,31 @@ export function PromptStep(): ReactNode {
 
   return (
     <WizardDialogLayout
-      subtitle="System prompt"
+      subtitle={t('promptstep.systemPrompt')}
       footerText={
         <Byline>
-          <KeyboardShortcutHint shortcut="Type" action="enter text" />
-          <KeyboardShortcutHint shortcut="Enter" action="continue" />
+          <KeyboardShortcutHint shortcut="Type" action={t('shortcutHint.enterText')} />
+          <KeyboardShortcutHint shortcut="Enter" action={t('shortcutHint.continue')} />
           <ConfigurableShortcutHint
             action="chat:externalEditor"
             context="Chat"
             fallback="ctrl+g"
-            description="open in editor"
+            description={t('desc.openInEditor')}
           />
-          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="go back" />
+          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.goBack')} />
         </Byline>
       }
     >
       <Box flexDirection="column">
-        <Text>Enter the system prompt for your agent:</Text>
-        <Text dimColor>Be comprehensive for best results</Text>
+        <Text>{t('promptstep.enterTheSystemPromptForYourAgent')}</Text>
+        <Text dimColor>{t('promptstep.beComprehensiveForBestResults')}</Text>
 
         <Box marginTop={1}>
           <TextInput
             value={systemPrompt}
             onChange={setSystemPrompt}
             onSubmit={handleSubmit}
-            placeholder="You are a helpful code reviewer who..."
+            placeholder={t('promptstep.youAreAHelpfulCodeReviewerWho')}
             columns={80}
             cursorOffset={cursorOffset}
             onChangeCursorOffset={setCursorOffset}

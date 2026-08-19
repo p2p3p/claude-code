@@ -3,8 +3,7 @@ import { ManagedSettingsSecurityDialog } from '../../components/ManagedSettingsS
 import {
   extractDangerousSettings,
   hasDangerousSettings,
-  hasDangerousSettingsChanged,
-} from '../../components/ManagedSettingsSecurityDialog/utils.js';
+  hasDangerousSettingsChanged} from '../../components/ManagedSettingsSecurityDialog/utils.js';
 import { wrappedRender as render } from '@anthropic/ink';
 import { KeybindingSetup } from '../../keybindings/KeybindingProviderSetup.js';
 import { AppStateProvider } from '../../state/AppState.js';

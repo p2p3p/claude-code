@@ -9,12 +9,11 @@ import {
   getOverrideSourceLabel,
   type ResolvedAgent,
   resolveAgentModelDisplay,
-  resolveAgentOverrides,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/agentDisplay.js'
+  resolveAgentOverrides} from '@claude-code-best/builtin-tools/tools/AgentTool/agentDisplay.js'
 import {
   getActiveAgentsFromList,
-  getAgentDefinitionsWithOverrides,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
+  getAgentDefinitionsWithOverrides} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
+import { t } from '../../utils/i18n/index.js'
 import { getCwd } from '../../utils/cwd.js'
 
 function formatAgent(agent: ResolvedAgent): string {
@@ -24,7 +23,7 @@ function formatAgent(agent: ResolvedAgent): string {
     parts.push(model)
   }
   if (agent.memory) {
-    parts.push(`${agent.memory} memory`)
+    parts.push(t('cli.agentMemoryLabel', agent.memory))
   }
   return parts.join(' · ')
 }
@@ -49,7 +48,7 @@ export async function agentsHandler(): Promise<void> {
     for (const agent of groupAgents) {
       if (agent.overriddenBy) {
         const winnerSource = getOverrideSourceLabel(agent.overriddenBy)
-        lines.push(`  (shadowed by ${winnerSource}) ${formatAgent(agent)}`)
+        lines.push(`  ${t('cli.agentShadowedBy', winnerSource)} ${formatAgent(agent)}`)
       } else {
         lines.push(`  ${formatAgent(agent)}`)
         totalActive++
@@ -59,9 +58,9 @@ export async function agentsHandler(): Promise<void> {
   }
 
   if (lines.length === 0) {
-    console.log('No agents found.')
+    console.log(t('cli.noAgentsFound'))
   } else {
-    console.log(`${totalActive} active agents\n`)
+    console.log(t('cli.totalActiveAgents', totalActive) + '\n')
     console.log(lines.join('\n').trimEnd())
   }
 }

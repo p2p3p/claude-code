@@ -65,9 +65,7 @@ export async function withAutonomyPersistenceLock<T>(
         retries: 10,
         factor: 1.2,
         minTimeout: 10,
-        maxTimeout: 100,
-      },
-    })
+        maxTimeout: 100}})
     try {
       return await fn()
     } finally {

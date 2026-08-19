@@ -10,13 +10,11 @@ import { shutdownLspServerManager } from '../services/lsp/manager.js'
 import { populateOAuthAccountInfoIfNeeded } from '../services/oauth/client.js'
 import {
   initializePolicyLimitsLoadingPromise,
-  isPolicyLimitsEligible,
-} from '../services/policyLimits/index.js'
+  isPolicyLimitsEligible} from '../services/policyLimits/index.js'
 import {
   initializeRemoteManagedSettingsLoadingPromise,
   isEligibleForRemoteManagedSettings,
-  waitForRemoteManagedSettingsToLoad,
-} from '../services/remoteManagedSettings/index.js'
+  waitForRemoteManagedSettingsToLoad} from '../services/remoteManagedSettings/index.js'
 import { preconnectAnthropicApi } from '../utils/apiPreconnect.js'
 import { applyExtraCACertsFromConfig } from '../utils/caCertsConfig.js'
 import { registerCleanup } from '../utils/cleanupRegistry.js'
@@ -24,8 +22,7 @@ import {
   enableConfigs,
   getGlobalConfig,
   recordFirstStartTime,
-  saveGlobalConfig,
-} from '../utils/config.js'
+  saveGlobalConfig} from '../utils/config.js'
 import { logForDebugging } from '../utils/debug.js'
 import { detectCurrentRepository } from '../utils/detectRepository.js'
 import { logForDiagnosticsNoPII } from '../utils/diagLogs.js'
@@ -35,17 +32,14 @@ import { ConfigParseError, errorMessage } from '../utils/errors.js'
 // showInvalidConfigDialog is dynamically imported in the error path to avoid loading React at init
 import {
   gracefulShutdownSync,
-  setupGracefulShutdown,
-} from '../utils/gracefulShutdown.js'
+  setupGracefulShutdown} from '../utils/gracefulShutdown.js'
 import {
   applyConfigEnvironmentVariables,
-  applySafeConfigEnvironmentVariables,
-} from '../utils/managedEnv.js'
+  applySafeConfigEnvironmentVariables} from '../utils/managedEnv.js'
 import { configureGlobalMTLS } from '../utils/mtls.js'
 import {
   ensureScratchpadDir,
-  isScratchpadEnabled,
-} from '../utils/permissions/filesystem.js'
+  isScratchpadEnabled} from '../utils/permissions/filesystem.js'
 // initializeTelemetry is loaded lazily via import() in setMeterState() to defer
 // ~400KB of OpenTelemetry + protobuf modules until telemetry is actually initialized.
 // gRPC exporters (~700KB via @grpc/grpc-js) are further lazy-loaded within instrumentation.ts.
@@ -57,6 +51,7 @@ import { initSentry } from '../utils/sentry.js'
 import { initUser } from '../utils/user.js'
 import { initLangfuse, shutdownLangfuse } from '../services/langfuse/index.js'
 import { setThemeConfigCallbacks } from '@anthropic/ink'
+import { setLocale, t } from '../utils/i18n/index.js'
 
 // initialize1PEventLogging is dynamically imported to defer OpenTelemetry sdk-logs/resources
 
@@ -75,11 +70,18 @@ export const init = memoize(async (): Promise<void> => {
     setThemeConfigCallbacks({
       loadTheme: () => getGlobalConfig().theme,
       saveTheme: setting =>
-        saveGlobalConfig(current => ({ ...current, theme: setting })),
-    })
+        saveGlobalConfig(current => ({ ...current, theme: setting }))})
+    // Initialize UI language from config
+    const prefLang = getGlobalConfig().preferredLanguage
+    if (prefLang === 'zh') setLocale('zh_CN')
+    else if (prefLang === 'en') setLocale('en')
+    else {
+      // auto: fall back to system locale
+      const { getSystemLocaleLanguage } = await import('../utils/intl.js')
+      if (getSystemLocaleLanguage() === 'zh') setLocale('zh_CN')
+    }
     logForDiagnosticsNoPII('info', 'init_configs_enabled', {
-      duration_ms: Date.now() - configsStart,
-    })
+      duration_ms: Date.now() - configsStart})
     profileCheckpoint('init_configs_enabled')
 
     // Apply only safe environment variables before trust dialog
@@ -93,8 +95,7 @@ export const init = memoize(async (): Promise<void> => {
     applyExtraCACertsFromConfig()
 
     logForDiagnosticsNoPII('info', 'init_safe_env_vars_applied', {
-      duration_ms: Date.now() - envVarsStart,
-    })
+      duration_ms: Date.now() - envVarsStart})
     profileCheckpoint('init_safe_env_vars_applied')
 
     // Make sure things get flushed on exit
@@ -156,8 +157,7 @@ export const init = memoize(async (): Promise<void> => {
     logForDebugging('[init] configureGlobalMTLS starting')
     configureGlobalMTLS()
     logForDiagnosticsNoPII('info', 'init_mtls_configured', {
-      duration_ms: Date.now() - mtlsStart,
-    })
+      duration_ms: Date.now() - mtlsStart})
     logForDebugging('[init] configureGlobalMTLS complete')
 
     // Configure global HTTP agents (proxy and/or mTLS)
@@ -165,8 +165,7 @@ export const init = memoize(async (): Promise<void> => {
     logForDebugging('[init] configureGlobalAgents starting')
     configureGlobalAgents()
     logForDiagnosticsNoPII('info', 'init_proxy_configured', {
-      duration_ms: Date.now() - proxyStart,
-    })
+      duration_ms: Date.now() - proxyStart})
     logForDebugging('[init] configureGlobalAgents complete')
     profileCheckpoint('init_network_configured')
 
@@ -233,8 +232,7 @@ export const init = memoize(async (): Promise<void> => {
       const scratchpadStart = Date.now()
       await ensureScratchpadDir()
       logForDiagnosticsNoPII('info', 'init_scratchpad_created', {
-        duration_ms: Date.now() - scratchpadStart,
-      })
+        duration_ms: Date.now() - scratchpadStart})
     }
 
     // Surface ripgrep fallback (e.g. Android/Termux) once per session.
@@ -251,8 +249,7 @@ export const init = memoize(async (): Promise<void> => {
     }
 
     logForDiagnosticsNoPII('info', 'init_completed', {
-      duration_ms: Date.now() - initStartTime,
-    })
+      duration_ms: Date.now() - initStartTime})
     profileCheckpoint('init_function_end')
   } catch (error) {
     if (error instanceof ConfigParseError) {
@@ -261,7 +258,7 @@ export const init = memoize(async (): Promise<void> => {
       // manager running `plugin marketplace list --json` in a VM sandbox).
       if (getIsNonInteractiveSession()) {
         process.stderr.write(
-          `Configuration error in ${error.filePath}: ${error.message}\n`,
+          t('entrypoint.configError', error.filePath, error.message) + '\n',
         )
         gracefulShutdownSync(1)
         return
@@ -375,11 +372,9 @@ async function setMeterState(): Promise<void> {
           const currentAttributes = getTelemetryAttributes()
           const mergedAttributes = {
             ...currentAttributes,
-            ...additionalAttributes,
-          }
+            ...additionalAttributes}
           counter?.add(value, mergedAttributes)
-        },
-      }
+        }}
     }
 
     setMeter(meter, createAttributedCounter)

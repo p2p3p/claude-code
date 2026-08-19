@@ -6,24 +6,20 @@ import type { SettingSource } from '../settings/constants.js'
 import {
   getInitialSettings,
   getSettingsForSource,
-  updateSettingsForSource,
-} from '../settings/settings.js'
+  updateSettingsForSource} from '../settings/settings.js'
 import { getAddDirEnabledPlugins } from './addDirPluginSettings.js'
 import {
   getInMemoryInstalledPlugins,
-  migrateFromEnabledPlugins,
-} from './installedPluginsManager.js'
+  migrateFromEnabledPlugins} from './installedPluginsManager.js'
 import { getPluginById } from './marketplaceManager.js'
 import {
   type ExtendedPluginScope,
   type PersistablePluginScope,
   SETTING_SOURCE_TO_SCOPE,
-  scopeToSettingSource,
-} from './pluginIdentifier.js'
+  scopeToSettingSource} from './pluginIdentifier.js'
 import {
   cacheAndRegisterPlugin,
-  registerPluginInstallation,
-} from './pluginInstallationHelpers.js'
+  registerPluginInstallation} from './pluginInstallationHelpers.js'
 import { isLocalPluginSource, type PluginScope } from './schemas.js'
 
 /**
@@ -297,8 +293,7 @@ export async function installSelectedPlugins(
       if (!pluginInfo) {
         failed.push({
           name: pluginId,
-          error: 'Plugin not found in any marketplace',
-        })
+          error: 'Plugin not found in any marketplace'})
         continue
       }
 
@@ -313,8 +308,7 @@ export async function installSelectedPlugins(
           {
             pluginId,
             installPath: join(marketplaceInstallLocation, entry.source),
-            version: entry.version,
-          },
+            version: entry.version},
           scope,
           projectPath,
         )
@@ -334,8 +328,7 @@ export async function installSelectedPlugins(
   // Update settings with newly enabled plugins using the correct settings source
   updateSettingsForSource(settingSource, {
     ...settings,
-    enabledPlugins: updatedEnabledPlugins,
-  })
+    enabledPlugins: updatedEnabledPlugins})
 
   return { installed, failed }
 }

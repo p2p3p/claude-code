@@ -19,11 +19,11 @@
  */
 import { feature } from 'bun:bundle'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
+import { t } from '../../utils/i18n/index.js'
 import type {
   Command,
   LocalCommandCall,
-  LocalCommandResult,
-} from '../../types/command.js'
+  LocalCommandResult} from '../../types/command.js'
 
 // ── Call implementation ───────────────────────────────────────────────────────
 
@@ -42,20 +42,17 @@ const call: LocalCommandCall = async (_args, context) => {
     case 'no-turn':
       return {
         type: 'text',
-        value: 'Nothing to recap yet \u2014 send a message first.',
-      } satisfies LocalCommandResult
+        value: t('recapCmd.nothingToRecap')} satisfies LocalCommandResult
 
     case 'aborted':
       return {
         type: 'text',
-        value: 'Recap cancelled.',
-      } satisfies LocalCommandResult
+        value: t('recapCmd.cancelled')} satisfies LocalCommandResult
 
     case 'failed':
       return {
         type: 'text',
-        value: 'Couldn\u2019t generate a recap. Run with --debug for details.',
-      } satisfies LocalCommandResult
+        value: t('recapCmd.failed')} satisfies LocalCommandResult
   }
 }
 
@@ -64,7 +61,7 @@ const call: LocalCommandCall = async (_args, context) => {
 const recap = {
   type: 'local',
   name: 'recap',
-  description: 'Generate a one-line session recap now',
+  description: t('cmd.descRecap'),
   aliases: ['away', 'catchup'],
   /**
    * Enabled when:
@@ -80,7 +77,6 @@ const recap = {
   },
   supportsNonInteractive: false,
   isHidden: false,
-  load: () => Promise.resolve({ call }),
-} satisfies Command
+  load: () => Promise.resolve({ call })} satisfies Command
 
 export default recap

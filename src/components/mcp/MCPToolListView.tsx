@@ -4,7 +4,7 @@ import { extractMcpToolDisplayName, getMcpDisplayName } from '../../services/mcp
 import { filterToolsByServer } from '../../services/mcp/utils.js';
 import { useAppState } from '../../state/AppState.js';
 import type { Tool } from '../../Tool.js';
-import { plural } from '../../utils/stringUtils.js';
+import { t } from '../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Select } from '../CustomSelect/index.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
@@ -43,29 +43,28 @@ export function MCPToolListView({ server, onSelectTool, onBack }: Props): React.
       label: displayName,
       value: index.toString(),
       description: annotations.length > 0 ? annotations.join(', ') : undefined,
-      descriptionColor: isDestructive ? 'error' : isReadOnly ? 'success' : undefined,
-    };
+      descriptionColor: isDestructive ? 'error' : isReadOnly ? 'success' : undefined};
   });
 
   return (
     <Dialog
-      title={`Tools for ${server.name}`}
-      subtitle={`${serverTools.length} ${plural(serverTools.length, 'tool')}`}
+      title={t('mcptoollistview.title', server.name)}
+      subtitle={t('mcptoollistview.subtitle', serverTools.length)}
       onCancel={onBack}
       inputGuide={exitState =>
         exitState.pending ? (
-          <Text>Press {exitState.keyName} again to exit</Text>
+          <Text>{t('common.pressAgain', exitState.keyName)}</Text>
         ) : (
           <Byline>
-            <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
-            <KeyboardShortcutHint shortcut="Enter" action="select" />
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+            <KeyboardShortcutHint shortcut="↑↓" action={t('shortcutHint.navigate')} />
+            <KeyboardShortcutHint shortcut="Enter" action={t('shortcutHint.select')} />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.back')} />
           </Byline>
         )
       }
     >
       {serverTools.length === 0 ? (
-        <Text dimColor>No tools available</Text>
+        <Text dimColor>{t('mcptoollistview.noToolsAvailable')}</Text>
       ) : (
         <Select
           options={toolOptions}

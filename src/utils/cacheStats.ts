@@ -61,8 +61,7 @@ const INIT_STATE: CacheStatsState = {
   version: 1,
   signature: null,
   lastResetAt: null,
-  lastHitRate: null,
-}
+  lastHitRate: null}
 
 function isValidState(obj: unknown): obj is CacheStatsState {
   if (typeof obj !== 'object' || obj === null) return false

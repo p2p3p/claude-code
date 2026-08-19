@@ -230,8 +230,7 @@ const EMPTY_REGISTRY: PipeRegistry = {
   version: 1,
   mainMachineId: null,
   main: null,
-  subs: [],
-}
+  subs: []}
 
 export async function readRegistry(): Promise<PipeRegistry> {
   try {
@@ -308,8 +307,7 @@ export async function registerAsSub(
     registry.subs.push({
       ...entry,
       subIndex,
-      boundToMain: registry.main?.id ?? null,
-    })
+      boundToMain: registry.main?.id ?? null})
     await writeRegistry(registry)
   } finally {
     await releaseLock()
@@ -478,8 +476,7 @@ export function mergeWithLanPeers(
       source: 'local',
       tcpEndpoint: registry.main.tcpPort
         ? { host: registry.main.ip, port: registry.main.tcpPort }
-        : undefined,
-    })
+        : undefined})
   }
 
   // Add subs from local registry
@@ -496,8 +493,7 @@ export function mergeWithLanPeers(
       source: 'local',
       tcpEndpoint: sub.tcpPort
         ? { host: sub.ip, port: sub.tcpPort }
-        : undefined,
-    })
+        : undefined})
   }
 
   // Add LAN peers not already in local registry
@@ -512,8 +508,7 @@ export function mergeWithLanPeers(
       hostname: peer.hostname,
       alive: true,
       source: 'lan',
-      tcpEndpoint: { host: peer.ip, port: peer.tcpPort },
-    })
+      tcpEndpoint: { host: peer.ip, port: peer.tcpPort }})
   }
 
   return result

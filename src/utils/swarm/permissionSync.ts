@@ -32,15 +32,13 @@ import {
   getAgentId,
   getAgentName,
   getTeammateColor,
-  getTeamName,
-} from '../teammate.js'
+  getTeamName} from '../teammate.js'
 import {
   createPermissionRequestMessage,
   createPermissionResponseMessage,
   createSandboxPermissionRequestMessage,
   createSandboxPermissionResponseMessage,
-  writeToMailbox,
-} from '../teammateMailbox.js'
+  writeToMailbox} from '../teammateMailbox.js'
 import { getTeamDir, readTeamFileAsync } from './teamHelpers.js'
 
 /**
@@ -81,8 +79,7 @@ export const SwarmPermissionRequestSchema = lazySchema(() =>
     /** "Always allow" rules applied during resolution */
     permissionUpdates: z.array(z.unknown()).optional(),
     /** Timestamp when request was created */
-    createdAt: z.number(),
-  }),
+    createdAt: z.number()}),
 )
 
 export type SwarmPermissionRequest = z.infer<
@@ -202,8 +199,7 @@ export function createPermissionRequest(params: {
     input: params.input,
     permissionSuggestions: params.permissionSuggestions || [],
     status: 'pending',
-    createdAt: Date.now(),
-  }
+    createdAt: Date.now()}
 }
 
 /**
@@ -413,8 +409,7 @@ export async function resolvePermission(
       resolvedAt: Date.now(),
       feedback: resolution.feedback,
       updatedInput: resolution.updatedInput,
-      permissionUpdates: resolution.permissionUpdates,
-    }
+      permissionUpdates: resolution.permissionUpdates}
 
     // Write to resolved directory
     await writeFile(
@@ -559,8 +554,7 @@ export async function pollForResponse(
       : new Date(resolved.createdAt).toISOString(),
     feedback: resolved.feedback,
     updatedInput: resolved.updatedInput,
-    permissionUpdates: resolved.permissionUpdates,
-  }
+    permissionUpdates: resolved.permissionUpdates}
 }
 
 /**
@@ -693,8 +687,7 @@ export async function sendPermissionRequestViaMailbox(
       tool_use_id: request.toolUseId,
       description: request.description,
       input: request.input,
-      permission_suggestions: request.permissionSuggestions,
-    })
+      permission_suggestions: request.permissionSuggestions})
 
     // Send to leader's mailbox (routes to in-process or file-based based on recipient)
     await writeToMailbox(
@@ -703,8 +696,7 @@ export async function sendPermissionRequestViaMailbox(
         from: request.workerName,
         text: jsonStringify(message),
         timestamp: new Date().toISOString(),
-        color: request.workerColor,
-      },
+        color: request.workerColor},
       request.teamName,
     )
 
@@ -752,8 +744,7 @@ export async function sendPermissionResponseViaMailbox(
       subtype: resolution.decision === 'approved' ? 'success' : 'error',
       error: resolution.feedback,
       updated_input: resolution.updatedInput,
-      permission_updates: resolution.permissionUpdates,
-    })
+      permission_updates: resolution.permissionUpdates})
 
     // Get the sender name (leader's name)
     const senderName = getAgentName() || 'team-lead'
@@ -764,8 +755,7 @@ export async function sendPermissionResponseViaMailbox(
       {
         from: senderName,
         text: jsonStringify(message),
-        timestamp: new Date().toISOString(),
-      },
+        timestamp: new Date().toISOString()},
       team,
     )
 
@@ -840,8 +830,7 @@ export async function sendSandboxPermissionRequestViaMailbox(
       workerId,
       workerName,
       workerColor,
-      host,
-    })
+      host})
 
     // Send to leader's mailbox (routes to in-process or file-based based on recipient)
     await writeToMailbox(
@@ -850,8 +839,7 @@ export async function sendSandboxPermissionRequestViaMailbox(
         from: workerName,
         text: jsonStringify(message),
         timestamp: new Date().toISOString(),
-        color: workerColor,
-      },
+        color: workerColor},
       team,
     )
 
@@ -898,8 +886,7 @@ export async function sendSandboxPermissionResponseViaMailbox(
     const message = createSandboxPermissionResponseMessage({
       requestId,
       host,
-      allow,
-    })
+      allow})
 
     const senderName = getAgentName() || 'team-lead'
 
@@ -909,8 +896,7 @@ export async function sendSandboxPermissionResponseViaMailbox(
       {
         from: senderName,
         text: jsonStringify(message),
-        timestamp: new Date().toISOString(),
-      },
+        timestamp: new Date().toISOString()},
       team,
     )
 

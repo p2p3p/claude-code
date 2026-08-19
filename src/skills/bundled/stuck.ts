@@ -74,6 +74,5 @@ export function registerStuckSkill(): void {
         prompt += `\n## User-provided context\n\n${args}\n`
       }
       return [{ type: 'text', text: prompt }]
-    },
-  })
+    }})
 }

@@ -127,8 +127,7 @@ export async function installOrUpdateClaudePackage(
     // Set installMethod to 'local' to prevent npm permission warnings
     saveGlobalConfig(current => ({
       ...current,
-      installMethod: 'local',
-    }))
+      installMethod: 'local'}))
 
     return 'success'
   } catch (error) {

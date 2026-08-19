@@ -59,6 +59,5 @@ export function cyclePermissionMode(
       toolPermissionContext.mode,
       nextMode,
       toolPermissionContext,
-    ),
-  }
+    )}
 }

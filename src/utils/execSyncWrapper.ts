@@ -2,8 +2,7 @@ import {
   type ExecSyncOptions,
   type ExecSyncOptionsWithBufferEncoding,
   type ExecSyncOptionsWithStringEncoding,
-  execSync as nodeExecSync,
-} from 'child_process'
+  execSync as nodeExecSync} from 'child_process'
 import { slowLogging } from './slowOperations.js'
 
 /**

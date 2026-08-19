@@ -1,4 +1,5 @@
 import type { Command } from '../../types/command.js'
+import { t } from '../../utils/i18n/index.js'
 
 const scheduleCommand: Command = {
   type: 'local-jsx',
@@ -9,8 +10,7 @@ const scheduleCommand: Command = {
   // keep the rename minimal — only the user-facing slash name changes.
   name: 'triggers',
   aliases: ['cron'],
-  description:
-    'Manage scheduled remote agent triggers (cloud cron). Requires Claude Pro/Max/Team subscription.',
+  description: t('cmd.descSchedule'),
   // REPL markdown renderer strips `<...>` as HTML tags — use uppercase.
   argumentHint:
     'list | get ID | create CRON PROMPT | update ID FIELD VALUE | delete ID | run ID | enable ID | disable ID',
@@ -21,7 +21,6 @@ const scheduleCommand: Command = {
   load: async () => {
     const m = await import('./launchSchedule.js')
     return { call: m.callSchedule }
-  },
-}
+  }}
 
 export default scheduleCommand

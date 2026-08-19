@@ -77,6 +77,5 @@ If auto-memory is empty, say so and offer to review CLAUDE.md for cleanup.
       }
 
       return [{ type: 'text', text: prompt }]
-    },
-  })
+    }})
 }

@@ -3,8 +3,7 @@ import isEqual from 'lodash-es/isEqual.js'
 import {
   getAnthropicApiKey,
   getClaudeAIOAuthTokens,
-  hasProfileScope,
-} from 'src/utils/auth.js'
+  hasProfileScope} from 'src/utils/auth.js'
 import { z } from 'zod'
 import { getOauthConfig, OAUTH_BETA_HEADER } from '../../constants/oauth.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
@@ -25,16 +24,13 @@ const bootstrapResponseSchema = lazySchema(() =>
           .object({
             model: z.string(),
             name: z.string(),
-            description: z.string(),
-          })
+            description: z.string()})
           .transform(({ model, name, description }) => ({
             value: model,
             label: name,
-            description,
-          })),
+            description})),
       )
-      .nullish(),
-  }),
+      .nullish()}),
 )
 
 type BootstrapResponse = z.infer<ReturnType<typeof bootstrapResponseSchema>>
@@ -45,7 +41,7 @@ async function fetchBootstrapAPI(): Promise<BootstrapResponse | null> {
     return null
   }
 
-  if (getAPIProvider() !== 'firstParty') {
+  if (getAPIProvider() !== 'anthropic') {
     logForDebugging('[Bootstrap] Skipped: 3P provider')
     return null
   }
@@ -72,8 +68,7 @@ async function fetchBootstrapAPI(): Promise<BootstrapResponse | null> {
       if (token && hasProfileScope()) {
         authHeaders = {
           Authorization: `Bearer ${token}`,
-          'anthropic-beta': OAUTH_BETA_HEADER,
-        }
+          'anthropic-beta': OAUTH_BETA_HEADER}
       } else if (apiKey) {
         authHeaders = { 'x-api-key': apiKey }
       } else {
@@ -86,10 +81,8 @@ async function fetchBootstrapAPI(): Promise<BootstrapResponse | null> {
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': getClaudeCodeUserAgent(),
-          ...authHeaders,
-        },
-        timeout: 5000,
-      })
+          ...authHeaders},
+        timeout: 5000})
       const parsed = bootstrapResponseSchema().safeParse(response.data)
       if (!parsed.success) {
         logForDebugging(
@@ -133,8 +126,7 @@ export async function fetchBootstrapData(): Promise<void> {
     saveGlobalConfig(current => ({
       ...current,
       clientDataCache: clientData,
-      additionalModelOptionsCache: additionalModelOptions,
-    }))
+      additionalModelOptionsCache: additionalModelOptions}))
   } catch (error) {
     logError(error)
   }

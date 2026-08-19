@@ -2,8 +2,7 @@ import { feature } from 'bun:bundle'
 import { APIError } from '@anthropic-ai/sdk'
 import type {
   BetaStopReason,
-  BetaUsage as Usage,
-} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
+  BetaUsage as Usage} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
 import {
   addToTotalDurationState,
   consumePostCompaction,
@@ -11,8 +10,7 @@ import {
   getLastApiCompletionTimestamp,
   getTeleportedSessionInfo,
   markFirstTeleportMessageLogged,
-  setLastApiCompletionTimestamp,
-} from 'src/bootstrap/state.js'
+  setLastApiCompletionTimestamp} from 'src/bootstrap/state.js'
 import type { QueryChainTracking } from 'src/Tool.js'
 import { isConnectorTextBlock } from 'src/types/connectorText.js'
 import type { AssistantMessage } from 'src/types/message.js'
@@ -27,18 +25,16 @@ import type { ThinkingConfig } from 'src/utils/thinking.js'
 import {
   endLLMRequestSpan,
   isBetaTracingEnabled,
-  type Span,
-} from 'src/utils/telemetry/sessionTracing.js'
-import type { NonNullableUsage } from '../../entrypoints/sdk/sdkUtilityTypes.js'
-import { consumeInvokingRequestId } from '../../utils/agentContext.js'
+  type Span} from 'src/utils/telemetry/sessionTracing.js'
+import type { NonNullableUsage } from '../../../entrypoints/sdk/sdkUtilityTypes.js'
+import { consumeInvokingRequestId } from '../../../utils/agentContext.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../analytics/index.js'
-import { sanitizeToolNameForAnalytics } from '../analytics/metadata.js'
-import { EMPTY_USAGE } from './emptyUsage.js'
-import { classifyAPIError } from './errors.js'
-import { extractConnectionErrorDetails } from './errorUtils.js'
+  logEvent} from '../../analytics/index.js'
+import { sanitizeToolNameForAnalytics } from '../../analytics/metadata.js'
+import { EMPTY_USAGE } from '../emptyUsage.js'
+import { classifyAPIError } from '../errors.js'
+import { extractConnectionErrorDetails } from '../errorUtils.js'
 
 export type { NonNullableUsage }
 export { EMPTY_USAGE }
@@ -69,29 +65,22 @@ const GATEWAY_FINGERPRINTS: Partial<
 > = {
   // https://docs.litellm.ai/docs/proxy/response_headers
   litellm: {
-    prefixes: ['x-litellm-'],
-  },
+    prefixes: ['x-litellm-']},
   // https://docs.helicone.ai/helicone-headers/header-directory
   helicone: {
-    prefixes: ['helicone-'],
-  },
+    prefixes: ['helicone-']},
   // https://portkey.ai/docs/api-reference/response-schema
   portkey: {
-    prefixes: ['x-portkey-'],
-  },
+    prefixes: ['x-portkey-']},
   // https://developers.cloudflare.com/ai-gateway/evaluations/add-human-feedback-api/
   'cloudflare-ai-gateway': {
-    prefixes: ['cf-aig-'],
-  },
+    prefixes: ['cf-aig-']},
   // https://developer.konghq.com/ai-gateway/ — X-Kong-Upstream-Latency, X-Kong-Proxy-Latency
   kong: {
-    prefixes: ['x-kong-'],
-  },
+    prefixes: ['x-kong-']},
   // https://www.braintrust.dev/docs/guides/proxy — x-bt-used-endpoint, x-bt-cached
   braintrust: {
-    prefixes: ['x-bt-'],
-  },
-}
+    prefixes: ['x-bt-']}}
 
 // Gateways that use provider-owned domains (not self-hosted), so the
 // ANTHROPIC_BASE_URL hostname is a reliable signal even without a
@@ -102,13 +91,11 @@ const GATEWAY_HOST_SUFFIXES: Partial<Record<KnownGateway, string[]>> = {
     '.cloud.databricks.com',
     '.azuredatabricks.net',
     '.gcp.databricks.com',
-  ],
-}
+  ]}
 
 function detectGateway({
   headers,
-  baseUrl,
-}: {
+  baseUrl}: {
   headers?: globalThis.Headers
   baseUrl?: string
 }): KnownGateway | undefined {
@@ -141,25 +128,21 @@ function detectGateway({
 
 function getAnthropicEnvMetadata() {
   return {
-    ...(process.env.ANTHROPIC_BASE_URL
+    ...(process.env.BASE_URL
       ? {
           baseUrl: process.env
-            .ANTHROPIC_BASE_URL as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            .BASE_URL as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
-    ...(process.env.ANTHROPIC_MODEL
+    ...(process.env.MODEL
       ? {
           envModel: process.env
-            .ANTHROPIC_MODEL as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            .MODEL as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
     ...(process.env.ANTHROPIC_SMALL_FAST_MODEL
       ? {
           envSmallFastModel: process.env
-            .ANTHROPIC_SMALL_FAST_MODEL as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
-      : {}),
-  }
+            .ANTHROPIC_SMALL_FAST_MODEL as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
+      : {})}
 }
 
 function getBuildAgeMinutes(): number | undefined {
@@ -180,8 +163,7 @@ export function logAPIQuery({
   thinkingConfig,
   effortValue,
   fastMode,
-  previousRequestId,
-}: {
+  previousRequestId}: {
   model: string
   messagesLength: number
   temperature: number
@@ -207,8 +189,7 @@ export function logAPIQuery({
       ? {
           betas: betas.join(
             ',',
-          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
     permissionMode:
       permissionMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -218,25 +199,21 @@ export function logAPIQuery({
       ? {
           queryChainId:
             queryTracking.chainId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          queryDepth: queryTracking.depth,
-        }
+          queryDepth: queryTracking.depth}
       : {}),
     thinkingType:
       thinkingType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     ...(thinkingBudgetTokens !== undefined && {
-      thinkingBudgetTokens,
-    }),
+      thinkingBudgetTokens}),
     effortValue:
       effortValue as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     fastMode,
     ...(previousRequestId
       ? {
           previousRequestId:
-            previousRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            previousRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
-    ...getAnthropicEnvMetadata(),
-  })
+    ...getAnthropicEnvMetadata()})
 }
 
 export function logAPIError({
@@ -256,8 +233,7 @@ export function logAPIError({
   querySource,
   llmSpan,
   fastMode,
-  previousRequestId,
-}: {
+  previousRequestId}: {
   error: unknown
   model: string
   messageCount: number
@@ -281,8 +257,7 @@ export function logAPIError({
   const gateway = detectGateway({
     headers:
       error instanceof APIError && error.headers ? error.headers : headers,
-    baseUrl: process.env.ANTHROPIC_BASE_URL,
-  })
+    baseUrl: process.env.BASE_URL})
 
   const errStr = getErrorMessage(error)
   const status = error instanceof APIError ? String(error.status) : undefined
@@ -329,8 +304,7 @@ export function logAPIError({
           invokingRequestId:
             invocation.invokingRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           invocationKind:
-            invocation.invocationKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            invocation.invocationKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
     clientRequestId:
       (clientRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS) ||
@@ -339,37 +313,31 @@ export function logAPIError({
     ...(promptCategory
       ? {
           promptCategory:
-            promptCategory as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            promptCategory as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
     ...(gateway
       ? {
           gateway:
-            gateway as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            gateway as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
     ...(queryTracking
       ? {
           queryChainId:
             queryTracking.chainId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          queryDepth: queryTracking.depth,
-        }
+          queryDepth: queryTracking.depth}
       : {}),
     ...(querySource
       ? {
           querySource:
-            querySource as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            querySource as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
     fastMode,
     ...(previousRequestId
       ? {
           previousRequestId:
-            previousRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            previousRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
-    ...getAnthropicEnvMetadata(),
-  })
+    ...getAnthropicEnvMetadata()})
 
   // Log API error event for OTLP
   void logOTelEvent('api_error', {
@@ -378,16 +346,14 @@ export function logAPIError({
     status_code: String(status),
     duration_ms: String(durationMs),
     attempt: String(attempt),
-    speed: fastMode ? 'fast' : 'normal',
-  })
+    speed: fastMode ? 'fast' : 'normal'})
 
   // Pass the span to correctly match responses to requests when beta tracing is enabled
   endLLMRequestSpan(llmSpan, {
     success: false,
     statusCode: status ? parseInt(status, 10) : undefined,
     error: errStr,
-    attempt,
-  })
+    attempt})
 
   // Log first error for teleported sessions (reliability tracking)
   const teleportInfo = getTeleportedSessionInfo()
@@ -396,8 +362,7 @@ export function logAPIError({
       session_id:
         teleportInfo.sessionId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       error_type:
-        errorType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        errorType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     markFirstTeleportMessageLogged()
   }
 }
@@ -427,8 +392,7 @@ function logAPISuccess({
   connectorTextBlockCount,
   fastMode,
   previousRequestId,
-  betas,
-}: {
+  betas}: {
   model: string
   preNormalizedModel: string
   messageCount: number
@@ -472,15 +436,13 @@ function logAPISuccess({
     ...(preNormalizedModel !== model
       ? {
           preNormalizedModel:
-            preNormalizedModel as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            preNormalizedModel as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
     ...(betas?.length
       ? {
           betas: betas.join(
             ',',
-          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
     messageCount,
     messageTokens,
@@ -502,8 +464,7 @@ function logAPISuccess({
           invokingRequestId:
             invocation.invokingRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           invocationKind:
-            invocation.invocationKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            invocation.invocationKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
     stop_reason:
       (stopReason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS) ??
@@ -518,45 +479,38 @@ function logAPISuccess({
     ...(gateway
       ? {
           gateway:
-            gateway as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            gateway as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
     ...(queryTracking
       ? {
           queryChainId:
             queryTracking.chainId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          queryDepth: queryTracking.depth,
-        }
+          queryDepth: queryTracking.depth}
       : {}),
     permissionMode:
       permissionMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     ...(globalCacheStrategy
       ? {
           globalCacheStrategy:
-            globalCacheStrategy as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            globalCacheStrategy as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
     ...(textContentLength !== undefined
       ? ({
-          textContentLength,
-        } as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS)
+          textContentLength} as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS)
       : {}),
     ...(thinkingContentLength !== undefined
       ? ({
-          thinkingContentLength,
-        } as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS)
+          thinkingContentLength} as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS)
       : {}),
     ...(toolUseContentLengths !== undefined
       ? ({
           toolUseContentLengths: jsonStringify(
             toolUseContentLengths,
-          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        } as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS)
+          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS} as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS)
       : {}),
     ...(connectorTextBlockCount !== undefined
       ? ({
-          connectorTextBlockCount,
-        } as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS)
+          connectorTextBlockCount} as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS)
       : {}),
     fastMode,
     // Log cache_deleted_input_tokens for cache editing analysis. Casts needed
@@ -568,19 +522,16 @@ function logAPISuccess({
       ? {
           cacheDeletedInputTokens: (
             usage as unknown as { cache_deleted_input_tokens: number }
-          ).cache_deleted_input_tokens,
-        }
+          ).cache_deleted_input_tokens}
       : {}),
     ...(previousRequestId
       ? {
           previousRequestId:
-            previousRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }
+            previousRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
       : {}),
     ...(isPostCompaction ? { isPostCompaction } : {}),
     ...getAnthropicEnvMetadata(),
-    timeSinceLastApiCallMs,
-  })
+    timeSinceLastApiCallMs})
 
   setLastApiCompletionTimestamp(now)
 }
@@ -610,8 +561,7 @@ export function logAPISuccessAndDuration({
   attemptStartTimes,
   fastMode,
   previousRequestId,
-  betas,
-}: {
+  betas}: {
   model: string
   preNormalizedModel: string
   start: number
@@ -647,8 +597,7 @@ export function logAPISuccessAndDuration({
 }): void {
   const gateway = detectGateway({
     headers,
-    baseUrl: process.env.ANTHROPIC_BASE_URL,
-  })
+    baseUrl: process.env.BASE_URL})
 
   let textContentLength: number | undefined
   let thinkingContentLength: number | undefined
@@ -728,8 +677,7 @@ export function logAPISuccessAndDuration({
     connectorTextBlockCount,
     fastMode,
     previousRequestId,
-    betas,
-  })
+    betas})
   // Log API request event for OTLP
   void logOTelEvent('api_request', {
     model,
@@ -739,8 +687,7 @@ export function logAPISuccessAndDuration({
     cache_creation_tokens: String(usage.cache_creation_input_tokens),
     cost_usd: String(costUSD),
     duration_ms: String(durationMs),
-    speed: fastMode ? 'fast' : 'normal',
-  })
+    speed: fastMode ? 'fast' : 'normal'})
 
   // Extract model output, thinking output, and tool call flag when beta tracing is enabled
   let modelOutput: string | undefined
@@ -795,16 +742,14 @@ export function logAPISuccessAndDuration({
     hasToolCall,
     ttftMs: ttftMs ?? undefined,
     requestSetupMs,
-    attemptStartTimes,
-  })
+    attemptStartTimes})
 
   // Log first successful message for teleported sessions (reliability tracking)
   const teleportInfo = getTeleportedSessionInfo()
   if (teleportInfo?.isTeleported && !teleportInfo.hasLoggedFirstMessage) {
     logEvent('tengu_teleport_first_message_success', {
       session_id:
-        teleportInfo.sessionId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        teleportInfo.sessionId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     markFirstTeleportMessageLogged()
   }
 }

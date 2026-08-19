@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Box, Text } from '@anthropic/ink';
 import type { SandboxViolationEvent } from '../utils/sandbox/sandbox-adapter.js';
 import { SandboxManager } from '../utils/sandbox/sandbox-adapter.js';
+import { t } from '../utils/i18n/index.js';
 
 /**
  * Format a timestamp as "h:mm:ssa" (e.g., "1:30:45pm").
@@ -43,7 +44,7 @@ export function SandboxViolationExpandedView(): ReactNode {
     <Box flexDirection="column" marginTop={1}>
       <Box marginLeft={0}>
         <Text color="permission">
-          ⧈ Sandbox blocked {totalCount} total {totalCount === 1 ? 'operation' : 'operations'}
+          ⧈ {t('sandboxViolation.blocked', totalCount)}
         </Text>
       </Box>
       {violations.map((v, i) => (
@@ -56,7 +57,7 @@ export function SandboxViolationExpandedView(): ReactNode {
       ))}
       <Box paddingLeft={2}>
         <Text dimColor>
-          … showing last {Math.min(10, violations.length)} of {totalCount}
+          {t('sandboxViolation.showingLast', { shown: Math.min(10, violations.length), total: totalCount })}
         </Text>
       </Box>
     </Box>

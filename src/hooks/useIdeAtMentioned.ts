@@ -3,8 +3,7 @@ import { logError } from 'src/utils/log.js'
 import { z } from 'zod/v4'
 import type {
   ConnectedMCPServer,
-  MCPServerConnection,
-} from '../services/mcp/types.js'
+  MCPServerConnection} from '../services/mcp/types.js'
 import { getConnectedIdeClient } from '../utils/ide.js'
 import { lazySchema } from '../utils/lazySchema.js'
 export type IDEAtMentioned = {
@@ -21,9 +20,7 @@ const AtMentionedSchema = lazySchema(() =>
     params: z.object({
       filePath: z.string(),
       lineStart: z.number().optional(),
-      lineEnd: z.number().optional(),
-    }),
-  }),
+      lineEnd: z.number().optional()})}),
 )
 
 /**
@@ -62,8 +59,7 @@ export function useIdeAtMentioned(
             onAtMentioned({
               filePath: data.filePath,
               lineStart: lineStart,
-              lineEnd: lineEnd,
-            })
+              lineEnd: lineEnd})
           } catch (error) {
             logError(error as Error)
           }

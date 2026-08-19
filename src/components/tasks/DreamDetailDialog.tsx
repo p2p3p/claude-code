@@ -4,7 +4,7 @@ import { useElapsedTime } from '../../hooks/useElapsedTime.js';
 import { type KeyboardEvent, Box, Text } from '@anthropic/ink';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import type { DreamTaskState } from '../../tasks/DreamTask/DreamTask.js';
-import { plural } from '../../utils/stringUtils.js';
+import { t } from '../../utils/i18n/index.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
 
 type Props = {
@@ -45,14 +45,14 @@ export function DreamDetailDialog({ task, onDone, onBack, onKill }: Props): Reac
   return (
     <Box flexDirection="column" tabIndex={0} autoFocus onKeyDown={handleKeyDown}>
       <Dialog
-        title="Memory consolidation"
+        title={t('taskDetail.memoryConsolidation')}
         subtitle={
           <Text dimColor>
-            {elapsedTime} · reviewing {task.sessionsReviewing} {plural(task.sessionsReviewing, 'session')}
+            {elapsedTime} · {t('taskDetail.reviewingSessions', task.sessionsReviewing)}
             {task.filesTouched.length > 0 && (
               <>
                 {' '}
-                · {task.filesTouched.length} {plural(task.filesTouched.length, 'file')} touched
+                · {t('taskDetail.filesTouched', task.filesTouched.length)}
               </>
             )}
           </Text>
@@ -61,35 +61,35 @@ export function DreamDetailDialog({ task, onDone, onBack, onKill }: Props): Reac
         color="background"
         inputGuide={exitState =>
           exitState.pending ? (
-            <Text>Press {exitState.keyName} again to exit</Text>
+            <Text>{t('common.pressAgain', exitState.keyName)}</Text>
           ) : (
             <Byline>
-              {onBack && <KeyboardShortcutHint shortcut="←" action="go back" />}
-              <KeyboardShortcutHint shortcut="Esc/Enter/Space" action="close" />
-              {task.status === 'running' && onKill && <KeyboardShortcutHint shortcut="x" action="stop" />}
+              {onBack && <KeyboardShortcutHint shortcut="←" action={t('taskDetail.goBack')} />}
+              <KeyboardShortcutHint shortcut="Esc/Enter/Space" action={t('taskDetail.close')} />
+              {task.status === 'running' && onKill && <KeyboardShortcutHint shortcut="x" action={t('taskDetail.stop')} />}
             </Byline>
           )
         }
       >
         <Box flexDirection="column" gap={1}>
           <Text>
-            <Text bold>Status:</Text>{' '}
+            <Text bold>{t('taskDetail.status')}:</Text>{' '}
             {task.status === 'running' ? (
-              <Text color="background">running</Text>
+              <Text color="background">{t('taskDetail.running')}</Text>
             ) : task.status === 'completed' ? (
-              <Text color="success">{task.status}</Text>
+              <Text color="success">{t('taskDetail.completed')}</Text>
             ) : (
-              <Text color="error">{task.status}</Text>
+              <Text color="error">{t('taskDetail.failed')}</Text>
             )}
           </Text>
 
           {shown.length === 0 ? (
-            <Text dimColor>{task.status === 'running' ? 'Starting…' : '(no text output)'}</Text>
+            <Text dimColor>{task.status === 'running' ? t('taskDetail.start') : t('taskDetail.noTextOutput')}</Text>
           ) : (
             <>
               {hidden > 0 && (
                 <Text dimColor>
-                  ({hidden} earlier {plural(hidden, 'turn')})
+                  {t('taskDetail.earlierTurns', hidden)}
                 </Text>
               )}
               {shown.map((turn, i) => (
@@ -97,7 +97,7 @@ export function DreamDetailDialog({ task, onDone, onBack, onKill }: Props): Reac
                   <Text wrap="wrap">{turn.text}</Text>
                   {turn.toolUseCount > 0 && (
                     <Text dimColor>
-                      {'  '}({turn.toolUseCount} {plural(turn.toolUseCount, 'tool')})
+                      {'  '}({turn.toolUseCount} {t('taskDetail.tools')})
                     </Text>
                   )}
                 </Box>

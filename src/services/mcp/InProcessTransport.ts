@@ -1,5 +1,6 @@
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
 import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js'
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * In-process linked transport pair for running an MCP server and client
@@ -25,7 +26,7 @@ class InProcessTransport implements Transport {
 
   async send(message: JSONRPCMessage): Promise<void> {
     if (this.closed) {
-      throw new Error('Transport is closed')
+      throw new Error(t('inProcessTransport.transportClosed'))
     }
     // Deliver to the other side asynchronously to avoid stack depth issues
     // with synchronous request/response cycles

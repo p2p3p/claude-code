@@ -10,8 +10,7 @@ import {
   extractAgentIdsFromMessages,
   getTranscriptPath,
   loadSubagentTranscripts,
-  MAX_TRANSCRIPT_READ_BYTES,
-} from '../../utils/sessionStorage.js'
+  MAX_TRANSCRIPT_READ_BYTES} from '../../utils/sessionStorage.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import { redactSensitiveInfo } from '../Feedback.js'
 
@@ -66,8 +65,7 @@ export async function submitTranscriptShare(
         Object.keys(subagentTranscripts).length > 0
           ? subagentTranscripts
           : undefined,
-      rawTranscriptJsonl,
-    }
+      rawTranscriptJsonl}
 
     const content = redactSensitiveInfo(jsonStringify(data))
 
@@ -81,16 +79,14 @@ export async function submitTranscriptShare(
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'User-Agent': getUserAgent(),
-      ...authResult.headers,
-    }
+      ...authResult.headers}
 
     const response = await axios.post(
       'https://api.anthropic.com/api/claude_code_shared_session_transcripts',
       { content, appearance_id: appearanceId },
       {
         headers,
-        timeout: 30000,
-      },
+        timeout: 30000},
     )
 
     if (response.status === 200 || response.status === 201) {
@@ -98,15 +94,13 @@ export async function submitTranscriptShare(
       logForDebugging('Transcript shared successfully', { level: 'info' })
       return {
         success: true,
-        transcriptId: result?.transcript_id,
-      }
+        transcriptId: result?.transcript_id}
     }
 
     return { success: false }
   } catch (err) {
     logForDebugging(errorMessage(err), {
-      level: 'error',
-    })
+      level: 'error'})
     return { success: false }
   }
 }

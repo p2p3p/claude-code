@@ -10,6 +10,7 @@ import { type ChannelEntry, getAllowedChannels, getHasDevChannels } from '../../
 import { getBuiltinPlugins } from '../../plugins/builtinPlugins.js';
 import { Box, Text } from '@anthropic/ink';
 import { getMcpConfigsByScope } from '../../services/mcp/config.js';
+import { t } from '../../utils/i18n/index.js';
 import { loadInstalledPluginsV2 } from '../../utils/plugins/installedPluginsManager.js';
 
 export function ChannelsNotice(): React.ReactNode {
@@ -22,14 +23,12 @@ export function ChannelsNotice(): React.ReactNode {
       return {
         channels: ch,
         list: '',
-        unmatched: [] as Unmatched[],
-      };
+        unmatched: [] as Unmatched[]};
     const l = ch.map(formatEntry).join(', ');
     return {
       channels: ch,
       list: l,
-      unmatched: findUnmatched(ch),
-    };
+      unmatched: findUnmatched(ch)};
   });
   if (channels.length === 0) return null;
 
@@ -48,10 +47,9 @@ export function ChannelsNotice(): React.ReactNode {
   // even matches a configured MCP server are all still unknown.
   return (
     <Box paddingLeft={2} flexDirection="column">
-      <Text color="error">Listening for channel messages from: {list}</Text>
+      <Text color="error">{t('misc.listeningChannels', list)}</Text>
       <Text dimColor>
-        Experimental · inbound messages will be pushed into this session, this carries prompt injection risks. Restart
-        Claude Code without {flag} to disable.
+        {t('misc.experimentalChannels', flag)}
       </Text>
       {unmatched.map(u => (
         <Text key={`${formatEntry(u.entry)}:${u.why}`} color="warning">
@@ -107,12 +105,12 @@ export function findUnmatched(entries: readonly ChannelEntry[], deps?: FindUnmat
   for (const entry of entries) {
     if (entry.kind === 'server') {
       if (!configured.has(entry.name)) {
-        out.push({ entry, why: 'no MCP server configured with that name' });
+        out.push({ entry, why: t('misc.noMcpServer') });
       }
       continue;
     }
     if (!installedPluginIds.has(`${entry.name}@${entry.marketplace}`)) {
-      out.push({ entry, why: 'plugin not installed' });
+      out.push({ entry, why: t('misc.pluginNotInstalled') });
     }
   }
   return out;

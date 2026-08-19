@@ -8,8 +8,7 @@ import { registerCleanup } from './cleanupRegistry.js'
 import {
   type DebugFilter,
   parseDebugFilter,
-  shouldShowDebugMessage,
-} from './debugFilter.js'
+  shouldShowDebugMessage} from './debugFilter.js'
 import { getClaudeConfigHomeDir, isEnvTruthy } from './envUtils.js'
 import { getFsImplementation } from './fsOperations.js'
 import { writeToStderr } from './process.js'
@@ -22,8 +21,7 @@ const LEVEL_ORDER: Record<DebugLogLevel, number> = {
   debug: 1,
   info: 2,
   warn: 3,
-  error: 4,
-}
+  error: 4}
 
 /**
  * Minimum log level to include in debug output. Defaults to 'debug', which
@@ -196,8 +194,7 @@ function getDebugWriter(): BufferedWriter {
       },
       flushIntervalMs: 1000,
       maxBufferSize: 100,
-      immediateMode: isDebugMode(),
-    })
+      immediateMode: isDebugMode()})
     registerCleanup(async () => {
       debugWriter?.dispose()
       await pendingWrite
@@ -214,8 +211,7 @@ export async function flushDebugLogs(): Promise<void> {
 export function logForDebugging(
   message: string,
   { level }: { level: DebugLogLevel } = {
-    level: 'debug',
-  },
+    level: 'debug'},
 ): void {
   if (LEVEL_ORDER[level] < LEVEL_ORDER[getMinDebugLogLevel()]) {
     return
@@ -275,7 +271,6 @@ export function logAntError(context: string, error: unknown): void {
 
   if (error instanceof Error && error.stack) {
     logForDebugging(`[ANT-ONLY] ${context} stack trace:\n${error.stack}`, {
-      level: 'error',
-    })
+      level: 'error'})
   }
 }

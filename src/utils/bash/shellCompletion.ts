@@ -2,8 +2,7 @@ import type { SuggestionItem } from 'src/components/PromptInput/PromptInputFoote
 import {
   type ParseEntry,
   quote,
-  tryParseShellCommand,
-} from '../bash/shellQuote.js'
+  tryParseShellCommand} from '../bash/shellQuote.js'
 import { logForDebugging } from '../debug.js'
 import { getShellType } from '../localInstaller.js'
 import * as Shell from '../Shell.js'
@@ -199,8 +198,7 @@ async function getCompletionsForShell(
   }
 
   const shellCommand = await Shell.exec(command, abortSignal, 'bash', {
-    timeout: SHELL_COMPLETION_TIMEOUT_MS,
-  })
+    timeout: SHELL_COMPLETION_TIMEOUT_MS})
   const result = await shellCommand.result
   return result.stdout
     .split('\n')
@@ -210,8 +208,7 @@ async function getCompletionsForShell(
       id: text,
       displayText: text,
       description: undefined,
-      metadata: { completionType },
-    }))
+      metadata: { completionType }}))
 }
 
 /**
@@ -249,9 +246,7 @@ export async function getShellCompletions(
       ...suggestion,
       metadata: {
         ...(suggestion.metadata as { completionType: ShellCompletionType }),
-        inputSnapshot: input,
-      },
-    }))
+        inputSnapshot: input}}))
   } catch (error) {
     logForDebugging(`Shell completion failed: ${error}`)
     return [] // Silent fail

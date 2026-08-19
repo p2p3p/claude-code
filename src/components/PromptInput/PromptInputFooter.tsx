@@ -1,27 +1,23 @@
 import { feature } from 'bun:bundle';
+import { t } from '../../utils/i18n/index.js'
 import * as React from 'react';
 import { memo, type ReactNode, useMemo, useRef, useState } from 'react';
 import { isBridgeEnabled } from '../../bridge/bridgeEnabled.js';
 import { getBridgeStatus } from '../../bridge/bridgeStatusUtil.js';
 import { useSetPromptOverlay } from '../../context/promptOverlayContext.js';
-import type { VerificationStatus } from '../../hooks/useApiKeyVerification.js';
-import type { IDESelection } from '../../hooks/useIdeSelection.js';
 import { useSettings } from '../../hooks/useSettings.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { Box, Text, useInput } from '@anthropic/ink';
-import type { MCPServerConnection } from '../../services/mcp/types.js';
 import { useRegisterOverlay } from '../../context/overlayContext.js';
 import { useAppState, useSetAppState } from '../../state/AppState.js';
 import type { ToolPermissionContext } from '../../Tool.js';
 import type { Message } from '../../types/message.js';
 import type { PromptInputMode, VimMode } from '../../types/textInputTypes.js';
-import type { AutoUpdaterResult } from '../../utils/autoUpdater.js';
 import { isFullscreenEnvEnabled } from '../../utils/fullscreen.js';
 import { getPipeDisplayRole, isPipeControlled } from '../../utils/pipeTransport.js';
 import { isUndercover } from '../../utils/undercover.js';
 import { CoordinatorTaskPanel, useCoordinatorTaskCount } from '../CoordinatorAgentStatus.js';
 import { getLastAssistantMessageId, StatusLine, statusLineShouldDisplay } from '../StatusLine.js';
-import { Notifications } from './Notifications.js';
 import { PromptInputFooterLeftSide } from './PromptInputFooterLeftSide.js';
 
 // Inline pipe status is shown only after /pipes sets pipeIpc.statusVisible.
@@ -29,7 +25,6 @@ import { PromptInputFooterSuggestions, type SuggestionItem } from './PromptInput
 import { PromptInputHelpMenu } from './PromptInputHelpMenu.js';
 
 type Props = {
-  apiKeyStatus: VerificationStatus;
   debug: boolean;
   exitMessage: {
     show: boolean;
@@ -37,11 +32,6 @@ type Props = {
   };
   vimMode: VimMode | undefined;
   mode: PromptInputMode;
-  autoUpdaterResult: AutoUpdaterResult | null;
-  isAutoUpdating: boolean;
-  verbose: boolean;
-  onAutoUpdaterResult: (result: AutoUpdaterResult) => void;
-  onChangeIsUpdating: (isUpdating: boolean) => void;
   suggestions: SuggestionItem[];
   selectedSuggestion: number;
   maxColumnWidth?: number;
@@ -54,29 +44,17 @@ type Props = {
   bridgeSelected: boolean;
   tmuxSelected: boolean;
   teammateFooterIndex?: number;
-  ideSelection: IDESelection | undefined;
-  mcpClients?: MCPServerConnection[];
   isPasting?: boolean;
-  isInputWrapped?: boolean;
   messages: Message[];
   isSearching: boolean;
-  historyQuery: string;
-  setHistoryQuery: (query: string) => void;
-  historyFailedMatch: boolean;
   onOpenTasksDialog?: (taskId?: string) => void;
 };
 
 function PromptInputFooter({
-  apiKeyStatus,
   debug,
   exitMessage,
   vimMode,
   mode,
-  autoUpdaterResult,
-  isAutoUpdating,
-  verbose,
-  onAutoUpdaterResult,
-  onChangeIsUpdating,
   suggestions,
   selectedSuggestion,
   maxColumnWidth,
@@ -89,17 +67,10 @@ function PromptInputFooter({
   bridgeSelected,
   tmuxSelected,
   teammateFooterIndex,
-  ideSelection,
-  mcpClients,
   isPasting = false,
-  isInputWrapped = false,
   messages,
   isSearching,
-  historyQuery,
-  setHistoryQuery,
-  historyFailedMatch,
-  onOpenTasksDialog,
-}: Props): ReactNode {
+  onOpenTasksDialog}: Props): ReactNode {
   const settings = useSettings();
   const { columns, rows } = useTerminalSize();
   const messagesRef = useRef(messages);
@@ -172,30 +143,11 @@ function PromptInputFooter({
             tmuxSelected={tmuxSelected}
             isPasting={isPasting}
             isSearching={isSearching}
-            historyQuery={historyQuery}
-            setHistoryQuery={setHistoryQuery}
-            historyFailedMatch={historyFailedMatch}
             onOpenTasksDialog={onOpenTasksDialog}
           />
         </Box>
         <Box flexShrink={1} gap={1}>
-          {isFullscreen ? null : (
-            <Notifications
-              apiKeyStatus={apiKeyStatus}
-              autoUpdaterResult={autoUpdaterResult}
-              debug={debug}
-              isAutoUpdating={isAutoUpdating}
-              verbose={verbose}
-              messages={messages}
-              onAutoUpdaterResult={onAutoUpdaterResult}
-              onChangeIsUpdating={onChangeIsUpdating}
-              ideSelection={ideSelection}
-              mcpClients={mcpClients}
-              isInputWrapped={isInputWrapped}
-              isNarrow={isNarrow}
-            />
-          )}
-          {process.env.USER_TYPE === 'ant' && isUndercover() && <Text dimColor>undercover</Text>}
+          {process.env.USER_TYPE === 'ant' && isUndercover() && <Text dimColor>{t('promptInputFooter.undercover')}</Text>}
           <BridgeStatusIndicator bridgeSelected={bridgeSelected} />
         </Box>
       </Box>
@@ -226,8 +178,7 @@ function BridgeStatusIndicator({ bridgeSelected }: BridgeStatusProps): React.Rea
     error: undefined,
     connected,
     sessionActive,
-    reconnecting,
-  });
+    reconnecting});
 
   // For implicit (config-driven) remote, only show the reconnecting state
   if (!explicit && status.label !== 'Remote Control reconnecting') {
@@ -237,7 +188,7 @@ function BridgeStatusIndicator({ bridgeSelected }: BridgeStatusProps): React.Rea
   return (
     <Text color={bridgeSelected ? 'background' : status.color} inverse={bridgeSelected} wrap="truncate">
       {status.label}
-      {bridgeSelected && <Text dimColor> · Enter to view</Text>}
+      {bridgeSelected && <Text dimColor>{t('promptInputFooter.enterToView')}</Text>}
     </Text>
   );
 }
@@ -335,7 +286,7 @@ function PipeStatusInline(): React.ReactNode {
   if (!selectorOpen) {
     return (
       <Box height={1} gap={1}>
-        <Text dimColor>pipe:</Text>
+        <Text dimColor>{t('promptInputFooter.pipe')}</Text>
         <Text bold>{pipeIpc.serverName}</Text>
         <Text dimColor>({displayRole})</Text>
         {pipeIpc.localIp && <Text dimColor>{pipeIpc.localIp}</Text>}
@@ -365,11 +316,11 @@ function PipeStatusInline(): React.ReactNode {
   return (
     <Box flexDirection="column">
       <Box height={1} gap={1}>
-        <Text dimColor>pipe:</Text>
+        <Text dimColor>{t('promptInputFooter.pipe')}</Text>
         <Text bold>{pipeIpc.serverName}</Text>
         <Text dimColor>({displayRole})</Text>
         {pipeIpc.localIp && <Text dimColor>{pipeIpc.localIp}</Text>}
-        <Text color="warning">↑↓ move Space select ←/→ or m route Enter/Esc close Shift+↓ toggle</Text>
+        <Text color="warning">{t('promptInputFooter.arrowKeysHint')}</Text>
       </Box>
       <Box height={1} paddingLeft={2}>
         <Text dimColor>
@@ -401,7 +352,7 @@ function PipeStatusInline(): React.ReactNode {
       })}
       {allPipes.length === 0 && (
         <Box height={1} paddingLeft={2}>
-          <Text dimColor>No other pipes found. Start another instance.</Text>
+          <Text dimColor>{t('promptinputfooter.noOtherPipesFoundStartAnotherInstance')}</Text>
         </Box>
       )}
     </Box>

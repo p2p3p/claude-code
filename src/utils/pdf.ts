@@ -3,8 +3,7 @@ import { mkdir, readdir, readFile } from 'fs/promises'
 import { join } from 'path'
 import {
   PDF_MAX_EXTRACT_SIZE,
-  PDF_TARGET_RAW_SIZE,
-} from '../constants/apiLimits.js'
+  PDF_TARGET_RAW_SIZE} from '../constants/apiLimits.js'
 import { errorMessage } from './errors.js'
 import { execFileNoThrow } from './execFileNoThrow.js'
 import { formatFileSize } from './format.js'
@@ -50,8 +49,7 @@ export async function readPDF(filePath: string): Promise<
     if (originalSize === 0) {
       return {
         success: false,
-        error: { reason: 'empty', message: `PDF file is empty: ${filePath}` },
-      }
+        error: { reason: 'empty', message: `PDF file is empty: ${filePath}` }}
     }
 
     // Check if PDF exceeds maximum size
@@ -62,9 +60,7 @@ export async function readPDF(filePath: string): Promise<
         success: false,
         error: {
           reason: 'too_large',
-          message: `PDF file exceeds maximum allowed size of ${formatFileSize(PDF_TARGET_RAW_SIZE)}.`,
-        },
-      }
+          message: `PDF file exceeds maximum allowed size of ${formatFileSize(PDF_TARGET_RAW_SIZE)}.`}}
     }
 
     const fileBuffer = await readFile(filePath)
@@ -80,9 +76,7 @@ export async function readPDF(filePath: string): Promise<
         success: false,
         error: {
           reason: 'corrupted',
-          message: `File is not a valid PDF (missing %PDF- header): ${filePath}`,
-        },
-      }
+          message: `File is not a valid PDF (missing %PDF- header): ${filePath}`}}
     }
 
     const base64 = fileBuffer.toString('base64')
@@ -97,18 +91,13 @@ export async function readPDF(filePath: string): Promise<
         file: {
           filePath,
           base64,
-          originalSize,
-        },
-      },
-    }
+          originalSize}}}
   } catch (e: unknown) {
     return {
       success: false,
       error: {
         reason: 'unknown',
-        message: errorMessage(e),
-      },
-    }
+        message: errorMessage(e)}}
   }
 }
 
@@ -121,8 +110,7 @@ export async function getPDFPageCount(
 ): Promise<number | null> {
   const { code, stdout } = await execFileNoThrow('pdfinfo', [filePath], {
     timeout: 10_000,
-    useCwd: false,
-  })
+    useCwd: false})
   if (code !== 0) {
     return null
   }
@@ -161,8 +149,7 @@ export async function isPdftoppmAvailable(): Promise<boolean> {
   if (pdftoppmAvailable !== undefined) return pdftoppmAvailable
   const { code, stderr } = await execFileNoThrow('pdftoppm', ['-v'], {
     timeout: 5000,
-    useCwd: false,
-  })
+    useCwd: false})
   // pdftoppm prints version info to stderr and exits 0 (or sometimes 99 on older versions)
   pdftoppmAvailable = code === 0 || stderr.length > 0
   return pdftoppmAvailable
@@ -188,8 +175,7 @@ export async function extractPDFPages(
     if (originalSize === 0) {
       return {
         success: false,
-        error: { reason: 'empty', message: `PDF file is empty: ${filePath}` },
-      }
+        error: { reason: 'empty', message: `PDF file is empty: ${filePath}` }}
     }
 
     if (originalSize > PDF_MAX_EXTRACT_SIZE) {
@@ -197,9 +183,7 @@ export async function extractPDFPages(
         success: false,
         error: {
           reason: 'too_large',
-          message: `PDF file exceeds maximum allowed size for text extraction (${formatFileSize(PDF_MAX_EXTRACT_SIZE)}).`,
-        },
-      }
+          message: `PDF file exceeds maximum allowed size for text extraction (${formatFileSize(PDF_MAX_EXTRACT_SIZE)}).`}}
     }
 
     const available = await isPdftoppmAvailable()
@@ -209,9 +193,7 @@ export async function extractPDFPages(
         error: {
           reason: 'unavailable',
           message:
-            'pdftoppm is not installed. Install poppler-utils (e.g. `brew install poppler` or `apt-get install poppler-utils`) to enable PDF page rendering.',
-        },
-      }
+            'pdftoppm is not installed. Install poppler-utils (e.g. `brew install poppler` or `apt-get install poppler-utils`) to enable PDF page rendering.'}}
     }
 
     const uuid = randomUUID()
@@ -230,8 +212,7 @@ export async function extractPDFPages(
     args.push(filePath, prefix)
     const { code, stderr } = await execFileNoThrow('pdftoppm', args, {
       timeout: 120_000,
-      useCwd: false,
-    })
+      useCwd: false})
 
     if (code !== 0) {
       if (/password/i.test(stderr)) {
@@ -240,23 +221,18 @@ export async function extractPDFPages(
           error: {
             reason: 'password_protected',
             message:
-              'PDF is password-protected. Please provide an unprotected version.',
-          },
-        }
+              'PDF is password-protected. Please provide an unprotected version.'}}
       }
       if (/damaged|corrupt|invalid/i.test(stderr)) {
         return {
           success: false,
           error: {
             reason: 'corrupted',
-            message: 'PDF file is corrupted or invalid.',
-          },
-        }
+            message: 'PDF file is corrupted or invalid.'}}
       }
       return {
         success: false,
-        error: { reason: 'unknown', message: `pdftoppm failed: ${stderr}` },
-      }
+        error: { reason: 'unknown', message: `pdftoppm failed: ${stderr}` }}
     }
 
     // Read generated image files and sort naturally
@@ -269,9 +245,7 @@ export async function extractPDFPages(
         success: false,
         error: {
           reason: 'corrupted',
-          message: 'pdftoppm produced no output pages. The PDF may be invalid.',
-        },
-      }
+          message: 'pdftoppm produced no output pages. The PDF may be invalid.'}}
     }
 
     const count = imageFiles.length
@@ -284,17 +258,12 @@ export async function extractPDFPages(
           filePath,
           originalSize,
           outputDir,
-          count,
-        },
-      },
-    }
+          count}}}
   } catch (e: unknown) {
     return {
       success: false,
       error: {
         reason: 'unknown',
-        message: errorMessage(e),
-      },
-    }
+        message: errorMessage(e)}}
   }
 }

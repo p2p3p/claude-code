@@ -4,8 +4,7 @@ import {
   type CommandPrefixResult,
   type CommandSubcommandPrefixResult,
   createCommandPrefixExtractor,
-  createSubcommandPrefixExtractor,
-} from '../shell/prefix.js'
+  createSubcommandPrefixExtractor} from '../shell/prefix.js'
 import { extractHeredocs, restoreHeredocs } from './heredoc.js'
 import { quote, tryParseShellCommand } from './shellQuote.js'
 
@@ -31,8 +30,7 @@ function generatePlaceholders(): {
     DOUBLE_QUOTE: `__DOUBLE_QUOTE_${salt}__`,
     NEW_LINE: `__NEW_LINE_${salt}__`,
     ESCAPED_OPEN_PAREN: `__ESCAPED_OPEN_PAREN_${salt}__`,
-    ESCAPED_CLOSE_PAREN: `__ESCAPED_CLOSE_PAREN_${salt}__`,
-  }
+    ESCAPED_CLOSE_PAREN: `__ESCAPED_CLOSE_PAREN_${salt}__`}
 }
 
 // File descriptors for standard input/output/error
@@ -504,8 +502,7 @@ const getCommandPrefix = createCommandPrefixExtractor({
   eventName: 'tengu_bash_prefix',
   querySource: 'bash_extract_prefix',
   preCheck: command =>
-    isHelpCommand(command) ? { commandPrefix: command } : null,
-})
+    isHelpCommand(command) ? { commandPrefix: command } : null})
 
 export const getCommandSubcommandPrefix = createSubcommandPrefixExtractor(
   getCommandPrefix,
@@ -694,8 +691,7 @@ export function extractOutputRedirections(cmd: string): {
     return {
       commandWithoutRedirections: cmd,
       redirections: [],
-      hasDangerousRedirection: true,
-    }
+      hasDangerousRedirection: true}
   }
 
   const parsed = parseResult.tokens
@@ -785,8 +781,7 @@ export function extractOutputRedirections(cmd: string): {
       heredocs,
     )[0]!,
     redirections,
-    hasDangerousRedirection,
-  }
+    hasDangerousRedirection}
 }
 
 function isOperator(part: ParseEntry | undefined, op: string): boolean {

@@ -55,8 +55,7 @@ export function registerMonitorMcpTask(
     resourceUri: opts.resourceUri,
     command: opts.command,
     agentId: opts.agentId,
-    abortController: opts.abortController,
-  }
+    abortController: opts.abortController}
   registerTask(task, setAppState)
   return id
 }
@@ -70,8 +69,7 @@ export function completeMonitorMcpTask(
     status: 'completed',
     endTime: Date.now(),
     notified: true,
-    abortController: undefined,
-  }))
+    abortController: undefined}))
 }
 
 export function failMonitorMcpTask(
@@ -83,8 +81,7 @@ export function failMonitorMcpTask(
     status: 'failed',
     endTime: Date.now(),
     notified: true,
-    abortController: undefined,
-  }))
+    abortController: undefined}))
 }
 
 export function killMonitorMcp(taskId: string, setAppState: SetAppState): void {
@@ -96,8 +93,7 @@ export function killMonitorMcp(taskId: string, setAppState: SetAppState): void {
       status: 'killed',
       endTime: Date.now(),
       notified: true,
-      abortController: undefined,
-    }
+      abortController: undefined}
   })
 }
 
@@ -132,5 +128,4 @@ export const MonitorMcpTask: Task = {
 
   async kill(taskId, setAppState) {
     killMonitorMcp(taskId, setAppState)
-  },
-}
+  }}

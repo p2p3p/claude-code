@@ -30,8 +30,7 @@ export type TimeBasedMCConfig = {
 const TIME_BASED_MC_CONFIG_DEFAULTS: TimeBasedMCConfig = {
   enabled: false,
   gapThresholdMinutes: 60,
-  keepRecent: 5,
-}
+  keepRecent: 5}
 
 export function getTimeBasedMCConfig(): TimeBasedMCConfig {
   // Hoist the GB read so exposure fires on every eval path, not just when

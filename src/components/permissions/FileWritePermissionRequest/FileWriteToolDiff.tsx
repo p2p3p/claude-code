@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useMemo } from 'react';
+import { t } from 'src/utils/i18n/index.js';
 import { useTerminalSize } from '../../../hooks/useTerminalSize.js';
 import { Box, NoSelect, Text } from '@anthropic/ink';
 import { intersperse } from '../../../utils/array.js';
@@ -27,10 +28,8 @@ export function FileWriteToolDiff({ file_path, content, fileExists, oldContent }
         {
           old_string: oldContent,
           new_string: content,
-          replace_all: false,
-        },
-      ],
-    });
+          replace_all: false},
+      ]});
   }, [fileExists, file_path, oldContent, content]);
 
   const firstLine = content.split('\n')[0] ?? null;
@@ -66,7 +65,7 @@ export function FileWriteToolDiff({ file_path, content, fileExists, oldContent }
             ),
           )
         ) : (
-          <HighlightedCode code={content || '(No content)'} filePath={file_path} />
+          <HighlightedCode code={content || t('fileWrite.noContent')} filePath={file_path} />
         )}
       </Box>
     </Box>

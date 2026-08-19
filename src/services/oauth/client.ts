@@ -1,22 +1,20 @@
 // OAuth client for handling authentication flows with Claude services
 import axios from 'axios'
+import { t } from '../../utils/i18n/index.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import {
   ALL_OAUTH_SCOPES,
   CLAUDE_AI_INFERENCE_SCOPE,
   CLAUDE_AI_OAUTH_SCOPES,
-  getOauthConfig,
-} from '../../constants/oauth.js'
+  getOauthConfig} from '../../constants/oauth.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
   getClaudeAIOAuthTokens,
   hasProfileScope,
   isClaudeAISubscriber,
-  saveApiKey,
-} from '../../utils/auth.js'
+  saveApiKey} from '../../utils/auth.js'
 import type { AccountInfo } from '../../utils/config.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
 import { logForDebugging } from '../../utils/debug.js'
@@ -28,8 +26,7 @@ import type {
   OAuthTokens,
   RateLimitTier,
   SubscriptionType,
-  UserRolesResponse,
-} from './types.js'
+  UserRolesResponse} from './types.js'
 
 /**
  * Check if the user has Claude.ai authentication scope
@@ -52,8 +49,7 @@ export function buildAuthUrl({
   inferenceOnly,
   orgUUID,
   loginHint,
-  loginMethod,
-}: {
+  loginMethod}: {
   codeChallenge: string
   state: string
   port: number
@@ -120,8 +116,7 @@ export async function exchangeCodeForTokens(
       : `http://localhost:${port}/callback`,
     client_id: getOauthConfig().CLIENT_ID,
     code_verifier: codeVerifier,
-    state,
-  }
+    state}
 
   if (expiresIn !== undefined) {
     requestBody.expires_in = expiresIn
@@ -129,14 +124,13 @@ export async function exchangeCodeForTokens(
 
   const response = await axios.post(getOauthConfig().TOKEN_URL, requestBody, {
     headers: { 'Content-Type': 'application/json' },
-    timeout: 15000,
-  })
+    timeout: 15000})
 
   if (response.status !== 200) {
     throw new Error(
       response.status === 401
-        ? 'Authentication failed: Invalid authorization code'
-        : `Token exchange failed (${response.status}): ${response.statusText}`,
+        ? t('oauthClient.authFailed')
+        : t('oauthClient.tokenExchangeFailed', String(response.status), response.statusText),
     )
   }
   logEvent('tengu_oauth_token_exchange_success', {})
@@ -159,25 +153,22 @@ export async function refreshOAuthToken(
     scope: (requestedScopes?.length
       ? requestedScopes
       : CLAUDE_AI_OAUTH_SCOPES
-    ).join(' '),
-  }
+    ).join(' ')}
 
   try {
     const response = await axios.post(getOauthConfig().TOKEN_URL, requestBody, {
       headers: { 'Content-Type': 'application/json' },
-      timeout: 15000,
-    })
+      timeout: 15000})
 
     if (response.status !== 200) {
-      throw new Error(`Token refresh failed: ${response.statusText}`)
+      throw new Error(t('oauthClient.tokenRefreshFailed', response.statusText))
     }
 
     const data = response.data as OAuthTokenExchangeResponse
     const {
       access_token: accessToken,
       refresh_token: newRefreshToken = refreshToken,
-      expires_in: expiresIn,
-    } = data
+      expires_in: expiresIn} = data
 
     const expiresAt = Date.now() + expiresIn * 1000
     const scopes = parseScopes(data.scope)
@@ -233,8 +224,7 @@ export async function refreshOAuthToken(
           ...current,
           oauthAccount: current.oauthAccount
             ? { ...current.oauthAccount, ...updates }
-            : current.oauthAccount,
-        }))
+            : current.oauthAccount}))
       }
     }
 
@@ -252,10 +242,8 @@ export async function refreshOAuthToken(
         ? {
             uuid: data.account.uuid,
             emailAddress: data.account.email_address,
-            organizationUuid: data.organization?.uuid,
-          }
-        : undefined,
-    }
+            organizationUuid: data.organization?.uuid}
+        : undefined}
   } catch (error) {
     const responseBody =
       axios.isAxiosError(error) && error.response?.data
@@ -266,9 +254,7 @@ export async function refreshOAuthToken(
         .message as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       ...(responseBody && {
         responseBody:
-          responseBody as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      }),
-    })
+          responseBody as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})})
     throw error
   }
 }
@@ -277,17 +263,16 @@ export async function fetchAndStoreUserRoles(
   accessToken: string,
 ): Promise<void> {
   const response = await axios.get(getOauthConfig().ROLES_URL, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  })
+    headers: { Authorization: `Bearer ${accessToken}` }})
 
   if (response.status !== 200) {
-    throw new Error(`Failed to fetch user roles: ${response.statusText}`)
+    throw new Error(t('oauthClient.fetchUserRolesFailed', response.statusText))
   }
   const data = response.data as UserRolesResponse
   const config = getGlobalConfig()
 
   if (!config.oauthAccount) {
-    throw new Error('OAuth account information not found in config')
+    throw new Error(t('oauthClient.accountInfoNotFound'))
   }
 
   saveGlobalConfig(current => ({
@@ -297,15 +282,12 @@ export async function fetchAndStoreUserRoles(
           ...current.oauthAccount,
           organizationRole: data.organization_role,
           workspaceRole: data.workspace_role,
-          organizationName: data.organization_name,
-        }
-      : current.oauthAccount,
-  }))
+          organizationName: data.organization_name}
+      : current.oauthAccount}))
 
   logEvent('tengu_oauth_roles_stored', {
     org_role:
-      data.organization_role as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      data.organization_role as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 }
 
 export async function createAndStoreApiKey(
@@ -313,8 +295,7 @@ export async function createAndStoreApiKey(
 ): Promise<string | null> {
   try {
     const response = await axios.post(getOauthConfig().API_KEY_URL, null, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
+      headers: { Authorization: `Bearer ${accessToken}` }})
 
     const apiKey = response.data?.raw_key
     if (apiKey) {
@@ -322,8 +303,7 @@ export async function createAndStoreApiKey(
       logEvent('tengu_oauth_api_key', {
         status:
           'success' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        statusCode: response.status,
-      })
+        statusCode: response.status})
       return apiKey
     }
     return null
@@ -335,8 +315,7 @@ export async function createAndStoreApiKey(
         ? error.message
         : String(
             error,
-          )) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+          )) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     throw error
   }
 }
@@ -399,8 +378,7 @@ export async function fetchProfileInfo(accessToken: string): Promise<{
     rateLimitTier: profile?.organization?.rate_limit_tier ?? null,
     hasExtraUsageEnabled:
       profile?.organization?.has_extra_usage_enabled ?? null,
-    billingType: profile?.organization?.billing_type ?? null,
-  }
+    billingType: profile?.organization?.billing_type ?? null}
 
   if (profile?.account?.display_name) {
     result.displayName = profile.account.display_name
@@ -465,8 +443,7 @@ export async function populateOAuthAccountInfoIfNeeded(): Promise<boolean> {
       storeOAuthAccountInfo({
         accountUuid: envAccountUuid,
         emailAddress: envUserEmail,
-        organizationUuid: envOrganizationUuid,
-      })
+        organizationUuid: envOrganizationUuid})
     }
   }
 
@@ -506,8 +483,7 @@ export async function populateOAuthAccountInfoIfNeeded(): Promise<boolean> {
         billingType: profile.organization.billing_type ?? undefined,
         accountCreatedAt: profile.account.created_at,
         subscriptionCreatedAt:
-          profile.organization.subscription_created_at ?? undefined,
-      })
+          profile.organization.subscription_created_at ?? undefined})
       return true
     }
   }
@@ -522,8 +498,7 @@ export function storeOAuthAccountInfo({
   hasExtraUsageEnabled,
   billingType,
   accountCreatedAt,
-  subscriptionCreatedAt,
-}: {
+  subscriptionCreatedAt}: {
   accountUuid: string
   emailAddress: string
   organizationUuid: string | undefined
@@ -540,8 +515,7 @@ export function storeOAuthAccountInfo({
     hasExtraUsageEnabled,
     billingType,
     accountCreatedAt,
-    subscriptionCreatedAt,
-  }
+    subscriptionCreatedAt}
   if (displayName) {
     accountInfo.displayName = displayName
   }

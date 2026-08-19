@@ -32,8 +32,7 @@ export function getShellConfigPaths(
   return {
     zsh: join(zshConfigDir, '.zshrc'),
     bash: join(home, '.bashrc'),
-    fish: join(home, '.config/fish/config.fish'),
-  }
+    fish: join(home, '.config/fish/config.fish')}
 }
 
 /**

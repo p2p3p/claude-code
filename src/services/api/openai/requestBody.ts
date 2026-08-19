@@ -92,8 +92,7 @@ export function buildOpenAIRequestBody(params: {
     enableThinking,
     maxTokens,
     temperatureOverride,
-    promptCacheKey,
-  } = params
+    promptCacheKey} = params
   return {
     model,
     messages,
@@ -101,8 +100,7 @@ export function buildOpenAIRequestBody(params: {
     ...(promptCacheKey && { prompt_cache_key: promptCacheKey }),
     ...(tools.length > 0 && {
       tools,
-      ...(toolChoice && { tool_choice: toolChoice }),
-    }),
+      ...(toolChoice && { tool_choice: toolChoice })}),
     stream: true,
     stream_options: { include_usage: true },
     // Enable chain-of-thought output for DeepSeek and MiMo models.
@@ -113,13 +111,10 @@ export function buildOpenAIRequestBody(params: {
       // Self-hosted DeepSeek-V3.2 format
       enable_thinking: true,
       // Both DeepSeek self-hosted and MiMo formats in chat_template_kwargs
-      chat_template_kwargs: { thinking: true, enable_thinking: true },
-    }),
+      chat_template_kwargs: { thinking: true, enable_thinking: true }}),
     // Only send temperature when thinking mode is off (DeepSeek ignores it anyway,
     // but other providers may respect it)
     ...(!enableThinking &&
       temperatureOverride !== undefined && {
-        temperature: temperatureOverride,
-      }),
-  }
+        temperature: temperatureOverride})}
 }

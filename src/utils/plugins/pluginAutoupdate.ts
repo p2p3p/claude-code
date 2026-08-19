@@ -19,13 +19,11 @@ import {
   getPendingUpdatesDetails,
   hasPendingUpdates,
   isInstallationRelevantToCurrentProject,
-  loadInstalledPluginsFromDisk,
-} from './installedPluginsManager.js'
+  loadInstalledPluginsFromDisk} from './installedPluginsManager.js'
 import {
   getDeclaredMarketplaces,
   loadKnownMarketplacesConfig,
-  refreshMarketplace,
-} from './marketplaceManager.js'
+  refreshMarketplace} from './marketplaceManager.js'
 import { parsePluginIdentifier } from './pluginIdentifier.js'
 import { isMarketplaceAutoUpdate, type PluginScope } from './schemas.js'
 
@@ -245,8 +243,7 @@ export function autoUpdateMarketplacesAndPluginsInBackground(): void {
         Array.from(autoUpdateEnabledMarketplaces).map(async name => {
           try {
             await refreshMarketplace(name, undefined, {
-              disableCredentialHelper: true,
-            })
+              disableCredentialHelper: true})
           } catch (error) {
             logForDebugging(
               `Plugin autoupdate: failed to refresh marketplace ${name}: ${errorMessage(error)}`,

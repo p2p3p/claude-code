@@ -16,8 +16,7 @@ import {
   getCachedRemoteUrl,
   getWorktreeCountFromFs,
   isShallowClone as isShallowCloneFs,
-  resolveGitDir,
-} from './git/gitFilesystem.js'
+  resolveGitDir} from './git/gitFilesystem.js'
 import { logError } from './log.js'
 import { memoizeWithLRU } from './memoize.js'
 import { whichSync } from './which.js'
@@ -43,8 +42,7 @@ const findGitRootImpl = memoizeWithLRU(
           logForDiagnosticsNoPII('info', 'find_git_root_completed', {
             duration_ms: Date.now() - startTime,
             stat_count: statCount,
-            found: true,
-          })
+            found: true})
           return current.normalize('NFC')
         }
       } catch {
@@ -66,8 +64,7 @@ const findGitRootImpl = memoizeWithLRU(
         logForDiagnosticsNoPII('info', 'find_git_root_completed', {
           duration_ms: Date.now() - startTime,
           stat_count: statCount,
-          found: true,
-        })
+          found: true})
         return root.normalize('NFC')
       }
     } catch {
@@ -77,8 +74,7 @@ const findGitRootImpl = memoizeWithLRU(
     logForDiagnosticsNoPII('info', 'find_git_root_completed', {
       duration_ms: Date.now() - startTime,
       stat_count: statCount,
-      found: false,
-    })
+      found: false})
     return GIT_ROOT_NOT_FOUND
   },
   path => path,
@@ -223,8 +219,7 @@ export const getIsGit = memoize(async (): Promise<boolean> => {
 
   logForDiagnosticsNoPII('info', 'is_git_check_completed', {
     duration_ms: Date.now() - startTime,
-    is_git: isGit,
-  })
+    is_git: isGit})
   return isGit
 })
 
@@ -339,8 +334,7 @@ export async function getRepoRemoteHash(): Promise<string | null> {
 
 export const getIsHeadOnRemote = async (): Promise<boolean> => {
   const { code } = await execFileNoThrow(gitExe(), ['rev-parse', '@{u}'], {
-    preserveOutputOnError: false,
-  })
+    preserveOutputOnError: false})
   return code === 0
 }
 
@@ -361,8 +355,7 @@ export const getIsClean = async (options?: {
     args.push('-uno')
   }
   const { stdout } = await execFileNoThrow(gitExe(), args, {
-    preserveOutputOnError: false,
-  })
+    preserveOutputOnError: false})
   return stdout.trim().length === 0
 }
 
@@ -371,8 +364,7 @@ export const getChangedFiles = async (): Promise<string[]> => {
     gitExe(),
     ['--no-optional-locks', 'status', '--porcelain'],
     {
-      preserveOutputOnError: false,
-    },
+      preserveOutputOnError: false},
   )
   return stdout
     .trim()
@@ -391,8 +383,7 @@ export const getFileStatus = async (): Promise<GitFileStatus> => {
     gitExe(),
     ['--no-optional-locks', 'status', '--porcelain'],
     {
-      preserveOutputOnError: false,
-    },
+      preserveOutputOnError: false},
   )
 
   const tracked: string[] = []
@@ -493,8 +484,7 @@ export async function getGitState(): Promise<GitRepoState | null> {
       remoteUrl,
       isHeadOnRemote,
       isClean,
-      worktreeCount,
-    }
+      worktreeCount}
   } catch (_) {
     // Fail silently - git state is best effort
     return null
@@ -742,8 +732,7 @@ export async function preserveGitStateForIssue(): Promise<PreservedGitState | nu
         untracked_files: untrackedFiles,
         format_patch: null,
         head_sha: null,
-        branch_name: null,
-      }
+        branch_name: null}
     }
 
     // Find the best remote base
@@ -763,8 +752,7 @@ export async function preserveGitStateForIssue(): Promise<PreservedGitState | nu
         untracked_files: untrackedFiles,
         format_patch: null,
         head_sha: null,
-        branch_name: null,
-      }
+        branch_name: null}
     }
 
     // Get the merge-base with remote
@@ -788,8 +776,7 @@ export async function preserveGitStateForIssue(): Promise<PreservedGitState | nu
         untracked_files: untrackedFiles,
         format_patch: null,
         head_sha: null,
-        branch_name: null,
-      }
+        branch_name: null}
     }
 
     const remoteBaseSha = mergeBase.trim()
@@ -836,8 +823,7 @@ export async function preserveGitStateForIssue(): Promise<PreservedGitState | nu
       format_patch: formatPatch,
       head_sha: headSha?.trim() || null,
       branch_name:
-        trimmedBranch && trimmedBranch !== 'HEAD' ? trimmedBranch : null,
-    }
+        trimmedBranch && trimmedBranch !== 'HEAD' ? trimmedBranch : null}
   } catch (err) {
     logError(err)
     return null

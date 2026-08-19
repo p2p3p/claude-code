@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import { t } from '../utils/i18n/index.js'
 import { getKairosActive, getSessionId } from '../bootstrap/state.js'
 import type { AppState } from '../state/AppState.js'
 import { formatAgentId } from '../utils/agentId.js'
@@ -11,14 +12,12 @@ import {
   registerTeamForSessionCleanup,
   sanitizeName,
   writeTeamFileAsync,
-  type TeamFile,
-} from '../utils/swarm/teamHelpers.js'
+  type TeamFile} from '../utils/swarm/teamHelpers.js'
 import { assignTeammateColor } from '../utils/swarm/teammateLayoutManager.js'
 import {
   ensureTasksDir,
   resetTaskList,
-  setLeaderTeamName,
-} from '../utils/tasks.js'
+  setLeaderTeamName} from '../utils/tasks.js'
 
 let _assistantForced = false
 
@@ -62,7 +61,7 @@ export async function initializeAssistantTeam(): Promise<
 
   const teamFile: TeamFile = {
     name: teamName,
-    description: 'Assistant mode in-process team',
+    description: t('assistant.inProcessTeam'),
     createdAt: now,
     leadAgentId,
     leadSessionId: sessionId,
@@ -76,10 +75,8 @@ export async function initializeAssistantTeam(): Promise<
         tmuxPaneId: '',
         cwd,
         subscriptions: [],
-        backendType: 'in-process',
-      },
-    ],
-  }
+        backendType: 'in-process'},
+    ]}
 
   await writeTeamFileAsync(teamName, teamFile)
   registerTeamForSessionCleanup(teamName)
@@ -103,10 +100,7 @@ export async function initializeAssistantTeam(): Promise<
         tmuxSessionName: 'in-process',
         tmuxPaneId: 'leader',
         cwd,
-        spawnedAt: now,
-      },
-    },
-  }
+        spawnedAt: now}}}
 }
 
 /**

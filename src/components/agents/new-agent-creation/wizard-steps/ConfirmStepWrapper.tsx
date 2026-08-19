@@ -2,14 +2,14 @@ import chalk from 'chalk';
 import { type ReactNode, useCallback, useState } from 'react';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
 import { useSetAppState } from 'src/state/AppState.js';
 import type { Tools } from '../../../../Tool.js';
 import type { AgentDefinition } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js';
 import { getActiveAgentsFromList } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js';
 import { clearAgentDefinitionsCache } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js';
 import { editFileInEditor } from '../../../../utils/promptEditor.js';
+import { t } from '../../../../utils/i18n/index.js';
 import { useWizard } from '../../../wizard/index.js';
 import { getNewAgentFilePath, saveAgentToFile } from '../../agentFileUtils.js';
 import type { AgentWizardData } from '../types.js';
@@ -52,9 +52,7 @@ export function ConfirmStepWrapper({ tools, existingAgents, onComplete }: Props)
             agentDefinitions: {
               ...state.agentDefinitions,
               activeAgents: getActiveAgentsFromList(allAgents),
-              allAgents,
-            },
-          };
+              allAgents}};
         });
 
         clearAgentDefinitionsCache();
@@ -62,8 +60,7 @@ export function ConfirmStepWrapper({ tools, existingAgents, onComplete }: Props)
         if (openInEditor) {
           const filePath = getNewAgentFilePath({
             source: wizardData.location!,
-            agentType: wizardData.finalAgent.agentType,
-          });
+            agentType: wizardData.finalAgent.agentType});
           await editFileInEditor(filePath);
         }
 
@@ -76,16 +73,14 @@ export function ConfirmStepWrapper({ tools, existingAgents, onComplete }: Props)
           has_custom_color: !!wizardData.finalAgent.color,
           has_memory: !!wizardData.finalAgent.memory,
           memory_scope: wizardData.finalAgent.memory ?? 'none',
-          ...(openInEditor ? { opened_in_editor: true } : {}),
-        } as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS);
+          ...(openInEditor ? { opened_in_editor: true } : {})} as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS);
 
         const message = openInEditor
-          ? `Created agent: ${chalk.bold(wizardData.finalAgent.agentType)} and opened in editor. ` +
-            `If you made edits, restart to load the latest version.`
-          : `Created agent: ${chalk.bold(wizardData.finalAgent.agentType)}`;
+          ? t('agentDisplay.createdAndOpened', chalk.bold(wizardData.finalAgent.agentType))
+          : t('agentDisplay.created', chalk.bold(wizardData.finalAgent.agentType));
         onComplete(message);
       } catch (err) {
-        setSaveError(err instanceof Error ? err.message : 'Failed to save agent');
+        setSaveError(err instanceof Error ? err.message : t('agentDisplay.failedToSave'));
       }
     },
     [wizardData, onComplete, setAppState],

@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 import type { Theme } from '../../utils/theme.js';
 import { Dialog } from '@anthropic/ink';
 import { useWizard } from './useWizard.js';
+import { t } from '../../utils/i18n/index.js';
 import { WizardNavigationFooter } from './WizardNavigationFooter.js';
 
 type Props = {
@@ -17,10 +18,9 @@ export function WizardDialogLayout({
   color = 'suggestion',
   children,
   subtitle,
-  footerText,
-}: Props): ReactNode {
+  footerText}: Props): ReactNode {
   const { currentStepIndex, totalSteps, title: providerTitle, showStepCounter, goBack } = useWizard();
-  const title = titleOverride || providerTitle || 'Wizard';
+  const title = titleOverride || providerTitle || t('wizard.defaultTitle');
   const stepSuffix = showStepCounter !== false ? ` (${currentStepIndex + 1}/${totalSteps})` : '';
 
   return (

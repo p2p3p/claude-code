@@ -13,15 +13,14 @@ import type { CacheSafeParams } from '../../utils/forkedAgent.js'
 import { logError } from '../../utils/log.js'
 import { tokenCountWithEstimation } from '../../utils/tokens.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../analytics/growthbook.js'
-import { getMaxOutputTokensForModel } from '../api/claude.js'
+import { getMaxOutputTokensForModel } from '../api/anthropic/index.js'
 import { notifyCompaction } from '../api/promptCacheBreakDetection.js'
 import { setLastSummarizedMessageId } from '../SessionMemory/sessionMemoryUtils.js'
 import {
   type CompactionResult,
   compactConversation,
   ERROR_MESSAGE_USER_ABORT,
-  type RecompactionInfo,
-} from './compact.js'
+  type RecompactionInfo} from './compact.js'
 import { runPostCompactCleanup } from './postCompactCleanup.js'
 import { trySessionMemoryCompaction } from './sessionMemoryCompact.js'
 
@@ -169,8 +168,7 @@ export function calculateTokenWarningState(
     isAboveWarningThreshold,
     isAboveErrorThreshold,
     isAboveAutoCompactThreshold,
-    isAtBlockingLimit,
-  }
+    isAtBlockingLimit}
 }
 
 export function isAutoCompactEnabled(): boolean {
@@ -310,8 +308,7 @@ export async function autoCompactIfNeeded(
     turnsSincePreviousCompact: tracking?.turnCounter ?? -1,
     previousCompactTurnId: tracking?.turnId,
     autoCompactThreshold: getAutoCompactThreshold(model),
-    querySource,
-  }
+    querySource}
 
   // EXPERIMENT: Try session memory compaction first
   const sessionMemoryResult = await trySessionMemoryCompaction(
@@ -334,8 +331,7 @@ export async function autoCompactIfNeeded(
     markPostCompaction()
     return {
       wasCompacted: true,
-      compactionResult: sessionMemoryResult,
-    }
+      compactionResult: sessionMemoryResult}
   }
 
   try {
@@ -358,8 +354,7 @@ export async function autoCompactIfNeeded(
       wasCompacted: true,
       compactionResult,
       // Reset failure count on success
-      consecutiveFailures: 0,
-    }
+      consecutiveFailures: 0}
   } catch (error) {
     if (!hasExactErrorMessage(error, ERROR_MESSAGE_USER_ABORT)) {
       logError(error)

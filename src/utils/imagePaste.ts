@@ -6,8 +6,7 @@ import { basename, extname, isAbsolute, join } from 'path'
 import {
   IMAGE_MAX_HEIGHT,
   IMAGE_MAX_WIDTH,
-  IMAGE_TARGET_RAW_SIZE,
-} from '../constants/apiLimits.js'
+  IMAGE_TARGET_RAW_SIZE} from '../constants/apiLimits.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { getImageProcessor } from '@claude-code-best/builtin-tools/tools/FileReadTool/imageProcessor.js'
 import { logForDebugging } from './debug.js'
@@ -16,8 +15,7 @@ import { getFsImplementation } from './fsOperations.js'
 import {
   detectImageFormatFromBase64,
   type ImageDimensions,
-  maybeResizeAndDownsampleImageBuffer,
-} from './imageResizer.js'
+  maybeResizeAndDownsampleImageBuffer} from './imageResizer.js'
 import { logError } from './log.js'
 
 // Native NSPasteboard reader. GrowthBook gate tengu_collage_kaleidoscope is
@@ -42,8 +40,7 @@ function getClipboardCommands() {
   const tempPaths: Record<SupportedPlatform, string> = {
     darwin: join(baseTmpDir, screenshotFilename),
     linux: join(baseTmpDir, screenshotFilename),
-    win32: join(baseTmpDir, screenshotFilename),
-  }
+    win32: join(baseTmpDir, screenshotFilename)}
 
   const screenshotPath = tempPaths[platform] || tempPaths.linux
 
@@ -61,29 +58,24 @@ function getClipboardCommands() {
       checkImage: `osascript -e 'the clipboard as «class PNGf»'`,
       saveImage: `osascript -e 'set png_data to (the clipboard as «class PNGf»)' -e 'set fp to open for access POSIX file "${screenshotPath}" with write permission' -e 'write png_data to fp' -e 'close access fp'`,
       getPath: `osascript -e 'get POSIX path of (the clipboard as «class furl»)'`,
-      deleteFile: `rm -f "${screenshotPath}"`,
-    },
+      deleteFile: `rm -f "${screenshotPath}"`},
     linux: {
       checkImage:
         'xclip -selection clipboard -t TARGETS -o 2>/dev/null | grep -E "image/(png|jpeg|jpg|gif|webp|bmp)" || wl-paste -l 2>/dev/null | grep -E "image/(png|jpeg|jpg|gif|webp|bmp)"',
       saveImage: `xclip -selection clipboard -t image/png -o > "${screenshotPath}" 2>/dev/null || wl-paste --type image/png > "${screenshotPath}" 2>/dev/null || xclip -selection clipboard -t image/bmp -o > "${screenshotPath}" 2>/dev/null || wl-paste --type image/bmp > "${screenshotPath}"`,
       getPath:
         'xclip -selection clipboard -t text/plain -o 2>/dev/null || wl-paste 2>/dev/null',
-      deleteFile: `rm -f "${screenshotPath}"`,
-    },
+      deleteFile: `rm -f "${screenshotPath}"`},
     win32: {
       checkImage:
         'powershell -NoProfile -Command "(Get-Clipboard -Format Image) -ne $null"',
       saveImage: `powershell -NoProfile -Command "$img = Get-Clipboard -Format Image; if ($img) { $img.Save('${screenshotPath.replace(/\\/g, '\\\\')}', [System.Drawing.Imaging.ImageFormat]::Png) }"`,
       getPath: 'powershell -NoProfile -Command "Get-Clipboard"',
-      deleteFile: `del /f "${screenshotPath}"`,
-    },
-  }
+      deleteFile: `del /f "${screenshotPath}"`}}
 
   return {
     commands: commands[platform] || commands.linux,
-    screenshotPath,
-  }
+    screenshotPath}
 }
 
 export type ImageWithDimensions = {
@@ -172,9 +164,7 @@ export async function getImageFromClipboard(): Promise<ImageWithDimensions | nul
             originalWidth: native.originalWidth,
             originalHeight: native.originalHeight,
             displayWidth: resized.dimensions?.displayWidth ?? native.width,
-            displayHeight: resized.dimensions?.displayHeight ?? native.height,
-          },
-        }
+            displayHeight: resized.dimensions?.displayHeight ?? native.height}}
       }
       return {
         base64: buffer.toString('base64'),
@@ -183,9 +173,7 @@ export async function getImageFromClipboard(): Promise<ImageWithDimensions | nul
           originalWidth: native.originalWidth,
           originalHeight: native.originalHeight,
           displayWidth: native.width,
-          displayHeight: native.height,
-        },
-      }
+          displayHeight: native.height}}
     } catch (e) {
       logError(e as Error)
       // Fall through to osascript fallback.
@@ -197,8 +185,7 @@ export async function getImageFromClipboard(): Promise<ImageWithDimensions | nul
     // Check if clipboard has image
     const checkResult = await execa(commands.checkImage, {
       shell: true,
-      reject: false,
-    })
+      reject: false})
     if (checkResult.exitCode !== 0) {
       return null
     }
@@ -206,8 +193,7 @@ export async function getImageFromClipboard(): Promise<ImageWithDimensions | nul
     // Save the image
     const saveResult = await execa(commands.saveImage, {
       shell: true,
-      reject: false,
-    })
+      reject: false})
     if (saveResult.exitCode !== 0) {
       return null
     }
@@ -243,8 +229,7 @@ export async function getImageFromClipboard(): Promise<ImageWithDimensions | nul
     return {
       base64: base64Image,
       mediaType,
-      dimensions: resized.dimensions,
-    }
+      dimensions: resized.dimensions}
   } catch {
     return null
   }
@@ -257,8 +242,7 @@ export async function getImagePathFromClipboard(): Promise<string | null> {
     // Try to get text from clipboard
     const result = await execa(commands.getPath, {
       shell: true,
-      reject: false,
-    })
+      reject: false})
     if (result.exitCode !== 0 || !result.stdout) {
       return null
     }
@@ -420,6 +404,5 @@ export async function tryReadImageFromPath(
     path: imagePath,
     base64: base64Image,
     mediaType,
-    dimensions: resized.dimensions,
-  }
+    dimensions: resized.dimensions}
 }

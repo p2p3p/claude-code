@@ -4,8 +4,7 @@ import { join } from 'path'
 import {
   getOriginalCwd,
   getSessionId,
-  onSessionSwitch,
-} from '../bootstrap/state.js'
+  onSessionSwitch} from '../bootstrap/state.js'
 import { registerCleanup } from './cleanupRegistry.js'
 import { logForDebugging } from './debug.js'
 import { getClaudeConfigHomeDir } from './envUtils.js'
@@ -90,10 +89,8 @@ export async function registerSession(): Promise<boolean> {
           ? {
               name: process.env.CLAUDE_CODE_SESSION_NAME,
               logPath: process.env.CLAUDE_CODE_SESSION_LOG,
-              agent: process.env.CLAUDE_CODE_AGENT,
-            }
-          : {}),
-      }),
+              agent: process.env.CLAUDE_CODE_AGENT}
+          : {})}),
     )
     // --resume / /resume mutates getSessionId() via switchSession. Without
     // this, the PID file's sessionId goes stale and `claude ps` sparkline

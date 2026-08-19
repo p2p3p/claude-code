@@ -31,8 +31,7 @@ function debug(msg: string): void {
 const attachmentSchema = lazySchema(() =>
   z.object({
     file_uuid: z.string(),
-    file_name: z.string(),
-  }),
+    file_name: z.string()}),
 )
 const attachmentsArraySchema = lazySchema(() => z.array(attachmentSchema()))
 
@@ -83,8 +82,7 @@ async function resolveOne(att: InboundAttachment): Promise<string | undefined> {
       headers: { Authorization: `Bearer ${token}` },
       responseType: 'arraybuffer',
       timeout: DOWNLOAD_TIMEOUT_MS,
-      validateStatus: () => true,
-    })
+      validateStatus: () => true})
     if (response.status !== 200) {
       debug(`fetch ${att.file_uuid} failed: status=${response.status}`)
       return undefined

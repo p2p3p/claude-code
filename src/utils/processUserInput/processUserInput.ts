@@ -2,8 +2,7 @@ import { feature } from 'bun:bundle'
 import type {
   Base64ImageSource,
   ContentBlockParam,
-  ImageBlockParam,
-} from '@anthropic-ai/sdk/resources/messages.mjs'
+  ImageBlockParam} from '@anthropic-ai/sdk/resources/messages.mjs'
 import { randomUUID } from 'crypto'
 import type { QuerySource } from 'src/constants/querySource.js'
 import { logEvent } from 'src/services/analytics/index.js'
@@ -12,8 +11,7 @@ import {
   findCommand,
   getBridgeCommandSafety,
   getCommandName,
-  type LocalJSXCommandContext,
-} from '../../commands.js'
+  type LocalJSXCommandContext} from '../../commands.js'
 import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import type { IDESelection } from '../../hooks/useIdeSelection.js'
 import type { SetToolJSXFn, ToolUseContext } from '../../Tool.js'
@@ -23,42 +21,36 @@ import type {
   Message,
   ProgressMessage,
   SystemMessage,
-  UserMessage,
-} from '../../types/message.js'
+  UserMessage} from '../../types/message.js'
 import type { PermissionMode } from '../../types/permissions.js'
 import {
   isValidImagePaste,
   type QueuedCommand,
-  type PromptInputMode,
-} from '../../types/textInputTypes.js'
+  type PromptInputMode} from '../../types/textInputTypes.js'
 import {
   type AgentMentionAttachment,
   createAttachmentMessage,
-  getAttachmentMessages,
-} from '../attachments.js'
+  getAttachmentMessages} from '../attachments.js'
 import type { PastedContent } from '../config.js'
 import type { EffortValue } from '../effort.js'
 import { toArray } from '../generators.js'
 import {
   executeUserPromptSubmitHooks,
-  getUserPromptSubmitHookBlockingMessage,
-} from '../hooks.js'
+  getUserPromptSubmitHookBlockingMessage} from '../hooks.js'
 import {
   createImageMetadataText,
-  maybeResizeAndDownsampleImageBlock,
-} from '../imageResizer.js'
+  maybeResizeAndDownsampleImageBlock} from '../imageResizer.js'
 import { storeImages } from '../imageStore.js'
 import {
   createCommandInputMessage,
   createSystemMessage,
-  createUserMessage,
-} from '../messages.js'
+  createUserMessage} from '../messages.js'
+import { t } from '../i18n/index.js'
 import { queryCheckpoint } from '../queryProfiler.js'
 import { parseSlashCommand } from '../slashCommandParsing.js'
 import {
   hasUltraplanKeyword,
-  replaceUltraplanKeyword,
-} from '../ultraplan/keyword.js'
+  replaceUltraplanKeyword} from '../ultraplan/keyword.js'
 import { processTextPrompt } from './processTextPrompt.js'
 export type ProcessUserInputContext = ToolUseContext & LocalJSXCommandContext
 
@@ -104,8 +96,7 @@ export async function processUserInput({
   bridgeOrigin,
   isMeta,
   skipAttachments,
-  autonomy,
-}: {
+  autonomy}: {
   input: string | Array<ContentBlockParam>
   /**
    * Input before [Pasted text #N] expansion. Used for ultraplan keyword
@@ -212,20 +203,18 @@ export async function processUserInput({
           ),
         ],
         shouldQuery: false,
-        allowedTools: result.allowedTools,
-      }
+        allowedTools: result.allowedTools}
     }
 
     // If preventContinuation is set, stop processing but keep the original
     // prompt in context.
     if (hookResult.preventContinuation) {
       const message = hookResult.stopReason
-        ? `Operation stopped by hook: ${hookResult.stopReason}`
-        : 'Operation stopped by hook'
+        ? t('processUserInput.stoppedByHookReason', { reason: hookResult.stopReason })
+        : t('processUserInput.stoppedByHook')
       result.messages.push(
         createUserMessage({
-          content: message,
-        }),
+          content: message}),
       )
       result.shouldQuery = false
       return result
@@ -242,8 +231,7 @@ export async function processUserInput({
           content: hookResult.additionalContexts.map(applyTruncation),
           hookName: 'UserPromptSubmit',
           toolUseID: `hook-${randomUUID()}`,
-          hookEvent: 'UserPromptSubmit',
-        }),
+          hookEvent: 'UserPromptSubmit'}),
       )
     }
 
@@ -261,9 +249,7 @@ export async function processUserInput({
               ...hookResult.message.attachment!,
               content: applyTruncation(
                 hookResult.message.attachment!.content as string,
-              ),
-            },
-          } as AttachmentMessage)
+              )}} as AttachmentMessage)
           break
         default:
           result.messages.push(hookResult.message as AttachmentMessage)
@@ -283,7 +269,7 @@ const MAX_HOOK_OUTPUT_LENGTH = 10000
 
 function applyTruncation(content: string): string {
   if (content.length > MAX_HOOK_OUTPUT_LENGTH) {
-    return `${content.substring(0, MAX_HOOK_OUTPUT_LENGTH)}… [output truncated - exceeded ${MAX_HOOK_OUTPUT_LENGTH} characters]`
+    return `${content.substring(0, MAX_HOOK_OUTPUT_LENGTH)}… ${t('processUserInput.outputTruncated', { maxChars: MAX_HOOK_OUTPUT_LENGTH })}`
   }
   return content
 }
@@ -382,19 +368,15 @@ async function processUserInputBase(
           type: 'base64',
           media_type: (pastedImage.mediaType ||
             'image/png') as Base64ImageSource['media_type'],
-          data: pastedImage.content,
-        },
-      }
+          data: pastedImage.content}}
       logEvent('tengu_pasted_image_resize_attempt', {
-        original_size_bytes: pastedImage.content.length,
-      })
+        original_size_bytes: pastedImage.content.length})
       const resized = await maybeResizeAndDownsampleImageBlock(imageBlock)
       return {
         resized,
         originalDimensions: pastedImage.dimensions,
         sourcePath:
-          pastedImage.sourcePath ?? storedImagePaths.get(pastedImage.id),
-      }
+          pastedImage.sourcePath ?? storedImagePaths.get(pastedImage.id)}
     }),
   )
   // Collect results preserving order
@@ -402,8 +384,7 @@ async function processUserInputBase(
   for (const {
     resized,
     originalDimensions,
-    sourcePath,
-  } of imageProcessingResults) {
+    sourcePath} of imageProcessingResults) {
     // Collect image metadata for isMeta message (prefer resized dimensions)
     if (resized.dimensions) {
       const metadataText = createImageMetadataText(
@@ -424,7 +405,7 @@ async function processUserInputBase(
       }
     } else if (sourcePath) {
       // If we have a source path but no dimensions, still add source info
-      imageMetadataTexts.push(`[Image source: ${sourcePath}]`)
+      imageMetadataTexts.push(t('processUserInput.imageSource', { sourcePath }))
     }
     imageContentBlocks.push(resized.block)
   }
@@ -449,7 +430,7 @@ async function processUserInputBase(
       } else {
         const msg =
           safety.reason ??
-          `/${getCommandName(cmd)} isn't available over Remote Control.`
+          t('processUserInput.remoteControlUnavailable', { command: getCommandName(cmd) })
         return {
           messages: [
             createUserMessage({ content: inputString, uuid }),
@@ -458,8 +439,7 @@ async function processUserInputBase(
             ),
           ],
           shouldQuery: false,
-          resultText: msg,
-        }
+          resultText: msg}
       }
     }
     // Unknown /foo or unparseable — fall through to plain text, same as
@@ -584,8 +564,7 @@ async function processUserInputBase(
       // Log whenever users use @agent-<name> syntax
       logEvent('tengu_subagent_at_mention', {
         is_subagent_only: isSubagentOnly,
-        is_prefix: isPrefix,
-      })
+        is_prefix: isPrefix})
     }
   }
 
@@ -613,8 +592,7 @@ function addImageMetadataMessage(
     result.messages.push(
       createUserMessage({
         content: imageMetadataTexts.map(text => ({ type: 'text', text })),
-        isMeta: true,
-      }),
+        isMeta: true}),
     )
   }
   return result

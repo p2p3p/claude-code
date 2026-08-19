@@ -5,8 +5,7 @@ import { join } from 'path'
 import {
   getIsInteractive,
   getIsNonInteractiveSession,
-  getSessionBypassPermissionsMode,
-} from '../../bootstrap/state.js'
+  getSessionBypassPermissionsMode} from '../../bootstrap/state.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import type { ScopedMcpServerConfig } from '../../services/mcp/types.js'
 import { isInBundledMode } from '../bundledMode.js'
@@ -16,8 +15,7 @@ import { logForDebugging } from '../debug.js'
 import {
   getClaudeConfigHomeDir,
   isEnvDefinedFalsy,
-  isEnvTruthy,
-} from '../envUtils.js'
+  isEnvTruthy} from '../envUtils.js'
 import { execFileNoThrowWithCwd } from '../execFileNoThrow.js'
 import { getPlatform } from '../platform.js'
 import { jsonStringify } from '../slowOperations.js'
@@ -26,8 +24,7 @@ import {
   getAllBrowserDataPaths,
   getAllNativeMessagingHostsDirs,
   getAllWindowsRegistryKeys,
-  openInChrome,
-} from './common.js'
+  openInChrome} from './common.js'
 import { getChromeSystemPrompt } from './prompt.js'
 import { isChromeExtensionInstalledPortable } from './setupPortable.js'
 
@@ -128,12 +125,9 @@ export function setupClaudeInChrome(): {
           command: process.execPath,
           args: ['--claude-in-chrome-mcp'],
           scope: 'dynamic' as const,
-          ...(hasEnv && { env }),
-        },
-      },
+          ...(hasEnv && { env })}},
       allowedTools,
-      systemPrompt: getChromeSystemPrompt(),
-    }
+      systemPrompt: getChromeSystemPrompt()}
   } else {
     const cliPath = join(distRoot, 'cli.js')
 
@@ -156,15 +150,12 @@ export function setupClaudeInChrome(): {
         command: process.execPath,
         args: [`${cliPath}`, '--claude-in-chrome-mcp'],
         scope: 'dynamic' as const,
-        ...(hasEnv && { env }),
-      },
-    }
+        ...(hasEnv && { env })}}
 
     return {
       mcpConfig,
       allowedTools,
-      systemPrompt: getChromeSystemPrompt(),
-    }
+      systemPrompt: getChromeSystemPrompt()}
   }
 }
 
@@ -207,8 +198,7 @@ export async function installChromeNativeHostManifest(
             'chrome-extension://dngcpimnedloihjnnfngkgjoidhnaolf/', // ANT_EXTENSION_ID
           ]
         : []),
-    ],
-  }
+    ]}
 
   const manifestContent = jsonStringify(manifest, null, 2)
   let anyManifestUpdated = false
@@ -370,8 +360,7 @@ function isChromeExtensionInstalled_CACHED_MAY_BE_STALE(): boolean {
     if (config.cachedChromeExtensionInstalled !== isInstalled) {
       saveGlobalConfig(prev => ({
         ...prev,
-        cachedChromeExtensionInstalled: isInstalled,
-      }))
+        cachedChromeExtensionInstalled: isInstalled}))
     }
   })
 

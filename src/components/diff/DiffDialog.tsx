@@ -1,4 +1,5 @@
 import type { StructuredPatchHunk } from 'diff';
+import { t } from '../../utils/i18n/index.js'
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { CommandResultDisplay } from '../../commands.js';
 import { useRegisterOverlay } from '../../context/overlayContext.js';
@@ -31,8 +32,7 @@ function turnDiffToDiffData(turn: TurnDiff): DiffData {
       isBinary: false,
       isLargeFile: false,
       isTruncated: false,
-      isNewFile: f.isNewFile,
-    }))
+      isNewFile: f.isNewFile}))
     .sort((a, b) => a.path.localeCompare(b.path));
 
   const hunks = new Map<string, StructuredPatchHunk[]>();
@@ -44,12 +44,10 @@ function turnDiffToDiffData(turn: TurnDiff): DiffData {
     stats: {
       filesCount: turn.stats.filesChanged,
       linesAdded: turn.stats.linesAdded,
-      linesRemoved: turn.stats.linesRemoved,
-    },
+      linesRemoved: turn.stats.linesRemoved},
     files,
     hunks,
-    loading: false,
-  };
+    loading: false};
 }
 
 export function DiffDialog({ messages, onDone }: Props): React.ReactNode {
@@ -141,8 +139,7 @@ export function DiffDialog({ messages, onDone }: Props): React.ReactNode {
         if (viewMode === 'list') {
           setSelectedIndex(prev => Math.min(diffData.files.length - 1, prev + 1));
         }
-      },
-    },
+      }},
     { context: 'DiffDialog' },
   );
 
@@ -155,12 +152,12 @@ export function DiffDialog({ messages, onDone }: Props): React.ReactNode {
   ) : null;
 
   // Build header based on current source
-  const headerTitle = currentTurn ? `Turn ${currentTurn.turnIndex}` : 'Uncommitted changes';
+  const headerTitle = currentTurn ? t('diffdialog.turn', currentTurn.turnIndex) : t('diffdialog.uncommittedChanges');
   const headerSubtitle = currentTurn
     ? currentTurn.userPromptPreview
       ? `"${currentTurn.userPromptPreview}"`
       : ''
-    : '(git diff HEAD)';
+    : t('diffdialog.gitDiffHead');
 
   // Source selector pills
   const sourceSelector =
@@ -169,7 +166,7 @@ export function DiffDialog({ messages, onDone }: Props): React.ReactNode {
         {sourceIndex > 0 && <Text dimColor>◀ </Text>}
         {sources.map((source, i) => {
           const isSelected = i === sourceIndex;
-          const label = source.type === 'current' ? 'Current' : `T${source.turn.turnIndex}`;
+          const label = source.type === 'current' ? t('diffdialog.current') : `T${source.turn.turnIndex}`;
           return (
             <Text key={i} dimColor={!isSelected} bold={isSelected}>
               {i > 0 ? ' · ' : ''}
@@ -185,16 +182,16 @@ export function DiffDialog({ messages, onDone }: Props): React.ReactNode {
   // Determine the appropriate message when no files are shown
   const emptyMessage = (() => {
     if (diffData.loading) {
-      return 'Loading diff…';
+      return t('diffDialog.loadingDiff');
     }
     if (currentTurn) {
-      return 'No file changes in this turn';
+      return t('diffDialog.noFileChanges');
     }
     // Check if we have stats but no files (too many files case)
     if (diffData.stats && diffData.stats.filesCount > 0 && diffData.files.length === 0) {
-      return 'Too many files to display details';
+      return t('diffDialog.tooManyFiles');
     }
-    return 'Working tree is clean';
+    return t('diffDialog.workingTreeClean');
   })();
 
   // Build title with header subtitle inline
@@ -210,7 +207,7 @@ export function DiffDialog({ messages, onDone }: Props): React.ReactNode {
     if (viewMode === 'detail') {
       setViewMode('list');
     } else {
-      onDone('Diff dialog dismissed', { display: 'system' });
+      onDone(t('diffdialog.dismissed'), { display: 'system' });
     }
   }
 
@@ -221,18 +218,18 @@ export function DiffDialog({ messages, onDone }: Props): React.ReactNode {
       color="background"
       inputGuide={exitState =>
         exitState.pending ? (
-          <Text>Press {exitState.keyName} again to exit</Text>
+          <Text>{t('common.pressAgain', exitState.keyName)}</Text>
         ) : viewMode === 'list' ? (
           <Byline>
-            {sources.length > 1 && <Text>←/→ source</Text>}
-            <Text>↑/↓ select</Text>
-            <Text>Enter view</Text>
-            <Text>{dismissShortcut} close</Text>
+            {sources.length > 1 && <Text>{t('diffdialog.sourceNav')}</Text>}
+            <Text>{t('diffdialog.upDownSelect')}</Text>
+            <Text>{t('diffdialog.enterView')}</Text>
+            <Text>{t('diffdialog.close', dismissShortcut)}</Text>
           </Byline>
         ) : (
           <Byline>
-            <Text>← back</Text>
-            <Text>{dismissShortcut} close</Text>
+            <Text>{t('diffdialog.back')}</Text>
+            <Text>{t('diffdialog.close', dismissShortcut)}</Text>
           </Byline>
         )
       }

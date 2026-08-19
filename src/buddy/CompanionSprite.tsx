@@ -51,8 +51,7 @@ function SpeechBubble({
   text,
   color,
   fading,
-  tail,
-}: {
+  tail}: {
   text: string;
   color: keyof Theme;
   fading: boolean;
@@ -126,8 +125,7 @@ export function CompanionSprite(): React.ReactNode {
   // has petStartTick=tick and petAge=0 — otherwise frame 0 is skipped.
   const [{ petStartTick, forPetAt }, setPetStart] = useState({
     petStartTick: 0,
-    forPetAt: petAt,
-  });
+    forPetAt: petAt});
   if (petAt !== forPetAt) {
     setPetStart({ petStartTick: tick, forPetAt: petAt });
   }
@@ -258,8 +256,7 @@ export function CompanionFloatingBubble(): React.ReactNode {
   const reaction = useAppState(s => s.companionReaction);
   const [{ tick, forReaction }, setTick] = useState({
     tick: 0,
-    forReaction: reaction,
-  });
+    forReaction: reaction});
 
   // Reset tick synchronously when reaction changes (not in useEffect, which
   // runs post-render and would show one stale-faded frame). Storing the

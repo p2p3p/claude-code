@@ -32,8 +32,7 @@ export function findBtwTriggerPositions(text: string): Array<{
       positions.push({
         word: match[0],
         start: match.index,
-        end: match.index + match[0].length,
-      })
+        end: match.index + match[0].length})
     }
   }
 
@@ -52,8 +51,7 @@ export type SideQuestionResult = {
  */
 export async function runSideQuestion({
   question,
-  cacheSafeParams,
-}: {
+  cacheSafeParams}: {
   question: string
   cacheSafeParams: CacheSafeParams
 }): Promise<SideQuestionResult> {
@@ -86,19 +84,16 @@ ${question}`
     canUseTool: async () => ({
       behavior: 'deny' as const,
       message: 'Side questions cannot use tools',
-      decisionReason: { type: 'other' as const, reason: 'side_question' },
-    }),
+      decisionReason: { type: 'other' as const, reason: 'side_question' }}),
     querySource: 'side_question',
     forkLabel: 'side_question',
     maxTurns: 1, // Single turn only - no tool use loops
     // No future request shares this suffix; skip writing cache entries.
-    skipCacheWrite: true,
-  })
+    skipCacheWrite: true})
 
   return {
     response: extractSideQuestionResponse(agentResult.messages),
-    usage: agentResult.totalUsage,
-  }
+    usage: agentResult.totalUsage}
 }
 
 /**

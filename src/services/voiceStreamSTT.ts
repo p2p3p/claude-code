@@ -17,8 +17,7 @@ import { getOauthConfig } from '../constants/oauth.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
   getClaudeAIOAuthTokens,
-  isAnthropicAuthEnabled,
-} from '../utils/auth.js'
+  isAnthropicAuthEnabled} from '../utils/auth.js'
 import { logForDebugging } from '../utils/debug.js'
 import { getUserAgent } from '../utils/http.js'
 import { logError } from '../utils/log.js'
@@ -43,8 +42,7 @@ const KEEPALIVE_INTERVAL_MS = 8_000
 // resort cap if the WS hangs. Exported so tests can shorten them.
 export const FINALIZE_TIMEOUTS_MS = {
   safety: 5_000,
-  noData: 1_500,
-}
+  noData: 1_500}
 
 // ─── Types ──────────────────────────────────────────────────────────
 
@@ -147,8 +145,7 @@ export async function connectVoiceStream(
     channels: '1',
     endpointing_ms: '300',
     utterance_end_ms: '1000',
-    language: options?.language ?? 'en',
-  })
+    language: options?.language ?? 'en'})
 
   // Route through conversation-engine with Deepgram Nova 3 (bypassing
   // the server's project_bell_v2_config GrowthBook gate). The server
@@ -179,8 +176,7 @@ export async function connectVoiceStream(
   const headers: Record<string, string> = {
     Authorization: `Bearer ${tokens.accessToken}`,
     'User-Agent': getUserAgent(),
-    'x-app': 'cli',
-  }
+    'x-app': 'cli'}
 
   const tlsOptions = getWebSocketTLSOptions()
   const wsOptions =
@@ -188,8 +184,7 @@ export async function connectVoiceStream(
       ? {
           headers,
           proxy: getWebSocketProxyUrl(url),
-          tls: tlsOptions || undefined,
-        }
+          tls: tlsOptions || undefined}
       : { headers, agent: getWebSocketProxyAgent(url), ...tlsOptions }
 
   const ws = new WebSocket(url, wsOptions)
@@ -316,8 +311,7 @@ export async function connectVoiceStream(
     },
     isConnected(): boolean {
       return connected && ws.readyState === WebSocket.OPEN
-    },
-  }
+    }}
 
   ws.on('open', () => {
     logForDebugging('[voice_stream] WebSocket connected')

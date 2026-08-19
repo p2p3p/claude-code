@@ -1,13 +1,11 @@
 import memoize from 'lodash-es/memoize.js'
 import {
   extractOutputRedirections,
-  splitCommandWithOperators,
-} from './commands.js'
+  splitCommandWithOperators} from './commands.js'
 import type { Node } from './parser.js'
 import {
   analyzeCommand,
-  type TreeSitterAnalysis,
-} from './treeSitterAnalysis.js'
+  type TreeSitterAnalysis} from './treeSitterAnalysis.js'
 
 export type OutputRedirection = {
   target: string
@@ -140,8 +138,7 @@ function extractRedirectionNodes(rootNode: Node): RedirectionNode[] {
           startIndex: node.startIndex,
           endIndex: node.endIndex,
           target: target.text,
-          operator: op.type as '>' | '>>',
-        })
+          operator: op.type as '>' | '>>'})
       }
     }
   })
@@ -228,8 +225,7 @@ class TreeSitterParsedCommand implements IParsedCommand {
   getOutputRedirections(): OutputRedirection[] {
     return this.redirectionNodes.map(({ target, operator }) => ({
       target,
-      operator,
-    }))
+      operator}))
   }
 
   getTreeSitterAnalysis(): TreeSitterAnalysis {
@@ -314,5 +310,4 @@ export const ParsedCommand = {
     lastCmd = command
     lastResult = doParse(command)
     return lastResult
-  },
-}
+  }}

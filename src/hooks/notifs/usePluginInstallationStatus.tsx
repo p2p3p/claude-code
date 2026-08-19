@@ -4,6 +4,7 @@ import { useNotifications } from '../../context/notifications.js';
 import { Text } from '@anthropic/ink';
 import { useAppState } from '../../state/AppState.js';
 import { logForDebugging } from '../../utils/debug.js';
+import { t } from '../../utils/i18n/index.js';
 import { plural } from '../../utils/stringUtils.js';
 
 export function usePluginInstallationStatus(): void {
@@ -16,8 +17,7 @@ export function usePluginInstallationStatus(): void {
       return {
         totalFailed: 0,
         failedMarketplacesCount: 0,
-        failedPluginsCount: 0,
-      };
+        failedPluginsCount: 0};
     }
 
     const failedMarketplaces = installationStatus.marketplaces.filter(m => m.status === 'failed');
@@ -26,8 +26,7 @@ export function usePluginInstallationStatus(): void {
     return {
       totalFailed: failedMarketplaces.length + failedPlugins.length,
       failedMarketplacesCount: failedMarketplaces.length,
-      failedPluginsCount: failedPlugins.length,
-    };
+      failedPluginsCount: failedPlugins.length};
   }, [installationStatus]);
 
   useEffect(() => {
@@ -56,12 +55,11 @@ export function usePluginInstallationStatus(): void {
       jsx: (
         <>
           <Text color="error">
-            {totalFailed} {plural(totalFailed, 'plugin')} failed to install
+            {t('notif.pluginInstall.failedToInstall', { count: totalFailed })}
           </Text>
-          <Text dimColor> · /plugin for details</Text>
+          <Text dimColor>{t('notif.pluginInstall.slashPluginDetails')}</Text>
         </>
       ),
-      priority: 'medium',
-    });
+      priority: 'medium'});
   }, [addNotification, totalFailed, failedMarketplacesCount, failedPluginsCount]);
 }

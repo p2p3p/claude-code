@@ -221,44 +221,36 @@ function getPhaseSummary(
     {
       name: 'Context loading',
       start: 'query_context_loading_start',
-      end: 'query_context_loading_end',
-    },
+      end: 'query_context_loading_end'},
     {
       name: 'Microcompact',
       start: 'query_microcompact_start',
-      end: 'query_microcompact_end',
-    },
+      end: 'query_microcompact_end'},
     {
       name: 'Autocompact',
       start: 'query_autocompact_start',
-      end: 'query_autocompact_end',
-    },
+      end: 'query_autocompact_end'},
     { name: 'Query setup', start: 'query_setup_start', end: 'query_setup_end' },
     {
       name: 'Tool schemas',
       start: 'query_tool_schema_build_start',
-      end: 'query_tool_schema_build_end',
-    },
+      end: 'query_tool_schema_build_end'},
     {
       name: 'Message normalization',
       start: 'query_message_normalization_start',
-      end: 'query_message_normalization_end',
-    },
+      end: 'query_message_normalization_end'},
     {
       name: 'Client creation',
       start: 'query_client_creation_start',
-      end: 'query_client_creation_end',
-    },
+      end: 'query_client_creation_end'},
     {
       name: 'Network TTFB',
       start: 'query_api_request_sent',
-      end: 'query_first_chunk_received',
-    },
+      end: 'query_first_chunk_received'},
     {
       name: 'Tool execution',
       start: 'query_tool_execution_start',
-      end: 'query_tool_execution_end',
-    },
+      end: 'query_tool_execution_end'},
   ]
 
   const markMap = new Map(marks.map(m => [m.name, m.startTime - baselineTime]))

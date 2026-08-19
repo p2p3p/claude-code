@@ -44,7 +44,6 @@ const command = {
   },
   immediate: true,
   type: 'local-jsx',
-  load: () => import('./sandbox-toggle.js'),
-} satisfies Command
+  load: () => import('./sandbox-toggle.js')} satisfies Command
 
 export default command

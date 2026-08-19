@@ -38,8 +38,7 @@ export async function copyAnsiToClipboard(
     logError(error)
     return {
       success: false,
-      message: `Failed to copy screenshot: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    }
+      message: `Failed to copy screenshot: ${error instanceof Error ? error.message : 'Unknown error'}`}
   }
 }
 
@@ -54,16 +53,14 @@ async function copyPngToClipboard(
     const escapedPath = pngPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
     const script = `set the clipboard to (read (POSIX file "${escapedPath}") as «class PNGf»)`
     const result = await execFileNoThrowWithCwd('osascript', ['-e', script], {
-      timeout: 5000,
-    })
+      timeout: 5000})
 
     if (result.code === 0) {
       return { success: true, message: 'Screenshot copied to clipboard' }
     }
     return {
       success: false,
-      message: `Failed to copy to clipboard: ${result.stderr}`,
-    }
+      message: `Failed to copy to clipboard: ${result.stderr}`}
   }
 
   if (platform === 'linux') {
@@ -92,8 +89,7 @@ async function copyPngToClipboard(
     return {
       success: false,
       message:
-        'Failed to copy to clipboard. Please install xclip or xsel: sudo apt install xclip',
-    }
+        'Failed to copy to clipboard. Please install xclip or xsel: sudo apt install xclip'}
   }
 
   if (platform === 'windows') {
@@ -110,12 +106,10 @@ async function copyPngToClipboard(
     }
     return {
       success: false,
-      message: `Failed to copy to clipboard: ${result.stderr}`,
-    }
+      message: `Failed to copy to clipboard: ${result.stderr}`}
   }
 
   return {
     success: false,
-    message: `Screenshot to clipboard is not supported on ${platform}`,
-  }
+    message: `Screenshot to clipboard is not supported on ${platform}`}
 }

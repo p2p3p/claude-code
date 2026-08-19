@@ -5,14 +5,12 @@ import {
   TASK_ID_TAG,
   TASK_NOTIFICATION_TAG,
   TASK_TYPE_TAG,
-  TOOL_USE_ID_TAG,
-} from '../../constants/xml.js'
+  TOOL_USE_ID_TAG} from '../../constants/xml.js'
 import type { AppState } from '../../state/AppState.js'
 import {
   isTerminalTaskStatus,
   type TaskStatus,
-  type TaskType,
-} from '../../Task.js'
+  type TaskType} from '../../Task.js'
 import type { TaskState } from '../../tasks/types.js'
 import { enqueuePendingNotification } from '../messageQueueManager.js'
 import { enqueueSdkEvent } from '../sdkEventQueue.js'
@@ -65,9 +63,7 @@ export function updateTaskState<T extends TaskState>(
       ...prev,
       tasks: {
         ...prev.tasks,
-        [taskId]: updated,
-      },
-    }
+        [taskId]: updated}}
   })
 }
 
@@ -92,8 +88,7 @@ export function registerTask(task: TaskState, setAppState: SetAppState): void {
             startTime: existing.startTime,
             messages: existing.messages,
             diskLoaded: existing.diskLoaded,
-            pendingMessages: existing.pendingMessages,
-          }
+            pendingMessages: existing.pendingMessages}
         : task
     return { ...prev, tasks: { ...prev.tasks, [task.id]: merged } }
   })
@@ -112,8 +107,7 @@ export function registerTask(task: TaskState, setAppState: SetAppState): void {
       'workflowName' in task
         ? (task.workflowName as string | undefined)
         : undefined,
-    prompt: 'prompt' in task ? (task.prompt as string) : undefined,
-  })
+    prompt: 'prompt' in task ? (task.prompt as string) : undefined})
 }
 
 /**

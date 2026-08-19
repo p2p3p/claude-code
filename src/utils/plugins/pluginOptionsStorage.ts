@@ -19,13 +19,11 @@ import { logError } from '../log.js'
 import { getSecureStorage } from '../secureStorage/index.js'
 import {
   getSettings_DEPRECATED,
-  updateSettingsForSource,
-} from '../settings/settings.js'
+  updateSettingsForSource} from '../settings/settings.js'
 import {
   type UserConfigSchema,
   type UserConfigValues,
-  validateUserConfig,
-} from './mcpbHandler.js'
+  validateUserConfig} from './mcpbHandler.js'
 import { getPluginDataDir } from './pluginDirectories.js'
 
 export type PluginOptionValues = UserConfigValues
@@ -133,8 +131,7 @@ export function savePluginOptions(
     }
     existing.pluginSecrets[pluginId] = {
       ...secureScrubbed,
-      ...sensitive,
-    }
+      ...sensitive}
     const result = storage.update(existing)
     if (!result.success) {
       const err = new Error(
@@ -145,8 +142,7 @@ export function savePluginOptions(
     }
     if (result.warning) {
       logForDebugging(`Plugin secrets save warning: ${result.warning}`, {
-        level: 'warn',
-      })
+        level: 'warn'})
     }
   }
 
@@ -179,8 +175,7 @@ export function savePluginOptions(
     ) as Record<string, undefined>
     settings.pluginConfigs[pluginId].options = {
       ...nonSensitive,
-      ...scrubbed,
-    } as PluginOptionValues
+      ...scrubbed} as PluginOptionValues
     const result = updateSettingsForSource('userSettings', settings)
     if (result.error) {
       logError(result.error)
@@ -228,8 +223,7 @@ export function deletePluginOptions(pluginId: string): void {
     // is a narrowing TS accepts (same approach as marketplaceManager.ts:1795).
     const pluginConfigs: Partial<PluginConfigs> = { [pluginId]: undefined }
     const { error } = updateSettingsForSource('userSettings', {
-      pluginConfigs: pluginConfigs as PluginConfigs,
-    })
+      pluginConfigs: pluginConfigs as PluginConfigs})
     if (error) {
       logForDebugging(
         `deletePluginOptions: failed to clear settings.pluginConfigs[${pluginId}]: ${error.message}`,
@@ -258,8 +252,7 @@ export function deletePluginOptions(pluginId: string): void {
         pluginSecrets:
           survivingEntries.length > 0
             ? Object.fromEntries(survivingEntries)
-            : undefined,
-      })
+            : undefined})
       if (!result.success) {
         logForDebugging(
           `deletePluginOptions: failed to clear pluginSecrets for ${pluginId} from keychain`,

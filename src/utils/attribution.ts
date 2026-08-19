@@ -4,8 +4,7 @@ import { getClientType } from '../bootstrap/state.js'
 import {
   getRemoteSessionUrl,
   isRemoteSessionLocal,
-  PRODUCT_URL,
-} from '../constants/product.js'
+  PRODUCT_URL} from '../constants/product.js'
 import { TERMINAL_OUTPUT_TAGS } from '../constants/xml.js'
 import type { AppState } from '../state/AppState.js'
 import { FILE_EDIT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileEditTool/constants.js'
@@ -17,8 +16,7 @@ import type { Entry } from '../types/logs.js'
 import {
   type AttributionData,
   calculateCommitAttribution,
-  isInternalModelRepo,
-} from './commitAttribution.js'
+  isInternalModelRepo} from './commitAttribution.js'
 import { logForDebugging } from './debug.js'
 import { parseJSONL } from './json.js'
 import { logError } from './log.js'
@@ -73,8 +71,7 @@ export function getAttributionTexts(): AttributionTexts {
   if (settings.attribution) {
     return {
       commit: settings.attribution.commit ?? defaultCommit,
-      pr: settings.attribution.pr ?? defaultAttribution,
-    }
+      pr: settings.attribution.pr ?? defaultAttribution}
   }
 
   // Backward compatibility: deprecated includeCoAuthoredBy setting
@@ -262,8 +259,7 @@ async function getTranscriptStats(): Promise<{
       lastBoundaryIdx >= 0 ? entries.slice(lastBoundaryIdx + 1) : entries
     return {
       promptCount: countUserPromptsFromEntries(postBoundary),
-      memoryAccessCount: countMemoryFileAccessFromEntries(postBoundary),
-    }
+      memoryAccessCount: countMemoryFileAccessFromEntries(postBoundary)}
   } catch {
     return { promptCount: 0, memoryAccessCount: 0 }
   }

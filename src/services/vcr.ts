@@ -1,7 +1,6 @@
 import type {
   BetaContentBlock,
-  BetaUsage,
-} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
+  BetaUsage} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
 import { createHash, randomUUID, type UUID } from 'crypto'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import isPlainObject from 'lodash-es/isPlainObject.js'
@@ -14,8 +13,7 @@ import type {
   Message,
   StreamEvent,
   SystemAPIErrorMessage,
-  UserMessage,
-} from '../types/message.js'
+  UserMessage} from '../types/message.js'
 import { getCwd } from '../utils/cwd.js'
 import { env } from '../utils/env.js'
 import { getClaudeConfigHomeDir, isEnvTruthy } from '../utils/envUtils.js'
@@ -82,8 +80,7 @@ async function withFixture<T>(
 
   await mkdir(dirname(filename), { recursive: true })
   await writeFile(filename, jsonStringify(result, null, 2), {
-    encoding: 'utf8',
-  })
+    encoding: 'utf8'})
 
   return result
 }
@@ -153,8 +150,7 @@ export async function withVCR(
         input: dehydratedInput,
         output: results.map((message, index) =>
           mapMessage(message, dehydrateValue, index),
-        ),
-      },
+        )},
       null,
       2,
     ),
@@ -201,8 +197,7 @@ function mapMessages(
                   default:
                     return undefined
                 }
-              }),
-            }
+              })}
           }
           return _
         case 'text':
@@ -210,8 +205,7 @@ function mapMessages(
         case 'tool_use':
           return {
             ..._,
-            input: mapValuesDeep(_.input as Record<string, unknown>, f),
-          }
+            input: mapValuesDeep(_.input as Record<string, unknown>, f)}
         case 'image':
           return _
         default:
@@ -261,21 +255,17 @@ function mapAssistantMessage(
               return {
                 ..._,
                 text: f(_.text) as string,
-                citations: _.citations || [],
-              } // Ensure citations
+                citations: _.citations || []} // Ensure citations
             case 'tool_use':
               return {
                 ..._,
-                input: mapValuesDeep(_.input as Record<string, unknown>, f),
-              }
+                input: mapValuesDeep(_.input as Record<string, unknown>, f)}
             default:
               return _ // Handle other block types unchanged
           }
         })
-        .filter(Boolean) as any,
-    },
-    type: 'assistant',
-  }
+        .filter(Boolean) as any},
+    type: 'assistant'}
 }
 
 function mapMessage(
@@ -403,7 +393,6 @@ export async function withTokenCountVCR(
     )
     .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z?/g, '[TIMESTAMP]')
   const result = await withFixture(dehydrated, 'token-count', async () => ({
-    tokenCount: await f(),
-  }))
+    tokenCount: await f()}))
   return result.tokenCount
 }

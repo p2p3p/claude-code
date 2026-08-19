@@ -1,4 +1,5 @@
 import { feature } from 'bun:bundle';
+import { t } from '../../../utils/i18n/index.js'
 import figures from 'figures';
 import * as React from 'react';
 import { SentryErrorBoundary } from 'src/components/SentryErrorBoundary.js';
@@ -9,8 +10,7 @@ import type { NormalizedUserMessage, ProgressMessage } from '../../../types/mess
 import {
   deleteClassifierApproval,
   getClassifierApproval,
-  getYoloClassifierApproval,
-} from '../../../utils/classifierApprovals.js';
+  getYoloClassifierApproval} from '../../../utils/classifierApprovals.js';
 import type { buildMessageLookups } from '../../../utils/messages.js';
 import { MessageResponse } from '../../MessageResponse.js';
 import { HookProgressMessage } from '../HookProgressMessage.js';
@@ -40,8 +40,7 @@ export function UserToolSuccessMessage({
   verbose,
   width,
   isTranscriptMode,
-  shouldCollapseDiffs,
-}: Props): React.ReactNode {
+  shouldCollapseDiffs}: Props): React.ReactNode {
   const [theme] = useTheme();
   // Always call hook unconditionally; feature gate applied to the value.
   const isBriefOnlyState = useAppState(s => s.isBriefOnly);
@@ -87,8 +86,7 @@ export function UserToolSuccessMessage({
       verbose,
       isTranscriptMode,
       isBriefOnly,
-      input: lookups.toolUseByToolUseID.get(toolUseID)?.input,
-    }) ?? null;
+      input: lookups.toolUseByToolUseID.get(toolUseID)?.input}) ?? null;
 
   // Don't render anything if the tool result message is null
   if (renderedMessage === null) {
@@ -124,8 +122,7 @@ export function UserToolSuccessMessage({
               <MessageResponse height={1}>
                 <Text dimColor>
                   <Text color="success">{figures.tick}</Text>
-                  {' Auto-approved \u00b7 matched '}
-                  {`"${classifierRule}"`}
+                  {t('componentsMessages.autoApprovedMatched', classifierRule)}
                 </Text>
               </MessageResponse>
             )
@@ -133,7 +130,7 @@ export function UserToolSuccessMessage({
         {feature('TRANSCRIPT_CLASSIFIER')
           ? yoloReason && (
               <MessageResponse height={1}>
-                <Text dimColor>Allowed by auto mode classifier</Text>
+                <Text dimColor>{t('usertoolsuccessmessage.allowedByAutoModeClassifier')}</Text>
               </MessageResponse>
             )
           : null}

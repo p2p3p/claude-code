@@ -10,22 +10,18 @@ import type {
   ContextCollapseSnapshotEntry,
   LogOption,
   PersistedWorktreeSession,
-  SerializedMessage,
-} from '../types/logs.js'
+  SerializedMessage} from '../types/logs.js'
 import type {
   Message,
   NormalizedMessage,
-  NormalizedUserMessage,
-} from '../types/message.js'
+  NormalizedUserMessage} from '../types/message.js'
 import { PERMISSION_MODES } from '../types/permissions.js'
 import {
   suppressNextSkillDiscovery,
-  suppressNextSkillListing,
-} from './attachments.js'
+  suppressNextSkillListing} from './attachments.js'
 import {
   copyFileHistoryForResume,
-  type FileHistorySnapshot,
-} from './fileHistory.js'
+  type FileHistorySnapshot} from './fileHistory.js'
 import { logError } from './log.js'
 import {
   createAssistantMessage,
@@ -35,8 +31,7 @@ import {
   filterWhitespaceOnlyAssistantMessages,
   isToolUseResultMessage,
   NO_RESPONSE_REQUESTED,
-  normalizeMessages,
-} from './messages.js'
+  normalizeMessages} from './messages.js'
 import { copyPlanForResume } from './plans.js'
 import { processSessionStartHooks } from './sessionStart.js'
 import {
@@ -48,8 +43,7 @@ import {
   loadFullLog,
   loadMessageLogs,
   loadTranscriptFile,
-  removeExtraFields,
-} from './sessionStorage.js'
+  removeExtraFields} from './sessionStorage.js'
 import type { ContentReplacementRecord } from './toolResultStorage.js'
 
 // Dead code elimination: ant-only tool names are conditionally required so
@@ -94,9 +88,7 @@ function migrateLegacyAttachmentTypes(message: Message): Message {
       attachment: {
         ...attachment,
         type: 'file',
-        displayPath: relative(getCwd(), attachment.filename as string),
-      },
-    } as unknown as SerializedMessage // Cast entire message since we know the structure is correct
+        displayPath: relative(getCwd(), attachment.filename as string)}} as unknown as SerializedMessage // Cast entire message since we know the structure is correct
   }
 
   if (attachment.type === 'new_directory') {
@@ -105,9 +97,7 @@ function migrateLegacyAttachmentTypes(message: Message): Message {
       attachment: {
         ...attachment,
         type: 'directory',
-        displayPath: relative(getCwd(), attachment.path as string),
-      },
-    } as unknown as SerializedMessage // Cast entire message since we know the structure is correct
+        displayPath: relative(getCwd(), attachment.path as string)}} as unknown as SerializedMessage // Cast entire message since we know the structure is correct
   }
 
   // Backfill displayPath for attachments from old sessions
@@ -125,9 +115,7 @@ function migrateLegacyAttachmentTypes(message: Message): Message {
         ...message,
         attachment: {
           ...attachment,
-          displayPath: relative(getCwd(), path),
-        },
-      } as unknown as Message
+          displayPath: relative(getCwd(), path)}} as unknown as Message
     }
   }
 
@@ -214,14 +202,12 @@ export function deserializeMessagesWithInterruptDetection(
       const [continuationMessage] = normalizeMessages([
         createUserMessage({
           content: 'Continue from where you left off.',
-          isMeta: true,
-        }),
+          isMeta: true}),
       ])
       filteredMessages.push(continuationMessage!)
       turnInterruptionState = {
         kind: 'interrupted_prompt',
-        message: continuationMessage!,
-      }
+        message: continuationMessage!}
     } else {
       turnInterruptionState = internalState
     }
@@ -242,8 +228,7 @@ export function deserializeMessagesWithInterruptDetection(
         lastRelevantIdx + 1,
         0,
         createAssistantMessage({
-          content: NO_RESPONSE_REQUESTED,
-        }) as NormalizedMessage,
+          content: NO_RESPONSE_REQUESTED}) as NormalizedMessage,
       )
     }
 
@@ -325,8 +310,7 @@ function detectTurnInterruption(
     // Plain text user prompt — CC hadn't started responding
     return {
       kind: 'interrupted_prompt',
-      message: lastMessage as NormalizedUserMessage,
-    }
+      message: lastMessage as NormalizedUserMessage}
   }
 
   if (lastMessage.type === 'attachment') {
@@ -464,8 +448,7 @@ export async function loadMessagesFromJsonlPath(path: string): Promise<{
     // Leaf's sessionId — forked sessions copy chain[0] from the source
     // transcript, so the root retains the source session's ID. Matches
     // loadFullLog's mostRecentLeaf.sessionId.
-    sessionId: tip.sessionId as UUID | undefined,
-  }
+    sessionId: tip.sessionId as UUID | undefined}
 }
 
 /**
@@ -621,8 +604,7 @@ export async function loadConversationForResume(
       // Include full path for cross-directory resume
       fullPath: log?.fullPath,
       // Goal state for hydration on resume
-      goal: log?.goal,
-    }
+      goal: log?.goal}
   } catch (error) {
     logError(error as Error)
     throw error

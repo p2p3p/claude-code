@@ -6,33 +6,28 @@ import {
   appendObservation,
   getSkillLearningRoot,
   purgeOldObservations,
-  stringifyField,
-} from './observationStore.js'
+  stringifyField} from './observationStore.js'
 import { resolveProjectContext } from './projectContext.js'
 import './sessionObserver.js'
 import { createInstinct } from './instinctParser.js'
 import {
   analyzeWithActiveBackend,
-  resolveDefaultObserverBackend,
-} from './observerBackend.js'
+  resolveDefaultObserverBackend} from './observerBackend.js'
 import {
   decayInstinctConfidence,
   loadInstincts,
   prunePendingInstincts,
-  upsertInstinct,
-} from './instinctStore.js'
+  upsertInstinct} from './instinctStore.js'
 import type { StoredSkillObservation } from './observationStore.js'
 import type { Message } from '../../types/message.js'
 import {
   applySkillLifecycleDecision,
   compareExistingArtifacts,
-  decideSkillLifecycle,
-} from './skillLifecycle.js'
+  decideSkillLifecycle} from './skillLifecycle.js'
 import {
   generateAgentCandidates,
   generateCommandCandidates,
-  clusterInstincts,
-} from './evolution.js'
+  clusterInstincts} from './evolution.js'
 import { generateOrMergeSkillDraft } from './skillGenerator.js'
 import { shouldGenerateSkillFromInstincts } from './learningPolicy.js'
 import { writeLearnedCommand } from './commandGenerator.js'
@@ -263,8 +258,7 @@ function observationsFromMessages(
     projectName: project.projectName,
     cwd: project.cwd,
     timestamp: new Date().toISOString(),
-    source: 'hook' as const,
-  }
+    source: 'hook' as const}
 
   return messages.flatMap((message): StoredSkillObservation[] => {
     // H6: watermark dedup — skip messages already processed in this session.
@@ -293,8 +287,7 @@ function observationsFromMessages(
           event: 'tool_complete',
           toolName: result.toolName,
           toolOutput: result.output,
-          outcome: result.isError ? 'failure' : 'success',
-        }))
+          outcome: result.isError ? 'failure' : 'success'}))
       }
       const text = textFromContent(message.message?.content)
       return text.trim()
@@ -303,8 +296,7 @@ function observationsFromMessages(
               ...base,
               id: crypto.randomUUID(),
               event: 'user_message',
-              messageText: text,
-            },
+              messageText: text},
           ]
         : []
     }
@@ -318,16 +310,14 @@ function observationsFromMessages(
           id: crypto.randomUUID(),
           event: 'tool_start' as const,
           toolName: toolUse.toolName,
-          toolInput: toolUse.input,
-        })),
+          toolInput: toolUse.input})),
         ...(text.trim()
           ? [
               {
                 ...base,
                 id: crypto.randomUUID(),
                 event: 'assistant_message' as const,
-                messageText: text,
-              },
+                messageText: text},
             ]
           : []),
       ]
@@ -361,8 +351,7 @@ function toolUsesFromContent(
     return [
       {
         toolName: String(record.name ?? 'unknown_tool'),
-        input: stringifyField(record.input),
-      },
+        input: stringifyField(record.input)},
     ]
   })
 }
@@ -379,8 +368,7 @@ function toolResultsFromContent(
       {
         toolName: String(record.name ?? record.tool_name ?? 'unknown_tool'),
         output: stringifyField(record.content),
-        isError: record.is_error === true,
-      },
+        isError: record.is_error === true},
     ]
   })
 }

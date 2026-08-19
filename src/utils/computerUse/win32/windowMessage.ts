@@ -147,8 +147,7 @@ export function findEditChild(parentHwnd: string): string | null {
         if (pipe === -1) return null
         return {
           hwnd: trimmed.slice(0, pipe),
-          className: trimmed.slice(pipe + 1),
-        }
+          className: trimmed.slice(pipe + 1)}
       })
       .filter(
         (item): item is { hwnd: string; className: string } => item !== null,

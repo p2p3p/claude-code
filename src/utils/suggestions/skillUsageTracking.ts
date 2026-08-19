@@ -27,10 +27,7 @@ export function recordSkillUsage(skillName: string): void {
         ...current.skillUsage,
         [skillName]: {
           usageCount: (existing?.usageCount ?? 0) + 1,
-          lastUsedAt: now,
-        },
-      },
-    }
+          lastUsedAt: now}}}
   })
 }
 

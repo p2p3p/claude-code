@@ -4,10 +4,10 @@ import { dirname, resolve } from 'path'
 import type { ToolPermissionContext } from '../../Tool.js'
 import { getErrnoCode } from '../../utils/errors.js'
 import { expandPath } from '../../utils/path.js'
+import { t } from '../../utils/i18n/index.js'
 import {
   allWorkingDirectories,
-  pathInWorkingPath,
-} from '../../utils/permissions/filesystem.js'
+  pathInWorkingPath} from '../../utils/permissions/filesystem.js'
 
 export type AddDirectoryResult =
   | {
@@ -34,8 +34,7 @@ export async function validateDirectoryForWorkspace(
 ): Promise<AddDirectoryResult> {
   if (!directoryPath) {
     return {
-      resultType: 'emptyPath',
-    }
+      resultType: 'emptyPath'}
   }
 
   // resolve() strips the trailing slash expandPath can leave on absolute
@@ -49,8 +48,7 @@ export async function validateDirectoryForWorkspace(
       return {
         resultType: 'notADirectory',
         directoryPath,
-        absolutePath,
-      }
+        absolutePath}
     }
   } catch (e: unknown) {
     const code = getErrnoCode(e)
@@ -66,8 +64,7 @@ export async function validateDirectoryForWorkspace(
       return {
         resultType: 'pathNotFound',
         directoryPath,
-        absolutePath,
-      }
+        absolutePath}
     }
     throw e
   }
@@ -81,30 +78,28 @@ export async function validateDirectoryForWorkspace(
       return {
         resultType: 'alreadyInWorkingDirectory',
         directoryPath,
-        workingDir,
-      }
+        workingDir}
     }
   }
 
   return {
     resultType: 'success',
-    absolutePath,
-  }
+    absolutePath}
 }
 
 export function addDirHelpMessage(result: AddDirectoryResult): string {
   switch (result.resultType) {
     case 'emptyPath':
-      return 'Please provide a directory path.'
+      return t('addDir.emptyPath')
     case 'pathNotFound':
-      return `Path ${chalk.bold(result.absolutePath)} was not found.`
+      return t('addDir.pathNotFound', chalk.bold(result.absolutePath))
     case 'notADirectory': {
       const parentDir = dirname(result.absolutePath)
-      return `${chalk.bold(result.directoryPath)} is not a directory. Did you mean to add the parent directory ${chalk.bold(parentDir)}?`
+      return t('addDir.notADirectory', chalk.bold(result.directoryPath), chalk.bold(parentDir))
     }
     case 'alreadyInWorkingDirectory':
-      return `${chalk.bold(result.directoryPath)} is already accessible within the existing working directory ${chalk.bold(result.workingDir)}.`
+      return t('addDir.alreadyInWorkingDirectory', chalk.bold(result.directoryPath), chalk.bold(result.workingDir))
     case 'success':
-      return `Added ${chalk.bold(result.absolutePath)} as a working directory.`
+      return t('addDir.success', chalk.bold(result.absolutePath))
   }
 }

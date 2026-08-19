@@ -31,8 +31,7 @@ export function parseAutofixArgs(raw: string): ParsedArgs {
       action: 'start',
       owner: cross[1],
       repo: cross[2],
-      prNumber: crossNum,
-    }
+      prNumber: crossNum}
   }
   return { action: 'freeform', prompt: trimmed }
 }

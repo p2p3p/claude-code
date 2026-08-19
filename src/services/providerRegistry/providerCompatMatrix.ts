@@ -45,35 +45,29 @@ export const COMPAT_PROFILES: Record<CompatRule, CompatProfile> = {
     supportsStreamUsageOption: false,
     supportsThinkingField: false,
     reasoningContentEcho: 'strip',
-    toolCallFormat: 'openai-v2',
-  },
+    toolCallFormat: 'openai-v2'},
   groq: {
     supportsStreamUsageOption: false,
     supportsThinkingField: false,
     reasoningContentEcho: 'strip',
-    toolCallFormat: 'openai-v2',
-  },
+    toolCallFormat: 'openai-v2'},
   deepseek: {
     // DeepSeek-reasoner supports reasoning_content and the thinking field.
     // For normal deepseek-chat, thinking field is ignored rather than rejected.
     supportsStreamUsageOption: true,
     supportsThinkingField: true,
     reasoningContentEcho: 'always-preserve',
-    toolCallFormat: 'openai-v2',
-  },
+    toolCallFormat: 'openai-v2'},
   'strict-openai': {
     supportsStreamUsageOption: false,
     supportsThinkingField: false,
     reasoningContentEcho: 'strip',
-    toolCallFormat: 'openai-v2',
-  },
+    toolCallFormat: 'openai-v2'},
   permissive: {
     supportsStreamUsageOption: true,
     supportsThinkingField: true,
     reasoningContentEcho: 'drop-on-non-thinking',
-    toolCallFormat: 'openai-v2',
-  },
-}
+    toolCallFormat: 'openai-v2'}}
 
 /**
  * Determine the DeepSeek reasoning mode based on presence of reasoning_content

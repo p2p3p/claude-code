@@ -9,12 +9,10 @@ import { isEnvTruthy } from '../../utils/envUtils.js'
 import { getWebSocketTLSOptions } from '../../utils/mtls.js'
 import {
   getWebSocketProxyAgent,
-  getWebSocketProxyUrl,
-} from '../../utils/proxy.js'
+  getWebSocketProxyUrl} from '../../utils/proxy.js'
 import {
   registerSessionActivityCallback,
-  unregisterSessionActivityCallback,
-} from '../../utils/sessionActivity.js'
+  unregisterSessionActivityCallback} from '../../utils/sessionActivity.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import type { Transport } from './Transport.js'
 
@@ -163,8 +161,7 @@ export class WebSocketTransport implements Transport {
       const ws = new globalThis.WebSocket(this.url.href, {
         headers,
         proxy: getWebSocketProxyUrl(this.url.href),
-        tls: getWebSocketTLSOptions() || undefined,
-      } as unknown as string[])
+        tls: getWebSocketTLSOptions() || undefined} as unknown as string[])
       this.ws = ws
       this.isBunWs = true
 
@@ -180,8 +177,7 @@ export class WebSocketTransport implements Transport {
       const ws = new WS(this.url.href, {
         headers,
         agent: getWebSocketProxyAgent(this.url.href),
-        ...getWebSocketTLSOptions(),
-      })
+        ...getWebSocketTLSOptions()})
       this.ws = ws
       this.isBunWs = false
 
@@ -213,8 +209,7 @@ export class WebSocketTransport implements Transport {
       typeof event.data === 'string' ? event.data : String(event.data)
     this.lastActivityTime = Date.now()
     logForDiagnosticsNoPII('info', 'cli_websocket_message_received', {
-      length: message.length,
-    })
+      length: message.length})
     if (this.onData) {
       this.onData(message)
     }
@@ -222,8 +217,7 @@ export class WebSocketTransport implements Transport {
 
   private onBunError = () => {
     logForDebugging('WebSocketTransport: Error', {
-      level: 'error',
-    })
+      level: 'error'})
     logForDiagnosticsNoPII('error', 'cli_websocket_connect_error')
     // close event fires after error — let it call handleConnectionError
   }
@@ -263,8 +257,7 @@ export class WebSocketTransport implements Transport {
     const message = data.toString()
     this.lastActivityTime = Date.now()
     logForDiagnosticsNoPII('info', 'cli_websocket_message_received', {
-      length: message.length,
-    })
+      length: message.length})
     if (this.onData) {
       this.onData(message)
     }
@@ -272,8 +265,7 @@ export class WebSocketTransport implements Transport {
 
   private onNodeError = (err: Error) => {
     logForDebugging(`WebSocketTransport: Error: ${err.message}`, {
-      level: 'error',
-    })
+      level: 'error'})
     logForDiagnosticsNoPII('error', 'cli_websocket_connect_error')
     // close event fires after error — let it call handleConnectionError
   }
@@ -298,16 +290,14 @@ export class WebSocketTransport implements Transport {
     const connectDuration = Date.now() - this.connectStartTime
     logForDebugging('WebSocketTransport: Connected')
     logForDiagnosticsNoPII('info', 'cli_websocket_connect_connected', {
-      duration_ms: connectDuration,
-    })
+      duration_ms: connectDuration})
 
     // Reconnect success — capture attempt count + downtime before resetting.
     // reconnectStartTime is null on first connect, non-null on reopen.
     if (this.isBridge && this.reconnectStartTime !== null) {
       logEvent('tengu_ws_transport_reconnected', {
         attempts: this.reconnectAttempts,
-        downtimeMs: Date.now() - this.reconnectStartTime,
-      })
+        downtimeMs: Date.now() - this.reconnectStartTime})
     }
 
     this.reconnectAttempts = 0
@@ -342,8 +332,7 @@ export class WebSocketTransport implements Transport {
       return true
     } catch (error) {
       logForDebugging(`WebSocketTransport: Failed to send: ${error}`, {
-        level: 'error',
-      })
+        level: 'error'})
       logForDiagnosticsNoPII('error', 'cli_websocket_send_error')
       // Don't null this.ws here — let doDisconnect() (via handleConnectionError)
       // handle cleanup so listeners are removed before the WS is released.
@@ -421,8 +410,7 @@ export class WebSocketTransport implements Transport {
         // connect-rejection mid-storm. State isn't mutated until the branches
         // below, so this reads the pre-close value.
         wasConnected: this.state === 'connected',
-        reconnectAttempts: this.reconnectAttempts,
-      })
+        reconnectAttempts: this.reconnectAttempts})
     }
     this.doDisconnect()
 
@@ -442,6 +430,17 @@ export class WebSocketTransport implements Transport {
           'WebSocketTransport: 4003 received but headers refreshed, scheduling reconnect',
         )
         logForDiagnosticsNoPII('info', 'cli_websocket_4003_token_refreshed')
+      } else if (freshHeaders.Authorization) {
+        // API key / permanent token: the value didn't change but the
+        // caller explicitly provided a refresh mechanism — trust it and
+        // re-apply so the reconnect attempt uses the same (valid) key.
+        Object.assign(this.headers, freshHeaders)
+        headersRefreshed = true
+        logForDebugging(
+          'WebSocketTransport: 4003 received, refreshHeaders returned same Authorization (permanent key), scheduling reconnect anyway',
+        )
+        logForDiagnosticsNoPII('info', 'cli_websocket_4003_token_stable_retry', {
+          hasAuth: true})
       }
     }
 
@@ -455,8 +454,7 @@ export class WebSocketTransport implements Transport {
         { level: 'error' },
       )
       logForDiagnosticsNoPII('error', 'cli_websocket_permanent_close', {
-        closeCode,
-      })
+        closeCode})
       this.state = 'closed'
       this.onCloseCallback?.(closeCode)
       return
@@ -489,8 +487,7 @@ export class WebSocketTransport implements Transport {
         `WebSocketTransport: Detected system sleep (${Math.round((now - this.lastReconnectAttemptTime) / 1000)}s gap), resetting reconnection budget`,
       )
       logForDiagnosticsNoPII('info', 'cli_websocket_sleep_detected', {
-        gapMs: now - this.lastReconnectAttemptTime,
-      })
+        gapMs: now - this.lastReconnectAttemptTime})
       this.reconnectStartTime = now
       this.reconnectAttempts = 0
     }
@@ -529,14 +526,12 @@ export class WebSocketTransport implements Transport {
         `WebSocketTransport: Reconnecting in ${Math.round(delay)}ms (attempt ${this.reconnectAttempts}, ${Math.round(elapsed / 1000)}s elapsed)`,
       )
       logForDiagnosticsNoPII('error', 'cli_websocket_reconnect_attempt', {
-        reconnectAttempts: this.reconnectAttempts,
-      })
+        reconnectAttempts: this.reconnectAttempts})
       if (this.isBridge) {
         logEvent('tengu_ws_transport_reconnecting', {
           attempt: this.reconnectAttempts,
           elapsedMs: elapsed,
-          delayMs: Math.round(delay),
-        })
+          delayMs: Math.round(delay)})
       }
 
       this.reconnectTimer = setTimeout(() => {
@@ -550,8 +545,7 @@ export class WebSocketTransport implements Transport {
       )
       logForDiagnosticsNoPII('error', 'cli_websocket_reconnect_exhausted', {
         reconnectAttempts: this.reconnectAttempts,
-        elapsedMs: elapsed,
-      })
+        elapsedMs: elapsed})
       this.state = 'closed'
 
       // Notify close callback
@@ -607,8 +601,7 @@ export class WebSocketTransport implements Transport {
           'cli_websocket_evicted_confirmed_messages',
           {
             evicted: startIndex,
-            remaining: remaining.length,
-          },
+            remaining: remaining.length},
         )
       }
     }
@@ -624,8 +617,7 @@ export class WebSocketTransport implements Transport {
       `WebSocketTransport: Replaying ${messagesToReplay.length} buffered messages`,
     )
     logForDiagnosticsNoPII('info', 'cli_websocket_messages_to_replay', {
-      count: messagesToReplay.length,
-    })
+      count: messagesToReplay.length})
 
     for (const message of messagesToReplay) {
       const line = jsonStringify(message) + '\n'
@@ -757,8 +749,7 @@ export class WebSocketTransport implements Transport {
           this.ws.ping?.()
         } catch (error) {
           logForDebugging(`WebSocketTransport: Ping failed: ${error}`, {
-            level: 'error',
-          })
+            level: 'error'})
           logForDiagnosticsNoPII('error', 'cli_websocket_ping_failed')
         }
       }

@@ -1,8 +1,7 @@
 import {
   expandPastedTextRefs,
   formatPastedTextRef,
-  getPastedTextRefNumLines,
-} from '../history.js'
+  getPastedTextRefNumLines} from '../history.js'
 import { instances } from '@anthropic/ink'
 import type { PastedContent } from './config.js'
 import { classifyGuiEditor, getExternalEditor } from './editor.js'
@@ -67,8 +66,7 @@ export function editFileInEditor(filePath: string): EditorResult {
     // Use override command if available, otherwise use the editor as-is
     const editorCommand = EDITOR_OVERRIDES[editor] ?? editor
     execSync_DEPRECATED(`${editorCommand} "${filePath}"`, {
-      stdio: 'inherit',
-    })
+      stdio: 'inherit'})
 
     // Read the edited content
     const editedContent = fs.readFileSync(filePath, { encoding: 'utf-8' })
@@ -85,8 +83,7 @@ export function editFileInEditor(filePath: string): EditorResult {
         const editorName = toIDEDisplayName(editor)
         return {
           content: null,
-          error: `${editorName} exited with code ${status}`,
-        }
+          error: `${editorName} exited with code ${status}`}
       }
     }
     return { content: null }
@@ -151,8 +148,7 @@ export function editPromptInEditor(
     // Write expanded prompt to temp file
     writeFileSync_DEPRECATED(tempFile, expandedPrompt, {
       encoding: 'utf-8',
-      flush: true,
-    })
+      flush: true})
 
     // Delegate to editFileInEditor
     const result = editFileInEditor(tempFile)

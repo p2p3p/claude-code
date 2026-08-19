@@ -10,25 +10,21 @@ import memoize from 'lodash-es/memoize.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import type { Tool } from '../Tool.js'
 import {
   type ToolPermissionContext,
   type Tools,
-  toolMatchesName,
-} from '../Tool.js'
+  toolMatchesName} from '../Tool.js'
 import type { AgentDefinition } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import {
   formatDeferredToolLine,
   isDeferredTool,
-  SEARCH_EXTRA_TOOLS_TOOL_NAME,
-} from '@claude-code-best/builtin-tools/tools/SearchExtraToolsTool/prompt.js'
+  SEARCH_EXTRA_TOOLS_TOOL_NAME} from '@claude-code-best/builtin-tools/tools/SearchExtraToolsTool/prompt.js'
 import type { Message } from '../types/message.js'
 import {
   countToolDefinitionTokens,
-  TOOL_TOKEN_COUNT_OVERHEAD,
-} from './analyzeContext.js'
+  TOOL_TOKEN_COUNT_OVERHEAD} from './analyzeContext.js'
 import { count } from './array.js'
 import { getMergedBetas } from './betas.js'
 import { getContextWindowForModel } from './context.js'
@@ -261,8 +257,7 @@ async function calculateDeferredToolDescriptionChars(
       const description = await tool.prompt({
         getToolPermissionContext,
         tools,
-        agents,
-      })
+        agents})
       const inputSchema = tool.inputJSONSchema
         ? jsonStringify(tool.inputJSONSchema)
         : tool.inputSchema
@@ -322,8 +317,7 @@ export async function isSearchExtraToolsEnabled(
       mcpToolCount,
       userType: (process.env.USER_TYPE ??
         'external') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      ...extraProps,
-    })
+      ...extraProps})
   }
 
   // Tool search is enabled uniformly regardless of provider or model.
@@ -659,14 +653,12 @@ export function getDeferredToolsDelta(
       'unknown') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     attachmentTypesSeen: [...attachmentTypesSeen]
       .sort()
-      .join(',') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      .join(',') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
   return {
     addedNames: added.map(t => t.name).sort(),
     addedLines: added.map(formatDeferredToolLine).sort(),
-    removedNames: removed.sort(),
-  }
+    removedNames: removed.sort()}
 }
 
 /**
@@ -698,8 +690,7 @@ async function checkAutoThreshold(
       debugDescription:
         `${deferredToolTokens} tokens (threshold: ${threshold}, ` +
         `${getAutoSearchExtraToolsPercentage()}% of context)`,
-      metrics: { deferredToolTokens, threshold },
-    }
+      metrics: { deferredToolTokens, threshold }}
   }
 
   // Fallback: character-based heuristic when token API is unavailable
@@ -715,6 +706,5 @@ async function checkAutoThreshold(
     debugDescription:
       `${deferredToolDescriptionChars} chars (threshold: ${charThreshold}, ` +
       `${getAutoSearchExtraToolsPercentage()}% of context) (char fallback)`,
-    metrics: { deferredToolDescriptionChars, charThreshold },
-  }
+    metrics: { deferredToolDescriptionChars, charThreshold }}
 }

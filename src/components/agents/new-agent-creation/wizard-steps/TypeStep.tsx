@@ -2,6 +2,7 @@ import { type ReactNode, useState } from 'react';
 import { Box, Byline, KeyboardShortcutHint, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js';
 import type { AgentDefinition } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js';
+import { t } from '../../../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import TextInput from '../../../TextInput.js';
 import { useWizard } from '../../../wizard/index.js';
@@ -39,23 +40,23 @@ export function TypeStep(_props: Props): ReactNode {
 
   return (
     <WizardDialogLayout
-      subtitle="Agent type (identifier)"
+      subtitle={t('typestep.agentTypeIdentifier')}
       footerText={
         <Byline>
-          <KeyboardShortcutHint shortcut="Type" action="enter text" />
-          <KeyboardShortcutHint shortcut="Enter" action="continue" />
-          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="go back" />
+          <KeyboardShortcutHint shortcut="Type" action={t('shortcutHint.enterText')} />
+          <KeyboardShortcutHint shortcut="Enter" action={t('shortcutHint.continue')} />
+          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.goBack')} />
         </Byline>
       }
     >
       <Box flexDirection="column">
-        <Text>Enter a unique identifier for your agent:</Text>
+        <Text>{t('typestep.enterAUniqueIdentifierForYourAgent')}</Text>
         <Box marginTop={1}>
           <TextInput
             value={agentType}
             onChange={setAgentType}
             onSubmit={handleSubmit}
-            placeholder="e.g., test-runner, tech-lead, etc"
+            placeholder={t('typestep.placeholder')}
             columns={60}
             cursorOffset={cursorOffset}
             onChangeCursorOffset={setCursorOffset}

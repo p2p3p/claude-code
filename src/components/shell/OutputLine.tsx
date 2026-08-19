@@ -56,8 +56,7 @@ export function OutputLine({
   verbose,
   isError,
   isWarning,
-  linkifyUrls,
-}: {
+  linkifyUrls}: {
   content: string;
   verbose: boolean;
   isError?: boolean;

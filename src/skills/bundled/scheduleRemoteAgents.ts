@@ -9,15 +9,13 @@ import { checkRepoForRemoteAccess } from '../../utils/background/remote/precondi
 import { logForDebugging } from '../../utils/debug.js'
 import {
   detectCurrentRepositoryWithHost,
-  parseGitRemote,
-} from '../../utils/detectRepository.js'
+  parseGitRemote} from '../../utils/detectRepository.js'
 import { getRemoteUrl } from '../../utils/git.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import {
   createDefaultCloudEnvironment,
   type EnvironmentResource,
-  fetchEnvironments,
-} from '../../utils/teleport/environments.js'
+  fetchEnvironments} from '../../utils/teleport/environments.js'
 import { registerBundledSkill } from '../bundledSkills.js'
 
 // Base58 alphabet (Bitcoin-style) used by the tagged ID system
@@ -80,8 +78,7 @@ function getConnectedClaudeAIConnectors(
     connectors.push({
       uuid,
       name: client.name,
-      url: client.config.url,
-    })
+      url: client.config.url})
   }
   return connectors
 }
@@ -150,8 +147,7 @@ function buildPrompt(opts: {
     createdEnvironment,
     setupNotes,
     needsGitHubAccessReminder,
-    userArgs,
-  } = opts
+    userArgs} = opts
   // When the user passes args, the initial AskUserQuestion dialog is skipped.
   // Setup notes must surface in the prompt body instead, otherwise they're
   // computed and silently discarded (regression vs. the old hard-block).
@@ -338,8 +334,7 @@ export function registerScheduleRemoteAgentsSkill(): void {
         return [
           {
             type: 'text',
-            text: 'You need to authenticate with a claude.ai account first. API accounts are not supported. Run /login, then try /schedule again.',
-          },
+            text: 'You need to authenticate with a claude.ai account first. API accounts are not supported. Run /login, then try /schedule again.'},
         ]
       }
 
@@ -348,13 +343,11 @@ export function registerScheduleRemoteAgentsSkill(): void {
         environments = await fetchEnvironments()
       } catch (err) {
         logForDebugging(`[schedule] Failed to fetch environments: ${err}`, {
-          level: 'warn',
-        })
+          level: 'warn'})
         return [
           {
             type: 'text',
-            text: "We're having trouble connecting with your remote claude.ai account to set up a scheduled task. Please try /schedule again in a few minutes.",
-          },
+            text: "We're having trouble connecting with your remote claude.ai account to set up a scheduled task. Please try /schedule again in a few minutes."},
         ]
       }
 
@@ -367,13 +360,11 @@ export function registerScheduleRemoteAgentsSkill(): void {
           environments = [createdEnvironment]
         } catch (err) {
           logForDebugging(`[schedule] Failed to create environment: ${err}`, {
-            level: 'warn',
-          })
+            level: 'warn'})
           return [
             {
               type: 'text',
-              text: 'No remote environments found, and we could not create one automatically. Visit https://claude.ai/code to set one up, then run /schedule again.',
-            },
+              text: 'No remote environments found, and we could not create one automatically. Visit https://claude.ai/code to set one up, then run /schedule again.'},
           ]
         }
       }
@@ -439,9 +430,7 @@ export function registerScheduleRemoteAgentsSkill(): void {
         createdEnvironment,
         setupNotes,
         needsGitHubAccessReminder,
-        userArgs: args,
-      })
+        userArgs: args})
       return [{ type: 'text', text: prompt }]
-    },
-  })
+    }})
 }

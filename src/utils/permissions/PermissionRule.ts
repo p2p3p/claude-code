@@ -4,8 +4,7 @@ import type {
   PermissionBehavior,
   PermissionRule,
   PermissionRuleSource,
-  PermissionRuleValue,
-} from '../../types/permissions.js'
+  PermissionRuleValue} from '../../types/permissions.js'
 import { lazySchema } from '../lazySchema.js'
 
 // Re-export for backwards compatibility
@@ -13,8 +12,7 @@ export type {
   PermissionBehavior,
   PermissionRule,
   PermissionRuleSource,
-  PermissionRuleValue,
-}
+  PermissionRuleValue}
 
 /**
  * ToolPermissionBehavior is the behavior associated with a permission rule.
@@ -35,6 +33,5 @@ export const permissionBehaviorSchema = lazySchema(() =>
 export const permissionRuleValueSchema = lazySchema(() =>
   z.object({
     toolName: z.string(),
-    ruleContent: z.string().optional(),
-  }),
+    ruleContent: z.string().optional()}),
 )

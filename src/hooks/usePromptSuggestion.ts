@@ -2,8 +2,7 @@ import { useCallback, useRef } from 'react'
 import { useTerminalFocus } from '@anthropic/ink'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import { abortSpeculation } from '../services/PromptSuggestion/speculation.js'
 import { useAppState, useSetAppState } from '../state/AppState.js'
 
@@ -14,8 +13,7 @@ type Props = {
 
 export function usePromptSuggestion({
   inputValue,
-  isAssistantResponding,
-}: Props): {
+  isAssistantResponding}: Props): {
   suggestion: string | null
   markAccepted: () => void
   markShown: () => void
@@ -32,8 +30,7 @@ export function usePromptSuggestion({
     promptId,
     shownAt,
     acceptedAt,
-    generationRequestId,
-  } = promptSuggestion
+    generationRequestId} = promptSuggestion
 
   const suggestion =
     isAssistantResponding || inputValue.length > 0 ? null : suggestionText
@@ -73,9 +70,7 @@ export function usePromptSuggestion({
         promptId: null,
         shownAt: 0,
         acceptedAt: 0,
-        generationRequestId: null,
-      },
-    }))
+        generationRequestId: null}}))
   }, [setAppState])
 
   const markAccepted = useCallback(() => {
@@ -84,9 +79,7 @@ export function usePromptSuggestion({
       ...prev,
       promptSuggestion: {
         ...prev.promptSuggestion,
-        acceptedAt: Date.now(),
-      },
-    }))
+        acceptedAt: Date.now()}}))
   }, [isValidSuggestion, setAppState])
 
   const markShown = useCallback(() => {
@@ -101,9 +94,7 @@ export function usePromptSuggestion({
         ...prev,
         promptSuggestion: {
           ...prev.promptSuggestion,
-          shownAt: Date.now(),
-        },
-      }
+          shownAt: Date.now()}}
     })
   }, [setAppState])
 
@@ -127,22 +118,17 @@ export function usePromptSuggestion({
           promptId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         ...(generationRequestId && {
           generationRequestId:
-            generationRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }),
+            generationRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
         ...(wasAccepted && {
           acceptMethod: (tabWasPressed
             ? 'tab'
-            : 'enter') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }),
+            : 'enter') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
         ...(wasAccepted && {
-          timeToAcceptMs: timeMs - shownAt,
-        }),
+          timeToAcceptMs: timeMs - shownAt}),
         ...(!wasAccepted && {
-          timeToIgnoreMs: timeMs - shownAt,
-        }),
+          timeToIgnoreMs: timeMs - shownAt}),
         ...(firstKeystrokeAt.current > 0 && {
-          timeToFirstKeystrokeMs: firstKeystrokeAt.current - shownAt,
-        }),
+          timeToFirstKeystrokeMs: firstKeystrokeAt.current - shownAt}),
         wasFocusedWhenShown: wasFocusedWhenShown.current,
         similarity:
           Math.round(
@@ -152,9 +138,7 @@ export function usePromptSuggestion({
           suggestion:
             suggestionText as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           userInput:
-            finalInput as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }),
-      })
+            finalInput as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})})
       if (!opts?.skipReset) resetSuggestion()
     },
     [
@@ -172,6 +156,5 @@ export function usePromptSuggestion({
     suggestion,
     markAccepted,
     markShown,
-    logOutcomeAtSubmission,
-  }
+    logOutcomeAtSubmission}
 }

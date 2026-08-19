@@ -7,8 +7,7 @@ import { lazySchema } from '../../utils/lazySchema.js'
  */
 export const PolicyLimitsResponseSchema = lazySchema(() =>
   z.object({
-    restrictions: z.record(z.string(), z.object({ allowed: z.boolean() })),
-  }),
+    restrictions: z.record(z.string(), z.object({ allowed: z.boolean() }))}),
 )
 
 export type PolicyLimitsResponse = z.infer<

@@ -26,6 +26,7 @@ import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import { count } from '../../utils/array.js';
 import { plural } from '../../utils/stringUtils.js';
 import { Divider } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 
 type Props = {
   tools: Tools;
@@ -64,28 +65,23 @@ function getToolBuckets(): ToolBuckets {
         TaskOutputTool.name,
         ListMcpResourcesTool.name,
         ReadMcpResourceTool.name,
-      ]),
-    },
+      ])},
     EDIT: {
       name: 'Edit tools',
-      toolNames: new Set([FileEditTool.name, FileWriteTool.name, NotebookEditTool.name]),
-    },
+      toolNames: new Set([FileEditTool.name, FileWriteTool.name, NotebookEditTool.name])},
     EXECUTION: {
       name: 'Execution tools',
       toolNames: new Set(
         [BashTool.name, process.env.USER_TYPE === 'ant' ? TungstenTool.name : undefined].filter(n => n !== undefined),
-      ),
-    },
+      )},
     MCP: {
       name: 'MCP tools',
       toolNames: new Set(), // Dynamic - no static list
-      isMcp: true,
-    },
+      isMcp: true},
     OTHER: {
       name: 'Other tools',
       toolNames: new Set(), // Dynamic - catch-all for uncategorized tools
-    },
-  };
+    }};
 }
 
 // Helper to get MCP server buckets dynamically
@@ -171,8 +167,7 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
       edit: [] as Tool[],
       execution: [] as Tool[],
       mcp: [] as Tool[],
-      other: [] as Tool[],
-    };
+      other: [] as Tool[]};
 
     customAgentTools.forEach(tool => {
       // Check if it's an MCP tool first
@@ -216,10 +211,9 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
   // Continue button
   navigableItems.push({
     id: 'continue',
-    label: 'Continue',
+    label: t('toolSelector.continue'),
     action: handleConfirm,
-    isContinue: true,
-  });
+    isContinue: true});
 
   // All tools
   navigableItems.push({
@@ -228,8 +222,7 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
     action: () => {
       const allToolNames = customAgentTools.map(t => t.name);
       handleToggleTools(allToolNames, !isAllSelected);
-    },
-  });
+    }});
 
   // Create bucket menu items
   const toolBuckets = getToolBuckets();
@@ -237,28 +230,23 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
     {
       id: 'bucket-readonly',
       name: toolBuckets.READ_ONLY.name,
-      tools: toolsByBucket.readOnly,
-    },
+      tools: toolsByBucket.readOnly},
     {
       id: 'bucket-edit',
       name: toolBuckets.EDIT.name,
-      tools: toolsByBucket.edit,
-    },
+      tools: toolsByBucket.edit},
     {
       id: 'bucket-execution',
       name: toolBuckets.EXECUTION.name,
-      tools: toolsByBucket.execution,
-    },
+      tools: toolsByBucket.execution},
     {
       id: 'bucket-mcp',
       name: toolBuckets.MCP.name,
-      tools: toolsByBucket.mcp,
-    },
+      tools: toolsByBucket.mcp},
     {
       id: 'bucket-other',
       name: toolBuckets.OTHER.name,
-      tools: toolsByBucket.other,
-    },
+      tools: toolsByBucket.other},
   ];
 
   bucketConfigs.forEach(({ id, name, tools: bucketTools }) => {
@@ -270,15 +258,14 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
     navigableItems.push({
       id,
       label: `${isFullySelected ? figures.checkboxOn : figures.checkboxOff} ${name}`,
-      action: createBucketToggleAction(bucketTools),
-    });
+      action: createBucketToggleAction(bucketTools)});
   });
 
   // Toggle button for individual tools
   const toggleButtonIndex = navigableItems.length;
   navigableItems.push({
     id: 'toggle-individual',
-    label: showIndividualTools ? 'Hide advanced options' : 'Show advanced options',
+    label: showIndividualTools ? t('ui.hideAdvancedOptions') : t('ui.showAdvancedOptions'),
     action: () => {
       setShowIndividualTools(!showIndividualTools);
       // If hiding tools and focus is on an individual tool, move focus to toggle button
@@ -286,8 +273,7 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
         setFocusIndex(toggleButtonIndex);
       }
     },
-    isToggle: true,
-  });
+    isToggle: true});
 
   // Memoize MCP server buckets (must be outside conditional for hooks rules)
   const mcpServerBuckets = useMemo(() => getMcpServerBuckets(customAgentTools), [customAgentTools]);
@@ -298,10 +284,9 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
     if (mcpServerBuckets.length > 0) {
       navigableItems.push({
         id: 'mcp-servers-header',
-        label: 'MCP Servers:',
+        label: t('toolSelector.mcpServers'),
         action: () => {}, // No action - just a header
-        isHeader: true,
-      });
+        isHeader: true});
 
       mcpServerBuckets.forEach(({ serverName, tools: serverTools }) => {
         const selected = count(serverTools, t => selectedSet.has(t.name));
@@ -313,17 +298,15 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
           action: () => {
             const toolNames = serverTools.map(t => t.name);
             handleToggleTools(toolNames, !isFullySelected);
-          },
-        });
+          }});
       });
 
       // Add separator header before individual tools
       navigableItems.push({
         id: 'tools-header',
-        label: 'Individual Tools:',
+        label: t('toolSelector.individualTools'),
         action: () => {},
-        isHeader: true,
-      });
+        isHeader: true});
     }
 
     // Add individual tools
@@ -337,8 +320,7 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
       navigableItems.push({
         id: `tool-${tool.name}`,
         label: `${selectedSet.has(tool.name) ? figures.checkboxOn : figures.checkboxOff} ${displayName}`,
-        action: () => handleToggleTool(tool.name),
-      });
+        action: () => handleToggleTool(tool.name)});
     });
   }
 
@@ -416,7 +398,7 @@ export function ToolSelector({ tools, initialTools, onComplete, onCancel }: Prop
 
       <Box marginTop={1} flexDirection="column">
         <Text dimColor>
-          {isAllSelected ? 'All tools selected' : `${selectedSet.size} of ${customAgentTools.length} tools selected`}
+          {isAllSelected ? t('ui.allToolsSelected') : t('ui.toolsSelectedCount', selectedSet.size, customAgentTools.length)}
         </Text>
       </Box>
     </Box>

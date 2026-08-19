@@ -5,6 +5,7 @@ import { Box, Text } from '@anthropic/ink';
 import { count } from '../utils/array.js';
 import { MessageResponse } from './MessageResponse.js';
 import { StructuredDiffList } from './StructuredDiffList.js';
+import { t } from '../utils/i18n/index.js';
 
 type Props = {
   filePath: string;
@@ -23,8 +24,7 @@ export function FileEditToolUpdatedMessage({
   fileContent,
   style,
   verbose,
-  previewHint,
-}: Props): React.ReactNode {
+  previewHint}: Props): React.ReactNode {
   const { columns } = useTerminalSize();
   const numAdditions = structuredPatch.reduce((acc, hunk) => acc + count(hunk.lines, _ => _.startsWith('+')), 0);
   const numRemovals = structuredPatch.reduce((acc, hunk) => acc + count(hunk.lines, _ => _.startsWith('-')), 0);
@@ -33,13 +33,13 @@ export function FileEditToolUpdatedMessage({
     <Text>
       {numAdditions > 0 ? (
         <>
-          Added <Text bold>{numAdditions}</Text> {numAdditions > 1 ? 'lines' : 'line'}
+          {t('toolUI.fileEditToolUpdated.added')} <Text bold>{numAdditions}</Text> {t('toolUI.fileEditToolUpdated.lineOrLines', numAdditions)}
         </>
       ) : null}
-      {numAdditions > 0 && numRemovals > 0 ? ', ' : null}
+      {numAdditions > 0 && numRemovals > 0 ? t('toolUI.fileEditToolUpdated.separator') : null}
       {numRemovals > 0 ? (
         <>
-          {numAdditions === 0 ? 'R' : 'r'}emoved <Text bold>{numRemovals}</Text> {numRemovals > 1 ? 'lines' : 'line'}
+          {t('toolUI.fileEditToolUpdated.removed', numAdditions)} <Text bold>{numRemovals}</Text> {t('toolUI.fileEditToolUpdated.lineOrLines', numRemovals)}
         </>
       ) : null}
     </Text>

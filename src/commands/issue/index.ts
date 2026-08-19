@@ -3,25 +3,23 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
-  writeFileSync,
-} from 'node:fs'
+  writeFileSync} from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import type { Command, LocalCommandResult } from '../../types/command.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import {
   getSessionId,
   getSessionProjectDir,
-  getOriginalCwd,
-} from '../../bootstrap/state.js'
+  getOriginalCwd} from '../../bootstrap/state.js'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
 import { sanitizePath } from '../../utils/path.js'
 
 import * as childProcess from 'node:child_process'
 import { promisify } from 'node:util'
+import { t } from '../../utils/i18n/index.js'
 
 // Re-resolved at call time via namespace import so that test runners using
 // mock.module('node:child_process') see the replacement.
@@ -49,8 +47,7 @@ function tryDetectGitRemoteUrl(): string | null {
   try {
     const out = execFileSyncFn('git', ['remote', 'get-url', 'origin'], {
       stdio: ['ignore', 'pipe', 'ignore'],
-      timeout: 3000,
-    })
+      timeout: 3000})
     return out.toString().trim() || null
   } catch {
     return null
@@ -73,8 +70,7 @@ function ghCliAvailable(): boolean {
   try {
     execFileSyncFn('gh', ['--version'], {
       stdio: ['ignore', 'pipe', 'ignore'],
-      timeout: 3000,
-    })
+      timeout: 3000})
     return true
   } catch {
     return false
@@ -146,7 +142,7 @@ function getTranscriptSummary(maxTurns = 5): string {
           sanitizePath(getOriginalCwd()),
           `${sessionId}.jsonl`,
         )
-    if (!existsSync(logPath)) return '(no session log found)'
+    if (!existsSync(logPath)) return t('issueCmd.noSessionLogFound')
     const lines = readFileSync(logPath, 'utf8')
       .trim()
       .split('\n')
@@ -195,14 +191,14 @@ function getTranscriptSummary(maxTurns = 5): string {
     let result =
       recentParts.length > 0
         ? recentParts.join('\n')
-        : '(no conversation content in log)'
+        : t('issueCmd.noConversationContent')
 
     if (errors.length > 0) {
-      result += '\n\n### Recent errors\n' + errors.slice(-3).join('\n')
+      result += t('issueCmd.recentErrorsHeader') + errors.slice(-3).join('\n')
     }
     return result
   } catch {
-    return '(could not read session log)'
+    return t('issueCmd.couldNotReadSessionLog')
   }
 }
 
@@ -239,8 +235,7 @@ function parseIssueArgs(args: string): IssueOptions {
           labels: [],
           assignees: [],
           valid: false,
-          parseError: `--label requires a value`,
-        }
+          parseError: t('issueCmd.labelRequiresValue')}
       }
       labels.push(next)
       i += 2
@@ -252,8 +247,7 @@ function parseIssueArgs(args: string): IssueOptions {
           labels: [],
           assignees: [],
           valid: false,
-          parseError: `--assignee requires a value`,
-        }
+          parseError: t('issueCmd.assigneeRequiresValue')}
       }
       assignees.push(next)
       i += 2
@@ -263,8 +257,7 @@ function parseIssueArgs(args: string): IssueOptions {
         labels: [],
         assignees: [],
         valid: false,
-        parseError: `Unknown flag: ${parts[i]}`,
-      }
+        parseError: t('issueCmd.unknownFlag', parts[i])}
     } else {
       titleParts.push(parts[i])
       i++
@@ -275,15 +268,13 @@ function parseIssueArgs(args: string): IssueOptions {
     title: titleParts.join(' '),
     labels,
     assignees,
-    valid: true,
-  }
+    valid: true}
 }
 
 const issue: Command = {
   type: 'local',
   name: 'issue',
-  description:
-    'Create a GitHub issue via gh CLI. Flags: --label <label>, --assignee <user>',
+  description: t('cmd.descIssue'),
   isHidden: false,
   isEnabled: () => true,
   supportsNonInteractive: true,
@@ -296,13 +287,12 @@ const issue: Command = {
         return {
           type: 'text',
           value: [
-            `Error: ${opts.parseError}`,
+            t('issueCmd.errorPrefix', opts.parseError ?? ''),
             '',
-            'Usage: /issue [--label <label>] [--assignee <user>] <title>',
+            t('issueCmd.usageLine'),
             '',
-            '  Example: /issue --label bug --assignee alice Fix login when token expires',
-          ].join('\n'),
-        }
+            t('issueCmd.usageExample'),
+          ].join('\n')}
       }
 
       const { title, labels, assignees } = opts
@@ -315,24 +305,23 @@ const issue: Command = {
       if (!title) {
         const urlHint = parsed
           ? `https://github.com/${parsed.owner}/${parsed.repo}/issues/new`
-          : '(no GitHub remote detected)'
+          : t('issueCmd.noRemoteDetected')
         return {
           type: 'text',
           value: [
-            'Usage: /issue [--label <label>] [--assignee <user>] <title>',
+            t('issueCmd.usageLine'),
             '',
-            `  Example: /issue Fix login bug when token expires`,
-            `  Example: /issue --label bug --assignee alice Fix crash on startup`,
+            t('issueCmd.usageExample1'),
+            t('issueCmd.usageExample2'),
             '',
             parsed
-              ? `Repo: ${parsed.owner}/${parsed.repo}`
-              : 'No GitHub remote detected.',
-            `New issue URL: ${urlHint}`,
+              ? t('issueCmd.repoInfo', parsed.owner, parsed.repo)
+              : t('issueCmd.noGitHubRemote'),
+            t('issueCmd.newIssueUrl', urlHint),
             hasGh
-              ? '\n`gh` CLI is available — run /issue <title> to create immediately.'
-              : '\nInstall `gh` CLI (https://cli.github.com/) for one-command issue creation.',
-          ].join('\n'),
-        }
+              ? t('issueCmd.ghAvailable')
+              : t('issueCmd.installGh'),
+          ].join('\n')}
       }
 
       logEvent('tengu_issue_started', {
@@ -344,8 +333,7 @@ const issue: Command = {
         ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         has_labels: String(
           labels.length > 0,
-        ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+        ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
       if (!hasGh || !parsed) {
         // Fallback: provide URL-encoded browser link.
@@ -361,7 +349,7 @@ const issue: Command = {
         if (fullBodyText.length > MAX_URL_BODY) {
           bodyText =
             fullBodyText.slice(0, MAX_URL_BODY) +
-            '\n\n... (truncated, see CLI for full body)'
+            t('issueCmd.truncatedBody')
           try {
             const draftsDir = join(homedir(), '.claude', 'issue-drafts')
             mkdirSync(draftsDir, { recursive: true })
@@ -385,30 +373,25 @@ const issue: Command = {
         const url = parsed
           ? `https://github.com/${parsed.owner}/${parsed.repo}/issues/new?title=${encodedTitle}&body=${body}${labelQuery ? '&' + labelQuery : ''}`
           : null
-        const lines: string[] = ['## File a GitHub issue', '']
+        const lines: string[] = [t('issueCmd.fileGitHubIssue'), '']
         if (url) {
-          lines.push(`Open in browser:\n${url}`)
+          lines.push(t('issueCmd.openInBrowser', url))
           if (draftPath) {
             lines.push('')
-            lines.push(`Full issue body saved to:\n  \`${draftPath}\``)
+            lines.push(t('issueCmd.fullBodySaved', draftPath))
           }
         } else {
-          lines.push('No GitHub remote detected in this directory.')
-          lines.push(
-            'Run from a directory with a GitHub git remote to get a pre-filled URL.',
-          )
+          lines.push(t('issueCmd.noRemoteDetectedDir'))
+          lines.push(t('issueCmd.runFromDirWithRemote'))
         }
         if (!hasGh) {
           lines.push('')
-          lines.push(
-            'Install `gh` CLI (https://cli.github.com/) to create issues without a browser.',
-          )
+          lines.push(t('issueCmd.installGhNoBrowser'))
         }
         logEvent('tengu_issue_fallback', {
           reason: (!hasGh
             ? 'no_gh'
-            : 'no_remote') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            : 'no_remote') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return { type: 'text', value: lines.join('\n') }
       }
 
@@ -417,20 +400,18 @@ const issue: Command = {
       if (hasIssues === false) {
         logEvent('tengu_issue_fallback', {
           reason:
-            'issues_disabled' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            'issues_disabled' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         const discussionUrl = `https://github.com/${parsed.owner}/${parsed.repo}/discussions/new`
         return {
           type: 'text',
           value: [
-            `## Issues are disabled for ${parsed.owner}/${parsed.repo}`,
+            t('issueCmd.issuesDisabled', parsed.owner, parsed.repo),
             '',
-            'The repository has Issues disabled. You can open a Discussion instead:',
+            t('issueCmd.issuesDisabledHint'),
             `  ${discussionUrl}`,
             '',
-            '`gh` does not support creating Discussions from the CLI without an extension.',
-          ].join('\n'),
-        }
+            t('issueCmd.ghNoDiscussions'),
+          ].join('\n')}
       }
 
       // Detect issue template
@@ -439,7 +420,7 @@ const issue: Command = {
       // Build rich body: session context + template (if present) + errors
       const sessionSummary = getTranscriptSummary(5)
       const bodyParts: string[] = [
-        '## Context from Claude Code session',
+        t('issueCmd.sessionContextHeader'),
         '',
         sessionSummary,
       ]
@@ -449,7 +430,7 @@ const issue: Command = {
       bodyParts.push(
         '',
         '---',
-        '_Created via `/issue` command in Claude Code._',
+        t('issueCmd.createdViaIssue'),
       )
       const body = bodyParts.join('\n')
 
@@ -477,42 +458,36 @@ const issue: Command = {
           repo: `${parsed.owner}/${parsed.repo}` as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           has_labels: String(
             labels.length > 0,
-          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return {
           type: 'text',
           value: [
-            '## Issue created',
+            t('issueCmd.issueCreated'),
             '',
-            `Title: ${title}`,
-            `URL:   ${issueUrl}`,
-            labels.length > 0 ? `Labels: ${labels.join(', ')}` : '',
-            assignees.length > 0 ? `Assignees: ${assignees.join(', ')}` : '',
+            t('issueCmd.issueTitle', title),
+            t('issueCmd.issueUrl', issueUrl),
+            labels.length > 0 ? t('issueCmd.issueLabels', labels.join(', ')) : '',
+            assignees.length > 0 ? t('issueCmd.issueAssignees', assignees.join(', ')) : '',
           ]
             .filter(l => l !== '')
-            .join('\n'),
-        }
+            .join('\n')}
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err)
         logEvent('tengu_issue_failed', {
           error: msg.slice(
             0,
             200,
-          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
         return {
           type: 'text',
           value: [
-            '## Failed to create issue',
+            t('issueCmd.failedToCreate'),
             '',
-            `Error: ${msg}`,
+            t('issueCmd.issueError', msg),
             '',
-            'Make sure you are logged in: `gh auth login`',
-          ].join('\n'),
-        }
+            t('issueCmd.makeSureLoggedIn'),
+          ].join('\n')}
       }
-    },
-  }),
-}
+    }})}
 
 export default issue

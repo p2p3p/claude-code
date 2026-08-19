@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { logError } from 'src/utils/log.js';
 import { getOriginalCwd } from '../../../bootstrap/state.js';
+import { t } from '../../../utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import { sanitizeToolNameForAnalytics } from '../../../services/analytics/metadata.js';
 import { SKILL_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/SkillTool/constants.js';
@@ -40,8 +41,7 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
   const unaryEvent = useMemo<UnaryEvent>(
     () => ({
       completion_type: 'tool_use_single',
-      language_name: 'none',
-    }),
+      language_name: 'none'}),
     [],
   );
 
@@ -52,10 +52,9 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
   const options = useMemo((): PermissionPromptOption<SkillOptionValue>[] => {
     const baseOptions: PermissionPromptOption<SkillOptionValue>[] = [
       {
-        label: 'Yes',
+        label: t('skillPermission.yes'),
         value: 'yes',
-        feedbackConfig: { type: 'accept' },
-      },
+        feedbackConfig: { type: 'accept' }},
     ];
 
     // Only add "always allow" options when not restricted by allowManagedPermissionRulesOnly
@@ -65,11 +64,10 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
       alwaysAllowOptions.push({
         label: (
           <Text>
-            Yes, and don&apos;t ask again for <Text bold>{skill}</Text> in <Text bold>{originalCwd}</Text>
+            {t('skillPermission.yesDontAsk', skill, originalCwd)}
           </Text>
         ),
-        value: 'yes-exact',
-      });
+        value: 'yes-exact'});
 
       // Add prefix option if the skill has arguments
       const spaceIndex = skill.indexOf(' ');
@@ -78,20 +76,17 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
         alwaysAllowOptions.push({
           label: (
             <Text>
-              Yes, and don&apos;t ask again for <Text bold>{commandPrefix + ':*'}</Text> commands in{' '}
-              <Text bold>{originalCwd}</Text>
+              {t('skillPermission.yesPrefix', commandPrefix + ':*', originalCwd)}
             </Text>
           ),
-          value: 'yes-prefix',
-        });
+          value: 'yes-prefix'});
       }
     }
 
     const noOption: PermissionPromptOption<SkillOptionValue> = {
-      label: 'No',
+      label: t('skillPermission.no'),
       value: 'no',
-      feedbackConfig: { type: 'reject' },
-    };
+      feedbackConfig: { type: 'reject' }};
 
     return [...baseOptions, ...alwaysAllowOptions, noOption];
   }, [skill, originalCwd, showAlwaysAllowOptions]);
@@ -99,8 +94,7 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
   const toolAnalyticsContext = useMemo(
     (): ToolAnalyticsContext => ({
       toolName: sanitizeToolNameForAnalytics(toolUseConfirm.tool.name),
-      isMcp: toolUseConfirm.tool.isMcp ?? false,
-    }),
+      isMcp: toolUseConfirm.tool.isMcp ?? false}),
     [toolUseConfirm.tool.name, toolUseConfirm.tool.isMcp],
   );
 
@@ -114,9 +108,7 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id!,
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
           toolUseConfirm.onAllow(toolUseConfirm.input, [], feedback);
           onDone();
           break;
@@ -127,9 +119,7 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id!,
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
 
           toolUseConfirm.onAllow(toolUseConfirm.input, [
             {
@@ -137,12 +127,10 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
               rules: [
                 {
                   toolName: SKILL_TOOL_NAME,
-                  ruleContent: skill,
-                },
+                  ruleContent: skill},
               ],
               behavior: 'allow',
-              destination: 'localSettings',
-            },
+              destination: 'localSettings'},
           ]);
           onDone();
           break;
@@ -154,9 +142,7 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id!,
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
 
           // Extract the skill prefix (everything before the first space)
           const spaceIndex = skill.indexOf(' ');
@@ -168,12 +154,10 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
               rules: [
                 {
                   toolName: SKILL_TOOL_NAME,
-                  ruleContent: `${commandPrefix}:*`,
-                },
+                  ruleContent: `${commandPrefix}:*`},
               ],
               behavior: 'allow',
-              destination: 'localSettings',
-            },
+              destination: 'localSettings'},
           ]);
           onDone();
           break;
@@ -185,9 +169,7 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id!,
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
           toolUseConfirm.onReject(feedback);
           onReject();
           onDone();
@@ -204,17 +186,15 @@ export function SkillPermissionRequest(props: PermissionRequestProps): React.Rea
       metadata: {
         language_name: 'none',
         message_id: toolUseConfirm.assistantMessage.message.id!,
-        platform: env.platform,
-      },
-    });
+        platform: env.platform}});
     toolUseConfirm.onReject();
     onReject();
     onDone();
   }, [toolUseConfirm, onDone, onReject]);
 
   return (
-    <PermissionDialog title={`Use skill "${skill}"?`} workerBadge={workerBadge}>
-      <Text>Claude may use instructions, code, or files from this Skill.</Text>
+    <PermissionDialog title={t('skillPermission.title', skill)} workerBadge={workerBadge}>
+      <Text>{t('permission.skillUse')}</Text>
       <Box flexDirection="column" paddingX={2} paddingY={1}>
         <Text dimColor>{commandObj?.description}</Text>
       </Box>

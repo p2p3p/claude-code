@@ -13,18 +13,15 @@ import { FILE_EDIT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileE
 import {
   FileReadTool,
   type Output as FileReadToolOutput,
-  registerFileReadListener,
-} from '@claude-code-best/builtin-tools/tools/FileReadTool/FileReadTool.js'
+  registerFileReadListener} from '@claude-code-best/builtin-tools/tools/FileReadTool/FileReadTool.js'
 import { isFsInaccessible } from '../../utils/errors.js'
 import { cloneFileStateCache } from '../../utils/fileStateCache.js'
 import {
   type REPLHookContext,
-  registerPostSamplingHook,
-} from '../../utils/hooks/postSamplingHooks.js'
+  registerPostSamplingHook} from '../../utils/hooks/postSamplingHooks.js'
 import {
   createUserMessage,
-  hasToolCallsInLastAssistantTurn,
-} from '../../utils/messages.js'
+  hasToolCallsInLastAssistantTurn} from '../../utils/messages.js'
 import { sequential } from '../../utils/sequential.js'
 import { buildMagicDocsUpdatePrompt } from './prompts.js'
 
@@ -72,8 +69,7 @@ export function detectMagicDocHeader(
       const instructions = italicsMatch[1].trim()
       return {
         title,
-        instructions,
-      }
+        instructions}
     }
   }
 
@@ -88,8 +84,7 @@ export function registerMagicDoc(filePath: string): void {
   // Only register if not already tracked
   if (!trackedMagicDocs.has(filePath)) {
     trackedMagicDocs.set(filePath, {
-      path: filePath,
-    })
+      path: filePath})
   }
 }
 
@@ -125,8 +120,7 @@ async function updateMagicDoc(
   clonedReadFileState.delete(docInfo.path)
   const clonedToolUseContext: ToolUseContext = {
     ...toolUseContext,
-    readFileState: clonedReadFileState,
-  }
+    readFileState: clonedReadFileState}
 
   // Read the document; if deleted or unreadable, remove from tracking
   let currentDoc = ''
@@ -186,9 +180,7 @@ async function updateMagicDoc(
       message: `only ${FILE_EDIT_TOOL_NAME} is allowed for ${docInfo.path}`,
       decisionReason: {
         type: 'other' as const,
-        reason: `only ${FILE_EDIT_TOOL_NAME} is allowed`,
-      },
-    }
+        reason: `only ${FILE_EDIT_TOOL_NAME} is allowed`}}
   }
 
   // Run Magic Docs update using runAgent with forked context
@@ -203,10 +195,8 @@ async function updateMagicDoc(
     override: {
       systemPrompt,
       userContext,
-      systemContext,
-    },
-    availableTools: clonedToolUseContext.options.tools,
-  })) {
+      systemContext},
+    availableTools: clonedToolUseContext.options.tools})) {
     // Just consume - let it run to completion
   }
 }

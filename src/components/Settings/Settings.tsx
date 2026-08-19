@@ -7,6 +7,7 @@ import { useTerminalSize } from '../../hooks/useTerminalSize.js';
 import { useIsInsideModal, useModalOrTerminalSize } from '../../context/modalContext.js';
 import { Pane, Tab, Tabs } from '@anthropic/ink';
 import { Status, buildDiagnostics } from './Status.js';
+import { t } from '../../utils/i18n/index.js';
 import { Config } from './Config.js';
 import { Usage } from './Usage.js';
 import type { LocalJSXCommandContext, CommandResultDisplay } from '../../commands.js';
@@ -50,7 +51,7 @@ export function Settings({ onClose, context, defaultTab }: Props): React.ReactNo
       return;
     }
     // TODO: Update to "Settings" dialog once we define '/settings'.
-    onClose('Status dialog dismissed', { display: 'system' });
+    onClose(t('settingsTab.statusDialogDismissed'), { display: 'system' });
   };
 
   // Disable when submenu is open so the submenu's Dialog can handle ESC,
@@ -58,14 +59,13 @@ export function Settings({ onClose, context, defaultTab }: Props): React.ReactNo
   // (clear query → exit search) processes Escape first.
   useKeybinding('confirm:no', handleEscape, {
     context: 'Settings',
-    isActive: !tabsHidden && !(selectedTab === 'Config' && configOwnsEsc),
-  });
+    isActive: !tabsHidden && !(selectedTab === 'Config' && configOwnsEsc)});
 
   const tabs = [
-    <Tab key="status" title="Status">
+    <Tab id="Status" key="Status" title={t('settingsTab.status')}>
       <Status context={context} diagnosticsPromise={diagnosticsPromise} />
     </Tab>,
-    <Tab key="config" title="Config">
+    <Tab id="Config" key="Config" title={t('settingsTab.config')}>
       <Suspense fallback={null}>
         <Config
           context={context}
@@ -76,7 +76,7 @@ export function Settings({ onClose, context, defaultTab }: Props): React.ReactNo
         />
       </Suspense>
     </Tab>,
-    <Tab key="usage" title="Usage">
+    <Tab id="Usage" key="Usage" title={t('settingsTab.usage')}>
       <Usage />
     </Tab>,
   ];

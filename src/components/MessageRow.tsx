@@ -8,15 +8,13 @@ import {
   getDisplayMessageFromCollapsed,
   getSearchExtraToolsOrReadInfo,
   getToolUseIdsFromCollapsedGroup,
-  hasAnyToolInProgress,
-} from '../utils/collapseReadSearch.js';
+  hasAnyToolInProgress} from '../utils/collapseReadSearch.js';
 import {
   type buildMessageLookups,
   EMPTY_STRING_SET,
   getProgressMessagesFromLookup,
   getSiblingToolUseIDsFromLookup,
-  getToolUseID,
-} from '../utils/messages.js';
+  getToolUseID} from '../utils/messages.js';
 import { hasThinkingContent, Message } from './Message.js';
 
 // Narrow the first element of MessageContent to a block with known shape.
@@ -141,8 +139,7 @@ function MessageRowImpl({
   columns,
   isLoading,
   lookups,
-  shouldCollapseDiffs,
-}: Props): React.ReactNode {
+  shouldCollapseDiffs}: Props): React.ReactNode {
   const isTranscriptMode = screen === 'transcript';
   const isGrouped = msg.type === 'grouped_tool_use';
   const isCollapsed = msg.type === 'collapsed_read_search';

@@ -28,8 +28,7 @@ export default class OptionMap<T> extends Map<T, OptionMapItem<T>> {
         description: option.description,
         previous,
         next: undefined,
-        index,
-      }
+        index}
 
       if (previous) {
         previous.next = item

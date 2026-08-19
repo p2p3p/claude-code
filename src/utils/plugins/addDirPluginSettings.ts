@@ -12,8 +12,7 @@ import { getAdditionalDirectoriesForClaudeMd } from '../../bootstrap/state.js'
 import { parseSettingsFile } from '../settings/settings.js'
 import type {
   ExtraKnownMarketplaceSchema,
-  SettingsJson,
-} from '../settings/types.js'
+  SettingsJson} from '../settings/types.js'
 
 type ExtraKnownMarketplace = z.infer<
   ReturnType<typeof ExtraKnownMarketplaceSchema>

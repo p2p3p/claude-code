@@ -3,8 +3,7 @@ import { useAppStateStore, useSetAppState } from '../state/AppState.js'
 import { isTerminalTaskStatus } from '../Task.js'
 import {
   findTeammateTaskByAgentId,
-  injectUserMessageToTeammate,
-} from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
+  injectUserMessageToTeammate} from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
 import { isKairosCronEnabled } from '@claude-code-best/builtin-tools/tools/ScheduleCronTool/prompt.js'
 import type { Message } from '../types/message.js'
 import { getCwd } from '../utils/cwd.js'
@@ -15,8 +14,7 @@ import {
   createAutonomyQueuedPrompt,
   createAutonomyQueuedPromptIfNoActiveSource,
   markAutonomyRunCancelled,
-  markAutonomyRunFailed,
-} from '../utils/autonomyRuns.js'
+  markAutonomyRunFailed} from '../utils/autonomyRuns.js'
 import { logForDebugging } from '../utils/debug.js'
 import { enqueuePendingNotification } from '../utils/messageQueueManager.js'
 import { createScheduledTaskFireMessage } from '../utils/messages.js'
@@ -53,8 +51,7 @@ export async function createScheduledTaskQueuedCommand(
     sourceId: task.id,
     sourceLabel: task.prompt,
     workload: WORKLOAD_CRON,
-    shouldCreate: options?.shouldCreate,
-  })
+    shouldCreate: options?.shouldCreate})
   if (!command) {
     logForDebugging(
       `[ScheduledTasks] skipping ${task.id}: previous run still queued or running`,
@@ -74,8 +71,7 @@ export async function createScheduledTaskQueuedCommand(
 export function useScheduledTasks({
   isLoading,
   assistantMode = false,
-  setMessages,
-}: Props): void {
+  setMessages}: Props): void {
   // Latest-value ref so the scheduler's isLoading() getter doesn't capture
   // a stale closure. The effect mounts once; isLoading changes every turn.
   const isLoadingRef = useRef(isLoading)
@@ -109,8 +105,7 @@ export function useScheduledTasks({
         trigger: 'scheduled-task',
         currentDir: getCwd(),
         workload: WORKLOAD_CRON,
-        shouldCreate: () => !disposed,
-      })
+        shouldCreate: () => !disposed})
       if (!command) {
         return
       }
@@ -147,8 +142,7 @@ export function useScheduledTasks({
             )
             if (teammate && !isTerminalTaskStatus(teammate.status)) {
               const command = await createScheduledTaskQueuedCommand(task, {
-                shouldCreate: () => !disposed,
-              })
+                shouldCreate: () => !disposed})
               if (!command) {
                 return
               }
@@ -165,8 +159,7 @@ export function useScheduledTasks({
                 {
                   autonomyRunId: command.autonomy?.runId,
                   autonomyRootDir: command.autonomy?.rootDir,
-                  origin: command.origin,
-                },
+                  origin: command.origin},
                 setAppState,
               )
               if (!injected && command.autonomy?.runId) {
@@ -189,8 +182,7 @@ export function useScheduledTasks({
           }
 
           const command = await createScheduledTaskQueuedCommand(task, {
-            shouldCreate: () => !disposed,
-          })
+            shouldCreate: () => !disposed})
           if (!command) {
             return
           }
@@ -217,8 +209,7 @@ export function useScheduledTasks({
       isLoading: () => isLoadingRef.current,
       assistantMode,
       getJitterConfig: getCronJitterConfig,
-      isKilled: () => !isKairosCronEnabled(),
-    })
+      isKilled: () => !isKairosCronEnabled()})
     scheduler.start()
     return () => {
       disposed = true
@@ -236,8 +227,7 @@ function formatCronFireTime(d: Date): string {
       month: 'short',
       day: 'numeric',
       hour: 'numeric',
-      minute: '2-digit',
-    })
+      minute: '2-digit'})
     .replace(/,? at |, /, ' ')
     .replace(/ ([AP]M)/, (_, ampm) => ampm.toLowerCase())
 }

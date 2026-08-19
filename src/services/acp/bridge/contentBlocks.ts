@@ -13,9 +13,7 @@ export function toAcpContentUpdate(
     return {
       content: content.map((c: Record<string, unknown>) => ({
         type: 'content' as const,
-        content: toAcpContentBlock(c, isError),
-      })),
-    }
+        content: toAcpContentBlock(c, isError)}))}
   }
   if (typeof content === 'string' && content.length > 0) {
     return {
@@ -24,11 +22,8 @@ export function toAcpContentUpdate(
           type: 'content' as const,
           content: {
             type: 'text' as const,
-            text: isError ? `\`\`\`\n${content}\n\`\`\`` : content,
-          },
-        },
-      ],
-    }
+            text: isError ? `\`\`\`\n${content}\n\`\`\`` : content}},
+      ]}
   }
   return {}
 }
@@ -39,8 +34,7 @@ export function toAcpContentBlock(
 ): ContentBlock {
   const wrapText = (text: string): ContentBlock => ({
     type: 'text',
-    text: isError ? `\`\`\`\n${text}\n\`\`\`` : text,
-  })
+    text: isError ? `\`\`\`\n${text}\n\`\`\`` : text})
 
   const type = content.type as string
   switch (type) {
@@ -54,8 +48,7 @@ export function toAcpContentBlock(
         return {
           type: 'image',
           data: source.data as string,
-          mimeType: source.media_type as string,
-        }
+          mimeType: source.media_type as string}
       }
       return wrapText(
         source?.type === 'url'
@@ -73,8 +66,7 @@ export function toAcpContentBlock(
         type: 'resource_link',
         uri: uri as string,
         name: name as string,
-        mimeType: content.mimeType as string | undefined,
-      }
+        mimeType: content.mimeType as string | undefined}
     }
     case 'resource': {
       // ACP v1 EmbeddedResource wraps an optional TextResource / BlobResource
@@ -87,12 +79,10 @@ export function toAcpContentBlock(
         uri: (r?.uri as string | undefined) ?? '',
         mimeType: r?.mimeType as string | null | undefined,
         ...(typeof r?.text === 'string' ? { text: r.text as string } : {}),
-        ...(typeof r?.blob === 'string' ? { blob: r.blob as string } : {}),
-      }
+        ...(typeof r?.blob === 'string' ? { blob: r.blob as string } : {})}
       return {
         type: 'resource',
-        resource: resourcePayload,
-      } as unknown as ContentBlock
+        resource: resourcePayload} as unknown as ContentBlock
     }
     case 'tool_reference':
       return wrapText(`Tool: ${content.tool_name as string}`)

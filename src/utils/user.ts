@@ -4,8 +4,7 @@ import { getSessionId } from '../bootstrap/state.js'
 import {
   getOauthAccountInfo,
   getRateLimitTier,
-  getSubscriptionType,
-} from './auth.js'
+  getSubscriptionType} from './auth.js'
 import { getGlobalConfig, getOrCreateUserID } from './config.js'
 import { getCwd } from './cwd.js'
 import { type env, getHostPlatformForAnalytics } from './env.js'
@@ -120,10 +119,7 @@ export const getCoreUserData = memoize(
           repository: process.env.GITHUB_REPOSITORY,
           repositoryId: process.env.GITHUB_REPOSITORY_ID,
           repositoryOwner: process.env.GITHUB_REPOSITORY_OWNER,
-          repositoryOwnerId: process.env.GITHUB_REPOSITORY_OWNER_ID,
-        },
-      }),
-    }
+          repositoryOwnerId: process.env.GITHUB_REPOSITORY_OWNER_ID}})}
   },
 )
 
@@ -186,8 +182,7 @@ export const getGitEmail = memoize(async (): Promise<string | undefined> => {
   const result = await execa('git config --get user.email', {
     shell: true,
     reject: false,
-    cwd: getCwd(),
-  })
+    cwd: getCwd()})
   return result.exitCode === 0 && result.stdout
     ? result.stdout.trim()
     : undefined

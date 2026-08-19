@@ -23,7 +23,6 @@ export async function getGhAuthStatus(): Promise<GhAuthStatus> {
     stdout: 'ignore',
     stderr: 'ignore',
     timeout: 5000,
-    reject: false,
-  })
+    reject: false})
   return exitCode === 0 ? 'authenticated' : 'not_authenticated'
 }

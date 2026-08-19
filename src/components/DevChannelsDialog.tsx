@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import type { ChannelEntry } from '../bootstrap/state.js';
 import { Box, Text, Dialog } from '@anthropic/ink';
 import { gracefulShutdownSync } from '../utils/gracefulShutdown.js';
+import { t } from '../utils/i18n/index.js';
 import { Select } from './CustomSelect/index.js';
 
 type Props = {
@@ -42,15 +43,14 @@ export function DevChannelsDialog({ channels, onAccept }: Props): React.ReactNod
   }
 
   return (
-    <Dialog title="WARNING: Loading development channels" color="error" onCancel={handleEscape}>
+    <Dialog title={t('devChannels.title')} color="error" onCancel={handleEscape}>
       <Box flexDirection="column" gap={1}>
         <Text>
-          --dangerously-load-development-channels is for local channel development only. Do not use this option to run
-          channels you have downloaded off the internet.
+          {t('devChannels.body1')}
         </Text>
-        <Text>Please use --channels to run a list of approved channels.</Text>
+        <Text>{t('devChannels.body2')}</Text>
         <Text dimColor>
-          Channels:{' '}
+          {t('devChannels.channels')}{' '}
           {channels
             .map(c => (c.kind === 'plugin' ? `plugin:${c.name}@${c.marketplace}` : `server:${c.name}`))
             .join(', ')}
@@ -59,8 +59,8 @@ export function DevChannelsDialog({ channels, onAccept }: Props): React.ReactNod
 
       <Select
         options={[
-          { label: 'I am using this for local development', value: 'accept' },
-          { label: 'Exit', value: 'exit' },
+          { label: t('devChannels.accept'), value: 'accept' },
+          { label: t('devChannels.exit'), value: 'exit' },
         ]}
         onChange={value => onChange(value as 'accept' | 'exit')}
       />

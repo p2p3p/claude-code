@@ -6,8 +6,7 @@ import { logError } from '../../utils/log.js'
 import { getAllLspServers } from './config.js'
 import {
   createLSPServerInstance,
-  type LSPServerInstance,
-} from './LSPServerInstance.js'
+  type LSPServerInstance} from './LSPServerInstance.js'
 import type { ScopedLspServerConfig } from './types.js'
 /**
  * LSP Server Manager interface returned by createLSPServerManager.
@@ -293,9 +292,7 @@ export function createLSPServerManager(): LSPServerManager {
           uri: fileUri,
           languageId,
           version: 1,
-          text: content,
-        },
-      })
+          text: content}})
       // Track that this file is now open on this server
       openedFiles.set(fileUri, server.name)
       logForDebugging(
@@ -329,10 +326,8 @@ export function createLSPServerManager(): LSPServerManager {
       await server.sendNotification('textDocument/didChange', {
         textDocument: {
           uri: fileUri,
-          version: 1,
-        },
-        contentChanges: [{ text: content }],
-      })
+          version: 1},
+        contentChanges: [{ text: content }]})
       logForDebugging(`LSP: Sent didChange for ${filePath}`)
     } catch (error) {
       const err = new Error(
@@ -355,9 +350,7 @@ export function createLSPServerManager(): LSPServerManager {
     try {
       await server.sendNotification('textDocument/didSave', {
         textDocument: {
-          uri: pathToFileURL(path.resolve(filePath)).href,
-        },
-      })
+          uri: pathToFileURL(path.resolve(filePath)).href}})
       logForDebugging(`LSP: Sent didSave for ${filePath}`)
     } catch (error) {
       const err = new Error(
@@ -385,9 +378,7 @@ export function createLSPServerManager(): LSPServerManager {
     try {
       await server.sendNotification('textDocument/didClose', {
         textDocument: {
-          uri: fileUri,
-        },
-      })
+          uri: fileUri}})
       // Remove from tracking so file can be reopened later
       openedFiles.delete(fileUri)
       logForDebugging(`LSP: Sent didClose for ${filePath}`)
@@ -419,8 +410,7 @@ export function createLSPServerManager(): LSPServerManager {
       if (!server || server.state !== 'running') continue
       try {
         await server.sendNotification('textDocument/didClose', {
-          textDocument: { uri: fileUri },
-        })
+          textDocument: { uri: fileUri }})
       } catch {
         // Best-effort — server may have stopped
       }
@@ -439,6 +429,5 @@ export function createLSPServerManager(): LSPServerManager {
     saveFile,
     closeFile,
     closeAllFiles,
-    isFileOpen,
-  }
+    isFileOpen}
 }

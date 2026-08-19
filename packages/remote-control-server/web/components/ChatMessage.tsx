@@ -1,5 +1,6 @@
 import { cn } from '../src/lib/utils';
 import { User, Bot, Wrench, Loader2 } from 'lucide-react';
+import { t } from '../../../../src/utils/i18n/index.js';
 
 export interface ToolCall {
   id: string;
@@ -19,6 +20,12 @@ interface ChatMessageProps {
   message: ChatMessageData;
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  running: t('rcs.statusRunning'),
+  complete: t('rcs.statusComplete'),
+  error: t('rcs.statusError'),
+};
+
 export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === 'user';
 
@@ -33,7 +40,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
       </div>
       <div className="flex-1 min-w-0 space-y-2">
-        <div className="text-sm font-medium">{isUser ? 'You' : 'Agent'}</div>
+        <div className="text-sm font-medium">{isUser ? t('rcs.you') : t('rcs.agent')}</div>
         <div className="text-sm whitespace-pre-wrap break-words">
           {message.content}
           {message.isStreaming && <span className="inline-block w-1.5 h-4 ml-0.5 bg-foreground animate-pulse" />}
@@ -84,7 +91,7 @@ function ToolCallDisplay({ toolCall }: ToolCallDisplayProps) {
           toolCall.status === 'error' && 'text-red-600 dark:text-red-400',
         )}
       >
-        {toolCall.status}
+        {STATUS_LABELS[toolCall.status] || toolCall.status}
       </span>
     </div>
   );

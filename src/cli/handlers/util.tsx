@@ -21,7 +21,7 @@ export async function setupTokenHandler(root: Root): Promise<void> {
   logEvent('tengu_setup_token_command', {});
 
   const showAuthWarning = !isAnthropicAuthEnabled();
-  const { ConsoleOAuthFlow } = await import('../../components/ConsoleOAuthFlow.js');
+  const { ConsoleOAuthFlow } = await import('../../accounts/ui/ConsoleOAuthFlow.js');
   await new Promise<void>(resolve => {
     root.render(
       <AppStateProvider onChangeAppState={onChangeAppState}>

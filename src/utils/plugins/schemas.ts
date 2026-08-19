@@ -174,15 +174,13 @@ const McpbPath = lazySchema(() =>
   z.union([
     RelativePath()
       .refine(path => path.endsWith('.mcpb') || path.endsWith('.dxt'), {
-        message: 'MCPB file path must end with .mcpb or .dxt',
-      })
+        message: 'MCPB file path must end with .mcpb or .dxt'})
       .describe('Path to MCPB file relative to plugin root'),
     z
       .string()
       .url()
       .refine(url => url.endsWith('.mcpb') || url.endsWith('.dxt'), {
-        message: 'MCPB URL must end with .mcpb or .dxt',
-      })
+        message: 'MCPB URL must end with .mcpb or .dxt'})
       .describe('URL to MCPB file'),
   ]),
 )
@@ -219,8 +217,7 @@ const MarketplaceNameSchema = lazySchema(() =>
     .min(1, 'Marketplace must have a name')
     .refine(name => !name.includes(' '), {
       message:
-        'Marketplace name cannot contain spaces. Use kebab-case (e.g., "my-marketplace")',
-    })
+        'Marketplace name cannot contain spaces. Use kebab-case (e.g., "my-marketplace")'})
     .refine(
       name =>
         !name.includes('/') &&
@@ -229,20 +226,16 @@ const MarketplaceNameSchema = lazySchema(() =>
         name !== '.',
       {
         message:
-          'Marketplace name cannot contain path separators (/ or \\), ".." sequences, or be "."',
-      },
+          'Marketplace name cannot contain path separators (/ or \\), ".." sequences, or be "."'},
     )
     .refine(name => !isBlockedOfficialName(name), {
       message:
-        'Marketplace name impersonates an official Anthropic/Claude marketplace',
-    })
+        'Marketplace name impersonates an official Anthropic/Claude marketplace'})
     .refine(name => name.toLowerCase() !== 'inline', {
       message:
-        'Marketplace name "inline" is reserved for --plugin-dir session plugins',
-    })
+        'Marketplace name "inline" is reserved for --plugin-dir session plugins'})
     .refine(name => name.toLowerCase() !== 'builtin', {
-      message: 'Marketplace name "builtin" is reserved for built-in plugins',
-    }),
+      message: 'Marketplace name "builtin" is reserved for built-in plugins'}),
 )
 
 /**
@@ -261,8 +254,7 @@ export const PluginAuthorSchema = lazySchema(() =>
     url: z
       .string()
       .optional()
-      .describe('Website, GitHub profile, or organization URL'),
-  }),
+      .describe('Website, GitHub profile, or organization URL')}),
 )
 
 /**
@@ -278,8 +270,7 @@ const PluginManifestMetadataSchema = lazySchema(() =>
       .min(1, 'Plugin name cannot be empty')
       .refine(name => !name.includes(' '), {
         message:
-          'Plugin name cannot contain spaces. Use kebab-case (e.g., "my-plugin")',
-      })
+          'Plugin name cannot contain spaces. Use kebab-case (e.g., "my-plugin")'})
       .describe(
         'Unique identifier for the plugin, used for namespacing (prefer kebab-case)',
       ),
@@ -315,8 +306,7 @@ const PluginManifestMetadataSchema = lazySchema(() =>
       .optional()
       .describe(
         'Plugins that must be enabled for this plugin to function. Bare names (no "@marketplace") are resolved against the declaring plugin\'s own marketplace.',
-      ),
-  }),
+      )}),
 )
 
 /**
@@ -335,8 +325,7 @@ export const PluginHooksSchema = lazySchema(() =>
       .lazy(() => HooksSchema())
       .describe(
         'The hooks provided by the plugin, in the same format as the one used for settings',
-      ),
-  }),
+      )}),
 )
 
 /**
@@ -368,8 +357,7 @@ const PluginManifestHooksSchema = lazySchema(() =>
             ),
         ]),
       ),
-    ]),
-  }),
+    ])}),
 )
 
 /**
@@ -404,14 +392,12 @@ export const CommandMetadataSchema = lazySchema(() =>
       allowedTools: z
         .array(z.string())
         .optional()
-        .describe('Tools allowed when command runs'),
-    })
+        .describe('Tools allowed when command runs')})
     .refine(
       data => (data.source && !data.content) || (!data.source && data.content),
       {
         message:
-          'Command must have either "source" (file path) or "content" (inline markdown), but not both',
-      },
+          'Command must have either "source" (file path) or "content" (inline markdown), but not both'},
     ),
 )
 
@@ -447,8 +433,7 @@ const PluginManifestCommandsSchema = lazySchema(() =>
         .describe(
           'Object mapping of command names to their metadata and source files. Command name becomes the slash command name (e.g., "about" → "/plugin:about")',
         ),
-    ]),
-  }),
+    ])}),
 )
 
 /**
@@ -471,8 +456,7 @@ const PluginManifestAgentsSchema = lazySchema(() =>
           ),
         )
         .describe('List of paths to additional agent files'),
-    ]),
-  }),
+    ])}),
 )
 
 /**
@@ -494,8 +478,7 @@ const PluginManifestSkillsSchema = lazySchema(() =>
           ),
         )
         .describe('List of paths to additional skill directories'),
-    ]),
-  }),
+    ])}),
 )
 
 /**
@@ -519,8 +502,7 @@ const PluginManifestOutputStylesSchema = lazySchema(() =>
         .describe(
           'List of paths to additional output styles directories or files',
         ),
-    ]),
-  }),
+    ])}),
 )
 
 // Helper validators for LSP config
@@ -530,8 +512,7 @@ const fileExtension = lazySchema(() =>
     .string()
     .min(2)
     .refine(ext => ext.startsWith('.'), {
-      message: 'File extensions must start with dot (e.g., ".ts", not "ts")',
-    }),
+      message: 'File extensions must start with dot (e.g., ".ts", not "ts")'}),
 )
 
 /**
@@ -567,8 +548,7 @@ const PluginManifestMcpServerSchema = lazySchema(() =>
         .describe(
           'Array of MCP server configurations (paths, MCPB files, or inline definitions)',
         ),
-    ]),
-  }),
+    ])}),
 )
 
 /**
@@ -615,8 +595,7 @@ const PluginUserConfigOptionSchema = lazySchema(() =>
           'If true, masks dialog input and stores value in secure storage (keychain/credentials file) instead of settings.json',
         ),
       min: z.number().optional().describe('Minimum value (number type only)'),
-      max: z.number().optional().describe('Maximum value (number type only)'),
-    })
+      max: z.number().optional().describe('Maximum value (number type only)')})
     .strict(),
 )
 
@@ -650,8 +629,7 @@ const PluginManifestUserConfigSchema = lazySchema(() =>
           'MCP/LSP server config, hook commands, and (non-sensitive only) skill/agent content. ' +
           'Note: sensitive values share a single keychain entry with OAuth tokens — keep ' +
           'secret counts small to stay under the ~2KB stdin-safe limit (see INC-3028).',
-      ),
-  }),
+      )}),
 )
 
 /**
@@ -693,15 +671,13 @@ const PluginManifestChannelsSchema = lazySchema(() =>
                 'Fields to prompt the user for when enabling this plugin in assistant mode. ' +
                   // biome-ignore lint/suspicious/noTemplateCurlyInString: ${user_config.KEY} is plugin config syntax documentation, not a JS template literal
                   'Saved values are substituted into ${user_config.KEY} references in the mcpServers env.',
-              ),
-          })
+              )})
           .strict(),
       )
       .describe(
         'Channels this plugin provides. Each entry declares an MCP server as a message channel ' +
           'and optionally specifies user configuration to prompt for at enable time.',
-      ),
-  }),
+      )}),
 )
 
 /**
@@ -722,8 +698,7 @@ export const LspServerConfigSchema = lazySchema(() =>
         },
         {
           message:
-            'Command should not contain spaces. Use args array for arguments.',
-        },
+            'Command should not contain spaces. Use args array for arguments.'},
       )
       .describe(
         'Command to execute the LSP server (e.g., "typescript-language-server")',
@@ -735,8 +710,7 @@ export const LspServerConfigSchema = lazySchema(() =>
     extensionToLanguage: z
       .record(fileExtension(), nonEmptyString())
       .refine(record => Object.keys(record).length > 0, {
-        message: 'extensionToLanguage must have at least one mapping',
-      })
+        message: 'extensionToLanguage must have at least one mapping'})
       .describe(
         'Mapping from file extension to LSP language ID. File extensions and languages are derived from this mapping.',
       ),
@@ -785,8 +759,7 @@ export const LspServerConfigSchema = lazySchema(() =>
       .int()
       .nonnegative()
       .optional()
-      .describe('Maximum number of restart attempts before giving up'),
-  }),
+      .describe('Maximum number of restart attempts before giving up')}),
 )
 
 /**
@@ -817,8 +790,7 @@ const PluginManifestLspServerSchema = lazySchema(() =>
         .describe(
           'Array of LSP server configurations (paths or inline definitions)',
         ),
-    ]),
-  }),
+    ])}),
 )
 
 /**
@@ -864,8 +836,7 @@ const PluginManifestSettingsSchema = lazySchema(() =>
       .describe(
         'Settings to merge when plugin is enabled. ' +
           'Only allowlisted keys are kept (currently: agent)',
-      ),
-  }),
+      )}),
 )
 
 /**
@@ -895,8 +866,7 @@ export const PluginManifestSchema = lazySchema(() =>
     ...PluginManifestMcpServerSchema().partial().shape,
     ...PluginManifestLspServerSchema().partial().shape,
     ...PluginManifestSettingsSchema().partial().shape,
-    ...PluginManifestUserConfigSchema().partial().shape,
-  }),
+    ...PluginManifestUserConfigSchema().partial().shape}),
 )
 
 /**
@@ -913,8 +883,7 @@ export const MarketplaceSourceSchema = lazySchema(() =>
       headers: z
         .record(z.string(), z.string())
         .optional()
-        .describe('Custom HTTP headers (e.g., for authentication)'),
-    }),
+        .describe('Custom HTTP headers (e.g., for authentication)')}),
     z.object({
       source: z.literal('github'),
       repo: z.string().describe('GitHub repository in owner/repo format'),
@@ -938,8 +907,7 @@ export const MarketplaceSourceSchema = lazySchema(() =>
             'Use for monorepos where the marketplace lives in a subdirectory. ' +
             'Example: [".claude-plugin", "plugins"]. ' +
             'If omitted, the full repository is cloned.',
-        ),
-    }),
+        )}),
     z.object({
       source: z.literal('git'),
       // No .endsWith('.git') here — that's a GitHub/GitLab/Bitbucket
@@ -970,24 +938,20 @@ export const MarketplaceSourceSchema = lazySchema(() =>
             'Use for monorepos where the marketplace lives in a subdirectory. ' +
             'Example: [".claude-plugin", "plugins"]. ' +
             'If omitted, the full repository is cloned.',
-        ),
-    }),
+        )}),
     z.object({
       source: z.literal('npm'),
       package: NpmPackageNameSchema().describe(
         'NPM package containing marketplace.json',
-      ),
-    }),
+      )}),
     z.object({
       source: z.literal('file'),
-      path: z.string().describe('Local file path to marketplace.json'),
-    }),
+      path: z.string().describe('Local file path to marketplace.json')}),
     z.object({
       source: z.literal('directory'),
       path: z
         .string()
-        .describe('Local directory containing .claude-plugin/marketplace.json'),
-    }),
+        .describe('Local directory containing .claude-plugin/marketplace.json')}),
     z.object({
       source: z.literal('hostPattern'),
       hostPattern: z
@@ -997,8 +961,7 @@ export const MarketplaceSourceSchema = lazySchema(() =>
             'For github sources, matches against "github.com". For git sources (SSH or HTTPS), ' +
             'extracts the hostname from the URL. Use in strictKnownMarketplaces to allow all ' +
             'marketplaces from a specific host (e.g., "^github\\.mycompany\\.com$").',
-        ),
-    }),
+        )}),
     z.object({
       source: z.literal('pathPattern'),
       pathPattern: z
@@ -1009,8 +972,7 @@ export const MarketplaceSourceSchema = lazySchema(() =>
             'hostPattern restrictions for network sources. Use ".*" to allow all filesystem ' +
             'paths, or a narrower pattern (e.g., "^/opt/approved/") to restrict to specific ' +
             'directories.',
-        ),
-    }),
+        )}),
     z
       .object({
         source: z.literal('settings'),
@@ -1022,8 +984,7 @@ export const MarketplaceSourceSchema = lazySchema(() =>
                 'Reserved official marketplace names cannot be used with settings sources. ' +
                 'validateOfficialNameSource only accepts github/git sources from anthropics/* ' +
                 'for these names; a settings source would be rejected after ' +
-                'loadAndCacheMarketplace has already written to disk with cleanupNeeded=false.',
-            },
+                'loadAndCacheMarketplace has already written to disk with cleanupNeeded=false.'},
           )
           .describe(
             'Marketplace name. Must match the extraKnownMarketplaces key (enforced); ' +
@@ -1034,8 +995,7 @@ export const MarketplaceSourceSchema = lazySchema(() =>
         plugins: z
           .array(SettingsMarketplacePluginSchema())
           .describe('Plugin entries declared inline in settings.json'),
-        owner: PluginAuthorSchema().optional(),
-      })
+        owner: PluginAuthorSchema().optional()})
       .describe(
         'Inline marketplace manifest defined directly in settings.json. ' +
           'The reconciler writes a synthetic marketplace.json to the cache; ' +
@@ -1084,8 +1044,7 @@ export const PluginSourceSchema = lazySchema(() =>
           .optional()
           .describe(
             'Custom NPM registry URL (defaults to using system default, likely npmjs.org)',
-          ),
-      })
+          )})
       .describe('NPM package as plugin source'),
     z
       .object({
@@ -1103,8 +1062,7 @@ export const PluginSourceSchema = lazySchema(() =>
           .optional()
           .describe(
             'Custom PyPI registry URL (defaults to using system default, likely pypi.org)',
-          ),
-      })
+          )})
       .describe('Python package as plugin source'),
     z.object({
       source: z.literal('url'),
@@ -1117,8 +1075,7 @@ export const PluginSourceSchema = lazySchema(() =>
         .describe(
           'Git branch or tag to use (e.g., "main", "v1.0.0"). Defaults to repository default branch.',
         ),
-      sha: gitSha().optional().describe('Specific commit SHA to use'),
-    }),
+      sha: gitSha().optional().describe('Specific commit SHA to use')}),
     z.object({
       source: z.literal('github'),
       repo: z.string().describe('GitHub repository in owner/repo format'),
@@ -1128,8 +1085,7 @@ export const PluginSourceSchema = lazySchema(() =>
         .describe(
           'Git branch or tag to use (e.g., "main", "v1.0.0"). Defaults to repository default branch.',
         ),
-      sha: gitSha().optional().describe('Specific commit SHA to use'),
-    }),
+      sha: gitSha().optional().describe('Specific commit SHA to use')}),
     z
       .object({
         source: z.literal('git-subdir'),
@@ -1151,8 +1107,7 @@ export const PluginSourceSchema = lazySchema(() =>
           .describe(
             'Git branch or tag to use (e.g., "main", "v1.0.0"). Defaults to repository default branch.',
           ),
-        sha: gitSha().optional().describe('Specific commit SHA to use'),
-      })
+        sha: gitSha().optional().describe('Specific commit SHA to use')})
       .describe(
         'Plugin located in a subdirectory of a larger repository (monorepo). ' +
           'Only the specified subdirectory is materialized; the rest of the repo is not downloaded.',
@@ -1189,8 +1144,7 @@ const SettingsMarketplacePluginSchema = lazySchema(() =>
         .min(1, 'Plugin name cannot be empty')
         .refine(name => !name.includes(' '), {
           message:
-            'Plugin name cannot contain spaces. Use kebab-case (e.g., "my-plugin")',
-        })
+            'Plugin name cannot contain spaces. Use kebab-case (e.g., "my-plugin")'})
         .describe('Plugin name as it appears in the target repository'),
       source: PluginSourceSchema().describe(
         'Where to fetch the plugin from. Must be a remote source — relative ' +
@@ -1198,14 +1152,12 @@ const SettingsMarketplacePluginSchema = lazySchema(() =>
       ),
       description: z.string().optional(),
       version: z.string().optional(),
-      strict: z.boolean().optional(),
-    })
+      strict: z.boolean().optional()})
     .refine(p => typeof p.source !== 'string', {
       message:
         'Plugins in a settings-sourced marketplace must use remote sources ' +
         '(github, git-subdir, npm, url, pip). Relative-path sources like "./foo" ' +
-        'have no marketplace repository to resolve against.',
-    }),
+        'have no marketplace repository to resolve against.'}),
 )
 
 /**
@@ -1262,8 +1214,7 @@ export const PluginMarketplaceEntrySchema = lazySchema(() =>
         .min(1, 'Plugin name cannot be empty')
         .refine(name => !name.includes(' '), {
           message:
-            'Plugin name cannot contain spaces. Use kebab-case (e.g., "my-plugin")',
-        })
+            'Plugin name cannot contain spaces. Use kebab-case (e.g., "my-plugin")'})
         .describe('Unique identifier matching the plugin name'),
       source: PluginSourceSchema().describe('Where to fetch the plugin from'),
       category: z
@@ -1282,8 +1233,7 @@ export const PluginMarketplaceEntrySchema = lazySchema(() =>
         .default(true)
         .describe(
           'Require the plugin manifest to be present in the plugin folder. If false, the marketplace entry provides the manifest.',
-        ),
-    }),
+        )}),
 )
 
 /**
@@ -1314,8 +1264,7 @@ export const PluginMarketplaceSchema = lazySchema(() =>
           .optional()
           .describe('Base path for relative plugin sources'),
         version: z.string().optional().describe('Marketplace version'),
-        description: z.string().optional().describe('Marketplace description'),
-      })
+        description: z.string().optional().describe('Marketplace description')})
       .optional()
       .describe('Optional marketplace metadata'),
     allowCrossMarketplaceDependenciesOn: z
@@ -1323,8 +1272,7 @@ export const PluginMarketplaceSchema = lazySchema(() =>
       .optional()
       .describe(
         "Marketplace names whose plugins may be auto-installed as dependencies. Only the root marketplace's allowlist applies \u2014 no transitive trust.",
-      ),
-  }),
+      )}),
 )
 
 /**
@@ -1385,8 +1333,7 @@ export const DependencyRefSchema = lazySchema(() =>
           .string()
           .min(1)
           .regex(/^[a-z0-9][-a-z0-9._]*$/i)
-          .optional(),
-      })
+          .optional()})
       .loose()
       .transform(o => (o.marketplace ? `${o.name}@${o.marketplace}` : o.name)),
   ]),
@@ -1424,8 +1371,7 @@ export const SettingsPluginEntrySchema = lazySchema(() =>
       config: z
         .record(z.string(), z.unknown())
         .optional()
-        .describe('Plugin-specific configuration'),
-    }),
+        .describe('Plugin-specific configuration')}),
   ]),
 )
 
@@ -1459,8 +1405,7 @@ export const InstalledPluginSchema = lazySchema(() =>
     gitCommitSha: z
       .string()
       .optional()
-      .describe('Git commit SHA for git-based plugins (for version tracking)'),
-  }),
+      .describe('Git commit SHA for git-based plugins (for version tracking)')}),
 )
 
 /**
@@ -1489,8 +1434,7 @@ export const InstalledPluginsFileSchemaV1 = lazySchema(() =>
         PluginIdSchema(), // Validated plugin ID key (e.g., "formatter@tools")
         InstalledPluginSchema(),
       )
-      .describe('Map of plugin IDs to their installation metadata'),
-  }),
+      .describe('Map of plugin IDs to their installation metadata')}),
 )
 
 /**
@@ -1539,8 +1483,7 @@ export const PluginInstallationEntrySchema = lazySchema(() =>
     gitCommitSha: z
       .string()
       .optional()
-      .describe('Git commit SHA for git-based plugins'),
-  }),
+      .describe('Git commit SHA for git-based plugins')}),
 )
 
 /**
@@ -1566,8 +1509,7 @@ export const InstalledPluginsFileSchemaV2 = lazySchema(() =>
     version: z.literal(2).describe('Schema version 2'),
     plugins: z
       .record(PluginIdSchema(), z.array(PluginInstallationEntrySchema()))
-      .describe('Map of plugin IDs to arrays of installation entries'),
-  }),
+      .describe('Map of plugin IDs to arrays of installation entries')}),
 )
 
 /**
@@ -1607,8 +1549,7 @@ export const KnownMarketplaceSchema = lazySchema(() =>
       .optional()
       .describe(
         'Whether to automatically update this marketplace and its installed plugins on startup',
-      ),
-  }),
+      )}),
 )
 
 /**

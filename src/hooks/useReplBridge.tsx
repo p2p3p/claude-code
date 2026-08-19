@@ -1,12 +1,12 @@
 import { feature } from 'bun:bundle';
+import { t } from '../utils/i18n/index.js'
 import { type FSWatcher, watch } from 'fs';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { setMainLoopModelOverride } from '../bootstrap/state.js';
 import {
   type BridgePermissionCallbacks,
   type BridgePermissionResponse,
-  parseBridgePermissionResponse,
-} from '../bridge/bridgePermissionCallbacks.js';
+  parseBridgePermissionResponse} from '../bridge/bridgePermissionCallbacks.js';
 import { handleRemoteInterrupt } from '../bridge/remoteInterruptHandling.js';
 import { isTranscriptResetResultReady, shouldDeferBridgeResult } from '../bridge/bridgeResultScheduling.js';
 import { buildBridgeConnectUrl } from '../bridge/bridgeStatusUtil.js';
@@ -35,8 +35,7 @@ import {
   getAutoModeUnavailableReason,
   isAutoModeGateEnabled,
   isBypassPermissionsModeDisabled,
-  transitionPermissionMode,
-} from '../utils/permissions/permissionSetup.js';
+  transitionPermissionMode} from '../utils/permissions/permissionSetup.js';
 import { getLeaderToolUseConfirmQueue } from '../utils/swarm/leaderPermissionBridge.js';
 import { getTaskListId, getTasksDir, listTasks, onTasksUpdated } from '../utils/tasks.js';
 import { ContentBlockParam } from '@anthropic-ai/sdk/resources';
@@ -127,12 +126,11 @@ export function useReplBridge(
           key: 'bridge-failed',
           jsx: (
             <>
-              <Text color="error">Remote Control failed</Text>
+              <Text color="error">{t('usereplbridge.remoteControlFailed')}</Text>
               {detail && <Text dimColor> · {detail}</Text>}
             </>
           ),
-          priority: 'immediate',
-        });
+          priority: 'immediate'});
       }
 
       if (consecutiveFailuresRef.current >= MAX_CONSECUTIVE_INIT_FAILURES) {
@@ -148,8 +146,7 @@ export function useReplBridge(
           return {
             ...prev,
             replBridgeError: fuseHint,
-            replBridgeEnabled: false,
-          };
+            replBridgeEnabled: false};
         });
         return;
       }
@@ -237,8 +234,7 @@ export function useReplBridge(
                 // This keeps exit-word suppression and immediate-command blocks
                 // intact for any code path that checks skipSlashCommands directly.
                 skipSlashCommands: true,
-                bridgeOrigin: true,
-              });
+                bridgeOrigin: true});
             } catch (e) {
               logForDebugging(`[bridge:repl] handleInboundMessage failed: ${e}`, { level: 'error' });
             }
@@ -297,8 +293,7 @@ export function useReplBridge(
                     replBridgeSessionUrl: sessionUrl,
                     replBridgeEnvironmentId: envId,
                     replBridgeSessionId: sessionId,
-                    replBridgeError: undefined,
-                  };
+                    replBridgeError: undefined};
                 });
                 break;
               case 'connected': {
@@ -310,8 +305,7 @@ export function useReplBridge(
                     replBridgeConnected: true,
                     replBridgeSessionActive: true,
                     replBridgeReconnecting: false,
-                    replBridgeError: undefined,
-                  };
+                    replBridgeError: undefined};
                 });
                 // Notify model about newly available bridge-dependent tools
                 if (!wasSessionActive) {
@@ -356,13 +350,11 @@ export function useReplBridge(
                           agents: state.agentDefinitions.activeAgents,
                           skills,
                           plugins: [],
-                          fastMode: state.fastMode,
-                        }),
+                          fastMode: state.fastMode}),
                       ]);
                     } catch (err) {
                       logForDebugging(`[bridge:repl] Failed to send system/init: ${errorMessage(err)}`, {
-                        level: 'error',
-                      });
+                        level: 'error'});
                     }
                   })();
                 }
@@ -374,8 +366,7 @@ export function useReplBridge(
                   return {
                     ...prev,
                     replBridgeReconnecting: true,
-                    replBridgeSessionActive: false,
-                  };
+                    replBridgeSessionActive: false};
                 });
                 break;
               case 'failed':
@@ -387,8 +378,7 @@ export function useReplBridge(
                   replBridgeError: detail,
                   replBridgeReconnecting: false,
                   replBridgeSessionActive: false,
-                  replBridgeConnected: false,
-                }));
+                  replBridgeConnected: false}));
                 // Auto-disable after timeout so the hook stops retrying.
                 failureTimeoutRef.current = setTimeout(() => {
                   if (cancelled) return;
@@ -398,8 +388,7 @@ export function useReplBridge(
                     return {
                       ...prev,
                       replBridgeEnabled: false,
-                      replBridgeError: undefined,
-                    };
+                      replBridgeError: undefined};
                   });
                 }, BRIDGE_FAILURE_DISMISS_MS);
                 break;
@@ -467,15 +456,13 @@ export function useReplBridge(
                   return {
                     ok: false,
                     error:
-                      'Cannot set permission mode to bypassPermissions because it is disabled by settings or configuration',
-                  };
+                      'Cannot set permission mode to bypassPermissions because it is disabled by settings or configuration'};
                 }
                 if (!store.getState().toolPermissionContext.isBypassPermissionsModeAvailable) {
                   return {
                     ok: false,
                     error:
-                      'Cannot set permission mode to bypassPermissions because the session was not launched with --dangerously-skip-permissions',
-                  };
+                      'Cannot set permission mode to bypassPermissions because the session was not launched with --dangerously-skip-permissions'};
                 }
               }
               if (feature('TRANSCRIPT_CLASSIFIER') && mode === 'auto' && !isAutoModeGateEnabled()) {
@@ -484,8 +471,7 @@ export function useReplBridge(
                   ok: false,
                   error: reason
                     ? `Cannot set permission mode to auto: ${getAutoModeUnavailableNotification(reason)}`
-                    : 'Cannot set permission mode to auto',
-                };
+                    : 'Cannot set permission mode to auto'};
               }
               // Guards passed — apply via the centralized transition so
               // prePlanMode stashing and auto-mode state sync all fire.
@@ -495,8 +481,7 @@ export function useReplBridge(
                 const next = transitionPermissionMode(current, mode, prev.toolPermissionContext);
                 return {
                   ...prev,
-                  toolPermissionContext: { ...next, mode },
-                };
+                  toolPermissionContext: { ...next, mode }};
               });
               // Recheck queued permission prompts now that mode changed.
               setImmediate(() => {
@@ -514,8 +499,7 @@ export function useReplBridge(
             getMessages: () => messagesRef.current,
             previouslyFlushedUUIDs: flushedUUIDsRef.current,
             initialName: replBridgeInitialName,
-            perpetual,
-          });
+            perpetual});
           const handle = rawHandle
             ? {
                 ...rawHandle,
@@ -523,8 +507,7 @@ export function useReplBridge(
                   transcriptResetPendingRef.current = true;
                   pendingResultAfterFlushRef.current = false;
                   lastWrittenIndexRef.current = 0;
-                },
-              }
+                }}
             : null;
           if (cancelled) {
             // Effect was cancelled while initReplBridge was in flight.
@@ -550,8 +533,7 @@ export function useReplBridge(
             clearTimeout(failureTimeoutRef.current);
             setAppState(prev => ({
               ...prev,
-              replBridgeError: prev.replBridgeError ?? 'check debug logs for details',
-            }));
+              replBridgeError: prev.replBridgeError ?? 'check debug logs for details'}));
             failureTimeoutRef.current = setTimeout(() => {
               if (cancelled) return;
               failureTimeoutRef.current = undefined;
@@ -560,8 +542,7 @@ export function useReplBridge(
                 return {
                   ...prev,
                   replBridgeEnabled: false,
-                  replBridgeError: undefined,
-                };
+                  replBridgeError: undefined};
               });
             }, BRIDGE_FAILURE_DISMISS_MS);
             return;
@@ -582,8 +563,7 @@ export function useReplBridge(
                 replBridgeSessionId: handle.bridgeSessionId,
                 replBridgeSessionUrl: undefined,
                 replBridgeConnectUrl: undefined,
-                replBridgeError: undefined,
-              };
+                replBridgeError: undefined};
             });
             logForDebugging(`[bridge:repl] Mirror initialized, session=${handle.bridgeSessionId}`);
           } else {
@@ -601,9 +581,7 @@ export function useReplBridge(
                     tool_use_id: toolUseId,
                     description,
                     ...(permissionSuggestions ? { permission_suggestions: permissionSuggestions } : {}),
-                    ...(blockedPath ? { blocked_path: blockedPath } : {}),
-                  },
-                });
+                    ...(blockedPath ? { blocked_path: blockedPath } : {})}});
               },
               sendResponse(requestId, response) {
                 const payload: Record<string, unknown> = { ...response };
@@ -612,9 +590,7 @@ export function useReplBridge(
                   response: {
                     subtype: 'success',
                     request_id: requestId,
-                    response: payload,
-                  },
-                });
+                    response: payload}});
               },
               cancelRequest(requestId) {
                 handle.sendControlCancelRequest(requestId);
@@ -624,12 +600,10 @@ export function useReplBridge(
                 return () => {
                   pendingPermissionHandlers.delete(requestId);
                 };
-              },
-            };
+              }};
             setAppState(prev => ({
               ...prev,
-              replBridgePermissionCallbacks: permissionCallbacks,
-            }));
+              replBridgePermissionCallbacks: permissionCallbacks}));
             const url = getRemoteSessionUrl(handle.bridgeSessionId, handle.sessionIngressUrl);
             // environmentId === '' signals the v2 env-less path. buildBridgeConnectUrl
             // builds an env-specific connect URL, which doesn't exist without an env.
@@ -648,8 +622,7 @@ export function useReplBridge(
                 replBridgeConnectUrl: connectUrl ?? prev.replBridgeConnectUrl,
                 replBridgeEnvironmentId: handle.environmentId,
                 replBridgeSessionId: handle.bridgeSessionId,
-                replBridgeError: undefined,
-              };
+                replBridgeError: undefined};
             });
 
             // Show bridge status with URL in the transcript. perpetual (KAIROS
@@ -687,8 +660,7 @@ export function useReplBridge(
           notifyBridgeFailed(errMsg);
           setAppState(prev => ({
             ...prev,
-            replBridgeError: errMsg,
-          }));
+            replBridgeError: errMsg}));
           failureTimeoutRef.current = setTimeout(() => {
             if (cancelled) return;
             failureTimeoutRef.current = undefined;
@@ -697,8 +669,7 @@ export function useReplBridge(
               return {
                 ...prev,
                 replBridgeEnabled: false,
-                replBridgeError: undefined,
-              };
+                replBridgeError: undefined};
             });
           }, BRIDGE_FAILURE_DISMISS_MS);
           if (!outboundOnly) {
@@ -736,8 +707,7 @@ export function useReplBridge(
             replBridgeEnvironmentId: undefined,
             replBridgeSessionId: undefined,
             replBridgeError: undefined,
-            replBridgePermissionCallbacks: undefined,
-          };
+            replBridgePermissionCallbacks: undefined};
         });
         lastWrittenIndexRef.current = 0;
         pendingResultAfterFlushRef.current = false;
@@ -903,8 +873,7 @@ export function useReplBridge(
           hasHandle: true,
           isConnected: replBridgeConnected,
           lastWrittenIndex: lastWrittenIndexRef.current,
-          messageCount: messagesRef.current.length,
-        })
+          messageCount: messagesRef.current.length})
       ) {
         pendingResultAfterFlushRef.current = true;
         return;

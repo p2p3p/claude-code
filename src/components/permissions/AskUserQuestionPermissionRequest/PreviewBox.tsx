@@ -28,8 +28,7 @@ const BOX_CHARS = {
   horizontal: '─',
   vertical: '│',
   teeLeft: '├',
-  teeRight: '┤',
-};
+  teeRight: '┤'};
 
 /**
  * A bordered monospace box for displaying preview content.
@@ -59,8 +58,7 @@ function PreviewBoxBody({
   minHeight,
   minWidth = 40,
   maxWidth,
-  highlight,
-}: PreviewBoxProps & { highlight: CliHighlight | null }): React.ReactNode {
+  highlight}: PreviewBoxProps & { highlight: CliHighlight | null }): React.ReactNode {
   const { columns: terminalWidth } = useTerminalSize();
   const [theme] = useTheme();
   const effectiveMaxWidth = maxWidth ?? terminalWidth - 4;

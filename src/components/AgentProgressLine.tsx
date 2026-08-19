@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import { formatNumber } from '../utils/format.js';
+import { t } from '../utils/i18n/index.js';
 import type { Theme } from '../utils/theme.js';
 
 type Props = {
@@ -36,20 +37,19 @@ export function AgentProgressLine({
   isAsync = false,
   shouldAnimate: _shouldAnimate,
   lastToolInfo,
-  hideType = false,
-}: Props): React.ReactNode {
+  hideType = false}: Props): React.ReactNode {
   const treeChar = isLast ? '└─' : '├─';
   const isBackgrounded = isAsync && isResolved;
 
   // Determine the status text
   const getStatusText = (): string => {
     if (!isResolved) {
-      return lastToolInfo || 'Initializing…';
+      return lastToolInfo || t('agentProgress.initializing');
     }
     if (isBackgrounded) {
-      return taskDescription ?? 'Running in the background';
+      return taskDescription ?? t('agentProgress.runningInBackground');
     }
-    return 'Done';
+    return t('agentProgress.done');
   };
 
   return (
@@ -81,8 +81,8 @@ export function AgentProgressLine({
           {!isBackgrounded && (
             <>
               {' · '}
-              {toolUseCount} tool {toolUseCount === 1 ? 'use' : 'uses'}
-              {tokens !== null && <> · {formatNumber(tokens)} tokens</>}
+              {toolUseCount} {t('singularPlural.toolUse', toolUseCount)}
+              {tokens !== null && <> · {formatNumber(tokens)} {t('agentProgress.tokens', tokens)}</>}
             </>
           )}
         </Text>

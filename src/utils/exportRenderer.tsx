@@ -66,8 +66,7 @@ export async function streamRenderedMessages(
     columns,
     verbose = false,
     chunkSize = 40,
-    onProgress,
-  }: {
+    onProgress}: {
     columns?: number;
     verbose?: boolean;
     chunkSize?: number;

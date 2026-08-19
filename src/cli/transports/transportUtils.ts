@@ -1,4 +1,5 @@
 import { URL } from 'url'
+import { t } from '../../utils/i18n/index.js'
 import { isEnvTruthy } from '../../utils/envUtils.js'
 import { HybridTransport } from './HybridTransport.js'
 import { SSETransport } from './SSETransport.js'
@@ -40,6 +41,6 @@ export function getTransportForUrl(
     }
     return new WebSocketTransport(url, headers, sessionId, refreshHeaders)
   } else {
-    throw new Error(`Unsupported protocol: ${url.protocol}`)
+    throw new Error(t('transportUtils.unsupportedProtocol', url.protocol))
   }
 }

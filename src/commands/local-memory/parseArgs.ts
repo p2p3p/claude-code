@@ -48,8 +48,7 @@ export function parseLocalMemoryArgs(args: string): LocalMemoryArgs {
     if (!store) {
       return {
         action: 'invalid',
-        reason: `create requires a store name. ${USAGE}`,
-      }
+        reason: `create requires a store name. ${USAGE}`}
     }
     return { action: 'create', store }
   }
@@ -61,8 +60,7 @@ export function parseLocalMemoryArgs(args: string): LocalMemoryArgs {
     if (!store) {
       return {
         action: 'invalid',
-        reason: `store requires a store name. ${USAGE}`,
-      }
+        reason: `store requires a store name. ${USAGE}`}
     }
     if (!key) {
       return { action: 'invalid', reason: `store requires a key. ${USAGE}` }
@@ -82,8 +80,7 @@ export function parseLocalMemoryArgs(args: string): LocalMemoryArgs {
     if (!store) {
       return {
         action: 'invalid',
-        reason: `fetch requires a store name. ${USAGE}`,
-      }
+        reason: `fetch requires a store name. ${USAGE}`}
     }
     if (!key) {
       return { action: 'invalid', reason: `fetch requires a key. ${USAGE}` }
@@ -97,8 +94,7 @@ export function parseLocalMemoryArgs(args: string): LocalMemoryArgs {
     if (!store) {
       return {
         action: 'invalid',
-        reason: `entries requires a store name. ${USAGE}`,
-      }
+        reason: `entries requires a store name. ${USAGE}`}
     }
     return { action: 'entries', store }
   }
@@ -109,14 +105,12 @@ export function parseLocalMemoryArgs(args: string): LocalMemoryArgs {
     if (!store) {
       return {
         action: 'invalid',
-        reason: `archive requires a store name. ${USAGE}`,
-      }
+        reason: `archive requires a store name. ${USAGE}`}
     }
     return { action: 'archive', store }
   }
 
   return {
     action: 'invalid',
-    reason: `Unknown sub-command "${subCmd}". ${USAGE}`,
-  }
+    reason: `Unknown sub-command "${subCmd}". ${USAGE}`}
 }

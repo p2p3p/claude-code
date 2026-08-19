@@ -14,8 +14,5 @@ export function registerWeixinBuiltinPlugin(): void {
       weixin: {
         type: 'stdio',
         command: launch.execPath,
-        args: launch.args,
-      },
-    },
-  })
+        args: launch.args}}})
 }

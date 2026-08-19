@@ -2,12 +2,12 @@ import * as React from 'react';
 import { type GroveDecision, GroveDialog, PrivacySettingsDialog } from '../../components/grove/Grove.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js';
+  logEvent} from '../../services/analytics/index.js';
 import { getGroveNoticeConfig, getGroveSettings, isQualifiedForGrove } from '../../services/api/grove.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
+import { t } from '../../utils/i18n/index.js'
 
-const FALLBACK_MESSAGE = 'Review and manage your privacy settings at https://claude.ai/settings/data-privacy-controls';
+const FALLBACK_MESSAGE = t('privacySettings.fallback');
 
 export async function call(onDone: LocalJSXCommandOnDone): Promise<React.ReactNode | null> {
   const qualified = await isQualifiedForGrove();
@@ -27,9 +27,8 @@ export async function call(onDone: LocalJSXCommandOnDone): Promise<React.ReactNo
 
   async function onDoneWithDecision(decision: GroveDecision) {
     if (decision === 'escape' || decision === 'defer') {
-      onDone('Privacy settings dialog dismissed', {
-        display: 'system',
-      });
+      onDone(t('privacySettings.dialogDismissed'), {
+        display: 'system'});
       return;
     }
     await onDoneWithSettingsCheck();
@@ -38,19 +37,17 @@ export async function call(onDone: LocalJSXCommandOnDone): Promise<React.ReactNo
   async function onDoneWithSettingsCheck() {
     const updatedSettingsResult = await getGroveSettings();
     if (!updatedSettingsResult.success) {
-      onDone('Unable to retrieve updated privacy settings', {
-        display: 'system',
-      });
+      onDone(t('privacySettings.unableToRetrieve'), {
+        display: 'system'});
       return;
     }
     const updatedSettings = updatedSettingsResult.data;
     const groveStatus = updatedSettings.grove_enabled ? 'true' : 'false';
-    onDone(`"Help improve Claude" set to ${groveStatus}.`);
+    onDone(t('privacySettings.helpImproveSet', groveStatus));
     if (settings.grove_enabled !== null && settings.grove_enabled !== updatedSettings.grove_enabled) {
       logEvent('tengu_grove_policy_toggled', {
         state: updatedSettings.grove_enabled as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        location: 'settings' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        location: 'settings' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     }
   }
 

@@ -17,9 +17,9 @@ import { errorMessage } from '../../utils/errors.js';
 import { formatDuration, truncateToWidth } from '../../utils/format.js';
 import { toInternalMessages } from '../../utils/messages/mappers.js';
 import { EMPTY_LOOKUPS, normalizeMessages } from '../../utils/messages.js';
-import { plural } from '../../utils/stringUtils.js';
 import { teleportResumeCodeSession } from '../../utils/teleport.js';
 import { Select } from '../CustomSelect/select.js';
+import { t } from '../../utils/i18n/index.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
 import { Message } from '../Message.js';
 import { formatReviewStageCounts, RemoteSessionProgress } from './RemoteSessionProgress.js';
@@ -37,10 +37,16 @@ type Props = {
 // Lighter than tool.renderToolUseMessage (no registry lookup / schema parse).
 // Collapses whitespace so multi-line inputs (e.g. Bash command text)
 // render on one line.
+function translatePhaseLabel(phase: 'needs_input' | 'plan_ready' | undefined): string {
+  if (phase === 'needs_input') return t('taskDetail.phaseNeedsInput');
+  if (phase === 'plan_ready') return t('taskDetail.phasePlanReady');
+  return t('taskDetail.running');
+}
+
 export function formatToolUseSummary(name: string, input: unknown): string {
   // plan_ready phase is only reached via ExitPlanMode tool
   if (name === EXIT_PLAN_MODE_V2_TOOL_NAME) {
-    return 'Review the plan in Claude Code on the web';
+    return t('taskDetail.reviewPlanInWeb');
   }
   if (!input || typeof input !== 'object') return name;
   // AskUserQuestion: show the question text as a CTA, not the tool name.
@@ -59,7 +65,7 @@ export function formatToolUseSummary(name: string, input: unknown): string {
             : null;
       if (q) {
         const oneLine = q.replace(/\s+/g, ' ').trim();
-        return `Answer in browser: ${truncateToWidth(oneLine, 50)}`;
+        return t('taskDetail.answerInBrowser', truncateToWidth(oneLine, 50));
       }
     }
   }
@@ -72,20 +78,10 @@ export function formatToolUseSummary(name: string, input: unknown): string {
   return name;
 }
 
-const PHASE_LABEL = {
-  needs_input: 'input required',
-  plan_ready: 'ready',
-} as const;
-
-const AGENT_VERB = {
-  needs_input: 'waiting',
-  plan_ready: 'done',
-} as const;
-
 function UltraplanSessionDetail({ session, onDone, onBack, onKill }: Omit<Props, 'toolUseContext'>): React.ReactNode {
   const running = session.status === 'running' || session.status === 'pending';
   const phase = session.ultraplanPhase;
-  const statusText = running ? (phase ? PHASE_LABEL[phase] : 'running') : session.status;
+  const statusText = running ? translatePhaseLabel(phase) : session.status;
   const elapsedTime = useElapsedTime(session.startTime, running, 1000, 0, session.endTime);
 
   // Counts are eventually correct (lag ≤ poll interval). agentsWorking starts
@@ -110,8 +106,7 @@ function UltraplanSessionDetail({ session, onDone, onBack, onKill }: Omit<Props,
     return {
       agentsWorking: 1 + spawns,
       toolCalls: calls,
-      lastToolCall: lastBlock ? formatToolUseSummary(lastBlock.name, lastBlock.input) : null,
-    };
+      lastToolCall: lastBlock ? formatToolUseSummary(lastBlock.name, lastBlock.input) : null};
   }, [session.log]);
 
   const sessionUrl = getRemoteTaskSessionUrl(session.sessionId);
@@ -120,13 +115,13 @@ function UltraplanSessionDetail({ session, onDone, onBack, onKill }: Omit<Props,
 
   if (confirmingStop) {
     return (
-      <Dialog title="Stop ultraplan?" onCancel={() => setConfirmingStop(false)} color="background">
+      <Dialog title={t('taskDetail.stopUltraplan') + '?'} onCancel={() => setConfirmingStop(false)} color="background">
         <Box flexDirection="column" gap={1}>
-          <Text dimColor>This will terminate the Claude Code on the web session.</Text>
+          <Text dimColor>{t('taskDetail.stopUltraplanDesc')}</Text>
           <Select
             options={[
-              { label: 'Terminate session', value: 'stop' as const },
-              { label: 'Back', value: 'back' as const },
+              { label: t('taskDetail.terminateSession'), value: 'stop' as const },
+              { label: t('taskDetail.back'), value: 'back' as const },
             ]}
             onChange={v => {
               if (v === 'stop') {
@@ -147,7 +142,7 @@ function UltraplanSessionDetail({ session, onDone, onBack, onKill }: Omit<Props,
       title={
         <Text>
           <Text color="background">{phase === 'plan_ready' ? DIAMOND_FILLED : DIAMOND_OPEN} </Text>
-          <Text bold>ultraplan</Text>
+          <Text bold>{t('taskDetail.ultraplan')}</Text>
           <Text dimColor>
             {' · '}
             {elapsedTime}
@@ -162,8 +157,7 @@ function UltraplanSessionDetail({ session, onDone, onBack, onKill }: Omit<Props,
       <Box flexDirection="column" gap={1}>
         <Text>
           {phase === 'plan_ready' && <Text color="success">{figures.tick} </Text>}
-          {agentsWorking} {plural(agentsWorking, 'agent')} {phase ? AGENT_VERB[phase] : 'working'} · {toolCalls} tool{' '}
-          {plural(toolCalls, 'call')}
+          {t('taskDetail.agentsStatus', agentsWorking, phase ? (phase === 'plan_ready' ? t('taskDetail.verbDone') : t('taskDetail.verbWaiting')) : t('taskDetail.verbWorking'))} · {t('taskDetail.toolCalls', toolCalls)}
         </Text>
         {lastToolCall && <Text dimColor>{lastToolCall}</Text>}
         <Link url={sessionUrl}>
@@ -172,11 +166,10 @@ function UltraplanSessionDetail({ session, onDone, onBack, onKill }: Omit<Props,
         <Select
           options={[
             {
-              label: 'Review in Claude Code on the web',
-              value: 'open' as const,
-            },
-            ...(onKill && running ? [{ label: 'Stop ultraplan', value: 'stop' as const }] : []),
-            { label: 'Back', value: 'back' as const },
+              label: t('taskDetail.reviewInWeb'),
+              value: 'open' as const},
+            ...(onKill && running ? [{ label: t('taskDetail.stopUltraplan'), value: 'stop' as const }] : []),
+            { label: t('taskDetail.back'), value: 'back' as const },
           ]}
           onChange={v => {
             switch (v) {
@@ -203,10 +196,9 @@ function UltraplanSessionDetail({ session, onDone, onBack, onKill }: Omit<Props,
 
 const STAGES = ['finding', 'verifying', 'synthesizing'] as const;
 const STAGE_LABELS: Record<(typeof STAGES)[number], string> = {
-  finding: 'Find',
-  verifying: 'Verify',
-  synthesizing: 'Dedupe',
-};
+  finding: t('taskDetail.find'),
+  verifying: t('taskDetail.verify'),
+  synthesizing: t('taskDetail.dedupe')};
 
 // Setup → Find → Verify → Dedupe pipeline. Current stage in cloud teal,
 // rest dim. When completed, all stages dim with a trailing green ✓. The
@@ -216,8 +208,7 @@ const STAGE_LABELS: Record<(typeof STAGES)[number], string> = {
 function StagePipeline({
   stage,
   completed,
-  hasProgress,
-}: {
+  hasProgress}: {
   stage: 'finding' | 'verifying' | 'synthesizing' | undefined;
   completed: boolean;
   hasProgress: boolean;
@@ -226,7 +217,7 @@ function StagePipeline({
   const inSetup = !completed && !hasProgress;
   return (
     <Text>
-      {inSetup ? <Text color="background">Setup</Text> : <Text dimColor>Setup</Text>}
+      {inSetup ? <Text color="background">{t('taskDetail.setup')}</Text> : <Text dimColor>{t('taskDetail.setup')}</Text>}
       <Text dimColor> → </Text>
       {STAGES.map((s, i) => {
         const isCurrent = !completed && !inSetup && i === currentIdx;
@@ -249,12 +240,12 @@ function reviewCountsLine(session: DeepImmutable<RemoteAgentTaskState>): string 
   const p = session.reviewProgress;
   // No progress data — the orchestrator never wrote a snapshot. Don't
   // claim "0 findings" when completed; we just don't know.
-  if (!p) return session.status === 'completed' ? 'done' : 'setting up';
+  if (!p) return session.status === 'completed' ? t('taskDetail.reviewDone') : t('taskDetail.reviewSettingUp');
   const verified = p.bugsVerified;
   const refuted = p.bugsRefuted ?? 0;
   if (session.status === 'completed') {
-    const parts = [`${verified} ${plural(verified, 'finding')}`];
-    if (refuted > 0) parts.push(`${refuted} refuted`);
+    const parts = [t('taskDetail.reviewFindings', verified)];
+    if (refuted > 0) parts.push(t('taskDetail.reviewRefuted', refuted));
     return parts.join(' · ');
   }
   return formatReviewStageCounts(p.stage, p.bugsFound, verified, refuted);
@@ -277,20 +268,19 @@ function ReviewSessionDetail({ session, onDone, onBack, onKill }: Omit<Props, 't
   const goBackOrClose = onBack ?? handleClose;
 
   const sessionUrl = getRemoteTaskSessionUrl(session.sessionId);
-  const statusLabel = completed ? 'ready' : running ? 'running' : session.status;
+  const statusLabel = completed ? t('taskDetail.phasePlanReady') : running ? t('taskDetail.running') : session.status;
 
   if (confirmingStop) {
     return (
-      <Dialog title="Stop ultrareview?" onCancel={() => setConfirmingStop(false)} color="background">
+      <Dialog title={t('taskDetail.stopUltrareview') + '?'} onCancel={() => setConfirmingStop(false)} color="background">
         <Box flexDirection="column" gap={1}>
           <Text dimColor>
-            This archives the remote session and stops local tracking. The review will not complete and any findings so
-            far are discarded.
+            {t('taskDetail.stopUltrareviewDesc')}
           </Text>
           <Select
             options={[
-              { label: 'Stop ultrareview', value: 'stop' as const },
-              { label: 'Back', value: 'back' as const },
+              { label: t('taskDetail.stopUltrareview'), value: 'stop' as const },
+              { label: t('taskDetail.back'), value: 'back' as const },
             ]}
             onChange={v => {
               if (v === 'stop') {
@@ -308,13 +298,13 @@ function ReviewSessionDetail({ session, onDone, onBack, onKill }: Omit<Props, 't
 
   const options: { label: string; value: MenuAction }[] = completed
     ? [
-        { label: 'Open in Claude Code on the web', value: 'open' },
-        { label: 'Dismiss', value: 'dismiss' },
+        { label: t('taskDetail.openInWeb'), value: 'open' },
+        { label: t('taskDetail.dismiss'), value: 'dismiss' },
       ]
     : [
-        { label: 'Open in Claude Code on the web', value: 'open' },
-        ...(onKill && running ? [{ label: 'Stop ultrareview', value: 'stop' as const }] : []),
-        { label: 'Back', value: 'back' },
+        { label: t('taskDetail.openInWeb'), value: 'open' },
+        ...(onKill && running ? [{ label: t('taskDetail.stopUltrareview'), value: 'stop' as const }] : []),
+        { label: t('taskDetail.back'), value: 'back' },
       ];
 
   const handleSelect = (action: MenuAction) => {
@@ -340,7 +330,7 @@ function ReviewSessionDetail({ session, onDone, onBack, onKill }: Omit<Props, 't
       title={
         <Text>
           <Text color="background">{completed ? DIAMOND_FILLED : DIAMOND_OPEN} </Text>
-          <Text bold>ultrareview</Text>
+          <Text bold>{t('taskDetail.ultrareview')}</Text>
           <Text dimColor>
             {' · '}
             {elapsedTime}
@@ -353,11 +343,11 @@ function ReviewSessionDetail({ session, onDone, onBack, onKill }: Omit<Props, 't
       color="background"
       inputGuide={exitState =>
         exitState.pending ? (
-          <Text>Press {exitState.keyName} again to exit</Text>
+          <Text>{t('common.pressAgain', exitState.keyName)}</Text>
         ) : (
           <Byline>
-            <KeyboardShortcutHint shortcut="Enter" action="select" />
-            <KeyboardShortcutHint shortcut="Esc" action="go back" />
+            <KeyboardShortcutHint shortcut="Enter" action={t('taskDetail.select')} />
+            <KeyboardShortcutHint shortcut="Esc" action={t('taskDetail.goBack')} />
           </Byline>
         )
       }
@@ -451,43 +441,43 @@ export function RemoteSessionDetailDialog({ session, toolUseContext, onDone, onB
   return (
     <Box flexDirection="column" tabIndex={0} autoFocus onKeyDown={handleKeyDown}>
       <Dialog
-        title="Remote session details"
+        title={t('taskDetail.remoteSessionTitle')}
         onCancel={handleClose}
         color="background"
         inputGuide={exitState =>
           exitState.pending ? (
-            <Text>Press {exitState.keyName} again to exit</Text>
+            <Text>{t('common.pressAgain', exitState.keyName)}</Text>
           ) : (
             <Byline>
-              {onBack && <KeyboardShortcutHint shortcut="←" action="go back" />}
-              <KeyboardShortcutHint shortcut="Esc/Enter/Space" action="close" />
-              {!isTeleporting && <KeyboardShortcutHint shortcut="t" action="teleport" />}
+              {onBack && <KeyboardShortcutHint shortcut="←" action={t('taskDetail.goBack')} />}
+              <KeyboardShortcutHint shortcut="Esc/Enter/Space" action={t('taskDetail.close')} />
+              {!isTeleporting && <KeyboardShortcutHint shortcut="t" action={t('taskDetail.teleport')} />}
             </Byline>
           )
         }
       >
         <Box flexDirection="column">
           <Text>
-            <Text bold>Status</Text>:{' '}
+            <Text bold>{t('taskDetail.status')}</Text>:{' '}
             {displayStatus === 'running' || displayStatus === 'starting' ? (
-              <Text color="background">{displayStatus}</Text>
+              <Text color="background">{displayStatus === 'running' ? t('taskDetail.running') : t('taskDetail.starting')}</Text>
             ) : displayStatus === 'completed' ? (
-              <Text color="success">{displayStatus}</Text>
+              <Text color="success">{t('taskDetail.completed')}</Text>
             ) : (
               <Text color="error">{displayStatus}</Text>
             )}
           </Text>
           <Text>
-            <Text bold>Runtime</Text>: {formatDuration((session.endTime ?? Date.now()) - session.startTime)}
+            <Text bold>{t('taskDetail.runtime')}</Text>: {formatDuration((session.endTime ?? Date.now()) - session.startTime)}
           </Text>
           <Text wrap="truncate-end">
-            <Text bold>Title</Text>: {displayTitle}
+            <Text bold>{t('taskDetail.title')}</Text>: {displayTitle}
           </Text>
           <Text>
-            <Text bold>Progress</Text>: <RemoteSessionProgress session={session} />
+            <Text bold>{t('taskDetail.progress')}</Text>: <RemoteSessionProgress session={session} />
           </Text>
           <Text>
-            <Text bold>Session URL</Text>:{' '}
+            <Text bold>{t('taskDetail.sessionUrl')}</Text>:{' '}
             <Link url={getRemoteTaskSessionUrl(session.sessionId)}>
               <Text dimColor>{getRemoteTaskSessionUrl(session.sessionId)}</Text>
             </Link>
@@ -498,7 +488,7 @@ export function RemoteSessionDetailDialog({ session, toolUseContext, onDone, onB
         {session.log.length > 0 && (
           <Box flexDirection="column" marginTop={1}>
             <Text>
-              <Text bold>Recent messages</Text>:
+              <Text bold>{t('taskDetail.recentMessages')}</Text>:
             </Text>
             <Box flexDirection="column" height={10} overflowY="hidden">
               {lastMessages.map((msg, i) => (
@@ -522,7 +512,7 @@ export function RemoteSessionDetailDialog({ session, toolUseContext, onDone, onB
             </Box>
             <Box marginTop={1}>
               <Text dimColor italic>
-                Showing last {lastMessages.length} of {session.log.length} messages
+                {t('taskDetail.showingLastOf', lastMessages.length, session.log.length)}
               </Text>
             </Box>
           </Box>
@@ -531,12 +521,12 @@ export function RemoteSessionDetailDialog({ session, toolUseContext, onDone, onB
         {/* Teleport error message */}
         {teleportError && (
           <Box marginTop={1}>
-            <Text color="error">Teleport failed: {teleportError}</Text>
+            <Text color="error">{t('taskDetail.teleportFailed', teleportError)}</Text>
           </Box>
         )}
 
         {/* Teleporting status */}
-        {isTeleporting && <Text color="background">Teleporting to session…</Text>}
+        {isTeleporting && <Text color="background">{t('taskDetail.teleporting')}</Text>}
       </Dialog>
     </Box>
   );

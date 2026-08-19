@@ -9,8 +9,7 @@ import {
   TOOL_USE_ID_TAG,
   WORKTREE_BRANCH_TAG,
   WORKTREE_PATH_TAG,
-  WORKTREE_TAG,
-} from '../../constants/xml.js';
+  WORKTREE_TAG} from '../../constants/xml.js';
 import { abortSpeculation } from '../../services/PromptSuggestion/speculation.js';
 import type { AppState } from '../../state/AppState.js';
 import type { SetAppState, Task, TaskStateBase } from '../../Task.js';
@@ -68,8 +67,7 @@ export function createProgressTracker(): ProgressTracker {
     toolUseCount: 0,
     latestInputTokens: 0,
     cumulativeOutputTokens: 0,
-    recentActivities: [],
-  };
+    recentActivities: []};
 }
 
 export function getTokenCountFromTracker(tracker: ProgressTracker): number {
@@ -112,8 +110,7 @@ export function updateProgressFromMessage(
           input,
           activityDescription: resolveActivityDescription?.(content.name!, input),
           isSearch: classification?.isSearch,
-          isRead: classification?.isRead,
-        });
+          isRead: classification?.isRead});
       }
     }
   }
@@ -128,8 +125,7 @@ export function getProgressUpdate(tracker: ProgressTracker): AgentProgress {
     tokenCount: getTokenCountFromTracker(tracker),
     lastActivity:
       tracker.recentActivities.length > 0 ? tracker.recentActivities[tracker.recentActivities.length - 1] : undefined,
-    recentActivities: [...tracker.recentActivities],
-  };
+    recentActivities: [...tracker.recentActivities]};
 }
 
 /**
@@ -198,8 +194,7 @@ export function queuePendingMessage(
 ): void {
   updateTaskState<LocalAgentTaskState>(taskId, setAppState, task => ({
     ...task,
-    pendingMessages: [...task.pendingMessages, msg],
-  }));
+    pendingMessages: [...task.pendingMessages, msg]}));
 }
 
 /**
@@ -215,8 +210,7 @@ export function appendMessageToLocalAgent(
 ): void {
   updateTaskState<LocalAgentTaskState>(taskId, setAppState, task => ({
     ...task,
-    messages: [...(task.messages ?? []), message],
-  }));
+    messages: [...(task.messages ?? []), message]}));
 }
 
 export function drainPendingMessages(
@@ -231,8 +225,7 @@ export function drainPendingMessages(
   const drained = task.pendingMessages;
   updateTaskState<LocalAgentTaskState>(taskId, setAppState, t => ({
     ...t,
-    pendingMessages: [],
-  }));
+    pendingMessages: []}));
   return drained;
 }
 
@@ -249,8 +242,7 @@ export function enqueueAgentNotification({
   usage,
   toolUseId,
   worktreePath,
-  worktreeBranch,
-}: {
+  worktreeBranch}: {
   taskId: string;
   description: string;
   status: 'completed' | 'failed' | 'killed';
@@ -277,8 +269,7 @@ export function enqueueAgentNotification({
     shouldEnqueue = true;
     return {
       ...task,
-      notified: true,
-    };
+      notified: true};
   });
 
   if (!shouldEnqueue) {
@@ -329,8 +320,7 @@ export const LocalAgentTask: Task = {
 
   async kill(taskId, setAppState) {
     killAsyncAgent(taskId, setAppState);
-  },
-};
+  }};
 
 /**
  * Kill an agent task. No-op if already killed/completed.
@@ -351,8 +341,7 @@ export function killAsyncAgent(taskId: string, setAppState: SetAppState): void {
       evictAfter: task.retain ? undefined : Date.now() + PANEL_GRACE_MS,
       abortController: undefined,
       unregisterCleanup: undefined,
-      selectedAgent: undefined,
-    };
+      selectedAgent: undefined};
   });
   if (killed) {
     void evictTaskOutput(taskId);
@@ -383,8 +372,7 @@ export function markAgentsNotified(taskId: string, setAppState: SetAppState): vo
     }
     return {
       ...task,
-      notified: true,
-    };
+      notified: true};
   });
 }
 
@@ -402,8 +390,7 @@ export function updateAgentProgress(taskId: string, progress: AgentProgress, set
     const existingSummary = task.progress?.summary;
     return {
       ...task,
-      progress: existingSummary ? { ...progress, summary: existingSummary } : progress,
-    };
+      progress: existingSummary ? { ...progress, summary: existingSummary } : progress};
   });
 }
 
@@ -428,8 +415,7 @@ export function updateAgentSummary(taskId: string, summary: string, setAppState:
       tokenCount: task.progress?.tokenCount ?? 0,
       toolUseCount: task.progress?.toolUseCount ?? 0,
       startTime: task.startTime,
-      toolUseId: task.toolUseId,
-    };
+      toolUseId: task.toolUseId};
 
     return {
       ...task,
@@ -437,9 +423,7 @@ export function updateAgentSummary(taskId: string, summary: string, setAppState:
         ...task.progress,
         toolUseCount: task.progress?.toolUseCount ?? 0,
         tokenCount: task.progress?.tokenCount ?? 0,
-        summary,
-      },
-    };
+        summary}};
   });
 
   // Emit summary to SDK consumers (e.g. VS Code subagent panel). No-op in TUI.
@@ -454,8 +438,7 @@ export function updateAgentSummary(taskId: string, summary: string, setAppState:
       startTime,
       totalTokens: tokenCount,
       toolUses: toolUseCount,
-      summary,
-    });
+      summary});
   }
 }
 
@@ -479,8 +462,7 @@ export function completeAgentTask(result: AgentToolResult, setAppState: SetAppSt
       evictAfter: task.retain ? undefined : Date.now() + PANEL_GRACE_MS,
       abortController: undefined,
       unregisterCleanup: undefined,
-      selectedAgent: undefined,
-    };
+      selectedAgent: undefined};
   });
   void evictTaskOutput(taskId);
   // Note: Notification is sent by AgentTool via enqueueAgentNotification
@@ -505,8 +487,7 @@ export function failAgentTask(taskId: string, error: string, setAppState: SetApp
       evictAfter: task.retain ? undefined : Date.now() + PANEL_GRACE_MS,
       abortController: undefined,
       unregisterCleanup: undefined,
-      selectedAgent: undefined,
-    };
+      selectedAgent: undefined};
   });
   void evictTaskOutput(taskId);
   // Note: Notification is sent by AgentTool via enqueueAgentNotification
@@ -527,8 +508,7 @@ export function registerAsyncAgent({
   selectedAgent,
   setAppState,
   parentAbortController,
-  toolUseId,
-}: {
+  toolUseId}: {
   agentId: string;
   description: string;
   prompt: string;
@@ -559,8 +539,7 @@ export function registerAsyncAgent({
     isBackgrounded: true, // registerAsyncAgent immediately backgrounds
     pendingMessages: [],
     retain: false,
-    diskLoaded: false,
-  };
+    diskLoaded: false};
 
   // Register cleanup handler
   const unregisterCleanup = registerCleanup(async () => {
@@ -591,8 +570,7 @@ export function registerAgentForeground({
   selectedAgent,
   setAppState,
   autoBackgroundMs,
-  toolUseId,
-}: {
+  toolUseId}: {
   agentId: string;
   description: string;
   prompt: string;
@@ -629,8 +607,7 @@ export function registerAgentForeground({
     isBackgrounded: false, // Not yet backgrounded - running in foreground
     pendingMessages: [],
     retain: false,
-    diskLoaded: false,
-  };
+    diskLoaded: false};
 
   // Create background signal promise
   let resolveBackgroundSignal: () => void;
@@ -656,9 +633,7 @@ export function registerAgentForeground({
             ...prev,
             tasks: {
               ...prev.tasks,
-              [agentId]: { ...prevTask, isBackgrounded: true },
-            },
-          };
+              [agentId]: { ...prevTask, isBackgrounded: true }}};
         });
         const resolver = backgroundSignalResolvers.get(agentId);
         if (resolver) {
@@ -697,9 +672,7 @@ export function backgroundAgentTask(taskId: string, getAppState: () => AppState,
       ...prev,
       tasks: {
         ...prev.tasks,
-        [taskId]: { ...prevTask, isBackgrounded: true },
-      },
-    };
+        [taskId]: { ...prevTask, isBackgrounded: true }}};
   });
 
   // Resolve the background signal to interrupt the agent loop

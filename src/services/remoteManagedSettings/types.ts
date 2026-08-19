@@ -11,8 +11,7 @@ export const RemoteManagedSettingsResponseSchema = lazySchema(() =>
   z.object({
     uuid: z.string(), // Settings UUID
     checksum: z.string(),
-    settings: z.record(z.string(), z.unknown()) as z.ZodType<SettingsJson>,
-  }),
+    settings: z.record(z.string(), z.unknown()) as z.ZodType<SettingsJson>}),
 )
 
 export type RemoteManagedSettingsResponse = z.infer<

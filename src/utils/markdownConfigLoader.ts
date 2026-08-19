@@ -6,8 +6,7 @@ import { homedir } from 'os'
 import { dirname, join, resolve, sep } from 'path'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { getProjectRoot } from '../bootstrap/state.js'
 import { logForDebugging } from './debug.js'
 import { getClaudeConfigHomeDir, isEnvTruthy } from './envUtils.js'
@@ -20,8 +19,7 @@ import { parseToolListFromCLI } from './permissions/permissionSetup.js'
 import { ripGrep } from './ripgrep.js'
 import {
   isSettingSourceEnabled,
-  type SettingSource,
-} from './settings/constants.js'
+  type SettingSource} from './settings/constants.js'
 import { getManagedFilePath } from './settings/managedPath.js'
 import { isRestrictedToPluginOnly } from './settings/pluginOnlyPolicy.js'
 
@@ -340,8 +338,7 @@ export const loadMarkdownFilesForSubdir = memoize(
         _.map(file => ({
           ...file,
           baseDir: managedDir,
-          source: 'policySettings' as const,
-        })),
+          source: 'policySettings' as const})),
       ),
       // Conditionally load user files
       isSettingSourceEnabled('userSettings') &&
@@ -350,8 +347,7 @@ export const loadMarkdownFilesForSubdir = memoize(
             _.map(file => ({
               ...file,
               baseDir: userDir,
-              source: 'userSettings' as const,
-            })),
+              source: 'userSettings' as const})),
           )
         : Promise.resolve([]),
       // Conditionally load project files from all directories up to home
@@ -363,8 +359,7 @@ export const loadMarkdownFilesForSubdir = memoize(
                 _.map(file => ({
                   ...file,
                   baseDir: projectDir,
-                  source: 'projectSettings' as const,
-                })),
+                  source: 'projectSettings' as const})),
               ),
             ),
           )
@@ -420,8 +415,7 @@ export const loadMarkdownFilesForSubdir = memoize(
       projectFilesFound: projectFiles.length,
       projectDirsSearched: projectDirs.length,
       subdir:
-        subdir as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        subdir as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
     return deduplicatedFiles
   },
@@ -583,8 +577,7 @@ async function loadMarkdownFiles(dir: string): Promise<
         return {
           filePath,
           frontmatter,
-          content,
-        }
+          content}
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error)

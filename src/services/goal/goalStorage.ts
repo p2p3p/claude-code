@@ -11,8 +11,7 @@ import { getSessionId } from '../../bootstrap/state.js'
 import type { GoalState } from '../../types/logs.js'
 import {
   clearGoalEntry as clearGoalEntryOnDisk,
-  saveGoal as saveGoalOnDisk,
-} from '../../utils/sessionStorage.js'
+  saveGoal as saveGoalOnDisk} from '../../utils/sessionStorage.js'
 import { _setGoalFromPersistedState, getGoal } from './goalState.js'
 
 /**

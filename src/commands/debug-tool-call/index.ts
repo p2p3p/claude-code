@@ -3,11 +3,11 @@ import { join } from 'node:path'
 import {
   getOriginalCwd,
   getSessionId,
-  getSessionProjectDir,
-} from '../../bootstrap/state.js'
+  getSessionProjectDir} from '../../bootstrap/state.js'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
 import { sanitizePath } from '../../utils/path.js'
 import type { Command, LocalCommandResult } from '../../types/command.js'
+import { t } from '../../utils/i18n/index.js'
 
 const DEFAULT_N = 5
 const MAX_OUTPUT_LEN = 200
@@ -66,8 +66,7 @@ function extractContentBlocks(
         type: 'tool_use',
         id: block.id,
         name: typeof block.name === 'string' ? block.name : 'unknown',
-        input: block.input,
-      })
+        input: block.input})
     } else if (
       block.type === 'tool_result' &&
       typeof block.tool_use_id === 'string'
@@ -75,8 +74,7 @@ function extractContentBlocks(
       result.push({
         type: 'tool_result',
         tool_use_id: block.tool_use_id,
-        content: block.content,
-      })
+        content: block.content})
     }
   }
   return result
@@ -105,8 +103,7 @@ function parseToolCallsFromLog(
             pairs.push({
               name: use.name,
               input: renderValue(use.input),
-              output: renderValue(block.content),
-            })
+              output: renderValue(block.content)})
           }
         }
       }
@@ -121,8 +118,7 @@ function parseToolCallsFromLog(
 const debugToolCall: Command = {
   type: 'local',
   name: 'debug-tool-call',
-  description:
-    'Show the last N tool call pairs (use/result) from the session log',
+  description: t('cmd.descDebugToolCall'),
   isHidden: false,
   isEnabled: () => true,
   supportsNonInteractive: true,
@@ -138,13 +134,12 @@ const debugToolCall: Command = {
         return {
           type: 'text',
           value: [
-            '## Debug Tool Calls',
+            t('debugToolCall.title'),
             '',
-            `Log file not found: \`${logPath}\``,
+            t('debugToolCall.logFileNotFound', logPath),
             '',
-            'No tool calls to show — the session log has not been created yet.',
-          ].join('\n'),
-        }
+            t('debugToolCall.noToolCallsYet'),
+          ].join('\n')}
       }
 
       const pairs = parseToolCallsFromLog(logPath)
@@ -154,28 +149,27 @@ const debugToolCall: Command = {
         return {
           type: 'text',
           value: [
-            '## Debug Tool Calls',
+            t('debugToolCall.title'),
             '',
-            `No tool call pairs found in session log: \`${logPath}\``,
+            t('debugToolCall.noPairsFound', logPath),
             '',
-            'Tool calls appear after the model invokes a tool and receives a result.',
-          ].join('\n'),
-        }
+            t('debugToolCall.toolCallsAppearAfter'),
+          ].join('\n')}
       }
 
       const lines: string[] = [
-        `## Last ${recent.length} Tool Call${recent.length === 1 ? '' : 's'} (of ${pairs.length} total)`,
+        t('debugToolCall.lastToolCallsTitle', recent.length, pairs.length),
         '',
       ]
 
       for (let i = 0; i < recent.length; i++) {
         const pair = recent[i]
         lines.push(`### [${pairs.length - recent.length + i + 1}] ${pair.name}`)
-        lines.push(`**Input:**`)
+        lines.push(t('debugToolCall.input'))
         lines.push('```')
         lines.push(pair.input)
         lines.push('```')
-        lines.push(`**Output:**`)
+        lines.push(t('debugToolCall.output'))
         lines.push('```')
         lines.push(pair.output)
         lines.push('```')
@@ -183,8 +177,6 @@ const debugToolCall: Command = {
       }
 
       return { type: 'text', value: lines.join('\n') }
-    },
-  }),
-}
+    }})}
 
 export default debugToolCall

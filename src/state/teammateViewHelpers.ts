@@ -33,8 +33,7 @@ function release(task: LocalAgentTaskState): LocalAgentTaskState {
     diskLoaded: false,
     evictAfter: isTerminalTaskStatus(task.status)
       ? Date.now() + PANEL_GRACE_MS
-      : undefined,
-  }
+      : undefined}
 }
 
 /**
@@ -75,8 +74,7 @@ export function enterTeammateView(
       ...prev,
       viewingAgentTaskId: taskId,
       viewSelectionMode: 'viewing-agent',
-      tasks,
-    }
+      tasks}
   })
 }
 
@@ -94,8 +92,7 @@ export function exitTeammateView(
     const cleared = {
       ...prev,
       viewingAgentTaskId: undefined,
-      viewSelectionMode: 'none' as const,
-    }
+      viewSelectionMode: 'none' as const}
     if (id === undefined) {
       return prev.viewSelectionMode === 'none' ? prev : cleared
     }
@@ -103,8 +100,7 @@ export function exitTeammateView(
     if (!isLocalAgent(task) || !task.retain) return cleared
     return {
       ...cleared,
-      tasks: { ...prev.tasks, [id]: release(task) },
-    }
+      tasks: { ...prev.tasks, [id]: release(task) }}
   })
 }
 
@@ -130,12 +126,9 @@ export function stopOrDismissAgent(
       ...prev,
       tasks: {
         ...prev.tasks,
-        [taskId]: { ...release(task), evictAfter: 0 },
-      },
+        [taskId]: { ...release(task), evictAfter: 0 }},
       ...(viewingThis && {
         viewingAgentTaskId: undefined,
-        viewSelectionMode: 'none',
-      }),
-    }
+        viewSelectionMode: 'none'})}
   })
 }

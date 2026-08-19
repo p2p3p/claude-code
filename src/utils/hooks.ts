@@ -6,6 +6,7 @@
 import { basename } from 'path'
 import { spawn, type ChildProcessWithoutNullStreams } from 'child_process'
 import { pathExists } from './file.js'
+import { t } from './i18n/index.js'
 import { wrapSpawn } from './ShellCommand.js'
 import { TaskOutput } from './task/TaskOutput.js'
 import { getCwd } from './cwd.js'
@@ -13,8 +14,7 @@ import { randomUUID } from 'crypto'
 import { formatShellPrefixCommand } from './bash/shellPrefix.js'
 import {
   getHookEnvFilePath,
-  invalidateSessionEnvCache,
-} from './sessionEnvironment.js'
+  invalidateSessionEnvCache} from './sessionEnvironment.js'
 import { subprocessEnv } from './subprocessEnv.js'
 import { getPlatform } from './platform.js'
 import { findGitBashPath, windowsPathToPosixPath } from './windowsPaths.js'
@@ -23,8 +23,7 @@ import { DEFAULT_HOOK_SHELL } from './shell/shellProvider.js'
 import { buildPowerShellArgs } from './shell/powershellProvider.js'
 import {
   loadPluginOptions,
-  substituteUserConfigVariables,
-} from './plugins/pluginOptionsStorage.js'
+  substituteUserConfigVariables} from './plugins/pluginOptionsStorage.js'
 import { getPluginDataDir } from './plugins/pluginDirectories.js'
 import {
   getSessionId,
@@ -34,34 +33,28 @@ import {
   getStatsStore,
   addToTurnHookDuration,
   getOriginalCwd,
-  getMainThreadAgentType,
-} from '../bootstrap/state.js'
+  getMainThreadAgentType} from '../bootstrap/state.js'
 import { checkHasTrustDialogAccepted } from './config.js'
 import {
   getHooksConfigFromSnapshot,
   shouldAllowManagedHooksOnly,
-  shouldDisableAllHooksIncludingManaged,
-} from './hooks/hooksConfigSnapshot.js'
+  shouldDisableAllHooksIncludingManaged} from './hooks/hooksConfigSnapshot.js'
 import {
   getTranscriptPathForSession,
-  getAgentTranscriptPath,
-} from './sessionStorage.js'
+  getAgentTranscriptPath} from './sessionStorage.js'
 import type { AgentId } from '../types/ids.js'
 import {
   getSettings_DEPRECATED,
-  getSettingsForSource,
-} from './settings/settings.js'
+  getSettingsForSource} from './settings/settings.js'
 import {
   logEvent,
-  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-} from 'src/services/analytics/index.js'
+  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS} from 'src/services/analytics/index.js'
 import { logOTelEvent } from './telemetry/events.js'
 import { ALLOWED_OFFICIAL_MARKETPLACE_NAMES } from './plugins/schemas.js'
 import {
   startHookSpan,
   endHookSpan,
-  isBetaTracingEnabled,
-} from './telemetry/sessionTracing.js'
+  isBetaTracingEnabled} from './telemetry/sessionTracing.js'
 import {
   hookJSONOutputSchema,
   promptRequestSchema,
@@ -71,8 +64,7 @@ import {
   type PromptResponse,
   isAsyncHookJSONOutput,
   isSyncHookJSONOutput,
-  type PermissionRequestResult,
-} from '../types/hooks.js'
+  type PermissionRequestResult} from '../types/hooks.js'
 import type {
   HookEvent,
   HookInput,
@@ -105,8 +97,7 @@ import type {
   PermissionUpdate,
   ExitReason,
   SyncHookJSONOutput,
-  AsyncHookJSONOutput,
-} from 'src/entrypoints/agentSdkTypes.js'
+  AsyncHookJSONOutput} from 'src/entrypoints/agentSdkTypes.js'
 import type { StatusLineCommandInput } from '../types/statusLine.js'
 import type { ElicitResult } from '@modelcontextprotocol/sdk/types.js'
 import type { FileSuggestionCommandInput } from '../types/fileSuggestion.js'
@@ -116,8 +107,7 @@ import type {
   HookMatcher,
   HookCommand,
   PluginHookMatcher,
-  SkillHookMatcher,
-} from './settings/types.js'
+  SkillHookMatcher} from './settings/types.js'
 import { getHookDisplayText } from './hooks/hooksSettings.js'
 import { logForDebugging } from './debug.js'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
@@ -125,8 +115,7 @@ import { firstLineOf } from './stringUtils.js'
 import {
   normalizeLegacyToolName,
   getLegacyToolNames,
-  permissionRuleValueFromString,
-} from './permissions/permissionRuleParser.js'
+  permissionRuleValueFromString} from './permissions/permissionRuleParser.js'
 import { logError } from './log.js'
 import { SandboxManager } from './sandbox/sandbox-adapter.js'
 import { createCombinedAbortSignal } from './combinedAbortSignal.js'
@@ -136,13 +125,11 @@ import { enqueuePendingNotification } from './messageQueueManager.js'
 import {
   extractTextContent,
   getLastAssistantMessage,
-  wrapInSystemReminder,
-} from './messages.js'
+  wrapInSystemReminder} from './messages.js'
 import {
   emitHookStarted,
   emitHookResponse,
-  startHookProgressInterval,
-} from './hooks/hookEvents.js'
+  startHookProgressInterval} from './hooks/hookEvents.js'
 import { createAttachmentMessage } from './attachments.js'
 import { all } from './generators.js'
 import { findToolByName, type Tools, type ToolUseContext } from '../Tool.js'
@@ -157,8 +144,7 @@ import {
   getSessionHookCallback,
   clearSessionHooks,
   type SessionDerivedHookMatcher,
-  type FunctionHook,
-} from './hooks/sessionHooks.js'
+  type FunctionHook} from './hooks/sessionHooks.js'
 import type { AppState } from '../state/AppState.js'
 import { jsonStringify, jsonParse } from './slowOperations.js'
 import { isEnvTruthy } from './envUtils.js'
@@ -191,8 +177,7 @@ function executeInBackground({
   hookName,
   command,
   asyncRewake,
-  pluginId,
-}: {
+  pluginId}: {
   processId: string
   hookId: string
   shellCommand: ShellCommand
@@ -232,15 +217,13 @@ function executeInBackground({
         stdout,
         stderr,
         exitCode: result.code,
-        outcome: result.code === 0 ? 'success' : 'error',
-      })
+        outcome: result.code === 0 ? 'success' : 'error'})
       if (result.code === 2) {
         enqueuePendingNotification({
           value: wrapInSystemReminder(
             `Stop hook blocking error from command "${hookName}": ${stderr || stdout}`,
           ),
-          mode: 'task-notification',
-        })
+          mode: 'task-notification'})
       }
     })
     return true
@@ -259,8 +242,7 @@ function executeInBackground({
     hookName,
     command,
     shellCommand,
-    pluginId,
-  })
+    pluginId})
 
   return true
 }
@@ -324,8 +306,7 @@ export function createBaseHookInput(
     cwd: getCwd(),
     permission_mode: permissionMode,
     agent_id: agentInfo?.agentId,
-    agent_type: resolvedAgentType,
-  }
+    agent_type: resolvedAgentType}
 }
 
 export interface HookBlockingError {
@@ -393,8 +374,7 @@ function validateHookJson(
     .map(err => `  - ${err.path.join('.')}: ${err.message}`)
     .join('\n')
   return {
-    validationError: `Hook JSON output validation failed:\n${errors}\n\nThe hook's output was: ${jsonStringify(parsed, null, 2)}`,
-  }
+    validationError: `Hook JSON output validation failed:\n${errors}\n\nThe hook's output was: ${jsonStringify(parsed, null, 2)}`}
 }
 
 function parseHookOutput(stdout: string): {
@@ -428,18 +408,13 @@ function parseHookOutput(stdout: string): {
             hookEventName: '"PreToolUse"',
             permissionDecision: '"allow" | "deny" | "ask" (optional)',
             permissionDecisionReason: 'string (optional)',
-            updatedInput: 'object (optional) - Modified tool input to use',
-          },
+            updatedInput: 'object (optional) - Modified tool input to use'},
           'for UserPromptSubmit': {
             hookEventName: '"UserPromptSubmit"',
-            additionalContext: 'string (required)',
-          },
+            additionalContext: 'string (required)'},
           'for PostToolUse': {
             hookEventName: '"PostToolUse"',
-            additionalContext: 'string (optional)',
-          },
-        },
-      },
+            additionalContext: 'string (optional)'}}},
       null,
       2,
     )}`
@@ -576,8 +551,7 @@ function processHookJSONOutput({
   stdout,
   stderr,
   exitCode,
-  durationMs,
-}: {
+  durationMs}: {
   json: SyncHookJSONOutput
   command: string
   hookName: string
@@ -614,8 +588,7 @@ function processHookJSONOutput({
         result.permissionBehavior = 'deny'
         result.blockingError = {
           blockingError: json.reason || 'Blocked by hook',
-          command,
-        }
+          command}
         break
       default:
         // Handle unknown decision types as errors
@@ -643,8 +616,7 @@ function processHookJSONOutput({
         result.permissionBehavior = 'deny'
         result.blockingError = {
           blockingError: json.reason || 'Blocked by hook',
-          command,
-        }
+          command}
         break
       case 'ask':
         result.permissionBehavior = 'ask'
@@ -687,8 +659,7 @@ function processHookJSONOutput({
                   json.hookSpecificOutput.permissionDecisionReason ||
                   json.reason ||
                   'Blocked by hook',
-                command,
-              }
+                command}
               break
             case 'ask':
               result.permissionBehavior = 'ask'
@@ -760,13 +731,11 @@ function processHookJSONOutput({
             action: json.hookSpecificOutput.action,
             content: json.hookSpecificOutput.content as
               | ElicitationResponse['content']
-              | undefined,
-          }
+              | undefined}
           if (json.hookSpecificOutput.action === 'decline') {
             result.blockingError = {
               blockingError: json.reason || 'Elicitation denied by hook',
-              command,
-            }
+              command}
           }
         }
         break
@@ -776,14 +745,12 @@ function processHookJSONOutput({
             action: json.hookSpecificOutput.action,
             content: json.hookSpecificOutput.content as
               | ElicitationResponse['content']
-              | undefined,
-          }
+              | undefined}
           if (json.hookSpecificOutput.action === 'decline') {
             result.blockingError = {
               blockingError:
                 json.reason || 'Elicitation result blocked by hook',
-              command,
-            }
+              command}
           }
         }
         break
@@ -798,8 +765,7 @@ function processHookJSONOutput({
           hookName,
           toolUseID,
           hookEvent,
-          blockingError: result.blockingError,
-        })
+          blockingError: result.blockingError})
       : createAttachmentMessage({
           type: 'hook_success',
           hookName,
@@ -814,9 +780,7 @@ function processHookJSONOutput({
           stderr,
           exitCode,
           command,
-          durationMs,
-        }),
-  }
+          durationMs})}
 }
 
 /**
@@ -964,8 +928,7 @@ async function execCommandHook(
   // Build env vars — all paths go through toHookPath for Windows POSIX conversion
   const envVars: NodeJS.ProcessEnv = {
     ...subprocessEnv(),
-    CLAUDE_PROJECT_DIR: toHookPath(projectDir),
-  }
+    CLAUDE_PROJECT_DIR: toHookPath(projectDir)}
 
   // Plugin and skill hooks both set CLAUDE_PLUGIN_ROOT (skills use the same
   // name for consistency — skills can migrate to plugins without code changes)
@@ -1060,17 +1023,14 @@ async function execCommandHook(
           // should use the `http` hook type instead of shell commands.
           network: {
             allowedDomains: [],
-            deniedDomains: [],
-          },
+            deniedDomains: []},
           // Filesystem: no additional restrictions beyond sandbox defaults.
           // Hooks need to read/write project files freely (e.g. prettier --write).
           filesystem: {
             allowWrite: ['/'],
             denyWrite: [],
             allowRead: [],
-            denyRead: [],
-          },
-        },
+            denyRead: []}},
         signal,
       )
       logForDebugging(
@@ -1102,8 +1062,7 @@ async function execCommandHook(
       env: envVars,
       cwd: safeCwd,
       // Prevent visible console window on Windows (no-op on other platforms)
-      windowsHide: true,
-    }) as ChildProcessWithoutNullStreams
+      windowsHide: true}) as ChildProcessWithoutNullStreams
   } else {
     // On Windows, use Git Bash explicitly (cmd.exe can't run bash syntax).
     // On other platforms, shell: true uses /bin/sh.
@@ -1113,8 +1072,7 @@ async function execCommandHook(
       cwd: safeCwd,
       shell,
       // Prevent visible console window on Windows (no-op on other platforms)
-      windowsHide: true,
-    }) as ChildProcessWithoutNullStreams
+      windowsHide: true}) as ChildProcessWithoutNullStreams
   }
 
   // Hooks use pipe mode — stdout must be streamed into JS so we can parse
@@ -1150,16 +1108,14 @@ async function execCommandHook(
       hookName,
       command: hook.command,
       asyncRewake: hook.asyncRewake,
-      pluginId,
-    })
+      pluginId})
     if (backgrounded) {
       return {
         stdout: '',
         stderr: '',
         output: '',
         status: 0,
-        backgrounded: true,
-      }
+        backgrounded: true}
     }
   }
 
@@ -1271,16 +1227,14 @@ async function execCommandHook(
             hookEvent,
             hookName,
             command: hook.command,
-            pluginId,
-          })
+            pluginId})
           if (backgrounded) {
             shellCommandTransferred = true
             asyncResolve?.({
               stdout,
               stderr,
               output,
-              status: 0,
-            })
+              status: 0})
           }
         } else if (isAsyncHookJSONOutput(parsed) && forceSyncExecution) {
           logForDebugging(
@@ -1306,8 +1260,7 @@ async function execCommandHook(
     hookId,
     hookName,
     hookEvent,
-    getOutput: async () => ({ stdout, stderr, output }),
-  })
+    getOutput: async () => ({ stdout, stderr, output })})
 
   // Wait for stdout and stderr streams to finish before considering output complete
   // This prevents a race condition where 'close' fires before all 'data' events are processed
@@ -1386,8 +1339,7 @@ async function execCommandHook(
           stderr,
           output,
           status: exitCode!,
-          aborted: signal.aborted,
-        })
+          aborted: signal.aborted})
       })
     })
   })
@@ -1397,8 +1349,7 @@ async function execCommandHook(
     if (shouldEmitDiag) {
       logForDiagnosticsNoPII('info', 'hook_spawn_started', {
         hook_event_name: hookEvent,
-        index: hookIndex,
-      })
+        index: hookIndex})
     }
     await Promise.race([stdinWritePromise, childErrorPromise])
 
@@ -1428,8 +1379,7 @@ async function execCommandHook(
         stdout: '',
         stderr: errMsg,
         output: errMsg,
-        status: 1,
-      }
+        status: 1}
     } else if (code === 'ABORT_ERR') {
       diagAborted = true
       return {
@@ -1437,8 +1387,7 @@ async function execCommandHook(
         stderr: 'Hook cancelled',
         output: 'Hook cancelled',
         status: 1,
-        aborted: true,
-      }
+        aborted: true}
     } else {
       const errorMsg = errorMessage(error)
       const errOutput = `Error occurred while executing hook command: ${errorMsg}`
@@ -1446,8 +1395,7 @@ async function execCommandHook(
         stdout: '',
         stderr: errOutput,
         output: errOutput,
-        status: 1,
-      }
+        status: 1}
     }
   } finally {
     if (shouldEmitDiag) {
@@ -1456,8 +1404,7 @@ async function execCommandHook(
         index: hookIndex,
         duration_ms: Date.now() - diagStartMs,
         exit_code: diagExitCode,
-        aborted: diagAborted,
-      })
+        aborted: diagAborted})
     }
     stopProgressInterval()
     // Clean up stream resources unless ownership was transferred (e.g., to async hook registry)
@@ -1810,8 +1757,7 @@ export async function getMatchingHooks(
       { level: 'verbose' },
     )
     logForDebugging(`Found ${hookMatchers.length} hook matchers in settings`, {
-      level: 'verbose',
-    })
+      level: 'verbose'})
 
     // Extract hooks with their plugin context (if any)
     const filteredMatchers = matchQuery
@@ -1841,8 +1787,7 @@ export async function getMatchingHooks(
         pluginRoot,
         pluginId,
         skillRoot,
-        hookSource,
-      }))
+        hookSource}))
     })
 
     // Deduplicate hooks by command/prompt/url within the same source context.
@@ -2095,8 +2040,7 @@ async function* executeHooks({
   messages,
   forceSyncExecution,
   requestPrompt,
-  toolInputSummary,
-}: {
+  toolInputSummary}: {
   hookInput: HookInput
   toolUseID: string
   matchQuery?: string
@@ -2166,9 +2110,7 @@ async function* executeHooks({
       ...(pluginHookCounts && {
         pluginHookCounts: jsonStringify(
           pluginHookCounts,
-        ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      }),
-    })
+        ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})})
   } else {
     // Fast-path: all hooks are internal callbacks (sessionFileAccessHooks,
     // attributionHooks). These return {} and don't use the abort signal, so we
@@ -2178,8 +2120,7 @@ async function* executeHooks({
     const context = toolUseContext
       ? {
           getAppState: toolUseContext.getAppState,
-          updateAttributionState: toolUseContext.updateAttributionState,
-        }
+          updateAttributionState: toolUseContext.updateAttributionState}
       : undefined
     for (const [i, { hook }] of matchingHooks.entries()) {
       if (hook.type === 'callback') {
@@ -2197,8 +2138,7 @@ async function* executeHooks({
       numBlocking: 0,
       numNonBlockingError: 0,
       numCancelled: 0,
-      totalDurationMs,
-    })
+      totalDurationMs})
     return
   }
 
@@ -2215,8 +2155,7 @@ async function* executeHooks({
       num_hooks: String(matchingHooks.length),
       managed_only: String(shouldAllowManagedHooksOnly()),
       hook_definitions: hookDefinitionsJson,
-      hook_source: shouldAllowManagedHooksOnly() ? 'policySettings' : 'merged',
-    })
+      hook_source: shouldAllowManagedHooksOnly() ? 'policySettings' : 'merged'})
   }
 
   // Start hook span for beta tracing
@@ -2240,15 +2179,11 @@ async function* executeHooks({
           ...(hook.type === 'prompt' && { promptText: hook.prompt }),
           ...('statusMessage' in hook &&
             hook.statusMessage != null && {
-              statusMessage: hook.statusMessage,
-            }),
-        },
+              statusMessage: hook.statusMessage})},
         parentToolUseID: toolUseID,
         toolUseID,
         timestamp: new Date().toISOString(),
-        uuid: randomUUID(),
-      },
-    }
+        uuid: randomUUID()}}
   }
 
   // Track wall-clock time for the entire hook batch
@@ -2293,8 +2228,7 @@ async function* executeHooks({
         hookInput,
         signal: abortSignal,
         hookIndex,
-        toolUseContext,
-      }).finally(cleanup)
+        toolUseContext}).finally(cleanup)
       return
     }
 
@@ -2306,11 +2240,9 @@ async function* executeHooks({
             hookName,
             toolUseID,
             hookEvent,
-            content: 'Messages not provided for function hook',
-          }),
+            content: 'Messages not provided for function hook'}),
           outcome: 'non_blocking_error',
-          hook,
-        }
+          hook}
         return
       }
 
@@ -2322,16 +2254,14 @@ async function* executeHooks({
         toolUseID,
         hookEvent,
         timeoutMs,
-        signal,
-      })
+        signal})
       return
     }
 
     // Command and prompt hooks need jsonInput
     const commandTimeoutMs = hook.timeout ? hook.timeout * 1000 : timeoutMs
     const { signal: abortSignal, cleanup } = createCombinedAbortSignal(signal, {
-      timeoutMs: commandTimeoutMs,
-    })
+      timeoutMs: commandTimeoutMs})
     const hookId = randomUUID()
     const hookStartMs = Date.now()
     const hookCommand = getHookDisplayText(hook)
@@ -2347,11 +2277,9 @@ async function* executeHooks({
             hookEvent,
             content: `Failed to prepare hook input: ${errorMessage((jsonInputRes as { ok: false; error: unknown }).error)}`,
             command: hookCommand,
-            durationMs: Date.now() - hookStartMs,
-          }),
+            durationMs: Date.now() - hookStartMs}),
           outcome: 'non_blocking_error',
-          hook,
-        }
+          hook}
         cleanup()
         return
       }
@@ -2452,18 +2380,15 @@ async function* executeHooks({
             stdout: '',
             stderr: '',
             exitCode: undefined,
-            outcome: 'cancelled',
-          })
+            outcome: 'cancelled'})
           yield {
             message: createAttachmentMessage({
               type: 'hook_cancelled',
               hookName,
               toolUseID,
-              hookEvent,
-            }),
+              hookEvent}),
             outcome: 'cancelled' as const,
-            hook,
-          }
+            hook}
           return
         }
 
@@ -2478,8 +2403,7 @@ async function* executeHooks({
             stdout: '',
             stderr,
             exitCode: httpResult.statusCode,
-            outcome: 'error',
-          })
+            outcome: 'error'})
           yield {
             message: createAttachmentMessage({
               type: 'hook_non_blocking_error',
@@ -2488,11 +2412,9 @@ async function* executeHooks({
               hookEvent,
               stderr,
               stdout: '',
-              exitCode: httpResult.statusCode ?? 0,
-            }),
+              exitCode: httpResult.statusCode ?? 0}),
             outcome: 'non_blocking_error' as const,
-            hook,
-          }
+            hook}
           return
         }
 
@@ -2509,8 +2431,7 @@ async function* executeHooks({
             stdout: httpResult.body,
             stderr: `JSON validation failed: ${httpValidationError}`,
             exitCode: httpResult.statusCode,
-            outcome: 'error',
-          })
+            outcome: 'error'})
           yield {
             message: createAttachmentMessage({
               type: 'hook_non_blocking_error',
@@ -2519,11 +2440,9 @@ async function* executeHooks({
               hookEvent,
               stderr: `JSON validation failed: ${httpValidationError}`,
               stdout: httpResult.body,
-              exitCode: httpResult.statusCode ?? 0,
-            }),
+              exitCode: httpResult.statusCode ?? 0}),
             outcome: 'non_blocking_error' as const,
-            hook,
-          }
+            hook}
           return
         }
 
@@ -2537,12 +2456,10 @@ async function* executeHooks({
             stdout: httpResult.body,
             stderr: '',
             exitCode: httpResult.statusCode,
-            outcome: 'success',
-          })
+            outcome: 'success'})
           yield {
             outcome: 'success' as const,
-            hook,
-          }
+            hook}
           return
         }
 
@@ -2556,8 +2473,7 @@ async function* executeHooks({
             expectedHookEvent: hookEvent,
             stdout: httpResult.body,
             stderr: '',
-            exitCode: httpResult.statusCode,
-          })
+            exitCode: httpResult.statusCode})
           emitHookResponse({
             hookId,
             hookName,
@@ -2566,13 +2482,11 @@ async function* executeHooks({
             stdout: httpResult.body,
             stderr: '',
             exitCode: httpResult.statusCode,
-            outcome: 'success',
-          })
+            outcome: 'success'})
           yield {
             ...processed,
             outcome: 'success' as const,
-            hook,
-          }
+            hook}
           return
         }
 
@@ -2601,8 +2515,7 @@ async function* executeHooks({
       if (result.backgrounded) {
         yield {
           outcome: 'success' as const,
-          hook,
-        }
+          hook}
         return
       }
 
@@ -2615,8 +2528,7 @@ async function* executeHooks({
           stdout: result.stdout,
           stderr: result.stderr,
           exitCode: result.status,
-          outcome: 'cancelled',
-        })
+          outcome: 'cancelled'})
         yield {
           message: createAttachmentMessage({
             type: 'hook_cancelled',
@@ -2624,11 +2536,9 @@ async function* executeHooks({
             toolUseID,
             hookEvent,
             command: hookCommand,
-            durationMs,
-          }),
+            durationMs}),
           outcome: 'cancelled' as const,
-          hook,
-        }
+          hook}
         return
       }
 
@@ -2646,8 +2556,7 @@ async function* executeHooks({
           stdout: result.stdout,
           stderr: `JSON validation failed: ${validationError}`,
           exitCode: 1,
-          outcome: 'error',
-        })
+          outcome: 'error'})
         yield {
           message: createAttachmentMessage({
             type: 'hook_non_blocking_error',
@@ -2658,11 +2567,9 @@ async function* executeHooks({
             stdout: result.stdout,
             exitCode: 1,
             command: hookCommand,
-            durationMs,
-          }),
+            durationMs}),
           outcome: 'non_blocking_error' as const,
-          hook,
-        }
+          hook}
         return
       }
 
@@ -2671,8 +2578,7 @@ async function* executeHooks({
         if (isAsyncHookJSONOutput(json)) {
           yield {
             outcome: 'success' as const,
-            hook,
-          }
+            hook}
           return
         }
 
@@ -2687,8 +2593,7 @@ async function* executeHooks({
           stdout: result.stdout,
           stderr: result.stderr,
           exitCode: result.status,
-          durationMs,
-        })
+          durationMs})
 
         // Handle suppressOutput (skip for async responses)
         const syncJson = json as TypedSyncHookOutput
@@ -2708,8 +2613,7 @@ async function* executeHooks({
             stdout: result.stdout,
             stderr: result.stderr,
             exitCode: result.status,
-            outcome: 'success',
-          })
+            outcome: 'success'})
           yield {
             ...processed,
             message:
@@ -2724,11 +2628,9 @@ async function* executeHooks({
                 stderr: result.stderr,
                 exitCode: result.status,
                 command: hookCommand,
-                durationMs,
-              }),
+                durationMs}),
             outcome: 'success' as const,
-            hook,
-          }
+            hook}
           return
         }
 
@@ -2740,13 +2642,11 @@ async function* executeHooks({
           stdout: result.stdout,
           stderr: result.stderr,
           exitCode: result.status,
-          outcome: result.status === 0 ? 'success' : 'error',
-        })
+          outcome: result.status === 0 ? 'success' : 'error'})
         yield {
           ...processed,
           outcome: 'success' as const,
-          hook,
-        }
+          hook}
         return
       }
 
@@ -2760,8 +2660,7 @@ async function* executeHooks({
           stdout: result.stdout,
           stderr: result.stderr,
           exitCode: result.status,
-          outcome: 'success',
-        })
+          outcome: 'success'})
         yield {
           message: createAttachmentMessage({
             type: 'hook_success',
@@ -2773,11 +2672,9 @@ async function* executeHooks({
             stderr: result.stderr,
             exitCode: result.status,
             command: hookCommand,
-            durationMs,
-          }),
+            durationMs}),
           outcome: 'success' as const,
-          hook,
-        }
+          hook}
         return
       }
 
@@ -2791,16 +2688,13 @@ async function* executeHooks({
           stdout: result.stdout,
           stderr: result.stderr,
           exitCode: result.status,
-          outcome: 'error',
-        })
+          outcome: 'error'})
         yield {
           blockingError: {
             blockingError: `[${hook.command}]: ${result.stderr || 'No stderr output'}`,
-            command: hook.command,
-          },
+            command: hook.command},
           outcome: 'blocking' as const,
-          hook,
-        }
+          hook}
         return
       }
 
@@ -2814,8 +2708,7 @@ async function* executeHooks({
         stdout: result.stdout,
         stderr: result.stderr,
         exitCode: result.status,
-        outcome: 'error',
-      })
+        outcome: 'error'})
       yield {
         message: createAttachmentMessage({
           type: 'hook_non_blocking_error',
@@ -2826,11 +2719,9 @@ async function* executeHooks({
           stdout: result.stdout,
           exitCode: result.status,
           command: hookCommand,
-          durationMs,
-        }),
+          durationMs}),
         outcome: 'non_blocking_error' as const,
-        hook,
-      }
+        hook}
       return
     } catch (error) {
       // Clean up on error
@@ -2846,8 +2737,7 @@ async function* executeHooks({
         stdout: '',
         stderr: `Failed to run: ${errorMessage}`,
         exitCode: 1,
-        outcome: 'error',
-      })
+        outcome: 'error'})
       yield {
         message: createAttachmentMessage({
           type: 'hook_non_blocking_error',
@@ -2858,11 +2748,9 @@ async function* executeHooks({
           stdout: '',
           exitCode: 1,
           command: hookCommand,
-          durationMs: Date.now() - hookStartMs,
-        }),
+          durationMs: Date.now() - hookStartMs}),
         outcome: 'non_blocking_error' as const,
-        hook,
-      }
+        hook}
       return
     }
   })
@@ -2872,8 +2760,7 @@ async function* executeHooks({
     success: 0,
     blocking: 0,
     non_blocking_error: 0,
-    cancelled: 0,
-  }
+    cancelled: 0}
 
   let permissionBehavior: PermissionResult['behavior'] | undefined
 
@@ -2888,15 +2775,13 @@ async function* executeHooks({
       )
       yield {
         preventContinuation: true,
-        stopReason: result.stopReason,
-      }
+        stopReason: result.stopReason}
     }
 
     // Handle different result types
     if (result.blockingError) {
       yield {
-        blockingError: result.blockingError,
-      }
+        blockingError: result.blockingError}
     }
 
     if (result.message) {
@@ -2911,9 +2796,7 @@ async function* executeHooks({
           content: result.systemMessage,
           hookName,
           toolUseID,
-          hookEvent,
-        }),
-      }
+          hookEvent})}
     }
 
     // Collect additional context from hooks
@@ -2922,8 +2805,7 @@ async function* executeHooks({
         `Hook ${hookEvent} (${getHookDisplayText(result.hook)}) provided additionalContext (${result.additionalContext.length} chars)`,
       )
       yield {
-        additionalContexts: [result.additionalContext],
-      }
+        additionalContexts: [result.additionalContext]}
     }
 
     if (result.initialUserMessage) {
@@ -2931,8 +2813,7 @@ async function* executeHooks({
         `Hook ${hookEvent} (${getHookDisplayText(result.hook)}) provided initialUserMessage (${result.initialUserMessage.length} chars)`,
       )
       yield {
-        initialUserMessage: result.initialUserMessage,
-      }
+        initialUserMessage: result.initialUserMessage}
     }
 
     if (result.watchPaths && result.watchPaths.length > 0) {
@@ -2940,8 +2821,7 @@ async function* executeHooks({
         `Hook ${hookEvent} (${getHookDisplayText(result.hook)}) provided ${result.watchPaths.length} watchPaths`,
       )
       yield {
-        watchPaths: result.watchPaths,
-      }
+        watchPaths: result.watchPaths}
     }
 
     // Yield updatedMCPToolOutput if provided (from PostToolUse hooks)
@@ -2950,8 +2830,7 @@ async function* executeHooks({
         `Hook ${hookEvent} (${getHookDisplayText(result.hook)}) replaced MCP tool output`,
       )
       yield {
-        updatedMCPToolOutput: result.updatedMCPToolOutput,
-      }
+        updatedMCPToolOutput: result.updatedMCPToolOutput}
     }
 
     // Check for permission behavior with precedence: deny > ask > allow
@@ -3000,8 +2879,7 @@ async function* executeHooks({
         permissionBehavior,
         hookPermissionDecisionReason: result.hookPermissionDecisionReason,
         hookSource: matchingHooks.find(m => m.hook === result.hook)?.hookSource,
-        updatedInput,
-      }
+        updatedInput}
     }
 
     // Yield updatedInput separately for passthrough case (no permission decision)
@@ -3012,32 +2890,27 @@ async function* executeHooks({
         `Hook ${hookEvent} (${getHookDisplayText(result.hook)}) modified tool input keys: [${Object.keys(result.updatedInput).join(', ')}]`,
       )
       yield {
-        updatedInput: result.updatedInput,
-      }
+        updatedInput: result.updatedInput}
     }
     // Yield permission request result if provided (from PermissionRequest hooks)
     if (result.permissionRequestResult) {
       yield {
-        permissionRequestResult: result.permissionRequestResult,
-      }
+        permissionRequestResult: result.permissionRequestResult}
     }
     // Yield retry flag if provided (from PermissionDenied hooks)
     if (result.retry) {
       yield {
-        retry: result.retry,
-      }
+        retry: result.retry}
     }
     // Yield elicitation response if provided (from Elicitation hooks)
     if (result.elicitationResponse) {
       yield {
-        elicitationResponse: result.elicitationResponse,
-      }
+        elicitationResponse: result.elicitationResponse}
     }
     // Yield elicitation result response if provided (from ElicitationResult hooks)
     if (result.elicitationResultResponse) {
       yield {
-        elicitationResultResponse: result.elicitationResultResponse,
-      }
+        elicitationResultResponse: result.elicitationResultResponse}
     }
 
     // Invoke session hook callback if this is a command/prompt/function hook (not a callback hook)
@@ -3077,8 +2950,7 @@ async function* executeHooks({
     numBlocking: outcomes.blocking,
     numNonBlockingError: outcomes.non_blocking_error,
     numCancelled: outcomes.cancelled,
-    totalDurationMs,
-  })
+    totalDurationMs})
 
   // Log hook execution completion to OTEL (only for beta tracing)
   if (isBetaTracingEnabled()) {
@@ -3095,8 +2967,7 @@ async function* executeHooks({
       num_cancelled: String(outcomes.cancelled),
       managed_only: String(shouldAllowManagedHooksOnly()),
       hook_definitions: jsonStringify(hookDefinitionsComplete),
-      hook_source: shouldAllowManagedHooksOnly() ? 'policySettings' : 'merged',
-    })
+      hook_source: shouldAllowManagedHooksOnly() ? 'policySettings' : 'merged'})
   }
 
   // End hook span for beta tracing
@@ -3104,8 +2975,7 @@ async function* executeHooks({
     numSuccess: outcomes.success,
     numBlocking: outcomes.blocking,
     numNonBlockingError: outcomes.non_blocking_error,
-    numCancelled: outcomes.cancelled,
-  })
+    numCancelled: outcomes.cancelled})
 }
 
 export type HookOutsideReplResult = {
@@ -3142,8 +3012,7 @@ async function executeHooksOutsideREPL({
   hookInput,
   matchQuery,
   signal,
-  timeoutMs = TOOL_HOOK_EXECUTION_TIMEOUT_MS,
-}: {
+  timeoutMs = TOOL_HOOK_EXECUTION_TIMEOUT_MS}: {
   getAppState?: () => AppState
   hookInput: HookInput
   matchQuery?: string
@@ -3203,9 +3072,7 @@ async function executeHooksOutsideREPL({
       ...(pluginHookCounts && {
         pluginHookCounts: jsonStringify(
           pluginHookCounts,
-        ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      }),
-    })
+        ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})})
   }
 
   // Validate and stringify the hook input
@@ -3247,8 +3114,7 @@ async function executeHooksOutsideREPL({
               command: 'callback',
               succeeded: true,
               output: '',
-              blocked: false,
-            }
+              blocked: false}
           }
 
           const typedJson = json as TypedSyncHookOutput
@@ -3267,8 +3133,7 @@ async function executeHooksOutsideREPL({
             command: 'callback',
             succeeded: true,
             output,
-            blocked,
-          }
+            blocked}
         } catch (error) {
           cleanup?.()
 
@@ -3282,8 +3147,7 @@ async function executeHooksOutsideREPL({
             command: 'callback',
             succeeded: false,
             output: errorMessage,
-            blocked: false,
-          }
+            blocked: false}
         }
       }
 
@@ -3293,8 +3157,7 @@ async function executeHooksOutsideREPL({
           command: hook.prompt,
           succeeded: false,
           output: 'Prompt stop hooks are not yet supported outside REPL',
-          blocked: false,
-        }
+          blocked: false}
       }
 
       // TODO: Implement agent stop hooks outside REPL
@@ -3303,8 +3166,7 @@ async function executeHooksOutsideREPL({
           command: hook.prompt,
           succeeded: false,
           output: 'Agent stop hooks are not yet supported outside REPL',
-          blocked: false,
-        }
+          blocked: false}
       }
 
       // Function hooks require messages array (only available in REPL context)
@@ -3319,8 +3181,7 @@ async function executeHooksOutsideREPL({
           command: 'function',
           succeeded: false,
           output: 'Internal error: function hook executed outside REPL context',
-          blocked: false,
-        }
+          blocked: false}
       }
 
       // Handle HTTP hooks (no toolUseContext needed - just HTTP POST).
@@ -3341,8 +3202,7 @@ async function executeHooksOutsideREPL({
               command: hook.url,
               succeeded: false,
               output: 'Hook cancelled',
-              blocked: false,
-            }
+              blocked: false}
           }
 
           if (httpResult.error || !httpResult.ok) {
@@ -3350,14 +3210,12 @@ async function executeHooksOutsideREPL({
               httpResult.error ||
               `HTTP ${httpResult.statusCode} from ${hook.url}`
             logForDebugging(`${hookName} [${hook.url}] failed: ${errMsg}`, {
-              level: 'error',
-            })
+              level: 'error'})
             return {
               command: hook.url,
               succeeded: false,
               output: errMsg,
-              blocked: false,
-            }
+              blocked: false}
           }
 
           // HTTP hooks must return JSON — parse and validate through Zod
@@ -3398,8 +3256,7 @@ async function executeHooksOutsideREPL({
             command: hook.url,
             succeeded: true,
             output,
-            blocked: !!jsonBlocked,
-          }
+            blocked: !!jsonBlocked}
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : String(error)
@@ -3411,8 +3268,7 @@ async function executeHooksOutsideREPL({
             command: hook.url,
             succeeded: false,
             output: errorMessage,
-            blocked: false,
-          }
+            blocked: false}
         }
       }
 
@@ -3444,8 +3300,7 @@ async function executeHooksOutsideREPL({
             command: hook.command,
             succeeded: false,
             output: 'Hook cancelled',
-            blocked: false,
-          }
+            blocked: false}
         }
 
         logForDebugging(
@@ -3498,8 +3353,7 @@ async function executeHooksOutsideREPL({
           output,
           blocked,
           watchPaths,
-          systemMessage,
-        }
+          systemMessage}
       } catch (error) {
         // Clean up on error
         cleanup?.()
@@ -3514,8 +3368,7 @@ async function executeHooksOutsideREPL({
           command: hook.command,
           succeeded: false,
           output: errorMessage,
-          blocked: false,
-        }
+          blocked: false}
       }
     },
   )
@@ -3556,16 +3409,14 @@ export async function* executePreToolHooks<ToolInput>(
   }
 
   logForDebugging(`executePreToolHooks called for tool: ${toolName}`, {
-    level: 'verbose',
-  })
+    level: 'verbose'})
 
   const hookInput: PreToolUseHookInput = {
     ...createBaseHookInput(permissionMode, undefined, toolUseContext),
     hook_event_name: 'PreToolUse',
     tool_name: toolName,
     tool_input: toolInput,
-    tool_use_id: toolUseID,
-  }
+    tool_use_id: toolUseID}
 
   yield* executeHooks({
     hookInput,
@@ -3575,8 +3426,7 @@ export async function* executePreToolHooks<ToolInput>(
     timeoutMs,
     toolUseContext,
     requestPrompt,
-    toolInputSummary,
-  })
+    toolInputSummary})
 }
 
 /**
@@ -3607,8 +3457,7 @@ export async function* executePostToolHooks<ToolInput, ToolResponse>(
     tool_name: toolName,
     tool_input: toolInput,
     tool_response: toolResponse,
-    tool_use_id: toolUseID,
-  }
+    tool_use_id: toolUseID}
 
   yield* executeHooks({
     hookInput,
@@ -3616,8 +3465,7 @@ export async function* executePostToolHooks<ToolInput, ToolResponse>(
     matchQuery: toolName,
     signal,
     timeoutMs,
-    toolUseContext,
-  })
+    toolUseContext})
 }
 
 /**
@@ -3657,8 +3505,7 @@ export async function* executePostToolUseFailureHooks<ToolInput>(
     tool_input: toolInput,
     tool_use_id: toolUseID,
     error,
-    is_interrupt: isInterrupt,
-  }
+    is_interrupt: isInterrupt}
 
   yield* executeHooks({
     hookInput,
@@ -3666,8 +3513,7 @@ export async function* executePostToolUseFailureHooks<ToolInput>(
     matchQuery: toolName,
     signal,
     timeoutMs,
-    toolUseContext,
-  })
+    toolUseContext})
 }
 
 export async function* executePermissionDeniedHooks<ToolInput>(
@@ -3692,8 +3538,7 @@ export async function* executePermissionDeniedHooks<ToolInput>(
     tool_name: toolName,
     tool_input: toolInput,
     tool_use_id: toolUseID,
-    reason,
-  }
+    reason}
 
   yield* executeHooks({
     hookInput,
@@ -3701,8 +3546,7 @@ export async function* executePermissionDeniedHooks<ToolInput>(
     matchQuery: toolName,
     signal,
     timeoutMs,
-    toolUseContext,
-  })
+    toolUseContext})
 }
 
 /**
@@ -3725,14 +3569,12 @@ export async function executeNotificationHooks(
     hook_event_name: 'Notification',
     message,
     title,
-    notification_type: notificationType,
-  }
+    notification_type: notificationType}
 
   await executeHooksOutsideREPL({
     hookInput,
     timeoutMs,
-    matchQuery: notificationType,
-  })
+    matchQuery: notificationType})
 }
 
 export async function executeStopFailureHooks(
@@ -3767,15 +3609,13 @@ export async function executeStopFailureHooks(
     hook_event_name: 'StopFailure',
     error,
     error_details: lastMessage.errorDetails,
-    last_assistant_message: lastAssistantText,
-  }
+    last_assistant_message: lastAssistantText}
 
   await executeHooksOutsideREPL({
     getAppState: toolUseContext?.getAppState,
     hookInput,
     timeoutMs,
-    matchQuery: error,
-  })
+    matchQuery: error})
 }
 
 /**
@@ -3834,14 +3674,12 @@ export async function* executeStopHooks(
         agent_id: subagentId,
         agent_transcript_path: getAgentTranscriptPath(subagentId),
         agent_type: agentType ?? '',
-        last_assistant_message: lastAssistantText,
-      }
+        last_assistant_message: lastAssistantText}
     : {
         ...createBaseHookInput(permissionMode),
         hook_event_name: 'Stop',
         stop_hook_active: stopHookActive,
-        last_assistant_message: lastAssistantText,
-      }
+        last_assistant_message: lastAssistantText}
 
   // Trust check is now centralized in executeHooks()
   yield* executeHooks({
@@ -3851,8 +3689,7 @@ export async function* executeStopHooks(
     timeoutMs,
     toolUseContext,
     messages,
-    requestPrompt,
-  })
+    requestPrompt})
 }
 
 /**
@@ -3876,15 +3713,13 @@ export async function* executeTeammateIdleHooks(
     ...createBaseHookInput(permissionMode),
     hook_event_name: 'TeammateIdle',
     teammate_name: teammateName,
-    team_name: teamName,
-  }
+    team_name: teamName}
 
   yield* executeHooks({
     hookInput,
     toolUseID: randomUUID(),
     signal,
-    timeoutMs,
-  })
+    timeoutMs})
 }
 
 /**
@@ -3919,16 +3754,14 @@ export async function* executeTaskCreatedHooks(
     task_subject: taskSubject,
     task_description: taskDescription,
     teammate_name: teammateName,
-    team_name: teamName,
-  }
+    team_name: teamName}
 
   yield* executeHooks({
     hookInput,
     toolUseID: randomUUID(),
     signal,
     timeoutMs,
-    toolUseContext,
-  })
+    toolUseContext})
 }
 
 /**
@@ -3963,16 +3796,14 @@ export async function* executeTaskCompletedHooks(
     task_subject: taskSubject,
     task_description: taskDescription,
     teammate_name: teammateName,
-    team_name: teamName,
-  }
+    team_name: teamName}
 
   yield* executeHooks({
     hookInput,
     toolUseID: randomUUID(),
     signal,
     timeoutMs,
-    toolUseContext,
-  })
+    toolUseContext})
 }
 
 /**
@@ -4000,8 +3831,7 @@ export async function* executeUserPromptSubmitHooks(
   const hookInput: UserPromptSubmitHookInput = {
     ...createBaseHookInput(permissionMode),
     hook_event_name: 'UserPromptSubmit',
-    prompt,
-  }
+    prompt}
 
   yield* executeHooks({
     hookInput,
@@ -4009,8 +3839,7 @@ export async function* executeUserPromptSubmitHooks(
     signal: toolUseContext.abortController.signal,
     timeoutMs: TOOL_HOOK_EXECUTION_TIMEOUT_MS,
     toolUseContext,
-    requestPrompt,
-  })
+    requestPrompt})
 }
 
 /**
@@ -4037,8 +3866,7 @@ export async function* executeSessionStartHooks(
     hook_event_name: 'SessionStart',
     source,
     agent_type: agentType,
-    model,
-  }
+    model}
 
   yield* executeHooks({
     hookInput,
@@ -4046,8 +3874,7 @@ export async function* executeSessionStartHooks(
     matchQuery: source,
     signal,
     timeoutMs,
-    forceSyncExecution,
-  })
+    forceSyncExecution})
 }
 
 /**
@@ -4067,8 +3894,7 @@ export async function* executeSetupHooks(
   const hookInput: SetupHookInput = {
     ...createBaseHookInput(undefined),
     hook_event_name: 'Setup',
-    trigger,
-  }
+    trigger}
 
   yield* executeHooks({
     hookInput,
@@ -4076,8 +3902,7 @@ export async function* executeSetupHooks(
     matchQuery: trigger,
     signal,
     timeoutMs,
-    forceSyncExecution,
-  })
+    forceSyncExecution})
 }
 
 /**
@@ -4098,16 +3923,14 @@ export async function* executeSubagentStartHooks(
     ...createBaseHookInput(undefined),
     hook_event_name: 'SubagentStart',
     agent_id: agentId,
-    agent_type: agentType,
-  }
+    agent_type: agentType}
 
   yield* executeHooks({
     hookInput,
     toolUseID: randomUUID(),
     matchQuery: agentType,
     signal,
-    timeoutMs,
-  })
+    timeoutMs})
 }
 
 /**
@@ -4132,15 +3955,13 @@ export async function executePreCompactHooks(
     ...createBaseHookInput(undefined),
     hook_event_name: 'PreCompact',
     trigger: compactData.trigger,
-    custom_instructions: compactData.customInstructions,
-  }
+    custom_instructions: compactData.customInstructions}
 
   const results = await executeHooksOutsideREPL({
     hookInput,
     matchQuery: compactData.trigger,
     signal,
-    timeoutMs,
-  })
+    timeoutMs})
 
   if (results.length === 0) {
     return {}
@@ -4179,8 +4000,7 @@ export async function executePreCompactHooks(
     newCustomInstructions:
       successfulOutputs.length > 0 ? successfulOutputs.join('\n\n') : undefined,
     userDisplayMessage:
-      displayMessages.length > 0 ? displayMessages.join('\n') : undefined,
-  }
+      displayMessages.length > 0 ? displayMessages.join('\n') : undefined}
 }
 
 /**
@@ -4204,15 +4024,13 @@ export async function executePostCompactHooks(
     ...createBaseHookInput(undefined),
     hook_event_name: 'PostCompact',
     trigger: compactData.trigger,
-    compact_summary: compactData.compactSummary,
-  }
+    compact_summary: compactData.compactSummary}
 
   const results = await executeHooksOutsideREPL({
     hookInput,
     matchQuery: compactData.trigger,
     signal,
-    timeoutMs,
-  })
+    timeoutMs})
 
   if (results.length === 0) {
     return {}
@@ -4243,8 +4061,7 @@ export async function executePostCompactHooks(
 
   return {
     userDisplayMessage:
-      displayMessages.length > 0 ? displayMessages.join('\n') : undefined,
-  }
+      displayMessages.length > 0 ? displayMessages.join('\n') : undefined}
 }
 
 /**
@@ -4266,28 +4083,25 @@ export async function executeSessionEndHooks(
     getAppState,
     setAppState,
     signal,
-    timeoutMs = TOOL_HOOK_EXECUTION_TIMEOUT_MS,
-  } = options || {}
+    timeoutMs = TOOL_HOOK_EXECUTION_TIMEOUT_MS} = options || {}
 
   const hookInput = {
     ...createBaseHookInput(undefined),
     hook_event_name: 'SessionEnd' as const,
-    reason,
-  } as unknown as SessionEndHookInput
+    reason} as unknown as SessionEndHookInput
 
   const results = await executeHooksOutsideREPL({
     getAppState,
     hookInput,
     matchQuery: reason,
     signal,
-    timeoutMs,
-  })
+    timeoutMs})
 
   // During shutdown, Ink is unmounted so we can write directly to stderr
   for (const result of results) {
     if (!result.succeeded && result.output) {
       process.stderr.write(
-        `SessionEnd hook [${result.command}] failed: ${result.output}\n`,
+        t('hooks.sessionEndFailed', result.command, result.output) + '\n',
       )
     }
   }
@@ -4335,8 +4149,7 @@ export async function* executePermissionRequestHooks<ToolInput>(
     hook_event_name: 'PermissionRequest',
     tool_name: toolName,
     tool_input: toolInput,
-    permission_suggestions: permissionSuggestions,
-  }
+    permission_suggestions: permissionSuggestions}
 
   yield* executeHooks({
     hookInput,
@@ -4346,8 +4159,7 @@ export async function* executePermissionRequestHooks<ToolInput>(
     timeoutMs,
     toolUseContext,
     requestPrompt,
-    toolInputSummary,
-  })
+    toolInputSummary})
 }
 
 export type ConfigChangeSource =
@@ -4379,14 +4191,12 @@ export async function executeConfigChangeHooks(
     ...createBaseHookInput(undefined),
     hook_event_name: 'ConfigChange',
     source,
-    file_path: filePath,
-  }
+    file_path: filePath}
 
   const results = await executeHooksOutsideREPL({
     hookInput,
     timeoutMs,
-    matchQuery: source,
-  })
+    matchQuery: source})
 
   // Policy settings are enterprise-managed — hooks fire for audit logging
   // but must never block policy changes from being applied
@@ -4429,8 +4239,7 @@ export function executeCwdChangedHooks(
     ...createBaseHookInput(undefined),
     hook_event_name: 'CwdChanged',
     old_cwd: oldCwd,
-    new_cwd: newCwd,
-  }
+    new_cwd: newCwd}
   return executeEnvHooks(hookInput, timeoutMs)
 }
 
@@ -4447,8 +4256,7 @@ export function executeFileChangedHooks(
     ...createBaseHookInput(undefined),
     hook_event_name: 'FileChanged' as const,
     file_path: filePath,
-    event,
-  } as unknown as FileChangedHookInput
+    event} as unknown as FileChangedHookInput
   return executeEnvHooks(hookInput, timeoutMs)
 }
 
@@ -4506,8 +4314,7 @@ export async function executeInstructionsLoadedHooks(
     globs,
     triggerFilePath,
     parentFilePath,
-    timeoutMs = TOOL_HOOK_EXECUTION_TIMEOUT_MS,
-  } = options ?? {}
+    timeoutMs = TOOL_HOOK_EXECUTION_TIMEOUT_MS} = options ?? {}
 
   const hookInput: InstructionsLoadedHookInput = {
     ...createBaseHookInput(undefined),
@@ -4517,14 +4324,12 @@ export async function executeInstructionsLoadedHooks(
     load_reason: loadReason,
     globs,
     trigger_file_path: triggerFilePath,
-    parent_file_path: parentFilePath,
-  }
+    parent_file_path: parentFilePath}
 
   await executeHooksOutsideREPL({
     hookInput,
     timeoutMs,
-    matchQuery: loadReason,
-  })
+    matchQuery: loadReason})
 }
 
 /** Result of an elicitation hook execution (non-REPL path). */
@@ -4556,9 +4361,7 @@ function parseElicitationHookOutput(
     return {
       blockingError: {
         blockingError: result.output || `Elicitation blocked by hook`,
-        command: result.command,
-      },
-    }
+        command: result.command}}
   }
 
   if (!result.output.trim()) {
@@ -4588,9 +4391,7 @@ function parseElicitationHookOutput(
       return {
         blockingError: {
           blockingError: typedParsed.reason || 'Elicitation blocked by hook',
-          command: result.command,
-        },
-      }
+          command: result.command}}
     }
 
     const specific = typedParsed.hookSpecificOutput
@@ -4610,8 +4411,7 @@ function parseElicitationHookOutput(
       action: typedSpecific.action as ElicitationResponse['action'],
       content: typedSpecific.content as
         | ElicitationResponse['content']
-        | undefined,
-    }
+        | undefined}
 
     const out: {
       response?: ElicitationResponse
@@ -4625,8 +4425,7 @@ function parseElicitationHookOutput(
           (expectedEventName === 'Elicitation'
             ? 'Elicitation denied by hook'
             : 'Elicitation result blocked by hook'),
-        command: result.command,
-      }
+        command: result.command}
     }
 
     return out
@@ -4644,8 +4443,7 @@ export async function executeElicitationHooks({
   timeoutMs = TOOL_HOOK_EXECUTION_TIMEOUT_MS,
   mode,
   url,
-  elicitationId,
-}: {
+  elicitationId}: {
   serverName: string
   message: string
   requestedSchema?: Record<string, unknown>
@@ -4664,15 +4462,13 @@ export async function executeElicitationHooks({
     mode,
     url,
     elicitation_id: elicitationId,
-    requested_schema: requestedSchema,
-  }
+    requested_schema: requestedSchema}
 
   const results = await executeHooksOutsideREPL({
     hookInput,
     matchQuery: serverName,
     signal,
-    timeoutMs,
-  })
+    timeoutMs})
 
   let elicitationResponse: ElicitationResponse | undefined
   let blockingError: HookBlockingError | undefined
@@ -4698,8 +4494,7 @@ export async function executeElicitationResultHooks({
   signal,
   timeoutMs = TOOL_HOOK_EXECUTION_TIMEOUT_MS,
   mode,
-  elicitationId,
-}: {
+  elicitationId}: {
   serverName: string
   action: 'accept' | 'decline' | 'cancel'
   content?: Record<string, unknown>
@@ -4716,15 +4511,13 @@ export async function executeElicitationResultHooks({
     elicitation_id: elicitationId,
     mode,
     action,
-    content,
-  }
+    content}
 
   const results = await executeHooksOutsideREPL({
     hookInput,
     matchQuery: serverName,
     signal,
-    timeoutMs,
-  })
+    timeoutMs})
 
   let elicitationResultResponse: ElicitationResponse | undefined
   let blockingError: HookBlockingError | undefined
@@ -4899,8 +4692,7 @@ export async function executeFileSuggestionCommand(
       .filter(Boolean)
   } catch (error) {
     logForDebugging(`File suggestion helper failed: ${error}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return []
   }
 }
@@ -4912,8 +4704,7 @@ async function executeFunctionHook({
   toolUseID,
   hookEvent,
   timeoutMs,
-  signal,
-}: {
+  signal}: {
   hook: FunctionHook
   messages: Message[]
   hookName: string
@@ -4924,8 +4715,7 @@ async function executeFunctionHook({
 }): Promise<HookResult> {
   const callbackTimeoutMs = hook.timeout ?? timeoutMs
   const { signal: abortSignal, cleanup } = createCombinedAbortSignal(signal, {
-    timeoutMs: callbackTimeoutMs,
-  })
+    timeoutMs: callbackTimeoutMs})
 
   try {
     // Check if already aborted
@@ -4933,8 +4723,7 @@ async function executeFunctionHook({
       cleanup()
       return {
         outcome: 'cancelled',
-        hook,
-      }
+        hook}
     }
 
     // Execute callback with abort signal
@@ -4960,17 +4749,14 @@ async function executeFunctionHook({
     if (passed) {
       return {
         outcome: 'success',
-        hook,
-      }
+        hook}
     }
     return {
       blockingError: {
         blockingError: hook.errorMessage,
-        command: 'function',
-      },
+        command: 'function'},
       outcome: 'blocking',
-      hook,
-    }
+      hook}
   } catch (error) {
     cleanup()
 
@@ -4982,8 +4768,7 @@ async function executeFunctionHook({
     ) {
       return {
         outcome: 'cancelled',
-        hook,
-      }
+        hook}
     }
 
     // Log for monitoring
@@ -4997,11 +4782,9 @@ async function executeFunctionHook({
         content:
           error instanceof Error
             ? error.message
-            : 'Function hook execution error',
-      }),
+            : 'Function hook execution error'}),
       outcome: 'non_blocking_error',
-      hook,
-    }
+      hook}
   }
 }
 
@@ -5012,8 +4795,7 @@ async function executeHookCallback({
   hookInput,
   signal,
   hookIndex,
-  toolUseContext,
-}: {
+  toolUseContext}: {
   toolUseID: string
   hook: HookCallback
   hookEvent: HookEvent
@@ -5026,8 +4808,7 @@ async function executeHookCallback({
   const context = toolUseContext
     ? {
         getAppState: toolUseContext.getAppState,
-        updateAttributionState: toolUseContext.updateAttributionState,
-      }
+        updateAttributionState: toolUseContext.updateAttributionState}
     : undefined
   const json = await hook.callback(
     hookInput,
@@ -5039,8 +4820,7 @@ async function executeHookCallback({
   if (isAsyncHookJSONOutput(json)) {
     return {
       outcome: 'success',
-      hook,
-    }
+      hook}
   }
 
   const processed = processHookJSONOutput({
@@ -5054,13 +4834,11 @@ async function executeHookCallback({
     // Callbacks don't have stdout/stderr/exitCode
     stdout: undefined,
     stderr: undefined,
-    exitCode: undefined,
-  })
+    exitCode: undefined})
   return {
     ...processed,
     outcome: 'success',
-    hook,
-  }
+    hook}
 }
 
 /**
@@ -5099,13 +4877,11 @@ export async function executeWorktreeCreateHook(
   const hookInput = {
     ...createBaseHookInput(undefined),
     hook_event_name: 'WorktreeCreate' as const,
-    name,
-  }
+    name}
 
   const results = await executeHooksOutsideREPL({
     hookInput,
-    timeoutMs: TOOL_HOOK_EXECUTION_TIMEOUT_MS,
-  })
+    timeoutMs: TOOL_HOOK_EXECUTION_TIMEOUT_MS})
 
   // Find the first successful result with non-empty output
   const successfulResult = results.find(
@@ -5146,13 +4922,11 @@ export async function executeWorktreeRemoveHook(
   const hookInput = {
     ...createBaseHookInput(undefined),
     hook_event_name: 'WorktreeRemove' as const,
-    worktree_path: worktreePath,
-  }
+    worktree_path: worktreePath}
 
   const results = await executeHooksOutsideREPL({
     hookInput,
-    timeoutMs: TOOL_HOOK_EXECUTION_TIMEOUT_MS,
-  })
+    timeoutMs: TOOL_HOOK_EXECUTION_TIMEOUT_MS})
 
   if (results.length === 0) {
     return false

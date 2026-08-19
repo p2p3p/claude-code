@@ -85,8 +85,7 @@ export function extractArtifacts(messages: Message[]): ArtifactInfo[] {
         url: urlMatch?.[0],
         expiresAt: expiresMatch?.[1],
         rawContent,
-        isError,
-      })
+        isError})
     }
   }
 

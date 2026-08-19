@@ -70,8 +70,7 @@ export async function findModifiedFiles(
   try {
     entries = (await fs.readdir(outputsDir, {
       withFileTypes: true,
-      recursive: true,
-    })) as { name: string; isFile(): boolean; isSymbolicLink(): boolean }[]
+      recursive: true})) as { name: string; isFile(): boolean; isSymbolicLink(): boolean }[]
   } catch {
     // Directory doesn't exist or is not accessible
     return []

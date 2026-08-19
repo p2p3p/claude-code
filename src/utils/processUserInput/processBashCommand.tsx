@@ -12,8 +12,7 @@ import {
   createSyntheticUserCaveatMessage,
   createUserInterruptionMessage,
   createUserMessage,
-  prepareUserContent,
-} from '../messages.js';
+  prepareUserContent} from '../messages.js';
 import { resolveDefaultShell } from '../shell/resolveDefaultShell.js';
 import { isPowerShellToolEnabled } from '../shell/shellToolUtils.js';
 import { processToolResultBlock } from '../toolResultStorage.js';
@@ -42,9 +41,7 @@ export async function processBashCommand(
   const userMessage = createUserMessage({
     content: prepareUserContent({
       inputString: `<bash-input>${inputString}</bash-input>`,
-      precedingInputBlocks,
-    }),
-  });
+      precedingInputBlocks})});
 
   // ctrl+b to background indicator
   let jsx: React.ReactNode;
@@ -52,8 +49,7 @@ export async function processBashCommand(
   // Just show initial UI
   setToolJSX({
     jsx: <BashModeProgress input={inputString} progress={null} verbose={context.options.verbose} />,
-    shouldHidePromptInput: false,
-  });
+    shouldHidePromptInput: false});
 
   try {
     const bashModeContext: ProcessUserInputContext = {
@@ -61,8 +57,7 @@ export async function processBashCommand(
       // TODO: Clean up this hack
       setToolJSX: _ => {
         jsx = _?.jsx;
-      },
-    };
+      }};
 
     // Progress UI — shared across both shell backends (both emit ShellProgress)
     const onProgress = (progress: { data: ShellProgress }) => {
@@ -74,8 +69,7 @@ export async function processBashCommand(
           </>
         ),
         shouldHidePromptInput: false,
-        showSpinner: false,
-      });
+        showSpinner: false});
     };
 
     // User-initiated `!` commands run outside sandbox. Both shell tools honor
@@ -105,8 +99,7 @@ export async function processBashCommand(
       : await BashTool.call(
           {
             command: inputString,
-            dangerouslyDisableSandbox: true,
-          },
+            dangerouslyDisableSandbox: true},
           bashModeContext,
           undefined,
           undefined,
@@ -135,11 +128,9 @@ export async function processBashCommand(
         userMessage,
         ...attachmentMessages,
         createUserMessage({
-          content: `<bash-stdout>${stdout}</bash-stdout><bash-stderr>${escapeXml(stderr)}</bash-stderr>`,
-        }),
+          content: `<bash-stdout>${stdout}</bash-stdout><bash-stderr>${escapeXml(stderr)}</bash-stderr>`}),
       ],
-      shouldQuery: false,
-    };
+      shouldQuery: false};
   } catch (e) {
     if (e instanceof ShellError) {
       if (e.interrupted) {
@@ -150,8 +141,7 @@ export async function processBashCommand(
             createUserInterruptionMessage({ toolUse: false }),
             ...attachmentMessages,
           ],
-          shouldQuery: false,
-        };
+          shouldQuery: false};
       }
       return {
         messages: [
@@ -159,11 +149,9 @@ export async function processBashCommand(
           userMessage,
           ...attachmentMessages,
           createUserMessage({
-            content: `<bash-stdout>${escapeXml(e.stdout)}</bash-stdout><bash-stderr>${escapeXml(e.stderr)}</bash-stderr>`,
-          }),
+            content: `<bash-stdout>${escapeXml(e.stdout)}</bash-stdout><bash-stderr>${escapeXml(e.stderr)}</bash-stderr>`}),
         ],
-        shouldQuery: false,
-      };
+        shouldQuery: false};
     }
     return {
       messages: [
@@ -171,11 +159,9 @@ export async function processBashCommand(
         userMessage,
         ...attachmentMessages,
         createUserMessage({
-          content: `<bash-stderr>Command failed: ${escapeXml(errorMessage(e))}</bash-stderr>`,
-        }),
+          content: `<bash-stderr>Command failed: ${escapeXml(errorMessage(e))}</bash-stderr>`}),
       ],
-      shouldQuery: false,
-    };
+      shouldQuery: false};
   } finally {
     setToolJSX(null);
   }

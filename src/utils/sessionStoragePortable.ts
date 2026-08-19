@@ -501,8 +501,7 @@ function parseBoundaryLine(
       return null
     }
     return {
-      hasPreservedSegment: Boolean(parsed.compactMetadata?.preservedSegment),
-    }
+      hasPreservedSegment: Boolean(parsed.compactMetadata?.preservedSegment)}
   } catch {
     return null
   }
@@ -733,8 +732,7 @@ export async function readTranscriptForLoad(
       len: 0,
       // +1: finalizeOutput may insert one LF between a non-LF-terminated
       // carry and the reordered last attr-snap (crash-truncated file).
-      cap: fileSize + 1,
-    },
+      cap: fileSize + 1},
     boundaryStartOffset: 0,
     hasPreservedSegment: false,
     lastSnapSrc: null,
@@ -744,8 +742,7 @@ export async function readTranscriptForLoad(
     carryLen: 0,
     carryBuf: undefined,
     straddleSnapCarryLen: 0,
-    straddleSnapTailEnd: 0,
-  }
+    straddleSnapTailEnd: 0}
 
   const chunk = Buffer.allocUnsafe(CHUNK_SIZE)
   const fd = await fsOpen(filePath, 'r')
@@ -786,6 +783,5 @@ export async function readTranscriptForLoad(
   return {
     boundaryStartOffset: s.boundaryStartOffset,
     postBoundaryBuf: s.out.buf.subarray(0, s.out.len),
-    hasPreservedSegment: s.hasPreservedSegment,
-  }
+    hasPreservedSegment: s.hasPreservedSegment}
 }

@@ -2,6 +2,7 @@ import { z } from 'zod/v4'
 import { buildTool, type ToolDef } from 'src/Tool.js'
 import type { PermissionUpdate } from 'src/types/permissions.js'
 import { formatFileSize } from 'src/utils/format.js'
+import { t } from 'src/utils/i18n/index.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import type { PermissionDecision } from 'src/utils/permissions/PermissionResult.js'
 import { getRuleByContentsForTool } from 'src/utils/permissions/permissions.js'
@@ -67,7 +68,7 @@ function webFetchToolInputToPermissionRuleContent(input: {
 
 export const WebFetchTool = buildTool({
   name: WEB_FETCH_TOOL_NAME,
-  searchHint: 'fetch and extract content from a URL',
+  searchHint: t('toolUI.webFetch.searchHint'),
   // 100K chars - tool result persistence threshold
   maxResultSizeChars: 100_000,
   shouldDefer: true,
@@ -75,18 +76,18 @@ export const WebFetchTool = buildTool({
     const { url } = input as { url: string }
     try {
       const hostname = new URL(url).hostname
-      return `Claude wants to fetch content from ${hostname}`
+      return t('toolUI.webFetch.description', hostname)
     } catch {
-      return `Claude wants to fetch content from this URL`
+      return t('toolUI.webFetch.descriptionFallback')
     }
   },
   userFacingName() {
-    return 'Fetch'
+    return t('toolUI.webFetch.userFacingName')
   },
   getToolUseSummary,
   getActivityDescription(input) {
     const summary = getToolUseSummary(input)
-    return summary ? `Fetching ${summary}` : 'Fetching web page'
+    return summary ? t('toolUI.webFetch.fetchingSummary', summary) : t('toolUI.webFetch.fetchingWebPage')
   },
   get inputSchema(): InputSchema {
     return inputSchema()
@@ -133,7 +134,7 @@ export const WebFetchTool = buildTool({
     if (denyRule) {
       return {
         behavior: 'deny',
-        message: `${WebFetchTool.name} denied access to ${ruleContent}.`,
+        message: t('toolUI.webFetch.deniedAccess', { toolName: WebFetchTool.name, ruleContent }),
         decisionReason: {
           type: 'rule',
           rule: denyRule,
@@ -149,7 +150,7 @@ export const WebFetchTool = buildTool({
     if (askRule) {
       return {
         behavior: 'ask',
-        message: `Claude requested permissions to use ${WebFetchTool.name}, but you haven't granted it yet.`,
+        message: t('toolUI.webFetch.permissionNotGranted', { toolName: WebFetchTool.name }),
         decisionReason: {
           type: 'rule',
           rule: askRule,
@@ -176,7 +177,7 @@ export const WebFetchTool = buildTool({
 
     return {
       behavior: 'ask',
-      message: `Claude requested permissions to use ${WebFetchTool.name}, but you haven't granted it yet.`,
+      message: t('toolUI.webFetch.permissionNotGranted', { toolName: WebFetchTool.name }),
       suggestions: buildSuggestions(ruleContent),
     }
   },
@@ -197,7 +198,7 @@ ${DESCRIPTION}`
     } catch {
       return {
         result: false,
-        message: `Error: Invalid URL "${url}". The URL provided could not be parsed.`,
+        message: t('toolUI.webFetch.invalidUrl', { url }),
         meta: { reason: 'invalid_url' },
         errorCode: 1,
       }

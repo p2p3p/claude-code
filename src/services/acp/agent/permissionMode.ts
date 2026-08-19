@@ -1,4 +1,5 @@
 import type { PermissionMode } from '../../../types/permissions.js'
+import { t } from '../../../utils/i18n/index.js'
 import { resolvePermissionMode } from '../utils.js'
 
 export const permissionModeIds: readonly PermissionMode[] = [
@@ -28,9 +29,7 @@ export function resolveSessionPermissionMode(
       metaResolved === 'bypassPermissions' &&
       !isAcpBypassPermissionModeAvailable()
     ) {
-      throw new Error(
-        'Mode not available: bypassPermissions cannot run as root (start the agent as a non-root user, or set IS_SANDBOX=1).',
-      )
+      throw new Error(t('permissionMode.notAvailableAsRoot'))
     }
 
     return metaResolved
@@ -45,7 +44,7 @@ function resolveRequiredPermissionMode(
   source: string,
 ): PermissionMode {
   if (mode === undefined || mode === null) {
-    throw new Error(`Invalid ${source}: expected a string.`)
+    throw new Error(t('permissionMode.invalidSource', source))
   }
 
   return resolvePermissionMode(mode, source) as PermissionMode

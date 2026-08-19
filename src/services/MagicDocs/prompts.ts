@@ -124,8 +124,7 @@ These instructions take priority over the general rules below. Make sure your up
     customInstructions,
     CLAUDE_EFFORT: getDisplayedEffortLevel(currentModel, undefined),
     CLAUDE_MODEL: currentModel,
-    CLAUDE_CWD: process.cwd(),
-  }
+    CLAUDE_CWD: process.cwd()}
 
   return substituteVariables(promptTemplate, variables)
 }

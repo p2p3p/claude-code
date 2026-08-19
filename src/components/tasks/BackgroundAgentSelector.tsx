@@ -4,6 +4,7 @@ import { useElapsedTime } from '../../hooks/useElapsedTime.js';
 import { useAppState } from '../../state/AppState.js';
 import type { LocalAgentTaskState } from '../../tasks/LocalAgentTask/LocalAgentTask.js';
 import { formatTokens } from '../../utils/format.js';
+import { t } from '../../utils/i18n/index.js';
 
 function AgentRow({ task, selected }: { task: LocalAgentTaskState; selected: boolean }) {
   const elapsed = useElapsedTime(task.startTime, task.status === 'running');
@@ -19,7 +20,7 @@ function AgentRow({ task, selected }: { task: LocalAgentTaskState; selected: boo
       </Box>
       <Box flexShrink={0}>
         <Text dimColor>
-          {elapsed} · ↓ {formatTokens(tokens)} tokens
+          {elapsed} · ↓ {formatTokens(tokens)} {t('backgroundAgentSelector.tokens')}
         </Text>
       </Box>
     </Box>
@@ -27,9 +28,9 @@ function AgentRow({ task, selected }: { task: LocalAgentTaskState; selected: boo
 }
 
 function getHint(pillFocused: boolean, viewedTask: LocalAgentTaskState | null): string {
-  if (pillFocused) return '↑/↓ to select · Enter to view';
-  if (!viewedTask) return 'shift+↓ to manage background agents';
-  return viewedTask.status === 'running' ? 'shift+↓ to manage · x to stop' : 'shift+↓ to manage · x to clear';
+  if (pillFocused) return t('backgroundAgentSelector.hintSelect');
+  if (!viewedTask) return t('backgroundAgentSelector.hintManage');
+  return viewedTask.status === 'running' ? t('backgroundAgentSelector.hintManageRunning') : t('backgroundAgentSelector.hintManageDone');
 }
 
 export function BackgroundAgentSelector(): React.ReactNode {
@@ -52,7 +53,7 @@ export function BackgroundAgentSelector(): React.ReactNode {
   return (
     <Box flexDirection="column" width="100%">
       <Box flexDirection="row" width="100%" justifyContent="space-between">
-        <Text bold={mainHighlighted}>{mainHighlighted ? '● ' : '○ '}main</Text>
+        <Text bold={mainHighlighted}>{mainHighlighted ? '● ' : '○ '}{t('backgroundAgentSelector.main')}</Text>
         <Text dimColor>{getHint(pillFocused, viewedTask)}</Text>
       </Box>
       {tasks.map(task => (

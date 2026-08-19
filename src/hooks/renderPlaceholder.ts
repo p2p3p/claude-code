@@ -17,8 +17,7 @@ export function renderPlaceholder({
   focus,
   terminalFocus = true,
   invert = chalk.inverse,
-  hidePlaceholderText = false,
-}: PlaceholderRendererProps): {
+  hidePlaceholderText = false}: PlaceholderRendererProps): {
   renderedPlaceholder: string | undefined
   showPlaceholder: boolean
 } {
@@ -46,6 +45,5 @@ export function renderPlaceholder({
 
   return {
     renderedPlaceholder,
-    showPlaceholder,
-  }
+    showPlaceholder}
 }

@@ -10,8 +10,7 @@
  */
 import type {
   AgentSideConnection,
-  ClientCapabilities,
-} from '@agentclientprotocol/sdk'
+  ClientCapabilities} from '@agentclientprotocol/sdk'
 import type { AcpAgent } from './AcpAgent.js'
 import type { AcpSession } from './sessionTypes.js'
 

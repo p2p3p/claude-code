@@ -6,9 +6,9 @@ import {
   checkCachedPassesEligibility,
   formatCreditAmount,
   getCachedReferrerReward,
-  getCachedRemainingPasses,
-} from '../../services/api/referral.js';
+  getCachedRemainingPasses} from '../../services/api/referral.js';
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js';
+import { t } from '../../utils/i18n/index.js';
 
 function resetIfPassesRefreshed(): void {
   const remaining = getCachedRemainingPasses();
@@ -20,8 +20,7 @@ function resetIfPassesRefreshed(): void {
       ...prev,
       passesUpsellSeenCount: 0,
       hasVisitedPasses: false,
-      passesLastSeenRemaining: remaining,
-    }));
+      passesLastSeenRemaining: remaining}));
   }
 }
 
@@ -50,12 +49,10 @@ export function incrementGuestPassesSeenCount(): void {
     newCount = (prev.passesUpsellSeenCount ?? 0) + 1;
     return {
       ...prev,
-      passesUpsellSeenCount: newCount,
-    };
+      passesUpsellSeenCount: newCount};
   });
   logEvent('tengu_guest_passes_upsell_shown', {
-    seen_count: newCount,
-  });
+    seen_count: newCount});
 }
 
 // Condensed layout for mini welcome screen
@@ -65,8 +62,8 @@ export function GuestPassesUpsell(): React.ReactNode {
     <Text dimColor>
       <Text color="claude">[✻]</Text> <Text color="claude">[✻]</Text> <Text color="claude">[✻]</Text> ·{' '}
       {reward
-        ? `Share Claude Code and earn ${formatCreditAmount(reward)} of extra usage · /passes`
-        : '3 guest passes at /passes'}
+        ? t('misc.guestPassesEarn', formatCreditAmount(reward))
+        : t('misc.guestPassesCount')}
     </Text>
   );
 }

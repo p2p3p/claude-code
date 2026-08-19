@@ -1,5 +1,6 @@
 import memoize from 'lodash-es/memoize.js'
 import sample from 'lodash-es/sample.js'
+import { getLocale, t } from './i18n/index.js'
 import { getCwd } from '../utils/cwd.js'
 import { getCurrentProjectConfig, saveCurrentProjectConfig } from './config.js'
 import { env } from './env.js'
@@ -121,8 +122,7 @@ async function getFrequentlyModifiedFiles(): Promise<string[]> {
     // Fall back to all authors if the user's own history is thin.
     if (counts.size < 10) {
       const { stdout } = await execFileNoThrowWithCwd(gitExe(), logArgs, {
-        cwd: getCwd(),
-      })
+        cwd: getCwd()})
       tallyInto(stdout)
     }
 
@@ -139,25 +139,30 @@ async function getFrequentlyModifiedFiles(): Promise<string[]> {
 
 const ONE_WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000
 
-export const getExampleCommandFromCache = memoize(() => {
-  const projectConfig = getCurrentProjectConfig()
-  const frequentFile = projectConfig.exampleFiles?.length
-    ? sample(projectConfig.exampleFiles)
-    : '<filepath>'
+export const getExampleCommandFromCache = memoize(
+  () => {
+    const projectConfig = getCurrentProjectConfig()
+    const frequentFile = projectConfig.exampleFiles?.length
+      ? sample(projectConfig.exampleFiles)
+      : '<filepath>'
 
-  const commands = [
-    'fix lint errors',
-    'fix typecheck errors',
-    `how does ${frequentFile} work?`,
-    `refactor ${frequentFile}`,
-    'how do I log an error?',
-    `edit ${frequentFile} to...`,
-    `write a test for ${frequentFile}`,
-    'create a util logging.py that...',
-  ]
+    const commands = [
+      t('exampleCommands.fixErrors'),
+      t('exampleCommands.unitTest'),
+      t('exampleCommands.explainCode'),
+      t('exampleCommands.optimizeFn'),
+      t('exampleCommands.inspectFile', frequentFile),
+      t('exampleCommands.addFeature'),
+      t('exampleCommands.refactor'),
+      t('exampleCommands.security'),
+    ]
 
-  return `Try "${sample(commands)}"`
-})
+    return t('common.tryCmd', sample(commands))
+  },
+  // Key the cache by locale so a language switch regenerates the placeholder
+  // instead of serving the first-render language forever.
+  () => getLocale(),
+)
 
 export const refreshExampleCommands = memoize(async (): Promise<void> => {
   const projectConfig = getCurrentProjectConfig()
@@ -176,8 +181,7 @@ export const refreshExampleCommands = memoize(async (): Promise<void> => {
         saveCurrentProjectConfig(current => ({
           ...current,
           exampleFiles: files,
-          exampleFilesGeneratedAt: Date.now(),
-        }))
+          exampleFilesGeneratedAt: Date.now()}))
       }
     })
   }

@@ -7,24 +7,21 @@ import { type Command, Option } from '@commander-js/extra-typings'
 import { cliError, cliOk } from '../../cli/exit.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import {
   readClientSecret,
-  saveMcpClientSecret,
-} from '../../services/mcp/auth.js'
+  saveMcpClientSecret} from '../../services/mcp/auth.js'
 import { addMcpConfig } from '../../services/mcp/config.js'
 import {
   describeMcpConfigFilePath,
   ensureConfigScope,
   ensureTransport,
-  parseHeaders,
-} from '../../services/mcp/utils.js'
+  parseHeaders} from '../../services/mcp/utils.js'
 import {
   getXaaIdpSettings,
-  isXaaEnabled,
-} from '../../services/mcp/xaaIdpLogin.js'
+  isXaaEnabled} from '../../services/mcp/xaaIdpLogin.js'
 import { parseEnvVars } from '../../utils/envUtils.js'
+import { t } from '../../utils/i18n/index.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 
 /**
@@ -33,18 +30,7 @@ import { jsonStringify } from '../../utils/slowOperations.js'
 export function registerMcpAddCommand(mcp: Command): void {
   mcp
     .command('add <name> <commandOrUrl> [args...]')
-    .description(
-      'Add an MCP server to Claude Code.\n\n' +
-        'Examples:\n' +
-        '  # Add HTTP server:\n' +
-        '  claude mcp add --transport http sentry https://mcp.sentry.dev/mcp\n\n' +
-        '  # Add HTTP server with headers:\n' +
-        '  claude mcp add --transport http corridor https://app.corridor.dev/api/mcp --header "Authorization: Bearer ..."\n\n' +
-        '  # Add stdio server with environment variables:\n' +
-        '  claude mcp add -e API_KEY=xxx my-server -- npx my-mcp-server\n\n' +
-        '  # Add stdio server with subprocess flags:\n' +
-        '  claude mcp add my-server -- my-command --some-flag arg1',
-    )
+    .description(t('mcpAddCmd.addMcpServer'))
     .option(
       '-s, --scope <scope>',
       'Configuration scope (local, user, or project)',
@@ -141,8 +127,7 @@ export function registerMcpAddCommand(mcp: Command): void {
           transport:
             transport as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           transportExplicit: transportExplicit,
-          looksLikeUrl: looksLikeUrl,
-        })
+          looksLikeUrl: looksLikeUrl})
 
         if (transport === 'sse') {
           if (!actualCommand) {
@@ -161,8 +146,7 @@ export function registerMcpAddCommand(mcp: Command): void {
               ? {
                   ...(options.clientId ? { clientId: options.clientId } : {}),
                   ...(callbackPort ? { callbackPort } : {}),
-                  ...(xaa ? { xaa: true } : {}),
-                }
+                  ...(xaa ? { xaa: true } : {})}
               : undefined
 
           const clientSecret =
@@ -174,8 +158,7 @@ export function registerMcpAddCommand(mcp: Command): void {
             type: 'sse' as const,
             url: actualCommand,
             headers,
-            oauth,
-          }
+            oauth}
           await addMcpConfig(name, serverConfig, scope)
 
           if (clientSecret) {
@@ -183,16 +166,16 @@ export function registerMcpAddCommand(mcp: Command): void {
           }
 
           process.stdout.write(
-            `Added SSE MCP server ${name} with URL: ${actualCommand} to ${scope} config\n`,
+            t('mcpAdd.addedSse', name, actualCommand, scope),
           )
           if (headers) {
             process.stdout.write(
-              `Headers: ${jsonStringify(headers, null, 2)}\n`,
+              t('mcpAdd.headers', jsonStringify(headers, null, 2)),
             )
           }
         } else if (transport === 'http') {
           if (!actualCommand) {
-            cliError('Error: URL is required for HTTP transport.')
+            cliError(t('mcpAdd.urlRequiredHttp'))
           }
 
           const headers = options.header
@@ -207,8 +190,7 @@ export function registerMcpAddCommand(mcp: Command): void {
               ? {
                   ...(options.clientId ? { clientId: options.clientId } : {}),
                   ...(callbackPort ? { callbackPort } : {}),
-                  ...(xaa ? { xaa: true } : {}),
-                }
+                  ...(xaa ? { xaa: true } : {})}
               : undefined
 
           const clientSecret =
@@ -220,8 +202,7 @@ export function registerMcpAddCommand(mcp: Command): void {
             type: 'http' as const,
             url: actualCommand,
             headers,
-            oauth,
-          }
+            oauth}
           await addMcpConfig(name, serverConfig, scope)
 
           if (clientSecret) {
@@ -229,11 +210,11 @@ export function registerMcpAddCommand(mcp: Command): void {
           }
 
           process.stdout.write(
-            `Added HTTP MCP server ${name} with URL: ${actualCommand} to ${scope} config\n`,
+            t('mcpAdd.addedHttp', name, actualCommand, scope),
           )
           if (headers) {
             process.stdout.write(
-              `Headers: ${jsonStringify(headers, null, 2)}\n`,
+              t('mcpAdd.headers', jsonStringify(headers, null, 2)),
             )
           }
         } else {
@@ -243,22 +224,14 @@ export function registerMcpAddCommand(mcp: Command): void {
             options.callbackPort ||
             options.xaa
           ) {
-            process.stderr.write(
-              `Warning: --client-id, --client-secret, --callback-port, and --xaa are only supported for HTTP/SSE transports and will be ignored for stdio.\n`,
-            )
+            process.stderr.write(t('mcpAdd.extrasIgnoredStdio'))
           }
 
           // Warn if this looks like a URL but transport wasn't explicitly specified
           if (!transportExplicit && looksLikeUrl) {
-            process.stderr.write(
-              `\nWarning: The command "${actualCommand}" looks like a URL, but is being interpreted as a stdio server as --transport was not specified.\n`,
-            )
-            process.stderr.write(
-              `If this is an HTTP server, use: claude mcp add --transport http ${name} ${actualCommand}\n`,
-            )
-            process.stderr.write(
-              `If this is an SSE server, use: claude mcp add --transport sse ${name} ${actualCommand}\n`,
-            )
+            process.stderr.write(t('mcpAdd.looksLikeUrl', actualCommand))
+            process.stderr.write(t('mcpAdd.httpHint', name, actualCommand))
+            process.stderr.write(t('mcpAdd.sseHint', name, actualCommand))
           }
 
           const env = parseEnvVars(options.env)
@@ -269,10 +242,10 @@ export function registerMcpAddCommand(mcp: Command): void {
           )
 
           process.stdout.write(
-            `Added stdio MCP server ${name} with command: ${actualCommand} ${actualArgs.join(' ')} to ${scope} config\n`,
+            t('mcpAdd.addedStdio', name, actualCommand, actualArgs.join(' '), scope),
           )
         }
-        cliOk(`File modified: ${describeMcpConfigFilePath(scope)}`)
+        cliOk(t('mcpAdd.fileModified', describeMcpConfigFilePath(scope)))
       } catch (error) {
         cliError((error as Error).message)
       }

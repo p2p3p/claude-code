@@ -4,8 +4,7 @@ import { feature } from 'bun:bundle'
 import chalk from 'chalk'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { getCwd } from 'src/utils/cwd.js'
 import { checkForReleaseNotes } from 'src/utils/releaseNotes.js'
 import { setCwd } from 'src/utils/Shell.js'
@@ -16,8 +15,7 @@ import {
   getSessionId,
   setOriginalCwd,
   setProjectRoot,
-  switchSession,
-} from './bootstrap/state.js'
+  switchSession} from './bootstrap/state.js'
 import { getCommands } from './commands.js'
 import { initSessionMemory } from './services/SessionMemory/sessionMemory.js'
 import { initSkillLearning } from './services/skillLearning/runtimeObserver.js'
@@ -32,12 +30,12 @@ import { env } from './utils/env.js'
 import { envDynamic } from './utils/envDynamic.js'
 import { isBareMode, isEnvTruthy } from './utils/envUtils.js'
 import { errorMessage } from './utils/errors.js'
+import { t } from './utils/i18n/index.js'
 import { findCanonicalGitRoot, findGitRoot, getIsGit } from './utils/git.js'
 import { initializeFileChangedWatcher } from './utils/hooks/fileChangedWatcher.js'
 import {
   captureHooksConfigSnapshot,
-  updateHooksConfigSnapshot,
-} from './utils/hooks/hooksConfigSnapshot.js'
+  updateHooksConfigSnapshot} from './utils/hooks/hooksConfigSnapshot.js'
 import { hasWorktreeCreateHook } from './utils/hooks.js'
 import { checkAndRestoreITerm2Backup } from './utils/iTermBackup.js'
 import { logError } from './utils/log.js'
@@ -51,8 +49,7 @@ import {
   createTmuxSessionForWorktree,
   createWorktreeForSession,
   generateTmuxSessionName,
-  worktreeBranchName,
-} from './utils/worktree.js'
+  worktreeBranchName} from './utils/worktree.js'
 
 export async function setup(
   cwd: string,
@@ -72,7 +69,7 @@ export async function setup(
   if (!nodeVersion || parseInt(nodeVersion, 10) < 18) {
     console.error(
       chalk.bold.red(
-        'Error: Claude Code requires Node.js version 18 or higher.',
+        t('setupNode.nodeVersion'),
       ),
     )
     process.exit(1)
@@ -103,7 +100,7 @@ export async function setup(
         logError(error)
         console.error(
           chalk.red(
-            `Error: Failed to start messaging socket (UDS_INBOX): ${errorMessage(error)}`,
+            t('setupNode.udsSocketFailed', errorMessage(error)),
           ),
         )
         process.exit(1)
@@ -129,13 +126,13 @@ export async function setup(
       if (restoredIterm2Backup.status === 'restored') {
         console.log(
           chalk.yellow(
-            'Detected an interrupted iTerm2 setup. Your original settings have been restored. You may need to restart iTerm2 for the changes to take effect.',
+            t('setupNode.iterm2Restored'),
           ),
         )
       } else if (restoredIterm2Backup.status === 'failed') {
         console.error(
           chalk.red(
-            `Failed to restore iTerm2 settings. Please manually restore your original settings with: defaults import com.googlecode.iterm2 ${restoredIterm2Backup.backupPath}.`,
+            t('setupNode.iterm2RestoreFailed', restoredIterm2Backup.backupPath),
           ),
         )
       }
@@ -147,13 +144,13 @@ export async function setup(
       if (restoredTerminalBackup.status === 'restored') {
         console.log(
           chalk.yellow(
-            'Detected an interrupted Terminal.app setup. Your original settings have been restored. You may need to restart Terminal.app for the changes to take effect.',
+            t('setupNode.terminalRestored'),
           ),
         )
       } else if (restoredTerminalBackup.status === 'failed') {
         console.error(
           chalk.red(
-            `Failed to restore Terminal.app settings. Please manually restore your original settings with: defaults import com.apple.Terminal ${restoredTerminalBackup.backupPath}.`,
+            t('setupNode.terminalRestoreFailed', restoredTerminalBackup.backupPath),
           ),
         )
       }
@@ -171,8 +168,7 @@ export async function setup(
   const hooksStart = Date.now()
   captureHooksConfigSnapshot()
   logForDiagnosticsNoPII('info', 'setup_hooks_captured', {
-    duration_ms: Date.now() - hooksStart,
-  })
+    duration_ms: Date.now() - hooksStart})
 
   // Initialize FileChanged hook watcher — sync, reads hook config snapshot
   initializeFileChangedWatcher(cwd)
@@ -187,8 +183,7 @@ export async function setup(
     if (!hasHook && !inGit) {
       process.stderr.write(
         chalk.red(
-          `Error: Can only use --worktree in a git repository, but ${chalk.bold(cwd)} is not a git repository. ` +
-            `Configure a WorktreeCreate hook in settings.json to use --worktree with other VCS systems.\n`,
+          t('setupNode.worktreeNoGit', chalk.bold(cwd)),
         ),
       )
       process.exit(1)
@@ -210,7 +205,7 @@ export async function setup(
       if (!mainRepoRoot) {
         process.stderr.write(
           chalk.red(
-            `Error: Could not determine the main git repository root.\n`,
+            t('setupNode.worktreeNoRoot'),
           ),
         )
         process.exit(1)
@@ -244,7 +239,7 @@ export async function setup(
       )
     } catch (error) {
       process.stderr.write(
-        chalk.red(`Error creating worktree: ${errorMessage(error)}\n`),
+        chalk.red(t('setupNode.worktreeCreateError', errorMessage(error))),
       )
       process.exit(1)
     }
@@ -260,13 +255,13 @@ export async function setup(
       if (tmuxResult.created) {
         console.log(
           chalk.green(
-            `Created tmux session: ${chalk.bold(tmuxSessionName)}\nTo attach: ${chalk.bold(`tmux attach -t ${tmuxSessionName}`)}`,
+            t('setupNode.tmuxCreated', chalk.bold(tmuxSessionName)),
           ),
         )
       } else {
         console.error(
           chalk.yellow(
-            `Warning: Failed to create tmux session: ${tmuxResult.error}`,
+            t('setupNode.tmuxFailed', tmuxResult.error),
           ),
         )
       }
@@ -417,30 +412,29 @@ export async function setup(
       if (process.stdin.isTTY) {
         console.error(
           chalk.bold.red(
-            'WARNING: Running as root/sudo with bypass permissions mode is dangerous.',
+            t('setupNode.rootWarning'),
           ),
         )
         console.error(
           chalk.yellow(
-            'Bypass mode skips ALL permission checks. Combined with root, any command (rm -rf /, chmod, dd) executes without review.',
+            t('setupNode.rootBypassDetail'),
           ),
         )
         const readline = await import('readline')
         const rl = readline.createInterface({
           input: process.stdin,
-          output: process.stdout,
-        })
+          output: process.stdout})
         const answer = await new Promise<string>(resolve => {
-          rl.question('\nI understand the risks. Continue? [y/N] ', resolve)
+          rl.question(t('setupNode.rootConfirm'), resolve)
         })
         rl.close()
         if (answer.trim().toLowerCase() !== 'y') {
-          console.error('Aborted.')
+          console.error(t('setupNode.rootAborted'))
           process.exit(1)
         }
       } else {
         console.error(
-          `--dangerously-skip-permissions cannot be used with root/sudo privileges for security reasons`,
+          t('setupNode.rootNotAllowed'),
         )
         process.exit(1)
       }
@@ -466,7 +460,7 @@ export async function setup(
       const isSandboxed = isDocker || isBubblewrap || isSandbox
       if (!isSandboxed || hasInternet) {
         console.error(
-          `--dangerously-skip-permissions can only be used in Docker/sandbox containers with no internet access but got Docker: ${isDocker}, Bubblewrap: ${isBubblewrap}, IS_SANDBOX: ${isSandbox}, hasInternet: ${hasInternet}`,
+          t('setupNode.bypassOutsideContainer', isDocker, isBubblewrap, isSandbox, hasInternet),
         )
         process.exit(1)
       }
@@ -500,8 +494,7 @@ export async function setup(
       last_session_fps_low_1_pct: projectConfig.lastFpsLow1Pct,
       last_session_id:
         projectConfig.lastSessionId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      ...projectConfig.lastSessionMetrics,
-    })
+      ...projectConfig.lastSessionMetrics})
     // Note: We intentionally don't clear these values after logging.
     // They're needed for cost restoration when resuming sessions.
     // The values will be overwritten when the next session exits.

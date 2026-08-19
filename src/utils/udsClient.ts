@@ -102,8 +102,7 @@ export async function listAllLiveSessions(): Promise<PeerSession[]> {
         messagingSocketPath: data.messagingSocketPath as string | undefined,
         entrypoint: data.entrypoint as string | undefined,
         bridgeSessionId: data.bridgeSessionId as string | null | undefined,
-        alive: true,
-      })
+        alive: true})
     } catch {
       // Corrupted file — skip
     }
@@ -149,8 +148,7 @@ export async function isPeerAlive(
       const ping: UdsMessage = {
         type: 'ping',
         ts: new Date().toISOString(),
-        meta: { authToken: token },
-      }
+        meta: { authToken: token }}
       conn.write(jsonStringify(ping) + '\n')
     })
 
@@ -219,8 +217,7 @@ export async function sendToUdsSocket(
   const udsMsg: UdsMessage = {
     type: 'text',
     data,
-    ts: new Date().toISOString(),
-  }
+    ts: new Date().toISOString()}
 
   // Lazily import to avoid circular dep at module-load time
   const { getUdsMessagingSocketPath } = await import('./udsMessaging.js')
@@ -251,8 +248,7 @@ export async function sendToUdsSocket(
       maxFrameBytes: MAX_UDS_FRAME_BYTES,
       onSettled: finish,
       formatSocketError: err =>
-        new UdsPeerConnectionError(target.socketPath, err),
-    })
+        new UdsPeerConnectionError(target.socketPath, err)})
     conn.setTimeout(timeoutMs, () => {
       finish(
         new UdsPeerConnectionError(

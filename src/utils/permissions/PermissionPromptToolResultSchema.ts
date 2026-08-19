@@ -4,12 +4,10 @@ import { logForDebugging } from '../debug.js'
 import { lazySchema } from '../lazySchema.js'
 import type {
   PermissionDecision,
-  PermissionDecisionReason,
-} from './PermissionResult.js'
+  PermissionDecisionReason} from './PermissionResult.js'
 import {
   applyPermissionUpdates,
-  persistPermissionUpdates,
-} from './PermissionUpdate.js'
+  persistPermissionUpdates} from './PermissionUpdate.js'
 import { permissionUpdateSchema } from './PermissionUpdateSchema.js'
 
 export const inputSchema = lazySchema(() =>
@@ -21,8 +19,7 @@ export const inputSchema = lazySchema(() =>
     tool_use_id: z
       .string()
       .optional()
-      .describe('The unique tool use request ID'),
-  }),
+      .describe('The unique tool use request ID')}),
 )
 
 export type Input = z.infer<ReturnType<typeof inputSchema>>
@@ -58,8 +55,7 @@ const PermissionAllowResultSchema = lazySchema(() =>
         return undefined
       }),
     toolUseID: z.string().optional(),
-    decisionClassification: decisionClassificationField(),
-  }),
+    decisionClassification: decisionClassificationField()}),
 )
 
 const PermissionDenyResultSchema = lazySchema(() =>
@@ -68,8 +64,7 @@ const PermissionDenyResultSchema = lazySchema(() =>
     message: z.string(),
     interrupt: z.boolean().optional(),
     toolUseID: z.string().optional(),
-    decisionClassification: decisionClassificationField(),
-  }),
+    decisionClassification: decisionClassificationField()}),
 )
 
 export const outputSchema = lazySchema(() =>
@@ -90,8 +85,7 @@ export function permissionPromptToolResultToPermissionDecision(
   const decisionReason: PermissionDecisionReason = {
     type: 'permissionPromptTool',
     permissionPromptToolName: tool.name,
-    toolResult: result,
-  }
+    toolResult: result}
   if (result.behavior === 'allow') {
     const updatedPermissions = result.updatedPermissions
     if (updatedPermissions) {
@@ -100,8 +94,7 @@ export function permissionPromptToolResultToPermissionDecision(
         toolPermissionContext: applyPermissionUpdates(
           prev.toolPermissionContext,
           updatedPermissions,
-        ),
-      }))
+        )}))
       persistPermissionUpdates(updatedPermissions)
     }
     // Mobile clients responding from a push notification don't have the
@@ -112,8 +105,7 @@ export function permissionPromptToolResultToPermissionDecision(
     return {
       ...result,
       updatedInput,
-      decisionReason,
-    }
+      decisionReason}
   } else if (result.behavior === 'deny' && result.interrupt) {
     logForDebugging(
       `SDK permission prompt deny+interrupt: tool=${tool.name} message=${result.message}`,
@@ -122,6 +114,5 @@ export function permissionPromptToolResultToPermissionDecision(
   }
   return {
     ...result,
-    decisionReason,
-  }
+    decisionReason}
 }

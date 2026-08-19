@@ -111,8 +111,7 @@ async function buildHeaders(): Promise<Record<string, string>> {
     'x-api-key': apiKey,
     'anthropic-version': '2023-06-01',
     'anthropic-beta': MEMORY_STORES_BETA_HEADER,
-    'content-type': 'application/json',
-  }
+    'content-type': 'application/json'}
 }
 
 function memoryStoresBaseUrl(): string {
@@ -207,8 +206,7 @@ export async function listStores(): Promise<MemoryStore[]> {
     const response = await axios.get<ListStoresResponse>(
       memoryStoresBaseUrl(),
       {
-        headers,
-      },
+        headers},
     )
     return response.data.data ?? []
   })
@@ -226,8 +224,7 @@ export async function createStore(
       memoryStoresBaseUrl(),
       body,
       {
-        headers,
-      },
+        headers},
     )
     return response.data
   })

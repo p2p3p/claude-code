@@ -23,8 +23,7 @@ import type {
   Message as MessageType,
   NormalizedMessage,
   ProgressMessage as ProgressMessageType,
-  RenderableMessage,
-} from '../types/message.js';
+  RenderableMessage} from '../types/message.js';
 import { type AdvisorBlock, isAdvisorBlock } from '../utils/advisor.js';
 import { collapseBackgroundBashNotifications } from '../utils/collapseBackgroundBashNotifications.js';
 import { collapseHookSummaries } from '../utils/collapseHookSummaries.js';
@@ -48,10 +47,9 @@ import {
   reorderMessagesInUI,
   type StreamingThinking,
   type StreamingToolUse,
-  shouldShowUserMessage,
-} from '../utils/messages.js';
-import { plural } from '../utils/stringUtils.js';
+  shouldShowUserMessage} from '../utils/messages.js';
 import { renderableSearchText } from '../utils/transcriptSearch.js';
+import { t } from '../utils/i18n/index.js';
 import { Divider } from '@anthropic/ink';
 import type { UnseenDivider } from './FullscreenLayout.js';
 import { LogoV2 } from './LogoV2/LogoV2.js';
@@ -61,8 +59,7 @@ import {
   InVirtualListContext,
   type MessageActionsNav,
   MessageActionsSelectedContext,
-  type MessageActionsState,
-} from './messageActions.js';
+  type MessageActionsState} from './messageActions.js';
 import { AssistantThinkingMessage } from './messages/AssistantThinkingMessage.js';
 import { isNullRenderingAttachment } from './messages/nullRenderingAttachments.js';
 import { OffscreenFreeze } from './OffscreenFreeze.js';
@@ -79,8 +76,7 @@ import type { JumpHandle } from './VirtualMessageList.js';
 // doesn't invalidate the logo subtree. LogoV2/StatusNotices internally
 // subscribe to useAppState/useSettings for their own updates.
 const LogoHeader = React.memo(function LogoHeader({
-  agentDefinitions,
-}: {
+  agentDefinitions}: {
   agentDefinitions: AgentDefinitionsResult | undefined;
 }): React.ReactNode {
   // LogoV2 has its own internal OffscreenFreeze (catches its useAppState
@@ -400,8 +396,7 @@ const MessagesImpl = ({
   cursor = null,
   setCursor,
   cursorNavRef,
-  renderRange,
-}: Props): React.ReactNode => {
+  renderRange}: Props): React.ReactNode => {
   const { columns } = useTerminalSize();
   const toggleShowAllShortcut = useShortcutDisplay('transcript:toggleShowAll', 'Transcript', 'Ctrl+E');
 
@@ -484,8 +479,7 @@ const MessagesImpl = ({
     () =>
       streamingToolUsesWithoutInProgress.flatMap(streamingToolUse => {
         const msg = createAssistantMessage({
-          content: [streamingToolUse.contentBlock],
-        });
+          content: [streamingToolUse.contentBlock]});
         // Override randomUUID with deterministic value derived from content
         // block ID to prevent React key changes on every memo recomputation.
         // Same class of bug fixed in normalizeMessages (commit 383326e613):
@@ -625,8 +619,7 @@ const MessagesImpl = ({
           lookups,
           normalizedCount: normalizedMessages.length,
           messageCount: (messagesToShow as MessageType[]).length,
-          lastAssistantMsgId: currentLastAssistantMsgId,
-        };
+          lastAssistantMsgId: currentLastAssistantMsgId};
       } else {
         lookups = buildMessageLookups(normalizedMessages, messagesToShow as MessageType[]);
         lookupsCacheRef.current = {
@@ -634,8 +627,7 @@ const MessagesImpl = ({
           lookups,
           normalizedCount: normalizedMessages.length,
           messageCount: (messagesToShow as MessageType[]).length,
-          lastAssistantMsgId: currentLastAssistantMsgId,
-        };
+          lastAssistantMsgId: currentLastAssistantMsgId};
       }
     } else {
       lookups = buildMessageLookups(normalizedMessages, messagesToShow as MessageType[]);
@@ -644,8 +636,7 @@ const MessagesImpl = ({
         lookups,
         normalizedCount: normalizedMessages.length,
         messageCount: (messagesToShow as MessageType[]).length,
-        lastAssistantMsgId: currentLastAssistantMsgId,
-      };
+        lastAssistantMsgId: currentLastAssistantMsgId};
     }
 
     const hiddenMessageCount = messagesToShowNotTruncated.length - MAX_MESSAGES_TO_SHOW_IN_TRANSCRIPT_MODE;
@@ -654,8 +645,7 @@ const MessagesImpl = ({
       collapsed,
       lookups,
       hasTruncatedMessages,
-      hiddenMessageCount,
-    };
+      hiddenMessageCount};
   }, [
     verbose,
     normalizedMessages,
@@ -836,7 +826,7 @@ const MessagesImpl = ({
       return [
         <Box key="unseen-divider" marginTop={1}>
           <Divider
-            title={`${unseenDivider.count} new ${plural(unseenDivider.count, 'message')}`}
+            title={t('messages.newMessages', unseenDivider.count)}
             width={columns}
             color="inactive"
           />
@@ -897,7 +887,7 @@ const MessagesImpl = ({
       {/* Truncation indicator */}
       {hasTruncatedMessages && (
         <Divider
-          title={`${toggleShowAllShortcut} to show ${chalk.bold(hiddenMessageCount)} previous messages`}
+          title={t('messages.showPrevious', toggleShowAllShortcut, chalk.bold(String(hiddenMessageCount)))}
           width={columns}
         />
       )}
@@ -911,7 +901,7 @@ const MessagesImpl = ({
         // nothing is actually "hidden" to restore.
         !disableRenderCap && (
           <Divider
-            title={`${toggleShowAllShortcut} to hide ${chalk.bold(hiddenMessageCount)} previous messages`}
+            title={t('messages.hidePrevious', toggleShowAllShortcut, chalk.bold(String(hiddenMessageCount)))}
             width={columns}
           />
         )}
@@ -968,8 +958,7 @@ const MessagesImpl = ({
           <AssistantThinkingMessage
             param={{
               type: 'thinking',
-              thinking: streamingThinking.thinking,
-            }}
+              thinking: streamingThinking.thinking}}
             addMargin={false}
             isTranscriptMode={true}
             verbose={verbose}

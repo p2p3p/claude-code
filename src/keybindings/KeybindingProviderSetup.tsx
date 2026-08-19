@@ -8,14 +8,13 @@ import { useCallback } from 'react';
 import { useNotifications } from '../context/notifications.js';
 import { count } from '../utils/array.js';
 import { logForDebugging } from '../utils/debug.js';
-import { plural } from '../utils/stringUtils.js';
+import { t } from '../utils/i18n/index.js';
 import { KeybindingSetup as InkKeybindingSetup } from '@anthropic/ink';
 import type { KeybindingWarning } from '@anthropic/ink';
 import {
   initializeKeybindingWatcher,
   loadKeybindingsSyncWithWarnings,
-  subscribeToKeybindingChanges,
-} from './loadUserBindings.js';
+  subscribeToKeybindingChanges} from './loadUserBindings.js';
 
 type Props = {
   children: React.ReactNode;
@@ -58,21 +57,20 @@ export function KeybindingSetup({ children }: Props): React.ReactNode {
 
       let message: string;
       if (errorCount > 0 && warnCount > 0) {
-        message = `Found ${errorCount} keybinding ${plural(errorCount, 'error')} and ${warnCount} ${plural(warnCount, 'warning')}`;
+        message = t('keybindingWarnings.foundErrorsAndWarnings', errorCount, warnCount);
       } else if (errorCount > 0) {
-        message = `Found ${errorCount} keybinding ${plural(errorCount, 'error')}`;
+        message = t('keybindingWarnings.foundErrors', errorCount);
       } else {
-        message = `Found ${warnCount} keybinding ${plural(warnCount, 'warning')}`;
+        message = t('keybindingWarnings.foundWarnings', warnCount);
       }
-      message += ' · /doctor for details';
+      message += t('keybindingWarnings.doctorForDetails');
 
       addNotification({
         key: notificationKey,
         text: message,
         color: errorCount > 0 ? 'error' : 'warning',
         priority: errorCount > 0 ? 'immediate' : 'high',
-        timeoutMs: 60000,
-      });
+        timeoutMs: 60000});
     },
     [addNotification, removeNotification],
   );

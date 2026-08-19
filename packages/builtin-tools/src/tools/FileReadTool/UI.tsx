@@ -11,6 +11,7 @@ import { formatFileSize } from 'src/utils/format.js';
 import { getPlansDirectory } from 'src/utils/plans.js';
 import { getTaskOutputDir } from 'src/utils/task/diskOutput.js';
 import type { Input, Output } from './FileReadTool.js';
+import { t } from 'src/utils/i18n/index.js';
 
 /**
  * Check if a file path is an agent output file and extract the task ID.
@@ -48,13 +49,13 @@ export function renderToolUseMessage(
     return (
       <>
         <FilePathLink filePath={file_path}>{displayPath}</FilePathLink>
-        {` · pages ${pages}`}
+        {` · ${t('toolUI.fileRead.pages', pages)}`}
       </>
     );
   }
   if (verbose && (offset || limit)) {
     const startLine = offset ?? 1;
-    const lineRange = limit ? `lines ${startLine}-${startLine + limit - 1}` : `from line ${startLine}`;
+    const lineRange = limit ? t('toolUI.fileRead.lines', startLine, startLine + limit - 1) : t('toolUI.fileRead.fromLine', startLine);
     return (
       <>
         <FilePathLink filePath={file_path}>{displayPath}</FilePathLink>
@@ -84,20 +85,18 @@ export function renderToolResultMessage(output: Output): React.ReactNode {
 
       return (
         <MessageResponse height={1}>
-          <Text>Read image ({formattedSize})</Text>
+          <Text>{t('toolUI.fileRead.readImage', formattedSize)}</Text>
         </MessageResponse>
       );
     }
     case 'notebook': {
       const { cells } = output.file;
       if (!cells || cells.length < 1) {
-        return <Text color="error">No cells found in notebook</Text>;
+        return <Text color="error">{t('toolUI.fileRead.noCells')}</Text>;
       }
       return (
         <MessageResponse height={1}>
-          <Text>
-            Read <Text bold>{cells.length}</Text> cells
-          </Text>
+          <Text>{t('toolUI.fileRead.readCells', cells.length)}</Text>
         </MessageResponse>
       );
     }
@@ -107,7 +106,7 @@ export function renderToolResultMessage(output: Output): React.ReactNode {
 
       return (
         <MessageResponse height={1}>
-          <Text>Read PDF ({formattedSize})</Text>
+          <Text>{t('toolUI.fileRead.readPdf', formattedSize)}</Text>
         </MessageResponse>
       );
     }
@@ -115,7 +114,7 @@ export function renderToolResultMessage(output: Output): React.ReactNode {
       return (
         <MessageResponse height={1}>
           <Text>
-            Read <Text bold>{output.file.count}</Text> {output.file.count === 1 ? 'page' : 'pages'} (
+            {t('toolUI.fileRead.readPages', output.file.count)} (
             {formatFileSize(output.file.originalSize)})
           </Text>
         </MessageResponse>
@@ -126,16 +125,14 @@ export function renderToolResultMessage(output: Output): React.ReactNode {
 
       return (
         <MessageResponse height={1}>
-          <Text>
-            Read <Text bold>{numLines}</Text> {numLines === 1 ? 'line' : 'lines'}
-          </Text>
+          <Text>{t('toolUI.fileRead.readLines', numLines)}</Text>
         </MessageResponse>
       );
     }
     case 'file_unchanged': {
       return (
         <MessageResponse height={1}>
-          <Text dimColor>Unchanged since last read</Text>
+          <Text dimColor>{t('toolUI.fileRead.unchanged')}</Text>
         </MessageResponse>
       );
     }
@@ -152,14 +149,14 @@ export function renderToolUseErrorMessage(
     if (result.includes(FILE_NOT_FOUND_CWD_NOTE)) {
       return (
         <MessageResponse>
-          <Text color="error">File not found</Text>
+          <Text color="error">{t('toolUI.fileRead.fileNotFound')}</Text>
         </MessageResponse>
       );
     }
     if (extractTag(result, 'tool_use_error')) {
       return (
         <MessageResponse>
-          <Text color="error">Error reading file</Text>
+          <Text color="error">{t('toolUI.fileRead.errorReading')}</Text>
         </MessageResponse>
       );
     }
@@ -169,12 +166,12 @@ export function renderToolUseErrorMessage(
 
 export function userFacingName(input: Partial<Input> | undefined): string {
   if (input?.file_path?.startsWith(getPlansDirectory())) {
-    return 'Reading Plan';
+    return t('toolUI.fileRead.nameReadingPlan');
   }
   if (input?.file_path && getAgentOutputTaskId(input.file_path)) {
-    return 'Read agent output';
+    return t('toolUI.fileRead.nameReadAgentOutput');
   }
-  return 'Read';
+  return t('toolUI.fileRead.nameRead');
 }
 
 export function getToolUseSummary(input: Partial<Input> | undefined): string | null {

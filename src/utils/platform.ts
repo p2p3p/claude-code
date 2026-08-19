@@ -55,8 +55,7 @@ export const getWslVersion = memoize((): string | undefined => {
   }
   try {
     const procVersion = getFsImplementation().readFileSync('/proc/version', {
-      encoding: 'utf8',
-    })
+      encoding: 'utf8'})
 
     // First check for explicit WSL version markers (e.g., "WSL2", "WSL3", etc.)
     const wslVersionMatch = procVersion.match(/WSL(\d+)/i)
@@ -91,8 +90,7 @@ export const getLinuxDistroInfo = memoize(
     }
 
     const result: LinuxDistroInfo = {
-      linuxKernel: osRelease(),
-    }
+      linuxKernel: osRelease()}
 
     try {
       const content = await readFile('/etc/os-release', 'utf8')

@@ -11,12 +11,10 @@ import { feature } from 'bun:bundle'
 import { join, relative } from 'path'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import {
   type FilesApiConfig,
-  uploadSessionFiles,
-} from '../../services/api/filesApi.js'
+  uploadSessionFiles} from '../../services/api/filesApi.js'
 import { getCwd } from '../cwd.js'
 import { errorMessage } from '../errors.js'
 import { logError } from '../log.js'
@@ -24,8 +22,7 @@ import { getSessionIngressAuthToken } from '../sessionIngressAuth.js'
 import {
   findModifiedFiles,
   getEnvironmentKind,
-  logDebug,
-} from './outputsScanner.js'
+  logDebug} from './outputsScanner.js'
 import {
   DEFAULT_UPLOAD_CONCURRENCY,
   type FailedPersistence,
@@ -33,8 +30,7 @@ import {
   type FilesPersistedEventData,
   OUTPUTS_SUBDIR,
   type PersistedFile,
-  type TurnStartTime,
-} from './types.js'
+  type TurnStartTime} from './types.js'
 
 /**
  * Execute file persistence for modified files in the outputs directory.
@@ -74,8 +70,7 @@ export async function runFilePersistence(
 
   const config: FilesApiConfig = {
     oauthToken: sessionAccessToken,
-    sessionId,
-  }
+    sessionId}
 
   const outputsDir = join(getCwd(), sessionId, OUTPUTS_SUBDIR)
 
@@ -87,8 +82,7 @@ export async function runFilePersistence(
 
   const startTime = Date.now()
   logEvent('tengu_file_persistence_started', {
-    mode: environmentKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+    mode: environmentKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
   try {
     // environmentKind === 'byoc' is guaranteed by the early return above
@@ -109,8 +103,7 @@ export async function runFilePersistence(
       success_count: result.files.length,
       failure_count: result.failed.length,
       duration_ms: durationMs,
-      mode: environmentKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+      mode: environmentKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
     return result
   } catch (error) {
@@ -124,18 +117,15 @@ export async function runFilePersistence(
       duration_ms: durationMs,
       mode: environmentKind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       error:
-        'exception' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'exception' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
     return {
       files: [],
       failed: [
         {
           filename: outputsDir,
-          error: errorMessage(error),
-        },
-      ],
-    }
+          error: errorMessage(error)},
+      ]}
   }
 }
 
@@ -171,24 +161,20 @@ async function executeBYOCPersistence(
     )
     logEvent('tengu_file_persistence_limit_exceeded', {
       file_count: modifiedFiles.length,
-      limit: FILE_COUNT_LIMIT,
-    })
+      limit: FILE_COUNT_LIMIT})
     return {
       files: [],
       failed: [
         {
           filename: outputsDir,
-          error: `Too many files modified (${modifiedFiles.length}). Maximum: ${FILE_COUNT_LIMIT}.`,
-        },
-      ],
-    }
+          error: `Too many files modified (${modifiedFiles.length}). Maximum: ${FILE_COUNT_LIMIT}.`},
+      ]}
   }
 
   const filesToProcess = modifiedFiles
     .map(filePath => ({
       path: filePath,
-      relativePath: relative(outputsDir, filePath),
-    }))
+      relativePath: relative(outputsDir, filePath)}))
     .filter(({ relativePath }) => {
       // Security: skip files that resolve outside the outputs directory
       if (relativePath.startsWith('..')) {
@@ -215,14 +201,12 @@ async function executeBYOCPersistence(
     if (result.success) {
       persistedFiles.push({
         filename: result.path,
-        file_id: result.fileId,
-      })
+        file_id: result.fileId})
     } else {
       failedFiles.push({
         filename: result.path,
         error: (result as { path: string; error: string; success: false })
-          .error,
-      })
+          .error})
     }
   }
 
@@ -232,8 +216,7 @@ async function executeBYOCPersistence(
 
   return {
     files: persistedFiles,
-    failed: failedFiles,
-  }
+    failed: failedFiles}
 }
 
 /**

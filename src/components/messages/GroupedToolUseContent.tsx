@@ -17,8 +17,7 @@ export function GroupedToolUseContent({
   tools,
   lookups,
   inProgressToolUseIDs,
-  shouldAnimate,
-}: Props): React.ReactNode {
+  shouldAnimate}: Props): React.ReactNode {
   const tool = findToolByName(tools, message.toolName);
   if (!tool?.renderGroupedToolUse) {
     return null;
@@ -32,8 +31,7 @@ export function GroupedToolUseContent({
       if (content.type === 'tool_result') {
         resultsByToolUseId.set(content.tool_use_id as string, {
           param: content as unknown as ToolResultBlockParam,
-          output: resultMsg.toolUseResult,
-        });
+          output: resultMsg.toolUseResult});
       }
     }
   }
@@ -48,14 +46,12 @@ export function GroupedToolUseContent({
       isError: lookups.erroredToolUseIDs.has(id),
       isInProgress: inProgressToolUseIDs.has(id),
       progressMessages: filterToolProgressMessages(lookups.progressMessagesByToolUseID.get(id) ?? []),
-      result,
-    };
+      result};
   });
 
   const anyInProgress = toolUsesData.some(d => d.isInProgress);
 
   return tool.renderGroupedToolUse(toolUsesData, {
     shouldAnimate: shouldAnimate && anyInProgress,
-    tools,
-  });
+    tools});
 }

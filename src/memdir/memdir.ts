@@ -13,8 +13,7 @@ import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growt
 /* eslint-enable @typescript-eslint/no-require-imports */
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import { GREP_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/GrepTool/prompt.js'
 import { isReplModeEnabled } from '@claude-code-best/builtin-tools/tools/REPLTool/constants.js'
 import { logForDebugging } from '../utils/debug.js'
@@ -28,8 +27,7 @@ import {
   TRUSTING_RECALL_SECTION,
   TYPES_SECTION_INDIVIDUAL,
   WHAT_NOT_TO_SAVE_SECTION,
-  WHEN_TO_ACCESS_SECTION,
-} from './memoryTypes.js'
+  WHEN_TO_ACCESS_SECTION} from './memoryTypes.js'
 
 export const ENTRYPOINT_NAME = 'MEMORY.md'
 export const MAX_ENTRYPOINT_LINES = 200
@@ -71,8 +69,7 @@ export function truncateEntrypointContent(raw: string): EntrypointTruncation {
       lineCount,
       byteCount,
       wasLineTruncated,
-      wasByteTruncated,
-    }
+      wasByteTruncated}
   }
 
   let truncated = wasLineTruncated
@@ -98,8 +95,7 @@ export function truncateEntrypointContent(raw: string): EntrypointTruncation {
     lineCount,
     byteCount,
     wasLineTruncated,
-    wasByteTruncated,
-  }
+    wasByteTruncated}
 }
 
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -174,8 +170,7 @@ function logMemoryDirCounts(
       logEvent('tengu_memdir_loaded', {
         ...baseMetadata,
         total_file_count: fileCount,
-        total_subdir_count: subdirCount,
-      })
+        total_subdir_count: subdirCount})
     },
     () => {
       // Directory unreadable — log without counts
@@ -301,8 +296,7 @@ export function buildMemoryPrompt(params: {
       was_truncated: t.wasLineTruncated,
       was_byte_truncated: t.wasByteTruncated,
       memory_type:
-        memoryType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        memoryType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     lines.push(`## ${ENTRYPOINT_NAME}`, '', t.content)
   } else {
     lines.push(
@@ -432,8 +426,7 @@ export async function loadMemoryPrompt(): Promise<string | null> {
   if (feature('KAIROS') && autoEnabled && getKairosActive()) {
     logMemoryDirCounts(getAutoMemPath(), {
       memory_type:
-        'auto' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'auto' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return buildAssistantDailyLogPrompt(skipIndex)
   }
 
@@ -459,12 +452,10 @@ export async function loadMemoryPrompt(): Promise<string | null> {
       await ensureMemoryDirExists(teamDir)
       logMemoryDirCounts(autoDir, {
         memory_type:
-          'auto' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          'auto' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       logMemoryDirCounts(teamDir, {
         memory_type:
-          'team' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          'team' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       return teamMemPrompts!.buildCombinedMemoryPrompt(
         extraGuidelines,
         skipIndex,
@@ -479,8 +470,7 @@ export async function loadMemoryPrompt(): Promise<string | null> {
     await ensureMemoryDirExists(autoDir)
     logMemoryDirCounts(autoDir, {
       memory_type:
-        'auto' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        'auto' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     return buildMemoryLines(
       'auto memory',
       autoDir,
@@ -495,8 +485,7 @@ export async function loadMemoryPrompt(): Promise<string | null> {
     ),
     disabled_by_setting:
       !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_AUTO_MEMORY) &&
-      getInitialSettings().autoMemoryEnabled === false,
-  })
+      getInitialSettings().autoMemoryEnabled === false})
   // Gate on the GB flag directly, not isTeamMemoryEnabled() — that function
   // checks isAutoMemoryEnabled() first, which is definitionally false in this
   // branch. We want "was this user in the team-memory cohort at all."

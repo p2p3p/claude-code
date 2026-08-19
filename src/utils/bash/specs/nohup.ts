@@ -6,8 +6,6 @@ const nohup: CommandSpec = {
   args: {
     name: 'command',
     description: 'Command to run with nohup',
-    isCommand: true,
-  },
-}
+    isCommand: true}}
 
 export default nohup

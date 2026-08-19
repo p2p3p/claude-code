@@ -6,8 +6,7 @@ import { capitalize } from '../stringUtils.js'
 import {
   getCustomValidation,
   isBashPrefixTool,
-  isFilePatternTool,
-} from './toolValidationConfig.js'
+  isFilePatternTool} from './toolValidationConfig.js'
 
 /**
  * Checks if a character at a given index is escaped (preceded by odd number of backslashes).
@@ -103,8 +102,7 @@ export function validatePermissionRule(
       valid: false,
       error: 'Mismatched parentheses',
       suggestion:
-        'Ensure all opening parentheses have matching closing parentheses',
-    }
+        'Ensure all opening parentheses have matching closing parentheses'}
   }
 
   // Check for empty parentheses (escape-aware)
@@ -114,15 +112,13 @@ export function validatePermissionRule(
       return {
         valid: false,
         error: 'Empty parentheses with no tool name',
-        suggestion: 'Specify a tool name before the parentheses',
-      }
+        suggestion: 'Specify a tool name before the parentheses'}
     }
     return {
       valid: false,
       error: 'Empty parentheses',
       suggestion: `Either specify a pattern or use just "${toolName}" without parentheses`,
-      examples: [`${toolName}`, `${toolName}(some-pattern)`],
-    }
+      examples: [`${toolName}`, `${toolName}(some-pattern)`]}
   }
 
   // Parse the rule
@@ -151,8 +147,7 @@ export function validatePermissionRule(
           mcpInfo.toolName && mcpInfo.toolName !== '*'
             ? `mcp__${mcpInfo.serverName}__${mcpInfo.toolName}`
             : undefined,
-        ].filter(Boolean) as string[],
-      }
+        ].filter(Boolean) as string[]}
     }
 
     return { valid: true } // Valid MCP rule
@@ -168,8 +163,7 @@ export function validatePermissionRule(
     return {
       valid: false,
       error: 'Tool names must start with uppercase',
-      suggestion: `Use "${capitalize(String(parsed.toolName))}"`,
-    }
+      suggestion: `Use "${capitalize(String(parsed.toolName))}"`}
   }
 
   // Check for custom validation rules first
@@ -195,8 +189,7 @@ export function validatePermissionRule(
         examples: [
           'Bash(npm run:*) - prefix matching (legacy)',
           'Bash(npm run *) - wildcard matching',
-        ],
-      }
+        ]}
     }
 
     // Check for :* without a prefix
@@ -205,8 +198,7 @@ export function validatePermissionRule(
         valid: false,
         error: 'Prefix cannot be empty before :*',
         suggestion: 'Specify a command prefix before :*',
-        examples: ['Bash(npm:*)', 'Bash(git:*)'],
-      }
+        examples: ['Bash(npm:*)', 'Bash(git:*)']}
     }
 
     // Note: We don't validate quote balancing because bash quoting rules are complex.
@@ -239,8 +231,7 @@ export function validatePermissionRule(
           `${parsed.toolName}(*.ts) - matches .ts files`,
           `${parsed.toolName}(src/**) - matches all files in src`,
           `${parsed.toolName}(**/*.test.ts) - matches test files`,
-        ],
-      }
+        ]}
     }
 
     // Warn about wildcards not at boundaries
@@ -259,8 +250,7 @@ export function validatePermissionRule(
           `${parsed.toolName}(*.js) - all .js files`,
           `${parsed.toolName}(src/*) - all files directly in src`,
           `${parsed.toolName}(src/**) - all files recursively in src`,
-        ],
-      }
+        ]}
     }
   }
 
@@ -285,8 +275,7 @@ export function validatePermissionRule(
         valid: false,
         error: `VaultHttpFetch rule content is too long (${rc.length} chars; max 384)`,
         suggestion:
-          'Use a shorter key name and host, or use the wildcard form <key>@*',
-      }
+          'Use a shorter key name and host, or use the wildcard form <key>@*'}
     }
     // Reject control / non-printable bytes — these can't appear in a
     // valid <key>@<host> rule and may indicate copy-paste corruption
@@ -297,8 +286,7 @@ export function validatePermissionRule(
         valid: false,
         error:
           'VaultHttpFetch rule content contains control characters (only printable ASCII allowed in key@host)',
-        suggestion: 'Remove control characters from the rule content',
-      }
+        suggestion: 'Remove control characters from the rule content'}
     }
   }
 
@@ -327,8 +315,7 @@ export function validatePermissionRule(
         'VaultHttpFetch — whole-tool kill switch',
         `VaultHttpFetch(${parsed.ruleContent}@api.github.com)`,
         `VaultHttpFetch(${parsed.ruleContent}@*)`,
-      ],
-    }
+      ]}
   }
 
   // Behavior-aware checks for vault-class tools.
@@ -346,8 +333,7 @@ export function validatePermissionRule(
         examples: [
           `${parsed.toolName}(github-token@api.github.com)`,
           `${parsed.toolName}(my-api@*) - allow any host (advanced)`,
-        ],
-      }
+        ]}
     }
     // For VaultHttpFetch specifically, require the rule content to be
     // formatted as `<key>@<host>` (or `<key>@*` for the explicit wildcard).
@@ -379,8 +365,7 @@ export function validatePermissionRule(
           'VaultHttpFetch(github-token@api.github.com)',
           'VaultHttpFetch(local-admin@localhost:8443)',
           'VaultHttpFetch(stripe-key@*) - any host (advanced)',
-        ],
-      }
+        ]}
     }
   }
 
@@ -404,8 +389,7 @@ export const PermissionRuleSchema = lazySchema(() =>
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message,
-        params: { received: val },
-      })
+        params: { received: val }})
     }
   }),
 )

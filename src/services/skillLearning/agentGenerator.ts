@@ -44,8 +44,7 @@ export function generateAgentDraft(
     name,
     description,
     confidence,
-    instincts,
-  })
+    instincts})
 
   return {
     name,
@@ -54,8 +53,7 @@ export function generateAgentDraft(
     sourceInstinctIds: instincts.map(instinct => instinct.id),
     confidence: Number(confidence.toFixed(2)),
     content,
-    outputPath,
-  }
+    outputPath}
 }
 
 export async function writeLearnedAgent(

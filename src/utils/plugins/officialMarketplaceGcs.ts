@@ -80,8 +80,7 @@ export async function fetchOfficialMarketplaceFromGcs(
     //    max-age=300. Cheap enough to hit every startup.
     const latest = await axios.get(`${GCS_BASE}/latest`, {
       responseType: 'text',
-      timeout: 10_000,
-    })
+      timeout: 10_000})
     sha = String(latest.data).trim()
     if (!sha) {
       // Empty /latest body — backend misconfigured. Bail (null), don't
@@ -106,8 +105,7 @@ export async function fetchOfficialMarketplaceFromGcs(
     //    rather than a half-written installLocation.
     const zipResp = await axios.get(`${GCS_BASE}/${sha}.zip`, {
       responseType: 'arraybuffer',
-      timeout: 60_000,
-    })
+      timeout: 60_000})
     const zipBuf = Buffer.from(zipResp.data)
     bytes = zipBuf.length
     const files = await unzipFile(zipBuf)
@@ -164,8 +162,7 @@ export async function fetchOfficialMarketplaceFromGcs(
       duration_ms: Math.round(performance.now() - start),
       ...(bytes !== undefined && { bytes }),
       ...(sha && { sha: sha as SafeString }),
-      ...(errKind && { error_kind: errKind as SafeString }),
-    })
+      ...(errKind && { error_kind: errKind as SafeString })})
   }
 }
 

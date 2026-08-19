@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { t } from '../utils/i18n/index.js';
 import type { CommandResultDisplay } from '../commands.js';
 // eslint-disable-next-line custom-rules/prefer-use-keybindings -- raw input for "any key" dismiss and y/n prompt
 import { Box, Text, useInput, LoadingState } from '@anthropic/ink';
@@ -34,18 +35,15 @@ export function DesktopHandoff({ onDone }: Props): React.ReactNode {
   // Handle keyboard input for error and prompt-download states
   useInput(input => {
     if (state === 'error') {
-      onDone(error ?? 'Unknown error', { display: 'system' });
+      onDone(error ?? t('desktopHandoff.unknownError'), { display: 'system' });
       return;
     }
     if (state === 'prompt-download') {
       if (input === 'y' || input === 'Y') {
         openBrowser(getDownloadUrl()).catch(() => {});
-        onDone(
-          `Starting download. Re-run /desktop once you\u2019ve installed the app.\nLearn more at ${DESKTOP_DOCS_URL}`,
-          { display: 'system' },
-        );
+        onDone(t('desktopHandoff.startingDownload', DESKTOP_DOCS_URL), { display: 'system' });
       } else if (input === 'n' || input === 'N') {
-        onDone(`The desktop app is required for /desktop. Learn more at ${DESKTOP_DOCS_URL}`, { display: 'system' });
+        onDone(t('desktopHandoff.desktopAppRequired', DESKTOP_DOCS_URL), { display: 'system' });
       }
     }
   });
@@ -57,13 +55,13 @@ export function DesktopHandoff({ onDone }: Props): React.ReactNode {
       const installStatus = await getDesktopInstallStatus();
 
       if (installStatus.status === 'not-installed') {
-        setDownloadMessage('Claude Desktop is not installed.');
+        setDownloadMessage(t('desktopHandoff.notInstalled'));
         setState('prompt-download');
         return;
       }
 
       if (installStatus.status === 'version-too-old') {
-        setDownloadMessage(`Claude Desktop needs to be updated (found v${installStatus.version}, need v1.1.2396+).`);
+        setDownloadMessage(t('desktopHandoff.versionTooOld', installStatus.version, '1.1.2396'));
         setState('prompt-download');
         return;
       }
@@ -77,7 +75,7 @@ export function DesktopHandoff({ onDone }: Props): React.ReactNode {
       const result = await openCurrentSessionInDesktop();
 
       if (!result.success) {
-        setError(result.error ?? 'Failed to open Claude Desktop');
+        setError(result.error ?? t('desktopHandoff.failedToOpen'));
         setState('error');
         return;
       }
@@ -88,7 +86,7 @@ export function DesktopHandoff({ onDone }: Props): React.ReactNode {
       // Give the user a moment to see the success message
       setTimeout(
         async (onDone: Props['onDone']) => {
-          onDone('Session transferred to Claude Desktop', { display: 'system' });
+          onDone(t('desktopHandoff.sessionTransferred'), { display: 'system' });
           await gracefulShutdown(0, 'other');
         },
         500,
@@ -105,8 +103,8 @@ export function DesktopHandoff({ onDone }: Props): React.ReactNode {
   if (state === 'error') {
     return (
       <Box flexDirection="column" paddingX={2}>
-        <Text color="error">Error: {error}</Text>
-        <Text dimColor>Press any key to continue…</Text>
+        <Text color="error">{t('desktopHandoff.error').replace('{error}', error)}</Text>
+        <Text dimColor>{t('desktopHandoff.pressAnyKeyContinue')}</Text>
       </Box>
     );
   }
@@ -115,17 +113,16 @@ export function DesktopHandoff({ onDone }: Props): React.ReactNode {
     return (
       <Box flexDirection="column" paddingX={2}>
         <Text>{downloadMessage}</Text>
-        <Text>Download now? (y/n)</Text>
+        <Text>{t('desktopHandoff.downloadNow')}</Text>
       </Box>
     );
   }
 
   const messages: Record<Exclude<DesktopHandoffState, 'error' | 'prompt-download'>, string> = {
-    checking: 'Checking for Claude Desktop…',
-    flushing: 'Saving session…',
-    opening: 'Opening Claude Desktop…',
-    success: 'Opening in Claude Desktop…',
-  };
+    checking: t('desktopHandoff.checking'),
+    flushing: t('desktopHandoff.flushing'),
+    opening: t('desktopHandoff.opening'),
+    success: t('desktopHandoff.success')};
 
   return <LoadingState message={messages[state]} />;
 }

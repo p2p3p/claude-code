@@ -3,11 +3,11 @@ import { useCallback } from 'react';
 import { Select } from '../../../components/CustomSelect/select.js';
 import { Box, Dialog, Text } from '@anthropic/ink';
 import type { ToolPermissionContext } from '../../../Tool.js';
+import { t } from '../../../utils/i18n/index.js';
 import type {
   PermissionBehavior,
   PermissionRule,
-  PermissionRuleValue,
-} from '../../../utils/permissions/PermissionRule.js';
+  PermissionRuleValue} from '../../../utils/permissions/PermissionRule.js';
 import { applyPermissionUpdate, persistPermissionUpdate } from '../../../utils/permissions/PermissionUpdate.js';
 import { permissionRuleValueToString } from '../../../utils/permissions/permissionRuleParser.js';
 import { detectUnreachableRules, type UnreachableRule } from '../../../utils/permissions/shadowedRuleDetection.js';
@@ -22,22 +22,19 @@ export function optionForPermissionSaveDestination(saveDestination: EditableSett
   switch (saveDestination) {
     case 'localSettings':
       return {
-        label: 'Project settings (local)',
+        label: t('addPermissionRules.projectLocal'),
         description: `Saved in ${getRelativeSettingsFilePathForSource('localSettings')}`,
-        value: saveDestination,
-      };
+        value: saveDestination};
     case 'projectSettings':
       return {
-        label: 'Project settings',
+        label: t('addPermissionRules.project'),
         description: `Checked in at ${getRelativeSettingsFilePathForSource('projectSettings')}`,
-        value: saveDestination,
-      };
+        value: saveDestination};
     case 'userSettings':
       return {
-        label: 'User settings',
+        label: t('addPermissionRules.user'),
         description: `Saved in at ~/.claude/settings.json`,
-        value: saveDestination,
-      };
+        value: saveDestination};
   }
 }
 
@@ -56,8 +53,7 @@ export function AddPermissionRules({
   ruleValues,
   ruleBehavior,
   initialContext,
-  setToolPermissionContext,
-}: Props): React.ReactNode {
+  setToolPermissionContext}: Props): React.ReactNode {
   const allOptions = SOURCES.map(optionForPermissionSaveDestination);
 
   const onSelect = useCallback(
@@ -72,31 +68,27 @@ export function AddPermissionRules({
           type: 'addRules',
           rules: ruleValues,
           behavior: ruleBehavior,
-          destination,
-        });
+          destination});
 
         // Persist to settings
         persistPermissionUpdate({
           type: 'addRules',
           rules: ruleValues,
           behavior: ruleBehavior,
-          destination,
-        });
+          destination});
 
         setToolPermissionContext(updatedContext);
 
         const rules: PermissionRule[] = ruleValues.map(ruleValue => ({
           ruleValue,
           ruleBehavior,
-          source: destination,
-        }));
+          source: destination}));
 
         // Check for unreachable rules among the ones we just added
         const sandboxAutoAllowEnabled =
           SandboxManager.isSandboxingEnabled() && SandboxManager.isAutoAllowBashIfSandboxedEnabled();
         const allUnreachable = detectUnreachableRules(updatedContext, {
-          sandboxAutoAllowEnabled,
-        });
+          sandboxAutoAllowEnabled});
 
         // Filter to only rules we just added
         const newUnreachable = allUnreachable.filter(u =>
@@ -126,7 +118,7 @@ export function AddPermissionRules({
 
       <Box flexDirection="column" marginY={1}>
         <Text>
-          {ruleValues.length === 1 ? 'Where should this rule be saved?' : 'Where should these rules be saved?'}
+          {t('ui.saveRuleQuestion', ruleValues.length)}
         </Text>
         <Select options={allOptions} onChange={onSelect} />
       </Box>

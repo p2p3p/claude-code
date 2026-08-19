@@ -36,8 +36,7 @@ export async function appendRemoteTriggerAuditRecord(
     ok: record.ok,
     ...(record.status !== undefined ? { status: record.status } : {}),
     ...(record.error ? { error: record.error } : {}),
-    createdAt: record.createdAt ?? Date.now(),
-  }
+    createdAt: record.createdAt ?? Date.now()}
   const path = resolveRemoteTriggerAuditPath(rootDir)
   await mkdir(dirname(path), { recursive: true })
   await appendFile(path, `${JSON.stringify(fullRecord)}\n`, 'utf-8')

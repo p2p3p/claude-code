@@ -91,6 +91,5 @@ export function createTeammateContext(config: {
 }): TeammateContext {
   return {
     ...config,
-    isInProcess: true,
-  }
+    isInProcess: true}
 }

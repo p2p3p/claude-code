@@ -7,8 +7,7 @@ import {
   setMainLoopModelOverride,
   setMainThreadAgentType,
   setOriginalCwd,
-  switchSession,
-} from '../bootstrap/state.js'
+  switchSession} from '../bootstrap/state.js'
 import { clearSystemPromptSections } from '../constants/systemPromptSections.js'
 import { restoreCostStateForSession } from '../cost-tracker.js'
 import type { AppState } from '../state/AppState.js'
@@ -17,24 +16,21 @@ import {
   type AgentDefinition,
   type AgentDefinitionsResult,
   getActiveAgentsFromList,
-  getAgentDefinitionsWithOverrides,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
+  getAgentDefinitionsWithOverrides} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import { TODO_WRITE_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/TodoWriteTool/constants.js'
 import { asSessionId } from '../types/ids.js'
 import type {
   AttributionSnapshotMessage,
   ContextCollapseCommitEntry,
   ContextCollapseSnapshotEntry,
-  PersistedWorktreeSession,
-} from '../types/logs.js'
+  PersistedWorktreeSession} from '../types/logs.js'
 import type { Message } from '../types/message.js'
 import { renameRecordingForSession } from './asciicast.js'
 import { clearMemoryFileCaches } from './claudemd.js'
 import {
   type AttributionState,
   attributionRestoreStateFromLog,
-  restoreAttributionStateFromSnapshots,
-} from './commitAttribution.js'
+  restoreAttributionStateFromSnapshots} from './commitAttribution.js'
 import { updateSessionName } from './concurrentSessions.js'
 import { getCwd } from './cwd.js'
 import { logForDebugging } from './debug.js'
@@ -50,16 +46,14 @@ import {
   resetSessionFilePointer,
   restoreSessionMetadata,
   saveMode,
-  saveWorktreeState,
-} from './sessionStorage.js'
+  saveWorktreeState} from './sessionStorage.js'
 import { isTodoV2Enabled } from './tasks.js'
 import type { TodoList } from './todo/types.js'
 import { TodoListSchema } from './todo/types.js'
 import type { ContentReplacementRecord } from './toolResultStorage.js'
 import {
   getCurrentWorktreeSession,
-  restoreWorktreeSession,
-} from './worktree.js'
+  restoreWorktreeSession} from './worktree.js'
 
 type ResumeResult = {
   messages?: Message[]
@@ -143,8 +137,7 @@ export function restoreSessionStateFromLog(
       const agentId = getSessionId()
       setAppState(prev => ({
         ...prev,
-        todos: { ...prev.todos, [agentId]: todos },
-      }))
+        todos: { ...prev.todos, [agentId]: todos }}))
     }
   }
 }
@@ -183,8 +176,7 @@ export function computeStandaloneAgentContext(
     name: agentName ?? '',
     color: (agentColor === 'default' ? undefined : agentColor) as
       | AgentColorName
-      | undefined,
-  }
+      | undefined}
 }
 
 /**
@@ -266,8 +258,7 @@ export async function refreshAgentDefinitionsForModeSwitch(
   return {
     ...freshAgentDefs,
     allAgents: freshAllAgents,
-    activeAgents: getActiveAgentsFromList(freshAllAgents),
-  }
+    activeAgents: getActiveAgentsFromList(freshAllAgents)}
 }
 
 /**
@@ -558,7 +549,5 @@ export async function processResumedConversation(
       ...(resumedAgentType && { agent: resumedAgentType }),
       ...(restoredAttribution && { attribution: restoredAttribution }),
       ...(standaloneAgentContext && { standaloneAgentContext }),
-      agentDefinitions: refreshedAgentDefs,
-    },
-  }
+      agentDefinitions: refreshedAgentDefs}}
 }

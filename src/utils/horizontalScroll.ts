@@ -32,8 +32,7 @@ export function calculateHorizontalScrollWindow(
       startIndex: 0,
       endIndex: 0,
       showLeftArrow: false,
-      showRightArrow: false,
-    }
+      showRightArrow: false}
   }
 
   // Clamp selectedIdx to valid range
@@ -46,8 +45,7 @@ export function calculateHorizontalScrollWindow(
       startIndex: 0,
       endIndex: totalItems,
       showLeftArrow: false,
-      showRightArrow: false,
-    }
+      showRightArrow: false}
   }
 
   // Calculate cumulative widths for efficient range calculations
@@ -95,8 +93,7 @@ export function calculateHorizontalScrollWindow(
       startIndex,
       endIndex,
       showLeftArrow: startIndex > 0,
-      showRightArrow: endIndex < totalItems,
-    }
+      showRightArrow: endIndex < totalItems}
   }
 
   // Selected is outside visible range - need to scroll
@@ -132,6 +129,5 @@ export function calculateHorizontalScrollWindow(
     startIndex,
     endIndex,
     showLeftArrow: startIndex > 0,
-    showRightArrow: endIndex < totalItems,
-  }
+    showRightArrow: endIndex < totalItems}
 }

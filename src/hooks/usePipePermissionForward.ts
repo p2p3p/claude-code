@@ -26,8 +26,7 @@ export function usePipePermissionForward({
   setMessages,
   setToolUseConfirmQueue,
   getToolUseContext,
-  mainLoopModel,
-}: Deps): void {
+  mainLoopModel}: Deps): void {
   useEffect(() => {
     if (!feature('UDS_INBOX')) return
     /* eslint-disable @typescript-eslint/no-require-imports */
@@ -68,9 +67,7 @@ export function usePipePermissionForward({
                 data: JSON.stringify({
                   requestId: payload.requestId,
                   behavior: 'deny',
-                  feedback: `Tool "${payload.toolName}" is not available in main.`,
-                }),
-              })
+                  feedback: `Tool "${payload.toolName}" is not available in main.`})})
               return
             }
 
@@ -96,8 +93,7 @@ export function usePipePermissionForward({
                   payload.permissionPromptStartTimeMs,
                 workerBadge: {
                   name: `${displayRole} / ${pipeName}`,
-                  color: 'cyan',
-                },
+                  color: 'cyan'},
                 onUserInteraction() {},
                 onAbort() {
                   client.send({
@@ -105,9 +101,7 @@ export function usePipePermissionForward({
                     data: JSON.stringify({
                       requestId: payload.requestId,
                       behavior: 'deny',
-                      feedback: 'Permission request was aborted in main.',
-                    }),
-                  })
+                      feedback: 'Permission request was aborted in main.'})})
                 },
                 onAllow(
                   updatedInput: any,
@@ -123,9 +117,7 @@ export function usePipePermissionForward({
                       updatedInput,
                       permissionUpdates,
                       feedback,
-                      contentBlocks,
-                    }),
-                  })
+                      contentBlocks})})
                 },
                 onReject(feedback: any, contentBlocks: any) {
                   client.send({
@@ -134,12 +126,9 @@ export function usePipePermissionForward({
                       requestId: payload.requestId,
                       behavior: 'deny',
                       feedback,
-                      contentBlocks,
-                    }),
-                  })
+                      contentBlocks})})
                 },
-                async recheckPermission() {},
-              },
+                async recheckPermission() {}},
             ])
           } catch {
             // Malformed permission request — ignore

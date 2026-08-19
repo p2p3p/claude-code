@@ -5,8 +5,7 @@ import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../../services/analytics
 import {
   checkAndRefreshOAuthTokenIfNeeded,
   getClaudeAIOAuthTokens,
-  isClaudeAISubscriber,
-} from '../../auth.js'
+  isClaudeAISubscriber} from '../../auth.js'
 import { getCwd } from '../../cwd.js'
 import { logForDebugging } from '../../debug.js'
 import { detectCurrentRepository } from '../../detectRepository.js'
@@ -100,8 +99,7 @@ export async function checkGithubAppInstalled(
     const url = `${getOauthConfig().BASE_API_URL}/api/oauth/organizations/${orgUUID}/code/repos/${owner}/${repo}`
     const headers = {
       ...getOAuthHeaders(accessToken),
-      'x-organization-uuid': orgUUID,
-    }
+      'x-organization-uuid': orgUUID}
 
     logForDebugging(`Checking GitHub app installation for ${owner}/${repo}`)
 
@@ -118,8 +116,7 @@ export async function checkGithubAppInstalled(
     }>(url, {
       headers,
       timeout: 15000,
-      signal,
-    })
+      signal})
 
     if (response.status === 200) {
       if (response.data.status) {
@@ -178,15 +175,13 @@ export async function checkGithubTokenSynced(): Promise<boolean> {
     const url = `${getOauthConfig().BASE_API_URL}/api/oauth/organizations/${orgUUID}/sync/github/auth`
     const headers = {
       ...getOAuthHeaders(accessToken),
-      'x-organization-uuid': orgUUID,
-    }
+      'x-organization-uuid': orgUUID}
 
     logForDebugging('Checking if GitHub token is synced via web-setup')
 
     const response = await axios.get(url, {
       headers,
-      timeout: 15000,
-    })
+      timeout: 15000})
 
     const synced =
       response.status === 200 && response.data?.is_authenticated === true

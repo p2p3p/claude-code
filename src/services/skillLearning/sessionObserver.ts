@@ -3,16 +3,14 @@ import {
   candidateFromObservation,
   createInstinct,
   type InstinctCandidate,
-  type StoredInstinct,
-} from './instinctParser.js'
+  type StoredInstinct} from './instinctParser.js'
 import type { InstinctDomain, SkillObservationOutcome } from './types.js'
 import {
   analyzeWithActiveBackend,
   getActiveObserverBackend,
   registerObserverBackend,
   type ObserverBackend,
-  type ObserverBackendContext,
-} from './observerBackend.js'
+  type ObserverBackendContext} from './observerBackend.js'
 import { llmObserverBackend } from './llmObserverBackend.js'
 
 export type SessionObserverOptions = {
@@ -40,8 +38,7 @@ export const heuristicObserverBackend: ObserverBackend = {
     _ctx?: ObserverBackendContext,
   ): InstinctCandidate[] {
     return heuristicAnalyze(observations)
-  },
-}
+  }}
 
 registerObserverBackend(heuristicObserverBackend)
 registerObserverBackend(llmObserverBackend)
@@ -101,8 +98,7 @@ function extractUserCorrections(
         scope: 'project',
         evidence: [text],
         evidenceOutcome: recentOutcomeBefore(observations, index),
-        observationIds: [observation.id],
-      },
+        observationIds: [observation.id]},
     ]
   })
 }
@@ -141,8 +137,7 @@ function extractToolErrorResolutions(
         laterSuccess.toolOutput ?? `${laterSuccess.toolName} succeeded`,
       ],
       evidenceOutcome: 'success',
-      observationIds: [current.id, laterSuccess.id],
-    })
+      observationIds: [current.id, laterSuccess.id]})
   }
 
   return candidates
@@ -194,8 +189,7 @@ function extractRepeatedToolSequences(
       scope: 'project',
       evidence: [evidence],
       evidenceOutcome: normalizeOutcome(sequenceOutcome),
-      observationIds: Array.from(new Set(matchedIds)),
-    },
+      observationIds: Array.from(new Set(matchedIds))},
   ]
 }
 
@@ -225,8 +219,7 @@ function extractProjectConventions(
         scope: 'project',
         evidence: [text],
         evidenceOutcome: recentOutcomeBefore(observations, index),
-        observationIds: [observation.id],
-      },
+        observationIds: [observation.id]},
     ]
   })
 }
@@ -268,8 +261,7 @@ function parseCorrection(
     const prefer = noUse.groups.prefer.trim()
     return {
       trigger: `When choosing between ${avoid} and ${prefer}`,
-      action: `Prefer ${prefer}; avoid ${avoid}.`,
-    }
+      action: `Prefer ${prefer}; avoid ${avoid}.`}
   }
 
   const should = text.match(shouldPattern)
@@ -277,8 +269,7 @@ function parseCorrection(
     const prefer = should.groups.prefer.trim()
     return {
       trigger: 'When this user gives a corrective instruction',
-      action: `Prefer this corrected action: ${prefer}.`,
-    }
+      action: `Prefer this corrected action: ${prefer}.`}
   }
 
   return null

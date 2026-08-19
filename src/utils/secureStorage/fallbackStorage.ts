@@ -54,8 +54,7 @@ export function createFallbackStorage(
         }
         return {
           success: true,
-          warning: fallbackResult.warning,
-        }
+          warning: fallbackResult.warning}
       }
 
       return { success: false }
@@ -65,6 +64,5 @@ export function createFallbackStorage(
       const secondarySuccess = secondary.delete()
 
       return primarySuccess || secondarySuccess
-    },
-  }
+    }}
 }

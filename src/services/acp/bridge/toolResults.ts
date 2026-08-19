@@ -36,11 +36,8 @@ export function toolUpdateFromToolResult(
               type: 'content' as const,
               content: {
                 type: 'text' as const,
-                text: markdownEscape(resultContent),
-              },
-            },
-          ],
-        }
+                text: markdownEscape(resultContent)}},
+          ]}
       }
       if (Array.isArray(resultContent) && resultContent.length > 0) {
         return {
@@ -50,11 +47,8 @@ export function toolUpdateFromToolResult(
               c.type === 'text'
                 ? {
                     type: 'text' as const,
-                    text: markdownEscape(c.text as string),
-                  }
-                : toAcpContentBlock(c, false),
-          })),
-        }
+                    text: markdownEscape(c.text as string)}
+                : toAcpContentBlock(c, false)}))}
       }
       return {}
     }
@@ -101,11 +95,8 @@ export function toolUpdateFromToolResult(
               type: 'content' as const,
               content: {
                 type: 'text' as const,
-                text: `\`\`\`console\n${output.trimEnd()}\n\`\`\``,
-              },
-            },
-          ],
-        }
+                text: `\`\`\`console\n${output.trimEnd()}\n\`\`\``}},
+          ]}
       }
       return {}
     }
@@ -169,8 +160,7 @@ export function toolUpdateFromEditToolResponse(
         type: 'diff',
         path: absPath,
         oldText: oldText.join('\n') || null,
-        newText: newText.join('\n'),
-      })
+        newText: newText.join('\n')})
     }
   }
 

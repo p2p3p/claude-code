@@ -2,8 +2,7 @@ import { execa } from 'execa';
 import React, { useCallback, useState } from 'react';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
 import { WorkflowMultiselectDialog } from '../../components/WorkflowMultiselectDialog.js';
 import { GITHUB_ACTION_SETUP_DOCS_URL } from '../../constants/github-app.js';
 import { useExitOnCtrlCDWithKeybindings } from '../../hooks/useExitOnCtrlCDWithKeybindings.js';
@@ -27,6 +26,7 @@ import { SuccessStep } from './SuccessStep.js';
 import { setupGitHubActions } from './setupGitHubActions.js';
 import type { State, Warning, Workflow } from './types.js';
 import { WarningsStep } from './WarningsStep.js';
+import { t } from '../../utils/i18n/index.js';
 
 const INITIAL_STATE: State = {
   step: 'check-gh',
@@ -43,8 +43,7 @@ const INITIAL_STATE: State = {
   workflowExists: false,
   selectedWorkflows: ['claude', 'claude-review'] as Workflow[],
   selectedApiKeyOption: 'new' as 'existing' | 'new' | 'oauth',
-  authType: 'api_key',
-};
+  authType: 'api_key'};
 
 function InstallGitHubApp(props: { onDone: (message: string) => void }): React.ReactNode {
   const [existingApiKey] = useState(() => getAnthropicApiKey());
@@ -54,8 +53,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
     selectedApiKeyOption: (existingApiKey ? 'existing' : isAnthropicAuthEnabled() ? 'oauth' : 'new') as
       | 'existing'
       | 'new'
-      | 'oauth',
-  });
+      | 'oauth'});
   useExitOnCtrlCDWithKeybindings();
 
   React.useEffect(() => {
@@ -68,36 +66,32 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
     // Check if gh is installed
     const ghVersionResult = await execa('gh --version', {
       shell: true,
-      reject: false,
-    });
+      reject: false});
     if (ghVersionResult.exitCode !== 0) {
       warnings.push({
-        title: 'GitHub CLI not found',
-        message: 'GitHub CLI (gh) does not appear to be installed or accessible.',
+        title: t('installGithub.ghCliNotFound'),
+        message: t('installGithub.ghCliNotFoundDesc'),
         instructions: [
-          'Install GitHub CLI from https://cli.github.com/',
-          'macOS: brew install gh',
-          'Windows: winget install --id GitHub.cli',
-          'Linux: See installation instructions at https://github.com/cli/cli#installation',
-        ],
-      });
+          t('installGithub.installGhCli'),
+          t('installGithub.brewInstallGh'),
+          t('installGithub.wingetInstallGh'),
+          t('installGithub.linuxInstallGh'),
+        ]});
     }
 
     // Check auth status
     const authResult = await execa('gh auth status -a', {
       shell: true,
-      reject: false,
-    });
+      reject: false});
     if (authResult.exitCode !== 0) {
       warnings.push({
-        title: 'GitHub CLI not authenticated',
-        message: 'GitHub CLI does not appear to be authenticated.',
+        title: t('installGithub.ghCliNotAuthenticated'),
+        message: t('installGithub.ghCliNotAuthenticatedDesc'),
         instructions: [
-          'Run: gh auth login',
-          'Follow the prompts to authenticate with GitHub',
-          'Or set up authentication using environment variables or other methods',
-        ],
-      });
+          t('installGithub.runGhAuthLogin'),
+          t('installGithub.followPromptsAuth'),
+          t('installGithub.envAuthAlternative'),
+        ]});
     } else {
       // Check if required scopes are present in the Token scopes line
       const tokenScopesMatch = authResult.stdout.match(/Token scopes:.*$/m);
@@ -117,17 +111,16 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
           setState(prev => ({
             ...prev,
             step: 'error',
-            error: `GitHub CLI is missing required permissions: ${missingScopes.join(', ')}.`,
-            errorReason: 'Missing required scopes',
+            error: t('installGithub.missingScopesError', missingScopes.join(', ')),
+            errorReason: t('installGithub.missingScopesReason'),
             errorInstructions: [
-              `Your GitHub CLI authentication is missing the "${missingScopes.join('" and "')}" ${plural(missingScopes.length, 'scope')} needed to manage GitHub Actions and secrets.`,
+              t('installGithub.missingScopesDesc', missingScopes.join('" and "'), plural(missingScopes.length, 'scope')),
               '',
-              'To fix this, run:',
+              t('installGithub.toFixThisRun'),
               '  gh auth refresh -h github.com -s repo,workflow',
               '',
-              'This will add the necessary permissions to manage workflows and secrets.',
-            ],
-          }));
+              t('installGithub.addPermissions'),
+            ]}));
           return;
         }
       }
@@ -137,8 +130,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
     const currentRepo = (await getGithubRepo()) ?? '';
 
     logEvent('tengu_install_github_app_step_completed', {
-      step: 'check-gh' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      step: 'check-gh' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
     setState(prev => ({
       ...prev,
@@ -146,8 +138,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
       currentRepo,
       selectedRepoName: currentRepo,
       useCurrentRepo: !!currentRepo, // Set to false if no repo detected
-      step: warnings.length > 0 ? 'warnings' : 'choose-repo',
-    }));
+      step: warnings.length > 0 ? 'warnings' : 'choose-repo'}));
   }, []);
 
   React.useEffect(() => {
@@ -161,8 +152,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
       setState(prev => ({
         ...prev,
         step: 'creating',
-        currentWorkflowInstallStep: 0,
-      }));
+        currentWorkflowInstallStep: 0}));
 
       try {
         await setupGitHubActions(
@@ -172,8 +162,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
           () => {
             setState(prev => ({
               ...prev,
-              currentWorkflowInstallStep: prev.currentWorkflowInstallStep + 1,
-            }));
+              currentWorkflowInstallStep: prev.currentWorkflowInstallStep + 1}));
           },
           state.workflowAction === 'skip',
           state.selectedWorkflows,
@@ -181,45 +170,39 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
           {
             useCurrentRepo: state.useCurrentRepo,
             workflowExists: state.workflowExists,
-            secretExists: state.secretExists,
-          },
+            secretExists: state.secretExists},
         );
         logEvent('tengu_install_github_app_step_completed', {
-          step: 'creating' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        });
+          step: 'creating' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
         setState(prev => ({ ...prev, step: 'success' }));
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to set up GitHub Actions';
+        const errorMessage = error instanceof Error ? error.message : t('installGithub.setupActionsFailed');
 
         if (errorMessage.includes('workflow file already exists')) {
           logEvent('tengu_install_github_app_error', {
-            reason: 'workflow_file_exists' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          });
+            reason: 'workflow_file_exists' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
           setState(prev => ({
             ...prev,
             step: 'error',
-            error: 'A Claude workflow file already exists in this repository.',
-            errorReason: 'Workflow file conflict',
+            error: t('installGithub.workflowConflictDesc'),
+            errorReason: t('installGithub.workflowConflictReason'),
             errorInstructions: [
-              'The file .github/workflows/claude.yml already exists',
-              'You can either:',
-              '  1. Delete the existing file and run this command again',
-              '  2. Update the existing file manually using the template from:',
+              t('installGithub.workflowConflictFile'),
+              t('installGithub.youCanEither'),
+              t('installGithub.deleteExistingFileRun'),
+              t('installGithub.updateExistingFileManual'),
               `     ${GITHUB_ACTION_SETUP_DOCS_URL}`,
-            ],
-          }));
+            ]}));
         } else {
           logEvent('tengu_install_github_app_error', {
-            reason: 'setup_github_actions_failed' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          });
+            reason: 'setup_github_actions_failed' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
           setState(prev => ({
             ...prev,
             step: 'error',
             error: errorMessage,
-            errorReason: 'GitHub Actions setup failed',
-            errorInstructions: [],
-          }));
+            errorReason: t('installGithub.setupActionsFailedReason'),
+            errorInstructions: []}));
         }
       }
     },
@@ -251,8 +234,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
       if (result.stderr.includes('404') || result.stderr.includes('Not Found')) {
         return {
           hasAccess: false,
-          error: 'repository_not_found',
-        };
+          error: 'repository_not_found'};
       }
 
       return { hasAccess: false };
@@ -292,8 +274,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
         setState(prev => ({
           ...prev,
           secretExists: true,
-          step: 'check-existing-secret',
-        }));
+          step: 'check-existing-secret'}));
       } else {
         // No existing secret found
         if (existingApiKey) {
@@ -301,8 +282,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
           setState(prev => ({
             ...prev,
             apiKeyOrOAuthToken: existingApiKey,
-            useExistingKey: true,
-          }));
+            useExistingKey: true}));
           await runSetupGitHubActions(existingApiKey, state.secretName);
         } else {
           // No local key, go to API key step
@@ -316,8 +296,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
         setState(prev => ({
           ...prev,
           apiKeyOrOAuthToken: existingApiKey,
-          useExistingKey: true,
-        }));
+          useExistingKey: true}));
         await runSetupGitHubActions(existingApiKey, state.secretName);
       } else {
         // No local key, go to API key step
@@ -329,8 +308,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
   const handleSubmit = async () => {
     if (state.step === 'warnings') {
       logEvent('tengu_install_github_app_step_completed', {
-        step: 'warnings' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        step: 'warnings' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       setState(prev => ({ ...prev, step: 'install-app' }));
       setTimeout(openGitHubAppInstallation, 0);
     } else if (state.step === 'choose-repo') {
@@ -346,10 +324,9 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
         const match = repoName.match(/github\.com[:/]([^/]+\/[^/]+)(\.git)?$/);
         if (!match) {
           repoWarnings.push({
-            title: 'Invalid GitHub URL format',
-            message: 'The repository URL format appears to be invalid.',
-            instructions: ['Use format: owner/repo or https://github.com/owner/repo', 'Example: anthropics/claude-cli'],
-          });
+            title: t('installGithub.invalidGhUrlTitle'),
+            message: t('installGithub.invalidGhUrlDesc'),
+            instructions: [t('installGithub.repoUrlFormatInstruction'), t('installGithub.exampleRepo')]});
         } else {
           repoName = match[1]?.replace(/\.git$/, '') || '';
         }
@@ -357,35 +334,32 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
 
       if (!repoName.includes('/')) {
         repoWarnings.push({
-          title: 'Repository format warning',
-          message: 'Repository should be in format "owner/repo"',
-          instructions: ['Use format: owner/repo', 'Example: anthropics/claude-cli'],
-        });
+          title: t('installGithub.repoFormatWarningTitle'),
+          message: t('installGithub.repoFormatWarningDesc'),
+          instructions: [t('installGithub.repoUrlFormatInstruction'), t('installGithub.exampleRepo')]});
       }
 
       const permissionCheck = await checkRepositoryPermissions(repoName);
 
       if (permissionCheck.error === 'repository_not_found') {
         repoWarnings.push({
-          title: 'Repository not found',
-          message: `Repository ${repoName} was not found or you don't have access.`,
+          title: t('installGithub.repoNotFoundTitle'),
+          message: t('installGithub.repoNotFoundDesc', repoName),
           instructions: [
-            `Check that the repository name is correct: ${repoName}`,
-            'Ensure you have access to this repository',
-            'For private repositories, make sure your GitHub token has the "repo" scope',
-            'You can add the repo scope with: gh auth refresh -h github.com -s repo,workflow',
-          ],
-        });
+            t('installGithub.checkRepoName', repoName),
+            t('installGithub.ensureRepoAccess'),
+            t('installGithub.ghTokenRepoScope'),
+            t('installGithub.addRepoScopeRefresh'),
+          ]});
       } else if (!permissionCheck.hasAccess) {
         repoWarnings.push({
-          title: 'Admin permissions required',
-          message: `You might need admin permissions on ${repoName} to set up GitHub Actions.`,
+          title: t('installGithub.adminPermsRequiredTitle'),
+          message: t('installGithub.adminPermsRequiredDesc', repoName),
           instructions: [
-            'Repository admins can install GitHub Apps and set secrets',
-            'Ask a repository admin to run this command if setup fails',
-            'Alternatively, you can use the manual setup instructions',
-          ],
-        });
+            t('installGithub.repoAdminsCanInstall'),
+            t('installGithub.askRepoAdmin'),
+            t('installGithub.manualSetupAlternative'),
+          ]});
       }
 
       const workflowExists = await checkExistingWorkflowFile(repoName);
@@ -397,24 +371,20 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
           selectedRepoName: repoName,
           workflowExists,
           warnings: allWarnings,
-          step: 'warnings',
-        }));
+          step: 'warnings'}));
       } else {
         logEvent('tengu_install_github_app_step_completed', {
-          step: 'choose-repo' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        });
+          step: 'choose-repo' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
         setState(prev => ({
           ...prev,
           selectedRepoName: repoName,
           workflowExists,
-          step: 'install-app',
-        }));
+          step: 'install-app'}));
         setTimeout(openGitHubAppInstallation, 0);
       }
     } else if (state.step === 'install-app') {
       logEvent('tengu_install_github_app_step_completed', {
-        step: 'install-app' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        step: 'install-app' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       if (state.workflowExists) {
         setState(prev => ({ ...prev, step: 'check-existing-workflow' }));
       } else {
@@ -427,8 +397,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
       return;
     } else if (state.step === 'check-existing-secret') {
       logEvent('tengu_install_github_app_step_completed', {
-        step: 'check-existing-secret' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        step: 'check-existing-secret' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       if (state.useExistingSecret) {
         await runSetupGitHubActions(null, state.secretName);
       } else {
@@ -448,13 +417,11 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
 
       if (!apiKeyToUse) {
         logEvent('tengu_install_github_app_error', {
-          reason: 'api_key_missing' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        });
+          reason: 'api_key_missing' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
         setState(prev => ({
           ...prev,
           step: 'error',
-          error: 'API key is required',
-        }));
+          error: t('installGithub.apiKeyRequired')}));
         return;
       }
 
@@ -462,8 +429,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
       setState(prev => ({
         ...prev,
         apiKeyOrOAuthToken: apiKeyToUse,
-        useExistingKey: state.selectedApiKeyOption === 'existing',
-      }));
+        useExistingKey: state.selectedApiKeyOption === 'existing'}));
 
       // Check if ANTHROPIC_API_KEY secret already exists
       const checkSecretsResult = await execFileNoThrow('gh', [
@@ -483,24 +449,20 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
 
         if (hasAnthropicKey) {
           logEvent('tengu_install_github_app_step_completed', {
-            step: 'api-key' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          });
+            step: 'api-key' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
           setState(prev => ({
             ...prev,
             secretExists: true,
-            step: 'check-existing-secret',
-          }));
+            step: 'check-existing-secret'}));
         } else {
           logEvent('tengu_install_github_app_step_completed', {
-            step: 'api-key' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          });
+            step: 'api-key' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
           // No existing secret, proceed to creating
           await runSetupGitHubActions(apiKeyToUse, state.secretName);
         }
       } else {
         logEvent('tengu_install_github_app_step_completed', {
-          step: 'api-key' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        });
+          step: 'api-key' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
         // Error checking secrets, proceed anyway
         await runSetupGitHubActions(apiKeyToUse, state.secretName);
       }
@@ -521,23 +483,20 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
 
   const handleCreateOAuthToken = useCallback(() => {
     logEvent('tengu_install_github_app_step_completed', {
-      step: 'api-key' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      step: 'api-key' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     setState(prev => ({ ...prev, step: 'oauth-flow' }));
   }, []);
 
   const handleOAuthSuccess = useCallback(
     (token: string) => {
       logEvent('tengu_install_github_app_step_completed', {
-        step: 'oauth-flow' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        step: 'oauth-flow' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       setState(prev => ({
         ...prev,
         apiKeyOrOAuthToken: token,
         useExistingKey: false,
         secretName: 'CLAUDE_CODE_OAUTH_TOKEN',
-        authType: 'oauth_token',
-      }));
+        authType: 'oauth_token'}));
       void runSetupGitHubActions(token, 'CLAUDE_CODE_OAUTH_TOKEN');
     },
     [runSetupGitHubActions],
@@ -556,8 +515,7 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
     setState(prev => ({
       ...prev,
       useCurrentRepo,
-      selectedRepoName: useCurrentRepo ? prev.currentRepo : '',
-    }));
+      selectedRepoName: useCurrentRepo ? prev.currentRepo : ''}));
   };
 
   const handleToggleUseExistingKey = (useExistingKey: boolean) => {
@@ -568,19 +526,17 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
     setState(prev => ({
       ...prev,
       useExistingSecret,
-      secretName: useExistingSecret ? 'ANTHROPIC_API_KEY' : '',
-    }));
+      secretName: useExistingSecret ? 'ANTHROPIC_API_KEY' : ''}));
   };
 
   const handleWorkflowAction = async (action: 'update' | 'skip' | 'exit') => {
     if (action === 'exit') {
-      props.onDone('Installation cancelled by user');
+      props.onDone(t('installGithub.cancelledByUser'));
       return;
     }
 
     logEvent('tengu_install_github_app_step_completed', {
-      step: 'check-existing-workflow' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      step: 'check-existing-workflow' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
     setState(prev => ({ ...prev, workflowAction: action }));
 
@@ -602,10 +558,10 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
     }
     props.onDone(
       state.step === 'success'
-        ? 'GitHub Actions setup complete!'
+        ? t('installGithub.setupComplete')
         : state.error
-          ? `Couldn't install GitHub App: ${state.error}\nFor manual setup instructions, see: ${GITHUB_ACTION_SETUP_DOCS_URL}`
-          : `GitHub App installation failed\nFor manual setup instructions, see: ${GITHUB_ACTION_SETUP_DOCS_URL}`,
+          ? t('installGithub.setupFailed', state.error, GITHUB_ACTION_SETUP_DOCS_URL)
+          : t('installGithub.installationFailed', GITHUB_ACTION_SETUP_DOCS_URL),
     );
   }
 
@@ -687,12 +643,10 @@ function InstallGitHubApp(props: { onDone: (message: string) => void }): React.R
           defaultSelections={state.selectedWorkflows}
           onSubmit={selectedWorkflows => {
             logEvent('tengu_install_github_app_step_completed', {
-              step: 'select-workflows' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            });
+              step: 'select-workflows' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
             setState(prev => ({
               ...prev,
-              selectedWorkflows,
-            }));
+              selectedWorkflows}));
             // Check if user has existing local API key
             if (existingApiKey) {
               void checkExistingSecret();

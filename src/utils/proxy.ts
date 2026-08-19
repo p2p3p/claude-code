@@ -4,6 +4,7 @@
 // ~1.5MB when no HTTPS_PROXY/mTLS env vars are set (the common case).
 import axios, { type AxiosInstance } from 'axios'
 import type { LookupOptions } from 'dns'
+import { t } from './i18n/index.js'
 import type { Agent } from 'http'
 import { HttpsProxyAgent, type HttpsProxyAgentOptions } from 'https-proxy-agent'
 import memoize from 'lodash-es/memoize.js'
@@ -15,8 +16,7 @@ import {
   getMTLSAgent,
   getMTLSConfig,
   getTLSFetchOptions,
-  type TLSConfig,
-} from './mtls.js'
+  type TLSConfig} from './mtls.js'
 
 // Disable fetch keep-alive after a stale-pool ECONNRESET so retries open a
 // fresh TCP connection instead of reusing the dead pooled socket. Sticky for
@@ -50,7 +50,7 @@ export function getAddressFamily(options: LookupOptions): 0 | 4 | 6 {
     case undefined:
       return 4
     default:
-      throw new Error(`Unsupported address family: ${options.family}`)
+      throw new Error(t('proxy.unsupportedAddressFamily', String(options.family)))
   }
 }
 
@@ -143,10 +143,8 @@ function createHttpsProxyAgent(
     ...(mtlsConfig && {
       cert: mtlsConfig.cert,
       key: mtlsConfig.key,
-      passphrase: mtlsConfig.passphrase,
-    }),
-    ...(caCerts && { ca: caCerts }),
-  }
+      passphrase: mtlsConfig.passphrase}),
+    ...(caCerts && { ca: caCerts })}
 
   if (isEnvTruthy(process.env.CLAUDE_CODE_PROXY_RESOLVES_HOSTS)) {
     // Skip local DNS resolution - let the proxy resolve hostnames
@@ -214,8 +212,7 @@ export const getProxyAgent = memoize((uri: string): undici.Dispatcher => {
     // Override both HTTP and HTTPS proxy with the provided URI
     httpProxy: uri,
     httpsProxy: uri,
-    noProxy: process.env.NO_PROXY || process.env.no_proxy,
-  }
+    noProxy: process.env.NO_PROXY || process.env.no_proxy}
 
   // Set both connect and requestTls so TLS options apply to both paths:
   // - requestTls: used by ProxyAgent for the TLS connection through CONNECT tunnels
@@ -225,10 +222,8 @@ export const getProxyAgent = memoize((uri: string): undici.Dispatcher => {
       ...(mtlsConfig && {
         cert: mtlsConfig.cert,
         key: mtlsConfig.key,
-        passphrase: mtlsConfig.passphrase,
-      }),
-      ...(caCerts && { ca: caCerts }),
-    }
+        passphrase: mtlsConfig.passphrase}),
+      ...(caCerts && { ca: caCerts })}
     proxyOptions.connect = tlsOpts
     proxyOptions.requestTls = tlsOpts
   }
@@ -406,15 +401,12 @@ export async function getAWSClientProxyConfig(): Promise<object> {
   const agent = createHttpsProxyAgent(proxyUrl)
   const requestHandler = new NodeHttpHandler({
     httpAgent: agent,
-    httpsAgent: agent,
-  })
+    httpsAgent: agent})
 
   return {
     requestHandler,
     credentials: defaultProvider({
-      clientConfig: { requestHandler },
-    }),
-  }
+      clientConfig: { requestHandler }})}
 }
 
 /**

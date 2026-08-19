@@ -76,8 +76,7 @@ export function registerLocalWorkflowTask(
     workflowFile: opts.workflowFile,
     summary: opts.summary,
     agentId: opts.agentId,
-    abortController: opts.abortController,
-  }
+    abortController: opts.abortController}
   registerTask(task, setAppState)
   return id
 }
@@ -91,8 +90,7 @@ export function completeWorkflowTask(
     status: 'completed',
     endTime: Date.now(),
     notified: true,
-    abortController: undefined,
-  }))
+    abortController: undefined}))
 }
 
 export function failWorkflowTask(
@@ -106,8 +104,7 @@ export function failWorkflowTask(
     endTime: Date.now(),
     notified: true,
     abortController: undefined,
-    ...(error !== undefined ? { error } : {}),
-  }))
+    ...(error !== undefined ? { error } : {})}))
 }
 
 /**
@@ -126,8 +123,7 @@ export function killWorkflowTask(
       status: 'killed',
       endTime: Date.now(),
       notified: true,
-      abortController: undefined,
-    }
+      abortController: undefined}
   })
 }
 
@@ -151,9 +147,7 @@ export function skipWorkflowAgent(
       pendingAgentAction: {
         kind: 'skip',
         agentId,
-        requestedAt: Date.now(),
-      },
-    }
+        requestedAt: Date.now()}}
   })
 }
 
@@ -177,9 +171,7 @@ export function retryWorkflowAgent(
       pendingAgentAction: {
         kind: 'retry',
         agentId,
-        requestedAt: Date.now(),
-      },
-    }
+        requestedAt: Date.now()}}
   })
 }
 
@@ -212,5 +204,4 @@ export const LocalWorkflowTask: Task = {
   type: 'local_workflow',
   async kill(taskId: string, setAppState: SetAppState) {
     killWorkflowTask(taskId, setAppState)
-  },
-}
+  }}

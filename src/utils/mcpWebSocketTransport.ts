@@ -1,8 +1,7 @@
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
 import {
   type JSONRPCMessage,
-  JSONRPCMessageSchema,
-} from '@modelcontextprotocol/sdk/types.js'
+  JSONRPCMessageSchema} from '@modelcontextprotocol/sdk/types.js'
 import type WsWebSocket from 'ws'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
 import { toError } from './errors.js'

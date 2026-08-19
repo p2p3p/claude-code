@@ -1,4 +1,5 @@
 import { getAllowedSettingSources } from '../../bootstrap/state.js'
+import { t } from '../i18n/index.js'
 
 /**
  * All possible sources where settings can come from
@@ -26,15 +27,15 @@ export type SettingSource = (typeof SETTING_SOURCES)[number]
 export function getSettingSourceName(source: SettingSource): string {
   switch (source) {
     case 'userSettings':
-      return 'user'
+      return t('settingSourceDisplay.sourceNameUser')
     case 'projectSettings':
-      return 'project'
+      return t('settingSourceDisplay.sourceNameProject')
     case 'localSettings':
-      return 'project, gitignored'
+      return t('settingSourceDisplay.sourceNameProjectGitignored')
     case 'flagSettings':
-      return 'cli flag'
+      return t('settingSourceDisplay.sourceNameCliFlag')
     case 'policySettings':
-      return 'managed'
+      return t('settingSourceDisplay.sourceNameManaged')
   }
 }
 
@@ -48,19 +49,19 @@ export function getSourceDisplayName(
 ): string {
   switch (source) {
     case 'userSettings':
-      return 'User'
+      return t('settingSourceDisplay.user')
     case 'projectSettings':
-      return 'Project'
+      return t('settingSourceDisplay.project')
     case 'localSettings':
-      return 'Local'
+      return t('settingSourceDisplay.local')
     case 'flagSettings':
-      return 'Flag'
+      return t('settingSourceDisplay.flag')
     case 'policySettings':
-      return 'Managed'
+      return t('settingSourceDisplay.managed')
     case 'plugin':
-      return 'Plugin'
+      return t('settingSourceDisplay.plugin')
     case 'built-in':
-      return 'Built-in'
+      return t('settingSourceDisplay.builtin')
   }
 }
 
@@ -74,21 +75,21 @@ export function getSettingSourceDisplayNameLowercase(
 ): string {
   switch (source) {
     case 'userSettings':
-      return 'user settings'
+      return t('settingSourceDisplay.userSettings')
     case 'projectSettings':
-      return 'shared project settings'
+      return t('settingSourceDisplay.sharedProjectSettings')
     case 'localSettings':
-      return 'project local settings'
+      return t('settingSourceDisplay.projectLocalSettings')
     case 'flagSettings':
-      return 'command line arguments'
+      return t('settingSourceDisplay.cliArgs')
     case 'policySettings':
-      return 'enterprise managed settings'
+      return t('settingSourceDisplay.enterpriseManaged')
     case 'cliArg':
-      return 'CLI argument'
+      return t('settingSourceDisplay.cliArg')
     case 'command':
-      return 'command configuration'
+      return t('settingSourceDisplay.commandConfiguration')
     case 'session':
-      return 'current session'
+      return t('settingSourceDisplay.currentSession')
   }
 }
 
@@ -102,21 +103,21 @@ export function getSettingSourceDisplayNameCapitalized(
 ): string {
   switch (source) {
     case 'userSettings':
-      return 'User settings'
+      return t('settingSourceDisplay.userSettingsCap')
     case 'projectSettings':
-      return 'Shared project settings'
+      return t('settingSourceDisplay.sharedProjectSettingsCap')
     case 'localSettings':
-      return 'Project local settings'
+      return t('settingSourceDisplay.projectLocalSettingsCap')
     case 'flagSettings':
-      return 'Command line arguments'
+      return t('settingSourceDisplay.cliArgsCap')
     case 'policySettings':
-      return 'Enterprise managed settings'
+      return t('settingSourceDisplay.enterpriseManagedCap')
     case 'cliArg':
-      return 'CLI argument'
+      return t('settingSourceDisplay.cliArgCap')
     case 'command':
-      return 'Command configuration'
+      return t('settingSourceDisplay.commandConfigurationCap')
     case 'session':
-      return 'Current session'
+      return t('settingSourceDisplay.currentSessionCap')
   }
 }
 

@@ -5,12 +5,10 @@ import {
   handleAutoModeTransition,
   handlePlanModeTransition,
   setHasExitedPlanMode,
-  setNeedsAutoModeExitAttachment,
-} from '../../bootstrap/state.js'
+  setNeedsAutoModeExitAttachment} from '../../bootstrap/state.js'
 import type {
   ToolPermissionContext,
-  ToolPermissionRulesBySource,
-} from '../../Tool.js'
+  ToolPermissionRulesBySource} from '../../Tool.js'
 import { getCwd } from '../cwd.js'
 import { isEnvTruthy } from '../envUtils.js'
 import type { SettingSource } from '../settings/constants.js'
@@ -19,12 +17,10 @@ import {
   getSettings_DEPRECATED,
   getSettingsFilePathForSource,
   getUseAutoModeDuringPlan,
-  hasAutoModeOptIn,
-} from '../settings/settings.js'
+  hasAutoModeOptIn} from '../settings/settings.js'
 import {
   type PermissionMode,
-  permissionModeFromString,
-} from './PermissionMode.js'
+  permissionModeFromString} from './PermissionMode.js'
 import { applyPermissionRulesToPermissionContext } from './permissions.js'
 import { loadAllPermissionRulesFromDisk } from './permissionsLoader.js'
 
@@ -38,16 +34,13 @@ import {
   checkSecurityRestrictionGate,
   checkStatsigFeatureGate_CACHED_MAY_BE_STALE,
   getDynamicConfig_BLOCKS_ON_INIT,
-  getFeatureValue_CACHED_MAY_BE_STALE,
-} from 'src/services/analytics/growthbook.js'
+  getFeatureValue_CACHED_MAY_BE_STALE} from 'src/services/analytics/growthbook.js'
 import {
   addDirHelpMessage,
-  validateDirectoryForWorkspace,
-} from '../../commands/add-dir/validation.js'
+  validateDirectoryForWorkspace} from '../../commands/add-dir/validation.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import { AGENT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/AgentTool/constants.js'
 import { BASH_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/BashTool/toolName.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
@@ -55,31 +48,26 @@ import { POWERSHELL_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/Powe
 import { getToolsForDefaultPreset, parseToolPreset } from '../../tools.js'
 import {
   getFsImplementation,
-  safeResolvePath,
-} from '../../utils/fsOperations.js'
+  safeResolvePath} from '../../utils/fsOperations.js'
 import { modelSupportsAutoMode } from '../betas.js'
 import { logForDebugging } from '../debug.js'
 import { gracefulShutdown } from '../gracefulShutdown.js'
 import { getMainLoopModel } from '../model/model.js'
 import {
   CROSS_PLATFORM_CODE_EXEC,
-  DANGEROUS_BASH_PATTERNS,
-} from './dangerousPatterns.js'
+  DANGEROUS_BASH_PATTERNS} from './dangerousPatterns.js'
 import type {
   PermissionRule,
   PermissionRuleSource,
-  PermissionRuleValue,
-} from './PermissionRule.js'
+  PermissionRuleValue} from './PermissionRule.js'
 import {
   type AdditionalWorkingDirectory,
-  applyPermissionUpdate,
-} from './PermissionUpdate.js'
+  applyPermissionUpdate} from './PermissionUpdate.js'
 import type { PermissionUpdateDestination } from './PermissionUpdateSchema.js'
 import {
   normalizeLegacyToolName,
   permissionRuleValueFromString,
-  permissionRuleValueToString,
-} from './permissionRuleParser.js'
+  permissionRuleValueToString} from './permissionRuleParser.js'
 
 /**
  * Checks if a Bash permission rule is dangerous for auto mode.
@@ -314,8 +302,7 @@ export function findDangerousClassifierPermissions(
         ruleValue: rule.ruleValue,
         source: rule.source,
         ruleDisplay: ruleString,
-        sourceDisplay: formatPermissionSource(rule.source),
-      })
+        sourceDisplay: formatPermissionSource(rule.source)})
     }
   }
 
@@ -332,8 +319,7 @@ export function findDangerousClassifierPermissions(
           ruleValue: { toolName, ruleContent },
           source: 'cliArg',
           ruleDisplay: ruleContent ? toolSpec : `${toolName}(*)`,
-          sourceDisplay: '--allowed-tools',
-        })
+          sourceDisplay: '--allowed-tools'})
       }
     }
   }
@@ -391,8 +377,7 @@ export function findOverlyBroadBashPermissions(
         ruleValue: rule.ruleValue,
         source: rule.source,
         ruleDisplay: `${BASH_TOOL_NAME}(*)`,
-        sourceDisplay: formatPermissionSource(rule.source),
-      })
+        sourceDisplay: formatPermissionSource(rule.source)})
     }
   }
 
@@ -403,8 +388,7 @@ export function findOverlyBroadBashPermissions(
         ruleValue: parsed,
         source: 'cliArg',
         ruleDisplay: `${BASH_TOOL_NAME}(*)`,
-        sourceDisplay: '--allowed-tools',
-      })
+        sourceDisplay: '--allowed-tools'})
     }
   }
 
@@ -429,8 +413,7 @@ export function findOverlyBroadPowerShellPermissions(
         ruleValue: rule.ruleValue,
         source: rule.source,
         ruleDisplay: `${POWERSHELL_TOOL_NAME}(*)`,
-        sourceDisplay: formatPermissionSource(rule.source),
-      })
+        sourceDisplay: formatPermissionSource(rule.source)})
     }
   }
 
@@ -441,8 +424,7 @@ export function findOverlyBroadPowerShellPermissions(
         ruleValue: parsed,
         source: 'cliArg',
         ruleDisplay: `${POWERSHELL_TOOL_NAME}(*)`,
-        sourceDisplay: '--allowed-tools',
-      })
+        sourceDisplay: '--allowed-tools'})
     }
   }
 
@@ -495,8 +477,7 @@ export function removeDangerousPermissions(
       type: 'removeRules' as const,
       rules,
       behavior: 'allow' as const,
-      destination,
-    })
+      destination})
   }
 
   return updatedContext
@@ -522,16 +503,14 @@ export function stripDangerousPermissionsForAutoMode(
       rules.push({
         source: source as PermissionRuleSource,
         ruleBehavior: 'allow',
-        ruleValue,
-      })
+        ruleValue})
     }
   }
   const dangerousPermissions = findDangerousClassifierPermissions(rules, [])
   if (dangerousPermissions.length === 0) {
     return {
       ...context,
-      strippedDangerousRules: context.strippedDangerousRules ?? {},
-    }
+      strippedDangerousRules: context.strippedDangerousRules ?? {}}
   }
   for (const permission of dangerousPermissions) {
     logForDebugging(
@@ -548,8 +527,7 @@ export function stripDangerousPermissionsForAutoMode(
   }
   return {
     ...removeDangerousPermissions(context, dangerousPermissions),
-    strippedDangerousRules: stripped,
-  }
+    strippedDangerousRules: stripped}
 }
 
 /**
@@ -572,8 +550,7 @@ export function restoreDangerousPermissions(
       type: 'addRules',
       rules: ruleStrings.map(permissionRuleValueFromString),
       behavior: 'allow',
-      destination: source as PermissionUpdateDestination,
-    })
+      destination: source as PermissionUpdateDestination})
   }
   return { ...result, strippedDangerousRules: undefined }
 }
@@ -669,8 +646,7 @@ export function parseBaseToolsFromCLI(baseTools: string[]): string[] {
  */
 function isSymlinkTo({
   processPwd,
-  originalCwd,
-}: {
+  originalCwd}: {
   processPwd: string
   originalCwd: string
 }): boolean {
@@ -688,8 +664,7 @@ function isSymlinkTo({
  */
 export function initialPermissionModeFromCLI({
   permissionModeCli,
-  dangerouslySkipPermissions,
-}: {
+  dangerouslySkipPermissions}: {
   permissionModeCli: string | undefined
   dangerouslySkipPermissions: boolean | undefined
 }): { mode: PermissionMode; notification?: string } {
@@ -754,8 +729,7 @@ export function initialPermissionModeFromCLI({
         { level: 'warn' },
       )
       logEvent('tengu_ccr_unsupported_default_mode_ignored', {
-        mode: settingsMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+        mode: settingsMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     }
     // auto from settings requires the same gate check as from CLI
     else if (feature('TRANSCRIPT_CLASSIFIER') && settingsMode === 'auto') {
@@ -778,14 +752,12 @@ export function initialPermissionModeFromCLI({
     if (mode === 'bypassPermissions' && disableBypassPermissionsMode) {
       if (growthBookDisableBypassPermissionsMode) {
         logForDebugging('bypassPermissions mode is disabled by Statsig gate', {
-          level: 'warn',
-        })
+          level: 'warn'})
         notification =
           'Bypass permissions mode was disabled by your organization policy'
       } else {
         logForDebugging('bypassPermissions mode is disabled by settings', {
-          level: 'warn',
-        })
+          level: 'warn'})
         notification = 'Bypass permissions mode was disabled by settings'
       }
       continue // Skip this mode if it's disabled
@@ -875,8 +847,7 @@ export async function initializeToolPermissionContext({
   baseToolsCli,
   permissionMode,
   allowDangerouslySkipPermissions: _allowDangerouslySkipPermissions,
-  addDirs,
-}: {
+  addDirs}: {
   allowedToolsCli: string[]
   disallowedToolsCli: string[]
   baseToolsCli?: string[]
@@ -923,8 +894,7 @@ export async function initializeToolPermissionContext({
   ) {
     additionalWorkingDirectories.set(processPwd, {
       path: processPwd,
-      source: 'session',
-    })
+      source: 'session'})
   }
 
   const isBypassPermissionsModeAvailable = true
@@ -973,8 +943,7 @@ export async function initializeToolPermissionContext({
       isBypassPermissionsModeAvailable,
       ...(feature('TRANSCRIPT_CLASSIFIER')
         ? { isAutoModeAvailable: true }
-        : {}),
-    },
+        : {})},
     rulesFromDisk,
   )
 
@@ -998,8 +967,7 @@ export async function initializeToolPermissionContext({
       toolPermissionContext = applyPermissionUpdate(toolPermissionContext, {
         type: 'addDirectories',
         directories: [result.absolutePath],
-        destination: 'cliArg',
-      })
+        destination: 'cliArg'})
     } else if (
       result.resultType !== 'alreadyInWorkingDirectory' &&
       result.resultType !== 'pathNotFound'
@@ -1016,8 +984,7 @@ export async function initializeToolPermissionContext({
     toolPermissionContext,
     warnings,
     dangerousPermissions,
-    overlyBroadBashPermissions,
-  }
+    overlyBroadBashPermissions}
 }
 
 export type AutoModeGateCheckResult = {
@@ -1150,8 +1117,7 @@ export async function verifyAutoModeGateAccess(
   if (disabledBySettings) {
     reason = 'settings'
     logForDebugging('auto mode disabled: disableAutoMode in settings', {
-      level: 'warn',
-    })
+      level: 'warn'})
   } else if (enabledState === 'disabled') {
     reason = 'circuit-breaker'
     logForDebugging(
@@ -1197,10 +1163,8 @@ export async function verifyAutoModeGateAccess(
         ...applyPermissionUpdate(restoreDangerousPermissions(ctx), {
           type: 'setMode',
           mode: 'default',
-          destination: 'session',
-        }),
-        isAutoModeAvailable: false,
-      }
+          destination: 'session'}),
+        isAutoModeAvailable: false}
     }
     // Plan with auto active: deactivate auto, restore permissions, defuse
     // prePlanMode so ExitPlanMode goes to default.
@@ -1209,8 +1173,7 @@ export async function verifyAutoModeGateAccess(
     return {
       ...restoreDangerousPermissions(ctx),
       prePlanMode: ctx.prePlanMode === 'auto' ? 'default' : ctx.prePlanMode,
-      isAutoModeAvailable: false,
-    }
+      isAutoModeAvailable: false}
   }
 
   // Notification decisions use the stale context — that's OK: we're deciding
@@ -1243,8 +1206,7 @@ export async function verifyAutoModeGateAccess(
   // unsupported-model switches).
   return {
     updateContext: kickOutOfAutoIfNeeded,
-    notification: currentContext.isAutoModeAvailable ? notification : undefined,
-  }
+    notification: currentContext.isAutoModeAvailable ? notification : undefined}
 }
 
 /**
@@ -1383,14 +1345,12 @@ export function createDisabledBypassPermissionsContext(
     updatedContext = applyPermissionUpdate(currentContext, {
       type: 'setMode',
       mode: 'default',
-      destination: 'session',
-    })
+      destination: 'session'})
   }
 
   return {
     ...updatedContext,
-    isBypassPermissionsModeAvailable: false,
-  }
+    isBypassPermissionsModeAvailable: false}
 }
 
 /**
@@ -1463,15 +1423,13 @@ export function prepareContextForPlanMode(
       setNeedsAutoModeExitAttachment(true)
       return {
         ...restoreDangerousPermissions(context),
-        prePlanMode: 'auto',
-      }
+        prePlanMode: 'auto'}
     }
     if (planAutoMode && currentMode !== 'bypassPermissions') {
       autoModeStateModule?.setAutoModeActive(true)
       return {
         ...stripDangerousPermissionsForAutoMode(context),
-        prePlanMode: currentMode,
-      }
+        prePlanMode: currentMode}
     }
   }
   logForDebugging(

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 
 type SuccessStepProps = {
   secretExists: boolean;
@@ -12,45 +13,44 @@ export function SuccessStep({
   secretExists,
   useExistingSecret,
   secretName,
-  skipWorkflow = false,
-}: SuccessStepProps): React.ReactNode {
+  skipWorkflow = false}: SuccessStepProps): React.ReactNode {
   return (
     <>
       <Box flexDirection="column" borderStyle="round" paddingX={1}>
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>Install GitHub App</Text>
-          <Text dimColor>Success</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
+          <Text dimColor>{t('installGithub.success')}</Text>
         </Box>
-        {!skipWorkflow && <Text color="success">✓ GitHub Actions workflow created!</Text>}
+        {!skipWorkflow && <Text color="success">✓ {t('installGithub.workflowCreated')}</Text>}
         {secretExists && useExistingSecret && (
           <Box marginTop={1}>
-            <Text color="success">✓ Using existing ANTHROPIC_API_KEY secret</Text>
+            <Text color="success">✓ {t('installGithub.usingExistingSecretSuccess')}</Text>
           </Box>
         )}
         {(!secretExists || !useExistingSecret) && (
           <Box marginTop={1}>
-            <Text color="success">✓ API key saved as {secretName} secret</Text>
+            <Text color="success">✓ {t('installGithub.apiKeySaved', secretName)}</Text>
           </Box>
         )}
         <Box marginTop={1}>
-          <Text>Next steps:</Text>
+          <Text>{t('installGithub.nextSteps')}</Text>
         </Box>
         {skipWorkflow ? (
           <>
-            <Text>1. Install the Claude GitHub App if you haven&apos;t already</Text>
-            <Text>2. Your workflow file was kept unchanged</Text>
-            <Text>3. API key is configured and ready to use</Text>
+            <Text>{t('installGithub.stepInstallApp')}</Text>
+            <Text>{t('installGithub.stepWorkflowUnchanged')}</Text>
+            <Text>{t('installGithub.stepApiKeyReady')}</Text>
           </>
         ) : (
           <>
-            <Text>1. A pre-filled PR page has been created</Text>
-            <Text>2. Install the Claude GitHub App if you haven&apos;t already</Text>
-            <Text>3. Merge the PR to enable Claude PR assistance</Text>
+            <Text>{t('installGithub.stepPrPage')}</Text>
+            <Text>{t('installGithub.stepInstallApp')}</Text>
+            <Text>{t('installGithub.stepMergePr')}</Text>
           </>
         )}
       </Box>
       <Box marginLeft={3}>
-        <Text dimColor>Press any key to exit</Text>
+        <Text dimColor>{t('installGithub.pressAnyKey')}</Text>
       </Box>
     </>
   );

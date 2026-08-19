@@ -647,8 +647,7 @@ const INVALID_RESULT_BASE: Omit<
   valid: false,
   statements: [],
   variables: [],
-  hasStopParsing: false,
-}
+  hasStopParsing: false}
 
 function makeInvalidResult(
   command: string,
@@ -658,8 +657,7 @@ function makeInvalidResult(
   return {
     ...INVALID_RESULT_BASE,
     errors: [{ message, errorId }],
-    originalCommand: command,
-  }
+    originalCommand: command}
 }
 
 /**
@@ -906,8 +904,7 @@ export function transformCommandAst(
         children.push(
           rawChildren.map(c => ({
             type: mapElementType(c.type),
-            text: c.text,
-          })),
+            text: c.text})),
         )
       } else {
         children.push(undefined)
@@ -922,8 +919,7 @@ export function transformCommandAst(
     args,
     text: raw.text,
     elementTypes,
-    ...(hasChildren ? { children } : {}),
-  }
+    ...(hasChildren ? { children } : {})}
 
   // Preserve redirections from nested commands (e.g., in && / || chains)
   const rawRedirs = ensureArray(raw.redirections)
@@ -953,8 +949,7 @@ export function transformExpressionElement(
     elementType,
     args: [],
     text: raw.text,
-    elementTypes,
-  }
+    elementTypes}
 }
 
 /** Map raw redirection to ParsedRedirection */
@@ -1051,8 +1046,7 @@ export function transformStatement(raw: RawStatement): ParsedStatement {
       nameType: 'unknown',
       elementType: 'CommandExpressionAst',
       args: [],
-      text: raw.text,
-    })
+      text: raw.text})
     // SECURITY: The PS1 else-branch does a direct recursive FindAll on
     // FileRedirectionAst to catch expression redirections inside control flow
     // (if/for/foreach/while/switch/try/trap/&& and ||). The CommandAst FindAll
@@ -1092,8 +1086,7 @@ export function transformStatement(raw: RawStatement): ParsedStatement {
     commands,
     redirections,
     text: raw.text,
-    nestedCommands,
-  }
+    nestedCommands}
 
   if (raw.securityPatterns) {
     result.securityPatterns = raw.securityPatterns
@@ -1110,8 +1103,7 @@ function transformRawOutput(raw: RawParsedOutput): ParsedPowerShellCommand {
     statements: ensureArray(raw.statements).map(transformStatement),
     variables: ensureArray(raw.variables),
     hasStopParsing: raw.hasStopParsing,
-    originalCommand: raw.originalCommand,
-  }
+    originalCommand: raw.originalCommand}
   const tl = ensureArray(raw.typeLiterals)
   if (tl.length > 0) {
     result.typeLiterals = tl
@@ -1194,8 +1186,7 @@ async function parsePowerShellCommandImpl(
     try {
       const result = await execa(pwshPath, args, {
         timeout: parseTimeoutMs,
-        reject: false,
-      })
+        reject: false})
       stdout = result.stdout
       stderr = result.stderr
       timedOut = result.timedOut
@@ -1447,8 +1438,7 @@ export const COMMON_ALIASES: Record<string, string> = Object.assign(
     cli: 'Clear-Item',
     epal: 'Export-Alias',
     // Text search
-    sls: 'Select-String',
-  },
+    sls: 'Select-String'},
 )
 
 const DIRECTORY_CHANGE_CMDLETS = new Set([
@@ -1736,8 +1726,7 @@ export function deriveSecurityFlags(
     hasExpandableStrings: false,
     hasMemberInvocations: false,
     hasAssignments: false,
-    hasStopParsing: parsed.hasStopParsing,
-  }
+    hasStopParsing: parsed.hasStopParsing}
 
   function checkElements(cmd: ParsedCommandElement): void {
     if (!cmd.elementTypes) {

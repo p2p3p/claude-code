@@ -9,8 +9,7 @@ import { getCwd } from '../cwd.js'
 import { logForDebugging } from '../debug.js'
 import {
   embeddedSearchToolsBinaryPath,
-  hasEmbeddedSearchTools,
-} from '../embeddedTools.js'
+  hasEmbeddedSearchTools} from '../embeddedTools.js'
 import { getClaudeConfigHomeDir } from '../envUtils.js'
 import { pathExists } from '../file.js'
 import { getFsImplementation } from '../fsOperations.js'
@@ -76,8 +75,7 @@ export function createRipgrepShellIntegration(): {
         'rg',
         rgCommand.argv0,
         rgCommand.rgPath,
-      ),
-    }
+      )}
   }
 
   // For regular ripgrep, use a simple alias target
@@ -273,8 +271,7 @@ async function getClaudeCodeSnapshotContent(): Promise<string> {
     // On Windows with git-bash, read the Cygwin PATH
     const cygwinResult = await execa('echo $PATH', {
       shell: true,
-      reject: false,
-    })
+      reject: false})
     if (cygwinResult.exitCode === 0 && cygwinResult.stdout) {
       pathValue = cygwinResult.stdout.trim()
     }
@@ -464,12 +461,10 @@ export const createAndSaveSnapshot = async (
               : subprocessEnv()) as typeof process.env),
             SHELL: binShell,
             GIT_EDITOR: 'true',
-            CLAUDECODE: '1',
-          },
+            CLAUDECODE: '1'},
           timeout: SNAPSHOT_CREATION_TIMEOUT,
           maxBuffer: 1024 * 1024, // 1MB buffer
-          encoding: 'utf8',
-        },
+          encoding: 'utf8'},
         async (error, stdout, stderr) => {
           if (error) {
             const execError = error as Error & {
@@ -515,8 +510,7 @@ export const createAndSaveSnapshot = async (
               stderr_length: stderr?.length || 0,
               has_error_code: !!execError?.code,
               error_signal_number: signalNumber,
-              error_killed: execError?.killed,
-            })
+              error_killed: execError?.killed})
             resolve(undefined)
           } else {
             let snapshotSize: number | undefined

@@ -21,8 +21,7 @@ export function detectEncodingForResolvedPath(
   resolvedPath: string,
 ): BufferEncoding {
   const { buffer, bytesRead } = getFsImplementation().readSync(resolvedPath, {
-    length: 4096,
-  })
+    length: 4096})
 
   // Empty files should default to utf8, not ascii
   // This fixes a bug where writing emojis/CJK to empty files caused corruption
@@ -93,8 +92,7 @@ export function readFileSyncWithMetadata(filePath: string): {
   return {
     content: raw.replaceAll('\r\n', '\n'),
     encoding,
-    lineEndings,
-  }
+    lineEndings}
 }
 
 export function readFileSync(filePath: string): string {

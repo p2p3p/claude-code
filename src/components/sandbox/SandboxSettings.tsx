@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, color, Link, Text, useTheme, Pane, Tab, Tabs, useTabHeaderFocus } from '@anthropic/ink';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import type { CommandResultDisplay } from '../../types/command.js';
@@ -43,19 +44,16 @@ export function SandboxSettings({ onComplete, depCheck }: Props): React.ReactNod
         currentMode === 'auto-allow'
           ? `Sandbox BashTool, with auto-allow ${currentIndicator}`
           : 'Sandbox BashTool, with auto-allow',
-      value: 'auto-allow',
-    },
+      value: 'auto-allow'},
     {
       label:
         currentMode === 'regular'
           ? `Sandbox BashTool, with regular permissions ${currentIndicator}`
           : 'Sandbox BashTool, with regular permissions',
-      value: 'regular',
-    },
+      value: 'regular'},
     {
       label: currentMode === 'disabled' ? `No Sandbox ${currentIndicator}` : 'No Sandbox',
-      value: 'disabled',
-    },
+      value: 'disabled'},
   ];
 
   async function handleSelect(value: string) {
@@ -65,22 +63,19 @@ export function SandboxSettings({ onComplete, depCheck }: Props): React.ReactNod
       case 'auto-allow':
         await SandboxManager.setSandboxSettings({
           enabled: true,
-          autoAllowBashIfSandboxed: true,
-        });
+          autoAllowBashIfSandboxed: true});
         onComplete('✓ Sandbox enabled with auto-allow for bash commands');
         break;
       case 'regular':
         await SandboxManager.setSandboxSettings({
           enabled: true,
-          autoAllowBashIfSandboxed: false,
-        });
+          autoAllowBashIfSandboxed: false});
         onComplete('✓ Sandbox enabled with regular bash permissions');
         break;
       case 'disabled':
         await SandboxManager.setSandboxSettings({
           enabled: false,
-          autoAllowBashIfSandboxed: false,
-        });
+          autoAllowBashIfSandboxed: false});
         onComplete('○ Sandbox disabled');
         break;
     }
@@ -88,13 +83,12 @@ export function SandboxSettings({ onComplete, depCheck }: Props): React.ReactNod
 
   useKeybindings(
     {
-      'confirm:no': () => onComplete(undefined, { display: 'skip' }),
-    },
+      'confirm:no': () => onComplete(undefined, { display: 'skip' })},
     { context: 'Settings' },
   );
 
   const modeTab = (
-    <Tab key="mode" title="Mode">
+    <Tab key="mode" title={t('sandboxSettings.mode')}>
       <SandboxModeTab
         showSocketWarning={showSocketWarning}
         options={options}
@@ -105,13 +99,13 @@ export function SandboxSettings({ onComplete, depCheck }: Props): React.ReactNod
   );
 
   const overridesTab = (
-    <Tab key="overrides" title="Overrides">
+    <Tab key="overrides" title={t('sandboxsettings.overrides')}>
       <SandboxOverridesTab onComplete={onComplete} />
     </Tab>
   );
 
   const configTab = (
-    <Tab key="config" title="Config">
+    <Tab key="config" title={t('sandboxsettings.config')}>
       <SandboxConfigTab />
     </Tab>
   );
@@ -122,7 +116,7 @@ export function SandboxSettings({ onComplete, depCheck }: Props): React.ReactNod
   // If only optional deps missing, show all tabs
   const tabs = hasErrors
     ? [
-        <Tab key="dependencies" title="Dependencies">
+        <Tab key="dependencies" title={t('sandboxsettings.dependencies')}>
           <SandboxDependenciesTab depCheck={depCheck} />
         </Tab>,
       ]
@@ -130,7 +124,7 @@ export function SandboxSettings({ onComplete, depCheck }: Props): React.ReactNod
         modeTab,
         ...(hasWarnings
           ? [
-              <Tab key="dependencies" title="Dependencies">
+              <Tab key="dependencies" title={t('sandboxsettings.dependencies2')}>
                 <SandboxDependenciesTab depCheck={depCheck} />
               </Tab>,
             ]
@@ -141,7 +135,7 @@ export function SandboxSettings({ onComplete, depCheck }: Props): React.ReactNod
 
   return (
     <Pane color="permission">
-      <Tabs title="Sandbox:" color="permission" defaultTab="Mode">
+      <Tabs title={t('sandboxsettings.sandbox')} color="permission" defaultTab="Mode">
         {tabs}
       </Tabs>
     </Pane>
@@ -152,8 +146,7 @@ function SandboxModeTab({
   showSocketWarning,
   options,
   onSelect,
-  onComplete,
-}: {
+  onComplete}: {
   showSocketWarning: boolean;
   options: Array<{ label: string; value: string }>;
   onSelect: (value: string) => void;
@@ -164,11 +157,11 @@ function SandboxModeTab({
     <Box flexDirection="column" paddingY={1}>
       {showSocketWarning && (
         <Box marginBottom={1}>
-          <Text color="warning">Cannot block unix domain sockets (see Dependencies tab)</Text>
+          <Text color="warning">{t('sandboxsettings.cannotBlockUnixDomainSocketsSeeDependenciesTab')}</Text>
         </Box>
       )}
       <Box marginBottom={1}>
-        <Text bold>Configure Mode:</Text>
+        <Text bold>{t('sandboxsettings.configureMode')}</Text>
       </Box>
       <Select
         options={options}

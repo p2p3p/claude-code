@@ -6,10 +6,10 @@ import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growt
 import {
   calculateTokenWarningState,
   getEffectiveContextWindowSize,
-  isAutoCompactEnabled,
-} from '../services/compact/autoCompact.js';
+  isAutoCompactEnabled} from '../services/compact/autoCompact.js';
 import { useCompactWarningSuppression } from '../services/compact/compactWarningHook.js';
 import { getUpgradeMessage } from '../utils/model/contextWindowUpgradeCheck.js';
+import { t } from 'src/utils/i18n/index.js';
 
 type Props = {
   tokenUsage: number;
@@ -48,17 +48,17 @@ function CollapseLabel({ upgradeMessage }: { upgradeMessage: string | null }): R
 
   // Show error indicator when ctx-agent is failing silently
   if (errors > 0 || idleWarn) {
-    const problem = errors > 0 ? `collapse errors: ${errors}` : `collapse idle (${emptySpawns} empty runs)`;
+    const problem = errors > 0 ? t('ui.collapseErrors', errors) : t('ui.collapseIdle', emptySpawns);
     return (
       <Text color="warning" wrap="truncate">
-        {total > 0 ? `${collapsed} / ${total} summarized \u00b7 ${problem}` : problem}
+        {total > 0 ? `${t('ui.summarizedCount', collapsed, total)} \u00b7 ${problem}` : problem}
       </Text>
     );
   }
 
   if (total === 0) return null;
 
-  const label = `${collapsed} / ${total} summarized`;
+  const label = t('ui.summarizedCount', collapsed, total);
   return (
     <Text dimColor wrap="truncate">
       {upgradeMessage ? `${label} \u00b7 ${upgradeMessage}` : label}
@@ -120,8 +120,8 @@ export function TokenWarning({ tokenUsage, model }: Props): React.ReactNode {
   }
 
   const autocompactLabel = reactiveOnlyMode
-    ? `${100 - displayPercentLeft}% context used`
-    : `${displayPercentLeft}% until auto-compact`;
+    ? t('tokenWarning.contextUsed', 100 - displayPercentLeft)
+    : t('tokenWarning.untilAutoCompact', displayPercentLeft);
 
   return (
     <Box flexDirection="row">
@@ -132,8 +132,8 @@ export function TokenWarning({ tokenUsage, model }: Props): React.ReactNode {
       ) : (
         <Text color={isAboveErrorThreshold ? 'error' : 'warning'} wrap="truncate">
           {upgradeMessage
-            ? `Context low (${percentLeft}% remaining) \u00b7 ${upgradeMessage}`
-            : `Context low (${percentLeft}% remaining) \u00b7 Run /compact to compact & continue`}
+            ? t('tokenWarning.contextLow', percentLeft, upgradeMessage)
+            : t('tokenWarning.contextLow', percentLeft, t('tokenWarning.compactToContinue'))}
         </Text>
       )}
     </Box>

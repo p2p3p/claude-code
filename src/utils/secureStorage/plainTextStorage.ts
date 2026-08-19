@@ -6,8 +6,7 @@ import { getFsImplementation } from '../fsOperations.js'
 import {
   jsonParse,
   jsonStringify,
-  writeFileSync_DEPRECATED,
-} from '../slowOperations.js'
+  writeFileSync_DEPRECATED} from '../slowOperations.js'
 import type { SecureStorage, SecureStorageData } from './types.js'
 
 function getStoragePath(): { storageDir: string; storagePath: string } {
@@ -23,8 +22,7 @@ export const plainTextStorage = {
     const { storagePath } = getStoragePath()
     try {
       const data = getFsImplementation().readFileSync(storagePath, {
-        encoding: 'utf8',
-      })
+        encoding: 'utf8'})
       return jsonParse(data)
     } catch {
       return null
@@ -34,8 +32,7 @@ export const plainTextStorage = {
     const { storagePath } = getStoragePath()
     try {
       const data = await getFsImplementation().readFile(storagePath, {
-        encoding: 'utf8',
-      })
+        encoding: 'utf8'})
       return jsonParse(data)
     } catch {
       return null
@@ -56,13 +53,11 @@ export const plainTextStorage = {
 
       writeFileSync_DEPRECATED(storagePath, jsonStringify(data), {
         encoding: 'utf8',
-        flush: false,
-      })
+        flush: false})
       chmodSync(storagePath, 0o600)
       return {
         success: true,
-        warning: 'Warning: Storing credentials in plaintext.',
-      }
+        warning: 'Warning: Storing credentials in plaintext.'}
     } catch {
       return { success: false }
     }
@@ -80,5 +75,4 @@ export const plainTextStorage = {
       }
       return false
     }
-  },
-} satisfies SecureStorage
+  }} satisfies SecureStorage

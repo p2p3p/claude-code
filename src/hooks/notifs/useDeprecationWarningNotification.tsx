@@ -18,8 +18,7 @@ export function useDeprecationWarningNotification(model: string): void {
         key: 'model-deprecation-warning',
         text: deprecationWarning,
         color: 'warning',
-        priority: 'high',
-      });
+        priority: 'high'});
     }
 
     // Reset tracking if model changes to non-deprecated

@@ -2,8 +2,7 @@ import {
   createWorkflowTool,
   workflowInputSchema,
   WORKFLOW_TOOL_NAME,
-  type WorkflowToolDescriptor,
-} from '@claude-code-best/workflow-engine'
+  type WorkflowToolDescriptor} from '@claude-code-best/workflow-engine'
 import { buildTool, type Tool } from '../Tool.js'
 import { getWorkflowService } from './service.js'
 
@@ -52,8 +51,7 @@ function buildWorkflowTool(): Tool {
     },
     renderToolUseMessage: input => descriptor().renderToolUseMessage(input),
     mapToolResultToToolResultBlockParam: (data, toolUseId) =>
-      descriptor().mapToolResultToToolResultBlockParam(data, toolUseId),
-  })
+      descriptor().mapToolResultToToolResultBlockParam(data, toolUseId)})
 }
 
 // Singleton: tools.ts registration and PermissionRequest must reference the same instance (switch matches by reference).

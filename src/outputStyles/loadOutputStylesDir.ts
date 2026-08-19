@@ -6,8 +6,7 @@ import { coerceDescriptionToString } from '../utils/frontmatterParser.js'
 import { logError } from '../utils/log.js'
 import {
   extractDescriptionFromMarkdown,
-  loadMarkdownFilesForSubdir,
-} from '../utils/markdownConfigLoader.js'
+  loadMarkdownFilesForSubdir} from '../utils/markdownConfigLoader.js'
 import { clearPluginOutputStyleCache } from '../utils/plugins/loadPluginOutputStyles.js'
 
 /**
@@ -74,8 +73,7 @@ export const getOutputStyleDirStyles = memoize(
               description,
               prompt: content.trim(),
               source,
-              keepCodingInstructions,
-            }
+              keepCodingInstructions}
           } catch (error) {
             logError(error)
             return null

@@ -5,16 +5,14 @@
 import { feature } from 'bun:bundle'
 import {
   clearInvokedSkills,
-  setLastEmittedDate,
-} from '../../bootstrap/state.js'
+  setLastEmittedDate} from '../../bootstrap/state.js'
 import { clearCommandsCache } from '../../commands.js'
 import { getSessionStartDate } from '../../constants/common.js'
 import {
   getGitStatus,
   getSystemContext,
   getUserContext,
-  setSystemPromptInjection,
-} from '../../context.js'
+  setSystemPromptInjection} from '../../context.js'
 import { clearFileSuggestionCaches } from '../../hooks/fileSuggestions.js'
 import { clearAllPendingCallbacks } from '../../hooks/useSwarmPermissionPoller.js'
 import { clearAllDumpState } from '../../services/api/dumpPrompts.js'

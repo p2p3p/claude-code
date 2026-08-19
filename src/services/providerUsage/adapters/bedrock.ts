@@ -28,11 +28,9 @@ export const bedrockAdapter: ProviderUsageAdapter = {
           kind: 'throttle',
           label: 'Throttle',
           utilization: 1 - remaining,
-          ...(Number.isFinite(resetsAt) && resetsAt > 0 ? { resetsAt } : {}),
-        })
+          ...(Number.isFinite(resetsAt) && resetsAt > 0 ? { resetsAt } : {})})
       }
     }
 
     return buckets
-  },
-}
+  }}

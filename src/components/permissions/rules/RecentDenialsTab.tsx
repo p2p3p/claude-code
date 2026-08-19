@@ -1,3 +1,4 @@
+import { t } from '../../../utils/i18n/index.js';
 import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 // eslint-disable-next-line custom-rules/prefer-use-keybindings -- 'r' is a view-specific key, not a global keybinding
@@ -66,12 +67,12 @@ export function RecentDenialsTab({ onHeaderFocusChange, onStateChange }: Props):
   );
 
   if (denials.length === 0) {
-    return <Text dimColor>No recent denials. Commands denied by the auto mode classifier will appear here.</Text>;
+    return <Text dimColor>{t('recentDenials.empty')}</Text>;
   }
 
   const options = denials.map((d, idx) => {
     const isApproved = approved.has(idx);
-    const suffix = retry.has(idx) ? ' (retry)' : '';
+    const suffix = retry.has(idx) ? t('recentDenials.retry') : '';
     return {
       label: (
         <Text>
@@ -80,13 +81,12 @@ export function RecentDenialsTab({ onHeaderFocusChange, onStateChange }: Props):
           <Text dimColor>{suffix}</Text>
         </Text>
       ),
-      value: String(idx),
-    };
+      value: String(idx)};
   });
 
   return (
     <Box flexDirection="column">
-      <Text>Commands recently denied by the auto mode classifier.</Text>
+      <Text>{t('permission.recentDenials')}</Text>
       <Box marginTop={1}>
         <Select
           options={options}

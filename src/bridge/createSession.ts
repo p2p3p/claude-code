@@ -40,8 +40,7 @@ export async function createBridgeSession({
   signal,
   baseUrl: baseUrlOverride,
   getAccessToken,
-  permissionMode,
-}: {
+  permissionMode}: {
   environmentId: string
   title?: string
   events: SessionEvent[]
@@ -92,16 +91,13 @@ export async function createBridgeSession({
       gitSource = {
         type: 'git_repository',
         url: `https://${host}/${owner}/${name}`,
-        revision,
-      }
+        revision}
       gitOutcome = {
         type: 'git_repository',
         git_info: {
           type: 'github',
           repo: `${owner}/${name}`,
-          branches: [`claude/${branch || 'task'}`],
-        },
-      }
+          branches: [`claude/${branch || 'task'}`]}}
     } else {
       // Fallback: try parseGitHubRepository for owner/repo format
       const ownerRepo = parseGitHubRepository(gitRepoUrl)
@@ -112,16 +108,13 @@ export async function createBridgeSession({
           gitSource = {
             type: 'git_repository',
             url: `https://github.com/${owner}/${name}`,
-            revision,
-          }
+            revision}
           gitOutcome = {
             type: 'git_repository',
             git_info: {
               type: 'github',
               repo: `${owner}/${name}`,
-              branches: [`claude/${branch || 'task'}`],
-            },
-          }
+              branches: [`claude/${branch || 'task'}`]}}
         }
       }
     }
@@ -133,18 +126,15 @@ export async function createBridgeSession({
     session_context: {
       sources: gitSource ? [gitSource] : [],
       outcomes: gitOutcome ? [gitOutcome] : [],
-      model: getMainLoopModel(),
-    },
+      model: getMainLoopModel()},
     environment_id: environmentId,
     source: 'remote-control',
-    ...(permissionMode && { permission_mode: permissionMode }),
-  }
+    ...(permissionMode && { permission_mode: permissionMode })}
 
   const headers = {
     ...getOAuthHeaders(accessToken),
     'anthropic-beta': 'ccr-byoc-2025-07-29',
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   const url = `${baseUrlOverride ?? getOauthConfig().BASE_API_URL}/v1/sessions`
   let response
@@ -152,8 +142,7 @@ export async function createBridgeSession({
     response = await axios.post(url, requestBody, {
       headers,
       signal,
-      validateStatus: s => s < 500,
-    })
+      validateStatus: s => s < 500})
   } catch (err: unknown) {
     logForDebugging(
       `[bridge] Session creation request failed: ${errorMessage(err)}`,
@@ -221,8 +210,7 @@ export async function getBridgeSession(
   const headers = {
     ...getOAuthHeaders(accessToken),
     'anthropic-beta': 'ccr-byoc-2025-07-29',
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   const url = `${opts?.baseUrl ?? getOauthConfig().BASE_API_URL}/v1/sessions/${sessionId}`
   logForDebugging(`[bridge] Fetching session ${sessionId}`)
@@ -301,8 +289,7 @@ export async function archiveBridgeSession(
   const headers = {
     ...getOAuthHeaders(accessToken),
     'anthropic-beta': 'ccr-byoc-2025-07-29',
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   const url = `${opts?.baseUrl ?? getOauthConfig().BASE_API_URL}/v1/sessions/${sessionId}/archive`
   logForDebugging(`[bridge] Archiving session ${sessionId}`)
@@ -313,8 +300,7 @@ export async function archiveBridgeSession(
     {
       headers,
       timeout: opts?.timeoutMs ?? 10_000,
-      validateStatus: s => s < 500,
-    },
+      validateStatus: s => s < 500},
   )
 
   if (response.status === 200) {
@@ -365,8 +351,7 @@ export async function updateBridgeSessionTitle(
   const headers = {
     ...getOAuthHeaders(accessToken),
     'anthropic-beta': 'ccr-byoc-2025-07-29',
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   // Compat gateway only accepts session_* (compat/convert.go:27). v2 callers
   // pass raw cse_*; retag here so all callers can pass whatever they hold.

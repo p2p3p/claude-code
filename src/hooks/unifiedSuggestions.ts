@@ -49,21 +49,18 @@ function createSuggestionFromSource(source: SuggestionSource): SuggestionItem {
       return {
         id: `file-${source.path}`,
         displayText: source.displayText,
-        description: source.description,
-      }
+        description: source.description}
     case 'mcp_resource':
       return {
         id: `mcp-resource-${source.server}__${source.uri}`,
         displayText: source.displayText,
-        description: source.description,
-      }
+        description: source.description}
     case 'agent':
       return {
         id: `agent-${source.agentType}`,
         displayText: source.displayText,
         description: source.description,
-        color: source.color,
-      }
+        color: source.color}
   }
 }
 
@@ -89,8 +86,7 @@ function generateAgentSuggestions(
       displayText: `${agent.agentType} (agent)`,
       description: truncateDescription(agent.whenToUse),
       agentType: agent.agentType,
-      color: getAgentColor(agent.agentType),
-    }))
+      color: getAgentColor(agent.agentType)}))
 
     if (!query) {
       return agentSources
@@ -130,8 +126,7 @@ export async function generateUnifiedSuggestions(
       description: suggestion.description,
       path: suggestion.displayText, // Use displayText as path for files
       filename: basename(suggestion.displayText),
-      score: (suggestion.metadata as { score?: number } | undefined)?.score,
-    }),
+      score: (suggestion.metadata as { score?: number } | undefined)?.score}),
   )
 
   const mcpSources: McpResourceSuggestionSource[] = Object.values(mcpResources)
@@ -144,8 +139,7 @@ export async function generateUnifiedSuggestions(
       ),
       server: resource.server,
       uri: resource.uri,
-      name: resource.name || resource.uri,
-    }))
+      name: resource.name || resource.uri}))
 
   if (!query) {
     const allSources = [...fileSources, ...mcpSources, ...agentSources]
@@ -180,15 +174,13 @@ export async function generateUnifiedSuggestions(
         { name: 'server', weight: 1 },
         { name: 'description', weight: 1 },
         { name: 'agentType', weight: 3 },
-      ],
-    })
+      ]})
 
     const fuseResults = fuse.search(query, { limit: MAX_UNIFIED_SUGGESTIONS })
     for (const result of fuseResults) {
       scoredResults.push({
         source: result.item,
-        score: result.score ?? 0.5,
-      })
+        score: result.score ?? 0.5})
     }
   }
 

@@ -25,8 +25,7 @@ import {
   addBetaToolResultAttributes,
   isBetaTracingEnabled,
   type LLMRequestNewContext,
-  truncateContent,
-} from './betaSessionTracing.js'
+  truncateContent} from './betaSessionTracing.js'
 import {
   endInteractionPerfettoSpan,
   endLLMRequestPerfettoSpan,
@@ -36,8 +35,7 @@ import {
   startInteractionPerfettoSpan,
   startLLMRequestPerfettoSpan,
   startToolPerfettoSpan,
-  startUserInputPerfettoSpan,
-} from './perfettoTracing.js'
+  startUserInputPerfettoSpan} from './perfettoTracing.js'
 
 // Re-export for callers
 export type { Span }
@@ -162,8 +160,7 @@ function createSpanAttributes(
   const attributes: Record<string, string | number | boolean> = {
     ...baseAttributes,
     'span.type': spanType,
-    ...customAttributes,
-  }
+    ...customAttributes}
 
   return attributes
 }
@@ -190,8 +187,7 @@ export function startInteractionSpan(userPrompt: string): Span {
         span: dummySpan,
         startTime: Date.now(),
         attributes: {},
-        perfettoSpanId,
-      }
+        perfettoSpanId}
       activeSpans.set(spanId, new WeakRef(spanContextObj))
       interactionContext.enterWith(spanContextObj)
       return dummySpan
@@ -210,12 +206,10 @@ export function startInteractionSpan(userPrompt: string): Span {
   const attributes = createSpanAttributes('interaction', {
     user_prompt: promptToLog,
     user_prompt_length: userPrompt.length,
-    'interaction.sequence': interactionSequence,
-  })
+    'interaction.sequence': interactionSequence})
 
   const span = tracer.startSpan('claude_code.interaction', {
-    attributes,
-  })
+    attributes})
 
   // Add experimental attributes (new_context)
   addBetaInteractionAttributes(span, userPrompt)
@@ -225,8 +219,7 @@ export function startInteractionSpan(userPrompt: string): Span {
     span,
     startTime: Date.now(),
     attributes,
-    perfettoSpanId,
-  }
+    perfettoSpanId}
   activeSpans.set(spanId, new WeakRef(spanContextObj))
 
   interactionContext.enterWith(spanContextObj)
@@ -262,8 +255,7 @@ export function endInteractionSpan(): void {
 
   const duration = Date.now() - spanContext.startTime
   spanContext.span.setAttributes({
-    'interaction.duration_ms': duration,
-  })
+    'interaction.duration_ms': duration})
 
   spanContext.span.end()
   spanContext.ended = true
@@ -295,8 +287,7 @@ export function startLLMRequestSpan(
         span: dummySpan,
         startTime: Date.now(),
         attributes: { model },
-        perfettoSpanId,
-      }
+        perfettoSpanId}
       activeSpans.set(spanId, new WeakRef(spanContextObj))
       strongSpans.set(spanId, spanContextObj)
       return dummySpan
@@ -310,8 +301,7 @@ export function startLLMRequestSpan(
   const attributes = createSpanAttributes('llm_request', {
     model: model,
     'llm_request.context': parentSpanCtx ? 'interaction' : 'standalone',
-    speed: fastMode ? 'fast' : 'normal',
-  })
+    speed: fastMode ? 'fast' : 'normal'})
 
   const ctx = parentSpanCtx
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
@@ -331,8 +321,7 @@ export function startLLMRequestSpan(
     span,
     startTime: Date.now(),
     attributes,
-    perfettoSpanId,
-  }
+    perfettoSpanId}
   activeSpans.set(spanId, new WeakRef(spanContextObj))
   strongSpans.set(spanId, spanContextObj)
 
@@ -415,8 +404,7 @@ export function endLLMRequestSpan(
       success: metadata?.success,
       error: metadata?.error,
       requestSetupMs: metadata?.requestSetupMs,
-      attemptStartTimes: metadata?.attemptStartTimes,
-    })
+      attemptStartTimes: metadata?.attemptStartTimes})
   }
 
   if (!isAnyTracingEnabled()) {
@@ -427,8 +415,7 @@ export function endLLMRequestSpan(
   }
 
   const endAttributes: Record<string, string | number | boolean> = {
-    duration_ms: duration,
-  }
+    duration_ms: duration}
 
   if (metadata) {
     if (metadata.inputTokens !== undefined)
@@ -482,8 +469,7 @@ export function startToolSpan(
         span: dummySpan,
         startTime: Date.now(),
         attributes: { 'span.type': 'tool', tool_name: toolName },
-        perfettoSpanId,
-      }
+        perfettoSpanId}
       activeSpans.set(spanId, new WeakRef(spanContextObj))
       toolContext.enterWith(spanContextObj)
       return dummySpan
@@ -496,8 +482,7 @@ export function startToolSpan(
 
   const attributes = createSpanAttributes('tool', {
     tool_name: toolName,
-    ...toolAttributes,
-  })
+    ...toolAttributes})
 
   const ctx = parentSpanCtx
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
@@ -514,8 +499,7 @@ export function startToolSpan(
     span,
     startTime: Date.now(),
     attributes,
-    perfettoSpanId,
-  }
+    perfettoSpanId}
   activeSpans.set(spanId, new WeakRef(spanContextObj))
 
   toolContext.enterWith(spanContextObj)
@@ -538,8 +522,7 @@ export function startToolBlockedOnUserSpan(): Span {
         span: dummySpan,
         startTime: Date.now(),
         attributes: { 'span.type': 'tool.blocked_on_user' },
-        perfettoSpanId,
-      }
+        perfettoSpanId}
       activeSpans.set(spanId, new WeakRef(spanContextObj))
       strongSpans.set(spanId, spanContextObj)
       return dummySpan
@@ -566,8 +549,7 @@ export function startToolBlockedOnUserSpan(): Span {
     span,
     startTime: Date.now(),
     attributes,
-    perfettoSpanId,
-  }
+    perfettoSpanId}
   activeSpans.set(spanId, new WeakRef(spanContextObj))
   strongSpans.set(spanId, spanContextObj)
 
@@ -592,8 +574,7 @@ export function endToolBlockedOnUserSpan(
   if (blockedSpanContext.perfettoSpanId) {
     endUserInputPerfettoSpan(blockedSpanContext.perfettoSpanId, {
       decision,
-      source,
-    })
+      source})
   }
 
   if (!isAnyTracingEnabled()) {
@@ -605,8 +586,7 @@ export function endToolBlockedOnUserSpan(
 
   const duration = Date.now() - blockedSpanContext.startTime
   const attributes: Record<string, string | number | boolean> = {
-    duration_ms: duration,
-  }
+    duration_ms: duration}
 
   if (decision) {
     attributes['decision'] = decision
@@ -646,8 +626,7 @@ export function startToolExecutionSpan(): Span {
   const spanContextObj: SpanContext = {
     span,
     startTime: Date.now(),
-    attributes,
-  }
+    attributes}
   activeSpans.set(spanId, new WeakRef(spanContextObj))
   strongSpans.set(spanId, spanContextObj)
 
@@ -672,8 +651,7 @@ export function endToolExecutionSpan(metadata?: {
 
   const duration = Date.now() - executionSpanContext.startTime
   const attributes: Record<string, string | number | boolean> = {
-    duration_ms: duration,
-  }
+    duration_ms: duration}
 
   if (metadata) {
     if (metadata.success !== undefined) attributes['success'] = metadata.success
@@ -699,8 +677,7 @@ export function endToolSpan(toolResult?: string, resultTokens?: number): void {
   if (toolSpanContext.perfettoSpanId) {
     endToolPerfettoSpan(toolSpanContext.perfettoSpanId, {
       success: true,
-      resultTokens,
-    })
+      resultTokens})
   }
 
   if (!isAnyTracingEnabled()) {
@@ -714,8 +691,7 @@ export function endToolSpan(toolResult?: string, resultTokens?: number): void {
 
   const duration = Date.now() - toolSpanContext.startTime
   const endAttributes: Record<string, string | number | boolean> = {
-    duration_ms: duration,
-  }
+    duration_ms: duration}
 
   // Add experimental tool result attributes (new_context)
   if (toolResult) {
@@ -798,8 +774,7 @@ export async function executeInSpan<T>(
   const parentSpanCtx = toolContext.getStore() ?? interactionContext.getStore()
 
   const finalAttributes = createSpanAttributes('tool', {
-    ...attributes,
-  })
+    ...attributes})
 
   const ctx = parentSpanCtx
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
@@ -810,8 +785,7 @@ export async function executeInSpan<T>(
   const spanContextObj: SpanContext = {
     span,
     startTime: Date.now(),
-    attributes: finalAttributes,
-  }
+    attributes: finalAttributes}
   activeSpans.set(spanId, new WeakRef(spanContextObj))
   strongSpans.set(spanId, spanContextObj)
 
@@ -858,8 +832,7 @@ export function startHookSpan(
     hook_event: hookEvent,
     hook_name: hookName,
     num_hooks: numHooks,
-    hook_definitions: hookDefinitions,
-  })
+    hook_definitions: hookDefinitions})
 
   const ctx = parentSpanCtx
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
@@ -870,8 +843,7 @@ export function startHookSpan(
   const spanContextObj: SpanContext = {
     span,
     startTime: Date.now(),
-    attributes,
-  }
+    attributes}
   activeSpans.set(spanId, new WeakRef(spanContextObj))
   strongSpans.set(spanId, spanContextObj)
 
@@ -906,8 +878,7 @@ export function endHookSpan(
 
   const duration = Date.now() - spanContext.startTime
   const endAttributes: Record<string, string | number | boolean> = {
-    duration_ms: duration,
-  }
+    duration_ms: duration}
 
   if (metadata) {
     if (metadata.numSuccess !== undefined)

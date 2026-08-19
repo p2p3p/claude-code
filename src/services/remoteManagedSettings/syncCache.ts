@@ -10,17 +10,13 @@
 import { CLAUDE_AI_INFERENCE_SCOPE } from '../../constants/oauth.js'
 import {
   getAnthropicApiKeyWithSource,
-  getClaudeAIOAuthTokens,
-} from '../../utils/auth.js'
+  getClaudeAIOAuthTokens} from '../../utils/auth.js'
 import {
-  getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
-} from '../../utils/model/providers.js'
+  getAPIProvider} from '../../utils/model/providers.js'
 
 import {
   resetSyncCache as resetLeafCache,
-  setEligibility,
-} from './syncCacheState.js'
+  setEligibility} from './syncCacheState.js'
 
 let cached: boolean | undefined
 
@@ -50,12 +46,12 @@ export function isRemoteManagedSettingsEligible(): boolean {
   if (cached !== undefined) return cached
 
   // 3p provider users should not hit the settings endpoint
-  if (getAPIProvider() !== 'firstParty') {
+  if (getAPIProvider() !== 'anthropic') {
     return (cached = setEligibility(false))
   }
 
   // Custom base URL users should not hit the settings endpoint
-  if (!isFirstPartyAnthropicBaseUrl()) {
+  if (!false) {
     return (cached = setEligibility(false))
   }
 
@@ -99,8 +95,7 @@ export function isRemoteManagedSettingsEligible(): boolean {
   // when no API key is available
   try {
     const { key: apiKey } = getAnthropicApiKeyWithSource({
-      skipRetrievingKeyFromApiKeyHelper: true,
-    })
+      skipRetrievingKeyFromApiKeyHelper: true})
     if (apiKey) {
       return (cached = setEligibility(true))
     }

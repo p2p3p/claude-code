@@ -36,8 +36,7 @@ export function ConfigurableShortcutHint({
   fallback,
   description,
   parens,
-  bold,
-}: Props): React.ReactNode {
+  bold}: Props): React.ReactNode {
   const shortcut = useShortcutDisplay(action, context, fallback);
   return <KeyboardShortcutHint shortcut={shortcut} action={description} parens={parens} bold={bold} />;
 }

@@ -162,8 +162,7 @@ export class WindowsTerminalBackend implements PaneBackend {
       title: name,
       mode: 'pane',
       pidFile: this.makePidFile(paneId),
-      status: 'registered',
-    })
+      status: 'registered'})
     return { paneId, isFirstTeammate }
   }
 
@@ -177,8 +176,7 @@ export class WindowsTerminalBackend implements PaneBackend {
       title: name,
       mode: 'window',
       pidFile: this.makePidFile(paneId),
-      status: 'registered',
-    })
+      status: 'registered'})
     return { paneId, isFirstTeammate: false, windowName }
   }
 

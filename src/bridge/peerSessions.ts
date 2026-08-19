@@ -31,8 +31,7 @@ export async function listBridgePeers(): Promise<BridgePeerSession[]> {
       address: `bridge:${compatId}`,
       name: session.name ?? session.kind,
       cwd: session.cwd,
-      pid: session.pid,
-    })
+      pid: session.pid})
   }
 
   return peers
@@ -82,17 +81,14 @@ export async function postInterClaudeMessage(
       {
         type: 'peer_message',
         from,
-        content: message,
-      },
+        content: message},
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'anthropic-version': '2023-06-01',
-        },
+          'anthropic-version': '2023-06-01'},
         timeout: 10_000,
-        validateStatus: (s: number) => s < 500,
-      },
+        validateStatus: (s: number) => s < 500},
     )
 
     if (response.status === 200 || response.status === 204) {

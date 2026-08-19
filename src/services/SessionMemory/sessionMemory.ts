@@ -15,28 +15,23 @@ import type { Tool, ToolUseContext } from '../../Tool.js'
 import { FILE_EDIT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileEditTool/constants.js'
 import {
   FileReadTool,
-  type Output as FileReadToolOutput,
-} from '@claude-code-best/builtin-tools/tools/FileReadTool/FileReadTool.js'
+  type Output as FileReadToolOutput} from '@claude-code-best/builtin-tools/tools/FileReadTool/FileReadTool.js'
 import type { Message } from '../../types/message.js'
 import { count } from '../../utils/array.js'
 import {
   createCacheSafeParams,
   createSubagentContext,
-  runForkedAgent,
-} from '../../utils/forkedAgent.js'
+  runForkedAgent} from '../../utils/forkedAgent.js'
 import { getFsImplementation } from '../../utils/fsOperations.js'
 import {
   type REPLHookContext,
-  registerPostSamplingHook,
-} from '../../utils/hooks/postSamplingHooks.js'
+  registerPostSamplingHook} from '../../utils/hooks/postSamplingHooks.js'
 import {
   createUserMessage,
-  hasToolCallsInLastAssistantTurn,
-} from '../../utils/messages.js'
+  hasToolCallsInLastAssistantTurn} from '../../utils/messages.js'
 import {
   getSessionMemoryDir,
-  getSessionMemoryPath,
-} from '../../utils/permissions/filesystem.js'
+  getSessionMemoryPath} from '../../utils/permissions/filesystem.js'
 import { sequential } from '../../utils/sequential.js'
 import { asSystemPrompt } from '../../utils/systemPromptType.js'
 import { getTokenUsage, tokenCountWithEstimation } from '../../utils/tokens.js'
@@ -44,8 +39,7 @@ import { logEvent } from '../analytics/index.js'
 import { isAutoCompactEnabled } from '../compact/autoCompact.js'
 import {
   buildSessionMemoryUpdatePrompt,
-  loadSessionMemoryTemplate,
-} from './prompts.js'
+  loadSessionMemoryTemplate} from './prompts.js'
 import {
   DEFAULT_SESSION_MEMORY_CONFIG,
   getSessionMemoryConfig,
@@ -59,8 +53,7 @@ import {
   recordExtractionTokenCount,
   type SessionMemoryConfig,
   setLastSummarizedMessageId,
-  setSessionMemoryConfig,
-} from './sessionMemoryUtils.js'
+  setSessionMemoryConfig} from './sessionMemoryUtils.js'
 
 // ============================================================================
 // Feature Gate and Config (Cached - Non-blocking)
@@ -71,8 +64,7 @@ import {
 import { errorMessage, getErrnoCode } from '../../utils/errors.js'
 import {
   getDynamicConfig_CACHED_MAY_BE_STALE,
-  getFeatureValue_CACHED_MAY_BE_STALE,
-} from '../analytics/growthbook.js'
+  getFeatureValue_CACHED_MAY_BE_STALE} from '../analytics/growthbook.js'
 
 /**
  * Check if session memory feature is enabled.
@@ -197,14 +189,12 @@ async function setupSessionMemoryFile(
     await writeFile(memoryPath, '', {
       encoding: 'utf-8',
       mode: 0o600,
-      flag: 'wx',
-    })
+      flag: 'wx'})
     // Only load template if file was just created
     const template = await loadSessionMemoryTemplate()
     await writeFile(memoryPath, template, {
       encoding: 'utf-8',
-      mode: 0o600,
-    })
+      mode: 0o600})
   } catch (e: unknown) {
     const code = getErrnoCode(e)
     if (code !== 'EEXIST') {
@@ -227,8 +217,7 @@ async function setupSessionMemoryFile(
   }
 
   logEvent('tengu_session_memory_file_read', {
-    content_length: currentMemory.length,
-  })
+    content_length: currentMemory.length})
 
   return { memoryPath, currentMemory }
 }
@@ -259,8 +248,7 @@ const initSessionMemoryConfigIfNeeded = memoize((): void => {
       remoteConfig.toolCallsBetweenUpdates &&
       remoteConfig.toolCallsBetweenUpdates > 0
         ? remoteConfig.toolCallsBetweenUpdates
-        : DEFAULT_SESSION_MEMORY_CONFIG.toolCallsBetweenUpdates,
-  }
+        : DEFAULT_SESSION_MEMORY_CONFIG.toolCallsBetweenUpdates}
   setSessionMemoryConfig(config)
 })
 
@@ -328,8 +316,7 @@ const extractSessionMemory = sequential(async function (
     canUseTool: createMemoryFileCanUseTool(memoryPath),
     querySource: 'session_memory',
     forkLabel: 'session_memory',
-    overrides: { readFileState: setupContext.readFileState },
-  })
+    overrides: { readFileState: setupContext.readFileState }})
 
   // Log extraction event for tracking frequency
   // Use the token usage from the last message in the conversation
@@ -344,8 +331,7 @@ const extractSessionMemory = sequential(async function (
       usage?.cache_creation_input_tokens ?? undefined,
     config_min_message_tokens_to_init: config.minimumMessageTokensToInit,
     config_min_tokens_between_update: config.minimumTokensBetweenUpdate,
-    config_tool_calls_between_updates: config.toolCallsBetweenUpdates,
-  })
+    config_tool_calls_between_updates: config.toolCallsBetweenUpdates})
 
   // Record the context size at extraction for tracking minimumTokensBetweenUpdate
   recordExtractionTokenCount(tokenCountWithEstimation(messages))
@@ -369,8 +355,7 @@ export function initSessionMemory(): void {
   // Log initialization state (ant-only to avoid noise in external logs)
   if (process.env.USER_TYPE === 'ant') {
     logEvent('tengu_session_memory_init', {
-      auto_compact_enabled: autoCompactEnabled,
-    })
+      auto_compact_enabled: autoCompactEnabled})
   }
 
   if (!autoCompactEnabled) {
@@ -431,13 +416,11 @@ export async function manuallyExtractSessionMemory(
         userContext,
         systemContext,
         toolUseContext: setupContext,
-        forkContextMessages: messages,
-      },
+        forkContextMessages: messages},
       canUseTool: createMemoryFileCanUseTool(memoryPath),
       querySource: 'session_memory',
       forkLabel: 'session_memory_manual',
-      overrides: { readFileState: setupContext.readFileState },
-    })
+      overrides: { readFileState: setupContext.readFileState }})
 
     // Log manual extraction event
     logEvent('tengu_session_memory_manual_extraction', {})
@@ -452,8 +435,7 @@ export async function manuallyExtractSessionMemory(
   } catch (error) {
     return {
       success: false,
-      error: errorMessage(error),
-    }
+      error: errorMessage(error)}
   } finally {
     markExtractionCompleted()
   }
@@ -482,9 +464,7 @@ export function createMemoryFileCanUseTool(memoryPath: string): CanUseToolFn {
       message: `only ${FILE_EDIT_TOOL_NAME} on ${memoryPath} is allowed`,
       decisionReason: {
         type: 'other' as const,
-        reason: `only ${FILE_EDIT_TOOL_NAME} on ${memoryPath} is allowed`,
-      },
-    }
+        reason: `only ${FILE_EDIT_TOOL_NAME} on ${memoryPath} is allowed`}}
   }
 }
 

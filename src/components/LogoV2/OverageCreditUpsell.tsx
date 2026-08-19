@@ -5,10 +5,10 @@ import { logEvent } from '../../services/analytics/index.js';
 import {
   formatGrantAmount,
   getCachedOverageCreditGrant,
-  refreshOverageCreditGrantCache,
-} from '../../services/api/overageCreditGrant.js';
+  refreshOverageCreditGrantCache} from '../../services/api/overageCreditGrant.js';
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js';
 import { truncate } from '../../utils/format.js';
+import { t } from '../../utils/i18n/index.js';
 import type { FeedConfig } from './Feed.js';
 
 const MAX_IMPRESSIONS = 3;
@@ -67,23 +67,19 @@ export function incrementOverageCreditUpsellSeenCount(): void {
     newCount = (prev.overageCreditUpsellSeenCount ?? 0) + 1;
     return {
       ...prev,
-      overageCreditUpsellSeenCount: newCount,
-    };
+      overageCreditUpsellSeenCount: newCount};
   });
   logEvent('tengu_overage_credit_upsell_shown', { seen_count: newCount });
 }
 
-// Copy from "OC & Bulk Overages copy" doc (#6 — CLI /usage)
 function getUsageText(amount: string): string {
-  return `${amount} in extra usage for third-party apps · /extra-usage`;
+  return t('misc.extraUsage', amount);
 }
 
-// Copy from "OC & Bulk Overages copy" doc (#4 — CLI Welcome screen).
-// Char budgets: title ≤19, subtitle ≤48.
-const FEED_SUBTITLE = 'On us. Works on third-party apps · /extra-usage';
+const FEED_SUBTITLE = t('misc.extraUsageSubtitle');
 
 function getFeedTitle(amount: string): string {
-  return `${amount} in extra usage`;
+  return t('misc.extraUsageTitle', amount);
 }
 
 type Props = { maxWidth?: number; twoLine?: boolean };
@@ -126,13 +122,11 @@ export function OverageCreditUpsell({ maxWidth, twoLine }: Props): React.ReactNo
 export function createOverageCreditFeed(): FeedConfig {
   const info = getCachedOverageCreditGrant();
   const amount = info ? formatGrantAmount(info) : null;
-  const title = amount ? getFeedTitle(amount) : 'extra usage credit';
+  const title = amount ? getFeedTitle(amount) : t('misc.extraUsageCredit');
   return {
     title,
     lines: [],
     customContent: {
       content: <Text dimColor>{FEED_SUBTITLE}</Text>,
-      width: Math.max(title.length, FEED_SUBTITLE.length),
-    },
-  };
+      width: Math.max(title.length, FEED_SUBTITLE.length)}};
 }

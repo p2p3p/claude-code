@@ -21,8 +21,7 @@ import { logError } from '../log.js'
 import {
   jsonParse,
   jsonStringify,
-  writeFileSync_DEPRECATED,
-} from '../slowOperations.js'
+  writeFileSync_DEPRECATED} from '../slowOperations.js'
 import { getPluginsDirectory } from './pluginDirectories.js'
 import {
   type InstalledPlugin,
@@ -31,8 +30,7 @@ import {
   type InstalledPluginsFileV1,
   type InstalledPluginsFileV2,
   type PluginInstallationEntry,
-  type PluginScope,
-} from './schemas.js'
+  type PluginScope} from './schemas.js'
 
 // Type alias for V2 plugins map
 type InstalledPluginsMapV2 = Record<string, PluginInstallationEntry[]>
@@ -46,13 +44,11 @@ import { getHeadForDir } from '../git/gitFilesystem.js'
 import type { EditableSettingSource } from '../settings/constants.js'
 import {
   getSettings_DEPRECATED,
-  getSettingsForSource,
-} from '../settings/settings.js'
+  getSettingsForSource} from '../settings/settings.js'
 import { getPluginById } from './marketplaceManager.js'
 import {
   parsePluginIdentifier,
-  settingSourceToScope,
-} from './pluginIdentifier.js'
+  settingSourceToScope} from './pluginIdentifier.js'
 import { getPluginCachePath, getVersionedCachePath } from './pluginLoader.js'
 
 // Migration state to prevent running migration multiple times per session
@@ -158,8 +154,7 @@ export function migrateToSinglePluginFile(): void {
 
       writeFileSync_DEPRECATED(mainFilePath, jsonStringify(v2Data, null, 2), {
         encoding: 'utf-8',
-        flush: true,
-      })
+        flush: true})
       logForDebugging(
         `Converted installed_plugins.json from V1 to V2 format (${Object.keys(v1Data.plugins).length} plugins)`,
       )
@@ -173,8 +168,7 @@ export function migrateToSinglePluginFile(): void {
   } catch (error) {
     const errorMsg = errorMessage(error)
     logForDebugging(`Failed to migrate plugin files: ${errorMsg}`, {
-      level: 'error',
-    })
+      level: 'error'})
     logError(toError(error))
     // Mark as completed to avoid retrying failed migration
     migrationCompleted = true
@@ -239,8 +233,7 @@ function cleanupLegacyCache(v2Data: InstalledPluginsFileV2): void {
   } catch (error) {
     const errorMsg = errorMessage(error)
     logForDebugging(`Failed to clean up legacy cache: ${errorMsg}`, {
-      level: 'warn',
-    })
+      level: 'warn'})
   }
 }
 
@@ -296,8 +289,7 @@ function migrateV1ToV2(v1Data: InstalledPluginsFileV1): InstalledPluginsFileV2 {
         version: plugin.version,
         installedAt: plugin.installedAt,
         lastUpdated: plugin.lastUpdated,
-        gitCommitSha: plugin.gitCommitSha,
-      },
+        gitCommitSha: plugin.gitCommitSha},
     ]
   }
 
@@ -377,8 +369,7 @@ function saveInstalledPluginsV2(data: InstalledPluginsFileV2): void {
     const jsonContent = jsonStringify(data, null, 2)
     writeFileSync_DEPRECATED(filePath, jsonContent, {
       encoding: 'utf-8',
-      flush: true,
-    })
+      flush: true})
 
     // Update cache
     installedPluginsCacheV2 = data
@@ -427,8 +418,7 @@ export function addPluginInstallation(
     installedAt: metadata.installedAt || new Date().toISOString(),
     lastUpdated: new Date().toISOString(),
     gitCommitSha: metadata.gitCommitSha,
-    ...(projectPath && { projectPath }),
-  }
+    ...(projectPath && { projectPath })}
 
   if (existingIndex >= 0) {
     installations[existingIndex] = newEntry
@@ -517,8 +507,7 @@ export function loadInstalledPluginsFromDisk(): InstalledPluginsFileV2 {
   } catch (error) {
     const errorMsg = errorMessage(error)
     logForDebugging(`Failed to load installed plugins from disk: ${errorMsg}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return { version: 2, plugins: {} }
   }
 }
@@ -569,8 +558,7 @@ export function updateInstallationPathOnDisk(
     // Write to single file (V2 format with version=2)
     writeFileSync_DEPRECATED(filePath, jsonStringify(diskData, null, 2), {
       encoding: 'utf-8',
-      flush: true,
-    })
+      flush: true})
 
     // Clear cache since disk changed, but do NOT update inMemoryInstalledPlugins
     installedPluginsCacheV2 = null
@@ -686,8 +674,7 @@ export function getPendingUpdatesDetails(): Array<{
           pluginId,
           scope: diskEntry.scope,
           oldVersion: memoryEntry.version || 'unknown',
-          newVersion: diskEntry.version || 'unknown',
-        })
+          newVersion: diskEntry.version || 'unknown'})
       }
     }
   }
@@ -885,8 +872,7 @@ export function addInstalledPlugin(
     installedAt: metadata.installedAt,
     lastUpdated: metadata.lastUpdated,
     gitCommitSha: metadata.gitCommitSha,
-    ...(projectPath && { projectPath }),
-  }
+    ...(projectPath && { projectPath })}
 
   // Get or create array for this plugin (preserves other scope installations)
   const installations = v2Data.plugins[pluginId] || []
@@ -939,8 +925,7 @@ export function removeInstalledPlugin(
         installedAt: firstInstall.installedAt || new Date().toISOString(),
         lastUpdated: firstInstall.lastUpdated,
         installPath: firstInstall.installPath,
-        gitCommitSha: firstInstall.gitCommitSha,
-      }
+        gitCommitSha: firstInstall.gitCommitSha}
     : undefined
 
   delete v2Data.plugins[pluginId]
@@ -1123,8 +1108,7 @@ export async function migrateFromEnabledPlugins(): Promise<void> {
       const scope = settingSourceToScope(source)
       pluginScopeFromSettings.set(pluginId, {
         scope,
-        projectPath: scope === 'user' ? undefined : projectPath,
-      })
+        projectPath: scope === 'user' ? undefined : projectPath})
     }
   }
 
@@ -1244,9 +1228,7 @@ export async function migrateFromEnabledPlugins(): Promise<void> {
             lastUpdated: now,
             gitCommitSha,
             ...(scopeInfo.projectPath && {
-              projectPath: scopeInfo.projectPath,
-            }),
-          },
+              projectPath: scopeInfo.projectPath})},
         ]
 
         addedCount++

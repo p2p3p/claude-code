@@ -3,8 +3,7 @@
 import type { SDKMessage } from '../entrypoints/agentSdkTypes.js'
 import type {
   SDKControlPermissionRequest,
-  StdoutMessage,
-} from '../entrypoints/sdk/controlTypes.js'
+  StdoutMessage} from '../entrypoints/sdk/controlTypes.js'
 import type { RemotePermissionResponse } from '../remote/RemoteSessionManager.js'
 import { logForDebugging } from '../utils/debug.js'
 import { jsonParse, jsonStringify } from '../utils/slowOperations.js'
@@ -54,8 +53,7 @@ export class DirectConnectSessionManager {
     }
     // Bun's WebSocket supports headers option but the DOM typings don't
     this.ws = new WebSocket(this.config.wsUrl, {
-      headers,
-    } as unknown as string[])
+      headers} as unknown as string[])
 
     this.ws.addEventListener('open', () => {
       this.callbacks.onConnected?.()
@@ -132,11 +130,9 @@ export class DirectConnectSessionManager {
       type: 'user',
       message: {
         role: 'user',
-        content: content,
-      },
+        content: content},
       parent_tool_use_id: null,
-      session_id: '',
-    })
+      session_id: ''})
     this.ws.send(message)
     return true
   }
@@ -159,10 +155,7 @@ export class DirectConnectSessionManager {
           behavior: result.behavior,
           ...(result.behavior === 'allow'
             ? { updatedInput: result.updatedInput }
-            : { message: result.message }),
-        },
-      },
-    })
+            : { message: result.message })}}})
     this.ws.send(response)
   }
 
@@ -179,9 +172,7 @@ export class DirectConnectSessionManager {
       type: 'control_request',
       request_id: crypto.randomUUID(),
       request: {
-        subtype: 'interrupt',
-      },
-    })
+        subtype: 'interrupt'}})
     this.ws.send(request)
   }
 
@@ -194,9 +185,7 @@ export class DirectConnectSessionManager {
       response: {
         subtype: 'error',
         request_id: requestId,
-        error,
-      },
-    })
+        error}})
     this.ws.send(response)
   }
 

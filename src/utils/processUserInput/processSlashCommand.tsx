@@ -10,8 +10,7 @@ import {
   getCommand,
   getCommandName,
   hasCommand,
-  type PromptCommand,
-} from 'src/commands.js';
+  type PromptCommand} from 'src/commands.js';
 import { NO_CONTENT_MESSAGE } from 'src/constants/messages.js';
 import type { SetToolJSXFn, ToolUseContext } from 'src/Tool.js';
 import type {
@@ -20,8 +19,7 @@ import type {
   Message,
   NormalizedUserMessage,
   ProgressMessage,
-  UserMessage,
-} from 'src/types/message.js';
+  UserMessage} from 'src/types/message.js';
 import type { QueuedCommand } from 'src/types/textInputTypes.js';
 import { addInvokedSkill, getSessionId } from '../../bootstrap/state.js';
 import { COMMAND_MESSAGE_TAG, COMMAND_NAME_TAG } from '../../constants/xml.js';
@@ -29,8 +27,7 @@ import type { CanUseToolFn } from '../../hooks/useCanUseTool.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-  logEvent,
-} from '../../services/analytics/index.js';
+  logEvent} from '../../services/analytics/index.js';
 import { getDumpPromptsPath } from '../../services/api/dumpPrompts.js';
 import { buildPostCompactMessages } from '../../services/compact/compact.js';
 import { resetMicrocompactState } from '../../services/compact/microCompact.js';
@@ -62,8 +59,7 @@ import {
   isCompactBoundaryMessage,
   isSystemLocalCommandMessage,
   normalizeMessages,
-  prepareUserContent,
-} from '../messages.js';
+  prepareUserContent} from '../messages.js';
 import type { ModelAlias } from '../model/aliases.js';
 import { parseToolListFromCLI } from '../permissions/permissionSetup.js';
 import { hasPermissionsToUseTool } from '../permissions/permissions.js';
@@ -125,11 +121,8 @@ async function executeForkedSlashCommand(
     ...(command.pluginInfo && {
       _PROTO_plugin_name: command.pluginInfo.pluginManifest.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
       ...(pluginMarketplace && {
-        _PROTO_marketplace_name: pluginMarketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-      }),
-      ...buildPluginCommandTelemetryFields(command.pluginInfo),
-    }),
-  });
+        _PROTO_marketplace_name: pluginMarketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
+      ...buildPluginCommandTelemetryFields(command.pluginInfo)})});
 
   const { skillContent, modifiedGetAppState, baseAgent, promptMessages } = await prepareForkedCommandContext(
     command,
@@ -198,8 +191,7 @@ async function executeForkedSlashCommand(
         priority: 'later',
         isMeta: true,
         skipSlashCommands: true,
-        workload: spawnTimeWorkload,
-      });
+        workload: spawnTimeWorkload});
     const finalizeDeferredAutonomyRunCompleted = async (): Promise<void> => {
       if (!autonomy?.runId) {
         return;
@@ -208,8 +200,7 @@ async function executeForkedSlashCommand(
         runId: autonomy.runId,
         rootDir: autonomy.rootDir,
         priority: 'later',
-        workload: spawnTimeWorkload,
-      });
+        workload: spawnTimeWorkload});
       for (const nextCommand of nextCommands) {
         enqueue(nextCommand);
       }
@@ -221,8 +212,7 @@ async function executeForkedSlashCommand(
       await finalizeAutonomyRunFailed({
         runId: autonomy.runId,
         rootDir: autonomy.rootDir,
-        error: error instanceof Error ? error.message : String(error),
-      });
+        error: error instanceof Error ? error.message : String(error)});
     };
 
     void (async () => {
@@ -247,15 +237,13 @@ async function executeForkedSlashCommand(
         toolUseContext: {
           ...context,
           getAppState: modifiedGetAppState,
-          abortController: bgAbortController,
-        },
+          abortController: bgAbortController},
         canUseTool,
         isAsync: true,
         querySource: 'agent:custom',
         model: command.model as ModelAlias | undefined,
         availableTools: freshTools,
-        override: { agentId },
-      })) {
+        override: { agentId }})) {
         agentMessages.push(message);
       }
       const resultText = extractResultText(agentMessages, 'Command completed');
@@ -288,8 +276,7 @@ async function executeForkedSlashCommand(
       messages: [],
       shouldQuery: false,
       command,
-      deferAutonomyCompletion: Boolean(autonomy?.runId),
-    };
+      deferAutonomyCompletion: Boolean(autonomy?.runId)};
   }
 
   // Collect messages from the forked agent
@@ -309,13 +296,11 @@ async function executeForkedSlashCommand(
         message,
         type: 'agent_progress',
         prompt: skillContent,
-        agentId,
-      },
+        agentId},
       parentToolUseID,
       toolUseID: `${parentToolUseID}-${toolUseCounter}`,
       timestamp: new Date().toISOString(),
-      uuid: randomUUID(),
-    };
+      uuid: randomUUID()};
   };
 
   // Helper to update progress display using agent progress UI
@@ -323,12 +308,10 @@ async function executeForkedSlashCommand(
     setToolJSX({
       jsx: renderToolUseProgressMessage(progressMessages, {
         tools: context.options.tools,
-        verbose: false,
-      }),
+        verbose: false}),
       shouldHidePromptInput: false,
       shouldContinueAnimation: true,
-      showSpinner: true,
-    });
+      showSpinner: true});
   };
 
   // Show initial "Initializing…" state
@@ -341,14 +324,12 @@ async function executeForkedSlashCommand(
       promptMessages,
       toolUseContext: {
         ...context,
-        getAppState: modifiedGetAppState,
-      },
+        getAppState: modifiedGetAppState},
       canUseTool,
       isAsync: false,
       querySource: 'agent:custom',
       model: command.model as ModelAlias | undefined,
-      availableTools: context.options.tools,
-    })) {
+      availableTools: context.options.tools})) {
       agentMessages.push(message);
       const normalizedNew = normalizeMessages([message]);
 
@@ -395,20 +376,16 @@ async function executeForkedSlashCommand(
     createUserMessage({
       content: prepareUserContent({
         inputString: `/${getCommandName(command)} ${args}`.trim(),
-        precedingInputBlocks,
-      }),
-    }),
+        precedingInputBlocks})}),
     createUserMessage({
-      content: `<local-command-stdout>\n${resultText}\n</local-command-stdout>`,
-    }),
+      content: `<local-command-stdout>\n${resultText}\n</local-command-stdout>`}),
   ];
 
   return {
     messages,
     shouldQuery: false,
     command,
-    resultText,
-  };
+    resultText};
 }
 
 /**
@@ -447,13 +424,10 @@ export async function processSlashCommand(
         createUserMessage({
           content: prepareUserContent({
             inputString: errorMessage,
-            precedingInputBlocks,
-          }),
-        }),
+            precedingInputBlocks})}),
       ],
       shouldQuery: false,
-      resultText: errorMessage,
-    };
+      resultText: errorMessage};
   }
 
   const { commandName, args: parsedArgs, isMcp } = parsed;
@@ -473,8 +447,7 @@ export async function processSlashCommand(
     }
     if (looksLikeCommand(commandName) && !isFilePath) {
       logEvent('tengu_input_slash_invalid', {
-        input: commandName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        input: commandName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
       const unknownMessage = `Unknown skill: ${commandName}`;
       return {
@@ -484,16 +457,13 @@ export async function processSlashCommand(
           createUserMessage({
             content: prepareUserContent({
               inputString: unknownMessage,
-              precedingInputBlocks,
-            }),
-          }),
+              precedingInputBlocks})}),
           // gh-32591: preserve args so the user can copy/resubmit without
           // retyping. System warning is UI-only (filtered before API).
           ...(parsedArgs ? [createSystemMessage(`Args from unknown skill: ${parsedArgs}`, 'warning')] : []),
         ],
         shouldQuery: false,
-        resultText: unknownMessage,
-      };
+        resultText: unknownMessage};
     }
 
     const promptId = randomUUID();
@@ -503,18 +473,15 @@ export async function processSlashCommand(
     void logOTelEvent('user_prompt', {
       prompt_length: String(inputString.length),
       prompt: redactIfDisabled(inputString),
-      'prompt.id': promptId,
-    });
+      'prompt.id': promptId});
     return {
       messages: [
         createUserMessage({
           content: prepareUserContent({ inputString, precedingInputBlocks }),
-          uuid: uuid,
-        }),
+          uuid: uuid}),
         ...attachmentMessages,
       ],
-      shouldQuery: true,
-    };
+      shouldQuery: true};
   }
 
   // Track slash command usage for feature discovery
@@ -529,8 +496,7 @@ export async function processSlashCommand(
     resultText,
     nextInput,
     submitNextInput,
-    deferAutonomyCompletion,
-  } = await getMessagesForSlashCommand(
+    deferAutonomyCompletion} = await getMessagesForSlashCommand(
     commandName,
     parsedArgs,
     setToolJSX,
@@ -546,8 +512,7 @@ export async function processSlashCommand(
   // Local slash commands that skip messages
   if (newMessages.length === 0) {
     const eventData: Record<string, boolean | number | undefined> = {
-      input: sanitizedCommandName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    };
+      input: sanitizedCommandName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS};
 
     // Add plugin metadata if this is a plugin command
     if (returnedCommand.type === 'prompt' && returnedCommand.pluginInfo) {
@@ -579,16 +544,11 @@ export async function processSlashCommand(
       ...(process.env.USER_TYPE === 'ant' && {
         skill_name: commandName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         ...(returnedCommand.type === 'prompt' && {
-          skill_source: returnedCommand.source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }),
+          skill_source: returnedCommand.source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
         ...(returnedCommand.loadedFrom && {
-          skill_loaded_from: returnedCommand.loadedFrom as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }),
+          skill_loaded_from: returnedCommand.loadedFrom as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
         ...(returnedCommand.kind && {
-          skill_kind: returnedCommand.kind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        }),
-      }),
-    });
+          skill_kind: returnedCommand.kind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})})});
     return {
       messages: [],
       shouldQuery: false,
@@ -596,8 +556,7 @@ export async function processSlashCommand(
       model,
       nextInput,
       submitNextInput,
-      deferAutonomyCompletion,
-    };
+      deferAutonomyCompletion};
   }
 
   // For invalid commands, preserve both the user message and error
@@ -613,8 +572,7 @@ export async function processSlashCommand(
 
     if (!looksLikeFilePath) {
       logEvent('tengu_input_slash_invalid', {
-        input: commandName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        input: commandName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     }
 
     return {
@@ -622,14 +580,12 @@ export async function processSlashCommand(
       shouldQuery: messageShouldQuery,
       allowedTools,
 
-      model,
-    };
+      model};
   }
 
   // A valid command
   const eventData: Record<string, boolean | number | undefined> = {
-    input: sanitizedCommandName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  };
+    input: sanitizedCommandName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS};
 
   // Add plugin metadata if this is a plugin command
   if (returnedCommand.type === 'prompt' && returnedCommand.pluginInfo) {
@@ -658,16 +614,11 @@ export async function processSlashCommand(
     ...(process.env.USER_TYPE === 'ant' && {
       skill_name: commandName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       ...(returnedCommand.type === 'prompt' && {
-        skill_source: returnedCommand.source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      }),
+        skill_source: returnedCommand.source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
       ...(returnedCommand.loadedFrom && {
-        skill_loaded_from: returnedCommand.loadedFrom as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      }),
+        skill_loaded_from: returnedCommand.loadedFrom as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}),
       ...(returnedCommand.kind && {
-        skill_kind: returnedCommand.kind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      }),
-    }),
-  });
+        skill_kind: returnedCommand.kind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})})});
 
   // Check if this is a compact result which handle their own synthetic caveat message ordering
   const isCompactResult = newMessages.length > 0 && newMessages[0] && isCompactBoundaryMessage(newMessages[0]);
@@ -684,8 +635,7 @@ export async function processSlashCommand(
     resultText,
     nextInput,
     submitNextInput,
-    deferAutonomyCompletion,
-  };
+    deferAutonomyCompletion};
 }
 
 async function getMessagesForSlashCommand(
@@ -715,16 +665,12 @@ async function getMessagesForSlashCommand(
         createUserMessage({
           content: prepareUserContent({
             inputString: `/${commandName}`,
-            precedingInputBlocks,
-          }),
-        }),
+            precedingInputBlocks})}),
         createUserMessage({
-          content: `This skill can only be invoked by Claude, not directly by users. Ask Claude to use the "${commandName}" skill for you.`,
-        }),
+          content: `This skill can only be invoked by Claude, not directly by users. Ask Claude to use the "${commandName}" skill for you.`}),
       ],
       shouldQuery: false,
-      command,
-    };
+      command};
   }
 
   try {
@@ -751,8 +697,7 @@ async function getMessagesForSlashCommand(
                 shouldQuery: false,
                 command,
                 nextInput: options?.nextInput,
-                submitNextInput: options?.submitNextInput,
-              });
+                submitNextInput: options?.submitNextInput});
               return;
             }
 
@@ -790,23 +735,18 @@ async function getMessagesForSlashCommand(
                       createUserMessage({
                         content: prepareUserContent({
                           inputString: formatCommandInput(command, breadcrumbArgs),
-                          precedingInputBlocks,
-                        }),
-                      }),
+                          precedingInputBlocks})}),
                       result
                         ? createUserMessage({
-                            content: `<local-command-stdout>${result}</local-command-stdout>`,
-                          })
+                            content: `<local-command-stdout>${result}</local-command-stdout>`})
                         : createUserMessage({
-                            content: `<local-command-stdout>${NO_CONTENT_MESSAGE}</local-command-stdout>`,
-                          }),
+                            content: `<local-command-stdout>${NO_CONTENT_MESSAGE}</local-command-stdout>`}),
                       ...metaMessages,
                     ],
               shouldQuery: options?.shouldQuery ?? false,
               command,
               nextInput: options?.nextInput,
-              submitNextInput: options?.submitNextInput,
-            });
+              submitNextInput: options?.submitNextInput});
           };
 
           void command
@@ -818,8 +758,7 @@ async function getMessagesForSlashCommand(
                 void resolve({
                   messages: [],
                   shouldQuery: false,
-                  command,
-                });
+                  command});
                 return;
               }
               // Guard: if onDone fired during mod.call() (early-exit path
@@ -835,8 +774,7 @@ async function getMessagesForSlashCommand(
                 shouldHidePromptInput: true,
                 showSpinner: false,
                 isLocalJSXCommand: true,
-                isImmediate: command.immediate === true,
-              });
+                isImmediate: command.immediate === true});
             })
             .catch(e => {
               // If load()/call() throws and onDone never fired, the outer
@@ -848,8 +786,7 @@ async function getMessagesForSlashCommand(
               setToolJSX({
                 jsx: null,
                 shouldHidePromptInput: false,
-                clearLocalJSX: true,
-              });
+                clearLocalJSX: true});
               void resolve({ messages: [], shouldQuery: false, command });
             });
         });
@@ -859,9 +796,7 @@ async function getMessagesForSlashCommand(
         const userMessage = createUserMessage({
           content: prepareUserContent({
             inputString: formatCommandInput(command, displayArgs),
-            precedingInputBlocks,
-          }),
-        });
+            precedingInputBlocks})});
 
         try {
           const syntheticCaveatMessage = createSyntheticUserCaveatMessage();
@@ -872,8 +807,7 @@ async function getMessagesForSlashCommand(
             return {
               messages: [],
               shouldQuery: false,
-              command,
-            };
+              command};
           }
 
           // Use discriminated union to handle different result types
@@ -892,15 +826,13 @@ async function getMessagesForSlashCommand(
                       // Since we're creating a bunch of synthetic messages for compact, it's important to set
                       // the timestamp of the last message to be slightly after the current time
                       // This is mostly important for sdk / -p mode
-                      timestamp: new Date(Date.now() + 100).toISOString(),
-                    }),
+                      timestamp: new Date(Date.now() + 100).toISOString()}),
                   ]
                 : []),
             ];
             const compactionResultWithSlashMessages = {
               ...result.compactionResult,
-              messagesToKeep: [...(result.compactionResult.messagesToKeep ?? []), ...slashCommandMessages],
-            };
+              messagesToKeep: [...(result.compactionResult.messagesToKeep ?? []), ...slashCommandMessages]};
             // Reset microcompact state since full compact replaces all
             // messages — old tool IDs are no longer relevant. Budget state
             // (on toolUseContext) needs no reset: stale entries are inert
@@ -909,8 +841,7 @@ async function getMessagesForSlashCommand(
             return {
               messages: buildPostCompactMessages(compactionResultWithSlashMessages) as AssistantMessage[],
               shouldQuery: false,
-              command,
-            };
+              command};
           }
 
           // Text result — use system message so it doesn't render as a user bubble
@@ -921,8 +852,7 @@ async function getMessagesForSlashCommand(
             ],
             shouldQuery: false,
             command,
-            resultText: result.value,
-          };
+            resultText: result.value};
         } catch (e) {
           logError(e);
           return {
@@ -931,8 +861,7 @@ async function getMessagesForSlashCommand(
               createCommandInputMessage(`<local-command-stderr>${String(e)}</local-command-stderr>`),
             ],
             shouldQuery: false,
-            command,
-          };
+            command};
         }
       }
       case 'prompt': {
@@ -966,30 +895,23 @@ async function getMessagesForSlashCommand(
                 createUserMessage({
                   content: prepareUserContent({
                     inputString: formatCommandInput(command, args),
-                    precedingInputBlocks,
-                  }),
-                }),
+                    precedingInputBlocks})}),
                 createUserInterruptionMessage({ toolUse: false }),
               ],
               shouldQuery: false,
-              command,
-            };
+              command};
           }
           return {
             messages: [
               createUserMessage({
                 content: prepareUserContent({
                   inputString: formatCommandInput(command, args),
-                  precedingInputBlocks,
-                }),
-              }),
+                  precedingInputBlocks})}),
               createUserMessage({
-                content: `<local-command-stderr>${String(e)}</local-command-stderr>`,
-              }),
+                content: `<local-command-stderr>${String(e)}</local-command-stderr>`}),
             ],
             shouldQuery: false,
-            command,
-          };
+            command};
         }
       }
     }
@@ -1000,13 +922,10 @@ async function getMessagesForSlashCommand(
           createUserMessage({
             content: prepareUserContent({
               inputString: e.message,
-              precedingInputBlocks,
-            }),
-          }),
+              precedingInputBlocks})}),
         ],
         shouldQuery: false,
-        command,
-      };
+        command};
     }
     throw e;
   }
@@ -1123,8 +1042,7 @@ async function getMessagesForPromptSlashCommand(
       shouldQuery: true,
       model: command.model,
       effort: command.effort,
-      command,
-    };
+      command};
   }
 
   const result = await command.getPromptForCommand(args, context);
@@ -1187,18 +1105,15 @@ async function getMessagesForPromptSlashCommand(
   const messages = [
     createUserMessage({
       content: metadata,
-      uuid,
-    }),
+      uuid}),
     createUserMessage({
       content: mainMessageContent,
-      isMeta: true,
-    }),
+      isMeta: true}),
     ...attachmentMessages,
     createAttachmentMessage({
       type: 'command_permissions',
       allowedTools: additionalAllowedTools,
-      model: command.model,
-    }),
+      model: command.model}),
   ];
 
   return {
@@ -1207,6 +1122,5 @@ async function getMessagesForPromptSlashCommand(
     allowedTools: additionalAllowedTools,
     model: command.model,
     effort: command.effort,
-    command,
-  };
+    command};
 }

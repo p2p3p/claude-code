@@ -29,8 +29,7 @@ function parseUpdates(text: string): ParsedUpdate[] {
       kind: 'resource',
       server: match[1] ?? '',
       target: match[2] ?? '',
-      reason: match[3],
-    });
+      reason: match[3]});
   }
 
   // Match <mcp-polling-update type="tool" server="..." tool="...">
@@ -41,8 +40,7 @@ function parseUpdates(text: string): ParsedUpdate[] {
       kind: 'polling',
       server: match[2] ?? '',
       target: match[3] ?? '',
-      reason: match[4],
-    });
+      reason: match[4]});
   }
 
   return updates;

@@ -68,8 +68,7 @@ export function parseMemoryStoresArgs(args: string): MemoryStoresArgs {
     if (!rest) {
       return {
         action: 'invalid',
-        reason: 'create requires a store name, e.g. create "My Work Store"',
-      }
+        reason: 'create requires a store name, e.g. create "My Work Store"'}
     }
     return { action: 'create', name: rest }
   }
@@ -107,16 +106,14 @@ export function parseMemoryStoresArgs(args: string): MemoryStoresArgs {
       return {
         action: 'invalid',
         reason:
-          'create-memory requires a store id and content, e.g. create-memory ms_123 "The content"',
-      }
+          'create-memory requires a store id and content, e.g. create-memory ms_123 "The content"'}
     }
     const storeId = parts[0]
     const content = parts.slice(1).join(' ')
     if (!content.trim()) {
       return {
         action: 'invalid',
-        reason: 'create-memory requires non-empty content',
-      }
+        reason: 'create-memory requires non-empty content'}
     }
     return { action: 'create-memory', storeId, content: content.trim() }
   }
@@ -128,8 +125,7 @@ export function parseMemoryStoresArgs(args: string): MemoryStoresArgs {
       return {
         action: 'invalid',
         reason:
-          'get-memory requires a store id and memory id, e.g. get-memory ms_123 mem_456',
-      }
+          'get-memory requires a store id and memory id, e.g. get-memory ms_123 mem_456'}
     }
     return { action: 'get-memory', storeId: parts[0], memoryId: parts[1] }
   }
@@ -141,8 +137,7 @@ export function parseMemoryStoresArgs(args: string): MemoryStoresArgs {
       return {
         action: 'invalid',
         reason:
-          'update-memory requires store id, memory id, and content, e.g. update-memory ms_123 mem_456 "New content"',
-      }
+          'update-memory requires store id, memory id, and content, e.g. update-memory ms_123 mem_456 "New content"'}
     }
     const storeId = parts[0]
     const memoryId = parts[1]
@@ -150,15 +145,13 @@ export function parseMemoryStoresArgs(args: string): MemoryStoresArgs {
     if (!content.trim()) {
       return {
         action: 'invalid',
-        reason: 'update-memory requires non-empty content',
-      }
+        reason: 'update-memory requires non-empty content'}
     }
     return {
       action: 'update-memory',
       storeId,
       memoryId,
-      content: content.trim(),
-    }
+      content: content.trim()}
   }
 
   // ── delete-memory ─────────────────────────────────────────────────────────
@@ -168,8 +161,7 @@ export function parseMemoryStoresArgs(args: string): MemoryStoresArgs {
       return {
         action: 'invalid',
         reason:
-          'delete-memory requires a store id and memory id, e.g. delete-memory ms_123 mem_456',
-      }
+          'delete-memory requires a store id and memory id, e.g. delete-memory ms_123 mem_456'}
     }
     return { action: 'delete-memory', storeId: parts[0], memoryId: parts[1] }
   }
@@ -194,14 +186,12 @@ export function parseMemoryStoresArgs(args: string): MemoryStoresArgs {
       return {
         action: 'invalid',
         reason:
-          'redact requires a store id and version id, e.g. redact ms_123 ver_456',
-      }
+          'redact requires a store id and version id, e.g. redact ms_123 ver_456'}
     }
     return { action: 'redact', storeId: parts[0], versionId: parts[1] }
   }
 
   return {
     action: 'invalid',
-    reason: `Unknown sub-command "${subCmd}". ${USAGE}`,
-  }
+    reason: `Unknown sub-command "${subCmd}". ${USAGE}`}
 }

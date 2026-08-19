@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, Text } from '@anthropic/ink';
 import { SandboxManager } from '../../utils/sandbox/sandbox-adapter.js';
 
@@ -20,11 +21,11 @@ export function SandboxDoctorSection(): React.ReactNode {
   }
 
   const statusColor = hasErrors ? ('error' as const) : ('warning' as const);
-  const statusText = hasErrors ? 'Missing dependencies' : 'Available (with warnings)';
+  const statusText = hasErrors ? t('ui.missingDependencies') : t('ui.availableWithWarnings');
 
   return (
     <Box flexDirection="column">
-      <Text bold>Sandbox</Text>
+      <Text bold>{t('sandboxdoctorsection.sandbox')}</Text>
       <Text>
         └ Status: <Text color={statusColor}>{statusText}</Text>
       </Text>
@@ -38,7 +39,7 @@ export function SandboxDoctorSection(): React.ReactNode {
           └ {w}
         </Text>
       ))}
-      {hasErrors && <Text dimColor>└ Run /sandbox for install instructions</Text>}
+      {hasErrors && <Text dimColor>└ {t('sandboxDoctor.runSandbox')}</Text>}
     </Box>
   );
 }

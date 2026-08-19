@@ -6,9 +6,7 @@ export function logUnaryPermissionEvent(
   completion_type: CompletionType,
   {
     assistantMessage: {
-      message: { id: message_id },
-    },
-  }: ToolUseConfirm,
+      message: { id: message_id }}}: ToolUseConfirm,
   event: 'accept' | 'reject',
   hasFeedback?: boolean,
 ): void {
@@ -19,7 +17,5 @@ export function logUnaryPermissionEvent(
       language_name: 'none',
       message_id: message_id!,
       platform: getHostPlatformForAnalytics(),
-      hasFeedback: hasFeedback ?? false,
-    },
-  })
+      hasFeedback: hasFeedback ?? false}})
 }

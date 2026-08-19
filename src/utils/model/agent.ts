@@ -5,8 +5,7 @@ import { applyBedrockRegionPrefix, getBedrockRegionPrefix } from './bedrock.js'
 import {
   getCanonicalName,
   getRuntimeMainLoopModel,
-  parseUserSpecifiedModel,
-} from './model.js'
+  parseUserSpecifiedModel} from './model.js'
 import { getAPIProvider } from './providers.js'
 
 export const AGENT_MODEL_OPTIONS = [...MODEL_ALIASES, 'inherit'] as const
@@ -83,8 +82,7 @@ export function getAgentModel(
     return getRuntimeMainLoopModel({
       permissionMode: permissionMode ?? 'default',
       mainLoopModel: parentModel,
-      exceeds200kTokens: false,
-    })
+      exceeds200kTokens: false})
   }
 
   if (aliasMatchesParentTier(agentModelWithExp, parentModel)) {
@@ -101,7 +99,7 @@ export function getAgentModel(
  *
  * Prevents surprising downgrades: a Vertex user on Opus 4.6 (via /model) who
  * spawns a subagent with `model: opus` should get Opus 4.6, not whatever
- * getDefaultOpusModel() returns for 3P.
+ * getDefaultModel() returns for 3P.
  * See https://github.com/anthropics/claude-code/issues/30815.
  *
  * Only bare family aliases match. `opus[1m]`, `best`, `opusplan` fall through
@@ -136,22 +134,18 @@ export function getAgentModelOptions(): AgentModelOption[] {
     {
       value: 'sonnet',
       label: 'Sonnet',
-      description: 'Balanced performance - best for most agents',
-    },
+      description: 'Balanced performance - best for most agents'},
     {
       value: 'opus',
       label: 'Opus',
-      description: 'Most capable for complex reasoning tasks',
-    },
+      description: 'Most capable for complex reasoning tasks'},
     {
       value: 'haiku',
       label: 'Haiku',
-      description: 'Fast and efficient for simple tasks',
-    },
+      description: 'Fast and efficient for simple tasks'},
     {
       value: 'inherit',
       label: 'Inherit from parent',
-      description: 'Use the same model as the main conversation',
-    },
+      description: 'Use the same model as the main conversation'},
   ]
 }

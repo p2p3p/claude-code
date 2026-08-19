@@ -4,14 +4,13 @@ import {
   type MessageConnection,
   StreamMessageReader,
   StreamMessageWriter,
-  Trace,
-} from 'vscode-jsonrpc/node.js'
+  Trace} from 'vscode-jsonrpc/node.js'
 import type {
   InitializeParams,
   InitializeResult,
-  ServerCapabilities,
-} from 'vscode-languageserver-protocol'
+  ServerCapabilities} from 'vscode-languageserver-protocol'
 import { logForDebugging } from '../../utils/debug.js'
+import { t } from '../../utils/i18n/index.js'
 import { errorMessage } from '../../utils/errors.js'
 import { logError } from '../../utils/log.js'
 import { subprocessEnv } from '../../utils/subprocessEnv.js'
@@ -72,7 +71,7 @@ export function createLSPClient(
 
   function checkStartFailed(): void {
     if (startFailed) {
-      throw startError || new Error(`LSP server ${serverName} failed to start`)
+      throw startError || new Error(t('lspClient.failedToStart', serverName))
     }
   }
 
@@ -100,11 +99,10 @@ export function createLSPClient(
           env: { ...subprocessEnv(), ...options?.env },
           cwd: options?.cwd,
           // Prevent visible console window on Windows (no-op on other platforms)
-          windowsHide: true,
-        })
+          windowsHide: true})
 
         if (!process.stdout || !process.stdin) {
-          throw new Error('LSP server process stdio not available')
+          throw new Error(t('lspClient.stdioNotAvailable'))
         }
 
         // 1.5. Wait for process to successfully spawn before using streams
@@ -217,8 +215,7 @@ export function createLSPClient(
           .trace(Trace.Verbose, {
             log: (message: string) => {
               logForDebugging(`[LSP PROTOCOL ${serverName}] ${message}`)
-            },
-          })
+            }})
           .catch((error: Error) => {
             logForDebugging(
               `Failed to enable tracing for ${serverName}: ${error.message}`,
@@ -255,7 +252,7 @@ export function createLSPClient(
 
     async initialize(params: InitializeParams): Promise<InitializeResult> {
       if (!connection) {
-        throw new Error('LSP client not started')
+        throw new Error(t('lspClient.clientNotStarted'))
       }
 
       checkStartFailed()
@@ -291,13 +288,13 @@ export function createLSPClient(
       params: unknown,
     ): Promise<TResult> {
       if (!connection) {
-        throw new Error('LSP client not started')
+        throw new Error(t('lspClient.clientNotStarted'))
       }
 
       checkStartFailed()
 
       if (!isInitialized) {
-        throw new Error('LSP server not initialized')
+        throw new Error(t('lspClient.serverNotInitialized'))
       }
 
       try {
@@ -315,7 +312,7 @@ export function createLSPClient(
 
     async sendNotification(method: string, params: unknown): Promise<void> {
       if (!connection) {
-        throw new Error('LSP client not started')
+        throw new Error(t('lspClient.clientNotStarted'))
       }
 
       checkStartFailed()
@@ -357,8 +354,7 @@ export function createLSPClient(
         // Queue handler for application when connection is ready (lazy initialization)
         pendingRequestHandlers.push({
           method,
-          handler: handler as (params: unknown) => unknown | Promise<unknown>,
-        })
+          handler: handler as (params: unknown) => unknown | Promise<unknown>})
         logForDebugging(
           `Queued request handler for ${serverName}.${method} (connection not ready)`,
         )
@@ -442,6 +438,5 @@ export function createLSPClient(
       if (shutdownError) {
         throw shutdownError
       }
-    },
-  }
+    }}
 }

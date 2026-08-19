@@ -19,8 +19,7 @@ import { NEVER_SUGGEST } from './dangerousCmdlets.js'
 import {
   getAllCommands,
   type ParsedCommandElement,
-  parsePowerShellCommand,
-} from './parser.js'
+  parsePowerShellCommand} from './parser.js'
 
 /**
  * Extract a static prefix from a single parsed command element.

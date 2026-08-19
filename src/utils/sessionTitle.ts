@@ -15,7 +15,7 @@
 import { z } from 'zod/v4'
 import { getIsNonInteractiveSession } from '../bootstrap/state.js'
 import { logEvent } from '../services/analytics/index.js'
-import { queryHaiku } from '../services/api/claude.js'
+import { queryHaiku } from '../services/api/anthropic/index.js'
 import type { Message } from '../types/message.js'
 import { logForDebugging } from './debug.js'
 import { safeParseJSON } from './json.js'
@@ -97,12 +97,9 @@ export async function generateSessionTitle(
         schema: {
           type: 'object',
           properties: {
-            title: { type: 'string' },
-          },
+            title: { type: 'string' }},
           required: ['title'],
-          additionalProperties: false,
-        },
-      },
+          additionalProperties: false}},
       signal,
       options: {
         querySource: 'generate_session_title',
@@ -112,9 +109,7 @@ export async function generateSessionTitle(
         // session path via useRemoteSession (interactive).
         isNonInteractiveSession: getIsNonInteractiveSession(),
         hasAppendSystemPrompt: false,
-        mcpTools: [],
-      },
-    })
+        mcpTools: []}})
 
     const text = extractTextContent(
       result.message.content as readonly { readonly type: string }[],
@@ -128,8 +123,7 @@ export async function generateSessionTitle(
     return title
   } catch (error) {
     logForDebugging(`generateSessionTitle failed: ${error}`, {
-      level: 'error',
-    })
+      level: 'error'})
     logEvent('tengu_session_title_generated', { success: false })
     return null
   }

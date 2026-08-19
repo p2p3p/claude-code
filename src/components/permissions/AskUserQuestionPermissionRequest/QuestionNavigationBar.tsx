@@ -4,6 +4,7 @@ import { useTerminalSize } from '../../../hooks/useTerminalSize.js';
 import { Box, Text, stringWidth } from '@anthropic/ink';
 import type { Question } from '@claude-code-best/builtin-tools/tools/AskUserQuestionTool/AskUserQuestionTool.js';
 import { truncateToWidth } from '../../../utils/format.js';
+import { t } from '../../../utils/i18n/index.js';
 
 type Props = {
   questions: Question[];
@@ -16,8 +17,7 @@ export function QuestionNavigationBar({
   questions,
   currentQuestionIndex,
   answers,
-  hideSubmitTab = false,
-}: Props): React.ReactNode {
+  hideSubmitTab = false}: Props): React.ReactNode {
   const { columns } = useTerminalSize();
 
   // Calculate the display text for each tab based on available width
@@ -25,7 +25,7 @@ export function QuestionNavigationBar({
     // Calculate fixed width elements
     const leftArrow = '← ';
     const rightArrow = ' →';
-    const submitText = hideSubmitTab ? '' : ` ${figures.tick} Submit `;
+    const submitText = hideSubmitTab ? '' : ` ${figures.tick} ${t('questionNavBar.submit')} `;
     const checkboxWidth = 2; // checkbox + space
     const paddingPerTab = 2; // space before and after each tab text
 
@@ -37,13 +37,13 @@ export function QuestionNavigationBar({
     if (availableForTabs <= 0) {
       // Terminal too narrow, fallback to minimal display
       return questions.map((q: Question, index: number) => {
-        const header = q?.header || `Q${index + 1}`;
+        const header = q?.header || t('questionNavBar.questionPrefix', index + 1);
         return index === currentQuestionIndex ? header.slice(0, 3) : '';
       });
     }
 
     // Calculate ideal width for each tab (checkbox + padding + text)
-    const tabHeaders = questions.map((q: Question, index: number) => q?.header || `Q${index + 1}`);
+    const tabHeaders = questions.map((q: Question, index: number) => q?.header || t('questionNavBar.questionPrefix', index + 1));
     const idealWidths = tabHeaders.map(header => checkboxWidth + paddingPerTab + stringWidth(header));
 
     // Calculate total ideal width
@@ -91,7 +91,7 @@ export function QuestionNavigationBar({
         const isSelected = index === currentQuestionIndex;
         const isAnswered = q?.question && !!answers[q.question];
         const checkbox = isAnswered ? figures.checkboxOn : figures.checkboxOff;
-        const displayText = tabDisplayTexts[index] || q?.header || `Q${index + 1}`;
+        const displayText = tabDisplayTexts[index] || q?.header || t('questionNavBar.questionPrefix', index + 1);
 
         return (
           <Box key={q?.question || `question-${index}`}>
@@ -114,10 +114,10 @@ export function QuestionNavigationBar({
           {currentQuestionIndex === questions.length ? (
             <Text backgroundColor="permission" color="inverseText">
               {' '}
-              {figures.tick} Submit{' '}
+              {figures.tick} {t('questionNavBar.submit')}{' '}
             </Text>
           ) : (
-            <Text> {figures.tick} Submit </Text>
+            <Text> {figures.tick} {t('questionNavBar.submit')} </Text>
           )}
         </Box>
       )}

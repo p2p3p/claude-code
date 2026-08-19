@@ -2,6 +2,7 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 import { spawnSync } from 'child_process'
 import { findGitRoot } from '../utils/git.js'
+import { t } from '../utils/i18n/index.js'
 
 /**
  * `claude up` — run the "# claude up" section from the nearest CLAUDE.md.
@@ -24,7 +25,7 @@ export async function up(): Promise<void> {
       const content = readFileSync(claudeMdPath, 'utf-8')
       upSection = extractUpSection(content)
       if (upSection) {
-        console.log(`Found "# claude up" in ${claudeMdPath}`)
+        console.log(t('cliUp.foundUpSection', claudeMdPath))
         break
       }
     } catch {
@@ -33,32 +34,23 @@ export async function up(): Promise<void> {
   }
 
   if (!upSection) {
-    console.log(
-      'No "# claude up" section found in CLAUDE.md.\n' +
-        'Add a section like:\n\n' +
-        '  # claude up\n' +
-        '  ```bash\n' +
-        '  npm install\n' +
-        '  npm run build\n' +
-        '  ```',
-    )
+    console.log(t('cliUp.noUpSection'))
     return
   }
 
-  console.log('Running:\n')
+  console.log(t('cliUp.running'))
   console.log(upSection)
   console.log()
 
   const result = spawnSync('bash', ['-c', upSection], {
     cwd,
-    stdio: 'inherit',
-  })
+    stdio: 'inherit'})
 
   if (result.status !== 0) {
-    console.error(`\nclaude up failed with exit code ${result.status}`)
+    console.error(t('cliUp.failedExitCode', result.status))
     process.exitCode = result.status ?? 1
   } else {
-    console.log('\nclaude up completed successfully.')
+    console.log(t('cliUp.completed'))
   }
 }
 

@@ -7,8 +7,7 @@ const OPEN_TO_CLOSE: Record<string, string> = {
   '{': '}',
   '[': ']',
   '(': ')',
-  "'": "'",
-}
+  "'": "'"}
 
 /**
  * Find keyword positions, skipping occurrences that are clearly not a

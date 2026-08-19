@@ -41,20 +41,17 @@ export type {
   GroupedToolUseMessage,
   CollapsibleMessage,
   HookResultMessage,
-  SystemThinkingMessage,
-} from '@ant/model-provider'
+  SystemThinkingMessage} from '@ant/model-provider'
 
 // UI-specific types that depend on main-project internals
 import type {
   BranchAction,
   CommitKind,
-  PrAction,
-} from '@claude-code-best/builtin-tools/tools/shared/gitOperationTracking.js'
+  PrAction} from '@claude-code-best/builtin-tools/tools/shared/gitOperationTracking.js'
 import type {
   AssistantMessage,
   CollapsibleMessage,
-  UserMessage,
-} from '@ant/model-provider'
+  UserMessage} from '@ant/model-provider'
 import type { UUID } from 'crypto'
 import type { StopHookInfo } from '@ant/model-provider'
 

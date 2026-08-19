@@ -2,9 +2,9 @@ import axios from 'axios'
 import memoize from 'lodash-es/memoize.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { getOauthAccountInfo, isConsumerSubscriber } from 'src/utils/auth.js'
+import { t } from 'src/utils/i18n/index.js'
 import { logForDebugging } from 'src/utils/debug.js'
 import { gracefulShutdown } from 'src/utils/gracefulShutdown.js'
 import { isEssentialTrafficOnly } from 'src/utils/privacyLevel.js'
@@ -14,8 +14,7 @@ import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
 import {
   getAuthHeaders,
   getUserAgent,
-  withOAuth401Retry,
-} from '../../utils/http.js'
+  withOAuth401Retry} from '../../utils/http.js'
 import { logError } from '../../utils/log.js'
 import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
 
@@ -59,16 +58,14 @@ export const getGroveSettings = memoize(
       const response = await withOAuth401Retry(() => {
         const authHeaders = getAuthHeaders()
         if (authHeaders.error) {
-          throw new Error(`Failed to get auth headers: ${authHeaders.error}`)
+          throw new Error(t('groveApi.authHeadersFailed', authHeaders.error))
         }
         return axios.get<AccountSettings>(
           `${getOauthConfig().BASE_API_URL}/api/oauth/account/settings`,
           {
             headers: {
               ...authHeaders.headers,
-              'User-Agent': getClaudeCodeUserAgent(),
-            },
-          },
+              'User-Agent': getClaudeCodeUserAgent()}},
         )
       })
       return { success: true, data: response.data }
@@ -92,7 +89,7 @@ export async function markGroveNoticeViewed(): Promise<void> {
     await withOAuth401Retry(() => {
       const authHeaders = getAuthHeaders()
       if (authHeaders.error) {
-        throw new Error(`Failed to get auth headers: ${authHeaders.error}`)
+        throw new Error(t('groveApi.authHeadersFailed', authHeaders.error))
       }
       return axios.post(
         `${getOauthConfig().BASE_API_URL}/api/oauth/account/grove_notice_viewed`,
@@ -100,9 +97,7 @@ export async function markGroveNoticeViewed(): Promise<void> {
         {
           headers: {
             ...authHeaders.headers,
-            'User-Agent': getClaudeCodeUserAgent(),
-          },
-        },
+            'User-Agent': getClaudeCodeUserAgent()}},
       )
     })
     // This mutates grove_notice_viewed_at server-side — Grove.tsx:87 reads it
@@ -124,19 +119,16 @@ export async function updateGroveSettings(
     await withOAuth401Retry(() => {
       const authHeaders = getAuthHeaders()
       if (authHeaders.error) {
-        throw new Error(`Failed to get auth headers: ${authHeaders.error}`)
+        throw new Error(t('groveApi.authHeadersFailed', authHeaders.error))
       }
       return axios.patch(
         `${getOauthConfig().BASE_API_URL}/api/oauth/account/settings`,
         {
-          grove_enabled: groveEnabled,
-        },
+          grove_enabled: groveEnabled},
         {
           headers: {
             ...authHeaders.headers,
-            'User-Agent': getClaudeCodeUserAgent(),
-          },
-        },
+            'User-Agent': getClaudeCodeUserAgent()}},
       )
     })
     // Invalidate memoized settings so the post-toggle confirmation
@@ -215,10 +207,7 @@ async function fetchAndStoreGroveConfig(accountId: string): Promise<void> {
         ...current.groveConfigCache,
         [accountId]: {
           grove_enabled: groveEnabled,
-          timestamp: Date.now(),
-        },
-      },
-    }))
+          timestamp: Date.now()}}}))
   } catch (err) {
     logForDebugging(`Grove: Failed to fetch and store config: ${err}`)
   }
@@ -239,15 +228,14 @@ export const getGroveNoticeConfig = memoize(
       const response = await withOAuth401Retry(() => {
         const authHeaders = getAuthHeaders()
         if (authHeaders.error) {
-          throw new Error(`Failed to get auth headers: ${authHeaders.error}`)
+          throw new Error(t('groveApi.authHeadersFailed', authHeaders.error))
         }
         return axios.get<GroveConfig>(
           `${getOauthConfig().BASE_API_URL}/api/claude_code_grove`,
           {
             headers: {
               ...authHeaders.headers,
-              'User-Agent': getUserAgent(),
-            },
+              'User-Agent': getUserAgent()},
             timeout: 3000, // Short timeout - if slow, skip Grove dialog
           },
         )
@@ -258,8 +246,7 @@ export const getGroveNoticeConfig = memoize(
         grove_enabled,
         domain_excluded,
         notice_is_grace_period,
-        notice_reminder_frequency,
-      } = response.data
+        notice_reminder_frequency} = response.data
 
       return {
         success: true,
@@ -267,9 +254,7 @@ export const getGroveNoticeConfig = memoize(
           grove_enabled,
           domain_excluded: domain_excluded ?? false,
           notice_is_grace_period: notice_is_grace_period ?? true,
-          notice_reminder_frequency,
-        },
-      }
+          notice_reminder_frequency}}
     } catch (err) {
       logForDebugging(`Failed to fetch Grove notice config: ${err}`)
       return { success: false }
@@ -338,8 +323,7 @@ export async function checkGroveForNonInteractive(): Promise<void> {
     const config = configResult.success ? configResult.data : null
     logEvent('tengu_grove_print_viewed', {
       dismissable:
-        config?.notice_is_grace_period as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        config?.notice_is_grace_period as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
     if (config === null || config.notice_is_grace_period) {
       // Grace period is still active - show informational message and continue
       writeToStderr(

@@ -2,12 +2,12 @@ import figures from 'figures';
 import * as React from 'react';
 import { useTerminalSize } from '../hooks/useTerminalSize.js';
 import { Box, Text, stringWidth } from '@anthropic/ink';
+import { t } from '../utils/i18n/index.js';
 import { useAppState } from '../state/AppState.js';
 import { isInProcessTeammateTask } from '../tasks/InProcessTeammateTask/types.js';
 import {
   AGENT_COLOR_TO_THEME_COLOR,
-  type AgentColorName,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js';
+  type AgentColorName} from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js';
 import { isAgentSwarmsEnabled } from '../utils/agentSwarmsEnabled.js';
 import { count } from '../utils/array.js';
 import { summarizeRecentActivities } from '../utils/collapseReadSearch.js';
@@ -186,15 +186,15 @@ export function TaskListV2({ tasks, isStandalone = false }: Props): React.ReactN
     const hiddenInProgress = count(hiddenTasks, t => t.status === 'in_progress');
     const hiddenCompleted = count(hiddenTasks, t => t.status === 'completed');
     if (hiddenInProgress > 0) {
-      parts.push(`${hiddenInProgress} in progress`);
+      parts.push(t('taskListV2.hiddenInProgress', hiddenInProgress));
     }
     if (hiddenPending > 0) {
-      parts.push(`${hiddenPending} pending`);
+      parts.push(t('taskListV2.hiddenPending', hiddenPending));
     }
     if (hiddenCompleted > 0) {
-      parts.push(`${hiddenCompleted} completed`);
+      parts.push(t('taskListV2.hiddenCompleted', hiddenCompleted));
     }
-    hiddenSummary = ` … +${parts.join(', ')}`;
+    hiddenSummary = ` \u2026 +${parts.join(', ')}`;
   }
 
   const content = (
@@ -220,17 +220,17 @@ export function TaskListV2({ tasks, isStandalone = false }: Props): React.ReactN
         <Box>
           <Text dimColor>
             <Text bold>{tasks.length}</Text>
-            {' tasks ('}
+            {t('taskListV2.tasksCount')}
             <Text bold>{completedCount}</Text>
-            {' done, '}
+            {t('taskListV2.done')}
             {inProgressCount > 0 && (
               <>
                 <Text bold>{inProgressCount}</Text>
-                {' in progress, '}
+                {t('taskListV2.inProgress')}
               </>
             )}
             <Text bold>{pendingCount}</Text>
-            {' open)'}
+            {t('taskListV2.open')}
           </Text>
         </Box>
         {content}

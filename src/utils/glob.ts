@@ -3,8 +3,7 @@ import type { ToolPermissionContext } from '../Tool.js'
 import { isEnvTruthy } from './envUtils.js'
 import {
   getFileReadIgnorePatterns,
-  normalizePatternsToPath,
-} from './permissions/filesystem.js'
+  normalizePatternsToPath} from './permissions/filesystem.js'
 import { getPlatform } from './platform.js'
 import { getGlobExclusionsForPluginCache } from './plugins/orphanedPluginFilter.js'
 import { ripGrep } from './ripgrep.js'

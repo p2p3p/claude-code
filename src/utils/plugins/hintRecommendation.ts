@@ -14,21 +14,18 @@ import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/gr
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import {
   type ClaudeCodeHint,
   hasShownHintThisSession,
-  setPendingHint,
-} from '../claudeCodeHints.js'
+  setPendingHint} from '../claudeCodeHints.js'
 import { getGlobalConfig, saveGlobalConfig } from '../config.js'
 import { logForDebugging } from '../debug.js'
 import { isPluginInstalled } from './installedPluginsManager.js'
 import { getPluginById } from './marketplaceManager.js'
 import {
   isOfficialMarketplaceName,
-  parsePluginIdentifier,
-} from './pluginIdentifier.js'
+  parsePluginIdentifier} from './pluginIdentifier.js'
 import { isPluginBlockedByPolicy } from './pluginPolicy.js'
 
 /**
@@ -115,8 +112,7 @@ export async function resolvePluginHint(
       '') as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
     result: (pluginData
       ? 'passed'
-      : 'not_in_cache') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      : 'not_in_cache') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
   if (!pluginData) {
     logForDebugging(
@@ -130,8 +126,7 @@ export async function resolvePluginHint(
     pluginName: pluginData.entry.name,
     marketplaceName: marketplace ?? '',
     pluginDescription: pluginData.entry.description,
-    sourceCommand: hint.sourceCommand,
-  }
+    sourceCommand: hint.sourceCommand}
 }
 
 /**
@@ -146,9 +141,7 @@ export function markHintPluginShown(pluginId: string): void {
       ...current,
       claudeCodeHints: {
         ...current.claudeCodeHints,
-        plugin: [...existing, pluginId],
-      },
-    }
+        plugin: [...existing, pluginId]}}
   })
 }
 
@@ -158,7 +151,6 @@ export function disableHintRecommendations(): void {
     if (current.claudeCodeHints?.disabled) return current
     return {
       ...current,
-      claudeCodeHints: { ...current.claudeCodeHints, disabled: true },
-    }
+      claudeCodeHints: { ...current.claudeCodeHints, disabled: true }}
   })
 }

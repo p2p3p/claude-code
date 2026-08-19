@@ -1,11 +1,11 @@
 import type { Command } from '../commands.js'
 import {
   getAttributionTexts,
-  getEnhancedPRAttribution,
-} from '../utils/attribution.js'
+  getEnhancedPRAttribution} from '../utils/attribution.js'
 import { getDefaultBranch } from '../utils/git.js'
 import { executeShellCommandsInPrompt } from '../utils/promptShellExecution.js'
 import { getUndercoverInstructions, isUndercover } from '../utils/undercover.js'
+import { t } from '../utils/i18n/index.js'
 
 const ALLOWED_TOOLS = [
   'Bash(git checkout --branch:*)',
@@ -108,13 +108,13 @@ Return the PR URL when you're done, so the user can see it.`
 const command = {
   type: 'prompt',
   name: 'commit-push-pr',
-  description: 'Commit, push, and open a PR',
+  description: t('cmd.descCommitPushPr'),
   allowedTools: ALLOWED_TOOLS,
   get contentLength() {
     // Use 'main' as estimate for content length calculation
     return getPromptContent('main').length
   },
-  progressMessage: 'creating commit and PR',
+  progressMessage: t('commitPushPr.progressMessage'),
   source: 'builtin',
   async getPromptForCommand(args, context) {
     // Get default branch and enhanced PR attribution
@@ -142,17 +142,12 @@ const command = {
               ...appState.toolPermissionContext,
               alwaysAllowRules: {
                 ...appState.toolPermissionContext.alwaysAllowRules,
-                command: ALLOWED_TOOLS,
-              },
-            },
-          }
-        },
-      },
+                command: ALLOWED_TOOLS}}}
+        }},
       '/commit-push-pr',
     )
 
     return [{ type: 'text', text: finalContent }]
-  },
-} satisfies Command
+  }} satisfies Command
 
 export default command

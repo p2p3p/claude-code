@@ -1,7 +1,6 @@
 import {
   getModelStrings as getModelStringsState,
-  setModelStrings as setModelStringsState,
-} from 'src/bootstrap/state.js'
+  setModelStrings as setModelStringsState} from 'src/bootstrap/state.js'
 import { logError } from '../log.js'
 import { sequential } from '../sequential.js'
 import { getInitialSettings } from '../settings/settings.js'
@@ -10,8 +9,7 @@ import {
   ALL_MODEL_CONFIGS,
   CANONICAL_ID_TO_KEY,
   type CanonicalModelId,
-  type ModelKey,
-} from './configs.js'
+  type ModelKey} from './configs.js'
 import { type APIProvider, getAPIProvider } from './providers.js'
 
 /**

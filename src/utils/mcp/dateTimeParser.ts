@@ -1,4 +1,4 @@
-import { queryHaiku } from '../../services/api/claude.js'
+import { queryHaiku } from '../../services/api/anthropic/index.js'
 import { logError } from '../log.js'
 import { extractTextContent } from '../messages.js'
 import { asSystemPrompt } from '../systemPromptType.js'
@@ -75,9 +75,7 @@ Parse the user's input into ISO 8601 format. Return ONLY the formatted string, o
         isNonInteractiveSession: false,
         hasAppendSystemPrompt: false,
         mcpTools: [],
-        enablePromptCaching: false,
-      },
-    })
+        enablePromptCaching: false}})
 
     // Extract text from result
     const parsedText = extractTextContent(
@@ -88,16 +86,14 @@ Parse the user's input into ISO 8601 format. Return ONLY the formatted string, o
     if (!parsedText || parsedText === 'INVALID') {
       return {
         success: false,
-        error: 'Unable to parse date/time from input',
-      }
+        error: 'Unable to parse date/time from input'}
     }
 
     // Basic sanity check - should start with a digit (year)
     if (!/^\d{4}/.test(parsedText)) {
       return {
         success: false,
-        error: 'Unable to parse date/time from input',
-      }
+        error: 'Unable to parse date/time from input'}
     }
 
     return { success: true, value: parsedText }
@@ -107,8 +103,7 @@ Parse the user's input into ISO 8601 format. Return ONLY the formatted string, o
     return {
       success: false,
       error:
-        'Unable to parse date/time. Please enter in ISO 8601 format manually.',
-    }
+        'Unable to parse date/time. Please enter in ISO 8601 format manually.'}
   }
 }
 

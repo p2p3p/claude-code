@@ -22,8 +22,7 @@ export function adjustHunkLineNumbers(
   return hunks.map(h => ({
     ...h,
     oldStart: h.oldStart + offset,
-    newStart: h.newStart + offset,
-  }))
+    newStart: h.newStart + offset}))
 }
 
 // For some reason, & confuses the diff library, so we replace it with a token,
@@ -74,8 +73,7 @@ export function countLinesChanged(
 
   logEvent('tengu_file_changed', {
     lines_added: numAdditions,
-    lines_removed: numRemovals,
-  })
+    lines_removed: numRemovals})
 }
 
 export function getPatchFromContents({
@@ -83,8 +81,7 @@ export function getPatchFromContents({
   oldContent,
   newContent,
   ignoreWhitespace = false,
-  singleHunk = false,
-}: {
+  singleHunk = false}: {
   filePath: string
   oldContent: string
   newContent: string
@@ -101,16 +98,14 @@ export function getPatchFromContents({
     {
       ignoreWhitespace,
       context: singleHunk ? 100_000 : CONTEXT_LINES,
-      timeout: DIFF_TIMEOUT_MS,
-    },
+      timeout: DIFF_TIMEOUT_MS},
   )
   if (!result) {
     return []
   }
   return result.hunks.map(_ => ({
     ..._,
-    lines: _.lines.map(unescapeFromDiff),
-  }))
+    lines: _.lines.map(unescapeFromDiff)}))
 }
 
 /**
@@ -129,8 +124,7 @@ export function getPatchForDisplay({
   filePath,
   fileContents,
   edits,
-  ignoreWhitespace = false,
-}: {
+  ignoreWhitespace = false}: {
   filePath: string
   fileContents: string
   edits: FileEdit[]
@@ -164,14 +158,12 @@ export function getPatchForDisplay({
     {
       context: CONTEXT_LINES,
       ignoreWhitespace,
-      timeout: DIFF_TIMEOUT_MS,
-    },
+      timeout: DIFF_TIMEOUT_MS},
   )
   if (!result) {
     return []
   }
   return result.hunks.map(_ => ({
     ..._,
-    lines: _.lines.map(unescapeFromDiff),
-  }))
+    lines: _.lines.map(unescapeFromDiff)}))
 }

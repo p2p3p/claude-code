@@ -5,6 +5,7 @@ import { Box, Text } from '@anthropic/ink';
 import type { ToolProgressData } from 'src/Tool.js';
 import type { ProgressMessage } from 'src/types/message.js';
 import { formatFileSize, truncate } from 'src/utils/format.js';
+import { t } from 'src/utils/i18n/index.js';
 import type { Output } from './WebFetchTool.js';
 
 export function renderToolUseMessage(
@@ -23,7 +24,7 @@ export function renderToolUseMessage(
 export function renderToolUseProgressMessage(): React.ReactNode {
   return (
     <MessageResponse height={1}>
-      <Text dimColor>Fetching…</Text>
+      <Text dimColor>{t('toolUI.webFetch.fetching')}</Text>
     </MessageResponse>
   );
 }
@@ -39,7 +40,9 @@ export function renderToolResultMessage(
       <Box flexDirection="column">
         <MessageResponse height={1}>
           <Text>
-            Received <Text bold>{formattedSize}</Text> ({code} {codeText})
+            {t('toolUI.webFetch.received')}
+            <Text bold>{formattedSize}</Text>
+            {t('toolUI.webFetch.receivedMeta', code, codeText)}
           </Text>
         </MessageResponse>
         <Box flexDirection="column">
@@ -51,7 +54,9 @@ export function renderToolResultMessage(
   return (
     <MessageResponse height={1}>
       <Text>
-        Received <Text bold>{formattedSize}</Text> ({code} {codeText})
+        {t('toolUI.webFetch.received')}
+        <Text bold>{formattedSize}</Text>
+        {t('toolUI.webFetch.receivedMeta', code, codeText)}
       </Text>
     </MessageResponse>
   );

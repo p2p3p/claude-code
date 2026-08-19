@@ -27,6 +27,7 @@ import { createSignal } from 'src/utils/signal.js'
 type RegisteredHookMatcher = HookCallbackMatcher | PluginHookMatcher
 
 import type { SessionId } from 'src/types/ids.js'
+import type { AppState } from 'src/state/AppStateStore.js'
 
 // DO NOT ADD MORE STATE HERE - BE JUDICIOUS WITH GLOBAL STATE
 
@@ -385,8 +386,7 @@ function getInitialState(): State {
     isRemoteMode: false,
     ...(process.env.USER_TYPE === 'ant'
       ? {
-          replBridgeActive: false,
-        }
+          replBridgeActive: false}
       : {}),
     // Direct connect server URL
     directConnectServerUrl: undefined,
@@ -413,8 +413,7 @@ function getInitialState(): State {
     promptId: null,
     lastMainRequestId: undefined,
     lastApiCompletionTimestamp: null,
-    pendingPostCompaction: false,
-  }
+    pendingPostCompaction: false}
 
   return state
 }
@@ -835,6 +834,20 @@ export function setInitialMainLoopModel(model: ModelSetting): void {
   STATE.initialMainLoopModel = model
 }
 
+let appStateSetter: ((updater: (prev: AppState) => AppState) => void) | null = null
+
+/** AppStateProvider registers its store setter so non-React layers can update state. */
+export function registerAppStateSetter(
+  setter: (updater: (prev: AppState) => AppState) => void,
+): void {
+  appStateSetter = setter
+}
+
+/** Reset the runtime mainLoopModel so a freshly activated platform's model takes effect. */
+export function resetAppStateMainLoopModel(): void {
+  appStateSetter?.((prev) => ({ ...prev, mainLoopModel: null }))
+}
+
 export function getSdkBetas(): string[] | undefined {
   return STATE.sdkBetas
 }
@@ -868,8 +881,7 @@ export function setCostStateForRestore({
   totalLinesAdded,
   totalLinesRemoved,
   lastDuration,
-  modelUsage,
-}: {
+  modelUsage}: {
   totalCostUSD: number
   totalAPIDuration: number
   totalAPIDurationWithoutRetries: number
@@ -935,37 +947,29 @@ export function setMeter(
 
   // Initialize all counters using the provided factory
   STATE.sessionCounter = createCounter('claude_code.session.count', {
-    description: 'Count of CLI sessions started',
-  })
+    description: 'Count of CLI sessions started'})
   STATE.locCounter = createCounter('claude_code.lines_of_code.count', {
     description:
-      "Count of lines of code modified, with the 'type' attribute indicating whether lines were added or removed",
-  })
+      "Count of lines of code modified, with the 'type' attribute indicating whether lines were added or removed"})
   STATE.prCounter = createCounter('claude_code.pull_request.count', {
-    description: 'Number of pull requests created',
-  })
+    description: 'Number of pull requests created'})
   STATE.commitCounter = createCounter('claude_code.commit.count', {
-    description: 'Number of git commits created',
-  })
+    description: 'Number of git commits created'})
   STATE.costCounter = createCounter('claude_code.cost.usage', {
     description: 'Cost of the Claude Code session',
-    unit: 'USD',
-  })
+    unit: 'USD'})
   STATE.tokenCounter = createCounter('claude_code.token.usage', {
     description: 'Number of tokens used',
-    unit: 'tokens',
-  })
+    unit: 'tokens'})
   STATE.codeEditToolDecisionCounter = createCounter(
     'claude_code.code_edit_tool.decision',
     {
       description:
-        'Count of code editing tool permission decisions (accept/reject) for Edit, Write, and NotebookEdit tools',
-    },
+        'Count of code editing tool permission decisions (accept/reject) for Edit, Write, and NotebookEdit tools'},
   )
   STATE.activeTimeCounter = createCounter('claude_code.active_time.total', {
     description: 'Total active time in seconds',
-    unit: 's',
-  })
+    unit: 's'})
 }
 
 export function getMeter(): Meter | null {
@@ -1464,8 +1468,7 @@ export function setTeleportedSessionInfo(info: {
   STATE.teleportedSessionInfo = {
     isTeleported: true,
     hasLoggedFirstMessage: false,
-    sessionId: info.sessionId,
-  }
+    sessionId: info.sessionId}
 }
 
 export function getTeleportedSessionInfo(): {
@@ -1503,8 +1506,7 @@ export function addInvokedSkill(
     skillPath,
     content,
     invokedAt: Date.now(),
-    agentId,
-  })
+    agentId})
 }
 
 export function getInvokedSkillsForAgent(

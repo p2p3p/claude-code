@@ -150,8 +150,7 @@ export async function tryAcquireComputerUseLock(): Promise<AcquireResult> {
   const lock: ComputerUseLock = {
     sessionId,
     pid: process.pid,
-    acquiredAt: Date.now(),
-  }
+    acquiredAt: Date.now()}
 
   await mkdir(getClaudeConfigHomeDir(), { recursive: true })
 

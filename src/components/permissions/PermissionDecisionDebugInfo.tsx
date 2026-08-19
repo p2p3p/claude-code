@@ -4,6 +4,7 @@ import figures from 'figures';
 import React, { useMemo } from 'react';
 import { Ansi, Box, color, Text, useTheme } from '@anthropic/ink';
 import { useAppState } from '../../state/AppState.js';
+import { t } from '../../utils/i18n/index.js';
 import type { PermissionMode } from '../../utils/permissions/PermissionMode.js';
 import { permissionModeTitle } from '../../utils/permissions/PermissionMode.js';
 import type { PermissionDecision, PermissionDecisionReason } from '../../utils/permissions/PermissionResult.js';
@@ -33,7 +34,7 @@ function decisionReasonDisplayString(
     case 'mode':
       return `${permissionModeTitle(decisionReason.mode)} mode`;
     case 'sandboxOverride':
-      return 'Requires permission to bypass sandbox';
+      return t('permissionDebug.requiresSandbox');
     case 'workingDir':
       return decisionReason.reason;
     case 'safetyCheck':
@@ -142,8 +143,7 @@ function extractMode(updates: PermissionUpdate[] | undefined): PermissionMode | 
 
 function SuggestionDisplay({
   suggestions,
-  width,
-}: {
+  width}: {
   suggestions: PermissionUpdate[] | undefined;
   width: number;
 }): React.ReactNode {
@@ -151,9 +151,9 @@ function SuggestionDisplay({
     return (
       <Box flexDirection="row">
         <Box justifyContent="flex-end" minWidth={width}>
-          <Text dimColor>Suggestions </Text>
+          <Text dimColor>{t('permissions.suggestions')} </Text>
         </Box>
-        <Text>None</Text>
+        <Text>{t('permissions.none')}</Text>
       </Box>
     );
   }
@@ -167,9 +167,9 @@ function SuggestionDisplay({
     return (
       <Box flexDirection="row">
         <Box justifyContent="flex-end" minWidth={width}>
-          <Text dimColor>Suggestion </Text>
+          <Text dimColor>{t('permissions.suggestion')} </Text>
         </Box>
-        <Text>None</Text>
+        <Text>{t('permissions.none')}</Text>
       </Box>
     );
   }
@@ -178,7 +178,7 @@ function SuggestionDisplay({
     <Box flexDirection="column">
       <Box flexDirection="row">
         <Box justifyContent="flex-end" minWidth={width}>
-          <Text dimColor>Suggestions </Text>
+          <Text dimColor>{t('permissions.suggestions')} </Text>
         </Box>
         <Text> </Text>
       </Box>
@@ -187,7 +187,7 @@ function SuggestionDisplay({
       {rules.length > 0 && (
         <Box flexDirection="row">
           <Box justifyContent="flex-end" minWidth={width}>
-            <Text dimColor> Rules </Text>
+            <Text dimColor>{t('permissions.rules')} </Text>
           </Box>
           <Box flexDirection="column">
             {rules.map((rule, index) => (
@@ -203,7 +203,7 @@ function SuggestionDisplay({
       {directories.length > 0 && (
         <Box flexDirection="row">
           <Box justifyContent="flex-end" minWidth={width}>
-            <Text dimColor> Directories </Text>
+            <Text dimColor>{t('permissions.directories')} </Text>
           </Box>
           <Box flexDirection="column">
             {directories.map((dir, index) => (
@@ -219,7 +219,7 @@ function SuggestionDisplay({
       {mode && (
         <Box flexDirection="row">
           <Box justifyContent="flex-end" minWidth={width}>
-            <Text dimColor> Mode </Text>
+            <Text dimColor>{t('permissions.mode')} </Text>
           </Box>
           <Text>{permissionModeTitle(mode)}</Text>
         </Box>
@@ -237,8 +237,7 @@ export function PermissionDecisionDebugInfo({ permissionResult, toolName }: Prop
     const sandboxAutoAllowEnabled =
       SandboxManager.isSandboxingEnabled() && SandboxManager.isAutoAllowBashIfSandboxedEnabled();
     const all = detectUnreachableRules(toolPermissionContext, {
-      sandboxAutoAllowEnabled,
-    });
+      sandboxAutoAllowEnabled});
 
     // Get the suggested rules from the permission result
     const suggestedRules = extractRules(suggestions);
@@ -268,21 +267,21 @@ export function PermissionDecisionDebugInfo({ permissionResult, toolName }: Prop
     <Box flexDirection="column">
       <Box flexDirection="row">
         <Box justifyContent="flex-end" minWidth={WIDTH}>
-          <Text dimColor>Behavior </Text>
+          <Text dimColor>{t('permissions.behavior')} </Text>
         </Box>
         <Text>{permissionResult.behavior}</Text>
       </Box>
       {permissionResult.behavior !== 'allow' && (
         <Box flexDirection="row">
           <Box justifyContent="flex-end" minWidth={WIDTH}>
-            <Text dimColor>Message </Text>
+            <Text dimColor>{t('permissions.message')} </Text>
           </Box>
           <Text>{permissionResult.message}</Text>
         </Box>
       )}
       <Box flexDirection="row">
         <Box justifyContent="flex-end" minWidth={WIDTH}>
-          <Text dimColor>Reason </Text>
+          <Text dimColor>{t('permissions.reason')} </Text>
         </Box>
         {decisionReason === undefined ? (
           <Text>undefined</Text>
@@ -294,7 +293,7 @@ export function PermissionDecisionDebugInfo({ permissionResult, toolName }: Prop
       {unreachableRules.length > 0 && (
         <Box flexDirection="column" marginTop={1}>
           <Text color="warning">
-            {figures.warning} Unreachable Rules ({unreachableRules.length})
+            {figures.warning} {t('permissions.unreachableRules', unreachableRules.length)}
           </Text>
           {unreachableRules.map((u, i) => (
             <Box key={i} flexDirection="column" marginLeft={2}>

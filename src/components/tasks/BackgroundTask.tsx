@@ -5,7 +5,7 @@ import type { BackgroundTaskState } from 'src/tasks/types.js';
 import type { DeepImmutable } from 'src/types/utils.js';
 import { truncate } from 'src/utils/format.js';
 
-import { plural } from 'src/utils/stringUtils.js';
+import { t } from '../../utils/i18n/index.js';
 import { DIAMOND_FILLED, DIAMOND_OPEN } from '../../constants/figures.js';
 import { RemoteSessionProgress } from './RemoteSessionProgress.js';
 import { ShellProgress, TaskStatusText } from './ShellProgress.js';
@@ -52,8 +52,8 @@ export function BackgroundTask({ task, maxActivityWidth }: Props): React.ReactNo
           {truncate(task.description, activityLimit, true)}{' '}
           <TaskStatusText
             status={task.status}
-            label={task.status === 'completed' ? 'done' : undefined}
-            suffix={task.status === 'completed' && !task.notified ? ', unread' : undefined}
+            label={task.status === 'completed' ? t('taskDetail.doneLabel') : undefined}
+            suffix={task.status === 'completed' && !task.notified ? t('taskDetail.unreadSuffix') : undefined}
           />
         </Text>
       );
@@ -79,12 +79,12 @@ export function BackgroundTask({ task, maxActivityWidth }: Props): React.ReactNo
             status={task.status}
             label={
               task.status === 'running'
-                ? `${_task.agentCount as number} ${plural(_task.agentCount as number, 'agent')}`
+                ? t('taskDetail.agentCount', (_task.agentCount as number) ?? 0)
                 : task.status === 'completed'
-                  ? 'done'
+                  ? t('taskDetail.doneLabel')
                   : undefined
             }
-            suffix={task.status === 'completed' && !task.notified ? ', unread' : undefined}
+            suffix={task.status === 'completed' && !task.notified ? t('taskDetail.unreadSuffix') : undefined}
           />
         </Text>
       );
@@ -95,8 +95,8 @@ export function BackgroundTask({ task, maxActivityWidth }: Props): React.ReactNo
           {truncate(task.description, activityLimit, true)}{' '}
           <TaskStatusText
             status={task.status}
-            label={task.status === 'completed' ? 'done' : undefined}
-            suffix={task.status === 'completed' && !task.notified ? ', unread' : undefined}
+            label={task.status === 'completed' ? t('taskDetail.doneLabel') : undefined}
+            suffix={task.status === 'completed' && !task.notified ? t('taskDetail.unreadSuffix') : undefined}
           />
         </Text>
       );
@@ -104,8 +104,8 @@ export function BackgroundTask({ task, maxActivityWidth }: Props): React.ReactNo
       const n = task.filesTouched.length;
       const detail =
         task.phase === 'updating' && n > 0
-          ? `${n} ${plural(n, 'file')}`
-          : `${task.sessionsReviewing} ${plural(task.sessionsReviewing, 'session')}`;
+          ? t('taskDetail.fileCount', n)
+          : t('taskDetail.sessionCount', task.sessionsReviewing);
       return (
         <Text>
           {task.description}{' '}
@@ -114,8 +114,8 @@ export function BackgroundTask({ task, maxActivityWidth }: Props): React.ReactNo
           </Text>{' '}
           <TaskStatusText
             status={task.status}
-            label={task.status === 'completed' ? 'done' : undefined}
-            suffix={task.status === 'completed' && !task.notified ? ', unread' : undefined}
+            label={task.status === 'completed' ? t('taskDetail.doneLabel') : undefined}
+            suffix={task.status === 'completed' && !task.notified ? t('taskDetail.unreadSuffix') : undefined}
           />
         </Text>
       );

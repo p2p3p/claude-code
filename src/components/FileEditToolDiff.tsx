@@ -88,11 +88,9 @@ async function loadDiffData(file_path: string, edits: FileEdit[]): Promise<DiffD
           patch: getPatchForDisplay({
             filePath: file_path,
             fileContents: file,
-            edits: normalized,
-          }),
+            edits: normalized}),
           firstLine: firstLineOf(file),
-          fileContent: file,
-        };
+          fileContent: file};
       }
 
       const ctx = await scanForContext(handle, single.old_string, CONTEXT_LINES);
@@ -103,13 +101,11 @@ async function loadDiffData(file_path: string, edits: FileEdit[]): Promise<DiffD
       const hunks = getPatchForDisplay({
         filePath: file_path,
         fileContents: ctx.content,
-        edits: [normalized],
-      });
+        edits: [normalized]});
       return {
         patch: adjustHunkLineNumbers(hunks, ctx.lineOffset - 1),
         firstLine: ctx.lineOffset === 1 ? firstLineOf(ctx.content) : null,
-        fileContent: ctx.content,
-      };
+        fileContent: ctx.content};
     } finally {
       await handle.close();
     }
@@ -125,12 +121,10 @@ function diffToolInputsOnly(filePath: string, edits: FileEdit[]): DiffData {
       getPatchForDisplay({
         filePath,
         fileContents: e.old_string,
-        edits: [e],
-      }),
+        edits: [e]}),
     ),
     firstLine: null,
-    fileContent: undefined,
-  };
+    fileContent: undefined};
 }
 
 function normalizeEdit(fileContent: string, edit: FileEdit): FileEdit {

@@ -11,6 +11,7 @@ import type { ToolProgressData } from 'src/Tool.js';
 import type { ProgressMessage } from 'src/types/message.js';
 import type { MCPProgress } from 'src/types/tools.js';
 import { formatNumber } from 'src/utils/format.js';
+import { t } from 'src/utils/i18n/index.js';
 
 import { getContentSizeEstimate, type MCPToolResult } from 'src/utils/mcpValidation.js';
 import { jsonParse, jsonStringify } from 'src/utils/slowOperations.js';
@@ -64,7 +65,7 @@ export function renderToolUseProgressMessage(
   if (!lastProgress?.data) {
     return (
       <MessageResponse height={1}>
-        <Text dimColor>Running…</Text>
+        <Text dimColor>{t('toolUI.mcp.running')}</Text>
       </MessageResponse>
     );
   }
@@ -74,7 +75,7 @@ export function renderToolUseProgressMessage(
   if (progress === undefined) {
     return (
       <MessageResponse height={1}>
-        <Text dimColor>Running…</Text>
+        <Text dimColor>{t('toolUI.mcp.running')}</Text>
       </MessageResponse>
     );
   }
@@ -97,7 +98,7 @@ export function renderToolUseProgressMessage(
 
   return (
     <MessageResponse height={1}>
-      <Text dimColor>{progressMessage ?? `Processing… ${progress}`}</Text>
+      <Text dimColor>{progressMessage ?? t('toolUI.mcp.processing', progress)}</Text>
     </MessageResponse>
   );
 }
@@ -115,7 +116,8 @@ export function renderToolResultMessage(
       return (
         <MessageResponse height={1}>
           <Text>
-            Sent a message to <Ansi>{createHyperlink(slackSend.url, slackSend.channel)}</Ansi>
+            {t('toolUI.mcp.sentMessage')}
+            <Ansi>{createHyperlink(slackSend.url, slackSend.channel)}</Ansi>
           </Text>
         </MessageResponse>
       );
@@ -125,7 +127,7 @@ export function renderToolResultMessage(
   const estimatedTokens = getContentSizeEstimate(mcpOutput);
   const showWarning = estimatedTokens > MCP_OUTPUT_WARNING_THRESHOLD_TOKENS;
   const warningMessage = showWarning
-    ? `${figures.warning} Large MCP response (~${formatNumber(estimatedTokens)} tokens), this can fill up context quickly`
+    ? `${figures.warning} ${t('toolUI.mcp.largeResponse', formatNumber(estimatedTokens))}`
     : null;
 
   let contentElement: React.ReactNode;
@@ -135,7 +137,7 @@ export function renderToolResultMessage(
         return (
           <Box key={i} justifyContent="space-between" overflowX="hidden" width="100%">
             <MessageResponse height={1}>
-              <Text>[Image]</Text>
+              <Text>{t('toolUI.mcp.image')}</Text>
             </MessageResponse>
           </Box>
         );
@@ -162,7 +164,7 @@ export function renderToolResultMessage(
     contentElement = (
       <Box justifyContent="space-between" overflowX="hidden" width="100%">
         <MessageResponse height={1}>
-          <Text dimColor>(No content)</Text>
+          <Text dimColor>{t('toolUI.mcp.noContent')}</Text>
         </MessageResponse>
       </Box>
     );

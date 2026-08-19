@@ -19,8 +19,7 @@ export function StatusNotices({ agentDefinitions }: Props = {}): React.ReactNode
   const context: StatusNoticeContext = {
     config: getGlobalConfig(),
     agentDefinitions,
-    memoryFiles: use(getMemoryFiles()),
-  };
+    memoryFiles: use(getMemoryFiles())};
   const activeNotices = getActiveNotices(context);
   if (activeNotices.length === 0) {
     return null;

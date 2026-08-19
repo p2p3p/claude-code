@@ -14,8 +14,7 @@ import { randomUUID } from 'crypto'
 import type { SDKMessage } from '../entrypoints/agentSdkTypes.js'
 import type {
   SDKControlRequest,
-  SDKControlResponse,
-} from '../entrypoints/sdk/controlTypes.js'
+  SDKControlResponse} from '../entrypoints/sdk/controlTypes.js'
 import type { SDKResultSuccess } from '../entrypoints/sdk/coreTypes.js'
 import { logEvent } from '../services/analytics/index.js'
 import { EMPTY_USAGE } from '@ant/model-provider'
@@ -38,8 +37,7 @@ import {
   TASK_NOTIFICATION_TAG,
   TEAMMATE_MESSAGE_TAG,
   TICK_TAG,
-  ULTRAPLAN_TAG,
-} from '../constants/xml.js'
+  ULTRAPLAN_TAG} from '../constants/xml.js'
 
 // ─── Type guards ─────────────────────────────────────────────────────────────
 
@@ -283,8 +281,7 @@ export function handleIngressMessage(
     if (parsed.type === 'user') {
       if (uuid) recentInboundUUIDs.add(uuid)
       logEvent('tengu_bridge_message_received', {
-        is_repl: true,
-      })
+        is_repl: true})
       // Fire-and-forget — handler may be async (attachment resolution).
       void onInboundMessage?.(parsed)
     } else {
@@ -343,8 +340,7 @@ export function handleServerControlRequest(
     onInterrupt,
     onSetModel,
     onSetMaxThinkingTokens,
-    onSetPermissionMode,
-  } = handlers
+    onSetPermissionMode} = handlers
   if (!transport) {
     logForDebugging(
       '[bridge:repl] Cannot respond to control_request: transport not configured',
@@ -370,9 +366,7 @@ export function handleServerControlRequest(
       response: {
         subtype: 'error',
         request_id: request.request_id,
-        error: OUTBOUND_ONLY_ERROR,
-      },
-    }
+        error: OUTBOUND_ONLY_ERROR}}
     const event = { ...response, session_id: sessionId }
     void transport.write(event)
     logForDebugging(
@@ -396,10 +390,7 @@ export function handleServerControlRequest(
             available_output_styles: ['normal'],
             models: [],
             account: {},
-            pid: process.pid,
-          },
-        },
-      }
+            pid: process.pid}}}
       break
 
     case 'set_model':
@@ -408,9 +399,7 @@ export function handleServerControlRequest(
         type: 'control_response',
         response: {
           subtype: 'success',
-          request_id: request.request_id,
-        },
-      }
+          request_id: request.request_id}}
       break
 
     case 'set_max_thinking_tokens':
@@ -419,9 +408,7 @@ export function handleServerControlRequest(
         type: 'control_response',
         response: {
           subtype: 'success',
-          request_id: request.request_id,
-        },
-      }
+          request_id: request.request_id}}
       break
 
     case 'set_permission_mode': {
@@ -435,25 +422,20 @@ export function handleServerControlRequest(
       const verdict = onSetPermissionMode?.(req.mode as PermissionMode) ?? {
         ok: false,
         error:
-          'set_permission_mode is not supported in this context (onSetPermissionMode callback not registered)',
-      }
+          'set_permission_mode is not supported in this context (onSetPermissionMode callback not registered)'}
       if (verdict.ok) {
         response = {
           type: 'control_response',
           response: {
             subtype: 'success',
-            request_id: request.request_id,
-          },
-        }
+            request_id: request.request_id}}
       } else {
         response = {
           type: 'control_response',
           response: {
             subtype: 'error',
             request_id: request.request_id,
-            error: (verdict as { ok: false; error: string }).error,
-          },
-        }
+            error: (verdict as { ok: false; error: string }).error}}
       }
       break
     }
@@ -464,9 +446,7 @@ export function handleServerControlRequest(
         type: 'control_response',
         response: {
           subtype: 'success',
-          request_id: request.request_id,
-        },
-      }
+          request_id: request.request_id}}
       break
 
     default:
@@ -477,9 +457,7 @@ export function handleServerControlRequest(
         response: {
           subtype: 'error',
           request_id: request.request_id,
-          error: `REPL bridge does not handle control_request subtype: ${req.subtype}`,
-        },
-      }
+          error: `REPL bridge does not handle control_request subtype: ${req.subtype}`}}
   }
 
   const event = { ...response, session_id: sessionId }
@@ -515,8 +493,7 @@ export function makeResultMessage(sessionId: string): SDKResultSuccess {
     modelUsage: {},
     permission_denials: [],
     session_id: sessionId,
-    uuid: randomUUID(),
-  }
+    uuid: randomUUID()}
 }
 
 // ─── BoundedUUIDSet (echo-dedup ring buffer) ─────────────────────────────────

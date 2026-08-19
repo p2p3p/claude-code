@@ -2,6 +2,7 @@ import * as React from 'react';
 import { pathToFileURL } from 'url';
 import { Link, supportsHyperlinks, Text } from '@anthropic/ink';
 import { getStoredImagePath } from '../utils/imageStore.js';
+import { t } from '../utils/i18n/index.js';
 import type { Theme } from '../utils/theme.js';
 
 type Props = {
@@ -20,7 +21,7 @@ type Props = {
  */
 export function ClickableImageRef({ imageId, backgroundColor, isSelected = false }: Props): React.ReactNode {
   const imagePath = getStoredImagePath(imageId);
-  const displayText = `[Image #${imageId}]`;
+  const displayText = t('clickableImageRef.image', imageId);
 
   // If we have a stored image and terminal supports hyperlinks, make it clickable
   if (imagePath && supportsHyperlinks()) {

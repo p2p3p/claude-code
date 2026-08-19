@@ -1,4 +1,5 @@
 import { feature } from 'bun:bundle';
+import { t } from '../utils/i18n/index.js';
 import * as React from 'react';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { logEvent } from 'src/services/analytics/index.js';
@@ -10,8 +11,7 @@ import {
   getMainThreadAgentType,
   getOriginalCwd,
   getSdkBetas,
-  getSessionId,
-} from '../bootstrap/state.js';
+  getSessionId} from '../bootstrap/state.js';
 import { DEFAULT_OUTPUT_STYLE_NAME } from '../constants/outputStyles.js';
 import { useNotifications } from '../context/notifications.js';
 import {
@@ -21,8 +21,7 @@ import {
   getTotalInputTokens,
   getTotalLinesAdded,
   getTotalLinesRemoved,
-  getTotalOutputTokens,
-} from '../cost-tracker.js';
+  getTotalOutputTokens} from '../cost-tracker.js';
 import { useMainLoopModel } from '../hooks/useMainLoopModel.js';
 import { type ReadonlySettings, useSettings } from '../hooks/useSettings.js';
 import { Ansi, Box, Text } from '@anthropic/ink';
@@ -121,9 +120,9 @@ function CachePill({ messages }: CachePillProps): React.ReactNode {
 
   const displayHitRate = usage !== null ? computeHitRate(usage) : lastHitRate;
 
-  // No data yet — show placeholder
+  // No data yet — show nothing
   if (displayHitRate === null && lastResetAt === null) {
-    return <Text dimColor>{' Cache --% --:--'}</Text>;
+    return null;
   }
 
   const countdownText = remaining !== null ? formatCountdown(remaining) : '--:--';
@@ -147,7 +146,7 @@ function CachePill({ messages }: CachePillProps): React.ReactNode {
 
   return (
     <Text>
-      <Text dimColor>{' Cache '}</Text>
+      <Text dimColor>{t('builtinstatusline.cache')}</Text>
       <Text color={hitRateColor}>{hitRateText}</Text>
       <Text color={timerColor} dimColor={inFlashZone && !isFlashOn}>
         {' '}
@@ -227,8 +226,7 @@ function buildStatusLineCommandInput(
   const runtimeModel = getRuntimeMainLoopModel({
     permissionMode,
     mainLoopModel,
-    exceeds200kTokens,
-  });
+    exceeds200kTokens});
   const outputStyleName = settings?.outputStyle || DEFAULT_OUTPUT_STYLE_NAME;
 
   const currentUsage = getCurrentUsage(messages);
@@ -242,76 +240,56 @@ function buildStatusLineCommandInput(
     ...(rawUtil.five_hour && {
       five_hour: {
         used_percentage: rawUtil.five_hour.utilization * 100,
-        resets_at: rawUtil.five_hour.resets_at,
-      },
-    }),
+        resets_at: rawUtil.five_hour.resets_at}}),
     ...(rawUtil.seven_day && {
       seven_day: {
         used_percentage: rawUtil.seven_day.utilization * 100,
-        resets_at: rawUtil.seven_day.resets_at,
-      },
-    }),
-  };
+        resets_at: rawUtil.seven_day.resets_at}})};
   return {
     ...createBaseHookInput(),
     ...(sessionName && { session_name: sessionName }),
     model: {
       id: runtimeModel,
-      display_name: renderModelName(runtimeModel),
-    },
+      display_name: renderModelName(runtimeModel)},
     workspace: {
       current_dir: getCwd(),
       project_dir: getOriginalCwd(),
-      added_dirs: addedDirs,
-    },
+      added_dirs: addedDirs},
     version: MACRO.VERSION,
     output_style: {
-      name: outputStyleName,
-    },
+      name: outputStyleName},
     cost: {
       total_cost_usd: getTotalCost(),
       total_duration_ms: getTotalDuration(),
       total_api_duration_ms: getTotalAPIDuration(),
       total_lines_added: getTotalLinesAdded(),
-      total_lines_removed: getTotalLinesRemoved(),
-    },
+      total_lines_removed: getTotalLinesRemoved()},
     context_window: {
       total_input_tokens: getTotalInputTokens(),
       total_output_tokens: getTotalOutputTokens(),
       context_window_size: contextWindowSize,
       current_usage: currentUsage,
       used_percentage: contextPercentages.used,
-      remaining_percentage: contextPercentages.remaining,
-    },
+      remaining_percentage: contextPercentages.remaining},
     exceeds_200k_tokens: exceeds200kTokens,
     ...((rateLimits.five_hour || rateLimits.seven_day) && {
-      rate_limits: rateLimits,
-    }),
+      rate_limits: rateLimits}),
     ...(isVimModeEnabled() && {
       vim: {
-        mode: vimMode ?? 'INSERT',
-      },
-    }),
+        mode: vimMode ?? 'INSERT'}}),
     ...(agentType && {
       agent: {
-        name: agentType,
-      },
-    }),
+        name: agentType}}),
     ...(getIsRemoteMode() && {
       remote: {
-        session_id: getSessionId(),
-      },
-    }),
+        session_id: getSessionId()}}),
     ...(worktreeSession && {
       worktree: {
         name: worktreeSession.worktreeName,
         path: worktreeSession.worktreePath,
         branch: worktreeSession.worktreeBranch,
         original_cwd: worktreeSession.originalCwd,
-        original_branch: worktreeSession.originalBranch,
-      },
-    }),
-  };
+        original_branch: worktreeSession.originalBranch}})};
 }
 
 type Props = {
@@ -363,8 +341,7 @@ function StatusLineInner({ messagesRef, lastAssistantMessageId, vimMode }: Props
     exceeds200kTokens: false,
     permissionMode,
     vimMode,
-    mainLoopModel,
-  });
+    mainLoopModel});
 
   // Debounce timer ref
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -476,8 +453,7 @@ function StatusLineInner({ messagesRef, lastAssistantMessageId, vimMode }: Props
     if (statusLine) {
       logEvent('tengu_status_line_mount', {
         command_length: statusLine.command.length,
-        padding: statusLine.padding,
-      });
+        padding: statusLine.padding});
       // Log if status line is configured but disabled by disableAllHooks
       if (settings.disableAllHooks === true) {
         logForDebugging('Status line is configured but disableAllHooks is true', { level: 'warn' });
@@ -488,10 +464,9 @@ function StatusLineInner({ messagesRef, lastAssistantMessageId, vimMode }: Props
       if (!checkHasTrustDialogAccepted()) {
         addNotification({
           key: 'statusline-trust-blocked',
-          text: 'statusline skipped · restart to fix',
+          text: t('builtinstatusline.skipTrustBlocked'),
           color: 'warning',
-          priority: 'low',
-        });
+          priority: 'low'});
         logForDebugging('Status line command skipped: workspace trust not accepted', { level: 'warn' });
       }
     }
@@ -514,12 +489,11 @@ function StatusLineInner({ messagesRef, lastAssistantMessageId, vimMode }: Props
   // Get padding from settings or default to 0
   const paddingX = settings?.statusLine?.padding ?? 0;
 
-  // ---- Top row data: feed BuiltinStatusLine (model + ctx + 5h + 7d + cost) ---
+  // ---- Top row data: feed BuiltinStatusLine (model + ctx + cost) ---
   const builtinRuntimeModel = getRuntimeMainLoopModel({
     permissionMode,
     mainLoopModel,
-    exceeds200kTokens: previousStateRef.current.exceeds200kTokens,
-  });
+    exceeds200kTokens: previousStateRef.current.exceeds200kTokens});
   const builtinContextWindowSize = getContextWindowForModel(builtinRuntimeModel, getSdkBetas());
   const builtinCurrentUsage = getCurrentUsage(messagesRef.current);
   const builtinUsedTokens = builtinCurrentUsage
@@ -527,24 +501,6 @@ function StatusLineInner({ messagesRef, lastAssistantMessageId, vimMode }: Props
       builtinCurrentUsage.cache_creation_input_tokens +
       builtinCurrentUsage.cache_read_input_tokens
     : 0;
-  const builtinContextPct = builtinCurrentUsage
-    ? Math.round(calculateContextPercentages(builtinCurrentUsage, builtinContextWindowSize).used ?? 0)
-    : 0;
-  const builtinRawUtil = getRawUtilization();
-  const builtinRateLimits = {
-    ...(builtinRawUtil.five_hour && {
-      five_hour: {
-        utilization: builtinRawUtil.five_hour.utilization,
-        resets_at: builtinRawUtil.five_hour.resets_at,
-      },
-    }),
-    ...(builtinRawUtil.seven_day && {
-      seven_day: {
-        utilization: builtinRawUtil.seven_day.utilization,
-        resets_at: builtinRawUtil.seven_day.resets_at,
-      },
-    }),
-  };
 
   // BuiltinStatusLine + CachePill: only when statusLineEnabled is explicitly true.
   // Shell command output: only when a statusLine.command is configured.
@@ -554,20 +510,18 @@ function StatusLineInner({ messagesRef, lastAssistantMessageId, vimMode }: Props
 
   return (
     <Box flexDirection="column" paddingX={paddingX}>
-      {/* Top: built-in fork status (model | ctx | 5h | 7d | cost) + Cache pill */}
+      {/* Top: built-in fork status (model | ctx | cost) + Cache pill */}
       {showBuiltin && (
-        <Box gap={2}>
+        <Text wrap="truncate">
           <BuiltinStatusLine
             modelName={renderModelName(builtinRuntimeModel)}
-            contextUsedPct={builtinContextPct}
             usedTokens={builtinUsedTokens}
             contextWindowSize={builtinContextWindowSize}
-            totalCostUsd={getTotalCost()}
-            rateLimits={builtinRateLimits}
           />
+          <Text dimColor>{' │ '}</Text>
           <GoalPill />
           <CachePill messages={messagesRef.current} />
-        </Box>
+        </Text>
       )}
       {/* Bottom: user-configured /statusline shell stdout (reserves row in fullscreen) */}
       {statusLineText ? (

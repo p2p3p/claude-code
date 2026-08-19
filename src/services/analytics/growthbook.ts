@@ -2,14 +2,12 @@ import { GrowthBook } from '@growthbook/growthbook'
 import { isEqual, memoize } from 'lodash-es'
 import {
   getIsNonInteractiveSession,
-  getSessionTrustAccepted,
-} from '../../bootstrap/state.js'
+  getSessionTrustAccepted} from '../../bootstrap/state.js'
 import { getGrowthBookClientKey } from '../../constants/keys.js'
 import {
   checkHasTrustDialogAccepted,
   getGlobalConfig,
-  saveGlobalConfig,
-} from '../../utils/config.js'
+  saveGlobalConfig} from '../../utils/config.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { toError } from '../../utils/errors.js'
 import { getAuthHeaders } from '../../utils/http.js'
@@ -18,12 +16,10 @@ import { createSignal } from '../../utils/signal.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import {
   type GitHubActionsMetadata,
-  getUserForGrowthBook,
-} from '../../utils/user.js'
+  getUserForGrowthBook} from '../../utils/user.js'
 import {
   is1PEventLoggingEnabled,
-  logGrowthBookExperimentTo1P,
-} from './firstPartyEventLogger.js'
+  logGrowthBookExperimentTo1P} from './firstPartyEventLogger.js'
 
 /**
  * User attributes sent to GrowthBook for targeting.
@@ -307,9 +303,7 @@ function logExposureForFeature(feature: string): void {
       variationId: expData.variationId,
       userAttributes: getUserAttributes(),
       experimentMetadata: {
-        feature_id: feature,
-      },
-    })
+        feature_id: feature}})
   }
 }
 
@@ -349,8 +343,7 @@ async function processRemoteEvalPayload(
     if ('value' in f && !('defaultValue' in f)) {
       transformedFeatures[key] = {
         ...f,
-        defaultValue: f.value,
-      }
+        defaultValue: f.value}
     } else {
       transformedFeatures[key] = f
     }
@@ -364,16 +357,14 @@ async function processRemoteEvalPayload(
       if (exp?.key && expResult.variationId !== undefined) {
         experimentDataByFeature.set(key, {
           experimentId: exp.key,
-          variationId: expResult.variationId,
-        })
+          variationId: expResult.variationId})
       }
     }
   }
   // Re-set the payload with transformed features
   await gbClient.setPayload({
     ...payload,
-    features: transformedFeatures,
-  })
+    features: transformedFeatures})
 
   // WORKAROUND: Cache the evaluated values directly from remote eval response.
   // The SDK's evalFeature() tries to re-evaluate rules locally, ignoring the
@@ -412,8 +403,7 @@ function syncRemoteEvalToDisk(): void {
   }
   saveGlobalConfig(current => ({
     ...current,
-    cachedGrowthBookFeatures: fresh,
-  }))
+    cachedGrowthBookFeatures: fresh}))
 }
 
 /**
@@ -500,7 +490,7 @@ function isGrowthBookEnabled(): boolean {
 }
 
 /**
- * Hostname of ANTHROPIC_BASE_URL when it points at a non-Anthropic proxy.
+ * Hostname of BASE_URL when it points at a non-Anthropic proxy.
  *
  * Enterprise-proxy deployments (Epic, Marble, etc.) typically use
  * apiKeyHelper auth, which means isAnthropicAuthEnabled() returns false and
@@ -512,7 +502,7 @@ function isGrowthBookEnabled(): boolean {
  * is absent for direct-API users. Hostname only — no path/query/creds.
  */
 export function getApiBaseUrlHost(): string | undefined {
-  const baseUrl = process.env.ANTHROPIC_BASE_URL
+  const baseUrl = process.env.BASE_URL
   if (!baseUrl) return undefined
   try {
     const host = new URL(baseUrl).host
@@ -553,9 +543,7 @@ function getUserAttributes(): GrowthBookUserAttributes {
     ...(email && { email }),
     ...(user.appVersion && { appVersion: user.appVersion }),
     ...(user.githubActionsMetadata && {
-      githubActionsMetadata: user.githubActionsMetadata,
-    }),
-  }
+      githubActionsMetadata: user.githubActionsMetadata})}
   return attributes
 }
 
@@ -622,10 +610,8 @@ const getGrowthBookClient = memoize(
         ? {
             log: (msg: string, ctx: Record<string, unknown>) => {
               logForDebugging(`GrowthBook: ${msg} ${jsonStringify(ctx)}`)
-            },
-          }
-        : {}),
-    })
+            }}
+        : {})})
     client = thisClient
 
     if (!hasAuth) {

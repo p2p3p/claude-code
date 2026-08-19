@@ -13,24 +13,21 @@ import { normalizeAttachmentForAPI } from '../utils/messages.js'
 import {
   createBedrockRuntimeClient,
   getInferenceProfileBackingModel,
-  isFoundationModel,
-} from '../utils/model/bedrock.js'
+  isFoundationModel} from '../utils/model/bedrock.js'
 import {
-  getDefaultSonnetModel,
+  getDefaultModel,
   getMainLoopModel,
   getSmallFastModel,
-  normalizeModelStringForAPI,
-} from '../utils/model/model.js'
+  normalizeModelStringForAPI} from '../utils/model/model.js'
 import { jsonStringify } from '../utils/slowOperations.js'
 import { isToolReferenceBlock } from '../utils/searchExtraTools.js'
-import { getAPIMetadata, getExtraBodyParams } from './api/claude.js'
-import { getAnthropicClient } from './api/client.js'
+import { getAPIMetadata, getExtraBodyParams } from './api/anthropic/index.js'
+import { getAnthropicClient } from './api/anthropic/client.js'
 import {
   createTrace,
   endTrace,
   isLangfuseEnabled,
-  recordLLMObservation,
-} from './langfuse/index.js'
+  recordLLMObservation} from './langfuse/index.js'
 import { getSessionId } from '../bootstrap/state.js'
 import { withTokenCountVCR } from './vcr.js'
 
@@ -90,8 +87,7 @@ function stripSearchExtraToolsFieldsFromMessages(
           type: 'tool_use' as const,
           id: toolUse.id,
           name: toolUse.name,
-          input: toolUse.input,
-        }
+          input: toolUse.input}
       }
 
       // Strip tool_reference blocks from tool_result content (user messages)
@@ -106,14 +102,12 @@ function stripSearchExtraToolsFieldsFromMessages(
           if (filteredContent.length === 0) {
             return {
               ...toolResult,
-              content: [{ type: 'text' as const, text: '[tool references]' }],
-            }
+              content: [{ type: 'text' as const, text: '[tool references]' }]}
           }
           if (filteredContent.length !== toolResult.content.length) {
             return {
               ...toolResult,
-              content: filteredContent,
-            }
+              content: filteredContent}
           }
         }
       }
@@ -123,8 +117,7 @@ function stripSearchExtraToolsFieldsFromMessages(
 
     return {
       ...message,
-      content: normalizedContent,
-    }
+      content: normalizedContent}
   })
 }
 
@@ -138,8 +131,7 @@ export async function countTokensWithAPI(
 
   const message: Anthropic.Beta.Messages.BetaMessageParam = {
     role: 'user',
-    content: content,
-  }
+    content: content}
 
   return countMessagesTokensWithAPI([message], [])
 }
@@ -166,15 +158,13 @@ export async function countMessagesTokensWithAPI(
           messages,
           tools,
           betas,
-          containsThinking,
-        })
+          containsThinking})
       }
 
       const anthropic = await getAnthropicClient({
         maxRetries: 1,
         model,
-        source: 'count_tokens',
-      })
+        source: 'count_tokens'})
 
       const filteredBetas =
         getAPIProvider() === 'vertex'
@@ -193,10 +183,7 @@ export async function countMessagesTokensWithAPI(
         ...(containsThinking && {
           thinking: {
             type: 'enabled',
-            budget_tokens: TOKEN_COUNT_THINKING_BUDGET,
-          },
-        }),
-      })
+            budget_tokens: TOKEN_COUNT_THINKING_BUDGET}})})
 
       if (typeof response.input_tokens !== 'number') {
         // Vertex client throws
@@ -290,13 +277,12 @@ export async function countTokensViaHaikuFallback(
   // with global inference profiles (see issue #10883).
   const model =
     isVertexGlobalEndpoint || isBedrockWithThinking || isVertexWithThinking
-      ? getDefaultSonnetModel()
+      ? getDefaultModel()
       : getSmallFastModel()
   const anthropic = await getAnthropicClient({
     maxRetries: 1,
     model,
-    source: 'count_tokens',
-  })
+    source: 'count_tokens'})
 
   // Strip tool search-specific fields (caller, tool_reference) before sending
   // These fields are only valid with the tool search beta header
@@ -321,8 +307,7 @@ export async function countTokensViaHaikuFallback(
         sessionId: getSessionId(),
         model: normalizeModelStringForAPI(model),
         provider: getAPIProvider(),
-        name: 'token-estimation',
-      })
+        name: 'token-estimation'})
     : null
   const response = await anthropic.beta.messages.create({
     model: normalizeModelStringForAPI(model),
@@ -336,10 +321,7 @@ export async function countTokensViaHaikuFallback(
     ...(containsThinking && {
       thinking: {
         type: 'enabled',
-        budget_tokens: TOKEN_COUNT_THINKING_BUDGET,
-      },
-    }),
-  })
+        budget_tokens: TOKEN_COUNT_THINKING_BUDGET}})})
 
   const usage = response.usage
   const inputTokens = usage.input_tokens
@@ -355,14 +337,11 @@ export async function countTokensViaHaikuFallback(
       input_tokens: inputTokens,
       output_tokens: usage.output_tokens,
       cache_creation_input_tokens: cacheCreationTokens || undefined,
-      cache_read_input_tokens: cacheReadTokens || undefined,
-    },
+      cache_read_input_tokens: cacheReadTokens || undefined},
     startTime: new Date(apiStart),
     endTime: new Date(),
     ...(containsThinking && {
-      thinking: { type: 'enabled', budgetTokens: TOKEN_COUNT_THINKING_BUDGET },
-    }),
-  })
+      thinking: { type: 'enabled', budgetTokens: TOKEN_COUNT_THINKING_BUDGET }})})
   endTrace(langfuseTrace)
 
   return inputTokens + cacheCreationTokens + cacheReadTokens
@@ -506,8 +485,7 @@ async function countTokensWithBedrock({
   messages,
   tools,
   betas,
-  containsThinking,
-}: {
+  containsThinking}: {
   model: string
   messages: Anthropic.Beta.Messages.BetaMessageParam[]
   tools: Anthropic.Beta.Messages.BetaToolUnion[]
@@ -536,10 +514,7 @@ async function countTokensWithBedrock({
       ...(containsThinking && {
         thinking: {
           type: 'enabled',
-          budget_tokens: TOKEN_COUNT_THINKING_BUDGET,
-        },
-      }),
-    }
+          budget_tokens: TOKEN_COUNT_THINKING_BUDGET}})}
 
     const { CountTokensCommand } = await import(
       '@aws-sdk/client-bedrock-runtime'
@@ -548,10 +523,7 @@ async function countTokensWithBedrock({
       modelId,
       input: {
         invokeModel: {
-          body: new TextEncoder().encode(jsonStringify(requestBody)),
-        },
-      },
-    }
+          body: new TextEncoder().encode(jsonStringify(requestBody))}}}
     const response = await client.send(new CountTokensCommand(input))
     const tokenCount = response.inputTokens ?? null
     return tokenCount

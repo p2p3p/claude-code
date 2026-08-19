@@ -18,8 +18,7 @@ import {
   PLUTIL_PATH,
   WINDOWS_REGISTRY_KEY_PATH_HKCU,
   WINDOWS_REGISTRY_KEY_PATH_HKLM,
-  WINDOWS_REGISTRY_VALUE_NAME,
-} from './constants.js'
+  WINDOWS_REGISTRY_VALUE_NAME} from './constants.js'
 
 export type RawReadResult = {
   plistStdouts: Array<{ stdout: string; label: string }> | null
@@ -82,8 +81,7 @@ export function fireRawRead(): Promise<RawReadResult> {
           ? [{ stdout: winner.stdout, label: winner.label }]
           : [],
         hklmStdout: null,
-        hkcuStdout: null,
-      }
+        hkcuStdout: null}
     }
 
     if (process.platform === 'win32') {
@@ -104,8 +102,7 @@ export function fireRawRead(): Promise<RawReadResult> {
       return {
         plistStdouts: null,
         hklmStdout: hklm.code === 0 ? hklm.stdout : null,
-        hkcuStdout: hkcu.code === 0 ? hkcu.stdout : null,
-      }
+        hkcuStdout: hkcu.code === 0 ? hkcu.stdout : null}
     }
 
     return { plistStdouts: null, hklmStdout: null, hkcuStdout: null }

@@ -1,11 +1,11 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const detach = {
   type: 'local',
   name: 'detach',
-  description: 'Detach from a sub CLI (or all connected subs)',
+  description: t('cmd.descDetach'),
   supportsNonInteractive: false,
-  load: () => import('./detach.js'),
-} satisfies Command
+  load: () => import('./detach.js')} satisfies Command
 
 export default detach

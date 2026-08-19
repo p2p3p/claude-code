@@ -63,8 +63,7 @@ const CLI_COMMAND_MAPPING: Record<string, CodeIndexingTool> = {
   gitloop: 'gitloop',
   // Cloud provider AI assistants
   q: 'amazon-q',
-  gemini: 'gemini',
-}
+  gemini: 'gemini'}
 
 /**
  * Mapping of MCP server name patterns to code indexing tools.

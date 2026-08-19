@@ -3,6 +3,7 @@ import React, { useCallback } from 'react';
 import { logEvent } from 'src/services/analytics/index.js';
 import { Box, Text } from '@anthropic/ink';
 import { getSettings_DEPRECATED, updateSettingsForSource } from '../utils/settings/settings.js';
+import { t } from '../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { SelectMulti } from './CustomSelect/SelectMulti.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
@@ -24,23 +25,20 @@ export function MCPServerMultiselectDialog({ serverNames, onDone }: Props): Reac
 
     logEvent('tengu_mcp_multidialog_choice', {
       approved: approvedServers.length,
-      rejected: rejectedServers.length,
-    });
+      rejected: rejectedServers.length});
 
     // Update settings with approved servers
     if (approvedServers.length > 0) {
       const newEnabledServers = [...new Set([...enabledServers, ...approvedServers])];
       updateSettingsForSource('localSettings', {
-        enabledMcpjsonServers: newEnabledServers,
-      });
+        enabledMcpjsonServers: newEnabledServers});
     }
 
     // Update settings with rejected servers
     if (rejectedServers.length > 0) {
       const newDisabledServers = [...new Set([...disabledServers, ...rejectedServers])];
       updateSettingsForSource('localSettings', {
-        disabledMcpjsonServers: newDisabledServers,
-      });
+        disabledMcpjsonServers: newDisabledServers});
     }
 
     onDone();
@@ -54,8 +52,7 @@ export function MCPServerMultiselectDialog({ serverNames, onDone }: Props): Reac
     const newDisabledServers = [...new Set([...disabledServers, ...serverNames])];
 
     updateSettingsForSource('localSettings', {
-      disabledMcpjsonServers: newDisabledServers,
-    });
+      disabledMcpjsonServers: newDisabledServers});
 
     onDone();
   }, [serverNames, onDone]);
@@ -63,8 +60,8 @@ export function MCPServerMultiselectDialog({ serverNames, onDone }: Props): Reac
   return (
     <>
       <Dialog
-        title={`${serverNames.length} new MCP servers found in .mcp.json`}
-        subtitle="Select any you wish to enable."
+        title={t('mcpServerDialog.title', serverNames.length)}
+        subtitle={t('mcpServerDialog.subtitle')}
         color="warning"
         onCancel={handleEscRejectAll}
         hideInputGuide
@@ -74,8 +71,7 @@ export function MCPServerMultiselectDialog({ serverNames, onDone }: Props): Reac
         <SelectMulti
           options={serverNames.map(server => ({
             label: server,
-            value: server,
-          }))}
+            value: server}))}
           defaultValue={serverNames}
           onSubmit={onSubmit}
           onCancel={handleEscRejectAll}
@@ -85,13 +81,13 @@ export function MCPServerMultiselectDialog({ serverNames, onDone }: Props): Reac
       <Box paddingX={1}>
         <Text dimColor italic>
           <Byline>
-            <KeyboardShortcutHint shortcut="Space" action="select" />
-            <KeyboardShortcutHint shortcut="Enter" action="confirm" />
+            <KeyboardShortcutHint shortcut="Space" action={t('shortcutHint.select')} />
+            <KeyboardShortcutHint shortcut="Enter" action={t('shortcutHint.confirm')} />
             <ConfigurableShortcutHint
               action="confirm:no"
               context="Confirmation"
               fallback="Esc"
-              description="reject all"
+              description={t('mcpServerDialog.rejectAll')}
             />
           </Byline>
         </Text>

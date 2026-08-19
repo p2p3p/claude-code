@@ -15,8 +15,7 @@ import { getProjectsDir } from './sessionStorage.js'
 import { getSettingsWithAllErrors } from './settings/allErrors.js'
 import {
   getSettings_DEPRECATED,
-  rawSettingsContainsKey,
-} from './settings/settings.js'
+  rawSettingsContainsKey} from './settings/settings.js'
 import { TOOL_RESULTS_SUBDIR } from './toolResultStorage.js'
 import { cleanupStaleAgentWorktrees } from './worktree.js'
 
@@ -41,8 +40,7 @@ export function addCleanupResults(
 ): CleanupResult {
   return {
     messages: a.messages + b.messages,
-    errors: a.errors + b.errors,
-  }
+    errors: a.errors + b.errors}
 }
 
 export function convertFileNameToDate(filename: string): Date {
@@ -329,8 +327,7 @@ export async function cleanupOldFileHistoryBackups(): Promise<CleanupResult> {
           if (stats.mtime < cutoffDate) {
             await fsImpl.rm(fileHistorySessionDir, {
               recursive: true,
-              force: true,
-            })
+              force: true})
             result.messages++
           }
         } catch {
@@ -521,14 +518,12 @@ export async function cleanupNpmCacheForAnthropicPackages(): Promise<void> {
     logEvent('tengu_npm_cache_cleanup', {
       success: true,
       durationMs,
-      entriesRemoved: keysToRemove.length,
-    })
+      entriesRemoved: keysToRemove.length})
   } catch (error) {
     logError(error as Error)
     logEvent('tengu_npm_cache_cleanup', {
       success: false,
-      durationMs: Date.now() - startTime,
-    })
+      durationMs: Date.now() - startTime})
   } finally {
     await lockfile.unlock(markerPath, { realpath: false }).catch(() => {})
   }

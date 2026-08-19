@@ -6,15 +6,13 @@ import { useKeybinding } from '../../../keybindings/useKeybinding.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../../services/analytics/growthbook.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../../services/analytics/index.js';
+  logEvent} from '../../../services/analytics/index.js';
 import { sanitizeToolNameForAnalytics } from '../../../services/analytics/metadata.js';
 import { useAppState } from '../../../state/AppState.js';
 import { BashTool } from '@claude-code-best/builtin-tools/tools/BashTool/BashTool.js';
 import {
   getFirstWordPrefix,
-  getSimpleCommandPrefix,
-} from '@claude-code-best/builtin-tools/tools/BashTool/bashPermissions.js';
+  getSimpleCommandPrefix} from '@claude-code-best/builtin-tools/tools/BashTool/bashPermissions.js';
 import { getDestructiveCommandWarning } from '@claude-code-best/builtin-tools/tools/BashTool/destructiveCommandWarning.js';
 import { parseSedEditCommand } from '@claude-code-best/builtin-tools/tools/BashTool/sedEditParser.js';
 import { shouldUseSandbox } from '@claude-code-best/builtin-tools/tools/BashTool/shouldUseSandbox.js';
@@ -23,8 +21,7 @@ import {
   createPromptRuleContent,
   generateGenericDescription,
   getBashPromptAllowDescriptions,
-  isClassifierPermissionsEnabled,
-} from '../../../utils/permissions/bashClassifier.js';
+  isClassifierPermissionsEnabled} from '../../../utils/permissions/bashClassifier.js';
 import { extractRules } from '../../../utils/permissions/PermissionUpdate.js';
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js';
 import { SandboxManager } from '../../../utils/sandbox/sandbox-adapter.js';
@@ -40,6 +37,7 @@ import { PermissionRuleExplanation } from '../PermissionRuleExplanation.js';
 import { SedEditPermissionRequest } from '../SedEditPermissionRequest/SedEditPermissionRequest.js';
 import { useShellPermissionFeedback } from '../useShellPermissionFeedback.js';
 import { logUnaryPermissionEvent } from '../utils.js';
+import { t } from '../../../utils/i18n/index.js';
 import { bashToolUseOptions } from './bashToolUseOptions.js';
 
 const CHECKING_TEXT = 'Attempting to auto-approve\u2026';
@@ -117,8 +115,7 @@ function BashPermissionRequestInner({
   verbose: _verbose,
   workerBadge,
   command,
-  description,
-}: PermissionRequestProps & {
+  description}: PermissionRequestProps & {
   command: string;
   description?: string;
 }): React.ReactNode {
@@ -128,8 +125,7 @@ function BashPermissionRequestInner({
     toolName: toolUseConfirm.tool.name,
     toolInput: toolUseConfirm.input,
     toolDescription: toolUseConfirm.description,
-    messages: toolUseContext.messages,
-  });
+    messages: toolUseContext.messages});
   const {
     yesInputMode,
     noInputMode,
@@ -142,13 +138,11 @@ function BashPermissionRequestInner({
     focusedOption,
     handleInputModeToggle,
     handleReject,
-    handleFocus,
-  } = useShellPermissionFeedback({
+    handleFocus} = useShellPermissionFeedback({
     toolUseConfirm,
     onDone,
     onReject,
-    explainerVisible: explainerState.visible,
-  });
+    explainerVisible: explainerState.visible});
   const [showPermissionDebug, setShowPermissionDebug] = useState(false);
   const [classifierDescription, setClassifierDescription] = useState(description || '');
   // Track whether the initial description (from prop or async generation) was empty.
@@ -284,8 +278,7 @@ function BashPermissionRequestInner({
         yesInputMode,
         noInputMode,
         editablePrefix,
-        onEditablePrefixChange,
-      }),
+        onEditablePrefixChange}),
     [
       toolUseConfirm,
       classifierDescription,
@@ -303,8 +296,7 @@ function BashPermissionRequestInner({
     setShowPermissionDebug(prev => !prev);
   }, []);
   useKeybinding('permission:toggleDebug', handleToggleDebug, {
-    context: 'Confirmation',
-  });
+    context: 'Confirmation'});
 
   // Allow Esc to dismiss the checkmark after auto-approval
   const handleDismissCheckmark = useCallback(() => {
@@ -312,8 +304,7 @@ function BashPermissionRequestInner({
   }, [toolUseConfirm]);
   useKeybinding('confirm:no', handleDismissCheckmark, {
     context: 'Confirmation',
-    isActive: feature('BASH_CLASSIFIER') ? !!toolUseConfirm.classifierAutoApproved : false,
-  });
+    isActive: feature('BASH_CLASSIFIER') ? !!toolUseConfirm.classifierAutoApproved : false});
 
   function onSelect(value: string) {
     // Map options to numeric values for analytics (strings not allowed in logEvent)
@@ -321,21 +312,18 @@ function BashPermissionRequestInner({
       yes: 1,
       'yes-apply-suggestions': 2,
       'yes-prefix-edited': 2,
-      no: 3,
-    };
+      no: 3};
     if (feature('BASH_CLASSIFIER')) {
       optionIndex = {
         yes: 1,
         'yes-apply-suggestions': 2,
         'yes-prefix-edited': 2,
         'yes-classifier-reviewed': 3,
-        no: 4,
-      };
+        no: 4};
     }
     logEvent('tengu_permission_request_option_selected', {
       option_index: optionIndex[value],
-      explainer_visible: explainerState.visible,
-    });
+      explainer_visible: explainerState.visible});
 
     const toolNameForAnalytics = sanitizeToolNameForAnalytics(
       toolUseConfirm.tool.name,
@@ -353,12 +341,10 @@ function BashPermissionRequestInner({
             rules: [
               {
                 toolName: BashTool.name,
-                ruleContent: trimmedPrefix,
-              },
+                ruleContent: trimmedPrefix},
             ],
             behavior: 'allow',
-            destination: 'localSettings',
-          },
+            destination: 'localSettings'},
         ];
         toolUseConfirm.onAllow(toolUseConfirm.input, prefixUpdates);
       }
@@ -378,12 +364,10 @@ function BashPermissionRequestInner({
             rules: [
               {
                 toolName: BashTool.name,
-                ruleContent: createPromptRuleContent(trimmedDescription),
-              },
+                ruleContent: createPromptRuleContent(trimmedDescription)},
             ],
             behavior: 'allow',
-            destination: 'session',
-          },
+            destination: 'session'},
         ];
         toolUseConfirm.onAllow(toolUseConfirm.input, permissionUpdates);
       }
@@ -401,8 +385,7 @@ function BashPermissionRequestInner({
           isMcp: toolUseConfirm.tool.isMcp ?? false,
           has_instructions: !!trimmedFeedback,
           instructions_length: trimmedFeedback.length,
-          entered_feedback_mode: yesFeedbackModeEntered,
-        });
+          entered_feedback_mode: yesFeedbackModeEntered});
         toolUseConfirm.onAllow(toolUseConfirm.input, [], trimmedFeedback || undefined);
         onDone();
         break;
@@ -425,8 +408,7 @@ function BashPermissionRequestInner({
           isMcp: toolUseConfirm.tool.isMcp ?? false,
           has_instructions: !!trimmedFeedback,
           instructions_length: trimmedFeedback.length,
-          entered_feedback_mode: noFeedbackModeEntered,
-        });
+          entered_feedback_mode: noFeedbackModeEntered});
 
         // Process rejection (with or without feedback)
         handleReject(trimmedFeedback || undefined);
@@ -438,26 +420,24 @@ function BashPermissionRequestInner({
   const classifierSubtitle = feature('BASH_CLASSIFIER') ? (
     toolUseConfirm.classifierAutoApproved ? (
       <Text>
-        <Text color="success">{figures.tick} Auto-approved</Text>
+        <Text color="success">{figures.tick} {t('bashPermission.autoApproved')}</Text>
         {toolUseConfirm.classifierMatchedRule && (
           <Text dimColor>
-            {' \u00b7 matched "'}
-            {toolUseConfirm.classifierMatchedRule}
-            {'"'}
+            {t('bashPermission.matchedRule', toolUseConfirm.classifierMatchedRule)}
           </Text>
         )}
       </Text>
     ) : toolUseConfirm.classifierCheckInProgress ? (
       <ClassifierCheckingSubtitle />
     ) : classifierWasChecking ? (
-      <Text dimColor>Requires manual approval</Text>
+      <Text dimColor>{t('bashPermission.requiresManual')}</Text>
     ) : undefined
   ) : undefined;
 
   return (
     <PermissionDialog
       workerBadge={workerBadge}
-      title={sandboxingEnabled && !isSandboxed ? 'Bash command (unsandboxed)' : 'Bash command'}
+      title={sandboxingEnabled && !isSandboxed ? t('bashPermission.titleUnsandboxed') : t('bashPermission.title')}
       subtitle={classifierSubtitle}
     >
       <Box flexDirection="column" paddingX={2} paddingY={1}>
@@ -475,7 +455,7 @@ function BashPermissionRequestInner({
           <PermissionDecisionDebugInfo permissionResult={toolUseConfirm.permissionResult} toolName="Bash" />
           {toolUseContext.options.debug && (
             <Box justifyContent="flex-end" marginTop={1}>
-              <Text dimColor>Ctrl-D to hide debug info</Text>
+              <Text dimColor>{t('bashpermissionrequest.ctrlDToHideDebugInfo')}</Text>
             </Box>
           )}
         </>
@@ -494,7 +474,7 @@ function BashPermissionRequestInner({
               </Box>
             )}
             <Text dimColor={feature('BASH_CLASSIFIER') ? toolUseConfirm.classifierAutoApproved : false}>
-              Do you want to proceed?
+              {t('bashPermission.doYouProceed')}
             </Text>
             <Select
               options={
@@ -514,12 +494,12 @@ function BashPermissionRequestInner({
           </Box>
           <Box justifyContent="space-between" marginTop={1}>
             <Text dimColor>
-              Esc to reject
+              {t('bashPermission.escToReject')}
               {((focusedOption === 'yes' && !yesInputMode) || (focusedOption === 'no' && !noInputMode)) &&
-                ' · Tab to add feedback'}
-              {explainerState.enabled && ` · ctrl+e to ${explainerState.visible ? 'hide' : 'explain'}`}
+                t('bashPermission.tabToAddFeedback')}
+              {explainerState.enabled && (explainerState.visible ? t('bashPermission.ctrlEToHide') : t('bashPermission.ctrlEToExplain'))}
             </Text>
-            {toolUseContext.options.debug && <Text dimColor>Ctrl+d to show debug info</Text>}
+            {toolUseContext.options.debug && <Text dimColor>{t('bashPermission.ctrlDToHide')}</Text>}
           </Box>
         </>
       )}

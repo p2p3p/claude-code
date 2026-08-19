@@ -9,6 +9,7 @@
 import figures from 'figures'
 import { errorMessage } from '../../utils/errors.js'
 import { gracefulShutdown } from '../../utils/gracefulShutdown.js'
+import { t } from '../../utils/i18n/index.js'
 import { logError } from '../../utils/log.js'
 import { getManagedPluginNames } from '../../utils/plugins/managedPlugins.js'
 import { parsePluginIdentifier } from '../../utils/plugins/pluginIdentifier.js'
@@ -16,13 +17,11 @@ import type { PluginScope } from '../../utils/plugins/schemas.js'
 import { writeToStdout } from '../../utils/process.js'
 import {
   buildPluginTelemetryFields,
-  classifyPluginCommandError,
-} from '../../utils/telemetry/pluginTelemetry.js'
+  classifyPluginCommandError} from '../../utils/telemetry/pluginTelemetry.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-  logEvent,
-} from '../analytics/index.js'
+  logEvent} from '../analytics/index.js'
 import {
   disableAllPluginsOp,
   disablePluginOp,
@@ -32,8 +31,7 @@ import {
   uninstallPluginOp,
   updatePluginOp,
   VALID_INSTALLABLE_SCOPES,
-  VALID_UPDATE_SCOPES,
-} from './pluginOperations.js'
+  VALID_UPDATE_SCOPES} from './pluginOperations.js'
 
 export { VALID_INSTALLABLE_SCOPES, VALID_UPDATE_SCOPES }
 
@@ -59,10 +57,10 @@ function handlePluginCommandError(
   const operation = plugin
     ? `${command} plugin "${plugin}"`
     : command === 'disable-all'
-      ? 'disable all plugins'
+      ? t('pluginCliCommands.disableAll')
       : `${command} plugins`
   console.error(
-    `${figures.cross} Failed to ${operation}: ${errorMessage(error)}`,
+    `${figures.cross} ${t('pluginCliCommands.failedTo', operation, errorMessage(error))}`,
   )
   const telemetryFields = plugin
     ? (() => {
@@ -72,14 +70,12 @@ function handlePluginCommandError(
             name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
           ...(marketplace && {
             _PROTO_marketplace_name:
-              marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-          }),
+              marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
           ...buildPluginTelemetryFields(
             name,
             marketplace,
             getManagedPluginNames(),
-          ),
-        }
+          )}
       })()
     : {}
   logEvent('tengu_plugin_command_failed', {
@@ -88,8 +84,7 @@ function handlePluginCommandError(
     error_category: classifyPluginCommandError(
       error,
     ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    ...telemetryFields,
-  })
+    ...telemetryFields})
   // eslint-disable-next-line custom-rules/no-process-exit
   process.exit(1)
 }
@@ -104,7 +99,7 @@ export async function installPlugin(
   scope: InstallableScope = 'user',
 ): Promise<void> {
   try {
-    console.log(`Installing plugin "${plugin}"...`)
+    console.log(t('pluginCliCommands.installingPlugin', plugin))
 
     const result = await installPluginOp(plugin, scope)
 
@@ -126,14 +121,12 @@ export async function installPlugin(
         name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
       ...(marketplace && {
         _PROTO_marketplace_name:
-          marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-      }),
+          marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
       scope: (result.scope ||
         scope) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       install_source:
         'cli-explicit' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      ...buildPluginTelemetryFields(name, marketplace, getManagedPluginNames()),
-    })
+      ...buildPluginTelemetryFields(name, marketplace, getManagedPluginNames())})
 
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(0)
@@ -169,12 +162,10 @@ export async function uninstallPlugin(
         name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
       ...(marketplace && {
         _PROTO_marketplace_name:
-          marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-      }),
+          marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
       scope: (result.scope ||
         scope) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      ...buildPluginTelemetryFields(name, marketplace, getManagedPluginNames()),
-    })
+      ...buildPluginTelemetryFields(name, marketplace, getManagedPluginNames())})
 
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(0)
@@ -209,12 +200,10 @@ export async function enablePlugin(
         name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
       ...(marketplace && {
         _PROTO_marketplace_name:
-          marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-      }),
+          marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
       scope:
         result.scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      ...buildPluginTelemetryFields(name, marketplace, getManagedPluginNames()),
-    })
+      ...buildPluginTelemetryFields(name, marketplace, getManagedPluginNames())})
 
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(0)
@@ -249,12 +238,10 @@ export async function disablePlugin(
         name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
       ...(marketplace && {
         _PROTO_marketplace_name:
-          marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-      }),
+          marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
       scope:
         result.scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      ...buildPluginTelemetryFields(name, marketplace, getManagedPluginNames()),
-    })
+      ...buildPluginTelemetryFields(name, marketplace, getManagedPluginNames())})
 
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(0)
@@ -316,8 +303,7 @@ export async function updatePluginCli(
           name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
         ...(marketplace && {
           _PROTO_marketplace_name:
-            marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-        }),
+            marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
         old_version: (result.oldVersion ||
           'unknown') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         new_version: (result.newVersion ||
@@ -326,8 +312,7 @@ export async function updatePluginCli(
           name,
           marketplace,
           getManagedPluginNames(),
-        ),
-      })
+        )})
     }
 
     await gracefulShutdown(0)

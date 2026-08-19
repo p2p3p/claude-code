@@ -129,8 +129,7 @@ async function loadInstallCountsCache(): Promise<InstallCountsCache | null> {
     return {
       version: cache.version as number,
       fetchedAt: cache.fetchedAt,
-      counts: cache.counts,
-    }
+      counts: cache.counts}
   } catch (error) {
     const code = getErrnoCode(error)
     if (code !== 'ENOENT') {
@@ -161,8 +160,7 @@ async function saveInstallCountsCache(
     const content = jsonStringify(cache, null, 2)
     await writeFile(tempPath, content, {
       encoding: 'utf-8',
-      mode: 0o600,
-    })
+      mode: 0o600})
 
     // Atomic rename
     await rename(tempPath, cachePath)
@@ -189,8 +187,7 @@ async function fetchInstallCountsFromGitHub(): Promise<
   const started = performance.now()
   try {
     const response = await axios.get<GitHubStatsResponse>(INSTALL_COUNTS_URL, {
-      timeout: 10000,
-    })
+      timeout: 10000})
 
     if (!response.data?.plugins || !Array.isArray(response.data.plugins)) {
       throw new Error('Invalid response format from install counts API')
@@ -243,8 +240,7 @@ export async function getInstallCounts(): Promise<Map<string, number> | null> {
     const newCache: InstallCountsCache = {
       version: INSTALL_COUNTS_CACHE_VERSION,
       fetchedAt: new Date().toISOString(),
-      counts,
-    }
+      counts}
     await saveInstallCountsCache(newCache)
 
     // Convert to Map

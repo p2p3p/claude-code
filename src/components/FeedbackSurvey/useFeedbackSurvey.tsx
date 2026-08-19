@@ -3,8 +3,7 @@ import { useDynamicConfig } from 'src/hooks/useDynamicConfig.js';
 import { isFeedbackSurveyDisabled } from 'src/services/analytics/config.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
 import { isPolicyAllowed } from '../../services/policyLimits/index.js';
 import type { Message } from '../../types/message.js';
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js';
@@ -41,12 +40,10 @@ const DEFAULT_FEEDBACK_SURVEY_CONFIG: FeedbackSurveyConfig = {
   minUserTurnsBetweenFeedback: 10,
   hideThanksAfterMs: 3000,
   onForModels: ['*'],
-  probability: 0.005,
-};
+  probability: 0.005};
 
 const DEFAULT_TRANSCRIPT_ASK_CONFIG: TranscriptAskConfig = {
-  probability: 0,
-};
+  probability: 0};
 
 export function useFeedbackSurvey(
   messages: Message[],
@@ -96,17 +93,14 @@ export function useFeedbackSurvey(
       }
       return {
         timeLastShown: timestamp,
-        submitCountAtLastAppearance: submitCountValue,
-      };
+        submitCountAtLastAppearance: submitCountValue};
     });
     // Persist cross-session pacing state (previously done by onChangeAppState observer)
     if (getGlobalConfig().feedbackSurveyState?.lastShownTime !== timestamp) {
       saveGlobalConfig(current => ({
         ...current,
         feedbackSurveyState: {
-          lastShownTime: timestamp,
-        },
-      }));
+          lastShownTime: timestamp}}));
     }
   }, []);
 
@@ -118,13 +112,11 @@ export function useFeedbackSurvey(
         appearance_id: appearanceId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         last_assistant_message_id:
           lastAssistantMessageIdRef.current as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        survey_type: surveyType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        survey_type: surveyType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       void logOTelEvent('feedback_survey', {
         event_type: 'appeared',
         appearance_id: appearanceId,
-        survey_type: surveyType,
-      });
+        survey_type: surveyType});
     },
     [updateLastShownTime, surveyType],
   );
@@ -138,14 +130,12 @@ export function useFeedbackSurvey(
         response: selected as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         last_assistant_message_id:
           lastAssistantMessageIdRef.current as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        survey_type: surveyType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        survey_type: surveyType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       void logOTelEvent('feedback_survey', {
         event_type: 'responded',
         appearance_id: appearanceId,
         response: selected,
-        survey_type: surveyType,
-      });
+        survey_type: surveyType});
     },
     [updateLastShownTime, surveyType],
   );
@@ -184,13 +174,11 @@ export function useFeedbackSurvey(
         last_assistant_message_id:
           lastAssistantMessageIdRef.current as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         survey_type: surveyType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        trigger: trigger as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        trigger: trigger as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       void logOTelEvent('feedback_survey', {
         event_type: 'transcript_prompt_appeared',
         appearance_id: appearanceId,
-        survey_type: surveyType,
-      });
+        survey_type: surveyType});
     },
     [surveyType],
   );
@@ -210,14 +198,12 @@ export function useFeedbackSurvey(
         last_assistant_message_id:
           lastAssistantMessageIdRef.current as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         survey_type: surveyType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        trigger: trigger as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        trigger: trigger as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
       if (selected === 'dont_ask_again') {
         saveGlobalConfig(current => ({
           ...current,
-          transcriptShareDismissed: true,
-        }));
+          transcriptShareDismissed: true}));
       }
 
       if (selected === 'yes') {
@@ -227,8 +213,7 @@ export function useFeedbackSurvey(
             ? 'transcript_share_submitted'
             : 'transcript_share_failed') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           appearance_id: appearanceId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          trigger: trigger as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        });
+          trigger: trigger as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
         return result.success;
       }
 
@@ -243,8 +228,7 @@ export function useFeedbackSurvey(
     onSelect,
     shouldShowTranscriptPrompt,
     onTranscriptPromptShown,
-    onTranscriptSelect,
-  });
+    onTranscriptSelect});
 
   const currentModel = getMainLoopModel();
   const isModelAllowed = useMemo(() => {

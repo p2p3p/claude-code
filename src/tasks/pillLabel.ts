@@ -1,5 +1,6 @@
 import { DIAMOND_FILLED, DIAMOND_OPEN } from '../constants/figures.js'
 import { count } from '../utils/array.js'
+import { t } from '../utils/i18n/index.js'
 import type { BackgroundTaskState } from './types.js'
 
 /**
@@ -21,9 +22,9 @@ export function getPillLabel(tasks: BackgroundTaskState[]): string {
         const shells = n - monitors
         const parts: string[] = []
         if (shells > 0)
-          parts.push(shells === 1 ? '1 shell' : `${shells} shells`)
+          parts.push(t('pillLabel.shells', shells))
         if (monitors > 0)
-          parts.push(monitors === 1 ? '1 monitor' : `${monitors} monitors`)
+          parts.push(t('pillLabel.monitors', monitors))
         return parts.join(', ')
       }
       case 'in_process_teammate': {
@@ -32,10 +33,10 @@ export function getPillLabel(tasks: BackgroundTaskState[]): string {
             t.type === 'in_process_teammate' ? t.identity.teamName : '',
           ),
         ).size
-        return teamCount === 1 ? '1 team' : `${teamCount} teams`
+        return t('pillLabel.teams', teamCount)
       }
       case 'local_agent':
-        return n === 1 ? '1 local agent' : `${n} local agents`
+        return t('pillLabel.localAgents', n)
       case 'remote_agent': {
         const first = tasks[0]!
         // Per design mockup: ◇ open diamond while running/needs-input,
@@ -43,27 +44,25 @@ export function getPillLabel(tasks: BackgroundTaskState[]): string {
         if (n === 1 && first.type === 'remote_agent' && first.isUltraplan) {
           switch (first.ultraplanPhase) {
             case 'plan_ready':
-              return `${DIAMOND_FILLED} ultraplan ready`
+              return `${DIAMOND_FILLED} ${t('pillLabel.ultraplanReady')}`
             case 'needs_input':
-              return `${DIAMOND_OPEN} ultraplan needs your input`
+              return `${DIAMOND_OPEN} ${t('pillLabel.ultraplanNeedsInput')}`
             default:
-              return `${DIAMOND_OPEN} ultraplan`
+              return `${DIAMOND_OPEN} ${t('pillLabel.ultraplan')}`
           }
         }
-        return n === 1
-          ? `${DIAMOND_OPEN} 1 cloud session`
-          : `${DIAMOND_OPEN} ${n} cloud sessions`
+        return `${DIAMOND_OPEN} ${t('pillLabel.cloudSessions', n)}`
       }
       case 'local_workflow':
-        return n === 1 ? '1 background workflow' : `${n} background workflows`
+        return t('pillLabel.backgroundWorkflows', n)
       case 'monitor_mcp':
-        return n === 1 ? '1 monitor' : `${n} monitors`
+        return t('pillLabel.monitors', n)
       case 'dream':
-        return 'dreaming'
+        return t('pillLabel.dreaming')
     }
   }
 
-  return `${n} background ${n === 1 ? 'task' : 'tasks'}`
+  return t('pillLabel.backgroundTasks', n)
 }
 
 /**

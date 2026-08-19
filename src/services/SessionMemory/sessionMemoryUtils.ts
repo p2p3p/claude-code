@@ -32,13 +32,11 @@ export type SessionMemoryConfig = {
 export const DEFAULT_SESSION_MEMORY_CONFIG: SessionMemoryConfig = {
   minimumMessageTokensToInit: 10000,
   minimumTokensBetweenUpdate: 5000,
-  toolCallsBetweenUpdates: 3,
-}
+  toolCallsBetweenUpdates: 3}
 
 // Current session memory configuration
 let sessionMemoryConfig: SessionMemoryConfig = {
-  ...DEFAULT_SESSION_MEMORY_CONFIG,
-}
+  ...DEFAULT_SESSION_MEMORY_CONFIG}
 
 // Track the last summarized message ID (shared state)
 let lastSummarizedMessageId: string | undefined
@@ -115,8 +113,7 @@ export async function getSessionMemoryContent(): Promise<string | null> {
     const content = await fs.readFile(memoryPath, { encoding: 'utf-8' })
 
     logEvent('tengu_session_memory_loaded', {
-      content_length: content.length,
-    })
+      content_length: content.length})
 
     return content
   } catch (e: unknown) {
@@ -133,8 +130,7 @@ export function setSessionMemoryConfig(
 ): void {
   sessionMemoryConfig = {
     ...sessionMemoryConfig,
-    ...config,
-  }
+    ...config}
 }
 
 /**

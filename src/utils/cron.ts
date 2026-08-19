@@ -7,6 +7,8 @@
 // No L, W, ?, or name aliases. All times are interpreted in the process's
 // local timezone — "0 9 * * *" means 9am wherever the CLI is running.
 
+import { t } from './i18n/index.js'
+
 export type CronFields = {
   minute: number[]
   hour: number[]
@@ -102,8 +104,7 @@ export function parseCronExpression(expr: string): CronFields | null {
     hour: expanded[1]!,
     dayOfMonth: expanded[2]!,
     month: expanded[3]!,
-    dayOfWeek: expanded[4]!,
-  }
+    dayOfWeek: expanded[4]!}
 }
 
 /**
@@ -217,8 +218,7 @@ function formatUtcTimeAsLocal(minute: number, hour: number): string {
   return d.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
-    timeZoneName: 'short',
-  })
+    timeZoneName: 'short'})
 }
 
 export function cronToHuman(cron: string, opts?: { utc?: boolean }): string {
@@ -284,7 +284,7 @@ export function cronToHuman(cron: string, opts?: { utc?: boolean }): string {
 
   // Daily at specific time: M H * * *
   if (dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
-    return `Every day at ${fmtTime(m, h)}`
+    return t('cron.everyDay', fmtTime(m, h))
   }
 
   // Specific day of week: M H * * D
@@ -302,12 +302,12 @@ export function cronToHuman(cron: string, opts?: { utc?: boolean }): string {
     } else {
       dayName = DAY_NAMES[dayIndex]
     }
-    if (dayName) return `Every ${dayName} at ${fmtTime(m, h)}`
+    if (dayName) return t('cron.everyDayName', dayName, fmtTime(m, h))
   }
 
   // Weekdays: M H * * 1-5
   if (dayOfMonth === '*' && month === '*' && dayOfWeek === '1-5') {
-    return `Weekdays at ${fmtTime(m, h)}`
+    return t('cron.weekdays', fmtTime(m, h))
   }
 
   return cron

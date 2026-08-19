@@ -95,8 +95,7 @@ export function createStatsStore(): StatsStore {
       }
 
       return result;
-    },
-  };
+    }};
 }
 
 export const StatsContext = createContext<StatsStore | null>(null);
@@ -116,8 +115,7 @@ export function StatsProvider({ store: externalStore, children }: Props): React.
       if (Object.keys(metrics).length > 0) {
         saveCurrentProjectConfig(current => ({
           ...current,
-          lastSessionMetrics: metrics,
-        }));
+          lastSessionMetrics: metrics}));
       }
     };
     process.on('exit', flush);

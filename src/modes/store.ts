@@ -4,8 +4,8 @@ import { useSyncExternalStore } from 'react'
 import { parse as parseYaml } from 'yaml'
 import {
   getInitialSettings,
-  updateSettingsForSource,
-} from '../utils/settings/settings.js'
+  updateSettingsForSource} from '../utils/settings/settings.js'
+import { t } from '../utils/i18n/index.js'
 import { getClaudeConfigHomeDir } from '../utils/envUtils.js'
 import { DEFAULT_MODES } from './defaults.js'
 import type { CCBMode } from './types.js'
@@ -39,12 +39,11 @@ function parseMarkdownFrontmatter(raw: string): {
 } {
   const parts = raw.split(/^---$/m)
   if (parts.length < 3) {
-    throw new Error('Invalid markdown frontmatter: missing --- delimiters')
+    throw new Error(t('modeStore.invalidFrontmatter'))
   }
   return {
     frontmatter: parseYaml(parts[1]) as Record<string, unknown>,
-    body: parts.slice(2).join('---').trim(),
-  }
+    body: parts.slice(2).join('---').trim()}
 }
 
 function loadCustomModes(): CCBMode[] {
@@ -86,8 +85,7 @@ function loadCustomModes(): CCBMode[] {
             ),
             promptPrefix: String(
               (data.ui as Record<string, unknown>)?.prompt_prefix || '',
-            ),
-          },
+            )},
           permissions: {
             defaultMode:
               ((data.permissions as Record<string, unknown>)
@@ -96,15 +94,12 @@ function loadCustomModes(): CCBMode[] {
             memoryExtract: Boolean(
               (data.permissions as Record<string, unknown>)?.memory_extract ??
                 true,
-            ),
-          },
+            )},
           responseStyle: {
             verbosity:
               ((data.response_style as Record<string, unknown>)
                 ?.verbosity as CCBMode['responseStyle']['verbosity']) ||
-              'normal',
-          },
-        })
+              'normal'}})
       } catch {
         // skip invalid yaml or markdown files
       }
@@ -142,7 +137,7 @@ export function setCurrentMode(slug: string): void {
   const mode = modes.find(m => m.slug === slug)
   if (!mode) {
     throw new Error(
-      `Unknown mode: ${slug}. Available: ${modes.map(m => m.slug).join(', ')}`,
+      t('modeStore.unknownMode', slug, modes.map(m => m.slug).join(', ')),
     )
   }
   currentModeSlug = slug

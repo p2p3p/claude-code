@@ -19,13 +19,11 @@ import {
   addMarketplaceSource,
   type DeclaredMarketplace,
   getDeclaredMarketplaces,
-  loadKnownMarketplacesConfig,
-} from './marketplaceManager.js'
+  loadKnownMarketplacesConfig} from './marketplaceManager.js'
 import {
   isLocalMarketplaceSource,
   type KnownMarketplacesFile,
-  type MarketplaceSource,
-} from './schemas.js'
+  type MarketplaceSource} from './schemas.js'
 
 export type MarketplaceDiff = {
   /** Declared in settings, absent from known_marketplaces.json */
@@ -72,8 +70,7 @@ export function diffMarketplaces(
       sourceChanged.push({
         name,
         declaredSource: normalizedIntent,
-        materializedSource: state.source,
-      })
+        materializedSource: state.source})
     } else {
       upToDate.push(name)
     }
@@ -128,8 +125,7 @@ export async function reconcileMarketplaces(
   }
 
   const diff = diffMarketplaces(declared, materialized, {
-    projectRoot: getOriginalCwd(),
-  })
+    projectRoot: getOriginalCwd()})
 
   type WorkItem = {
     name: string
@@ -141,15 +137,13 @@ export async function reconcileMarketplaces(
       (name): WorkItem => ({
         name,
         source: normalizeSource(declared[name]!.source),
-        action: 'install',
-      }),
+        action: 'install'}),
     ),
     ...diff.sourceChanged.map(
       ({ name, declaredSource }): WorkItem => ({
         name,
         source: declaredSource,
-        action: 'update',
-      }),
+        action: 'update'}),
     ),
   ]
 
@@ -186,8 +180,7 @@ export async function reconcileMarketplaces(
       updated: [],
       failed: [],
       upToDate: diff.upToDate,
-      skipped,
-    }
+      skipped}
   }
 
   logForDebugging(
@@ -205,8 +198,7 @@ export async function reconcileMarketplaces(
       name,
       action,
       index: i + 1,
-      total: toProcess.length,
-    })
+      total: toProcess.length})
 
     try {
       // addMarketplaceSource is source-idempotent — same source returns
@@ -220,8 +212,7 @@ export async function reconcileMarketplaces(
       opts?.onProgress?.({
         type: 'installed',
         name,
-        alreadyMaterialized: result.alreadyMaterialized,
-      })
+        alreadyMaterialized: result.alreadyMaterialized})
     } catch (e) {
       const error = errorMessage(e)
       failed.push({ name, error })
@@ -258,8 +249,7 @@ function normalizeSource(
     const canonicalRoot = findCanonicalGitRoot(base)
     return {
       ...source,
-      path: resolve(canonicalRoot ?? base, source.path),
-    }
+      path: resolve(canonicalRoot ?? base, source.path)}
   }
   return source
 }

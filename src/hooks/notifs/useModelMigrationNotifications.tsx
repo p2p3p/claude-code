@@ -1,5 +1,6 @@
 import type { Notification } from 'src/context/notifications.js';
 import { type GlobalConfig, getGlobalConfig } from 'src/utils/config.js';
+import { t } from '../../utils/i18n/index.js';
 import { useStartupNotification } from './useStartupNotification.js';
 
 // Shows a one-time notification right after a model migration writes its
@@ -12,11 +13,10 @@ const MIGRATIONS: ((c: GlobalConfig) => Notification | undefined)[] = [
     if (!recent(c.sonnet45To46MigrationTimestamp)) return;
     return {
       key: 'sonnet-46-update',
-      text: 'Model updated to Sonnet 4.6',
+      text: t('notif.modelMigration.sonnet46'),
       color: 'suggestion',
       priority: 'high',
-      timeoutMs: 3000,
-    };
+      timeoutMs: 3000};
   },
   // Opus Pro → default, or pinned 4.0/4.1 → opus alias. Both land on the
   // current Opus default (4.7 for 1P).
@@ -27,12 +27,11 @@ const MIGRATIONS: ((c: GlobalConfig) => Notification | undefined)[] = [
     return {
       key: 'opus-pro-update',
       text: isLegacyRemap
-        ? 'Model updated to Opus 4.7 · Set CLAUDE_CODE_DISABLE_LEGACY_MODEL_REMAP=1 to opt out'
-        : 'Model updated to Opus 4.7',
+        ? t('notif.modelMigration.opus47Legacy')
+        : t('notif.modelMigration.opus47'),
       color: 'suggestion',
       priority: 'high',
-      timeoutMs: isLegacyRemap ? 8000 : 3000,
-    };
+      timeoutMs: isLegacyRemap ? 8000 : 3000};
   },
 ];
 

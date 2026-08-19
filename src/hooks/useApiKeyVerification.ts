@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
 import { getIsNonInteractiveSession } from '../bootstrap/state.js'
-import { verifyApiKey } from '../services/api/claude.js'
+import { t } from '../utils/i18n/index.js'
+import { verifyApiKey } from '../services/api/anthropic/index.js'
 import {
   getAnthropicApiKeyWithSource,
   getApiKeyFromApiKeyHelper,
   isAnthropicAuthEnabled,
-  isClaudeAISubscriber,
-} from '../utils/auth.js'
+  isClaudeAISubscriber} from '../utils/auth.js'
 
 export type VerificationStatus =
   | 'loading'
@@ -29,8 +29,7 @@ export function useApiKeyVerification(): ApiKeyVerificationResult {
     // Use skipRetrievingKeyFromApiKeyHelper to avoid executing apiKeyHelper
     // before trust dialog is shown (security: prevents RCE via settings.json)
     const { key, source } = getAnthropicApiKeyWithSource({
-      skipRetrievingKeyFromApiKeyHelper: true,
-    })
+      skipRetrievingKeyFromApiKeyHelper: true})
     // If apiKeyHelper is configured, we have a key source even though we
     // haven't executed it yet - return 'loading' to indicate we'll verify later
     if (key || source === 'apiKeyHelper') {
@@ -52,7 +51,7 @@ export function useApiKeyVerification(): ApiKeyVerificationResult {
     if (!apiKey) {
       if (source === 'apiKeyHelper') {
         setStatus('error')
-        setError(new Error('API key helper did not return a valid key'))
+        setError(new Error(t('apiKeyVerification.keyHelperFailed')))
         return
       }
       const newStatus = 'missing'
@@ -79,6 +78,5 @@ export function useApiKeyVerification(): ApiKeyVerificationResult {
   return {
     status,
     reverify: verify,
-    error,
-  }
+    error}
 }

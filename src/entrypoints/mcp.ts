@@ -5,16 +5,15 @@ import {
   type CallToolResult,
   ListToolsRequestSchema,
   type ListToolsResult,
-  type Tool,
-} from '@modelcontextprotocol/sdk/types.js'
+  type Tool} from '@modelcontextprotocol/sdk/types.js'
 import { getDefaultAppState } from 'src/state/AppStateStore.js'
+import { t } from '../utils/i18n/index.js'
 import review from '../commands/review.js'
 import type { Command } from '../commands.js'
 import {
   findToolByName,
   getEmptyToolPermissionContext,
-  type ToolUseContext,
-} from '../Tool.js'
+  type ToolUseContext} from '../Tool.js'
 import { getTools } from '../tools.js'
 import { createAbortController } from '../utils/abortController.js'
 import { createFileStateCacheWithSizeLimit } from '../utils/fileStateCache.js'
@@ -47,13 +46,10 @@ export async function startMCPServer(
   const server = new Server(
     {
       name: 'claude/tengu',
-      version: MACRO.VERSION,
-    },
+      version: MACRO.VERSION},
     {
       capabilities: {
-        tools: {},
-      },
-    },
+        tools: {}}},
   )
 
   server.setRequestHandler(
@@ -85,14 +81,11 @@ export async function startMCPServer(
               description: await tool.prompt({
                 getToolPermissionContext: async () => toolPermissionContext,
                 tools,
-                agents: [],
-              }),
+                agents: []}),
               inputSchema: zodToJsonSchema(tool.inputSchema) as ToolInput,
-              outputSchema,
-            }
+              outputSchema}
           }),
-        ),
-      }
+        )}
     },
   )
 
@@ -104,7 +97,7 @@ export async function startMCPServer(
       const tools = getTools(toolPermissionContext)
       const tool = findToolByName(tools, name)
       if (!tool) {
-        throw new Error(`Tool ${name} not found`)
+        throw new Error(t('mcpEntry.toolNotFound', name))
       }
 
       // Assume MCP servers do not read messages separately from the tool
@@ -121,8 +114,7 @@ export async function startMCPServer(
           isNonInteractiveSession: true,
           debug,
           verbose,
-          agentDefinitions: { activeAgents: [], allAgents: [] },
-        },
+          agentDefinitions: { activeAgents: [], allAgents: [] }},
         getAppState: () => getDefaultAppState(),
         setAppState: () => {},
         messages: [],
@@ -130,13 +122,12 @@ export async function startMCPServer(
         setInProgressToolUseIDs: () => {},
         setResponseLength: () => {},
         updateFileHistoryState: () => {},
-        updateAttributionState: () => {},
-      }
+        updateAttributionState: () => {}}
 
       // TODO: validate input types with zod
       try {
         if (!tool.isEnabled()) {
-          throw new Error(`Tool ${name} is not enabled`)
+          throw new Error(t('mcpEntry.toolNotEnabled', name))
         }
         const validationResult = await tool.validateInput?.(
           (args as never) ?? {},
@@ -144,7 +135,7 @@ export async function startMCPServer(
         )
         if (validationResult && !validationResult.result) {
           throw new Error(
-            `Tool ${name} input is invalid: ${'message' in validationResult ? validationResult.message : String(validationResult)}`,
+            t('mcpEntry.invalidInput', name, 'message' in validationResult ? validationResult.message : String(validationResult)),
           )
         }
         const finalResult = await tool.call(
@@ -152,8 +143,7 @@ export async function startMCPServer(
           toolUseContext,
           hasPermissionsToUseTool,
           createAssistantMessage({
-            content: [],
-          }),
+            content: []}),
         )
 
         return {
@@ -163,10 +153,8 @@ export async function startMCPServer(
               text:
                 typeof finalResult === 'string'
                   ? finalResult
-                  : jsonStringify(finalResult.data),
-            },
-          ],
-        }
+                  : jsonStringify(finalResult.data)},
+          ]}
       } catch (error) {
         logError(error)
 
@@ -179,10 +167,8 @@ export async function startMCPServer(
           content: [
             {
               type: 'text',
-              text: errorText,
-            },
-          ],
-        }
+              text: errorText},
+          ]}
       }
     },
   )

@@ -2,8 +2,7 @@ import { feature } from 'bun:bundle'
 import type { Anthropic } from '@anthropic-ai/sdk'
 import {
   getSystemPrompt,
-  SYSTEM_PROMPT_DYNAMIC_BOUNDARY,
-} from 'src/constants/prompts.js'
+  SYSTEM_PROMPT_DYNAMIC_BOUNDARY} from 'src/constants/prompts.js'
 import { microcompactMessages } from 'src/services/compact/microCompact.js'
 import { getSdkBetas } from '../bootstrap/state.js'
 import { getCommandName } from '../commands.js'
@@ -13,13 +12,11 @@ import {
   AUTOCOMPACT_BUFFER_TOKENS,
   getEffectiveContextWindowSize,
   isAutoCompactEnabled,
-  MANUAL_COMPACT_BUFFER_TOKENS,
-} from '../services/compact/autoCompact.js'
+  MANUAL_COMPACT_BUFFER_TOKENS} from '../services/compact/autoCompact.js'
 import {
   countMessagesTokensWithAPI,
   countTokensViaHaikuFallback,
-  roughTokenCountEstimation,
-} from '../services/tokenEstimation.js'
+  roughTokenCountEstimation} from '../services/tokenEstimation.js'
 import { estimateSkillFrontmatterTokens } from '../skills/loadSkillsDir.js'
 import {
   findToolByName,
@@ -27,25 +24,21 @@ import {
   type ToolPermissionContext,
   type Tools,
   type ToolUseContext,
-  toolMatchesName,
-} from '../Tool.js'
+  toolMatchesName} from '../Tool.js'
 import type {
   AgentDefinition,
-  AgentDefinitionsResult,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
+  AgentDefinitionsResult} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import { SKILL_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/SkillTool/constants.js'
 import {
   getLimitedSkillToolCommands,
-  getSkillToolInfo as getSlashCommandInfo,
-} from '@claude-code-best/builtin-tools/tools/SkillTool/prompt.js'
+  getSkillToolInfo as getSlashCommandInfo} from '@claude-code-best/builtin-tools/tools/SkillTool/prompt.js'
 import type {
   AssistantMessage,
   AttachmentMessage,
   Message,
   NormalizedAssistantMessage,
   NormalizedUserMessage,
-  UserMessage,
-} from '../types/message.js'
+  UserMessage} from '../types/message.js'
 import { toolToAPISchema } from './api.js'
 import { filterInjectedMemoryFiles, getMemoryFiles } from './claudemd.js'
 import { getContextWindowForModel } from './context.js'
@@ -247,8 +240,7 @@ export async function countToolDefinitionTokens(
         getToolPermissionContext,
         tools,
         agents: agentInfo?.activeAgents ?? [],
-        model,
-      }),
+        model}),
     ),
   )
   const result = await countTokensWithFallback([], toolSchemas)
@@ -309,8 +301,7 @@ async function countSystemTokens(
   const systemPromptSections: SystemPromptSectionDetail[] = namedEntries.map(
     (entry, i) => ({
       name: entry.name,
-      tokens: systemTokenCounts[i] || 0,
-    }),
+      tokens: systemTokenCounts[i] || 0}),
   )
 
   const systemPromptTokens = systemTokenCounts.reduce(
@@ -337,8 +328,7 @@ async function countMemoryFileTokens(): Promise<{
   if (memoryFilesData.length < 1) {
     return {
       memoryFileDetails: [],
-      claudeMdTokens: 0,
-    }
+      claudeMdTokens: 0}
   }
 
   const claudeMdTokenCounts = await Promise.all(
@@ -357,8 +347,7 @@ async function countMemoryFileTokens(): Promise<{
     memoryFileDetails.push({
       path: file.path,
       type: file.type,
-      tokens,
-    })
+      tokens})
   }
 
   return { claudeMdTokens, memoryFileDetails }
@@ -382,8 +371,7 @@ async function countBuiltInToolTokens(
       builtInToolTokens: 0,
       deferredBuiltinDetails: [],
       deferredBuiltinTokens: 0,
-      systemToolDetails: [],
-    }
+      systemToolDetails: []}
   }
 
   // Check if tool search is enabled
@@ -434,8 +422,7 @@ async function countBuiltInToolTokens(
       systemToolDetails = toolsForBreakdown
         .map((t, i) => ({
           name: t.name,
-          tokens: Math.round((estimates[i]! / estimateTotal) * distributable),
-        }))
+          tokens: Math.round((estimates[i]! / estimateTotal) * distributable)}))
         .sort((a, b) => b.tokens - a.tokens)
     }
   }
@@ -489,8 +476,7 @@ async function countBuiltInToolTokens(
       deferredBuiltinDetails.push({
         name: tool.name,
         tokens,
-        isLoaded,
-      })
+        isLoaded})
       totalDeferredTokens += tokens
       if (isLoaded) {
         loadedDeferredTokens += tokens
@@ -508,8 +494,7 @@ async function countBuiltInToolTokens(
       builtInToolTokens: alwaysLoadedTokens + deferredTokens,
       deferredBuiltinDetails: [],
       deferredBuiltinTokens: 0,
-      systemToolDetails,
-    }
+      systemToolDetails}
   }
 
   return {
@@ -517,8 +502,7 @@ async function countBuiltInToolTokens(
     builtInToolTokens: alwaysLoadedTokens + loadedDeferredTokens,
     deferredBuiltinDetails,
     deferredBuiltinTokens: totalDeferredTokens - loadedDeferredTokens,
-    systemToolDetails,
-  }
+    systemToolDetails}
 }
 
 function findSkillTool(tools: Tools): Tool | undefined {
@@ -539,8 +523,7 @@ async function countSlashCommandTokens(
   if (!slashCommandTool) {
     return {
       slashCommandTokens: 0,
-      commandInfo: { totalCommands: 0, includedCommands: 0 },
-    }
+      commandInfo: { totalCommands: 0, includedCommands: 0 }}
   }
 
   const slashCommandTokens = await countToolDefinitionTokens(
@@ -553,9 +536,7 @@ async function countSlashCommandTokens(
     slashCommandTokens,
     commandInfo: {
       totalCommands: info.totalCommands,
-      includedCommands: info.includedCommands,
-    },
-  }
+      includedCommands: info.includedCommands}}
 }
 
 async function countSkillTokens(
@@ -577,8 +558,7 @@ async function countSkillTokens(
     if (!slashCommandTool) {
       return {
         skillTokens: 0,
-        skillInfo: { totalSkills: 0, includedSkills: 0, skillFrontmatter: [] },
-      }
+        skillInfo: { totalSkills: 0, includedSkills: 0, skillFrontmatter: [] }}
     }
 
     // NOTE: This counts the entire SlashCommandTool (which includes both commands AND skills).
@@ -598,25 +578,21 @@ async function countSkillTokens(
       source: (skill.type === 'prompt' ? skill.source : 'plugin') as
         | SettingSource
         | 'plugin',
-      tokens: estimateSkillFrontmatterTokens(skill),
-    }))
+      tokens: estimateSkillFrontmatterTokens(skill)}))
 
     return {
       skillTokens,
       skillInfo: {
         totalSkills: skills.length,
         includedSkills: skills.length,
-        skillFrontmatter,
-      },
-    }
+        skillFrontmatter}}
   } catch (error) {
     logError(toError(error))
 
     // Return zero values rather than failing the entire context analysis
     return {
       skillTokens: 0,
-      skillInfo: { totalSkills: 0, includedSkills: 0, skillFrontmatter: [] },
-    }
+      skillInfo: { totalSkills: 0, includedSkills: 0, skillFrontmatter: [] }}
   }
 }
 
@@ -659,10 +635,8 @@ export async function countMcpToolTokens(
           description: await t.prompt({
             getToolPermissionContext,
             tools,
-            agents: agentInfo?.activeAgents ?? [],
-          }),
-          input_schema: t.inputJSONSchema ?? {},
-        }),
+            agents: agentInfo?.activeAgents ?? []}),
+          input_schema: t.inputJSONSchema ?? {}}),
       ),
     ),
   )
@@ -714,8 +688,7 @@ export async function countMcpToolTokens(
       name: tool.name,
       serverName: tool.name.split('__')[1] || 'unknown',
       tokens: mcpToolTokensByTool[i]!,
-      isLoaded: loadedMcpToolNames.has(tool.name) || !isDeferredTool(tool),
-    })
+      isLoaded: loadedMcpToolNames.has(tool.name) || !isDeferredTool(tool)})
   }
 
   // Calculate loaded vs deferred tokens
@@ -735,8 +708,7 @@ export async function countMcpToolTokens(
     mcpToolDetails,
     // Track deferred tokens separately for display
     deferredToolTokens: deferredTokens,
-    loadedMcpToolNames,
-  }
+    loadedMcpToolNames}
 }
 
 async function countCustomAgentTokens(agentDefinitions: {
@@ -757,8 +729,7 @@ async function countCustomAgentTokens(agentDefinitions: {
         [
           {
             role: 'user',
-            content: [agent.agentType, agent.whenToUse].join(' '),
-          },
+            content: [agent.agentType, agent.whenToUse].join(' ')},
         ],
         [],
       ),
@@ -771,8 +742,7 @@ async function countCustomAgentTokens(agentDefinitions: {
     agentDetails.push({
       agentType: agent.agentType,
       source: agent.source,
-      tokens: tokens || 0,
-    })
+      tokens: tokens || 0})
   }
   return { agentTokens, agentDetails }
 }
@@ -881,8 +851,7 @@ async function approximateMessageTokens(
     userMessageTokens: 0,
     toolCallsByType: new Map<string, number>(),
     toolResultsByType: new Map<string, number>(),
-    attachmentsByType: new Map<string, number>(),
-  }
+    attachmentsByType: new Map<string, number>()}
 
   // Build a map of tool_use_id to tool_name for easier lookup
   const toolUseIdToName = new Map<string, string>()
@@ -925,8 +894,7 @@ async function approximateMessageTokens(
         return {
           // Important: strip out fields like id, etc. -- the counting API errors if they're present
           role: 'assistant' as const,
-          content: _.message.content,
-        }
+          content: _.message.content}
       }
       return _.message
     }) as Anthropic.Beta.Messages.BetaMessageParam[],
@@ -951,8 +919,7 @@ export async function analyzeContextUsage(
 ): Promise<ContextData> {
   const runtimeModel = getRuntimeMainLoopModel({
     permissionMode: (await getToolPermissionContext()).mode,
-    mainLoopModel: model,
-  })
+    mainLoopModel: model})
   // Get context window size
   const contextWindow = getContextWindowForModel(runtimeModel, getSdkBetas())
 
@@ -961,12 +928,10 @@ export async function analyzeContextUsage(
   const effectiveSystemPrompt = buildEffectiveSystemPrompt({
     mainThreadAgentDefinition,
     toolUseContext: toolUseContext ?? {
-      options: {} as ToolUseContext['options'],
-    },
+      options: {} as ToolUseContext['options']},
     customSystemPrompt: toolUseContext?.options.customSystemPrompt,
     defaultSystemPrompt,
-    appendSystemPrompt: toolUseContext?.options.appendSystemPrompt,
-  })
+    appendSystemPrompt: toolUseContext?.options.appendSystemPrompt})
 
   // Critical operations that should not fail due to skills
   const [
@@ -976,8 +941,7 @@ export async function analyzeContextUsage(
       builtInToolTokens,
       deferredBuiltinDetails,
       deferredBuiltinTokens,
-      systemToolDetails,
-    },
+      systemToolDetails},
     { mcpToolTokens, mcpToolDetails, deferredToolTokens },
     { agentTokens, agentDetails },
     { slashCommandTokens, commandInfo },
@@ -1034,8 +998,7 @@ export async function analyzeContextUsage(
     cats.push({
       name: 'System prompt',
       tokens: systemPromptTokens,
-      color: 'promptBorder',
-    })
+      color: 'promptBorder'})
   }
 
   // Built-in tools right after system prompt (skills shown separately below)
@@ -1048,8 +1011,7 @@ export async function analyzeContextUsage(
           ? '[ANT-ONLY] System tools'
           : 'System tools',
       tokens: systemToolsTokens,
-      color: 'inactive',
-    })
+      color: 'inactive'})
   }
 
   // MCP tools after system tools
@@ -1057,8 +1019,7 @@ export async function analyzeContextUsage(
     cats.push({
       name: 'MCP tools',
       tokens: mcpToolTokens,
-      color: 'cyan_FOR_SUBAGENTS_ONLY',
-    })
+      color: 'cyan_FOR_SUBAGENTS_ONLY'})
   }
 
   // Show deferred MCP tools (when tool search is enabled)
@@ -1068,8 +1029,7 @@ export async function analyzeContextUsage(
       name: 'MCP tools (deferred)',
       tokens: deferredToolTokens,
       color: 'inactive',
-      isDeferred: true,
-    })
+      isDeferred: true})
   }
 
   // Show deferred builtin tools (when tool search is enabled)
@@ -1078,8 +1038,7 @@ export async function analyzeContextUsage(
       name: 'System tools (deferred)',
       tokens: deferredBuiltinTokens,
       color: 'inactive',
-      isDeferred: true,
-    })
+      isDeferred: true})
   }
 
   // Custom agents after MCP tools
@@ -1087,8 +1046,7 @@ export async function analyzeContextUsage(
     cats.push({
       name: 'Custom agents',
       tokens: agentTokens,
-      color: 'permission',
-    })
+      color: 'permission'})
   }
 
   // Memory files after custom agents
@@ -1096,8 +1054,7 @@ export async function analyzeContextUsage(
     cats.push({
       name: 'Memory files',
       tokens: claudeMdTokens,
-      color: 'claude',
-    })
+      color: 'claude'})
   }
 
   // Skills after memory files
@@ -1105,16 +1062,14 @@ export async function analyzeContextUsage(
     cats.push({
       name: 'Skills',
       tokens: skillFrontmatterTokens,
-      color: 'warning',
-    })
+      color: 'warning'})
   }
 
   if (messageTokens !== null && messageTokens > 0) {
     cats.push({
       name: 'Messages',
       tokens: messageTokens,
-      color: 'purple_FOR_SUBAGENTS_ONLY',
-    })
+      color: 'purple_FOR_SUBAGENTS_ONLY'})
   }
 
   // Calculate actual content usage (before adding reserved buffers)
@@ -1156,16 +1111,14 @@ export async function analyzeContextUsage(
     cats.push({
       name: RESERVED_CATEGORY_NAME,
       tokens: reservedTokens,
-      color: 'inactive',
-    })
+      color: 'inactive'})
   } else if (!isAutoCompact) {
     // Compact buffer reserve (3k from actual context limit)
     reservedTokens = MANUAL_COMPACT_BUFFER_TOKENS
     cats.push({
       name: MANUAL_COMPACT_BUFFER_NAME,
       tokens: reservedTokens,
-      color: 'inactive',
-    })
+      color: 'inactive'})
   }
 
   // Calculate free space (subtract both actual usage and reserved buffer)
@@ -1174,8 +1127,7 @@ export async function analyzeContextUsage(
   cats.push({
     name: 'Free space',
     tokens: freeTokens,
-    color: 'promptBorder',
-  })
+    color: 'promptBorder'})
 
   // Total for display (everything except free space)
   const totalIncludingReserved = actualUsage
@@ -1221,8 +1173,7 @@ export async function analyzeContextUsage(
       cat.name === 'Free space'
         ? Math.round((cat.tokens / contextWindow) * TOTAL_SQUARES)
         : Math.max(1, Math.round((cat.tokens / contextWindow) * TOTAL_SQUARES)),
-    percentageOfTotal: Math.round((cat.tokens / contextWindow) * 100),
-  }))
+    percentageOfTotal: Math.round((cat.tokens / contextWindow) * 100)}))
 
   // Helper function to create grid squares for a category
   function createCategorySquares(
@@ -1247,8 +1198,7 @@ export async function analyzeContextUsage(
         categoryName: category.name,
         tokens: category.tokens,
         percentage: category.percentageOfTotal,
-        squareFullness,
-      })
+        squareFullness})
     }
 
     return squares
@@ -1340,8 +1290,7 @@ export async function analyzeContextUsage(
     .map(([name, { callTokens, resultTokens }]) => ({
       name,
       callTokens,
-      resultTokens,
-    }))
+      resultTokens}))
     .sort(
       (a, b) => b.callTokens + b.resultTokens - (a.callTokens + a.resultTokens),
     )
@@ -1359,8 +1308,7 @@ export async function analyzeContextUsage(
     assistantMessageTokens: messageBreakdown.assistantMessageTokens,
     userMessageTokens: messageBreakdown.userMessageTokens,
     toolCallsByType: toolsByTypeArray,
-    attachmentsByType: attachmentsByTypeArray,
-  }
+    attachmentsByType: attachmentsByTypeArray}
 
   return {
     categories: cats,
@@ -1384,8 +1332,7 @@ export async function analyzeContextUsage(
         ? {
             totalCommands: commandInfo.totalCommands,
             includedCommands: commandInfo.includedCommands,
-            tokens: slashCommandTokens,
-          }
+            tokens: slashCommandTokens}
         : undefined,
     skills:
       skillFrontmatterTokens > 0
@@ -1393,8 +1340,7 @@ export async function analyzeContextUsage(
             totalSkills: skillInfo.totalSkills,
             includedSkills: skillInfo.includedSkills,
             tokens: skillFrontmatterTokens,
-            skillFrontmatter: skillInfo.skillFrontmatter,
-          }
+            skillFrontmatter: skillInfo.skillFrontmatter}
         : undefined,
     autoCompactThreshold,
     isAutoCompactEnabled: isAutoCompact,
@@ -1407,6 +1353,5 @@ export async function analyzeContextUsage(
       const hitRate = calculateCacheHitRate(apiUsage)
       if (hitRate === null) return {}
       return { cacheHitRate: hitRate, cacheThreshold: getCacheThreshold() }
-    })(),
-  }
+    })()}
 }

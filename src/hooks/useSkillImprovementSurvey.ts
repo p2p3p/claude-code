@@ -3,12 +3,12 @@ import type { FeedbackSurveyResponse } from '../components/FeedbackSurvey/utils.
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import { useAppState, useSetAppState } from '../state/AppState.js'
 import type { Message } from '../types/message.js'
 import type { SkillUpdate } from '../utils/hooks/skillImprovement.js'
 import { applySkillImprovement } from '../utils/hooks/skillImprovement.js'
+import { t } from '../utils/i18n/index.js'
 import { createSystemMessage } from '../utils/messages.js'
 
 type SkillImprovementSuggestion = {
@@ -45,8 +45,7 @@ export function useSkillImprovementSurvey(setMessages: SetMessages): {
         // _PROTO_skill_name routes to the privileged skill_name BQ column.
         // Unredacted names don't go in additional_metadata.
         _PROTO_skill_name: (suggestion.skillName ??
-          'unknown') as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-      })
+          'unknown') as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED})
     }
   }
 
@@ -66,8 +65,7 @@ export function useSkillImprovementSurvey(setMessages: SetMessages): {
         // _PROTO_skill_name routes to the privileged skill_name BQ column.
         // Unredacted names don't go in additional_metadata.
         _PROTO_skill_name:
-          current.skillName as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-      })
+          current.skillName as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED})
 
       if (applied) {
         void applySkillImprovement(current.skillName, current.updates).then(
@@ -75,7 +73,7 @@ export function useSkillImprovementSurvey(setMessages: SetMessages): {
             setMessages(prev => [
               ...prev,
               createSystemMessage(
-                `Skill "${current.skillName}" updated with improvements.`,
+                t('hook.skillImprovement.updated', { skillName: current.skillName }),
                 'suggestion',
               ),
             ])
@@ -90,8 +88,7 @@ export function useSkillImprovementSurvey(setMessages: SetMessages): {
         if (!prev.skillImprovement.suggestion) return prev
         return {
           ...prev,
-          skillImprovement: { suggestion: null },
-        }
+          skillImprovement: { suggestion: null }}
       })
     },
     [setAppState, setMessages],
@@ -100,6 +97,5 @@ export function useSkillImprovementSurvey(setMessages: SetMessages): {
   return {
     isOpen,
     suggestion: lastSuggestionRef.current,
-    handleSelect,
-  }
+    handleSelect}
 }

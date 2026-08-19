@@ -69,8 +69,7 @@ export function getAPIContextManagement(options?: {
   const {
     hasThinking = false,
     isRedactThinkingActive = false,
-    clearAllThinking = false,
-  } = options ?? {}
+    clearAllThinking = false} = options ?? {}
 
   const strategies: ContextEditStrategy[] = []
 
@@ -82,8 +81,7 @@ export function getAPIContextManagement(options?: {
   if (hasThinking && !isRedactThinkingActive) {
     strategies.push({
       type: 'clear_thinking_20251015',
-      keep: clearAllThinking ? { type: 'thinking_turns', value: 1 } : 'all',
-    })
+      keep: clearAllThinking ? { type: 'thinking_turns', value: 1 } : 'all'})
   }
 
   // Tool clearing: default enabled for all users (upstream gates on USER_TYPE=ant).
@@ -110,14 +108,11 @@ export function getAPIContextManagement(options?: {
       type: 'clear_tool_uses_20250919',
       trigger: {
         type: 'input_tokens',
-        value: triggerThreshold,
-      },
+        value: triggerThreshold},
       clear_at_least: {
         type: 'input_tokens',
-        value: triggerThreshold - keepTarget,
-      },
-      clear_tool_inputs: TOOLS_CLEARABLE_RESULTS,
-    }
+        value: triggerThreshold - keepTarget},
+      clear_tool_inputs: TOOLS_CLEARABLE_RESULTS}
 
     strategies.push(strategy)
   }
@@ -134,14 +129,11 @@ export function getAPIContextManagement(options?: {
       type: 'clear_tool_uses_20250919',
       trigger: {
         type: 'input_tokens',
-        value: triggerThreshold,
-      },
+        value: triggerThreshold},
       clear_at_least: {
         type: 'input_tokens',
-        value: triggerThreshold - keepTarget,
-      },
-      exclude_tools: TOOLS_CLEARABLE_USES,
-    }
+        value: triggerThreshold - keepTarget},
+      exclude_tools: TOOLS_CLEARABLE_USES}
 
     strategies.push(strategy)
   }

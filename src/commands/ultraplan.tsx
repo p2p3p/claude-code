@@ -1,20 +1,16 @@
-import { REMOTE_CONTROL_DISCONNECTED_MSG } from '../bridge/types.js';
 import type { Command } from '../commands.js';
-import { DIAMOND_OPEN } from '../constants/figures.js';
 import { getRemoteSessionUrl } from '../constants/product.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js';
+  logEvent} from '../services/analytics/index.js';
 import type { AppState } from '../state/AppStateStore.js';
 import {
   checkRemoteAgentEligibility,
   formatPreconditionError,
   RemoteAgentTask,
   type RemoteAgentTaskState,
-  registerRemoteAgentTask,
-} from '../tasks/RemoteAgentTask/RemoteAgentTask.js';
+  registerRemoteAgentTask} from '../tasks/RemoteAgentTask/RemoteAgentTask.js';
 import type { LocalJSXCommandCall } from '../types/command.js';
 import { logForDebugging } from '../utils/debug.js';
 import { errorMessage } from '../utils/errors.js';
@@ -27,9 +23,9 @@ import {
   getPromptText,
   getDialogConfig,
   getPromptIdentifier,
-  type PromptIdentifier,
-} from '../utils/ultraplan/prompt.js';
+  type PromptIdentifier} from '../utils/ultraplan/prompt.js';
 import { registerCleanup } from '../utils/cleanupRegistry.js';
+import { t } from '../utils/i18n/index.js';
 
 // TODO(prod-hardening): OAuth token may go stale over the 30min poll;
 // consider refresh.
@@ -111,8 +107,7 @@ function startDetachedPoll(
         duration_ms: Date.now() - started,
         plan_length: plan.length,
         reject_count: rejectCount,
-        execution_target: executionTarget as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        execution_target: executionTarget as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       if (executionTarget === 'remote') {
         // User chose "execute in CCR" in the browser PlanModal — the remote
         // session is now coding. Skip archive (ARCHIVE has no running-check,
@@ -131,8 +126,7 @@ function startDetachedPoll(
             '',
             'Results will land as a pull request when the remote session finishes. There is nothing to do here.',
           ].join('\n'),
-          mode: 'task-notification',
-        });
+          mode: 'task-notification'});
       } else {
         // Teleport: set pendingChoice so REPL mounts UltraplanChoiceDialog.
         // The dialog owns archive + URL clear on choice. Guard on task status
@@ -143,8 +137,7 @@ function startDetachedPoll(
           if (!task || task.status !== 'running') return prev;
           return {
             ...prev,
-            ultraplanPendingChoice: { plan, sessionId, taskId },
-          };
+            ultraplanPendingChoice: { plan, sessionId, taskId }};
         });
       }
     } catch (e) {
@@ -159,12 +152,10 @@ function startDetachedPoll(
         reason: (e instanceof UltraplanPollError
           ? e.reason
           : 'network_or_unknown') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        reject_count: e instanceof UltraplanPollError ? e.rejectCount : undefined,
-      });
+        reject_count: e instanceof UltraplanPollError ? e.rejectCount : undefined});
       enqueuePendingNotification({
         value: `Ultraplan failed: ${errorMessage(e)}\n\nSession: ${url}`,
-        mode: 'task-notification',
-      });
+        mode: 'task-notification'});
       // Error path owns cleanup; teleport path defers to the dialog; remote
       // path handled its own cleanup above.
       void archiveRemoteSession(sessionId).catch(e => logForDebugging(`ultraplan archive failed: ${String(e)}`));
@@ -192,18 +183,18 @@ function startDetachedPoll(
 // Renders immediately so the terminal doesn't appear hung during the
 // multi-second teleportToRemote round-trip.
 function buildLaunchMessage(disconnectedBridge?: boolean): string {
-  const prefix = disconnectedBridge ? `${REMOTE_CONTROL_DISCONNECTED_MSG} ` : '';
-  return `${DIAMOND_OPEN} ultraplan\n${prefix}Starting Claude Code on the web…`;
+  const prefix = disconnectedBridge ? `${t('bridge.disconnected')} ` : '';
+  return t('ultraplanCmd.launchMessage', prefix);
 }
 
 function buildSessionReadyMessage(url: string): string {
-  return `${DIAMOND_OPEN} ultraplan · Monitor progress in Claude Code on the web ${url}\nYou can continue working — when the ${DIAMOND_OPEN} fills, press ↓ to view results`;
+  return t('ultraplanCmd.sessionReady', url);
 }
 
 function buildAlreadyActiveMessage(url: string | undefined): string {
   return url
-    ? `ultraplan: already polling. Open ${url} to check status, or wait for the plan to land here.`
-    : 'ultraplan: already launching. Please wait for the session to start.';
+    ? t('ultraplanCmd.alreadyPolling', url)
+    : t('ultraplanCmd.alreadyLaunching');
 }
 
 /**
@@ -227,21 +218,18 @@ export async function stopUltraplan(
           ...prev,
           ultraplanSessionUrl: undefined,
           ultraplanPendingChoice: undefined,
-          ultraplanLaunching: undefined,
-        }
+          ultraplanLaunching: undefined}
       : prev,
   );
   const url = getRemoteSessionUrl(sessionId, process.env.SESSION_INGRESS_URL);
   enqueuePendingNotification({
     value: `Ultraplan stopped.\n\nSession: ${url}`,
-    mode: 'task-notification',
-  });
+    mode: 'task-notification'});
   enqueuePendingNotification({
     value:
       'The user stopped the ultraplan session above. Do not respond to the stop notification — wait for their next message.',
     mode: 'task-notification',
-    isMeta: true,
-  });
+    isMeta: true});
 }
 
 /**
@@ -279,8 +267,7 @@ export async function launchUltraplan(opts: {
     logEvent('tengu_ultraplan_create_failed', {
       reason: (active
         ? 'already_polling'
-        : 'already_launching') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+        : 'already_launching') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     return buildAlreadyActiveMessage(active);
   }
 
@@ -313,8 +300,7 @@ export async function launchUltraplan(opts: {
     getAppState,
     setAppState,
     signal,
-    onSessionReady,
-  });
+    onSessionReady});
   return buildLaunchMessage(disconnectedBridge);
 }
 
@@ -334,8 +320,7 @@ async function launchDetached(opts: {
     getAppState,
     setAppState,
     signal,
-    onSessionReady,
-  } = opts;
+    onSessionReady} = opts;
   // Hoisted so the catch block can archive the remote session if an error
   // occurs after teleportToRemote succeeds (avoids 30min orphan).
   let sessionId: string | undefined;
@@ -346,13 +331,11 @@ async function launchDetached(opts: {
         reason: 'precondition' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         precondition_errors: eligibility.errors
           .map(e => e.type)
-          .join(',') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+          .join(',') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       const reasons = eligibility.errors.map(formatPreconditionError).join('\n');
       enqueuePendingNotification({
         value: `ultraplan: cannot launch remote session —\n${reasons}`,
-        mode: 'task-notification',
-      });
+        mode: 'task-notification'});
       return;
     }
 
@@ -361,7 +344,7 @@ async function launchDetached(opts: {
     let createFailMsg: string | undefined;
     const session = await teleportToRemote({
       initialMessage: prompt,
-      description: blurb || 'Refine local plan',
+      description: blurb || t('ultraplanCmd.refineLocalPlan'),
       permissionMode: 'plan',
       ultraplan: true,
       signal,
@@ -371,8 +354,7 @@ async function launchDetached(opts: {
       },
       onCreateFail: msg => {
         createFailMsg = msg;
-      },
-    });
+      }});
     if (!session) {
       let failMsg = bundleFailMsg ?? createFailMsg;
       logEvent('tengu_ultraplan_create_failed', {
@@ -380,12 +362,10 @@ async function launchDetached(opts: {
           ? 'bundle_fail'
           : createFailMsg
             ? 'create_api_fail'
-            : 'teleport_null') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+            : 'teleport_null') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       enqueuePendingNotification({
         value: `ultraplan: session creation failed${failMsg ? ` — ${failMsg}` : ''}. See --debug for details.`,
-        mode: 'task-notification',
-      });
+        mode: 'task-notification'});
       return;
     }
     sessionId = session.id;
@@ -394,13 +374,11 @@ async function launchDetached(opts: {
     setAppState(prev => ({
       ...prev,
       ultraplanSessionUrl: url,
-      ultraplanLaunching: undefined,
-    }));
+      ultraplanLaunching: undefined}));
     onSessionReady?.(buildSessionReadyMessage(url));
     logEvent('tengu_ultraplan_launched', {
       has_seed_plan: Boolean(seedPlan),
-      prompt_identifier: promptIdentifier as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      prompt_identifier: promptIdentifier as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     // TODO(#23985): replace registerRemoteAgentTask + startDetachedPoll with
     // ExitPlanModeScanner inside startRemoteSessionPolling.
     const { taskId } = registerRemoteAgentTask({
@@ -410,10 +388,8 @@ async function launchDetached(opts: {
       context: {
         abortController: new AbortController(),
         getAppState,
-        setAppState,
-      },
-      isUltraplan: true,
-    });
+        setAppState},
+      isUltraplan: true});
     startDetachedPoll(taskId, session.id, url, getAppState, setAppState);
     registerCleanup(async () => {
       if (getAppState().ultraplanSessionUrl === url) {
@@ -423,18 +399,15 @@ async function launchDetached(opts: {
   } catch (e) {
     logError(e);
     logEvent('tengu_ultraplan_create_failed', {
-      reason: 'unexpected_error' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      reason: 'unexpected_error' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     enqueuePendingNotification({
       value: `ultraplan: unexpected error — ${errorMessage(e)}`,
-      mode: 'task-notification',
-    });
+      mode: 'task-notification'});
 
     enqueuePendingNotification({
       value: `Ultraplan hit an unexpected error during launch. Wait for the user's next instructions.`,
       mode: 'task-notification',
-      isMeta: true,
-    });
+      isMeta: true});
 
     if (sessionId) {
       // Error after teleport succeeded — archive so the remote doesn't sit
@@ -461,8 +434,7 @@ const call: LocalJSXCommandCall = async (onDone, context, args) => {
       blurb,
       getAppState: context.getAppState,
       setAppState: context.setAppState,
-      signal: context.abortController.signal,
-    });
+      signal: context.abortController.signal});
     onDone(msg, { display: 'system' });
     return null;
   }
@@ -475,8 +447,7 @@ const call: LocalJSXCommandCall = async (onDone, context, args) => {
     logEvent('tengu_ultraplan_create_failed', {
       reason: (active
         ? 'already_polling'
-        : 'already_launching') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+        : 'already_launching') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     onDone(buildAlreadyActiveMessage(active), { display: 'system' });
     return null;
   }
@@ -494,9 +465,8 @@ const call: LocalJSXCommandCall = async (onDone, context, args) => {
 export default {
   type: 'local-jsx',
   name: 'ultraplan',
-  description: `~10–30 min · Claude Code on the web drafts an advanced plan you can edit and approve. See ${CCR_TERMS_URL}`,
+  description: t('ultraplanCmd.description', CCR_TERMS_URL),
   argumentHint: '<prompt>',
   // isEnabled: () => process.env.USER_TYPE === 'ant',
   isEnabled: () => isUltraplanEnabled(),
-  load: () => Promise.resolve({ call }),
-} satisfies Command;
+  load: () => Promise.resolve({ call })} satisfies Command;

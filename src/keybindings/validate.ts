@@ -2,13 +2,11 @@ import { plural } from '../utils/stringUtils.js'
 import { chordToString, parseChord, parseKeystroke } from './parser.js'
 import {
   getReservedShortcuts,
-  normalizeKeyForComparison,
-} from './reservedShortcuts.js'
+  normalizeKeyForComparison} from './reservedShortcuts.js'
 import type {
   KeybindingBlock,
   KeybindingContextName,
-  ParsedBinding,
-} from './types.js'
+  ParsedBinding} from './types.js'
 
 /**
  * Types of validation issues that can occur with keybindings.
@@ -102,8 +100,7 @@ function validateKeystroke(keystroke: string): KeybindingWarning | null {
         severity: 'error',
         message: `Empty key part in "${keystroke}"`,
         key: keystroke,
-        suggestion: 'Remove extra "+" characters',
-      }
+        suggestion: 'Remove extra "+" characters'}
     }
   }
 
@@ -120,8 +117,7 @@ function validateKeystroke(keystroke: string): KeybindingWarning | null {
       type: 'parse_error',
       severity: 'error',
       message: `Could not parse keystroke "${keystroke}"`,
-      key: keystroke,
-    }
+      key: keystroke}
   }
 
   return null
@@ -140,8 +136,7 @@ function validateBlock(
     warnings.push({
       type: 'parse_error',
       severity: 'error',
-      message: `Keybinding block ${blockIndex + 1} is not an object`,
-    })
+      message: `Keybinding block ${blockIndex + 1} is not an object`})
     return warnings
   }
 
@@ -154,16 +149,14 @@ function validateBlock(
     warnings.push({
       type: 'parse_error',
       severity: 'error',
-      message: `Keybinding block ${blockIndex + 1} missing "context" field`,
-    })
+      message: `Keybinding block ${blockIndex + 1} missing "context" field`})
   } else if (!isValidContext(rawContext)) {
     warnings.push({
       type: 'invalid_context',
       severity: 'error',
       message: `Unknown context "${rawContext}"`,
       context: rawContext,
-      suggestion: `Valid contexts: ${VALID_CONTEXTS.join(', ')}`,
-    })
+      suggestion: `Valid contexts: ${VALID_CONTEXTS.join(', ')}`})
   } else {
     contextName = rawContext
   }
@@ -173,8 +166,7 @@ function validateBlock(
     warnings.push({
       type: 'parse_error',
       severity: 'error',
-      message: `Keybinding block ${blockIndex + 1} missing "bindings" field`,
-    })
+      message: `Keybinding block ${blockIndex + 1} missing "bindings" field`})
     return warnings
   }
 
@@ -194,8 +186,7 @@ function validateBlock(
         severity: 'error',
         message: `Invalid action for "${key}": must be a string or null`,
         key,
-        context: contextName,
-      })
+        context: contextName})
     } else if (typeof action === 'string' && action.startsWith('command:')) {
       // Validate command binding format
       if (!/^command:[a-zA-Z0-9:\-_]+$/.test(action)) {
@@ -205,8 +196,7 @@ function validateBlock(
           message: `Invalid command binding "${action}" for "${key}": command name may only contain alphanumeric characters, colons, hyphens, and underscores`,
           key,
           context: contextName,
-          action,
-        })
+          action})
       }
       // Command bindings must be in Chat context
       if (contextName && contextName !== 'Chat') {
@@ -217,8 +207,7 @@ function validateBlock(
           key,
           context: contextName,
           action,
-          suggestion: 'Move this binding to a block with "context": "Chat"',
-        })
+          suggestion: 'Move this binding to a block with "context": "Chat"'})
       }
     } else if (action === 'voice:pushToTalk') {
       // Hold detection needs OS auto-repeat. Bare letters print into the
@@ -240,8 +229,7 @@ function validateBlock(
           message: `Binding "${key}" to voice:pushToTalk prints into the input during warmup; use space or a modifier combo like meta+k`,
           key,
           context: contextName,
-          action,
-        })
+          action})
       }
     }
   }
@@ -300,8 +288,7 @@ export function checkDuplicateKeysInJson(
           message: `Duplicate key "${key}" in ${context} bindings`,
           key,
           context,
-          suggestion: `This key appears multiple times in the same context. JSON uses the last value, earlier values are ignored.`,
-        })
+          suggestion: `This key appears multiple times in the same context. JSON uses the last value, earlier values are ignored.`})
       }
     }
   }
@@ -320,8 +307,7 @@ export function validateUserConfig(userBlocks: unknown): KeybindingWarning[] {
       type: 'parse_error',
       severity: 'error',
       message: 'keybindings.json must contain an array',
-      suggestion: 'Wrap your bindings in [ ]',
-    })
+      suggestion: 'Wrap your bindings in [ ]'})
     return warnings
   }
 
@@ -359,8 +345,7 @@ export function checkDuplicates(
           key,
           context: block.context,
           action: (action as string) ?? 'null (unbind)',
-          suggestion: `Previously bound to "${existingAction}". Only the last binding will be used.`,
-        })
+          suggestion: `Previously bound to "${existingAction}". Only the last binding will be used.`})
       }
 
       contextMap.set(normalizedKey, (action as string) ?? 'null')
@@ -392,8 +377,7 @@ export function checkReservedShortcuts(
           message: `"${keyDisplay}" may not work: ${res.reason}`,
           key: keyDisplay,
           context: binding.context,
-          action: binding.action ?? undefined,
-        })
+          action: binding.action ?? undefined})
       }
     }
   }
@@ -415,8 +399,7 @@ function getUserBindingsForValidation(
       bindings.push({
         chord,
         action,
-        context: block.context,
-      })
+        context: block.context})
     }
   }
   return bindings

@@ -22,12 +22,10 @@ import {
   addMarketplaceSource,
   getMarketplacesCacheDir,
   loadKnownMarketplacesConfig,
-  saveKnownMarketplacesConfig,
-} from './marketplaceManager.js'
+  saveKnownMarketplacesConfig} from './marketplaceManager.js'
 import {
   OFFICIAL_MARKETPLACE_NAME,
-  OFFICIAL_MARKETPLACE_SOURCE,
-} from './officialMarketplace.js'
+  OFFICIAL_MARKETPLACE_SOURCE} from './officialMarketplace.js'
 import { fetchOfficialMarketplaceFromGcs } from './officialMarketplaceGcs.js'
 
 /**
@@ -155,8 +153,7 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
     return {
       installed: false,
       skipped: true,
-      reason,
-    }
+      reason}
   }
 
   try {
@@ -169,13 +166,11 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
         ...current,
         officialMarketplaceAutoInstallAttempted: true,
         officialMarketplaceAutoInstalled: false,
-        officialMarketplaceAutoInstallFailReason: 'policy_blocked',
-      }))
+        officialMarketplaceAutoInstallFailReason: 'policy_blocked'}))
       logEvent('tengu_official_marketplace_auto_install', {
         installed: false,
         skipped: true,
-        policy_blocked: true,
-      })
+        policy_blocked: true})
       return { installed: false, skipped: true, reason: 'policy_blocked' }
     }
 
@@ -189,8 +184,7 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
       saveGlobalConfig(current => ({
         ...current,
         officialMarketplaceAutoInstallAttempted: true,
-        officialMarketplaceAutoInstalled: true,
-      }))
+        officialMarketplaceAutoInstalled: true}))
       return { installed: false, skipped: true, reason: 'already_installed' }
     }
 
@@ -203,13 +197,11 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
         ...current,
         officialMarketplaceAutoInstallAttempted: true,
         officialMarketplaceAutoInstalled: false,
-        officialMarketplaceAutoInstallFailReason: 'policy_blocked',
-      }))
+        officialMarketplaceAutoInstallFailReason: 'policy_blocked'}))
       logEvent('tengu_official_marketplace_auto_install', {
         installed: false,
         skipped: true,
-        policy_blocked: true,
-      })
+        policy_blocked: true})
       return { installed: false, skipped: true, reason: 'policy_blocked' }
     }
 
@@ -229,8 +221,7 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
       known[OFFICIAL_MARKETPLACE_NAME] = {
         source: OFFICIAL_MARKETPLACE_SOURCE,
         installLocation,
-        lastUpdated: new Date().toISOString(),
-      }
+        lastUpdated: new Date().toISOString()}
       await saveKnownMarketplacesConfig(known)
 
       saveGlobalConfig(current => ({
@@ -240,13 +231,11 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
         officialMarketplaceAutoInstallFailReason: undefined,
         officialMarketplaceAutoInstallRetryCount: undefined,
         officialMarketplaceAutoInstallLastAttemptTime: undefined,
-        officialMarketplaceAutoInstallNextRetryTime: undefined,
-      }))
+        officialMarketplaceAutoInstallNextRetryTime: undefined}))
       logEvent('tengu_official_marketplace_auto_install', {
         installed: true,
         skipped: false,
-        via_gcs: true,
-      })
+        via_gcs: true})
       return { installed: true, skipped: false }
     }
     // GCS failed (404 until backend writes, or network). Fall through to git
@@ -273,14 +262,12 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
         officialMarketplaceAutoInstallFailReason: 'gcs_unavailable',
         officialMarketplaceAutoInstallRetryCount: retryCount,
         officialMarketplaceAutoInstallLastAttemptTime: now,
-        officialMarketplaceAutoInstallNextRetryTime: nextRetryTime,
-      }))
+        officialMarketplaceAutoInstallNextRetryTime: nextRetryTime}))
       logEvent('tengu_official_marketplace_auto_install', {
         installed: false,
         skipped: true,
         gcs_unavailable: true,
-        retry_count: retryCount,
-      })
+        retry_count: retryCount})
       return { installed: false, skipped: true, reason: 'gcs_unavailable' }
     }
 
@@ -305,8 +292,7 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
           officialMarketplaceAutoInstallFailReason: 'git_unavailable',
           officialMarketplaceAutoInstallRetryCount: retryCount,
           officialMarketplaceAutoInstallLastAttemptTime: now,
-          officialMarketplaceAutoInstallNextRetryTime: nextRetryTime,
-        }))
+          officialMarketplaceAutoInstallNextRetryTime: nextRetryTime}))
       } catch (saveError) {
         configSaveFailed = true
         // Log the error properly so it gets tracked
@@ -322,14 +308,12 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
         installed: false,
         skipped: true,
         git_unavailable: true,
-        retry_count: retryCount,
-      })
+        retry_count: retryCount})
       return {
         installed: false,
         skipped: true,
         reason: 'git_unavailable',
-        configSaveFailed,
-      }
+        configSaveFailed}
     }
 
     // Attempt installation
@@ -348,13 +332,11 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
       officialMarketplaceAutoInstallFailReason: undefined,
       officialMarketplaceAutoInstallRetryCount: undefined,
       officialMarketplaceAutoInstallLastAttemptTime: undefined,
-      officialMarketplaceAutoInstallNextRetryTime: undefined,
-    }))
+      officialMarketplaceAutoInstallNextRetryTime: undefined}))
     logEvent('tengu_official_marketplace_auto_install', {
       installed: true,
       skipped: false,
-      retry_count: previousRetryCount,
-    })
+      retry_count: previousRetryCount})
     return { installed: true, skipped: false }
   } catch (error) {
     // Handle installation failure
@@ -376,13 +358,11 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
         installed: false,
         skipped: true,
         git_unavailable: true,
-        macos_xcrun_shim: true,
-      })
+        macos_xcrun_shim: true})
       return {
         installed: false,
         skipped: true,
-        reason: 'git_unavailable',
-      }
+        reason: 'git_unavailable'}
     }
 
     logForDebugging(
@@ -406,8 +386,7 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
         officialMarketplaceAutoInstallFailReason: 'unknown',
         officialMarketplaceAutoInstallRetryCount: retryCount,
         officialMarketplaceAutoInstallLastAttemptTime: now,
-        officialMarketplaceAutoInstallNextRetryTime: nextRetryTime,
-      }))
+        officialMarketplaceAutoInstallNextRetryTime: nextRetryTime}))
     } catch (saveError) {
       configSaveFailed = true
       // Log the error properly so it gets tracked
@@ -426,14 +405,12 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
       installed: false,
       skipped: true,
       failed: true,
-      retry_count: retryCount,
-    })
+      retry_count: retryCount})
 
     return {
       installed: false,
       skipped: true,
       reason: 'unknown',
-      configSaveFailed,
-    }
+      configSaveFailed}
   }
 }

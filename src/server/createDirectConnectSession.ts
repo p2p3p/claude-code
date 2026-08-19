@@ -1,6 +1,7 @@
 /* eslint-disable eslint-plugin-n/no-unsupported-features/node-builtins */
 
 import { errorMessage } from '../utils/errors.js'
+import { t } from '../utils/i18n/index.js'
 import { jsonStringify } from '../utils/slowOperations.js'
 import type { DirectConnectConfig } from './directConnectManager.js'
 import { connectResponseSchema } from './types.js'
@@ -27,8 +28,7 @@ export async function createDirectConnectSession({
   serverUrl,
   authToken,
   cwd,
-  dangerouslySkipPermissions,
-}: {
+  dangerouslySkipPermissions}: {
   serverUrl: string
   authToken?: string
   cwd: string
@@ -38,8 +38,7 @@ export async function createDirectConnectSession({
   workDir?: string
 }> {
   const headers: Record<string, string> = {
-    'content-type': 'application/json',
-  }
+    'content-type': 'application/json'}
   if (authToken) {
     headers['authorization'] = `Bearer ${authToken}`
   }
@@ -52,26 +51,23 @@ export async function createDirectConnectSession({
       body: jsonStringify({
         cwd,
         ...(dangerouslySkipPermissions && {
-          dangerously_skip_permissions: true,
-        }),
-      }),
-    })
+          dangerously_skip_permissions: true})})})
   } catch (err) {
     throw new DirectConnectError(
-      `Failed to connect to server at ${serverUrl}: ${errorMessage(err)}`,
+      `${t('directConnect.failedToConnect', serverUrl)}: ${errorMessage(err)}`,
     )
   }
 
   if (!resp.ok) {
     throw new DirectConnectError(
-      `Failed to create session: ${resp.status} ${resp.statusText}`,
+      t('directConnect.failedToCreate', resp.status, resp.statusText),
     )
   }
 
   const result = connectResponseSchema().safeParse(await resp.json())
   if (!result.success) {
     throw new DirectConnectError(
-      `Invalid session response: ${result.error.message}`,
+      t('directConnect.invalidResponse', result.error.message),
     )
   }
 
@@ -81,8 +77,6 @@ export async function createDirectConnectSession({
       serverUrl,
       sessionId: data.session_id,
       wsUrl: data.ws_url,
-      authToken,
-    },
-    workDir: data.work_dir,
-  }
+      authToken},
+    workDir: data.work_dir}
 }

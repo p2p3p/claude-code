@@ -63,8 +63,7 @@ function createEmptyToolCounts(): ToolCounts {
     reads: 0,
     writes: 0,
     commands: 0,
-    other: 0,
-  }
+    other: 0}
 }
 
 /**
@@ -157,8 +156,7 @@ export function createStreamlinedTransformer(): (
             type: 'streamlined_text',
             text,
             session_id: message.session_id,
-            uuid: message.uuid,
-          }
+            uuid: message.uuid}
         }
 
         // Tool-only message: emit cumulative tool summary
@@ -171,8 +169,7 @@ export function createStreamlinedTransformer(): (
           type: 'streamlined_tool_use_summary',
           tool_summary: toolSummary,
           session_id: message.session_id,
-          uuid: message.uuid,
-        }
+          uuid: message.uuid}
       }
 
       case 'result':

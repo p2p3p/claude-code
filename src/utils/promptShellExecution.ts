@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto'
+import { t } from './i18n/index.js'
 import type { Tool, ToolUseContext } from '../Tool.js'
 import { BashTool } from '@claude-code-best/builtin-tools/tools/BashTool/BashTool.js'
 import { logForDebugging } from './debug.js'
@@ -108,7 +109,11 @@ export async function executeShellCommandsInPrompt(
               `Shell command permission check failed for command in ${slashCommandName}: ${command}. Error: ${permissionResult.message}`,
             )
             throw new MalformedCommandError(
-              `Shell command permission check failed for pattern "${match[0]}": ${permissionResult.message || 'Permission denied'}`,
+              t(
+                'promptShellExec.permissionCheckFailed',
+                match[0],
+                permissionResult.message || t('promptShellExec.permissionDenied'),
+              ),
             )
           }
 
@@ -155,9 +160,9 @@ function formatBashOutput(
 
   if (stderr.trim()) {
     if (inline) {
-      parts.push(`[stderr: ${stderr.trim()}]`)
+      parts.push(t('promptShellExec.stderrInline', stderr.trim()))
     } else {
-      parts.push(`[stderr]\n${stderr.trim()}`)
+      parts.push(t('promptShellExec.stderrBlock', stderr.trim()))
     }
   }
 
@@ -168,16 +173,18 @@ function formatBashError(e: unknown, pattern: string, inline = false): never {
   if (e instanceof ShellError) {
     if (e.interrupted) {
       throw new MalformedCommandError(
-        `Shell command interrupted for pattern "${pattern}": [Command interrupted]`,
+        t('promptShellExec.commandInterrupted', pattern),
       )
     }
     const output = formatBashOutput(e.stdout, e.stderr, inline)
     throw new MalformedCommandError(
-      `Shell command failed for pattern "${pattern}": ${output}`,
+      t('promptShellExec.commandFailed', pattern, output),
     )
   }
 
   const message = errorMessage(e)
-  const formatted = inline ? `[Error: ${message}]` : `[Error]\n${message}`
+  const formatted = inline
+    ? t('promptShellExec.errorInline', message)
+    : t('promptShellExec.errorBlock', message)
   throw new MalformedCommandError(formatted)
 }

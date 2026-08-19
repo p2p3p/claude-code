@@ -24,8 +24,7 @@ export function GlimmerMessage({
   glimmerIndex,
   flashOpacity,
   shimmerColor,
-  stalledIntensity = 0,
-}: Props): React.ReactNode {
+  stalledIntensity = 0}: Props): React.ReactNode {
   const [themeName] = useTheme();
   const theme = getTheme(themeName);
 

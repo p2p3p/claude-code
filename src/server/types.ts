@@ -6,8 +6,7 @@ export const connectResponseSchema = lazySchema(() =>
   z.object({
     session_id: z.string(),
     ws_url: z.string(),
-    work_dir: z.string().optional(),
-  }),
+    work_dir: z.string().optional()}),
 )
 
 export type ServerConfig = {

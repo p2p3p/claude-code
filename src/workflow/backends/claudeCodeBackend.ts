@@ -5,16 +5,14 @@ import {
   type AgentAdapterContext,
   type AgentRunParams,
   type AgentRunResult,
-  WorkflowAbortedError,
-} from '@claude-code-best/workflow-engine'
+  WorkflowAbortedError} from '@claude-code-best/workflow-engine'
 import { assembleToolPool } from '../../tools.js'
 import { finalizeAgentTool } from '@claude-code-best/builtin-tools/tools/AgentTool/agentToolUtils.js'
 import { runAgent } from '@claude-code-best/builtin-tools/tools/AgentTool/runAgent.js'
 import {
   isBuiltInAgent,
   type AgentDefinition,
-  type BuiltInAgentDefinition,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
+  type BuiltInAgentDefinition} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import { createUserMessage, extractTextContent } from '../../utils/messages.js'
 import { getTokenCountFromUsage } from '../../utils/tokens.js'
 import { createHash } from 'node:crypto'
@@ -24,8 +22,7 @@ import { runWithCwdOverride } from '../../utils/cwd.js'
 import {
   createAgentWorktree,
   hasWorktreeChanges,
-  removeAgentWorktree,
-} from '../../utils/worktree.js'
+  removeAgentWorktree} from '../../utils/worktree.js'
 import { logEvent } from '../../services/analytics/index.js'
 import type { ModelAlias } from '../../utils/model/aliases.js'
 import type { Message } from '../../types/message.js'
@@ -40,8 +37,7 @@ export const WORKFLOW_AGENT: BuiltInAgentDefinition = {
   source: 'built-in',
   baseDir: 'built-in',
   getSystemPrompt: () =>
-    'You are a workflow sub-agent. Complete the task concisely; your final text is the return value relayed to the workflow.',
-}
+    'You are a workflow sub-agent. Complete the task concisely; your final text is the return value relayed to the workflow.'}
 
 /** agentType -> real agent registry (use if activeAgents hits, otherwise fallback). Exported for unit test coverage. */
 export function resolveAgentDefinition(
@@ -256,8 +252,7 @@ export const claudeCodeBackend: AgentAdapter = {
 
     const workerPermissionContext = {
       ...appState.toolPermissionContext,
-      mode: agentDef.permissionMode ?? 'acceptEdits',
-    }
+      mode: agentDef.permissionMode ?? 'acceptEdits'}
     const workerTools = assembleToolPool(
       workerPermissionContext,
       appState.mcp.tools,
@@ -308,8 +303,7 @@ export const claudeCodeBackend: AgentAdapter = {
           // the types are incompatible and resolved by the provider layer at runtime. Passes through via double assertion (better than as any/never).
           override: { agentId: coreAgentId, abortController: agentAbort },
           ...(model ? { model: model as unknown as ModelAlias } : {}),
-          ...(worktreeInfo ? { worktreePath: worktreeInfo.worktreePath } : {}),
-        })) {
+          ...(worktreeInfo ? { worktreePath: worktreeInfo.worktreePath } : {})})) {
           messages.push(msg as Message)
           // Accumulate running progress: assistant message carries usage (cumulative value -> overwrite), tool_use inside content (incremental).
           if (msg.type === 'assistant' && msg.message) {
@@ -358,8 +352,7 @@ export const claudeCodeBackend: AgentAdapter = {
       isBuiltInAgent: isBuiltInAgent(agentDef),
       startTime,
       agentType: agentDef.agentType,
-      isAsync: true,
-    })
+      isAsync: true})
     const outputTokens =
       finalized.usage?.output_tokens ?? finalized.totalTokens ?? 0
     // For panel display: total context tokens, tool-call count, parsed model id at completion.
@@ -384,8 +377,7 @@ export const claudeCodeBackend: AgentAdapter = {
         return {
           kind: 'dead',
           reason: 'no-structured-output',
-          detail: preview,
-        }
+          detail: preview}
       }
       return {
         kind: 'ok',
@@ -393,8 +385,7 @@ export const claudeCodeBackend: AgentAdapter = {
         usage: { outputTokens },
         model: resolvedModel,
         toolCount: finalToolCount,
-        tokenCount: finalTokenCount,
-      }
+        tokenCount: finalTokenCount}
     }
     const text = extractTextContent(finalized.content, '\n')
     return {
@@ -403,7 +394,5 @@ export const claudeCodeBackend: AgentAdapter = {
       usage: { outputTokens },
       model: resolvedModel,
       toolCount: finalToolCount,
-      tokenCount: finalTokenCount,
-    }
-  },
-}
+      tokenCount: finalTokenCount}
+  }}

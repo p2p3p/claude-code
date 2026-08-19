@@ -7,33 +7,27 @@ import {
   isAbsolute,
   join,
   sep as pathSep,
-  relative,
-} from 'path'
+  relative} from 'path'
 import {
   getAdditionalDirectoriesForClaudeMd,
-  getSessionId,
-} from '../bootstrap/state.js'
+  getSessionId} from '../bootstrap/state.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import { roughTokenCountEstimation } from '../services/tokenEstimation.js'
 import type { Command, PromptCommand } from '../types/command.js'
 import {
   parseArgumentNames,
-  substituteArguments,
-} from '../utils/argumentSubstitution.js'
+  substituteArguments} from '../utils/argumentSubstitution.js'
 import { logForDebugging } from '../utils/debug.js'
 import {
   EFFORT_LEVELS,
   type EffortValue,
-  parseEffortValue,
-} from '../utils/effort.js'
+  parseEffortValue} from '../utils/effort.js'
 import {
   getClaudeConfigHomeDir,
   isBareMode,
-  isEnvTruthy,
-} from '../utils/envUtils.js'
+  isEnvTruthy} from '../utils/envUtils.js'
 import { isENOENT, isFsInaccessible } from '../utils/errors.js'
 import {
   coerceDescriptionToString,
@@ -42,8 +36,7 @@ import {
   parseBooleanFrontmatter,
   parseFrontmatter,
   parseShellFrontmatter,
-  splitPathInFrontmatter,
-} from '../utils/frontmatterParser.js'
+  splitPathInFrontmatter} from '../utils/frontmatterParser.js'
 import { getFsImplementation } from '../utils/fsOperations.js'
 import { isPathGitignored } from '../utils/git/gitignore.js'
 import { logError } from '../utils/log.js'
@@ -52,8 +45,7 @@ import {
   getProjectDirsUpToHome,
   loadMarkdownFilesForSubdir,
   type MarkdownFile,
-  parseSlashCommandToolsFromFrontmatter,
-} from '../utils/markdownConfigLoader.js'
+  parseSlashCommandToolsFromFrontmatter} from '../utils/markdownConfigLoader.js'
 import { parseUserSpecifiedModel } from '../utils/model/model.js'
 import { executeShellCommandsInPrompt } from '../utils/promptShellExecution.js'
 import type { SettingSource } from '../utils/settings/constants.js'
@@ -260,8 +252,7 @@ export function parseSkillFrontmatterFields(
     executionContext: frontmatter.context === 'fork' ? 'fork' : undefined,
     agent: frontmatter.agent as string | undefined,
     effort,
-    shell: parseShellFrontmatter(frontmatter.shell, resolvedName),
-  }
+    shell: parseShellFrontmatter(frontmatter.shell, resolvedName)}
 }
 
 /**
@@ -289,8 +280,7 @@ export function createSkillCommand({
   agent,
   paths,
   effort,
-  shell,
-}: {
+  shell}: {
   skillName: string
   displayName: string | undefined
   description: string
@@ -384,20 +374,15 @@ export function createSkillCommand({
                   ...appState.toolPermissionContext,
                   alwaysAllowRules: {
                     ...appState.toolPermissionContext.alwaysAllowRules,
-                    command: allowedTools,
-                  },
-                },
-              }
-            },
-          },
+                    command: allowedTools}}}
+            }},
           `/${skillName}`,
           shell,
         )
       }
 
       return [{ type: 'text', text: finalContent }]
-    },
-  } satisfies Command
+    }} satisfies Command
 }
 
 /**
@@ -438,8 +423,7 @@ async function loadSkillsFromSkillsDir(
           // (EACCES/EPERM/EIO) so permission/IO problems are diagnosable.
           if (!isENOENT(e)) {
             logForDebugging(`[skills] failed to read ${skillFilePath}: ${e}`, {
-              level: 'warn',
-            })
+              level: 'warn'})
           }
           return null
         }
@@ -465,10 +449,8 @@ async function loadSkillsFromSkillsDir(
             source,
             baseDir: skillDirPath,
             loadedFrom: 'skills',
-            paths,
-          }),
-          filePath: skillFilePath,
-        }
+            paths}),
+          filePath: skillFilePath}
       } catch (error) {
         logError(error)
         return null
@@ -577,8 +559,7 @@ async function loadSkillsFromCommandsDir(
       filePath,
       frontmatter,
       content,
-      source,
-    } of processedFiles) {
+      source} of processedFiles) {
       try {
         const isSkillFormat = isSkillFile(filePath)
         const skillDirectory = isSkillFormat ? dirname(filePath) : undefined
@@ -587,8 +568,7 @@ async function loadSkillsFromCommandsDir(
           filePath,
           frontmatter,
           content,
-          source,
-        })
+          source})
 
         const parsed = parseSkillFrontmatterFields(
           frontmatter,
@@ -606,10 +586,8 @@ async function loadSkillsFromCommandsDir(
             source,
             baseDir: skillDirectory,
             loadedFrom: 'commands_DEPRECATED',
-            paths: undefined,
-          }),
-          filePath,
-        })
+            paths: undefined}),
+          filePath})
       } catch (error) {
         logError(error)
       }
@@ -965,8 +943,7 @@ export async function addSkillDirectories(dirs: string[]): Promise<void> {
         previousCount: previousSkillNamesForLogging.size,
         newCount: dynamicSkills.size,
         addedCount: addedSkills.length,
-        directoryCount: dirs.length,
-      })
+        directoryCount: dirs.length})
     }
   }
 
@@ -1047,8 +1024,7 @@ export function activateConditionalSkillsForPaths(
       previousCount: dynamicSkills.size - activated.length,
       newCount: dynamicSkills.size,
       addedCount: activated.length,
-      directoryCount: 0,
-    })
+      directoryCount: 0})
 
     // Notify listeners that skills were loaded (so they can clear caches)
     skillsLoaded.emit()
@@ -1075,5 +1051,4 @@ export function clearDynamicSkills(): void {
 // eslint-disable-next-line custom-rules/no-top-level-side-effects -- write-once registration, idempotent
 registerMCPSkillBuilders({
   createSkillCommand,
-  parseSkillFrontmatterFields,
-})
+  parseSkillFrontmatterFields})

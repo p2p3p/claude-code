@@ -2,8 +2,7 @@ import { open, readFile, stat } from 'fs/promises'
 import {
   applyEdits,
   modify,
-  parse as parseJsonc,
-} from 'jsonc-parser/lib/esm/main.js'
+  parse as parseJsonc} from 'jsonc-parser/lib/esm/main.js'
 import { stripBOM } from './jsonRead.js'
 import { logError } from './log.js'
 import { memoizeWithLRU } from './memoize.js'
@@ -252,8 +251,7 @@ export function addItemToJSONCArray(content: string, newItem: unknown): string {
       // Generate edits - we're using isArrayInsertion to add a new item without overwriting existing ones
       const edits = modify(cleanContent, insertPath, newItem, {
         formattingOptions: { insertSpaces: true, tabSize: 4 },
-        isArrayInsertion: true,
-      })
+        isArrayInsertion: true})
 
       // If edits could not be generated, fall back to manual JSON string manipulation
       if (!edits || edits.length === 0) {

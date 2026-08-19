@@ -1,3 +1,4 @@
+import { t } from '../../utils/i18n/index.js'
 import type { InstinctCandidate } from './instinctParser.js'
 import type { StoredSkillObservation } from './observationStore.js'
 import type { SkillLearningProjectContext } from './types.js'
@@ -28,7 +29,7 @@ export function registerObserverBackend(backend: ObserverBackend): void {
 
 export function setActiveObserverBackend(name: string): void {
   if (!registry.has(name)) {
-    throw new Error(`Observer backend "${name}" is not registered`)
+    throw new Error(t('observerBackend.notRegistered', name))
   }
   activeName = name
 }
@@ -36,9 +37,7 @@ export function setActiveObserverBackend(name: string): void {
 export function getActiveObserverBackend(): ObserverBackend {
   const backend = activeName ? registry.get(activeName) : undefined
   if (!backend) {
-    throw new Error(
-      'No observer backend is active — register one before analyzing observations',
-    )
+    throw new Error(t('observerBackend.noActive'))
   }
   return backend
 }

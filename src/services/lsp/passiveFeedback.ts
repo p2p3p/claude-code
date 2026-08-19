@@ -4,6 +4,7 @@ import { logForDebugging } from '../../utils/debug.js'
 import { toError } from '../../utils/errors.js'
 import { logError } from '../../utils/log.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
+import { t } from '../../utils/i18n/index.js'
 import type { DiagnosticFile } from '../diagnosticTracking.js'
 import { registerPendingLSPDiagnostic } from './LSPDiagnosticRegistry.js'
 import type { LSPServerManager } from './LSPServerManager.js'
@@ -22,15 +23,15 @@ function mapLSPSeverity(
   // 1 = Error, 2 = Warning, 3 = Information, 4 = Hint
   switch (lspSeverity) {
     case 1:
-      return 'Error'
+      return t('passiveFeedback.severityError')
     case 2:
-      return 'Warning'
+      return t('passiveFeedback.severityWarning')
     case 3:
-      return 'Info'
+      return t('passiveFeedback.severityInfo')
     case 4:
-      return 'Hint'
+      return t('passiveFeedback.severityHint')
     default:
-      return 'Error'
+      return t('passiveFeedback.severityError')
   }
 }
 
@@ -76,26 +77,21 @@ export function formatDiagnosticsForAttachment(
       range: {
         start: {
           line: diag.range.start.line,
-          character: diag.range.start.character,
-        },
+          character: diag.range.start.character},
         end: {
           line: diag.range.end.line,
-          character: diag.range.end.character,
-        },
-      },
+          character: diag.range.end.character}},
       source: diag.source,
       code:
         diag.code !== undefined && diag.code !== null
           ? String(diag.code)
-          : undefined,
-    }),
+          : undefined}),
   )
 
   return [
     {
       uri,
-      diagnostics,
-    },
+      diagnostics},
   ]
 }
 
@@ -209,8 +205,7 @@ export function registerLSPNotificationHandlers(
             try {
               registerPendingLSPDiagnostic({
                 serverName,
-                files: diagnosticFiles,
-              })
+                files: diagnosticFiles})
 
               logForDebugging(
                 `LSP Diagnostics: Registered ${diagnosticFiles.length} diagnostic file(s) from ${serverName} for async delivery`,
@@ -231,8 +226,7 @@ export function registerLSPNotificationHandlers(
               // Track consecutive failures and warn after 3+
               const failures = diagnosticFailures.get(serverName) || {
                 count: 0,
-                lastError: '',
-              }
+                lastError: ''}
               failures.count++
               failures.lastError = err.message
               diagnosticFailures.set(serverName, failures)
@@ -257,8 +251,7 @@ export function registerLSPNotificationHandlers(
             // Track consecutive failures and warn after 3+
             const failures = diagnosticFailures.get(serverName) || {
               count: 0,
-              lastError: '',
-            }
+              lastError: ''}
             failures.count++
             failures.lastError = err.message
             diagnosticFailures.set(serverName, failures)
@@ -284,8 +277,7 @@ export function registerLSPNotificationHandlers(
 
       registrationErrors.push({
         serverName,
-        error: err.message,
-      })
+        error: err.message})
 
       logError(err)
       logForDebugging(
@@ -323,6 +315,5 @@ export function registerLSPNotificationHandlers(
     totalServers,
     successCount,
     registrationErrors,
-    diagnosticFailures,
-  }
+    diagnosticFailures}
 }

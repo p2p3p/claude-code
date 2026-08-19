@@ -4,12 +4,12 @@ import {
   mkdirSync,
   readFileSync,
   unlinkSync,
-  writeFileSync,
-} from 'node:fs'
+  writeFileSync} from 'node:fs'
 import { join } from 'node:path'
 import { getIsNonInteractiveSession } from '../../bootstrap/state.js'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
 import type { Command, LocalCommandResult } from '../../types/command.js'
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * Path to the next-request-no-cache marker file.
@@ -86,8 +86,7 @@ function readStats(): BreakCacheStats {
     return {
       totalBreaks: onceBreaks.length,
       lastBreakAt: lastEvent?.at ?? null,
-      alwaysModeEnabled: lastAlways?.kind === 'always_on',
-    }
+      alwaysModeEnabled: lastAlways?.kind === 'always_on'}
   } catch {
     return { totalBreaks: 0, lastBreakAt: null, alwaysModeEnabled: false }
   }
@@ -140,16 +139,15 @@ export async function callBreakCache(
     return {
       type: 'text',
       value: [
-        '## Break-Cache Status',
+        t('breakCache.statusTitle'),
         '',
-        `  Once marker:    ${onceActive ? 'ACTIVE (next call will bust cache)' : 'not set'}`,
-        `  Always mode:    ${alwaysActive ? 'ON (every call busts cache)' : 'off'}`,
+        `  Once marker:    ${onceActive ? t('breakCache.onceMarkerActive') : t('breakCache.onceMarkerNotSet')}`,
+        `  Always mode:    ${alwaysActive ? t('breakCache.alwaysModeOn') : t('breakCache.alwaysModeOff')}`,
         '',
-        '## Stats',
-        `  total_breaks:   ${stats.totalBreaks}`,
-        `  last_break_at:  ${stats.lastBreakAt ?? 'never'}`,
-      ].join('\n'),
-    }
+        t('breakCache.statsTitle'),
+        t('breakCache.totalBreaks', stats.totalBreaks),
+        stats.lastBreakAt ? t('breakCache.lastBreakAt', stats.lastBreakAt) : t('breakCache.lastBreakNever'),
+      ].join('\n')}
   }
 
   // ── off ──
@@ -166,10 +164,7 @@ export async function callBreakCache(
     appendBreakEvent('always_off')
     return {
       type: 'text',
-      value: cleared
-        ? 'Break-cache disabled. Removed once marker and/or always flag.'
-        : 'Break-cache was not active.',
-    }
+      value: cleared ? t('breakCache.disabledCleared') : t('breakCache.wasNotActive')}
   }
 
   // ── --clear ──
@@ -178,13 +173,11 @@ export async function callBreakCache(
       unlinkSync(markerPath)
       return {
         type: 'text',
-        value: `Cache-break marker cleared.\n  \`${markerPath}\``,
-      }
+        value: t('breakCache.markerCleared', markerPath)}
     }
     return {
       type: 'text',
-      value: 'No cache-break marker was set.',
-    }
+      value: t('breakCache.noMarkerSet')}
   }
 
   // ── always ──
@@ -194,16 +187,14 @@ export async function callBreakCache(
     return {
       type: 'text',
       value: [
-        '## Always-on cache break enabled',
+        t('breakCache.alwaysEnabledTitle'),
         '',
-        `Flag written: \`${alwaysPath}\``,
+        t('breakCache.flagWritten', alwaysPath),
         '',
-        'Every API call will now append a random nonce to the system prompt,',
-        'permanently preventing prompt-cache hits for this session.',
+        t('breakCache.alwaysEnabledDesc'),
         '',
-        'To disable: `/break-cache off`',
-      ].join('\n'),
-    }
+        t('breakCache.toDisable'),
+      ].join('\n')}
   }
 
   // ── once (legacy default, or explicit "once") ──
@@ -216,37 +207,33 @@ export async function callBreakCache(
     return {
       type: 'text',
       value: [
-        '## Cache break scheduled',
+        t('breakCache.cacheScheduledTitle'),
         '',
-        `Marker written: \`${markerPath}\``,
-        `Timestamp: ${timestamp}`,
+        t('breakCache.markerWritten', markerPath),
+        t('breakCache.timestamp', timestamp),
         '',
-        'The next API call will append a random nonce to the system prompt,',
-        'causing a cache miss. The marker is removed automatically after use.',
+        t('breakCache.cacheScheduledDesc'),
         '',
-        'To cancel before the next call: `/break-cache --clear`',
-        'For every call:               `/break-cache always`',
+        t('breakCache.toCancel'),
+        t('breakCache.forEveryCall'),
         '',
-        `Total breaks this session: ${stats.totalBreaks}`,
+        t('breakCache.totalBreaksSession', stats.totalBreaks),
         '',
-        '_How it works: Anthropic prompt cache keys on the system-prompt prefix hash._',
-        '_A unique nonce invalidates the hash, forcing a fresh compute._',
-      ].join('\n'),
-    }
+        t('breakCache.howItWorksLine1'),
+        t('breakCache.howItWorksLine2'),
+      ].join('\n')}
   }
 
   // ── unknown scope ──
   return {
     type: 'text',
-    value: [`Unknown scope: "${scope}"`, '', USAGE_TEXT].join('\n'),
-  }
+    value: [t('breakCache.unknownScope', scope), '', USAGE_TEXT].join('\n')}
 }
 
 const breakCache: Command = {
   type: 'local-jsx',
   name: 'break-cache',
-  description:
-    'Manage prompt-cache breaking. Open actions or run: once, status, always, off',
+  description: t('cmd.descBreakCache'),
   isHidden: false,
   isEnabled: () => !getIsNonInteractiveSession(),
   argumentHint: '[once|status|always|off|--clear]',
@@ -255,21 +242,17 @@ const breakCache: Command = {
     args.trim()
       ? undefined
       : 'Use /break-cache once/status/always/off over Remote Control.',
-  load: () => import('./panel.js'),
-}
+  load: () => import('./panel.js')}
 
 export const breakCacheNonInteractive: Command = {
   type: 'local',
   name: 'break-cache',
-  description:
-    'Force the next (or all) API call(s) to miss prompt cache. Scopes: once, status, always, off',
+  description: t('cmd.descBreakCache'),
   isHidden: false,
   isEnabled: () => getIsNonInteractiveSession(),
   supportsNonInteractive: true,
   bridgeSafe: true,
   load: async () => ({
-    call: callBreakCache,
-  }),
-}
+    call: callBreakCache})}
 
 export default breakCache

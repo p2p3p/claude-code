@@ -4,8 +4,7 @@ import { getGlobalConfig, saveGlobalConfig } from './config.js'
 import { logForDebugging } from './debug.js'
 import {
   detectCurrentRepository,
-  parseGitHubRepository,
-} from './detectRepository.js'
+  parseGitHubRepository} from './detectRepository.js'
 import { pathExists } from './file.js'
 import { getRemoteUrlForDir } from './git/gitFilesystem.js'
 import { findGitRoot } from './git.js'
@@ -64,9 +63,7 @@ export async function updateGithubRepoPathMapping(): Promise<void> {
       ...current,
       githubRepoPaths: {
         ...current.githubRepoPaths,
-        [repoKey]: updatedPaths,
-      },
-    }))
+        [repoKey]: updatedPaths}}))
 
     logForDebugging(`Added ${currentPath} to tracked paths for repo ${repoKey}`)
   } catch (error) {
@@ -153,8 +150,7 @@ export function removePathFromRepo(repo: string, pathToRemove: string): void {
 
   saveGlobalConfig(current => ({
     ...current,
-    githubRepoPaths: updatedMapping,
-  }))
+    githubRepoPaths: updatedMapping}))
 
   logForDebugging(
     `Removed ${pathToRemove} from tracked paths for repo ${repoKey}`,

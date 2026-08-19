@@ -24,8 +24,7 @@ export function SpinnerGlyph({
   messageColor,
   stalledIntensity = 0,
   reducedMotion = false,
-  time = 0,
-}: Props): React.ReactNode {
+  time = 0}: Props): React.ReactNode {
   const [themeName] = useTheme();
   const theme = getTheme(themeName);
 

@@ -29,8 +29,7 @@ type Props = {
 const NOOP_HELPERS: PromptInputHelpers = {
   setCursorOffset: () => {},
   clearBuffer: () => {},
-  resetHistory: () => {},
-};
+  resetHistory: () => {}};
 
 /**
  * Registers keybinding handlers for all "command:*" actions found in the
@@ -60,8 +59,7 @@ export function CommandKeybindingHandlers({ onSubmit, isActive = true }: Props):
       const commandName = action.slice('command:'.length);
       map[action] = () => {
         onSubmit(`/${commandName}`, NOOP_HELPERS, undefined, {
-          fromKeybinding: true,
-        });
+          fromKeybinding: true});
       };
     }
     return map;
@@ -69,8 +67,7 @@ export function CommandKeybindingHandlers({ onSubmit, isActive = true }: Props):
 
   useKeybindings(handlers, {
     context: 'Chat',
-    isActive: isActive && !isModalOverlayActive,
-  });
+    isActive: isActive && !isModalOverlayActive});
 
   return null;
 }

@@ -48,8 +48,7 @@ type UsePaginationResult<T> = {
 export function usePagination<T>({
   totalItems,
   maxVisible = DEFAULT_MAX_VISIBLE,
-  selectedIndex = 0,
-}: UsePaginationOptions): UsePaginationResult<T> {
+  selectedIndex = 0}: UsePaginationOptions): UsePaginationResult<T> {
   const needsPagination = totalItems > maxVisible
 
   // Use a ref to track the previous scroll offset for smooth scrolling
@@ -165,7 +164,5 @@ export function usePagination<T>({
       current: selectedIndex + 1,
       total: totalItems,
       canScrollUp: scrollOffset > 0,
-      canScrollDown: scrollOffset + maxVisible < totalItems,
-    },
-  }
+      canScrollDown: scrollOffset + maxVisible < totalItems}}
 }

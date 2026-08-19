@@ -11,12 +11,12 @@ import { applyPermissionUpdate, persistPermissionUpdate } from '../../utils/perm
 import type { PermissionUpdateDestination } from '../../utils/permissions/PermissionUpdateSchema.js';
 import { SandboxManager } from '../../utils/sandbox/sandbox-adapter.js';
 import { addDirHelpMessage, validateDirectoryForWorkspace } from './validation.js';
+import { t } from '../../utils/i18n/index.js'
 
 function AddDirError({
   message,
   args,
-  onDone,
-}: {
+  onDone}: {
   message: string;
   args: string;
   onDone: () => void;
@@ -56,16 +56,14 @@ export async function call(
     const permissionUpdate = {
       type: 'addDirectories' as const,
       directories: [path],
-      destination,
-    };
+      destination};
 
     // Apply to session context
     const latestAppState = context.getAppState();
     const updatedContext = applyPermissionUpdate(latestAppState.toolPermissionContext, permissionUpdate);
     context.setAppState(prev => ({
       ...prev,
-      toolPermissionContext: updatedContext,
-    }));
+      toolPermissionContext: updatedContext}));
 
     // Update sandbox config so Bash commands can access the new directory.
     // Bootstrap state is the source of truth for session-only dirs; persisted
@@ -82,15 +80,15 @@ export async function call(
     if (remember) {
       try {
         persistPermissionUpdate(permissionUpdate);
-        message = `Added ${chalk.bold(path)} as a working directory and saved to local settings`;
+        message = t('addDirCmd.addedSaved', chalk.bold(path));
       } catch (error) {
-        message = `Added ${chalk.bold(path)} as a working directory. Failed to save to local settings: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        message = t('addDirCmd.addedFailedSave', chalk.bold(path), error instanceof Error ? error.message : t('branchCmd.unknownError'));
       }
     } else {
-      message = `Added ${chalk.bold(path)} as a working directory for this session`;
+      message = t('addDirCmd.addedSession', chalk.bold(path));
     }
 
-    const messageWithHint = `${message} ${chalk.dim('· /permissions to manage')}`;
+    const messageWithHint = `${message} ${chalk.dim(t('addDirCmd.manageHint'))}`;
     onDone(messageWithHint);
   };
 
@@ -102,7 +100,7 @@ export async function call(
         permissionContext={appState.toolPermissionContext}
         onAddDirectory={handleAddDirectory}
         onCancel={() => {
-          onDone('Did not add a working directory.');
+          onDone(t('addDirCmd.didNotAdd'));
         }}
       />
     );
@@ -122,7 +120,7 @@ export async function call(
       permissionContext={appState.toolPermissionContext}
       onAddDirectory={handleAddDirectory}
       onCancel={() => {
-        onDone(`Did not add ${chalk.bold(result.absolutePath)} as a working directory.`);
+        onDone(t('addDirCmd.didNotAddPath', chalk.bold(result.absolutePath)));
       }}
     />
   );

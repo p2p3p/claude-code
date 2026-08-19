@@ -127,8 +127,7 @@ export function getSummaryContextFingerprint(
   if (!lastMessage) return null
   const hash = createHash('sha256')
   updateFingerprintHash(hash, messages, {
-    remaining: MAX_SUMMARY_CONTEXT_CHARS,
-  })
+    remaining: MAX_SUMMARY_CONTEXT_CHARS})
   return `${messages.length}:${lastMessage.uuid}:${hash.digest('hex').slice(0, 16)}`
 }
 
@@ -200,20 +199,17 @@ export function buildSummaryContext(
     return {
       messages: boundedMessages,
       fingerprint,
-      skipReason: 'unchanged',
-    }
+      skipReason: 'unchanged'}
   }
 
   if (boundedMessages.length < 3) {
     return {
       messages: boundedMessages,
       fingerprint,
-      skipReason: 'too_small',
-    }
+      skipReason: 'too_small'}
   }
 
   return {
     messages: boundedMessages,
-    fingerprint,
-  }
+    fingerprint}
 }

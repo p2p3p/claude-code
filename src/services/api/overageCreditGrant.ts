@@ -31,8 +31,7 @@ async function fetchOverageCreditGrant(): Promise<OverageCreditGrantInfo | null>
     const { accessToken, orgUUID } = await prepareApiRequest()
     const url = `${getOauthConfig().BASE_API_URL}/api/oauth/organizations/${orgUUID}/overage_credit_grant`
     const response = await axios.get<OverageCreditGrantInfo>(url, {
-      headers: getOAuthHeaders(accessToken),
-    })
+      headers: getOAuthHeaders(accessToken)})
     return response.data
   } catch (err) {
     logError(err)
@@ -108,15 +107,12 @@ export async function refreshOverageCreditGrantCache(): Promise<void> {
     }
     const entry: CachedGrantEntry = {
       info: dataUnchanged ? existing : info,
-      timestamp: Date.now(),
-    }
+      timestamp: Date.now()}
     return {
       ...prev,
       overageCreditGrantCache: {
         ...prev.overageCreditGrantCache,
-        [orgId]: entry,
-      },
-    }
+        [orgId]: entry}}
   })
 }
 

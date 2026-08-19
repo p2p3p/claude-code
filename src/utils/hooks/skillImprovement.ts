@@ -4,14 +4,12 @@ import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/gr
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-  logEvent,
-} from '../../services/analytics/index.js'
-import { queryModelWithoutStreaming } from '../../services/api/claude.js'
+  logEvent} from '../../services/analytics/index.js'
+import { queryModelWithoutStreaming } from '../../services/api/anthropic/index.js'
 import {
   createTrace,
   endTrace,
-  isLangfuseEnabled,
-} from '../../services/langfuse/index.js'
+  isLangfuseEnabled} from '../../services/langfuse/index.js'
 import { getSessionId } from '../../bootstrap/state.js'
 import { getAPIProvider } from '../model/providers.js'
 import { getEmptyToolPermissionContext } from '../../Tool.js'
@@ -24,15 +22,13 @@ import { logError } from '../log.js'
 import {
   createUserMessage,
   extractTag,
-  extractTextContent,
-} from '../messages.js'
+  extractTextContent} from '../messages.js'
 import { getSmallFastModel } from '../model/model.js'
 import { jsonParse } from '../slowOperations.js'
 import { asSystemPrompt } from '../systemPromptType.js'
 import {
   type ApiQueryHookConfig,
-  createApiQueryHook,
-} from './apiQueryHookHelper.js'
+  createApiQueryHook} from './apiQueryHookHelper.js'
 import { registerPostSamplingHook } from './postSamplingHooks.js'
 
 export function isSkillImprovementEnabled(): boolean {
@@ -138,8 +134,7 @@ Ignore:
 - Things the skill already does
 
 Output a JSON array inside <updates> tags. Each item: {"section": "which step/section to modify or 'new step'", "change": "what to add/modify", "reason": "which user message prompted this"}.
-Output <updates>[]</updates> if no updates are needed.`,
-        }),
+Output <updates>[]</updates> if no updates are needed.`}),
       ]
     },
 
@@ -171,20 +166,16 @@ Output <updates>[]</updates> if no updates are needed.`,
           uuid: result.uuid as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           // _PROTO_skill_name routes to the privileged skill_name BQ column.
           _PROTO_skill_name:
-            skillName as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-        })
+            skillName as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED})
 
         context.toolUseContext.setAppState(prev => ({
           ...prev,
           skillImprovement: {
-            suggestion: { skillName, updates: result.result },
-          },
-        }))
+            suggestion: { skillName, updates: result.result }}}))
       }
     },
 
-    getModel: getSmallFastModel,
-  }
+    getModel: getSmallFastModel}
 
   return createApiQueryHook(config)
 }
@@ -232,8 +223,7 @@ export async function applySkillImprovement(
         sessionId: getSessionId(),
         model,
         provider: getAPIProvider(),
-        name: 'skill-improvement-apply',
-      })
+        name: 'skill-improvement-apply'})
     : null
 
   const response = await queryModelWithoutStreaming({
@@ -254,8 +244,7 @@ Rules:
 - Preserve frontmatter (--- block) exactly as-is
 - Preserve the overall format and style
 - Do not remove existing content unless an improvement explicitly replaces it
-- Output the complete updated file inside <updated_file> tags`,
-      }),
+- Output the complete updated file inside <updated_file> tags`}),
     ],
     systemPrompt: asSystemPrompt([
       'You edit skill definition files to incorporate user preferences. Output only the updated file content.',
@@ -273,9 +262,7 @@ Rules:
       agents: [],
       querySource: 'skill_improvement_apply',
       mcpTools: [],
-      langfuseTrace,
-    },
-  })
+      langfuseTrace}})
 
   endTrace(langfuseTrace)
 

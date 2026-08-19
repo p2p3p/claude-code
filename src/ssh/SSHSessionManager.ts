@@ -2,8 +2,7 @@ import type { Subprocess } from 'bun'
 import type { SDKMessage } from '../entrypoints/agentSdkTypes.js'
 import type {
   SDKControlPermissionRequest,
-  StdoutMessage,
-} from '../entrypoints/sdk/controlTypes.js'
+  StdoutMessage} from '../entrypoints/sdk/controlTypes.js'
 import type { PermissionUpdate } from '../types/permissions.js'
 import { logForDebugging } from '../utils/debug.js'
 import { jsonParse, jsonStringify } from '../utils/slowOperations.js'
@@ -273,11 +272,9 @@ export class SSHSessionManagerImpl implements SSHSessionManager {
       type: 'user',
       message: {
         role: 'user',
-        content,
-      },
+        content},
       parent_tool_use_id: null,
-      session_id: '',
-    })
+      session_id: ''})
     return this.writeToStdin(message)
   }
 
@@ -286,9 +283,7 @@ export class SSHSessionManagerImpl implements SSHSessionManager {
       type: 'control_request',
       request_id: crypto.randomUUID(),
       request: {
-        subtype: 'interrupt',
-      },
-    })
+        subtype: 'interrupt'}})
     this.writeToStdin(request)
   }
 
@@ -305,10 +300,7 @@ export class SSHSessionManagerImpl implements SSHSessionManager {
           behavior: response.behavior,
           ...(response.behavior === 'allow'
             ? { updatedInput: response.updatedInput }
-            : { message: response.message }),
-        },
-      },
-    })
+            : { message: response.message })}}})
     this.writeToStdin(msg)
   }
 
@@ -318,9 +310,7 @@ export class SSHSessionManagerImpl implements SSHSessionManager {
       response: {
         subtype: 'error',
         request_id: requestId,
-        error,
-      },
-    })
+        error}})
     this.writeToStdin(response)
   }
 

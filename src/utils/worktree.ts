@@ -8,8 +8,7 @@ import {
   readFile,
   stat,
   symlink,
-  utimes,
-} from 'fs/promises'
+  utimes} from 'fs/promises'
 import ignore from 'ignore'
 import { basename, dirname, join } from 'path'
 import { saveCurrentProjectConfig } from './config.js'
@@ -18,30 +17,27 @@ import { logForDebugging } from './debug.js'
 import { errorMessage, getErrnoCode } from './errors.js'
 import { execFileNoThrow, execFileNoThrowWithCwd } from './execFileNoThrow.js'
 import { parseGitConfigValue } from './git/gitConfigParser.js'
+import { t } from './i18n/index.js'
 import {
   getCommonDir,
   readWorktreeHeadSha,
   resolveGitDir,
-  resolveRef,
-} from './git/gitFilesystem.js'
+  resolveRef} from './git/gitFilesystem.js'
 import {
   findCanonicalGitRoot,
   findGitRoot,
   getBranch,
   getDefaultBranch,
-  gitExe,
-} from './git.js'
+  gitExe} from './git.js'
 import {
   executeWorktreeCreateHook,
   executeWorktreeRemoveHook,
-  hasWorktreeCreateHook,
-} from './hooks.js'
+  hasWorktreeCreateHook} from './hooks.js'
 import { containsPathTraversal } from './path.js'
 import { getPlatform } from './platform.js'
 import {
   getInitialSettings,
-  getRelativeSettingsFilePathForSource,
-} from './settings/settings.js'
+  getRelativeSettingsFilePathForSource} from './settings/settings.js'
 import { sleep } from './sleep.js'
 import { isInITerm2 } from './swarm/backends/detection.js'
 
@@ -65,23 +61,17 @@ const MAX_WORKTREE_SLUG_LENGTH = 64
  */
 export function validateWorktreeSlug(slug: string): void {
   if (slug.length > MAX_WORKTREE_SLUG_LENGTH) {
-    throw new Error(
-      `Invalid worktree name: must be ${MAX_WORKTREE_SLUG_LENGTH} characters or fewer (got ${slug.length})`,
-    )
+    throw new Error(t('worktree.invalidNameLength', String(MAX_WORKTREE_SLUG_LENGTH), String(slug.length)))
   }
   // Leading or trailing `/` would make path.join produce an absolute path
   // or a dangling segment. Splitting and validating each segment rejects
   // both (empty segments fail the regex) while allowing `user/feature`.
   for (const segment of slug.split('/')) {
     if (segment === '.' || segment === '..') {
-      throw new Error(
-        `Invalid worktree name "${slug}": must not contain "." or ".." path segments`,
-      )
+      throw new Error(t('worktree.invalidNameDotSegments', slug))
     }
     if (!VALID_WORKTREE_SLUG_SEGMENT.test(segment)) {
-      throw new Error(
-        `Invalid worktree name "${slug}": each "/"-separated segment must be non-empty and contain only letters, digits, dots, underscores, and dashes`,
-      )
+      throw new Error(t('worktree.invalidNameChars', slug))
     }
   }
 }
@@ -198,8 +188,7 @@ type WorktreeCreateResult =
 // stdin: 'ignore' closes stdin so interactive prompts can't block.
 const GIT_NO_PROMPT_ENV = {
   GIT_TERMINAL_PROMPT: '0',
-  GIT_ASKPASS: '',
-}
+  GIT_ASKPASS: ''}
 
 function worktreesDir(repoRoot: string): string {
   return join(repoRoot, '.claude', 'worktrees')
@@ -250,8 +239,7 @@ async function getOrCreateWorktree(
       worktreePath,
       worktreeBranch,
       headCommit: existingHead,
-      existed: true,
-    }
+      existed: true}
   }
 
   // New worktree: fetch base branch then add
@@ -269,9 +257,7 @@ async function getOrCreateWorktree(
         { cwd: repoRoot, stdin: 'ignore', env: fetchEnv },
       )
     if (prFetchCode !== 0) {
-      throw new Error(
-        `Failed to fetch PR #${options.prNumber}: ${prFetchStderr.trim() || 'PR may not exist or the repository may not have a remote named "origin"'}`,
-      )
+      throw new Error(t('worktree.fetchPrFailed', String(options.prNumber), prFetchStderr.trim() || t('worktree.prNotExist')))
     }
     baseBranch = 'FETCH_HEAD'
   } else {
@@ -311,9 +297,7 @@ async function getOrCreateWorktree(
       { cwd: repoRoot },
     )
     if (shaCode !== 0) {
-      throw new Error(
-        `Failed to resolve base branch "${baseBranch}": git rev-parse failed`,
-      )
+      throw new Error(t('worktree.resolveBaseBranchFailed', baseBranch))
     }
     baseSha = stdout.trim()
   }
@@ -330,7 +314,7 @@ async function getOrCreateWorktree(
   const { code: createCode, stderr: createStderr } =
     await execFileNoThrowWithCwd(gitExe(), addArgs, { cwd: repoRoot })
   if (createCode !== 0) {
-    throw new Error(`Failed to create worktree: ${createStderr}`)
+    throw new Error(t('worktree.createFailed', createStderr))
   }
 
   if (sparsePaths?.length) {
@@ -353,7 +337,7 @@ async function getOrCreateWorktree(
         { cwd: worktreePath },
       )
     if (sparseCode !== 0) {
-      await tearDown(`Failed to configure sparse-checkout: ${sparseErr}`)
+      await tearDown(t('worktree.sparseCheckoutConfigFailed', sparseErr))
     }
     const { code: coCode, stderr: coErr } = await execFileNoThrowWithCwd(
       gitExe(),
@@ -361,7 +345,7 @@ async function getOrCreateWorktree(
       { cwd: worktreePath },
     )
     if (coCode !== 0) {
-      await tearDown(`Failed to checkout sparse worktree: ${coErr}`)
+      await tearDown(t('worktree.sparseCheckoutFailed', coErr))
     }
   }
 
@@ -370,8 +354,7 @@ async function getOrCreateWorktree(
     worktreeBranch,
     headCommit: baseSha,
     baseBranch,
-    existed: false,
-  }
+    existed: false}
 }
 
 /**
@@ -571,8 +554,7 @@ async function performPostCreationSetup(
         )
       } else {
         logForDebugging(`Failed to configure hooks path: ${configError}`, {
-          level: 'error',
-        })
+          level: 'error'})
       }
     }
   }
@@ -724,15 +706,13 @@ export async function createWorktreeForSession(
       worktreeName: slug,
       sessionId,
       tmuxSessionName,
-      hookBased: true,
-    }
+      hookBased: true}
   } else {
     // Fall back to git worktree
     const gitRoot = findGitRoot(getCwd())
     if (!gitRoot) {
       throw new Error(
-        'Cannot create a worktree: not in a git repository and no WorktreeCreate hooks are configured. ' +
-          'Configure WorktreeCreate/WorktreeRemove hooks in settings.json to use worktree isolation with other VCS systems.',
+        t('worktree.notInGitRepo'),
       )
     }
 
@@ -764,15 +744,13 @@ export async function createWorktreeForSession(
       tmuxSessionName,
       creationDurationMs,
       usedSparsePaths:
-        (getInitialSettings().worktree?.sparsePaths?.length ?? 0) > 0,
-    }
+        (getInitialSettings().worktree?.sparsePaths?.length ?? 0) > 0}
   }
 
   // Save to project config for persistence
   saveCurrentProjectConfig(current => ({
     ...current,
-    activeWorktreeSession: currentWorktreeSession ?? undefined,
-  }))
+    activeWorktreeSession: currentWorktreeSession ?? undefined}))
 
   return currentWorktreeSession
 }
@@ -794,8 +772,7 @@ export async function keepWorktree(): Promise<void> {
     // Update config
     saveCurrentProjectConfig(current => ({
       ...current,
-      activeWorktreeSession: undefined,
-    }))
+      activeWorktreeSession: undefined}))
 
     logForDebugging(
       `Linked worktree preserved at: ${worktreePath}${worktreeBranch ? ` on branch: ${worktreeBranch}` : ''}`,
@@ -805,8 +782,7 @@ export async function keepWorktree(): Promise<void> {
     )
   } catch (error) {
     logForDebugging(`Error keeping worktree: ${error}`, {
-      level: 'error',
-    })
+      level: 'error'})
   }
 }
 
@@ -847,8 +823,7 @@ export async function cleanupWorktree(): Promise<void> {
 
       if (removeCode !== 0) {
         logForDebugging(`Failed to remove linked worktree: ${removeError}`, {
-          level: 'error',
-        })
+          level: 'error'})
       } else {
         logForDebugging(`Removed linked worktree at: ${worktreePath}`)
       }
@@ -860,8 +835,7 @@ export async function cleanupWorktree(): Promise<void> {
     // Update config
     saveCurrentProjectConfig(current => ({
       ...current,
-      activeWorktreeSession: undefined,
-    }))
+      activeWorktreeSession: undefined}))
 
     // Delete the temporary worktree branch (git-based only)
     if (!hookBased && worktreeBranch) {
@@ -888,8 +862,7 @@ export async function cleanupWorktree(): Promise<void> {
     logForDebugging('Linked worktree cleaned up completely')
   } catch (error) {
     logForDebugging(`Error cleaning up worktree: ${error}`, {
-      level: 'error',
-    })
+      level: 'error'})
   }
 }
 
@@ -926,8 +899,7 @@ export async function createAgentWorktree(slug: string): Promise<{
   const gitRoot = findCanonicalGitRoot(getCwd())
   if (!gitRoot) {
     throw new Error(
-      'Cannot create agent worktree: not in a git repository and no WorktreeCreate hooks are configured. ' +
-        'Configure WorktreeCreate/WorktreeRemove hooks in settings.json to use worktree isolation with other VCS systems.',
+      t('worktree.agentNotInGitRepo'),
     )
   }
 
@@ -979,8 +951,7 @@ export async function removeAgentWorktree(
 
   if (!gitRoot) {
     logForDebugging('Cannot remove agent worktree: no git root provided', {
-      level: 'error',
-    })
+      level: 'error'})
     return false
   }
 
@@ -994,8 +965,7 @@ export async function removeAgentWorktree(
 
   if (removeCode !== 0) {
     logForDebugging(`Failed to remove agent worktree: ${removeError}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return false
   }
   logForDebugging(`Removed agent worktree at: ${worktreePath}`)
@@ -1007,8 +977,7 @@ export async function removeAgentWorktree(
   // Delete the temporary worktree branch from the main repo
   const { code: deleteBranchCode, stderr: deleteBranchError } =
     await execFileNoThrowWithCwd(gitExe(), ['branch', '-D', worktreeBranch], {
-      cwd: gitRoot,
-    })
+      cwd: gitRoot})
 
   if (deleteBranchCode !== 0) {
     logForDebugging(
@@ -1128,8 +1097,7 @@ export async function cleanupStaleAgentWorktrees(
 
   if (removed > 0) {
     await execFileNoThrowWithCwd(gitExe(), ['worktree', 'prune'], {
-      cwd: gitRoot,
-    })
+      cwd: gitRoot})
     logForDebugging(
       `cleanupStaleAgentWorktrees: removed ${removed} stale worktree(s)`,
     )
@@ -1149,8 +1117,7 @@ export async function hasWorktreeChanges(
 ): Promise<boolean> {
   const { code: statusCode, stdout: statusOutput } =
     await execFileNoThrowWithCwd(gitExe(), ['status', '--porcelain'], {
-      cwd: worktreePath,
-    })
+      cwd: worktreePath})
   if (statusCode !== 0) {
     return true
   }
@@ -1187,8 +1154,7 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
   if (process.platform === 'win32') {
     return {
       handled: false,
-      error: 'Error: --tmux is not supported on Windows',
-    }
+      error: 'Error: --tmux is not supported on Windows'}
   }
 
   // Check if tmux is available
@@ -1200,8 +1166,7 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
         : 'Install tmux with: sudo apt install tmux'
     return {
       handled: false,
-      error: `Error: tmux is not installed. ${installHint}`,
-    }
+      error: `Error: tmux is not installed. ${installHint}`}
   }
 
   // Parse worktree name and tmux mode from args
@@ -1250,8 +1215,7 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
   } catch (e) {
     return {
       handled: false,
-      error: `Error: ${(e as Error).message}`,
-    }
+      error: `Error: ${(e as Error).message}`}
   }
 
   // Mirror createWorktreeForSession(): hook takes precedence over git so the
@@ -1266,8 +1230,7 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
     } catch (error) {
       return {
         handled: false,
-        error: `Error: ${errorMessage(error)}`,
-      }
+        error: `Error: ${errorMessage(error)}`}
     }
     repoName = basename(findCanonicalGitRoot(getCwd()) ?? getCwd())
     console.log(`Using worktree via hook: ${worktreeDir}`)
@@ -1277,8 +1240,7 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
     if (!repoRoot) {
       return {
         handled: false,
-        error: 'Error: --worktree requires a git repository',
-      }
+        error: t('worktree.requiresGit')}
     }
 
     repoName = basename(repoRoot)
@@ -1300,8 +1262,7 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
     } catch (error) {
       return {
         handled: false,
-        error: `Error: ${errorMessage(error)}`,
-      }
+        error: `Error: ${errorMessage(error)}`}
     }
   }
 
@@ -1330,8 +1291,7 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
   // Get tmux prefix for user guidance
   let tmuxPrefix = 'C-b' // default
   const prefixResult = spawnSync('tmux', ['show-options', '-g', 'prefix'], {
-    encoding: 'utf-8',
-  })
+    encoding: 'utf-8'})
   if (prefixResult.status === 0 && prefixResult.stdout) {
     const match = prefixResult.stdout.match(/prefix\s+(\S+)/)
     if (match?.[1]) {
@@ -1359,8 +1319,7 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
     ...process.env,
     CLAUDE_CODE_TMUX_SESSION: tmuxSessionName,
     CLAUDE_CODE_TMUX_PREFIX: tmuxPrefix,
-    CLAUDE_CODE_TMUX_PREFIX_CONFLICTS: prefixConflicts ? '1' : '',
-  }
+    CLAUDE_CODE_TMUX_PREFIX_CONFLICTS: prefixConflicts ? '1' : ''}
 
   // Check if session already exists
   const hasSessionResult = spawnSync(
@@ -1433,20 +1392,17 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
       { cwd: worktreeDir },
     )
     spawnSync('tmux', ['send-keys', '-t', tmuxSessionName, 'bun run start'], {
-      cwd: worktreeDir,
-    })
+      cwd: worktreeDir})
 
     // Select the first pane (Claude)
     spawnSync('tmux', ['select-pane', '-t', `${tmuxSessionName}:0.0`], {
-      cwd: worktreeDir,
-    })
+      cwd: worktreeDir})
 
     // Attach or switch to the session
     if (isAlreadyInTmux) {
       // Switch to sibling session (avoid nesting)
       spawnSync('tmux', ['switch-client', '-t', tmuxSessionName], {
-        stdio: 'inherit',
-      })
+        stdio: 'inherit'})
     } else {
       // Attach to the session
       spawnSync(
@@ -1454,8 +1410,7 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
         [...tmuxGlobalArgs, 'attach-session', '-t', tmuxSessionName],
         {
           stdio: 'inherit',
-          cwd: worktreeDir,
-        },
+          cwd: worktreeDir},
       )
     }
   } else {
@@ -1466,8 +1421,7 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
       if (sessionExists) {
         // Just switch to existing session
         spawnSync('tmux', ['switch-client', '-t', tmuxSessionName], {
-          stdio: 'inherit',
-        })
+          stdio: 'inherit'})
       } else {
         // Create new detached session
         spawnSync(
@@ -1488,8 +1442,7 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
 
         // Switch to the new session
         spawnSync('tmux', ['switch-client', '-t', tmuxSessionName], {
-          stdio: 'inherit',
-        })
+          stdio: 'inherit'})
       }
     } else {
       // Not in tmux - create and attach (original behavior)
@@ -1509,8 +1462,7 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
       spawnSync('tmux', tmuxArgs, {
         stdio: 'inherit',
         cwd: worktreeDir,
-        env: tmuxEnv,
-      })
+        env: tmuxEnv})
     }
   }
 

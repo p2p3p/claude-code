@@ -38,8 +38,7 @@ const MACOS_TERMINALS: Array<{
   {
     name: 'Terminal.app',
     bundleId: 'com.apple.Terminal',
-    app: 'Terminal',
-  },
+    app: 'Terminal'},
 ]
 
 // Linux terminals in preference order (command name)
@@ -281,8 +280,7 @@ async function launchMacosTerminal(
   end tell
 end tell`
       const { code } = await execFileNoThrow('osascript', ['-e', script], {
-        useCwd: false,
-      })
+        useCwd: false})
       if (code === 0) return true
       break
     }
@@ -294,8 +292,7 @@ end tell`
   activate
 end tell`
       const { code } = await execFileNoThrow('osascript', ['-e', script], {
-        useCwd: false,
-      })
+        useCwd: false})
       return code === 0
     }
 
@@ -464,8 +461,7 @@ async function launchWindowsTerminal(
   // quoting for spawn() on Windows assumes MSVCRT rules and would double-
   // escape our already-cmdQuote'd string. Bypass it for cmd.exe only.
   return spawnDetached(terminal.command, args, {
-    windowsVerbatimArguments: terminal.name === 'Command Prompt',
-  })
+    windowsVerbatimArguments: terminal.name === 'Command Prompt'})
 }
 
 /**
@@ -483,12 +479,10 @@ function spawnDetached(
       detached: true,
       stdio: 'ignore',
       cwd: opts.cwd,
-      windowsVerbatimArguments: opts.windowsVerbatimArguments,
-    })
+      windowsVerbatimArguments: opts.windowsVerbatimArguments})
     child.once('error', err => {
       logForDebugging(`Failed to spawn ${command}: ${err.message}`, {
-        level: 'error',
-      })
+        level: 'error'})
       void resolve(false)
     })
     child.once('spawn', () => {

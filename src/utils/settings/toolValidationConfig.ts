@@ -46,8 +46,7 @@ export const TOOL_VALIDATION_CONFIG: ToolValidationConfig = {
           valid: false,
           error: 'WebSearch does not support wildcards',
           suggestion: 'Use exact search terms without * or ?',
-          examples: ['WebSearch(claude ai)', 'WebSearch(typescript tutorial)'],
-        }
+          examples: ['WebSearch(claude ai)', 'WebSearch(typescript tutorial)']}
       }
       return { valid: true }
     },
@@ -63,8 +62,7 @@ export const TOOL_VALIDATION_CONFIG: ToolValidationConfig = {
           examples: [
             'WebFetch(domain:example.com)',
             'WebFetch(domain:github.com)',
-          ],
-        }
+          ]}
       }
 
       // Must start with domain: prefix
@@ -76,16 +74,13 @@ export const TOOL_VALIDATION_CONFIG: ToolValidationConfig = {
           examples: [
             'WebFetch(domain:example.com)',
             'WebFetch(domain:*.google.com)',
-          ],
-        }
+          ]}
       }
 
       // Allow wildcards in domain patterns
       // Valid: domain:*.example.com, domain:example.*, etc.
       return { valid: true }
-    },
-  },
-}
+    }}}
 
 // Helper to check if a tool uses file patterns
 export function isFilePatternTool(toolName: string): boolean {

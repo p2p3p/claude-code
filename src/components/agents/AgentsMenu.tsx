@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { t } from '../../utils/i18n/index.js'
 import * as React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import type { SettingSource } from 'src/utils/settings/constants.js';
@@ -10,12 +11,10 @@ import { useAppState, useSetAppState } from '../../state/AppState.js';
 import type { Tools } from '../../Tool.js';
 import {
   type ResolvedAgent,
-  resolveAgentOverrides,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/agentDisplay.js';
+  resolveAgentOverrides} from '@claude-code-best/builtin-tools/tools/AgentTool/agentDisplay.js';
 import {
   type AgentDefinition,
-  getActiveAgentsFromList,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js';
+  getActiveAgentsFromList} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js';
 import { toError } from '../../utils/errors.js';
 import { logError } from '../../utils/log.js';
 import { Select } from '../CustomSelect/select.js';
@@ -36,8 +35,7 @@ type Props = {
 export function AgentsMenu({ tools, onExit }: Props): React.ReactNode {
   const [modeState, setModeState] = useState<ModeState>({
     mode: 'list-agents',
-    source: 'all',
-  });
+    source: 'all'});
   const agentDefinitions = useAppState(s => s.agentDefinitions);
   const mcpTools = useAppState(s => s.mcp.tools);
   const toolPermissionContext = useAppState(s => s.toolPermissionContext);
@@ -59,8 +57,7 @@ export function AgentsMenu({ tools, onExit }: Props): React.ReactNode {
       localSettings: allAgents.filter(a => a.source === 'localSettings'),
       flagSettings: allAgents.filter(a => a.source === 'flagSettings'),
       plugin: allAgents.filter(a => a.source === 'plugin'),
-      all: allAgents,
-    }),
+      all: allAgents}),
     [allAgents],
   );
 
@@ -82,9 +79,7 @@ export function AgentsMenu({ tools, onExit }: Props): React.ReactNode {
             agentDefinitions: {
               ...state.agentDefinitions,
               allAgents,
-              activeAgents: getActiveAgentsFromList(allAgents),
-            },
-          };
+              activeAgents: getActiveAgentsFromList(allAgents)}};
         });
 
         setChanges(prev => [...prev, `Deleted agent: ${chalk.bold(agent.agentType)}`]);
@@ -123,17 +118,15 @@ export function AgentsMenu({ tools, onExit }: Props): React.ReactNode {
             source={modeState.source}
             agents={resolvedAgents}
             onBack={() => {
-              const exitMessage = changes.length > 0 ? `Agent changes:\n${changes.join('\n')}` : undefined;
-              onExit(exitMessage ?? 'Agents dialog dismissed', {
-                display: changes.length === 0 ? 'system' : undefined,
-              });
+              const exitMessage = changes.length > 0 ? t('agentsMenu.agentChanges', changes.join('\n')) : undefined;
+              onExit(exitMessage ?? t('agentsMenu.dialogDismissed'), {
+                display: changes.length === 0 ? 'system' : undefined});
             }}
             onSelect={agent =>
               setModeState({
                 mode: 'agent-menu',
                 agent,
-                previousMode: modeState,
-              })
+                previousMode: modeState})
             }
             onCreateNew={() => setModeState({ mode: 'create-agent' })}
             changes={changes}
@@ -163,14 +156,14 @@ export function AgentsMenu({ tools, onExit }: Props): React.ReactNode {
       const isEditable =
         agentToUse.source !== 'built-in' && agentToUse.source !== 'plugin' && agentToUse.source !== 'flagSettings';
       const menuItems = [
-        { label: 'View agent', value: 'view' },
+        { label: t('agentsMenu.viewAgent'), value: 'view' },
         ...(isEditable
           ? [
-              { label: 'Edit agent', value: 'edit' },
-              { label: 'Delete agent', value: 'delete' },
+              { label: t('agentsMenu.editAgent'), value: 'edit' },
+              { label: t('agentsMenu.deleteAgent'), value: 'delete' },
             ]
           : []),
-        { label: 'Back', value: 'back' },
+        { label: t('agentsMenu.back'), value: 'back' },
       ];
 
       const handleMenuSelect = (value: string): void => {
@@ -179,22 +172,19 @@ export function AgentsMenu({ tools, onExit }: Props): React.ReactNode {
             setModeState({
               mode: 'view-agent',
               agent: agentToUse,
-              previousMode: modeState.previousMode,
-            });
+              previousMode: modeState.previousMode});
             break;
           case 'edit':
             setModeState({
               mode: 'edit-agent',
               agent: agentToUse,
-              previousMode: modeState,
-            });
+              previousMode: modeState});
             break;
           case 'delete':
             setModeState({
               mode: 'delete-confirm',
               agent: agentToUse,
-              previousMode: modeState,
-            });
+              previousMode: modeState});
             break;
           case 'back':
             setModeState(modeState.previousMode);
@@ -242,8 +232,7 @@ export function AgentsMenu({ tools, onExit }: Props): React.ReactNode {
               setModeState({
                 mode: 'agent-menu',
                 agent: agentToDisplay,
-                previousMode: modeState.previousMode,
-              })
+                previousMode: modeState.previousMode})
             }
             hideInputGuide
           >
@@ -255,36 +244,35 @@ export function AgentsMenu({ tools, onExit }: Props): React.ReactNode {
                 setModeState({
                   mode: 'agent-menu',
                   agent: agentToDisplay,
-                  previousMode: modeState.previousMode,
-                })
+                  previousMode: modeState.previousMode})
               }
             />
           </Dialog>
-          <AgentNavigationFooter instructions="Press Enter or Esc to go back" />
+          <AgentNavigationFooter instructions={t('agentsMenu.enterOrEscToGoBack')} />
         </>
       );
     }
 
     case 'delete-confirm': {
       const deleteOptions = [
-        { label: 'Yes, delete', value: 'yes' },
-        { label: 'No, cancel', value: 'no' },
+        { label: t('agentsMenu.yesDelete'), value: 'yes' },
+        { label: t('agentsMenu.noCancel'), value: 'no' },
       ];
 
       return (
         <>
           <Dialog
-            title="Delete agent"
+            title={t('agentsmenu.deleteAgent')}
             onCancel={() => {
               if ('previousMode' in modeState) setModeState(modeState.previousMode);
             }}
             color="error"
           >
             <Text>
-              Are you sure you want to delete the agent <Text bold>{modeState.agent.agentType}</Text>?
+              {t('agentsMenu.areYouSureDelete').replace('{name}', modeState.agent.agentType)}
             </Text>
             <Box marginTop={1}>
-              <Text dimColor>Source: {modeState.agent.source}</Text>
+              <Text dimColor>{t('agentsMenu.source').replace('{source}', modeState.agent.source)}</Text>
             </Box>
             <Box marginTop={1}>
               <Select
@@ -306,7 +294,7 @@ export function AgentsMenu({ tools, onExit }: Props): React.ReactNode {
               />
             </Box>
           </Dialog>
-          <AgentNavigationFooter instructions="Press ↑↓ to navigate, Enter to select, Esc to cancel" />
+          <AgentNavigationFooter instructions={t('agentsMenu.arrowsToNavigate')} />
         </>
       );
     }
@@ -321,7 +309,7 @@ export function AgentsMenu({ tools, onExit }: Props): React.ReactNode {
       return (
         <>
           <Dialog
-            title={`Edit agent: ${agentToEdit.agentType}`}
+            title={t('agentsMenu.editAgentTitle').replace('{name}', agentToEdit.agentType)}
             onCancel={() => setModeState(modeState.previousMode)}
             hideInputGuide
           >

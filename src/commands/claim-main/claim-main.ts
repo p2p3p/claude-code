@@ -4,9 +4,9 @@ import {
   getMachineId,
   getMacAddress,
   claimMain,
-  readRegistry,
-} from '../../utils/pipeRegistry.js'
+  readRegistry} from '../../utils/pipeRegistry.js'
 import { getLocalIp } from '../../utils/pipeTransport.js'
+import { t } from '../../utils/i18n/index.js'
 
 export const call: LocalCommandCall = async (_args, context) => {
   const currentState = context.getAppState()
@@ -16,8 +16,7 @@ export const call: LocalCommandCall = async (_args, context) => {
   if (!myName) {
     return {
       type: 'text',
-      value: 'Pipe server not started. Cannot claim main.',
-    }
+      value: t('claimMain.pipeServerNotStarted')}
   }
 
   const machineId = await getMachineId()
@@ -27,8 +26,7 @@ export const call: LocalCommandCall = async (_args, context) => {
   if (registry.mainMachineId === machineId && registry.main?.id === myName) {
     return {
       type: 'text',
-      value: 'This instance is already the main. No change needed.',
-    }
+      value: t('claimMain.alreadyMain')}
   }
 
   const { hostname } = require('os') as typeof import('os')
@@ -41,8 +39,7 @@ export const call: LocalCommandCall = async (_args, context) => {
     ip: getLocalIp(),
     mac: getMacAddress(),
     hostname: hostname(),
-    pipeName: myName,
-  }
+    pipeName: myName}
 
   await claimMain(machineId, entry)
 
@@ -55,22 +52,20 @@ export const call: LocalCommandCall = async (_args, context) => {
       subIndex: null,
       displayRole: 'main',
       machineId,
-      attachedBy: null,
-    },
-  }))
+      attachedBy: null}}))
 
   const lines: string[] = []
-  lines.push('Main role claimed successfully.')
-  lines.push(`Machine ID: ${machineId.slice(0, 8)}...`)
-  lines.push(`Pipe:       ${myName}`)
+  lines.push(t('claimMain.mainClaimed'))
+  lines.push(t('claimMain.machineId', machineId.slice(0, 8)))
+  lines.push(t('claimMain.pipeName', myName))
   if (registry.mainMachineId && registry.mainMachineId !== machineId) {
     lines.push(
-      `Previous main machine: ${registry.mainMachineId.slice(0, 8)}...`,
+      t('claimMain.previousMain', registry.mainMachineId.slice(0, 8)),
     )
   }
   lines.push('')
-  lines.push('All existing subs are now bound to this instance.')
-  lines.push('Use /pipes to verify.')
+  lines.push(t('claimMain.allSubsBound'))
+  lines.push(t('claimMain.usePipesVerify'))
 
   return { type: 'text', value: lines.join('\n') }
 }

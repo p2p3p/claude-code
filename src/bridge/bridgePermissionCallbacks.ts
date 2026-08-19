@@ -93,8 +93,7 @@ function parseBridgePermissionResponse(
   if (messageText) {
     return {
       behavior: 'deny',
-      message: messageText,
-    }
+      message: messageText}
   }
 
   return null

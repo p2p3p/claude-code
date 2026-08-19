@@ -16,8 +16,7 @@ import { homedir } from 'os'
 import { logForDebugging } from '../debug.js'
 import {
   filterExistingPaths,
-  getKnownPathsForRepo,
-} from '../githubRepoPathMapping.js'
+  getKnownPathsForRepo} from '../githubRepoPathMapping.js'
 import { jsonStringify } from '../slowOperations.js'
 import { readLastFetchTime } from './banner.js'
 
@@ -61,8 +60,7 @@ export async function handleDeepLinkUri(uri: string): Promise<number> {
     query: action.query,
     cwd,
     repo: resolvedRepo,
-    lastFetchMs: lastFetch?.getTime(),
-  })
+    lastFetchMs: lastFetch?.getTime()})
   if (!launched) {
     console.error(
       'Failed to open a terminal. Make sure a supported terminal emulator is installed.',

@@ -11,8 +11,7 @@ import { lock } from './utils/lockfile.js'
 import {
   hashPastedText,
   retrievePastedText,
-  storePastedText,
-} from './utils/pasteStore.js'
+  storePastedText} from './utils/pasteStore.js'
 import { sleep } from './utils/sleep.js'
 import { jsonParse, jsonStringify } from './utils/slowOperations.js'
 
@@ -69,8 +68,7 @@ export function parseReferences(
     .map(match => ({
       id: parseInt(match[2] || '0', 10),
       match: match[0],
-      index: match.index,
-    }))
+      index: match.index}))
     .filter(match => match.id > 0)
 }
 
@@ -172,8 +170,7 @@ export async function* getTimestampedHistory(): AsyncGenerator<TimestampedHistor
     yield {
       display: entry.display,
       timestamp: entry.timestamp,
-      resolve: () => logEntryToHistoryEntry(entry),
-    }
+      resolve: () => logEntryToHistoryEntry(entry)}
 
     if (seen.size >= MAX_HISTORY_ITEMS) return
   }
@@ -237,8 +234,7 @@ async function resolveStoredPastedContent(
       type: stored.type,
       content: stored.content,
       mediaType: stored.mediaType,
-      filename: stored.filename,
-    }
+      filename: stored.filename}
   }
 
   // If we have a hash reference, fetch from paste store
@@ -250,8 +246,7 @@ async function resolveStoredPastedContent(
         type: stored.type,
         content,
         mediaType: stored.mediaType,
-        filename: stored.filename,
-      }
+        filename: stored.filename}
     }
   }
 
@@ -274,8 +269,7 @@ async function logEntryToHistoryEntry(entry: LogEntry): Promise<HistoryEntry> {
 
   return {
     display: entry.display,
-    pastedContents,
-  }
+    pastedContents}
 }
 
 let pendingEntries: LogEntry[] = []
@@ -302,16 +296,13 @@ async function immediateFlushHistory(): Promise<void> {
     await writeFile(historyPath, '', {
       encoding: 'utf8',
       mode: 0o600,
-      flag: 'a',
-    })
+      flag: 'a'})
 
     release = await lock(historyPath, {
       stale: 10000,
       retries: {
         retries: 3,
-        minTimeout: 50,
-      },
-    })
+        minTimeout: 50}})
 
     const jsonLines = pendingEntries.map(entry => jsonStringify(entry) + '\n')
     pendingEntries = []
@@ -375,8 +366,7 @@ async function addToPromptHistory(
           type: content.type,
           content: content.content,
           mediaType: content.mediaType,
-          filename: content.filename,
-        }
+          filename: content.filename}
       } else {
         // For large text content, compute hash synchronously and store reference
         // The actual disk write happens async (fire-and-forget)
@@ -386,8 +376,7 @@ async function addToPromptHistory(
           type: content.type,
           contentHash: hash,
           mediaType: content.mediaType,
-          filename: content.filename,
-        }
+          filename: content.filename}
         // Fire-and-forget disk write - don't block history entry creation
         void storePastedText(hash, content.content)
       }
@@ -399,8 +388,7 @@ async function addToPromptHistory(
     pastedContents: storedPastedContents,
     timestamp: Date.now(),
     project: getProjectRoot(),
-    sessionId: getSessionId(),
-  }
+    sessionId: getSessionId()}
 
   pendingEntries.push(logEntry)
   lastAddedEntry = logEntry

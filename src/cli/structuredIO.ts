@@ -1,8 +1,7 @@
 import { feature } from 'bun:bundle'
 import type {
   ElicitResult,
-  JSONRPCMessage,
-} from '@modelcontextprotocol/sdk/types.js'
+  JSONRPCMessage} from '@modelcontextprotocol/sdk/types.js'
 import { randomUUID } from 'crypto'
 import type { AssistantMessage } from 'src//types/message.js'
 import type {
@@ -10,15 +9,13 @@ import type {
   HookJSONOutput,
   PermissionUpdate as SDKPermissionUpdate,
   SDKMessage,
-  SDKUserMessage,
-} from 'src/entrypoints/agentSdkTypes.js'
+  SDKUserMessage} from 'src/entrypoints/agentSdkTypes.js'
 import { SDKControlElicitationResponseSchema } from 'src/entrypoints/sdk/controlSchemas.js'
 import type {
   SDKControlRequest,
   SDKControlResponse,
   StdinMessage,
-  StdoutMessage,
-} from 'src/entrypoints/sdk/controlTypes.js'
+  StdoutMessage} from 'src/entrypoints/sdk/controlTypes.js'
 import type { PermissionUpdate as InternalPermissionUpdate } from 'src/types/permissions.js'
 import type { CanUseToolFn } from 'src/hooks/useCanUseTool.js'
 import type { Tool, ToolUseContext } from 'src/Tool.js'
@@ -29,12 +26,10 @@ import { AbortError } from 'src/utils/errors.js'
 import {
   type Output as PermissionToolOutput,
   permissionPromptToolResultToPermissionDecision,
-  outputSchema as permissionToolOutputSchema,
-} from 'src/utils/permissions/PermissionPromptToolResultSchema.js'
+  outputSchema as permissionToolOutputSchema} from 'src/utils/permissions/PermissionPromptToolResultSchema.js'
 import type {
   PermissionDecision,
-  PermissionDecisionReason,
-} from 'src/utils/permissions/PermissionResult.js'
+  PermissionDecisionReason} from 'src/utils/permissions/PermissionResult.js'
 import { hasPermissionsToUseTool } from 'src/utils/permissions/permissions.js'
 import { writeToStdout } from 'src/utils/process.js'
 import { jsonStringify } from 'src/utils/slowOperations.js'
@@ -44,15 +39,14 @@ import { normalizeControlMessageKeys } from '../utils/controlMessageCompat.js'
 import { executePermissionRequestHooks } from '../utils/hooks.js'
 import {
   applyPermissionUpdates,
-  persistPermissionUpdates,
-} from '../utils/permissions/PermissionUpdate.js'
+  persistPermissionUpdates} from '../utils/permissions/PermissionUpdate.js'
 import {
   notifySessionStateChanged,
   type RequiresActionDetails,
-  type SessionExternalMetadata,
-} from '../utils/sessionState.js'
+  type SessionExternalMetadata} from '../utils/sessionState.js'
 import { jsonParse } from '../utils/slowOperations.js'
 import { Stream } from '../utils/stream.js'
+import { t } from '../utils/i18n/index.js'
 import { ndjsonSafeStringify } from './ndjsonSafeStringify.js'
 
 /**
@@ -113,8 +107,7 @@ function buildRequiresActionDetails(
     action_description: description,
     tool_use_id: toolUseID,
     request_id: requestId,
-    input,
-  }
+    input}
 }
 
 type PendingRequest<T> = {
@@ -211,8 +204,7 @@ export class StructuredIO {
         uuid: '',
         session_id: '',
         message: { role: 'user', content },
-        parent_tool_use_id: null,
-      } satisfies SDKUserMessage) + '\n',
+        parent_tool_use_id: null} satisfies SDKUserMessage) + '\n',
     )
   }
 
@@ -236,8 +228,7 @@ export class StructuredIO {
         const message = await this.processLine(line)
         if (message) {
           logForDiagnosticsNoPII('info', 'cli_stdin_message_parsed', {
-            type: message.type,
-          })
+            type: message.type})
           yield message
         }
       }
@@ -259,7 +250,7 @@ export class StructuredIO {
     for (const request of this.pendingRequests.values()) {
       // Reject all pending requests if the input stream
       request.reject(
-        new Error('Tool permission stream closed before response received'),
+        new Error(t('structuredIO.permissionStreamClosed')),
       )
     }
   }
@@ -304,8 +295,7 @@ export class StructuredIO {
     // Cancel the SDK consumer's canUseTool callback — the bridge won.
     void this.write({
       type: 'control_cancel_request',
-      request_id: requestId,
-    })
+      request_id: requestId})
     if (responseInner.subtype === 'error') {
       request.reject(new Error(responseInner.error as string))
     } else {
@@ -431,7 +421,7 @@ export class StructuredIO {
         }
 
         if (resp.subtype === 'error') {
-          request.reject(new Error(resp.error ?? 'Unknown error'))
+          request.reject(new Error(resp.error ?? t('structuredIO.unknownError')))
           return undefined
         }
         const result = resp.response
@@ -457,13 +447,12 @@ export class StructuredIO {
         message.type !== 'system'
       ) {
         logForDebugging(`Ignoring unknown message type: ${message.type}`, {
-          level: 'warn',
-        })
+          level: 'warn'})
         return undefined
       }
       if (message.type === 'control_request') {
         if (!message.request) {
-          exitWithMessage(`Error: Missing request on control_request`)
+          exitWithMessage(t('structuredIO.missingRequest'))
         }
         return message
       }
@@ -474,12 +463,12 @@ export class StructuredIO {
         (message as { message?: { role?: string } }).message?.role !== 'user'
       ) {
         exitWithMessage(
-          `Error: Expected message role 'user', got '${(message as { message?: { role?: string } }).message?.role}'`,
+          t('structuredIO.expectedUserRole', (message as { message?: { role?: string } }).message?.role ?? 'undefined'),
         )
       }
       return message
     } catch (error) {
-      console.error(`Error parsing streaming input line: ${line}: ${error}`)
+      console.error(t('structuredIO.parseError', line, String(error)))
       // eslint-disable-next-line custom-rules/no-process-exit
       process.exit(1)
     }
@@ -498,13 +487,12 @@ export class StructuredIO {
     const message: SDKControlRequest = {
       type: 'control_request',
       request_id: requestId,
-      request,
-    }
+      request}
     if (this.inputClosed) {
-      throw new Error('Stream closed')
+      throw new Error(t('structuredIO.streamClosed'))
     }
     if (signal?.aborted) {
-      throw new Error('Request aborted')
+      throw new Error(t('structuredIO.requestAborted'))
     }
     this.outbound.enqueue(message)
     if (
@@ -516,8 +504,7 @@ export class StructuredIO {
     const aborted = () => {
       this.outbound.enqueue({
         type: 'control_cancel_request',
-        request_id: requestId,
-      })
+        request_id: requestId})
       // Immediately reject the outstanding promise, without
       // waiting for the host to acknowledge the cancellation.
       const request = this.pendingRequests.get(requestId)
@@ -530,8 +517,7 @@ export class StructuredIO {
     }
     if (signal) {
       signal.addEventListener('abort', aborted, {
-        once: true,
-      })
+        once: true})
     }
     try {
       return await new Promise<Response>((resolve, reject) => {
@@ -539,14 +525,12 @@ export class StructuredIO {
           request: {
             type: 'control_request',
             request_id: requestId,
-            request,
-          },
+            request},
           resolve: result => {
             resolve(result as Response)
           },
           reject,
-          schema,
-        })
+          schema})
       })
     } finally {
       if (signal) {
@@ -624,8 +608,7 @@ export class StructuredIO {
               mainPermissionResult.decisionReason,
             ),
             tool_use_id: toolUseID,
-            agent_id: toolUseContext.agentId,
-          },
+            agent_id: toolUseContext.agentId},
           permissionToolOutputSchema(),
           hookAbortController.signal,
           requestId,
@@ -666,9 +649,8 @@ export class StructuredIO {
         return permissionPromptToolResultToPermissionDecision(
           {
             behavior: 'deny',
-            message: `Tool permission request failed: ${error}`,
-            toolUseID,
-          },
+            message: t('structuredIO.permissionRequestFailed', String(error)),
+            toolUseID},
           tool,
           input,
           toolUseContext,
@@ -699,18 +681,16 @@ export class StructuredIO {
               subtype: 'hook_callback',
               callback_id: callbackId,
               input: input as any,
-              tool_use_id: toolUseID || undefined,
-            },
+              tool_use_id: toolUseID || undefined},
             hookJSONOutputSchema(),
             abort,
           )
           return result
         } catch (error) {
-          console.error(`Error in hook callback ${callbackId}:`, error)
+          console.error(t('structuredIO.hookCallbackError', callbackId), error)
           return {}
         }
-      },
-    }
+      }}
   }
 
   /**
@@ -734,8 +714,7 @@ export class StructuredIO {
           mode,
           url,
           elicitation_id: elicitationId,
-          requested_schema: requestedSchema,
-        },
+          requested_schema: requestedSchema},
         SDKControlElicitationResponseSchema(),
         signal,
       )
@@ -765,8 +744,7 @@ export class StructuredIO {
             tool_name: SANDBOX_NETWORK_ACCESS_TOOL_NAME,
             input: { host: hostPattern.host },
             tool_use_id: randomUUID(),
-            description: `Allow network connection to ${hostPattern.host}?`,
-          },
+            description: `Allow network connection to ${hostPattern.host}?`},
           permissionToolOutputSchema(),
         )
         return result.behavior === 'allow'
@@ -788,11 +766,9 @@ export class StructuredIO {
       {
         subtype: 'mcp_message',
         server_name: serverName,
-        message,
-      },
+        message},
       z.object({
-        mcp_response: z.any() as z.Schema<JSONRPCMessage>,
-      }),
+        mcp_response: z.any() as z.Schema<JSONRPCMessage>}),
     )
     return response.mcp_response
   }
@@ -862,20 +838,16 @@ async function executePermissionRequestHooksForSDK(
           userModified: false,
           decisionReason: {
             type: 'hook',
-            hookName: 'PermissionRequest',
-          },
-        }
+            hookName: 'PermissionRequest'}}
       } else {
         // Hook denied the permission
         return {
           behavior: 'deny',
           message:
-            decision.message || 'Permission denied by PermissionRequest hook',
+            decision.message || t('structuredIO.permissionDeniedByHook'),
           decisionReason: {
             type: 'hook',
-            hookName: 'PermissionRequest',
-          },
-        }
+            hookName: 'PermissionRequest'}}
       }
     }
   }

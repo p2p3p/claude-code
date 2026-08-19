@@ -406,8 +406,7 @@ export function extractCompoundStructure(
     hasSubshell,
     hasCommandGroup,
     operators,
-    segments,
-  }
+    segments}
 }
 
 /**
@@ -484,8 +483,7 @@ export function extractDangerousPatterns(rootNode: unknown): DangerousPatterns {
     hasProcessSubstitution,
     hasParameterExpansion,
     hasHeredoc,
-    hasComment,
-  }
+    hasComment}
 }
 
 /**
@@ -501,6 +499,5 @@ export function analyzeCommand(
     quoteContext: extractQuoteContext(rootNode, command),
     compoundStructure: extractCompoundStructure(rootNode, command),
     hasActualOperatorNodes: hasActualOperatorNodes(rootNode),
-    dangerousPatterns: extractDangerousPatterns(rootNode),
-  }
+    dangerousPatterns: extractDangerousPatterns(rootNode)}
 }

@@ -8,8 +8,7 @@ import type {
   NewSessionRequest,
   NewSessionResponse,
   SessionModeState,
-  SessionModelState,
-} from '@agentclientprotocol/sdk'
+  SessionModelState} from '@agentclientprotocol/sdk'
 import type { Message } from '../../../types/message.js'
 import { QueryEngine } from '../../../QueryEngine.js'
 import type { QueryEngineConfig } from '../../../QueryEngine.js'
@@ -18,12 +17,12 @@ import { getTools } from '../../../tools.js'
 import { getEmptyToolPermissionContext } from '../../../Tool.js'
 import type { PermissionMode } from '../../../types/permissions.js'
 import { getCommands } from '../../../commands.js'
+import { t } from '../../../utils/i18n/index.js'
 import { getAgentDefinitionsWithOverrides } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import {
   setOriginalCwd,
   switchSession,
-  getSessionProjectDir,
-} from '../../../bootstrap/state.js'
+  getSessionProjectDir} from '../../../bootstrap/state.js'
 import type { SessionId } from '../../../types/ids.js'
 import { enableConfigs } from '../../../utils/config.js'
 import { applySafeConfigEnvironmentVariables } from '../../../utils/managedEnv.js'
@@ -41,8 +40,7 @@ import type { AcpSession } from './sessionTypes.js'
 import {
   resolveSessionPermissionMode,
   isAcpBypassPermissionModeAvailable,
-  hasOwnField,
-} from './permissionMode.js'
+  hasOwnField} from './permissionMode.js'
 import { buildConfigOptions } from './configOptions.js'
 import { readClientCapabilities } from './internalAccessors.js'
 
@@ -160,9 +158,7 @@ async function createSession(
       toolPermissionContext: {
         ...permissionContext,
         mode: permissionMode as PermissionMode,
-        isBypassPermissionsModeAvailable: isBypassAvailable,
-      },
-    }
+        isBypassPermissionsModeAvailable: isBypassAvailable}}
 
     // Load commands and agent definitions for subagent support
     const [commands, agentDefinitionsResult] = await Promise.all([
@@ -189,8 +185,7 @@ async function createSession(
       readFileCache: new FileStateCache(500, 50 * 1024 * 1024),
       includePartialMessages: true,
       replayUserMessages: true,
-      initialMessages: opts.initialMessages,
-    }
+      initialMessages: opts.initialMessages}
 
     const queryEngine = new QueryEngine(engineConfig)
 
@@ -198,45 +193,37 @@ async function createSession(
     const availableModes = [
       {
         id: 'default',
-        name: 'Default',
-        description: 'Standard behavior, prompts for dangerous operations',
-      },
+        name: t('services.acpModeDefaultName'),
+        description: t('services.acpModeDefaultDescription')},
       {
         id: 'acceptEdits',
-        name: 'Accept Edits',
-        description: 'Auto-accept file edit operations',
-      },
+        name: t('services.acpModeAcceptEditsName'),
+        description: t('services.acpModeAcceptEditsDescription')},
       {
         id: 'plan',
-        name: 'Plan Mode',
-        description: 'Planning mode, no actual tool execution',
-      },
+        name: t('services.acpModePlanName'),
+        description: t('services.acpModePlanDescription')},
       {
         id: 'auto',
-        name: 'Auto',
-        description:
-          'Use a model classifier to approve/deny permission prompts.',
-      },
+        name: t('services.acpModeAutoName'),
+        description: t('services.acpModeAutoDescription')},
       ...(isBypassAvailable
         ? [
             {
               id: 'bypassPermissions' as const,
-              name: 'Bypass Permissions',
-              description: 'Skip all permission checks',
-            },
+              name: t('services.acpModeBypassName'),
+              description: t('services.acpModeBypassDescription')},
           ]
         : []),
       {
         id: 'dontAsk',
-        name: "Don't Ask",
-        description: "Don't prompt for permissions, deny if not pre-approved",
-      },
+        name: t('services.acpModeDontAskName'),
+        description: t('services.acpModeDontAskDescription')},
     ]
 
     const modes: SessionModeState = {
       currentModeId: permissionMode,
-      availableModes,
-    }
+      availableModes}
 
     // Build models
     const modelOptions = getModelOptions()
@@ -245,10 +232,8 @@ async function createSession(
       availableModels: modelOptions.map(m => ({
         modelId: String(m.value ?? ''),
         name: m.label ?? String(m.value ?? ''),
-        description: m.description ?? undefined,
-      })),
-      currentModelId: currentModel,
-    }
+        description: m.description ?? undefined})),
+      currentModelId: currentModel}
 
     // Set the model on the engine
     queryEngine.setModel(currentModel)
@@ -276,9 +261,7 @@ async function createSession(
         cwd,
         mcpServers: params.mcpServers as
           | Array<{ name: string; [key: string]: unknown }>
-          | undefined,
-      }),
-    }
+          | undefined})}
 
     this.sessions.set(sessionId, session)
 
@@ -292,8 +275,7 @@ async function createSession(
       sessionId,
       modes,
       models,
-      configOptions,
-    }
+      configOptions}
   } finally {
     if (processCwdChanged) {
       process.chdir(previousProcessCwd)
@@ -304,5 +286,4 @@ async function createSession(
 // ── Prototype attachment ─────────────────────────────────────────
 
 Object.assign(AcpAgent.prototype, {
-  createSession,
-})
+  createSession})

@@ -1,1 +1,5 @@
-export const TEAMMATE_SELECT_HINT = 'shift + ↑/↓ to select'
+import { t } from '../../utils/i18n/index.js';
+
+export function getTeammateSelectHint(): string {
+  return t('teammateSpinner.selectHint');
+}

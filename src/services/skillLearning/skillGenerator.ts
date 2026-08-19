@@ -7,8 +7,7 @@ import { buildLearnedSkillName, normalizeSkillName } from './learningPolicy.js'
 import {
   compareExistingArtifacts,
   scoreArtifactOverlap,
-  type ExistingSkill,
-} from './skillLifecycle.js'
+  type ExistingSkill} from './skillLifecycle.js'
 import type { LearnedSkillDraft, SkillLearningScope } from './types.js'
 
 export const DUPLICATE_SKILL_OVERLAP_THRESHOLD = 0.8
@@ -45,8 +44,7 @@ export function generateSkillDraft(
     name,
     description,
     confidence,
-    instincts,
-  })
+    instincts})
 
   return {
     name,
@@ -55,8 +53,7 @@ export function generateSkillDraft(
     sourceInstinctIds: instincts.map(instinct => instinct.id),
     confidence: Number(confidence.toFixed(2)),
     content,
-    outputPath,
-  }
+    outputPath}
 }
 
 export type SkillDedupOutcome =
@@ -90,8 +87,7 @@ export async function generateOrMergeSkillDraft(
         action: 'append-evidence',
         target: candidate,
         overlap,
-        appendedPath,
-      }
+        appendedPath}
     }
   }
   return { action: 'create', draft }

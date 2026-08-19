@@ -13,8 +13,7 @@ export type {
   SandboxFilesystemConfig,
   SandboxIgnoreViolations,
   SandboxNetworkConfig,
-  SandboxSettings,
-} from '../sandboxTypes.js'
+  SandboxSettings} from '../sandboxTypes.js'
 // Re-export all generated types
 export * from './coreTypes.generated.js'
 

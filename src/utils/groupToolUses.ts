@@ -1,8 +1,7 @@
 import type { BetaToolUseBlock } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
 import type {
   ContentBlockParam,
-  ToolResultBlockParam,
-} from '@anthropic-ai/sdk/resources/messages/messages.mjs'
+  ToolResultBlockParam} from '@anthropic-ai/sdk/resources/messages/messages.mjs'
 import type { Tools } from '../Tool.js'
 import type {
   GroupedToolUseMessage,
@@ -10,8 +9,7 @@ import type {
   NormalizedMessage,
   NormalizedUserMessage,
   ProgressMessage,
-  RenderableMessage,
-} from '../types/message.js'
+  RenderableMessage} from '../types/message.js'
 
 export type MessageWithoutProgress = Exclude<NormalizedMessage, ProgressMessage>
 
@@ -52,8 +50,7 @@ function getToolUseInfo(
     return {
       messageId: msg.message.id as string,
       toolUseId: content.id,
-      toolName: content.name,
-    }
+      toolName: content.name}
   }
   return null
 }
@@ -72,8 +69,7 @@ export function applyGrouping(
   // In verbose mode, don't group - each message renders at its original position
   if (verbose) {
     return {
-      messages: messages as RenderableMessage[],
-    }
+      messages: messages as RenderableMessage[]}
   }
   const toolsWithGrouping = getToolsWithGrouping(tools)
 
@@ -174,8 +170,7 @@ export function applyGrouping(
             displayMessage: firstMsg,
             uuid: `grouped-${firstMsg.uuid}`,
             timestamp: firstMsg.timestamp,
-            messageId: info.messageId,
-          }
+            messageId: info.messageId}
           result.push(groupedMessage)
         }
         continue

@@ -1,12 +1,12 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const rename = {
   type: 'local-jsx',
   name: 'rename',
-  description: 'Rename the current conversation',
+  description: t('cmd.descRename'),
   immediate: true,
   argumentHint: '[name]',
-  load: () => import('./rename.js'),
-} satisfies Command
+  load: () => import('./rename.js')} satisfies Command
 
 export default rename

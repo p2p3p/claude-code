@@ -30,6 +30,7 @@ import { getFsImplementation } from 'src/utils/fsOperations.js'
 import { fetchSingleFileGitDiff, type ToolUseDiff } from 'src/utils/gitDiff.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import { logError } from 'src/utils/log.js'
+import { t } from 'src/utils/i18n/index.js'
 import { expandPath } from 'src/utils/path.js'
 import {
   checkWritePermissionForTool,
@@ -90,17 +91,19 @@ export type FileWriteToolInput = InputSchema
 
 export const FileWriteTool = buildTool({
   name: FILE_WRITE_TOOL_NAME,
-  searchHint: 'create or overwrite files',
+  searchHint: t('toolUI.fileWrite.searchHint'),
   maxResultSizeChars: 100_000,
   strict: true,
   async description() {
-    return 'Write a file to the local filesystem.'
+    return t('toolUI.fileWrite.description')
   },
   userFacingName,
   getToolUseSummary,
   getActivityDescription(input) {
     const summary = getToolUseSummary(input)
-    return summary ? `Writing ${summary}` : 'Writing file'
+    return summary
+      ? t('toolUI.fileWrite.activityWriting', summary)
+      : t('toolUI.fileWrite.activityWritingFile')
   },
   async prompt() {
     return getWriteToolDescription()
@@ -167,8 +170,7 @@ export const FileWriteTool = buildTool({
     if (denyRule !== null) {
       return {
         result: false,
-        message:
-          'File is in a directory that is denied by your permission settings.',
+        message: t('toolUI.fileWrite.deniedByPermission'),
         errorCode: 1,
       }
     }
@@ -191,7 +193,7 @@ export const FileWriteTool = buildTool({
       if (fileStat.isDirectory()) {
         return {
           result: false,
-          message: `Cannot write to '${file_path}': the specified path is an existing directory. To write a file inside this directory, use a path that includes a filename with extension, e.g. '${file_path}/<filename>.md'. Use Bash ls to list existing files in this directory.`,
+          message: t('toolUI.fileWrite.isDirectory', file_path),
           errorCode: 5,
         }
       }
@@ -212,8 +214,7 @@ export const FileWriteTool = buildTool({
       if (lastWriteTime > readTimestamp.timestamp) {
         return {
           result: false,
-          message:
-            'File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.',
+          message: t('toolUI.fileWrite.modifiedSinceRead'),
           errorCode: 3,
         }
       }
@@ -290,7 +291,7 @@ export const FileWriteTool = buildTool({
           lastRead.limit === undefined
         // meta.content is CRLF-normalized — matches readFileState's normalized form.
         if (!isFullRead || meta.content !== lastRead.content) {
-          throw new Error(FILE_UNEXPECTEDLY_MODIFIED_ERROR)
+          throw new Error(FILE_UNEXPECTEDLY_MODIFIED_ERROR())
         }
       }
     }

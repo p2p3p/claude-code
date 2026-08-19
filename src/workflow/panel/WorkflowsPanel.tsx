@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, Dialog, Text, useAnimationFrame } from '@anthropic/ink';
 import type { Theme } from '@anthropic/ink';
 import type { LocalJSXCommandContext, LocalJSXCommandOnDone } from '../../types/command.js';
@@ -50,8 +51,7 @@ export function isRunTerminatedTransition(
  */
 export function WorkflowsPanel({
   onDone,
-  context,
-}: {
+  context}: {
   onDone: LocalJSXCommandOnDone;
   context: LocalJSXCommandContext;
 }): React.ReactNode {
@@ -201,8 +201,7 @@ export function WorkflowsPanel({
       }
       setConfirmKill(null);
     },
-    confirmNo: () => setConfirmKill(null),
-  };
+    confirmNo: () => setConfirmKill(null)};
   useWorkflowKeyboard(handlers, confirmKill !== null ? 'confirm' : 'normal');
 
   const running = runs.filter(r => r.status === 'running').length;
@@ -280,7 +279,7 @@ export function WorkflowsPanel({
           onCancel={() => setConfirmKill(null)}
           color="warning"
         >
-          <Text color="subtle">Press y to confirm, or n/Esc to cancel.</Text>
+          <Text color="subtle">{t('workflowspanel.pressYToConfirmOrNEscToCancel')}</Text>
         </Dialog>
       ) : null}
     </Box>

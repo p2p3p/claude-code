@@ -1,4 +1,5 @@
 import type { ToolUseBlock } from '@anthropic-ai/sdk/resources';
+import { t } from '../../utils/i18n/index.js'
 import { getRemoteSessionUrl } from '../../constants/product.js';
 import {
   OUTPUT_FILE_TAG,
@@ -10,8 +11,7 @@ import {
   TASK_NOTIFICATION_TAG,
   TASK_TYPE_TAG,
   TOOL_USE_ID_TAG,
-  ULTRAPLAN_TAG,
-} from '../../constants/xml.js';
+  ULTRAPLAN_TAG} from '../../constants/xml.js';
 import type { SDKAssistantMessage, SDKMessage } from '../../entrypoints/agentSdkTypes.js';
 import type { MessageContent } from '../../types/message.js';
 import type { SetAppState, Task, TaskContext, TaskStateBase } from '../../Task.js';
@@ -19,8 +19,7 @@ import { createTaskStateBase, generateTaskId } from '../../Task.js';
 import { TodoWriteTool } from '@claude-code-best/builtin-tools/tools/TodoWriteTool/TodoWriteTool.js';
 import {
   type BackgroundRemoteSessionPrecondition,
-  checkBackgroundRemoteSessionEligibility,
-} from '../../utils/background/remote/remoteSession.js';
+  checkBackgroundRemoteSessionEligibility} from '../../utils/background/remote/remoteSession.js';
 export type { BackgroundRemoteSessionPrecondition };
 import { logForDebugging } from '../../utils/debug.js';
 import { logError } from '../../utils/log.js';
@@ -31,8 +30,7 @@ import {
   deleteRemoteAgentMetadata,
   listRemoteAgentMetadata,
   type RemoteAgentMetadata,
-  writeRemoteAgentMetadata,
-} from '../../utils/sessionStorage.js';
+  writeRemoteAgentMetadata} from '../../utils/sessionStorage.js';
 import { jsonStringify } from '../../utils/slowOperations.js';
 import { appendTaskOutput, evictTaskOutput, getTaskOutputPath, initTaskOutput } from '../../utils/task/diskOutput.js';
 import { registerTask, updateTaskState } from '../../utils/task/framework.js';
@@ -226,8 +224,7 @@ export type RemoteAgentPreconditionResult =
  * Check eligibility for creating a remote agent session.
  */
 export async function checkRemoteAgentEligibility({
-  skipBundle = false,
-}: {
+  skipBundle = false}: {
   skipBundle?: boolean;
 } = {}): Promise<RemoteAgentPreconditionResult> {
   const errors = await checkBackgroundRemoteSessionEligibility({ skipBundle });
@@ -243,17 +240,17 @@ export async function checkRemoteAgentEligibility({
 export function formatPreconditionError(error: BackgroundRemoteSessionPrecondition): string {
   switch (error.type) {
     case 'not_logged_in':
-      return 'Please run /login and sign in with your Claude.ai account (not Console).';
+      return t('remoteagenttask.notLoggedIn');
     case 'no_remote_environment':
-      return 'No cloud environment available. Set one up at https://claude.ai/code/onboarding?magic=env-setup';
+      return t('remoteagenttask.noRemoteEnvironment');
     case 'not_in_git_repo':
-      return 'Background tasks require a git repository. Initialize git or run from a git repository.';
+      return t('remoteagenttask.notInGitRepo');
     case 'no_git_remote':
-      return 'Background tasks require a GitHub remote. Add one with `git remote add origin REPO_URL`.';
+      return t('remoteagenttask.noGitRemote');
     case 'github_app_not_installed':
-      return 'The Claude GitHub app must be installed on this repository first.\nhttps://github.com/apps/claude/installations/new';
+      return t('remoteagenttask.githubAppNotInstalled');
     case 'policy_blocked':
-      return "Remote sessions are disabled by your organization's policy. Contact your organization admin to enable them.";
+      return t('remoteagenttask.policyBlocked');
   }
 }
 
@@ -506,7 +503,7 @@ function enqueueRemoteReviewNotification(taskId: string, reviewContent: string, 
 <${TASK_ID_TAG}>${taskId}</${TASK_ID_TAG}>
 <${TASK_TYPE_TAG}>remote_agent</${TASK_TYPE_TAG}>
 <${STATUS_TAG}>completed</${STATUS_TAG}>
-<${SUMMARY_TAG}>Remote review completed</${SUMMARY_TAG}>
+<${SUMMARY_TAG}>{t('remoteagenttask.remoteReviewCompleted')}</${SUMMARY_TAG}>
 </${TASK_NOTIFICATION_TAG}>
 The remote review produced the following findings:
 
@@ -597,8 +594,7 @@ export function registerRemoteAgentTask(options: {
     isRemoteReview,
     isUltraplan,
     isLongRunning,
-    remoteTaskMetadata,
-  } = options;
+    remoteTaskMetadata} = options;
   const taskId = generateTaskId('remote_agent');
 
   // Create the output file before registering the task.
@@ -620,8 +616,7 @@ export function registerRemoteAgentTask(options: {
     isUltraplan,
     isLongRunning,
     pollStartedAt: Date.now(),
-    remoteTaskMetadata,
-  };
+    remoteTaskMetadata};
 
   registerTask(taskState, context.setAppState);
 
@@ -639,8 +634,7 @@ export function registerRemoteAgentTask(options: {
     isUltraplan,
     isRemoteReview,
     isLongRunning,
-    remoteTaskMetadata,
-  });
+    remoteTaskMetadata});
 
   // Ultraplan lifecycle is owned by startDetachedPoll in ultraplan.tsx. Generic
   // polling still runs so session.log populates for the detail view's progress
@@ -651,8 +645,7 @@ export function registerRemoteAgentTask(options: {
   return {
     taskId,
     sessionId: session.id,
-    cleanup: stopPolling,
-  };
+    cleanup: stopPolling};
 }
 
 /**
@@ -717,8 +710,7 @@ async function restoreRemoteAgentTasksImpl(context: TaskContext): Promise<void> 
       isLongRunning: meta.isLongRunning,
       startTime: meta.spawnedAt,
       pollStartedAt: Date.now(),
-      remoteTaskMetadata: meta.remoteTaskMetadata as RemoteTaskMetadata | undefined,
-    };
+      remoteTaskMetadata: meta.remoteTaskMetadata as RemoteTaskMetadata | undefined};
 
     registerTask(taskState, context.setAppState);
     void initTaskOutput(meta.taskId);
@@ -875,8 +867,7 @@ function startRemoteSessionPolling(taskId: string, context: TaskContext): () => 
                   stage: p.stage,
                   bugsFound: p.bugs_found ?? 0,
                   bugsVerified: p.bugs_verified ?? 0,
-                  bugsRefuted: p.bugs_refuted ?? 0,
-                };
+                  bugsRefuted: p.bugs_refuted ?? 0};
               } catch {
                 // ignore malformed progress
               }
@@ -963,8 +954,7 @@ function startRemoteSessionPolling(taskId: string, context: TaskContext): () => 
           // some + find + safeParse every second when idle.
           todoList: logGrew ? extractTodoListFromLog(accumulatedLog) : prevTask.todoList,
           reviewProgress: newProgress ?? prevTask.reviewProgress,
-          endTime: result || sessionDone || reviewTimedOut ? Date.now() : undefined,
-        };
+          endTime: result || sessionDone || reviewTimedOut ? Date.now() : undefined};
       });
       if (raceTerminated) return;
 
@@ -994,8 +984,7 @@ function startRemoteSessionPolling(taskId: string, context: TaskContext): () => 
           // No output or remote error — mark failed with a review-specific message.
           updateTaskState(taskId, context.setAppState, t => ({
             ...t,
-            status: 'failed',
-          }));
+            status: 'failed'}));
           const reason =
             result && result.subtype !== 'success'
               ? 'remote session returned an error'
@@ -1047,8 +1036,7 @@ function startRemoteSessionPolling(taskId: string, context: TaskContext): () => 
           updateTaskState(taskId, context.setAppState, t => ({
             ...t,
             status: 'failed',
-            endTime: Date.now(),
-          }));
+            endTime: Date.now()}));
           enqueueRemoteReviewFailureNotification(taskId, 'remote session exceeded 30 minutes', context.setAppState);
           void evictTaskOutput(taskId);
           void removeRemoteAgentMetadata(taskId);
@@ -1101,8 +1089,7 @@ export const RemoteAgentTask: Task = {
         ...task,
         status: 'killed',
         notified: true,
-        endTime: Date.now(),
-      };
+        endTime: Date.now()};
     });
 
     // Close the task_started bookend for SDK consumers. The poll loop's
@@ -1110,8 +1097,7 @@ export const RemoteAgentTask: Task = {
     if (killed) {
       emitTaskTerminatedSdk(taskId, 'stopped', {
         toolUseId,
-        summary: description,
-      });
+        summary: description});
       // Archive the remote session so it stops consuming cloud resources.
       if (sessionId) {
         void archiveRemoteSession(sessionId).catch(e =>
@@ -1123,8 +1109,7 @@ export const RemoteAgentTask: Task = {
     void evictTaskOutput(taskId);
     void removeRemoteAgentMetadata(taskId);
     logForDebugging(`RemoteAgentTask ${taskId} killed, archiving session ${sessionId ?? 'unknown'}`);
-  },
-};
+  }};
 
 /**
  * Get the session URL for a remote task.

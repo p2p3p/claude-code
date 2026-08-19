@@ -8,8 +8,7 @@ import {
   getTasksDir,
   listTasks,
   type Task,
-  updateTask,
-} from '../utils/tasks.js'
+  updateTask} from '../utils/tasks.js'
 
 const DEBOUNCE_MS = 1000
 
@@ -34,8 +33,7 @@ type Props = {
 export function useTaskListWatcher({
   taskListId,
   isLoading,
-  onSubmitTask,
-}: Props): void {
+  onSubmitTask}: Props): void {
   const currentTaskRef = useRef<string | null>(null)
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 

@@ -1,4 +1,5 @@
 import { type StructuredPatchHunk, structuredPatch } from 'diff'
+import { t } from 'src/utils/i18n/index.js'
 import { logError } from 'src/utils/log.js'
 import { expandPath } from 'src/utils/path.js'
 import { countCharInString } from 'src/utils/stringUtils.js'
@@ -166,7 +167,7 @@ export function getPatchForEdits({
         previousNewString.includes(oldStringToCheck)
       ) {
         throw new Error(
-          'Cannot edit file: old_string is a substring of a new_string from a previous edit.',
+          t('toolUI.fileEdit.oldStringIsSubstring'),
         )
       }
     }
@@ -184,7 +185,7 @@ export function getPatchForEdits({
 
     // If this edit didn't change anything, throw an error
     if (updatedFile === previousContent) {
-      throw new Error('String not found in file. Failed to apply edit.')
+      throw new Error(t('toolUI.fileEdit.stringNotFound'))
     }
 
     // Track the new string that was applied
@@ -193,7 +194,7 @@ export function getPatchForEdits({
 
   if (updatedFile === fileContents) {
     throw new Error(
-      'Original and edited file match exactly. Failed to apply edit.',
+      t('toolUI.fileEdit.matchExactly'),
     )
   }
 

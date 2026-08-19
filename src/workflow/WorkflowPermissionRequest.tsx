@@ -4,6 +4,7 @@ import { getTheme, type Theme } from 'src/utils/theme.js';
 import { env } from 'src/utils/env.js';
 import { shouldShowAlwaysAllowOptions } from 'src/utils/permissions/permissionsLoader.js';
 import { logUnaryEvent } from 'src/utils/unaryLogging.js';
+import { t } from '../utils/i18n/index.js';
 import { PermissionDialog } from 'src/components/permissions/PermissionDialog.js';
 import { PermissionPrompt, type PermissionPromptOption } from 'src/components/permissions/PermissionPrompt.js';
 import type { PermissionRequestProps } from 'src/components/permissions/PermissionRequest.js';
@@ -20,8 +21,7 @@ export function WorkflowPermissionRequest({
   toolUseConfirm,
   onDone,
   onReject,
-  workerBadge,
-}: PermissionRequestProps): React.ReactNode {
+  workerBadge}: PermissionRequestProps): React.ReactNode {
   const [themeName] = useTheme();
   const theme = getTheme(themeName);
 
@@ -35,26 +35,23 @@ export function WorkflowPermissionRequest({
   const options: PermissionPromptOption<OptionValue>[] = useMemo(() => {
     const opts: PermissionPromptOption<OptionValue>[] = [
       {
-        label: 'Yes',
+        label: t('workflowPermission.yes'),
         value: 'yes',
-        feedbackConfig: { type: 'accept' as const },
-      },
+        feedbackConfig: { type: 'accept' as const }},
     ];
     if (showAlwaysAllowOptions) {
       opts.push({
         label: (
           <Text>
-            Yes, and don{'\u2019'}t ask again for <Text bold>{toolUseConfirm.tool.name}</Text> commands
+            {t('workflowPermission.yesDontAsk', toolUseConfirm.tool.name)}
           </Text>
         ),
-        value: 'yes-dont-ask-again',
-      });
+        value: 'yes-dont-ask-again'});
     }
     opts.push({
-      label: 'No',
+      label: t('workflowPermission.no'),
       value: 'no',
-      feedbackConfig: { type: 'reject' as const },
-    });
+      feedbackConfig: { type: 'reject' as const }});
     return opts;
   }, [showAlwaysAllowOptions, toolUseConfirm.tool.name]);
 
@@ -68,9 +65,7 @@ export function WorkflowPermissionRequest({
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id ?? '',
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
           toolUseConfirm.onAllow(toolUseConfirm.input, [], feedback);
           onDone();
           break;
@@ -81,16 +76,13 @@ export function WorkflowPermissionRequest({
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id ?? '',
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
           toolUseConfirm.onAllow(toolUseConfirm.input, [
             {
               type: 'addRules',
               rules: [{ toolName: toolUseConfirm.tool.name }],
               behavior: 'allow',
-              destination: 'localSettings',
-            },
+              destination: 'localSettings'},
           ]);
           onDone();
           break;
@@ -101,9 +93,7 @@ export function WorkflowPermissionRequest({
             metadata: {
               language_name: 'none',
               message_id: toolUseConfirm.assistantMessage.message.id ?? '',
-              platform: env.platform,
-            },
-          });
+              platform: env.platform}});
           toolUseConfirm.onReject(feedback);
           onReject();
           onDone();
@@ -120,22 +110,20 @@ export function WorkflowPermissionRequest({
       metadata: {
         language_name: 'none',
         message_id: toolUseConfirm.assistantMessage.message.id ?? '',
-        platform: env.platform,
-      },
-    });
+        platform: env.platform}});
     toolUseConfirm.onReject();
     onReject();
     onDone();
   }, [toolUseConfirm, onDone, onReject]);
 
   return (
-    <PermissionDialog title="Workflow" workerBadge={workerBadge}>
+    <PermissionDialog title={t('workflowPermission.title')} workerBadge={workerBadge}>
       <Box flexDirection="column" gap={1}>
         <Box flexDirection="column">
           <Text bold color={theme.permission as keyof Theme}>
-            Execute workflow: {input.workflow}
+            {t('workflowPermission.executeWorkflow', input.workflow)}
           </Text>
-          {input.args && <Text dimColor>Arguments: {input.args}</Text>}
+          {input.args && <Text dimColor>{t('workflowPermission.arguments', input.args)}</Text>}
         </Box>
         <PermissionRuleExplanation permissionResult={toolUseConfirm.permissionResult} toolType="command" />
         <PermissionPrompt<OptionValue> options={options} onSelect={handleSelect} onCancel={handleCancel} />

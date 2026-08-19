@@ -72,8 +72,7 @@ export function createProgressStoreFromBus(bus: ProgressBus): ProgressStore {
         agents: [],
         agentCount: 0,
         startedAt: Date.now(),
-        updatedAt: Date.now(),
-      }
+        updatedAt: Date.now()}
       byId.set(runId, p)
     }
     return p
@@ -113,8 +112,7 @@ export function createProgressStoreFromBus(bus: ProgressBus): ProgressStore {
             id: event.agentId,
             label: event.label,
             phase: event.phase,
-            status: 'running',
-          }
+            status: 'running'}
           p.agents.push(a)
           p.agentCount = p.agents.length
         } else {
@@ -150,10 +148,8 @@ export function createProgressStoreFromBus(bus: ProgressBus): ProgressStore {
                       : ('text' as const),
                   tokenCount: event.result.tokenCount,
                   toolCount: event.result.toolCount,
-                  model: event.result.model,
-                }
-              : {}),
-          }
+                  model: event.result.model}
+              : {})}
           p.agents.push(a)
           p.agentCount = p.agents.length
         } else {
@@ -195,6 +191,5 @@ export function createProgressStoreFromBus(bus: ProgressBus): ProgressStore {
       listeners.add(fn)
       return () => listeners.delete(fn)
     },
-    getSnapshot: () => snapshot,
-  }
+    getSnapshot: () => snapshot}
 }

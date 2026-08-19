@@ -11,24 +11,23 @@ import { useSetVoiceState } from '../context/voice.js'
 import { useTerminalFocus } from '@anthropic/ink'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import { getVoiceKeyterms } from '../services/voiceKeyterms.js'
 import {
   connectVoiceStream,
   type FinalizeSource,
   isVoiceStreamAvailable,
-  type VoiceStreamConnection,
-} from '../services/voiceStreamSTT.js'
+  type VoiceStreamConnection} from '../services/voiceStreamSTT.js'
 import {
   connectDoubaoStream,
-  isDoubaoAvailableSync,
-} from '../services/doubaoSTT.js'
+  isDoubaoAvailableSync} from '../services/doubaoSTT.js'
 import { logForDebugging } from '../utils/debug.js'
 import { toError } from '../utils/errors.js'
+import { t } from '../utils/i18n/index.js'
 import { getSystemLocaleLanguage } from '../utils/intl.js'
 import { logError } from '../utils/log.js'
 import { getInitialSettings } from '../utils/settings/settings.js'
+import { getGlobalConfig } from '../utils/config.js'
 import { sleep } from '../utils/sleep.js'
 
 function isDoubaoProvider(): boolean {
@@ -93,8 +92,7 @@ const LANGUAGE_NAME_TO_CODE: Record<string, string> = {
   swedish: 'sv',
   svenska: 'sv',
   norwegian: 'no',
-  norsk: 'no',
-}
+  norsk: 'no'}
 
 // Subset of the GrowthBook speech_to_text_voice_stream_config allowlist.
 // Sending a code not in the server allowlist closes the connection.
@@ -208,8 +206,7 @@ export function useVoice({
   onTranscript,
   onError,
   enabled,
-  focusMode,
-}: UseVoiceOptions): UseVoiceReturn {
+  focusMode}: UseVoiceOptions): UseVoiceReturn {
   const [state, setState] = useState<VoiceState>('idle')
   const stateRef = useRef<VoiceState>('idle')
   const connectionRef = useRef<VoiceStreamConnection | null>(null)
@@ -400,8 +397,7 @@ export function useVoice({
           )
           logEvent('tengu_voice_silent_drop_replay', {
             recordingDurationMs,
-            chunkCount: fullAudioRef.current.length,
-          })
+            chunkCount: fullAudioRef.current.length})
           if (connectionRef.current) {
             connectionRef.current.close()
             connectionRef.current = null
@@ -409,7 +405,7 @@ export function useVoice({
           const replayBuffer = fullAudioRef.current
           await sleep(250)
           if (isStale()) return
-          const stt = normalizeLanguageForSTT(getInitialSettings().language)
+          const stt = normalizeLanguageForSTT(getGlobalConfig().preferredLanguage)
           const keyterms = await getVoiceKeyterms()
           if (isStale()) return
           await new Promise<void>(resolve => {
@@ -448,8 +444,7 @@ export function useVoice({
                     conn.close()
                     resolve()
                   })
-                },
-              },
+                }},
               { language: stt.code, keyterms },
             ).then(
               c => {
@@ -483,8 +478,7 @@ export function useVoice({
           retried,
           silentDropRetried: silentDropRetriedRef.current,
           wsConnected,
-          focusTriggered,
-        })
+          focusTriggered})
 
         if (connectionRef.current) {
           connectionRef.current.close()
@@ -504,15 +498,15 @@ export function useVoice({
             // WS never connected → audio never reached backend. Not a silent
             // drop; a connection failure (slow OAuth refresh, network, etc).
             onErrorRef.current?.(
-              'Voice connection failed. Check your network and try again.',
+              t('voice.connectionFailed'),
             )
           } else if (!hadAudioSignal) {
             // Distinguish silent mic (capture issue) from speech not recognized.
             onErrorRef.current?.(
-              'No audio detected from microphone. Check that the correct input device is selected and that Claude Code has microphone access.',
+              t('voice.noAudioDetected'),
             )
           } else {
-            onErrorRef.current?.('No speech detected.')
+            onErrorRef.current?.(t('voice.noSpeechDetected'))
           }
         }
 
@@ -641,7 +635,7 @@ export function useVoice({
   async function startRecordingSession(): Promise<void> {
     if (!voiceModule) {
       onErrorRef.current?.(
-        'Voice module not loaded yet. Try again in a moment.',
+        t('voice.moduleNotLoaded'),
       )
       return
     }
@@ -672,7 +666,7 @@ export function useVoice({
         `[voice] Recording not available: ${availability.reason ?? 'unknown'}`,
       )
       onErrorRef.current?.(
-        availability.reason ?? 'Audio recording is not available.',
+        availability.reason ?? t('voice.audioRecordingNotAvailable'),
       )
       cleanup()
       updateState('idle')
@@ -741,18 +735,17 @@ export function useVoice({
     if (!started) {
       logError(new Error('[voice] Recording failed — no audio tool found'))
       onErrorRef.current?.(
-        'Failed to start audio capture. Check that your microphone is accessible.',
+        t('voice.failedToStartCapture'),
       )
       cleanup()
       updateState('idle')
       setVoiceState(prev => ({
         ...prev,
-        voiceError: 'Recording failed — no audio tool found',
-      }))
+        voiceError: t('voice.recordingFailedNoTool')}))
       return
     }
 
-    const rawLanguage = getInitialSettings().language
+    const rawLanguage = getGlobalConfig().preferredLanguage
     const stt = normalizeLanguageForSTT(rawLanguage)
     logEvent('tengu_voice_recording_started', {
       focusTriggered: focusTriggeredRef.current,
@@ -763,8 +756,7 @@ export function useVoice({
       // ISO 639 subtag from Intl (bounded set, never user text). undefined if
       // Intl failed — omitted from the payload, no retry cost (cached).
       systemLocaleLanguage:
-        getSystemLocaleLanguage() as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        getSystemLocaleLanguage() as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
     // Retry once if the connection errors before delivering any transcript.
     // The conversation-engine proxy can reject rapid reconnects (~1/N_pods
@@ -912,7 +904,7 @@ export function useVoice({
             // (ws fires error then close 1006) is swallowed above.
             attemptGenRef.current++
             logError(new Error(`[voice] voice_stream error: ${error}`))
-            onErrorRef.current?.(`Voice stream error: ${error}`)
+            onErrorRef.current?.(t('voice.streamError', { error }))
             // Clear the audio buffer on error to avoid memory leaks
             audioBuffer.length = 0
             focusTriggeredRef.current = false
@@ -990,12 +982,10 @@ export function useVoice({
                 finishRecording,
               )
             }
-          },
-        },
+          }},
         {
           language: stt.code,
-          keyterms,
-        },
+          keyterms},
       ).then(conn => {
         if (isStale()) {
           conn?.close()
@@ -1006,7 +996,7 @@ export function useVoice({
             '[voice] Failed to connect to voice_stream (no OAuth token?)',
           )
           onErrorRef.current?.(
-            'Voice mode requires a Claude.ai account. Please run /login to sign in.',
+            t('voice.requiresAccount'),
           )
           // Clear the audio buffer on failure
           audioBuffer.length = 0
@@ -1165,6 +1155,5 @@ export function useVoice({
 
   return {
     state,
-    handleKeyEvent,
-  }
+    handleKeyEvent}
 }

@@ -45,8 +45,7 @@ export class FileStateCache {
                 ? JSON.stringify(c)
                 : String(c)
         return Math.max(1, Buffer.byteLength(s, 'utf8'))
-      },
-    })
+      }})
   }
 
   get(key: string): FileState | undefined {

@@ -36,14 +36,12 @@ import {
   isAbsolute,
   join,
   parse,
-  relative,
-} from 'path'
+  relative} from 'path'
 import picomatch from 'picomatch'
 import { logEvent } from 'src/services/analytics/index.js'
 import {
   getAdditionalDirectoriesForClaudeMd,
-  getOriginalCwd,
-} from '../bootstrap/state.js'
+  getOriginalCwd} from '../bootstrap/state.js'
 import { truncateEntrypointContent } from '../memdir/memdir.js'
 import { getAutoMemEntrypoint, isAutoMemoryEnabled } from '../memdir/paths.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
@@ -51,8 +49,7 @@ import {
   getCurrentProjectConfig,
   getManagedClaudeRulesDir,
   getMemoryPath,
-  getUserClaudeRulesDir,
-} from './config.js'
+  getUserClaudeRulesDir} from './config.js'
 import { logForDebugging } from './debug.js'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
 import { getClaudeConfigHomeDir, isEnvTruthy } from './envUtils.js'
@@ -61,16 +58,14 @@ import { normalizePathForComparison } from './file.js'
 import { cacheKeys, type FileStateCache } from './fileStateCache.js'
 import {
   parseFrontmatter,
-  splitPathInFrontmatter,
-} from './frontmatterParser.js'
+  splitPathInFrontmatter} from './frontmatterParser.js'
 import { getFsImplementation, safeResolvePath } from './fsOperations.js'
 import { findCanonicalGitRoot, findGitRoot } from './git.js'
 import {
   executeInstructionsLoadedHooks,
   hasInstructionsLoadedHook,
   type InstructionsLoadReason,
-  type InstructionsMemoryType,
-} from './hooks.js'
+  type InstructionsMemoryType} from './hooks.js'
 import type { MemoryType } from './memory/types.js'
 import { expandPath } from './path.js'
 import { pathInWorkingPath } from './permissions/filesystem.js'
@@ -392,10 +387,8 @@ function parseMemoryFileContent(
       content: finalContent,
       globs: paths,
       contentDiffersFromDisk,
-      rawContent: contentDiffersFromDisk ? rawContent : undefined,
-    },
-    includePaths,
-  }
+      rawContent: contentDiffersFromDisk ? rawContent : undefined},
+    includePaths}
 }
 
 function handleMemoryFileReadError(error: unknown, filePath: string): void {
@@ -409,8 +402,7 @@ function handleMemoryFileReadError(error: unknown, filePath: string): void {
     // Don't log the full file path to avoid PII/security issues
     logEvent('tengu_claude_md_permission_error', {
       is_access_error: 1,
-      has_home_dir: filePath.includes(getClaudeConfigHomeDir()) ? 1 : 0,
-    })
+      has_home_dir: filePath.includes(getClaudeConfigHomeDir()) ? 1 : 0})
   }
 }
 
@@ -699,8 +691,7 @@ export async function processMdRules({
   processedPaths,
   includeExternal,
   conditionalRule,
-  visitedDirs = new Set(),
-}: {
+  visitedDirs = new Set()}: {
   rulesDir: string
   type: MemoryType
   processedPaths: Set<string>
@@ -758,8 +749,7 @@ export async function processMdRules({
             processedPaths,
             includeExternal,
             conditionalRule,
-            visitedDirs,
-          })),
+            visitedDirs})),
         )
       } else if (isFile && entry.name.endsWith('.md')) {
         const files = await processMemoryFile(
@@ -779,8 +769,7 @@ export async function processMdRules({
     if (error instanceof Error && error.message.includes('EACCES')) {
       logEvent('tengu_claude_rules_md_permission_error', {
         is_access_error: 1,
-        has_home_dir: rulesDir.includes(getClaudeConfigHomeDir()) ? 1 : 0,
-      })
+        has_home_dir: rulesDir.includes(getClaudeConfigHomeDir()) ? 1 : 0})
     }
     return []
   }
@@ -817,8 +806,7 @@ export const getMemoryFiles = memoize(
         type: 'Managed',
         processedPaths,
         includeExternal,
-        conditionalRule: false,
-      })),
+        conditionalRule: false})),
     )
 
     // Process User file (only if userSettings is enabled)
@@ -840,8 +828,7 @@ export const getMemoryFiles = memoize(
           type: 'User',
           processedPaths,
           includeExternal: true,
-          conditionalRule: false,
-        })),
+          conditionalRule: false})),
       )
     }
 
@@ -913,8 +900,7 @@ export const getMemoryFiles = memoize(
             type: 'Project',
             processedPaths,
             includeExternal,
-            conditionalRule: false,
-          })),
+            conditionalRule: false})),
         )
       }
 
@@ -969,8 +955,7 @@ export const getMemoryFiles = memoize(
             type: 'Project',
             processedPaths,
             includeExternal,
-            conditionalRule: false,
-          })),
+            conditionalRule: false})),
         )
       }
     }
@@ -1013,8 +998,7 @@ export const getMemoryFiles = memoize(
     logForDiagnosticsNoPII('info', 'memory_files_completed', {
       duration_ms: Date.now() - startTime,
       file_count: result.length,
-      total_content_length: totalContentLength,
-    })
+      total_content_length: totalContentLength})
 
     const typeCounts: Record<string, number> = {}
     for (const f of result) {
@@ -1034,8 +1018,7 @@ export const getMemoryFiles = memoize(
         ...(feature('TEAMMEM')
           ? { teammem_count: typeCounts['TeamMem'] ?? 0 }
           : {}),
-        duration_ms: Date.now() - startTime,
-      })
+        duration_ms: Date.now() - startTime})
     }
 
     // Fire InstructionsLoaded hook for each instruction file loaded
@@ -1062,8 +1045,7 @@ export const getMemoryFiles = memoize(
             loadReason,
             {
               globs: file.globs,
-              parentFilePath: file.parent,
-            },
+              parentFilePath: file.parent},
           )
         }
       }
@@ -1293,8 +1275,7 @@ export async function getMemoryFilesForNestedDirectory(
       type: 'Project',
       processedPaths: unconditionalProcessedPaths,
       includeExternal: false,
-      conditionalRule: false,
-    })),
+      conditionalRule: false})),
   )
 
   // Process project conditional .claude/rules/*.md files
@@ -1362,8 +1343,7 @@ export async function processConditionedMdRules(
     type,
     processedPaths,
     includeExternal,
-    conditionalRule: true,
-  })
+    conditionalRule: true})
 
   // Filter to only include files whose globs patterns match the targetPath
   return conditionedRuleMdFiles.filter(file => {

@@ -1,3 +1,4 @@
+import { t } from '../utils/i18n/index.js'
 import type { CCBMode } from './types.js'
 
 const DR_SHARP_SYSTEM_PROMPT = `You are Dr. Sharp, a meticulous code reviewer and diagnostician.
@@ -49,26 +50,26 @@ export const DEFAULT_MODES: CCBMode[] = [
   {
     name: 'Default',
     slug: 'default',
-    description: 'Balanced mode for everyday development',
+    get description() {
+      return t('modes.defaultMode')
+    },
     icon: '⚡',
     systemPrompt: '',
     ui: {
       accentColor: '#D77757',
-      promptPrefix: '',
-    },
+      promptPrefix: ''},
     companionSpecies: 'duck',
     permissions: {
       defaultMode: 'default',
-      memoryExtract: true,
-    },
+      memoryExtract: true},
     responseStyle: {
-      verbosity: 'normal',
-    },
-  },
+      verbosity: 'normal'}},
   {
     name: 'Gentle',
     slug: 'gentle',
-    description: 'Patient explanations, great for learning',
+    get description() {
+      return t('modes.gentleMode')
+    },
     icon: '🌸',
     companionSpecies: 'cat',
     systemPrompt:
@@ -78,39 +79,35 @@ export const DEFAULT_MODES: CCBMode[] = [
       'Use analogies to help understand complex concepts.',
     ui: {
       accentColor: '#E8A0BF',
-      promptPrefix: 'gentle',
-    },
+      promptPrefix: 'gentle'},
     permissions: {
       defaultMode: 'default',
-      memoryExtract: true,
-    },
+      memoryExtract: true},
     responseStyle: {
-      verbosity: 'verbose',
-    },
-  },
+      verbosity: 'verbose'}},
   {
     name: 'Dr. Sharp',
     slug: 'sharp',
-    description: 'Strict review, focused on code quality',
+    get description() {
+      return t('modes.sharpMode')
+    },
     icon: '🔍',
     companionSpecies: 'owl',
     systemPrompt: DR_SHARP_SYSTEM_PROMPT,
     ui: {
       accentColor: '#5769F7',
-      promptPrefix: 'sharp',
-    },
+      promptPrefix: 'sharp'},
     permissions: {
       defaultMode: 'default',
-      memoryExtract: true,
-    },
+      memoryExtract: true},
     responseStyle: {
-      verbosity: 'normal',
-    },
-  },
+      verbosity: 'normal'}},
   {
     name: 'Workhorse',
     slug: 'workhorse',
-    description: 'Auto-execute, minimal confirmations',
+    get description() {
+      return t('modes.workhorseMode')
+    },
     icon: '🐴',
     companionSpecies: 'capybara',
     systemPrompt:
@@ -120,20 +117,18 @@ export const DEFAULT_MODES: CCBMode[] = [
       'Batch related changes together.',
     ui: {
       accentColor: '#8B7355',
-      promptPrefix: 'work',
-    },
+      promptPrefix: 'work'},
     permissions: {
       defaultMode: 'acceptEdits',
-      memoryExtract: false,
-    },
+      memoryExtract: false},
     responseStyle: {
-      verbosity: 'minimal',
-    },
-  },
+      verbosity: 'minimal'}},
   {
     name: 'Token Saver',
     slug: 'token-saver',
-    description: 'Minimal replies, save tokens',
+    get description() {
+      return t('modes.tokenSaverMode')
+    },
     icon: '💰',
     companionSpecies: 'snail',
     systemPrompt:
@@ -144,20 +139,18 @@ export const DEFAULT_MODES: CCBMode[] = [
       'No pleasantries or filler.',
     ui: {
       accentColor: '#4A7C59',
-      promptPrefix: 'save',
-    },
+      promptPrefix: 'save'},
     permissions: {
       defaultMode: 'acceptEdits',
-      memoryExtract: false,
-    },
+      memoryExtract: false},
     responseStyle: {
-      verbosity: 'minimal',
-    },
-  },
+      verbosity: 'minimal'}},
   {
     name: 'Super AI',
     slug: 'super-ai',
-    description: 'Deep thinking, comprehensive analysis',
+    get description() {
+      return t('modes.superAiMode')
+    },
     icon: '🧠',
     companionSpecies: 'dragon',
     systemPrompt:
@@ -168,14 +161,10 @@ export const DEFAULT_MODES: CCBMode[] = [
       'Reference relevant best practices and patterns.',
     ui: {
       accentColor: '#9B59B6',
-      promptPrefix: 'super',
-    },
+      promptPrefix: 'super'},
     permissions: {
       defaultMode: 'default',
-      memoryExtract: true,
-    },
+      memoryExtract: true},
     responseStyle: {
-      verbosity: 'verbose',
-    },
-  },
+      verbosity: 'verbose'}},
 ]

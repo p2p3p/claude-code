@@ -15,6 +15,5 @@ export function loadRemoteSkill(
     cacheHit: false,
     latencyMs: 0,
     skillPath: '',
-    content: '',
-  })
+    content: ''})
 }

@@ -101,8 +101,7 @@ export function emitHookStarted(
     type: 'started',
     hookId,
     hookName,
-    hookEvent,
-  })
+    hookEvent})
 }
 
 export function emitHookProgress(data: {
@@ -117,8 +116,7 @@ export function emitHookProgress(data: {
 
   emit({
     type: 'progress',
-    ...data,
-  })
+    ...data})
 }
 
 export function startHookProgressInterval(params: {
@@ -141,8 +139,7 @@ export function startHookProgressInterval(params: {
         hookEvent: params.hookEvent,
         stdout,
         stderr,
-        output,
-      })
+        output})
     })
   }, params.intervalMs ?? 1000)
   interval.unref()
@@ -172,8 +169,7 @@ export function emitHookResponse(data: {
 
   emit({
     type: 'response',
-    ...data,
-  })
+    ...data})
 }
 
 /**

@@ -1,4 +1,5 @@
 import { registerBundledSkill } from '../bundledSkills.js'
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * /ultracode — multi-agent workflow orchestration playbook (knowledge-only prompt skill).
@@ -53,8 +54,7 @@ export const meta = {
   phases: [                                            // one entry per phase() call
     { title: 'Scan', detail: 'grep test logs for retries' },
     { title: 'Fix', detail: 'one agent per flaky test' },
-  ],
-}
+  ]}
 // script body starts here — use agent()/parallel()/pipeline()/phase()/log()
 phase('Scan')
 const flaky = await agent('grep CI logs for retry markers', {schema: FLAKY_SCHEMA})
@@ -121,8 +121,7 @@ The canonical multi-stage pattern — pipeline by default, each dimension verifi
 export const meta = {
   name: 'review-changes',
   description: 'Review changed files across dimensions, verify each finding',
-  phases: [{ title: 'Review' }, { title: 'Verify' }],
-}
+  phases: [{ title: 'Review' }, { title: 'Verify' }]}
 const DIMENSIONS = [{key: 'bugs', prompt: '...'}, {key: 'perf', prompt: '...'}]
 const results = await pipeline(
   DIMENSIONS,
@@ -230,6 +229,5 @@ export function registerUltracodeSkill(): void {
         prompt += `\n## User input\n\n${args}\n`
       }
       return [{ type: 'text', text: prompt }]
-    },
-  })
+    }})
 }

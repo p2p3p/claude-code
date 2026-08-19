@@ -38,8 +38,7 @@ export const getMTLSConfig = memoize((): MTLSConfig | undefined => {
       )
     } catch (error) {
       logForDebugging(`mTLS: Failed to load client certificate: ${error}`, {
-        level: 'error',
-      })
+        level: 'error'})
     }
   }
 
@@ -53,8 +52,7 @@ export const getMTLSConfig = memoize((): MTLSConfig | undefined => {
       logForDebugging('mTLS: Loaded client key from CLAUDE_CODE_CLIENT_KEY')
     } catch (error) {
       logForDebugging(`mTLS: Failed to load client key: ${error}`, {
-        level: 'error',
-      })
+        level: 'error'})
     }
   }
 
@@ -87,8 +85,7 @@ export const getMTLSAgent = memoize((): HttpsAgent | undefined => {
     ...mtlsConfig,
     ...(caCerts && { ca: caCerts }),
     // Enable keep-alive for better performance
-    keepAlive: true,
-  }
+    keepAlive: true}
 
   logForDebugging('mTLS: Creating HTTPS agent with custom certificates')
   return new HttpsAgent(agentOptions)
@@ -107,8 +104,7 @@ export function getWebSocketTLSOptions(): tls.ConnectionOptions | undefined {
 
   return {
     ...mtlsConfig,
-    ...(caCerts && { ca: caCerts }),
-  }
+    ...(caCerts && { ca: caCerts })}
 }
 
 /**
@@ -127,8 +123,7 @@ export function getTLSFetchOptions(): {
 
   const tlsConfig: TLSConfig = {
     ...mtlsConfig,
-    ...(caCerts && { ca: caCerts }),
-  }
+    ...(caCerts && { ca: caCerts })}
 
   if (typeof Bun !== 'undefined') {
     return { tls: tlsConfig }
@@ -143,10 +138,8 @@ export function getTLSFetchOptions(): {
       cert: tlsConfig.cert,
       key: tlsConfig.key,
       passphrase: tlsConfig.passphrase,
-      ...(tlsConfig.ca && { ca: tlsConfig.ca }),
-    },
-    pipelining: 1,
-  })
+      ...(tlsConfig.ca && { ca: tlsConfig.ca })},
+    pipelining: 1})
 
   return { dispatcher: agent }
 }

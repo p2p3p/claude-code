@@ -74,8 +74,7 @@ export const openaiAdapter: ProviderUsageAdapter = {
         label: 'RPM',
         utilization: reqUtil,
         resetsAt:
-          parseResetAt(headers.get('x-ratelimit-reset-requests')) || undefined,
-      })
+          parseResetAt(headers.get('x-ratelimit-reset-requests')) || undefined})
     }
 
     const tokUtil = computeUtilization(
@@ -88,10 +87,8 @@ export const openaiAdapter: ProviderUsageAdapter = {
         label: 'TPM',
         utilization: tokUtil,
         resetsAt:
-          parseResetAt(headers.get('x-ratelimit-reset-tokens')) || undefined,
-      })
+          parseResetAt(headers.get('x-ratelimit-reset-tokens')) || undefined})
     }
 
     return buckets
-  },
-}
+  }}

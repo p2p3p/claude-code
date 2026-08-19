@@ -1,5 +1,6 @@
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { Box, Link, Text, type TextProps } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js'
 import { FilePathLink } from '../FilePathLink.js';
 import { feature } from 'bun:bundle';
 import * as React from 'react';
@@ -22,8 +23,7 @@ import type {
   SystemBridgeStatusMessage,
   SystemTurnDurationMessage,
   SystemThinkingMessage,
-  SystemMemorySavedMessage,
-} from '../../types/message.js';
+  SystemMemorySavedMessage} from '../../types/message.js';
 import { SystemAPIErrorMessage } from './SystemAPIErrorMessage.js';
 import { formatDuration, formatNumber, formatSecondsShort } from '../../utils/format.js';
 import { getGlobalConfig } from '../../utils/config.js';
@@ -70,7 +70,7 @@ export function SystemTextMessage({ message, addMargin, verbose, isTranscriptMod
         <Box minWidth={2}>
           <Text color="error">{BLACK_CIRCLE}</Text>
         </Box>
-        <Text dimColor>All background agents stopped</Text>
+        <Text dimColor>{t('systemtextmessage.allBackgroundAgentsStopped')}</Text>
       </Box>
     );
   }
@@ -101,7 +101,7 @@ export function SystemTextMessage({ message, addMargin, verbose, isTranscriptMod
     return (
       <Box marginTop={addMargin ? 1 : 0} backgroundColor={bg} width="100%">
         <Text dimColor>{TEARDROP_ASTERISK} </Text>
-        <Text>Allowed </Text>
+        <Text>{t('systemtextmessage.allowed')} </Text>
         <Text bold>{(message.commands as string[]).join(', ')}</Text>
       </Box>
     );
@@ -152,8 +152,7 @@ function StopHookSummaryMessage({
   message,
   addMargin,
   verbose,
-  isTranscriptMode,
-}: {
+  isTranscriptMode}: {
   message: SystemStopHookSummaryMessage;
   addMargin: boolean;
   verbose: boolean;
@@ -185,7 +184,7 @@ function StopHookSummaryMessage({
     return (
       <Box flexDirection="column" width="100%">
         <Text dimColor>
-          {'  ⎿  '}Ran {hookCount} {message.hookLabel} {hookCount === 1 ? 'hook' : 'hooks'}
+          {'  ⎿  '}{t('hookPanel.ran', hookCount, message.hookLabel)} {hookCount === 1 ? t('hookPanel.hookSingular') : t('hookPanel.hookPlural')}
           {totalStr}
         </Text>
         {isTranscriptMode &&
@@ -211,7 +210,7 @@ function StopHookSummaryMessage({
       </Box>
       <Box flexDirection="column" width={columns - 10}>
         <Text>
-          Ran <Text bold>{hookCount}</Text> {message.hookLabel ?? 'stop'} {hookCount === 1 ? 'hook' : 'hooks'}
+          {t('hookPanel.ran', hookCount, message.hookLabel ?? t('hookPanel.stop'))} {hookCount === 1 ? t('hookPanel.hookSingular') : t('hookPanel.hookPlural')}
           {totalStr}
           {!verbose && hookInfos.length > 0 && (
             <>
@@ -243,7 +242,7 @@ function StopHookSummaryMessage({
           hookErrors.map((err, idx) => (
             <Text key={idx}>
               <Text dimColor>⎿ &nbsp;</Text>
-              {message.hookLabel ?? 'Stop'} hook error: {err}
+              {t('hookPanel.hookError', message.hookLabel ?? t('hookPanel.stop'))}: {err}
             </Text>
           ))}
       </Box>
@@ -256,8 +255,7 @@ function SystemTextMessageInner({
   addMargin,
   dot,
   color,
-  dimColor,
-}: {
+  dimColor}: {
   content: string;
   addMargin: boolean;
   dot: boolean;
@@ -287,13 +285,12 @@ function SystemTextMessageInner({
 
 function TurnDurationMessage({
   message,
-  addMargin,
-}: {
+  addMargin}: {
   message: SystemTurnDurationMessage;
   addMargin: boolean;
 }): React.ReactNode {
   const bg = useSelectedMessageBg();
-  const [verb] = useState(() => sample(TURN_COMPLETION_VERBS) ?? 'Worked');
+  const [verb] = useState(() => sample(TURN_COMPLETION_VERBS) ?? t('systemtextmessage.workedVerb'));
   const store = useAppStateStore();
   const [backgroundTaskSummary] = useState(() => {
     const tasks = store.getState().tasks;
@@ -315,7 +312,7 @@ function TurnDurationMessage({
         : `${formatNumber(tokens)} / ${formatNumber(limit)} (${Math.round((tokens / limit) * 100)}%)`;
     const nudges =
       (message.budgetNudges as number) > 0
-        ? ` \u00B7 ${message.budgetNudges as number} ${(message.budgetNudges as number) === 1 ? 'nudge' : 'nudges'}`
+        ? ` \u00B7 ${message.budgetNudges as number} ${t('systemtextmessage.nudge', message.budgetNudges as number)}`
         : '';
     return `${showTurnDuration ? ' \u00B7 ' : ''}${usage}${nudges}`;
   })();
@@ -330,9 +327,9 @@ function TurnDurationMessage({
         <Text dimColor>{TEARDROP_ASTERISK}</Text>
       </Box>
       <Text dimColor>
-        {showTurnDuration && `${verb} for ${duration}`}
+        {showTurnDuration && t('systemtextmessage.verbForDuration', verb, duration)}
         {budgetSuffix}
-        {backgroundTaskSummary && ` \u00B7 ${backgroundTaskSummary} still running`}
+        {backgroundTaskSummary && t('systemtextmessage.stillRunning', backgroundTaskSummary)}
       </Text>
     </Box>
   );
@@ -340,8 +337,7 @@ function TurnDurationMessage({
 
 function MemorySavedMessage({
   message,
-  addMargin,
-}: {
+  addMargin}: {
   message: SystemMemorySavedMessage;
   addMargin: boolean;
 }): React.ReactNode {
@@ -350,7 +346,7 @@ function MemorySavedMessage({
   const team = feature('TEAMMEM') ? teamMemSaved!.teamMemSavedPart(message) : null;
   const privateCount = writtenPaths.length - (team?.count ?? 0);
   const parts = [
-    privateCount > 0 ? `${privateCount} ${privateCount === 1 ? 'memory' : 'memories'}` : null,
+    privateCount > 0 ? `${privateCount} ${t('systemtextmessage.memory', privateCount)}` : null,
     team?.segment as React.ReactNode,
   ].filter(Boolean);
   return (
@@ -360,7 +356,7 @@ function MemorySavedMessage({
           <Text dimColor>{BLACK_CIRCLE}</Text>
         </Box>
         <Text>
-          {(message.verb as string) ?? 'Saved'} {parts.join(' \u00B7 ')}
+          {(message.verb as string) ?? t('systemtextmessage.saved')} {parts.join(' \u00B7 ')}
         </Text>
       </Box>
       {writtenPaths.map(p => (
@@ -385,8 +381,7 @@ function MemoryFileRow({ path }: { path: string }): React.ReactNode {
 
 function ThinkingMessage({
   message,
-  addMargin,
-}: {
+  addMargin}: {
   message: SystemThinkingMessage;
   addMargin: boolean;
 }): React.ReactNode {
@@ -403,8 +398,7 @@ function ThinkingMessage({
 
 function BridgeStatusMessage({
   message,
-  addMargin,
-}: {
+  addMargin}: {
   message: SystemBridgeStatusMessage;
   addMargin: boolean;
 }): React.ReactNode {
@@ -416,7 +410,7 @@ function BridgeStatusMessage({
       <Box minWidth={2} />
       <Box flexDirection="column">
         <Text>
-          <ThemedText color="suggestion">/remote-control</ThemedText> is active. Code in CLI or at
+          <ThemedText color="suggestion">/remote-control</ThemedText>{t('systemtextmessage.bridgeActive')}
         </Text>
         <Link url={url}>{url}</Link>
         {upgradeNudge && <Text dimColor>⎿ {upgradeNudge}</Text>}

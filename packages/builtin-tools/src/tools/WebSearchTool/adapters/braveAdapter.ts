@@ -5,6 +5,7 @@
 
 import axios from 'axios'
 import { AbortError } from 'src/utils/errors.js'
+import { t } from 'src/utils/i18n/index.js'
 import { getSettings_DEPRECATED } from 'src/utils/settings/settings.js'
 import type { SearchResult, SearchOptions, WebSearchAdapter } from './types.js'
 
@@ -173,6 +174,6 @@ function getBraveApiKey(): string {
   }
 
   throw new Error(
-    'BraveSearchAdapter requires BRAVE_SEARCH_API_KEY or BRAVE_API_KEY',
+    t('toolUI.webSearch.braveRequiresApiKey'),
   )
 }

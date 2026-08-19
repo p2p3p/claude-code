@@ -1,8 +1,7 @@
 import { randomUUID } from 'crypto'
 import type {
   SDKPartialAssistantMessage,
-  StdoutMessage,
-} from 'src/entrypoints/sdk/controlTypes.js'
+  StdoutMessage} from 'src/entrypoints/sdk/controlTypes.js'
 import { decodeJwtExpiry } from '../../bridge/jwtUtils.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { logForDiagnosticsNoPII } from '../../utils/diagLogs.js'
@@ -10,22 +9,18 @@ import { errorMessage, getErrnoCode } from '../../utils/errors.js'
 import { createAxiosInstance } from '../../utils/proxy.js'
 import {
   registerSessionActivityCallback,
-  unregisterSessionActivityCallback,
-} from '../../utils/sessionActivity.js'
+  unregisterSessionActivityCallback} from '../../utils/sessionActivity.js'
 import {
   getSessionIngressAuthHeaders,
-  getSessionIngressAuthToken,
-} from '../../utils/sessionIngressAuth.js'
+  getSessionIngressAuthToken} from '../../utils/sessionIngressAuth.js'
 import type {
   RequiresActionDetails,
-  SessionState,
-} from '../../utils/sessionState.js'
+  SessionState} from '../../utils/sessionState.js'
 import { sleep } from '../../utils/sleep.js'
 import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
 import {
   RetryableError,
-  SerialBatchEventUploader,
-} from './SerialBatchEventUploader.js'
+  SerialBatchEventUploader} from './SerialBatchEventUploader.js'
 import type { SSETransport, StreamClientEvent } from './SSETransport.js'
 import { WorkerStateUploader } from './WorkerStateUploader.js'
 
@@ -182,8 +177,7 @@ export function accumulateStreamEvents(
         if (existing) {
           ;(existing.event as Record<string, unknown>).delta = {
             type: 'text_delta',
-            text: chunks.join(''),
-          }
+            text: chunks.join('')}
           break
         }
         const snapshot: CoalescedStreamEvent = {
@@ -194,9 +188,7 @@ export function accumulateStreamEvents(
           event: {
             type: 'content_block_delta',
             index: idx,
-            delta: { type: 'text_delta', text: chunks.join('') },
-          },
-        }
+            delta: { type: 'text_delta', text: chunks.join('') }}}
         touched.set(chunks, snapshot)
         out.push(snapshot)
         break
@@ -359,8 +351,7 @@ export class CCRClient {
         ).then(r => r.ok),
       baseDelayMs: 500,
       maxDelayMs: 30_000,
-      jitterMs: 500,
-    })
+      jitterMs: 500})
 
     this.eventUploader = new SerialBatchEventUploader<ClientEvent>({
       maxBatchSize: 100,
@@ -387,8 +378,7 @@ export class CCRClient {
       },
       baseDelayMs: 500,
       maxDelayMs: 30_000,
-      jitterMs: 500,
-    })
+      jitterMs: 500})
 
     this.internalEventUploader = new SerialBatchEventUploader<WorkerEvent>({
       maxBatchSize: 100,
@@ -410,8 +400,7 @@ export class CCRClient {
       },
       baseDelayMs: 500,
       maxDelayMs: 30_000,
-      jitterMs: 500,
-    })
+      jitterMs: 500})
 
     this.deliveryUploader = new SerialBatchEventUploader<{
       eventId: string
@@ -427,9 +416,7 @@ export class CCRClient {
             worker_epoch: this.workerEpoch,
             updates: batch.map(d => ({
               event_id: d.eventId,
-              status: d.status,
-            })),
-          },
+              status: d.status}))},
           'delivery batch',
         )
         if (!result.ok) {
@@ -438,8 +425,7 @@ export class CCRClient {
       },
       baseDelayMs: 500,
       maxDelayMs: 30_000,
-      jitterMs: 500,
-    })
+      jitterMs: 500})
 
     // Ack each received client_event so CCR can track delivery status.
     // Wired here (not in initialize()) so the callback is registered the
@@ -490,9 +476,7 @@ export class CCRClient {
         external_metadata: {
           pending_action: null,
           task_summary: null,
-          automation_state: null,
-        },
-      },
+          automation_state: null}},
       'PUT worker (init)',
     )
     if (!result.ok) {
@@ -515,8 +499,7 @@ export class CCRClient {
     logForDebugging(`CCRClient: initialized, epoch=${this.workerEpoch}`)
     logForDiagnosticsNoPII('info', 'cli_worker_lifecycle_initialized', {
       epoch: this.workerEpoch,
-      duration_ms: Date.now() - startMs,
-    })
+      duration_ms: Date.now() - startMs})
 
     // Await the concurrent GET and log state_restored here, after the PUT
     // has succeeded — logging inside getWorkerState() raced: if the GET
@@ -526,8 +509,7 @@ export class CCRClient {
     if (!this.closed) {
       logForDiagnosticsNoPII('info', 'cli_worker_state_restored', {
         duration_ms: durationMs,
-        had_state: metadata !== null,
-      })
+        had_state: metadata !== null})
     }
     return metadata
   }
@@ -550,8 +532,7 @@ export class CCRClient {
     )
     return {
       metadata: data?.worker?.external_metadata ?? null,
-      durationMs: Date.now() - startMs,
-    }
+      durationMs: Date.now() - startMs}
   }
 
   /**
@@ -579,11 +560,9 @@ export class CCRClient {
             ...authHeaders,
             'Content-Type': 'application/json',
             'anthropic-version': '2023-06-01',
-            'User-Agent': getClaudeCodeUserAgent(),
-          },
+            'User-Agent': getClaudeCodeUserAgent()},
           validateStatus: alwaysValidStatus,
-          timeout,
-        },
+          timeout},
       )
 
       if (response.status >= 200 && response.status < 300) {
@@ -620,13 +599,11 @@ export class CCRClient {
         }
       }
       logForDebugging(`CCRClient: ${label} returned ${response.status}`, {
-        level: 'warn',
-      })
+        level: 'warn'})
       logForDiagnosticsNoPII('warn', 'cli_worker_request_failed', {
         method,
         path,
-        status: response.status,
-      })
+        status: response.status})
       if (response.status === 429) {
         const raw = response.headers?.['retry-after']
         const seconds = typeof raw === 'string' ? parseInt(raw, 10) : NaN
@@ -637,13 +614,11 @@ export class CCRClient {
       return { ok: false }
     } catch (error) {
       logForDebugging(`CCRClient: ${label} failed: ${errorMessage(error)}`, {
-        level: 'warn',
-      })
+        level: 'warn'})
       logForDiagnosticsNoPII('warn', 'cli_worker_request_error', {
         method,
         path,
-        error_code: getErrnoCode(error),
-      })
+        error_code: getErrnoCode(error)})
       return { ok: false }
     }
   }
@@ -658,10 +633,8 @@ export class CCRClient {
         ? {
             tool_name: details.tool_name,
             action_description: details.action_description,
-            request_id: details.request_id,
-          }
-        : null,
-    })
+            request_id: details.request_id}
+        : null})
   }
 
   /** Report external metadata to CCR via PUT /worker. */
@@ -675,8 +648,7 @@ export class CCRClient {
    */
   private handleEpochMismatch(): never {
     logForDebugging('CCRClient: Epoch mismatch (409), shutting down', {
-      level: 'error',
-    })
+      level: 'error'})
     logForDiagnosticsNoPII('error', 'cli_worker_epoch_mismatch')
     this.onEpochMismatch()
   }
@@ -770,9 +742,7 @@ export class CCRClient {
     return {
       payload: {
         ...msg,
-        uuid: typeof msg.uuid === 'string' ? msg.uuid : randomUUID(),
-      } as EventPayload,
-    }
+        uuid: typeof msg.uuid === 'string' ? msg.uuid : randomUUID()} as EventPayload}
   }
 
   /**
@@ -809,8 +779,7 @@ export class CCRClient {
     payload: Record<string, unknown>,
     {
       isCompaction = false,
-      agentId,
-    }: {
+      agentId}: {
       isCompaction?: boolean
       agentId?: string
     } = {},
@@ -819,11 +788,9 @@ export class CCRClient {
       payload: {
         type: eventType,
         ...payload,
-        uuid: typeof payload.uuid === 'string' ? payload.uuid : randomUUID(),
-      } as EventPayload,
+        uuid: typeof payload.uuid === 'string' ? payload.uuid : randomUUID()} as EventPayload,
       ...(isCompaction && { is_compaction: true }),
-      ...(agentId && { agent_id: agentId }),
-    }
+      ...(agentId && { agent_id: agentId })}
     await this.internalEventUploader.enqueue(event)
   }
 
@@ -928,11 +895,9 @@ export class CCRClient {
           headers: {
             ...authHeaders,
             'anthropic-version': '2023-06-01',
-            'User-Agent': getClaudeCodeUserAgent(),
-          },
+            'User-Agent': getClaudeCodeUserAgent()},
           validateStatus: alwaysValidStatus,
-          timeout: 30_000,
-        })
+          timeout: 30_000})
       } catch (error) {
         logForDebugging(
           `CCRClient: GET ${url} failed (attempt ${attempt}/10): ${errorMessage(error)}`,
@@ -966,8 +931,7 @@ export class CCRClient {
 
     logForDebugging('CCRClient: GET retries exhausted', { level: 'error' })
     logForDiagnosticsNoPII('error', 'cli_worker_get_retries_exhausted', {
-      context,
-    })
+      context})
     return null
   }
 

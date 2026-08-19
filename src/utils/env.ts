@@ -22,15 +22,17 @@ export const getGlobalClaudeFile = memoize((): string => {
   }
 
   const filename = `.claude${fileSuffixForOauthConfig()}.json`
-  return join(process.env.CLAUDE_CONFIG_DIR || homedir(), filename)
+  return join(
+    process.env.CLAUDE_CONFIG_DIR || getClaudeConfigHomeDir(),
+    filename,
+  )
 })
 
 const hasInternetAccess = memoize(async (): Promise<boolean> => {
   try {
     const { default: axiosClient } = await import('axios')
     await axiosClient.head('http://1.1.1.1', {
-      signal: AbortSignal.timeout(1000),
-    })
+      signal: AbortSignal.timeout(1000)})
     return true
   } catch {
     return false
@@ -329,8 +331,7 @@ export const env = {
   isWslEnvironment,
   isNpmFromWindowsPath,
   isConductor,
-  detectDeploymentEnvironment,
-}
+  detectDeploymentEnvironment}
 
 /**
  * Returns the host platform for analytics reporting.

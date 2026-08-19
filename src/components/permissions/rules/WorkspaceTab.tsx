@@ -6,6 +6,7 @@ import type { CommandResultDisplay } from '../../../commands.js';
 import { Select } from '../../../components/CustomSelect/select.js';
 import { Box, Text, useTabHeaderFocus } from '@anthropic/ink';
 import type { ToolPermissionContext } from '../../../Tool.js';
+import { t } from '../../../utils/i18n/index.js';
 
 type Props = {
   onExit: (result?: string, options?: { display?: CommandResultDisplay }) => void;
@@ -26,8 +27,7 @@ export function WorkspaceTab({
   toolPermissionContext,
   onRequestAddDirectory,
   onRequestRemoveDirectory,
-  onHeaderFocusChange,
-}: Props): React.ReactNode {
+  onHeaderFocusChange}: Props): React.ReactNode {
   const { headerFocused, focusHeader } = useTabHeaderFocus();
   useEffect(() => {
     onHeaderFocusChange?.(headerFocused);
@@ -37,8 +37,7 @@ export function WorkspaceTab({
     return Array.from(toolPermissionContext.additionalWorkingDirectories.keys()).map(path => ({
       path,
       isCurrent: false,
-      isDeletable: true,
-    }));
+      isDeletable: true}));
   }, [toolPermissionContext.additionalWorkingDirectories]);
 
   const handleDirectorySelect = useCallback(
@@ -56,19 +55,17 @@ export function WorkspaceTab({
     [additionalDirectories, onRequestAddDirectory, onRequestRemoveDirectory],
   );
 
-  const handleCancel = useCallback(() => onExit('Workspace dialog dismissed', { display: 'system' }), [onExit]);
+  const handleCancel = useCallback(() => onExit(t('workspaceTab.dialogDismissed'), { display: 'system' }), [onExit]);
 
   // Main list view options
   const options = React.useMemo(() => {
     const opts = additionalDirectories.map(dir => ({
       label: dir.path,
-      value: dir.path,
-    }));
+      value: dir.path}));
 
     opts.push({
-      label: `Add directory${figures.ellipsis}`,
-      value: 'add-directory',
-    });
+      label: `${t('workspaceTab.addDirectory')}${figures.ellipsis}`,
+      value: 'add-directory'});
 
     return opts;
   }, [additionalDirectories]);
@@ -79,7 +76,7 @@ export function WorkspaceTab({
       {/* Current working directory section */}
       <Box flexDirection="row" marginTop={1} marginLeft={2} gap={1}>
         <Text>{`-  ${getOriginalCwd()}`}</Text>
-        <Text dimColor>(Original working directory)</Text>
+        <Text dimColor>{t('workspaceTab.originalWorkingDirectory')}</Text>
       </Box>
       <Select
         options={options}

@@ -7,8 +7,7 @@ async function whichNodeAsync(command: string): Promise<string | null> {
     const result = await execa(`where.exe ${command}`, {
       shell: true,
       stderr: 'ignore',
-      reject: false,
-    })
+      reject: false})
     if (result.exitCode !== 0 || !result.stdout) {
       return null
     }
@@ -22,8 +21,7 @@ async function whichNodeAsync(command: string): Promise<string | null> {
   const result = await execa(`which ${command}`, {
     shell: true,
     stderr: 'ignore',
-    reject: false,
-  })
+    reject: false})
   if (result.exitCode !== 0 || !result.stdout) {
     return null
   }
@@ -35,8 +33,7 @@ function whichNodeSync(command: string): string | null {
     try {
       const result = execSync_DEPRECATED(`where.exe ${command}`, {
         encoding: 'utf-8',
-        stdio: ['ignore', 'pipe', 'ignore'],
-      })
+        stdio: ['ignore', 'pipe', 'ignore']})
       const output = result.toString().trim()
       return output.split(/\r?\n/)[0] || null
     } catch {
@@ -47,8 +44,7 @@ function whichNodeSync(command: string): string | null {
   try {
     const result = execSync_DEPRECATED(`which ${command}`, {
       encoding: 'utf-8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    })
+      stdio: ['ignore', 'pipe', 'ignore']})
     return result.toString().trim() || null
   } catch {
     return null

@@ -8,6 +8,7 @@ import {
   type ToolResult,
   type Tools,
 } from 'src/Tool.js'
+import { t } from 'src/utils/i18n/index.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import { createUserMessage } from 'src/utils/messages.js'
 import { formatZodValidationError } from 'src/utils/toolErrors.js'
@@ -220,7 +221,7 @@ export const ExecuteTool = buildTool({
   async checkPermissions() {
     return {
       behavior: 'passthrough',
-      message: 'ExecuteExtraTool delegates permission to the target tool.',
+      message: t('toolUI.execute.delegatesPermission'),
     }
   },
   renderToolUseMessage(input) {

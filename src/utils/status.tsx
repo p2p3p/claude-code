@@ -13,6 +13,7 @@ import { getIdeClientName, type IDEExtensionInstallationStatus, isJetBrainsIde, 
 import { getClaudeAiUserDefaultModelDescription, modelDisplayString } from './model/model.js';
 import { getAPIProvider } from './model/providers.js';
 import { getMTLSConfig } from './mtls.js';
+import { t } from './i18n/index.js';
 import { checkInstall } from './nativeInstaller/index.js';
 import { getProxyUrl } from './proxy.js';
 import { SandboxManager } from './sandbox/sandbox-adapter.js';
@@ -37,9 +38,8 @@ export function buildSandboxProperties(): Property[] {
 
   return [
     {
-      label: 'Bash Sandbox',
-      value: isSandboxed ? 'Enabled' : 'Disabled',
-    },
+      label: t('status.bashSandbox'),
+      value: isSandboxed ? t('status.enabled') : t('status.disabled')},
   ];
 }
 
@@ -57,15 +57,13 @@ export function buildIDEProperties(
     if (ideInstallationStatus.error) {
       return [
         {
-          label: 'IDE',
+          label: t('status.ide'),
           value: (
             <Text>
-              {color('error', theme)(figures.cross)} Error installing {ideName} {pluginOrExtension}:{' '}
-              {ideInstallationStatus.error}
-              {'\n'}Please restart your IDE and try again.
+              {color('error', theme)(figures.cross)} {t('status.ideErrorInstalling', { ideName, pluginOrExtension, error: ideInstallationStatus.error })}
+              {'\n'}{t('status.ideRestartHint')}
             </Text>
-          ),
-        },
+          )},
       ];
     }
 
@@ -74,24 +72,21 @@ export function buildIDEProperties(
         if (ideInstallationStatus.installedVersion !== ideClient.serverInfo?.version) {
           return [
             {
-              label: 'IDE',
-              value: `Connected to ${ideName} ${pluginOrExtension} version ${ideInstallationStatus.installedVersion} (server version: ${ideClient.serverInfo?.version})`,
-            },
+              label: t('status.ide'),
+              value: t('status.ideConnectedVersionMismatch', { ideName, pluginOrExtension, installedVersion: ideInstallationStatus.installedVersion, serverVersion: ideClient.serverInfo?.version ?? '' })},
           ];
         } else {
           return [
             {
-              label: 'IDE',
-              value: `Connected to ${ideName} ${pluginOrExtension} version ${ideInstallationStatus.installedVersion}`,
-            },
+              label: t('status.ide'),
+              value: t('status.ideConnectedVersion', { ideName, pluginOrExtension, installedVersion: ideInstallationStatus.installedVersion })},
           ];
         }
       } else {
         return [
           {
-            label: 'IDE',
-            value: `Installed ${ideName} ${pluginOrExtension}`,
-          },
+            label: t('status.ide'),
+            value: t('status.ideInstalled', { ideName, pluginOrExtension })},
         ];
       }
     }
@@ -100,16 +95,14 @@ export function buildIDEProperties(
     if (ideClient.type === 'connected') {
       return [
         {
-          label: 'IDE',
-          value: `Connected to ${ideName} extension`,
-        },
+          label: t('status.ide'),
+          value: t('status.ideConnected', { ideName })},
       ];
     } else {
       return [
         {
-          label: 'IDE',
-          value: `${color('error', theme)(figures.cross)} Not connected to ${ideName}`,
-        },
+          label: t('status.ide'),
+          value: `${color('error', theme)(figures.cross)} ${t('status.ideNotConnected', { ideName })}`},
       ];
     }
   }
@@ -133,16 +126,15 @@ export function buildMcpProperties(clients: MCPServerConnection[] = [], theme: T
     else byState.failed++;
   }
   const parts: string[] = [];
-  if (byState.connected) parts.push(color('success', theme)(`${byState.connected} connected`));
-  if (byState.needsAuth) parts.push(color('warning', theme)(`${byState.needsAuth} need auth`));
-  if (byState.pending) parts.push(color('inactive', theme)(`${byState.pending} pending`));
-  if (byState.failed) parts.push(color('error', theme)(`${byState.failed} failed`));
+  if (byState.connected) parts.push(color('success', theme)(t('status.mcpConnected', { count: byState.connected })));
+  if (byState.needsAuth) parts.push(color('warning', theme)(t('status.mcpNeedAuth', { count: byState.needsAuth })));
+  if (byState.pending) parts.push(color('inactive', theme)(t('status.mcpPending', { count: byState.pending })));
+  if (byState.failed) parts.push(color('error', theme)(t('status.mcpFailed', { count: byState.failed })));
 
   return [
     {
-      label: 'MCP servers',
-      value: `${parts.join(', ')} ${color('inactive', theme)('· /mcp')}`,
-    },
+      label: t('status.mcpServers'),
+      value: `${parts.join(', ')} ${color('inactive', theme)(t('status.slashMcp'))}`},
   ];
 }
 
@@ -155,7 +147,7 @@ export async function buildMemoryDiagnostics(): Promise<Diagnostic[]> {
   largeFiles.forEach(file => {
     const displayPath = getDisplayPath(file.path);
     diagnostics.push(
-      `Large ${displayPath} will impact performance (${formatNumber(file.content.length)} chars > ${formatNumber(MAX_MEMORY_CHARACTER_COUNT)})`,
+      t('status.largeMemoryFile', { displayPath, chars: formatNumber(file.content.length), maxChars: formatNumber(MAX_MEMORY_CHARACTER_COUNT) }),
     );
   });
 
@@ -182,23 +174,23 @@ export function buildSettingSourcesProperties(): Property[] {
         }
         switch (origin) {
           case 'remote':
-            return 'Enterprise managed settings (remote)';
+            return t('status.enterpriseManagedRemote');
           case 'plist':
-            return 'Enterprise managed settings (plist)';
+            return t('status.enterpriseManagedPlist');
           case 'hklm':
-            return 'Enterprise managed settings (HKLM)';
+            return t('status.enterpriseManagedHklm');
           case 'file': {
             const { hasBase, hasDropIns } = getManagedFileSettingsPresence();
             if (hasBase && hasDropIns) {
-              return 'Enterprise managed settings (file + drop-ins)';
+              return t('status.enterpriseManagedFileDropins');
             }
             if (hasDropIns) {
-              return 'Enterprise managed settings (drop-ins)';
+              return t('status.enterpriseManagedDropins');
             }
-            return 'Enterprise managed settings (file)';
+            return t('status.enterpriseManagedFile');
           }
           case 'hkcu':
-            return 'Enterprise managed settings (HKCU)';
+            return t('status.enterpriseManagedHkcu');
         }
       }
       return getSettingSourceDisplayNameCapitalized(source);
@@ -207,9 +199,8 @@ export function buildSettingSourcesProperties(): Property[] {
 
   return [
     {
-      label: 'Setting sources',
-      value: sourceNames,
-    },
+      label: t('status.settingSources'),
+      value: sourceNames},
   ];
 }
 
@@ -227,7 +218,7 @@ export async function buildInstallationHealthDiagnostics(): Promise<Diagnostic[]
     const invalidFiles = Array.from(new Set(validationErrors.map(error => error.file)));
     const fileList = invalidFiles.join(', ');
 
-    items.push(`Found invalid settings files: ${fileList}. They will be ignored.`);
+    items.push(t('status.invalidSettingsFiles', { fileList }));
   }
 
   // Add warnings from doctor diagnostic (includes leftover installations, config mismatches, etc.)
@@ -236,7 +227,7 @@ export async function buildInstallationHealthDiagnostics(): Promise<Diagnostic[]
   });
 
   if (diagnostic.hasUpdatePermissions === false) {
-    items.push('No write permissions for auto-updates (requires sudo)');
+    items.push(t('status.noWritePermAutoUpdates'));
   }
 
   return items;
@@ -252,37 +243,32 @@ export function buildAccountProperties(): Property[] {
 
   if (accountInfo.subscription) {
     properties.push({
-      label: 'Login method',
-      value: `${accountInfo.subscription} Account`,
-    });
+      label: t('status.loginMethod'),
+      value: t('status.subscriptionAccount', { subscription: accountInfo.subscription })});
   }
 
   if (accountInfo.tokenSource) {
     properties.push({
-      label: 'Auth token',
-      value: accountInfo.tokenSource,
-    });
+      label: t('status.authToken'),
+      value: accountInfo.tokenSource});
   }
 
   if (accountInfo.apiKeySource) {
     properties.push({
-      label: 'API key',
-      value: accountInfo.apiKeySource,
-    });
+      label: t('status.apiKey'),
+      value: accountInfo.apiKeySource});
   }
 
   // Hide sensitive account info in demo mode
   if (accountInfo.organization && !process.env.IS_DEMO) {
     properties.push({
-      label: 'Organization',
-      value: accountInfo.organization,
-    });
+      label: t('status.organization'),
+      value: accountInfo.organization});
   }
   if (accountInfo.email && !process.env.IS_DEMO) {
     properties.push({
-      label: 'Email',
-      value: accountInfo.email,
-    });
+      label: t('status.email'),
+      value: accountInfo.email});
   }
 
   return properties;
@@ -293,145 +279,125 @@ export function buildAPIProviderProperties(): Property[] {
 
   const properties: Property[] = [];
 
-  if (apiProvider !== 'firstParty') {
+  if (apiProvider !== 'anthropic') {
     const providerLabel = {
-      bedrock: 'AWS Bedrock',
-      vertex: 'Google Vertex AI',
-      foundry: 'Microsoft Foundry',
-      gemini: 'Gemini API',
-      grok: 'Grok API',
-      openai: 'OpenAI API',
-    }[apiProvider];
+      bedrock: t('status.providerBedrock'),
+      vertex: t('status.providerVertex'),
+      foundry: t('status.providerFoundry'),
+      gemini: t('status.providerGemini'),
+      grok: t('status.providerGrok'),
+      openai: t('status.providerOpenai')}[apiProvider];
     properties.push({
-      label: 'API provider',
-      value: providerLabel,
-    });
+      label: t('status.apiProvider'),
+      value: providerLabel});
   }
 
-  if (apiProvider === 'firstParty') {
-    const anthropicBaseUrl = process.env.ANTHROPIC_BASE_URL;
+  if (apiProvider === 'anthropic') {
+    const anthropicBaseUrl = process.env.BASE_URL;
     if (anthropicBaseUrl) {
       properties.push({
-        label: 'Anthropic base URL',
-        value: anthropicBaseUrl,
-      });
+        label: t('status.anthropicBaseUrl'),
+        value: anthropicBaseUrl});
     }
   } else if (apiProvider === 'bedrock') {
     const bedrockBaseUrl = process.env.BEDROCK_BASE_URL;
     if (bedrockBaseUrl) {
       properties.push({
-        label: 'Bedrock base URL',
-        value: bedrockBaseUrl,
-      });
+        label: t('status.bedrockBaseUrl'),
+        value: bedrockBaseUrl});
     }
 
     properties.push({
-      label: 'AWS region',
-      value: getAWSRegion(),
-    });
+      label: t('status.awsRegion'),
+      value: getAWSRegion()});
 
     if (isEnvTruthy(process.env.CLAUDE_CODE_SKIP_BEDROCK_AUTH)) {
       properties.push({
-        value: 'AWS auth skipped',
-      });
+        value: t('status.awsAuthSkipped')});
     }
   } else if (apiProvider === 'vertex') {
     const vertexBaseUrl = process.env.VERTEX_BASE_URL;
     if (vertexBaseUrl) {
       properties.push({
-        label: 'Vertex base URL',
-        value: vertexBaseUrl,
-      });
+        label: t('status.vertexBaseUrl'),
+        value: vertexBaseUrl});
     }
 
     const gcpProject = process.env.ANTHROPIC_VERTEX_PROJECT_ID;
     if (gcpProject) {
       properties.push({
-        label: 'GCP project',
-        value: gcpProject,
-      });
+        label: t('status.gcpProject'),
+        value: gcpProject});
     }
 
     properties.push({
-      label: 'Default region',
-      value: getDefaultVertexRegion(),
-    });
+      label: t('status.defaultRegion'),
+      value: getDefaultVertexRegion()});
 
     if (isEnvTruthy(process.env.CLAUDE_CODE_SKIP_VERTEX_AUTH)) {
       properties.push({
-        value: 'GCP auth skipped',
-      });
+        value: t('status.gcpAuthSkipped')});
     }
   } else if (apiProvider === 'foundry') {
     const foundryBaseUrl = process.env.ANTHROPIC_FOUNDRY_BASE_URL;
     if (foundryBaseUrl) {
       properties.push({
-        label: 'Microsoft Foundry base URL',
-        value: foundryBaseUrl,
-      });
+        label: t('status.foundryBaseUrl'),
+        value: foundryBaseUrl});
     }
 
     const foundryResource = process.env.ANTHROPIC_FOUNDRY_RESOURCE;
     if (foundryResource) {
       properties.push({
-        label: 'Microsoft Foundry resource',
-        value: foundryResource,
-      });
+        label: t('status.foundryResource'),
+        value: foundryResource});
     }
 
     if (isEnvTruthy(process.env.CLAUDE_CODE_SKIP_FOUNDRY_AUTH)) {
       properties.push({
-        value: 'Microsoft Foundry auth skipped',
-      });
+        value: t('status.foundryAuthSkipped')});
     }
   } else if (apiProvider === 'gemini') {
-    const geminiBaseUrl = process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta';
+    const geminiBaseUrl = process.env.BASE_URL || 'https://generativelanguage.googleapis.com/v1beta';
     properties.push({
-      label: 'Gemini base URL',
-      value: geminiBaseUrl,
-    });
+      label: t('status.geminiBaseUrl'),
+      value: geminiBaseUrl});
   } else if (apiProvider === 'grok') {
-    const grokBaseUrl = process.env.GROK_BASE_URL;
+    const grokBaseUrl = process.env.BASE_URL;
     properties.push({
-      label: 'Grok base URL',
-      value: grokBaseUrl,
-    });
+      label: t('status.grokBaseUrl'),
+      value: grokBaseUrl});
   } else if (apiProvider === 'openai') {
-    const openaiBaseUrl = process.env.OPENAI_BASE_URL;
+    const openaiBaseUrl = process.env.BASE_URL;
     properties.push({
-      label: 'OpenAI base URL',
-      value: openaiBaseUrl,
-    });
+      label: t('status.openaiBaseUrl'),
+      value: openaiBaseUrl});
   }
 
   const proxyUrl = getProxyUrl();
   if (proxyUrl) {
     properties.push({
-      label: 'Proxy',
-      value: proxyUrl,
-    });
+      label: t('status.proxy'),
+      value: proxyUrl});
   }
 
   const mtlsConfig = getMTLSConfig();
   if (process.env.NODE_EXTRA_CA_CERTS) {
     properties.push({
-      label: 'Additional CA cert(s)',
-      value: process.env.NODE_EXTRA_CA_CERTS,
-    });
+      label: t('status.additionalCaCerts'),
+      value: process.env.NODE_EXTRA_CA_CERTS});
   }
   if (mtlsConfig) {
     if (mtlsConfig.cert && process.env.CLAUDE_CODE_CLIENT_CERT) {
       properties.push({
-        label: 'mTLS client cert',
-        value: process.env.CLAUDE_CODE_CLIENT_CERT,
-      });
+        label: t('status.mtlsClientCert'),
+        value: process.env.CLAUDE_CODE_CLIENT_CERT});
     }
 
     if (mtlsConfig.key && process.env.CLAUDE_CODE_CLIENT_KEY) {
       properties.push({
-        label: 'mTLS client key',
-        value: process.env.CLAUDE_CODE_CLIENT_KEY,
-      });
+        label: t('status.mtlsClientKey'),
+        value: process.env.CLAUDE_CODE_CLIENT_KEY});
     }
   }
 
@@ -444,7 +410,7 @@ export function getModelDisplayLabel(mainLoopModel: string | null): string {
   if (mainLoopModel === null && isClaudeAISubscriber()) {
     const description = getClaudeAiUserDefaultModelDescription();
 
-    modelLabel = `${chalk.bold('Default')} ${description}`;
+    modelLabel = `${chalk.bold(t('status.default'))} ${description}`;
   }
 
   return modelLabel;

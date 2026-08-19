@@ -1,28 +1,24 @@
 import type Anthropic from '@anthropic-ai/sdk'
 import type {
   BetaTool,
-  BetaToolUnion,
-} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
+  BetaToolUnion} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
 import { createHash } from 'crypto'
 import { SYSTEM_PROMPT_DYNAMIC_BOUNDARY } from 'src/constants/prompts.js'
 import { getSystemContext, getUserContext } from 'src/context.js'
 import { isAnalyticsDisabled } from 'src/services/analytics/config.js'
 import {
   checkStatsigFeatureGate_CACHED_MAY_BE_STALE,
-  getFeatureValue_CACHED_MAY_BE_STALE,
-} from 'src/services/analytics/growthbook.js'
+  getFeatureValue_CACHED_MAY_BE_STALE} from 'src/services/analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { prefetchAllMcpResources } from 'src/services/mcp/client.js'
 import type { ScopedMcpServerConfig } from 'src/services/mcp/types.js'
 import { BashTool } from '@claude-code-best/builtin-tools/tools/BashTool/BashTool.js'
 import { FileEditTool } from '@claude-code-best/builtin-tools/tools/FileEditTool/FileEditTool.js'
 import {
   normalizeFileEditInput,
-  stripTrailingWhitespace,
-} from '@claude-code-best/builtin-tools/tools/FileEditTool/utils.js'
+  stripTrailingWhitespace} from '@claude-code-best/builtin-tools/tools/FileEditTool/utils.js'
 import { FileWriteTool } from '@claude-code-best/builtin-tools/tools/FileWriteTool/FileWriteTool.js'
 import { getTools } from 'src/tools.js'
 import type { AgentId } from 'src/types/ids.js'
@@ -38,25 +34,20 @@ import type { Message } from '../types/message.js'
 import { isAgentSwarmsEnabled } from './agentSwarmsEnabled.js'
 import {
   modelSupportsStructuredOutputs,
-  shouldUseGlobalCacheScope,
-} from './betas.js'
+  shouldUseGlobalCacheScope} from './betas.js'
 import { getCwd } from './cwd.js'
 import { logForDebugging } from './debug.js'
 import { isEnvTruthy } from './envUtils.js'
 import { createUserMessage } from './messages.js'
 import {
-  getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
-} from './model/providers.js'
+  getAPIProvider} from './model/providers.js'
 import {
   getFileReadIgnorePatterns,
-  normalizePatternsToPath,
-} from './permissions/filesystem.js'
+  normalizePatternsToPath} from './permissions/filesystem.js'
 import {
   getPlan,
   getPlanFilePath,
-  persistFileSnapshotIfRemote,
-} from './plans.js'
+  persistFileSnapshotIfRemote} from './plans.js'
 import { getPlatform } from './platform.js'
 import { countFilesRoundedRg } from './ripgrep.js'
 import { jsonStringify } from './slowOperations.js'
@@ -86,8 +77,7 @@ export type SystemPromptBlock = {
 // Fields to filter from tool schemas when swarms are not enabled
 const SWARM_FIELDS_BY_TOOL: Record<string, string[]> = {
   [EXIT_PLAN_MODE_V2_TOOL_NAME]: ['launchSwarm', 'teammateCount'],
-  [AGENT_TOOL_NAME]: ['name', 'team_name', 'mode'],
-}
+  [AGENT_TOOL_NAME]: ['name', 'team_name', 'mode']}
 
 /**
  * Filter swarm-related fields from a tool's input schema.
@@ -172,10 +162,8 @@ export async function toolToAPISchema(
         getToolPermissionContext: options.getToolPermissionContext,
         tools: options.tools,
         agents: options.agents,
-        allowedAgentTypes: options.allowedAgentTypes,
-      }),
-      input_schema,
-    }
+        allowedAgentTypes: options.allowedAgentTypes}),
+      input_schema}
 
     // Only add strict if:
     // 1. Feature flag is enabled
@@ -197,8 +185,8 @@ export async function toolToAPISchema(
     // Gated to direct api.anthropic.com: proxies (LiteLLM etc.) and Bedrock/Vertex
     // with Claude 4.5 reject this field with 400. See GH#32742, PR #21729.
     if (
-      getAPIProvider() === 'firstParty' &&
-      isFirstPartyAnthropicBaseUrl() &&
+      getAPIProvider() === 'anthropic' &&
+      false &&
       (getFeatureValue_CACHED_MAY_BE_STALE('tengu_fgts', false) ||
         isEnvTruthy(process.env.CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING))
     ) {
@@ -217,8 +205,7 @@ export async function toolToAPISchema(
     description: base.description,
     input_schema: base.input_schema,
     ...(base.strict && { strict: true }),
-    ...(base.eager_input_streaming && { eager_input_streaming: true }),
-  }
+    ...(base.eager_input_streaming && { eager_input_streaming: true })}
 
   // Add defer_loading if requested (for tool search feature)
   if (options.deferLoading) {
@@ -250,8 +237,7 @@ export async function toolToAPISchema(
         name: schema.name,
         description: schema.description,
         input_schema: schema.input_schema,
-        ...(schema.cache_control && { cache_control: schema.cache_control }),
-      }
+        ...(schema.cache_control && { cache_control: schema.cache_control })}
     }
   }
 
@@ -285,8 +271,7 @@ export function logAPIPrefix(systemPrompt: SystemPrompt): void {
     length: firstSystemPrompt?.length ?? 0,
     hash: (firstSystemPrompt
       ? createHash('sha256').update(firstSystemPrompt).digest('hex')
-      : '') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      : '') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 }
 
 /**
@@ -321,8 +306,7 @@ export function splitSysPromptPrefix(
   const useGlobalCacheFeature = shouldUseGlobalCacheScope()
   if (useGlobalCacheFeature && options?.skipGlobalCacheForSystemPrompt) {
     logEvent('tengu_sysprompt_using_tool_based_cache', {
-      promptBlockCount: systemPrompt.length,
-    })
+      promptBlockCount: systemPrompt.length})
 
     // Filter out boundary marker, return blocks without global scope
     let attributionHeader: string | undefined
@@ -392,14 +376,12 @@ export function splitSysPromptPrefix(
       logEvent('tengu_sysprompt_boundary_found', {
         blockCount: result.length,
         staticBlockLength: staticJoined.length,
-        dynamicBlockLength: dynamicJoined.length,
-      })
+        dynamicBlockLength: dynamicJoined.length})
 
       return result
     } else {
       logEvent('tengu_sysprompt_missing_boundary_marker', {
-        promptBlockCount: systemPrompt.length,
-      })
+        promptBlockCount: systemPrompt.length})
     }
   }
   let attributionHeader: string | undefined
@@ -462,8 +444,7 @@ export function prependUserContext(
     result.push(
       createUserMessage({
         content: `<project-instructions>\n${claudeMd}\n</project-instructions>\n`,
-        isMeta: true,
-      }),
+        isMeta: true}),
     )
   }
 
@@ -476,8 +457,7 @@ export function prependUserContext(
           .join('\n')}
 
       IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.\n</system-reminder>\n`,
-        isMeta: true,
-      }),
+        isMeta: true}),
     )
   }
 
@@ -569,8 +549,7 @@ export async function logContextMetrics(
     mcp_servers_count: mcpServersCount,
     mcp_tools_tokens: mcpToolsTokens,
     non_mcp_tools_count: nonMcpToolsCount,
-    non_mcp_tools_tokens: nonMcpToolsTokens,
-  })
+    non_mcp_tools_tokens: nonMcpToolsTokens})
 }
 
 // TODO: Generalize this to all tools
@@ -626,9 +605,7 @@ export function normalizeToolInput<T extends Tool>(
         ...(run_in_background !== undefined && { run_in_background }),
         ...('dangerouslyDisableSandbox' in parsed &&
           parsed.dangerouslyDisableSandbox !== undefined && {
-            dangerouslyDisableSandbox: parsed.dangerouslyDisableSandbox,
-          }),
-      } as z.infer<T['inputSchema']>
+            dangerouslyDisableSandbox: parsed.dangerouslyDisableSandbox})} as z.infer<T['inputSchema']>
     }
     case FileEditTool.name: {
       // Validated upstream, won't throw
@@ -641,18 +618,15 @@ export function normalizeToolInput<T extends Tool>(
           {
             old_string: parsedInput.old_string,
             new_string: parsedInput.new_string,
-            replace_all: parsedInput.replace_all,
-          },
-        ],
-      })
+            replace_all: parsedInput.replace_all},
+        ]})
 
       // SAFETY: See comment in BashTool case above
       return {
         replace_all: edits[0]!.replace_all,
         file_path,
         old_string: edits[0]!.old_string,
-        new_string: edits[0]!.new_string,
-      } as z.infer<T['inputSchema']>
+        new_string: edits[0]!.new_string} as z.infer<T['inputSchema']>
     }
     case FileWriteTool.name: {
       // Validated upstream, won't throw
@@ -666,8 +640,7 @@ export function normalizeToolInput<T extends Tool>(
         file_path: parsedInput.file_path,
         content: isMarkdown
           ? parsedInput.content
-          : stripTrailingWhitespace(parsedInput.content),
-      } as z.infer<T['inputSchema']>
+          : stripTrailingWhitespace(parsedInput.content)} as z.infer<T['inputSchema']>
     }
     case TASK_OUTPUT_TOOL_NAME: {
       // Normalize legacy parameter names from AgentOutputTool/BashOutputTool
@@ -683,8 +656,7 @@ export function normalizeToolInput<T extends Tool>(
       return {
         task_id: taskId ?? '',
         block: legacyInput.block ?? true,
-        timeout: timeout ?? 30000,
-      } as z.infer<T['inputSchema']>
+        timeout: timeout ?? 30000} as z.infer<T['inputSchema']>
     }
     default:
       return input

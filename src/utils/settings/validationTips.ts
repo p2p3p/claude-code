@@ -32,17 +32,13 @@ const TIP_MATCHERS: TipMatcher[] = [
     tip: {
       suggestion:
         'Valid modes: "acceptEdits" (ask before file changes), "plan" (analysis only), "bypassPermissions" (auto-accept all), or "default" (standard behavior)',
-      docLink: `${DOCUMENTATION_BASE}/iam#permission-modes`,
-    },
-  },
+      docLink: `${DOCUMENTATION_BASE}/iam#permission-modes`}},
   {
     matches: (ctx): boolean =>
       ctx.path === 'apiKeyHelper' && ctx.code === 'invalid_type',
     tip: {
       suggestion:
-        'Provide a shell command that outputs your API key to stdout. The script should output only the API key. Example: "/bin/generate_temp_api_key.sh"',
-    },
-  },
+        'Provide a shell command that outputs your API key to stdout. The script should output only the API key. Example: "/bin/generate_temp_api_key.sh"'}},
   {
     matches: (ctx): boolean =>
       ctx.path === 'cleanupPeriodDays' &&
@@ -50,18 +46,14 @@ const TIP_MATCHERS: TipMatcher[] = [
       ctx.expected === '0',
     tip: {
       suggestion:
-        'Must be 0 or greater. Set a positive number for days to retain transcripts (default is 30). Setting 0 disables session persistence entirely: no transcripts are written and existing transcripts are deleted at startup.',
-    },
-  },
+        'Must be 0 or greater. Set a positive number for days to retain transcripts (default is 30). Setting 0 disables session persistence entirely: no transcripts are written and existing transcripts are deleted at startup.'}},
   {
     matches: (ctx): boolean =>
       ctx.path.startsWith('env.') && ctx.code === 'invalid_type',
     tip: {
       suggestion:
         'Environment variables must be strings. Wrap numbers and booleans in quotes. Example: "DEBUG": "true", "PORT": "3000"',
-      docLink: `${DOCUMENTATION_BASE}/settings#environment-variables`,
-    },
-  },
+      docLink: `${DOCUMENTATION_BASE}/settings#environment-variables`}},
   {
     matches: (ctx): boolean =>
       (ctx.path === 'permissions.allow' || ctx.path === 'permissions.deny') &&
@@ -69,9 +61,7 @@ const TIP_MATCHERS: TipMatcher[] = [
       ctx.expected === 'array',
     tip: {
       suggestion:
-        'Permission rules must be in an array. Format: ["Tool(specifier)"]. Examples: ["Bash(npm run build)", "Edit(docs/**)", "Read(~/.zshrc)"]. Use * for wildcards.',
-    },
-  },
+        'Permission rules must be in an array. Format: ["Tool(specifier)"]. Examples: ["Bash(npm run build)", "Edit(docs/**)", "Read(~/.zshrc)"]. Use * for wildcards.'}},
   {
     matches: (ctx): boolean =>
       ctx.path.includes('hooks') && ctx.code === 'invalid_type',
@@ -82,32 +72,24 @@ const TIP_MATCHERS: TipMatcher[] = [
         // always has been). Users copied the tip's example and got the same validation
         // error again. See matchesPattern() in hooks.ts: matcher is exact-match,
         // pipe-separated ("Edit|Write"), or regex. Empty/"*" matches all.
-        'Hooks use a matcher + hooks array. The matcher is a string: a tool name ("Bash"), pipe-separated list ("Edit|Write"), or empty to match all. Example: {"PostToolUse": [{"matcher": "Edit|Write", "hooks": [{"type": "command", "command": "echo Done"}]}]}',
-    },
-  },
+        'Hooks use a matcher + hooks array. The matcher is a string: a tool name ("Bash"), pipe-separated list ("Edit|Write"), or empty to match all. Example: {"PostToolUse": [{"matcher": "Edit|Write", "hooks": [{"type": "command", "command": "echo Done"}]}]}'}},
   {
     matches: (ctx): boolean =>
       ctx.code === 'invalid_type' && ctx.expected === 'boolean',
     tip: {
       suggestion:
-        'Use true or false without quotes. Example: "includeCoAuthoredBy": true',
-    },
-  },
+        'Use true or false without quotes. Example: "includeCoAuthoredBy": true'}},
   {
     matches: (ctx): boolean => ctx.code === 'unrecognized_keys',
     tip: {
       suggestion:
         'Check for typos or refer to the documentation for valid fields',
-      docLink: `${DOCUMENTATION_BASE}/settings`,
-    },
-  },
+      docLink: `${DOCUMENTATION_BASE}/settings`}},
   {
     matches: (ctx): boolean =>
       ctx.code === 'invalid_value' && ctx.enumValues !== undefined,
     tip: {
-      suggestion: undefined,
-    },
-  },
+      suggestion: undefined}},
   {
     matches: (ctx): boolean =>
       ctx.code === 'invalid_type' &&
@@ -116,9 +98,7 @@ const TIP_MATCHERS: TipMatcher[] = [
       ctx.path === '',
     tip: {
       suggestion:
-        'Check for missing commas, unmatched brackets, or trailing commas. Use a JSON validator to identify the exact syntax error.',
-    },
-  },
+        'Check for missing commas, unmatched brackets, or trailing commas. Use a JSON validator to identify the exact syntax error.'}},
   {
     matches: (ctx): boolean =>
       ctx.path === 'permissions.additionalDirectories' &&
@@ -126,16 +106,13 @@ const TIP_MATCHERS: TipMatcher[] = [
     tip: {
       suggestion:
         'Must be an array of directory paths. Example: ["~/projects", "/tmp/workspace"]. You can also use --add-dir flag or /add-dir command',
-      docLink: `${DOCUMENTATION_BASE}/iam#working-directories`,
-    },
-  },
+      docLink: `${DOCUMENTATION_BASE}/iam#working-directories`}},
 ]
 
 const PATH_DOC_LINKS: Record<string, string> = {
   permissions: `${DOCUMENTATION_BASE}/iam#configuring-permissions`,
   env: `${DOCUMENTATION_BASE}/settings#environment-variables`,
-  hooks: `${DOCUMENTATION_BASE}/hooks`,
-}
+  hooks: `${DOCUMENTATION_BASE}/hooks`}
 
 export function getValidationTip(context: TipContext): ValidationTip | null {
   const matcher = TIP_MATCHERS.find(m => m.matches(context))

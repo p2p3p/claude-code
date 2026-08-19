@@ -8,13 +8,11 @@ import type {
   AssistantMessage,
   AttachmentMessage,
   SystemFileSnapshotMessage,
-  UserMessage,
-} from 'src/types/message.js'
+  UserMessage} from 'src/types/message.js'
 import {
   getPlanSlugCache,
   getSessionId,
-  setPlanSlugCacheEntry,
-} from '../bootstrap/state.js'
+  setPlanSlugCacheEntry} from '../bootstrap/state.js'
 import { EXIT_PLAN_MODE_V2_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/ExitPlanModeTool/constants.js'
 import { getCwd } from './cwd.js'
 import { logForDebugging } from './debug.js'
@@ -374,8 +372,7 @@ export async function persistFileSnapshotIfRemote(): Promise<void> {
       snapshotFiles.push({
         key: 'plan',
         path: getPlanFilePath(),
-        content: plan,
-      })
+        content: plan})
     }
 
     if (snapshotFiles.length === 0) {
@@ -390,8 +387,7 @@ export async function persistFileSnapshotIfRemote(): Promise<void> {
       isMeta: true,
       timestamp: new Date().toISOString(),
       uuid: randomUUID(),
-      snapshotFiles,
-    }
+      snapshotFiles}
 
     const { recordTranscript } = await import('./sessionStorage.js')
     await recordTranscript([message])

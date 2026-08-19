@@ -6,5 +6,4 @@ export {
   chordToString,
   keystrokeToDisplayString,
   chordToDisplayString,
-  parseBindings,
-} from '@anthropic/ink'
+  parseBindings} from '@anthropic/ink'

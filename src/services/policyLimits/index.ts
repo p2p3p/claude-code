@@ -20,22 +20,18 @@ import { join } from 'path'
 import {
   CLAUDE_AI_INFERENCE_SCOPE,
   getOauthConfig,
-  OAUTH_BETA_HEADER,
-} from '../../constants/oauth.js'
+  OAUTH_BETA_HEADER} from '../../constants/oauth.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
   getAnthropicApiKeyWithSource,
-  getClaudeAIOAuthTokens,
-} from '../../utils/auth.js'
+  getClaudeAIOAuthTokens} from '../../utils/auth.js'
 import { registerCleanup } from '../../utils/cleanupRegistry.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
 import { classifyAxiosError } from '../../utils/errors.js'
 import { safeParseJSON } from '../../utils/json.js'
 import {
-  getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
-} from '../../utils/model/providers.js'
+  getAPIProvider} from '../../utils/model/providers.js'
 import { isEssentialTrafficOnly } from '../../utils/privacyLevel.js'
 import { sleep } from '../../utils/sleep.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
@@ -44,8 +40,7 @@ import { getRetryDelay } from '../api/withRetry.js'
 import {
   type PolicyLimitsFetchResult,
   type PolicyLimitsResponse,
-  PolicyLimitsResponseSchema,
-} from './types.js'
+  PolicyLimitsResponseSchema} from './types.js'
 
 function isNodeError(e: unknown): e is NodeJS.ErrnoException {
   return e instanceof Error
@@ -166,20 +161,19 @@ function computeChecksum(
  */
 export function isPolicyLimitsEligible(): boolean {
   // 3p provider users should not hit the policy limits endpoint
-  if (getAPIProvider() !== 'firstParty') {
+  if (getAPIProvider() !== 'anthropic') {
     return false
   }
 
   // Custom base URL users should not hit the policy limits endpoint
-  if (!isFirstPartyAnthropicBaseUrl()) {
+  if (!false) {
     return false
   }
 
   // Console users (API key) are eligible if we can get the actual key
   try {
     const { key: apiKey } = getAnthropicApiKeyWithSource({
-      skipRetrievingKeyFromApiKeyHelper: true,
-    })
+      skipRetrievingKeyFromApiKeyHelper: true})
     if (apiKey) {
       return true
     }
@@ -231,14 +225,11 @@ function getAuthHeaders(): {
   // Try API key first (for Console users)
   try {
     const { key: apiKey } = getAnthropicApiKeyWithSource({
-      skipRetrievingKeyFromApiKeyHelper: true,
-    })
+      skipRetrievingKeyFromApiKeyHelper: true})
     if (apiKey) {
       return {
         headers: {
-          'x-api-key': apiKey,
-        },
-      }
+          'x-api-key': apiKey}}
     }
   } catch {
     // No API key available - continue to check OAuth
@@ -250,15 +241,12 @@ function getAuthHeaders(): {
     return {
       headers: {
         Authorization: `Bearer ${oauthTokens.accessToken}`,
-        'anthropic-beta': OAUTH_BETA_HEADER,
-      },
-    }
+        'anthropic-beta': OAUTH_BETA_HEADER}}
   }
 
   return {
     headers: {},
-    error: 'No authentication available',
-  }
+    error: 'No authentication available'}
 }
 
 /**
@@ -308,15 +296,13 @@ async function fetchPolicyLimits(
       return {
         success: false,
         error: 'Authentication required for policy limits',
-        skipRetry: true,
-      }
+        skipRetry: true}
     }
 
     const endpoint = getPolicyLimitsEndpoint()
     const headers: Record<string, string> = {
       ...authHeaders.headers,
-      'User-Agent': getClaudeCodeUserAgent(),
-    }
+      'User-Agent': getClaudeCodeUserAgent()}
 
     if (cachedChecksum) {
       headers['If-None-Match'] = `"${cachedChecksum}"`
@@ -326,8 +312,7 @@ async function fetchPolicyLimits(
       headers,
       timeout: FETCH_TIMEOUT_MS,
       validateStatus: status =>
-        status === 200 || status === 304 || status === 404,
-    })
+        status === 200 || status === 304 || status === 404})
 
     // Handle 304 Not Modified - cached version is still valid
     if (response.status === 304) {
@@ -335,8 +320,7 @@ async function fetchPolicyLimits(
       return {
         success: true,
         restrictions: null, // Signal that cache is valid
-        etag: cachedChecksum,
-      }
+        etag: cachedChecksum}
     }
 
     // Handle 404 Not Found - no policy limits exist or feature not enabled
@@ -345,8 +329,7 @@ async function fetchPolicyLimits(
       return {
         success: true,
         restrictions: {},
-        etag: undefined,
-      }
+        etag: undefined}
     }
 
     const parsed = PolicyLimitsResponseSchema().safeParse(response.data)
@@ -356,15 +339,13 @@ async function fetchPolicyLimits(
       )
       return {
         success: false,
-        error: 'Invalid policy limits format',
-      }
+        error: 'Invalid policy limits format'}
     }
 
     logForDebugging('Policy limits: Fetched successfully')
     return {
       success: true,
-      restrictions: parsed.data.restrictions,
-    }
+      restrictions: parsed.data.restrictions}
   } catch (error) {
     // 404 is handled above via validateStatus, so it won't reach here
     const { kind, message } = classifyAxiosError(error)
@@ -373,8 +354,7 @@ async function fetchPolicyLimits(
         return {
           success: false,
           error: 'Not authorized for policy limits',
-          skipRetry: true,
-        }
+          skipRetry: true}
       case 'timeout':
         return { success: false, error: 'Policy limits request timeout' }
       case 'network':
@@ -415,8 +395,7 @@ async function saveCachedRestrictions(
     const data: PolicyLimitsResponse = { restrictions }
     await writeFile(path, jsonStringify(data, null, 2), {
       encoding: 'utf-8',
-      mode: 0o600,
-    })
+      mode: 0o600})
     logForDebugging(`Policy limits: Saved to ${path}`)
   } catch (error) {
     logForDebugging(

@@ -68,8 +68,7 @@ export function getTeammateStatuses(teamName: string): TeammateStatus[] {
       worktreePath: member.worktreePath,
       isHidden: hiddenPaneIds.has(member.tmuxPaneId),
       backendType: member.backendType,
-      mode: member.mode,
-    })
+      mode: member.mode})
   }
 
   return statuses

@@ -1,10 +1,10 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import { type NetworkHostPattern, shouldAllowManagedSandboxDomainsOnly } from 'src/utils/sandbox/sandbox-adapter.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js';
+  logEvent} from '../../services/analytics/index.js';
 import { Select } from '../CustomSelect/select.js';
 import { PermissionDialog } from './PermissionDialog.js';
 
@@ -15,8 +15,7 @@ export type SandboxPermissionRequestProps = {
 
 export function SandboxPermissionRequest({
   hostPattern: { host },
-  onUserResponse,
-}: SandboxPermissionRequestProps): React.ReactNode {
+  onUserResponse}: SandboxPermissionRequestProps): React.ReactNode {
   function onSelect(value: string) {
     // We may want to better unify this dialog with other permission dialogs
     // and use their logging, but this is slightly different and we don't have
@@ -24,8 +23,7 @@ export function SandboxPermissionRequest({
     if (process.env.USER_TYPE === 'ant') {
       logEvent('tengu_sandbox_network_dialog_result', {
         host: host as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        result: value as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        result: value as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     }
 
     switch (value) {
@@ -44,38 +42,36 @@ export function SandboxPermissionRequest({
   const managedDomainsOnly = shouldAllowManagedSandboxDomainsOnly();
 
   const options = [
-    { label: 'Yes', value: 'yes' },
+    { label: t('sandbox.yes'), value: 'yes' },
     ...(!managedDomainsOnly
       ? [
           {
             label: (
               <Text>
-                Yes, and don&apos;t ask again for <Text bold>{host}</Text>
+                {t('sandbox.yesDontAsk', host)}
               </Text>
             ),
-            value: 'yes-dont-ask-again',
-          },
+            value: 'yes-dont-ask-again'},
         ]
       : []),
     {
       label: (
         <Text>
-          No, and tell Claude what to do differently <Text bold>(esc)</Text>
+          {t('sandbox.noTellClaude')} <Text bold>(esc)</Text>
         </Text>
       ),
-      value: 'no',
-    },
+      value: 'no'},
   ];
 
   return (
-    <PermissionDialog title="Network request outside of sandbox">
+    <PermissionDialog title={t('sandbox.title')}>
       <Box flexDirection="column" paddingX={2} paddingY={1}>
         <Box>
-          <Text dimColor>Host:</Text>
+          <Text dimColor>{t('sandbox.host')}</Text>
           <Text> {host}</Text>
         </Box>
         <Box marginTop={1}>
-          <Text>Do you want to allow this connection?</Text>
+          <Text>{t('permission.allowConnection')}</Text>
         </Box>
         <Box>
           <Select
@@ -85,8 +81,7 @@ export function SandboxPermissionRequest({
               if (process.env.USER_TYPE === 'ant') {
                 logEvent('tengu_sandbox_network_dialog_result', {
                   host: host as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-                  result: 'cancel' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-                });
+                  result: 'cancel' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
               }
               onUserResponse({ allow: false, persistToSettings: false });
             }}

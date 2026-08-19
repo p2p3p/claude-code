@@ -52,8 +52,7 @@ const pendingDiagnostics = new Map<string, PendingLSPDiagnostic>()
 // Maps file URI to a set of diagnostic keys (hash of message+severity+range)
 // Using LRUCache to prevent unbounded growth in long sessions
 const deliveredDiagnostics = new LRUCache<string, Set<string>>({
-  max: MAX_DELIVERED_FILES,
-})
+  max: MAX_DELIVERED_FILES})
 
 /**
  * Register LSP diagnostics received from a server.
@@ -64,8 +63,7 @@ const deliveredDiagnostics = new LRUCache<string, Set<string>>({
  */
 export function registerPendingLSPDiagnostic({
   serverName,
-  files,
-}: {
+  files}: {
   serverName: string
   files: DiagnosticFile[]
 }): void {
@@ -80,8 +78,7 @@ export function registerPendingLSPDiagnostic({
     serverName,
     files,
     timestamp: Date.now(),
-    attachmentSent: false,
-  })
+    attachmentSent: false})
 }
 
 /**
@@ -119,8 +116,7 @@ function createDiagnosticKey(diag: {
     severity: diag.severity,
     range: diag.range,
     source: diag.source || null,
-    code: diag.code || null,
-  })
+    code: diag.code || null})
 }
 
 /**
@@ -332,8 +328,7 @@ export function checkForLSPDiagnostics(): Array<{
   return [
     {
       serverName: Array.from(serverNames).join(', '),
-      files: dedupedFiles,
-    },
+      files: dedupedFiles},
   ]
 }
 

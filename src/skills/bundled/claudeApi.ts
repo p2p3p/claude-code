@@ -24,8 +24,7 @@ const LANGUAGE_INDICATORS: Record<DetectedLanguage, string[]> = {
   ruby: ['.rb', 'Gemfile'],
   csharp: ['.cs', '.csproj'],
   php: ['.php', 'composer.json'],
-  curl: [],
-}
+  curl: []}
 
 async function detectLanguage(): Promise<DetectedLanguage | null> {
   const cwd = getCwd()
@@ -191,6 +190,5 @@ export function registerClaudeApiSkill(): void {
       const lang = await detectLanguage()
       const prompt = buildPrompt(lang, args, content)
       return [{ type: 'text', text: prompt }]
-    },
-  })
+    }})
 }

@@ -6,9 +6,10 @@ import type { ToolProgressData } from 'src/Tool.js';
 import type { ProgressMessage } from 'src/types/message.js';
 import { jsonStringify } from 'src/utils/slowOperations.js';
 import type { Output } from './ListMcpResourcesTool.js';
+import { t } from 'src/utils/i18n/index.js';
 
 export function renderToolUseMessage(input: Partial<{ server?: string }>): React.ReactNode {
-  return input.server ? `List MCP resources from server "${input.server}"` : `List all MCP resources`;
+  return input.server ? t('toolUI.listMcpResources.fromServer', input.server) : t('toolUI.listMcpResources.all');
 }
 
 export function renderToolResultMessage(
@@ -19,7 +20,7 @@ export function renderToolResultMessage(
   if (!output || output.length === 0) {
     return (
       <MessageResponse height={1}>
-        <Text dimColor>(No resources found)</Text>
+        <Text dimColor>{t('toolUI.listMcpResources.noResources')}</Text>
       </MessageResponse>
     );
   }

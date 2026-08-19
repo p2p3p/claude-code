@@ -24,8 +24,7 @@ export function useSurveyState({
   onSelect,
   shouldShowTranscriptPrompt,
   onTranscriptPromptShown,
-  onTranscriptSelect,
-}: UseSurveyStateOptions): {
+  onTranscriptSelect}: UseSurveyStateOptions): {
   state: SurveyState;
   lastResponse: FeedbackSurveyResponse | null;
   open: () => void;

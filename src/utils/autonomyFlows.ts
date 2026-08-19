@@ -5,8 +5,7 @@ import { getProjectRoot } from '../bootstrap/state.js'
 import { AUTONOMY_DIR, type AutonomyTriggerKind } from './autonomyAuthority.js'
 import {
   retainActiveFirst,
-  withAutonomyPersistenceLock,
-} from './autonomyPersistence.js'
+  withAutonomyPersistenceLock} from './autonomyPersistence.js'
 import { getFsImplementation } from './fsOperations.js'
 
 const AUTONOMY_FLOWS_MAX = 100
@@ -142,8 +141,7 @@ function cloneManagedState(
   }
   return {
     currentStepIndex: state.currentStepIndex,
-    steps: state.steps.map(cloneFlowStep),
-  }
+    steps: state.steps.map(cloneFlowStep)}
 }
 
 function cloneWaitState(
@@ -157,8 +155,7 @@ function cloneFlowRecord(flow: AutonomyFlowRecord): AutonomyFlowRecord {
     ...flow,
     ...(flow.boundary ? { boundary: [...flow.boundary] } : {}),
     ...(flow.stateJson ? { stateJson: cloneManagedState(flow.stateJson) } : {}),
-    ...(flow.waitJson ? { waitJson: cloneWaitState(flow.waitJson) } : {}),
-  }
+    ...(flow.waitJson ? { waitJson: cloneWaitState(flow.waitJson) } : {})}
 }
 
 function isManagedFlowStatusActive(status: AutonomyFlowStatus): boolean {
@@ -189,14 +186,12 @@ function defaultFlowSource(params: {
   if (params.sourceId || params.sourceLabel) {
     return {
       ...(params.sourceId ? { sourceId: params.sourceId } : {}),
-      ...(params.sourceLabel ? { sourceLabel: params.sourceLabel } : {}),
-    }
+      ...(params.sourceLabel ? { sourceLabel: params.sourceLabel } : {})}
   }
   if (params.trigger === 'proactive-tick') {
     return {
       sourceId: 'heartbeat-loop',
-      sourceLabel: 'heartbeat-loop',
-    }
+      sourceLabel: 'heartbeat-loop'}
   }
   return {}
 }
@@ -232,8 +227,7 @@ function normalizeManagedState(
       ...(step.runId ? { runId: step.runId } : {}),
       ...(step.startedAt != null ? { startedAt: step.startedAt } : {}),
       ...(step.endedAt != null ? { endedAt: step.endedAt } : {}),
-      ...(step.error ? { error: step.error } : {}),
-    }))
+      ...(step.error ? { error: step.error } : {})}))
   if (steps.length === 0) {
     return undefined
   }
@@ -243,8 +237,7 @@ function normalizeManagedState(
   )
   return {
     currentStepIndex,
-    steps,
-  }
+    steps}
 }
 
 function normalizeWaitState(value: unknown): AutonomyFlowWaitState | undefined {
@@ -262,8 +255,7 @@ function normalizeWaitState(value: unknown): AutonomyFlowWaitState | undefined {
     reason: (value as { reason: string }).reason,
     stepId: (value as { stepId: string }).stepId,
     stepName: (value as { stepName: string }).stepName,
-    stepIndex: (value as { stepIndex: number }).stepIndex,
-  }
+    stepIndex: (value as { stepIndex: number }).stepIndex}
 }
 
 function isPosixBoundaryGlob(value: string): boolean {
@@ -317,8 +309,7 @@ function normalizeFlowRecord(flow: AutonomyFlowRecord): AutonomyFlowRecord {
       ? { sourceLabel: flow.sourceLabel }
       : source.sourceLabel
         ? { sourceLabel: source.sourceLabel }
-        : {}),
-  }
+        : {})}
 }
 
 function buildManagedState(
@@ -331,9 +322,7 @@ function buildManagedState(
       name: step.name,
       prompt: step.prompt,
       status: 'pending',
-      ...(step.waitFor ? { waitFor: step.waitFor } : {}),
-    })),
-  }
+      ...(step.waitFor ? { waitFor: step.waitFor } : {})}))}
 }
 
 function getManagedStep(
@@ -355,8 +344,7 @@ function buildQueueInstruction(
     flowId: flow.flowId,
     flowKey: flow.flowKey,
     stepIndex,
-    step: cloneFlowStep(step),
-  }
+    step: cloneFlowStep(step)}
 }
 
 function markRemainingStepsCancelled(
@@ -391,8 +379,7 @@ export async function listAutonomyFlows(
     const raw = (await getFsImplementation().readFile(
       resolveAutonomyFlowsPath(rootDir),
       {
-        encoding: 'utf-8',
-      },
+        encoding: 'utf-8'},
     )) as string
     const parsed = JSON.parse(raw) as Partial<AutonomyFlowsFile>
     if (!Array.isArray(parsed.flows)) {
@@ -428,8 +415,7 @@ async function writeAutonomyFlows(
     path,
     `${JSON.stringify(
       {
-        flows: selectPersistedAutonomyFlows(flows),
-      } satisfies AutonomyFlowsFile,
+        flows: selectPersistedAutonomyFlows(flows)} satisfies AutonomyFlowsFile,
       null,
       2,
     )}\n`,
@@ -488,8 +474,7 @@ export async function startManagedAutonomyFlow(params: {
     trigger: params.trigger,
     sourceId: source.sourceId,
     sourceLabel: source.sourceLabel,
-    goal: params.goal,
-  })
+    goal: params.goal})
   const nowMs = params.nowMs ?? Date.now()
 
   return withAutonomyPersistenceLock(rootDir, async () => {
@@ -500,8 +485,7 @@ export async function startManagedAutonomyFlow(params: {
     if (current && isManagedFlowStatusActive(current.status)) {
       return {
         flow: current,
-        started: false,
-      }
+        started: false}
     }
 
     const stateJson = buildManagedState(params.steps)
@@ -514,8 +498,7 @@ export async function startManagedAutonomyFlow(params: {
             reason: firstStep.waitFor,
             stepId: firstStep.stepId,
             stepName: firstStep.name,
-            stepIndex: 0,
-          }
+            stepIndex: 0}
         : undefined
 
     const next: AutonomyFlowRecord = normalizeFlowRecord({
@@ -545,8 +528,7 @@ export async function startManagedAutonomyFlow(params: {
       stateJson,
       ...(waiting ? { waitJson: waiting } : {}),
       cancelRequestedAt: undefined,
-      lastError: undefined,
-    })
+      lastError: undefined})
 
     if (index === -1) {
       flows.unshift(next)
@@ -557,8 +539,7 @@ export async function startManagedAutonomyFlow(params: {
     return {
       flow: next,
       started: true,
-      ...(waiting ? {} : { nextStep: buildQueueInstruction(next, 0) }),
-    }
+      ...(waiting ? {} : { nextStep: buildQueueInstruction(next, 0) })}
   })
 }
 
@@ -598,8 +579,7 @@ export async function queueManagedAutonomyFlowStepRun(params: {
         blockedSummary: undefined,
         waitJson: undefined,
         stateJson: state,
-        lastError: undefined,
-      }
+        lastError: undefined}
     },
     rootDir,
   )
@@ -642,8 +622,7 @@ export async function markManagedAutonomyFlowStepRunning(params: {
         blockedSummary: undefined,
         waitJson: undefined,
         stateJson: state,
-        lastError: undefined,
-      }
+        lastError: undefined}
     },
     rootDir,
   )
@@ -692,8 +671,7 @@ export async function markManagedAutonomyFlowStepCompleted(params: {
           blockedSummary: undefined,
           waitJson: undefined,
           stateJson: state,
-          lastError: undefined,
-        }
+          lastError: undefined}
       }
 
       if (!nextStep) {
@@ -708,8 +686,7 @@ export async function markManagedAutonomyFlowStepCompleted(params: {
           blockedSummary: undefined,
           waitJson: undefined,
           stateJson: state,
-          lastError: undefined,
-        }
+          lastError: undefined}
       }
 
       state.currentStepIndex = nextIndex
@@ -727,11 +704,9 @@ export async function markManagedAutonomyFlowStepCompleted(params: {
             reason: nextStep.waitFor,
             stepId: nextStep.stepId,
             stepName: nextStep.name,
-            stepIndex: nextIndex,
-          },
+            stepIndex: nextIndex},
           stateJson: state,
-          lastError: undefined,
-        }
+          lastError: undefined}
       }
 
       return {
@@ -745,8 +720,7 @@ export async function markManagedAutonomyFlowStepCompleted(params: {
         blockedSummary: undefined,
         waitJson: undefined,
         stateJson: state,
-        lastError: undefined,
-      }
+        lastError: undefined}
     },
     rootDir,
   ).then(flow =>
@@ -758,10 +732,8 @@ export async function markManagedAutonomyFlowStepCompleted(params: {
                 nextStep: buildQueueInstruction(
                   flow,
                   flow.stateJson.currentStepIndex,
-                ),
-              }
-            : {}),
-        }
+                )}
+            : {})}
       : null,
   )
 }
@@ -807,8 +779,7 @@ export async function markManagedAutonomyFlowStepFailed(params: {
           blockedSummary: params.error,
           waitJson: undefined,
           stateJson: state,
-          lastError: params.error,
-        }
+          lastError: params.error}
       }
 
       return {
@@ -822,8 +793,7 @@ export async function markManagedAutonomyFlowStepFailed(params: {
         blockedSummary: params.error,
         waitJson: undefined,
         stateJson: state,
-        lastError: params.error,
-      }
+        lastError: params.error}
     },
     rootDir,
   ).then(flow => (flow ? { flow } : null))
@@ -866,8 +836,7 @@ export async function markManagedAutonomyFlowStepCancelled(params: {
         blockedSummary: undefined,
         waitJson: undefined,
         stateJson: state,
-        lastError: undefined,
-      }
+        lastError: undefined}
     },
     rootDir,
   ).then(flow => (flow ? { flow } : null))
@@ -899,8 +868,7 @@ export async function resumeManagedAutonomyFlow(params: {
           endedAt: nowMs,
           currentStep: undefined,
           waitJson: undefined,
-          lastError: undefined,
-        }
+          lastError: undefined}
       }
       const state = cloneManagedState(current.stateJson)!
       state.currentStepIndex = current.waitJson.stepIndex
@@ -913,8 +881,7 @@ export async function resumeManagedAutonomyFlow(params: {
         currentStep: current.waitJson.stepName,
         waitJson: undefined,
         stateJson: state,
-        lastError: undefined,
-      }
+        lastError: undefined}
     },
     rootDir,
   ).then(flow =>
@@ -926,10 +893,8 @@ export async function resumeManagedAutonomyFlow(params: {
                 nextStep: buildQueueInstruction(
                   flow,
                   flow.stateJson.currentStepIndex,
-                ),
-              }
-            : {}),
-        }
+                )}
+            : {})}
       : null,
   )
 }
@@ -959,8 +924,7 @@ export async function requestManagedAutonomyFlowCancel(params: {
       return {
         flow: current,
         queuedRunIds,
-        accepted: false,
-      }
+        accepted: false}
     }
 
     const state = cloneManagedState(current.stateJson)
@@ -968,8 +932,7 @@ export async function requestManagedAutonomyFlowCancel(params: {
       return {
         flow: current,
         queuedRunIds,
-        accepted: false,
-      }
+        accepted: false}
     }
 
     const next =
@@ -978,8 +941,7 @@ export async function requestManagedAutonomyFlowCancel(params: {
             ...current,
             revision: current.revision + 1,
             updatedAt: nowMs,
-            cancelRequestedAt: current.cancelRequestedAt ?? nowMs,
-          })
+            cancelRequestedAt: current.cancelRequestedAt ?? nowMs})
         : normalizeFlowRecord({
             ...current,
             revision: current.revision + 1,
@@ -995,16 +957,14 @@ export async function requestManagedAutonomyFlowCancel(params: {
             cancelRequestedAt: current.cancelRequestedAt ?? nowMs,
             lastError: undefined,
             blockedRunId: undefined,
-            blockedSummary: undefined,
-          })
+            blockedSummary: undefined})
 
     flows[index] = next
     await writeAutonomyFlows(flows, rootDir)
     return {
       flow: next,
       queuedRunIds,
-      accepted: true,
-    }
+      accepted: true}
   })
 }
 
@@ -1025,8 +985,7 @@ export function formatAutonomyFlowsStatus(flows: AutonomyFlowRecord[]): string {
     succeeded: 0,
     failed: 0,
     cancelled: 0,
-    lost: 0,
-  }
+    lost: 0}
   for (const flow of flows) {
     counts[flow.status] += 1
   }

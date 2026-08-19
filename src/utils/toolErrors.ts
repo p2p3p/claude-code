@@ -92,8 +92,7 @@ export function formatZodValidationError(
       return {
         param: formatValidationPath(err.path),
         expected: typeErr.expected,
-        received,
-      }
+        received}
     })
 
   // Default to original error message if we can't create a better one

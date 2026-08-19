@@ -80,16 +80,14 @@ export function getBuiltinPlugins(): {
       manifest: {
         name,
         description: definition.description,
-        version: definition.version,
-      },
+        version: definition.version},
       path: BUILTIN_MARKETPLACE_NAME, // sentinel — no filesystem path
       source: pluginId,
       repository: pluginId,
       enabled: isEnabled,
       isBuiltin: true,
       hooksConfig: definition.hooks,
-      mcpServers: definition.mcpServers,
-    }
+      mcpServers: definition.mcpServers}
 
     if (isEnabled) {
       enabled.push(plugin)
@@ -154,6 +152,5 @@ function skillDefinitionToCommand(definition: BundledSkillDefinition): Command {
     isEnabled: definition.isEnabled ?? (() => true),
     isHidden: !(definition.userInvocable ?? true),
     progressMessage: 'running',
-    getPromptForCommand: definition.getPromptForCommand,
-  }
+    getPromptForCommand: definition.getPromptForCommand}
 }

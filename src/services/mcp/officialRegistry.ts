@@ -54,8 +54,7 @@ export async function prefetchOfficialMcpUrls(): Promise<void> {
     logForDebugging(`[mcp-registry] Loaded ${urls.size} official MCP URLs`)
   } catch (error) {
     logForDebugging(`Failed to fetch MCP registry: ${errorMessage(error)}`, {
-      level: 'error',
-    })
+      level: 'error'})
   }
 }
 

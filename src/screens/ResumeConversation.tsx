@@ -13,8 +13,7 @@ import { Box, Text } from '@anthropic/ink';
 import { useKeybinding } from '../keybindings/useKeybinding.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js';
+  logEvent} from '../services/analytics/index.js';
 import type { MCPServerConnection, ScopedMcpServerConfig } from '../services/mcp/types.js';
 import { useAppState, useSetAppState } from '../state/AppState.js';
 import type { Tool } from '../Tool.js';
@@ -34,8 +33,7 @@ import { createSystemMessage } from '../utils/messages.js';
 import {
   computeStandaloneAgentContext,
   restoreAgentFromSession,
-  restoreWorktreeForResume,
-} from '../utils/sessionRestore.js';
+  restoreWorktreeForResume} from '../utils/sessionRestore.js';
 import {
   adoptResumedSessionFile,
   enrichLogs,
@@ -45,10 +43,10 @@ import {
   recordContentReplacement,
   resetSessionFilePointer,
   restoreSessionMetadata,
-  type SessionLogResult,
-} from '../utils/sessionStorage.js';
+  type SessionLogResult} from '../utils/sessionStorage.js';
 import type { ThinkingConfig } from '../utils/thinking.js';
 import type { ContentReplacementRecord } from '../utils/toolResultStorage.js';
+import { t } from '../utils/i18n/index.js';
 import { REPL } from './REPL.js';
 
 function parsePrIdentifier(value: string): number | null {
@@ -102,8 +100,7 @@ export function ResumeConversation({
   taskListId,
   filterByPr,
   thinkingConfig,
-  onTurnComplete,
-}: Props): React.ReactNode {
+  onTurnComplete}: Props): React.ReactNode {
   const { rows } = useTerminalSize();
   const agentDefinitions = useAppState(s => s.agentDefinitions);
   const setAppState = useSetAppState();
@@ -229,7 +226,7 @@ export function ResumeConversation({
     try {
       const result = await loadConversationForResume(log, undefined);
       if (!result) {
-        throw new Error('Failed to load conversation');
+        throw new Error(t('resume.failedToLoad'));
       }
 
       if (feature('COORDINATOR_MODE')) {
@@ -250,9 +247,7 @@ export function ResumeConversation({
             agentDefinitions: {
               ...freshAgentDefs,
               allAgents: freshAgentDefs.allAgents,
-              activeAgents: getActiveAgentsFromList(freshAgentDefs.allAgents),
-            },
-          }));
+              activeAgents: getActiveAgentsFromList(freshAgentDefs.allAgents)}}));
           result.messages.push(createSystemMessage(warning, 'warning'));
         }
       }
@@ -316,8 +311,7 @@ export function ResumeConversation({
       logEvent('tengu_session_resumed', {
         entrypoint: 'picker' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         success: true,
-        resume_duration_ms: Math.round(performance.now() - resumeStart),
-      });
+        resume_duration_ms: Math.round(performance.now() - resumeStart)});
 
       setLogs([]);
       setResumeData({
@@ -326,13 +320,11 @@ export function ResumeConversation({
         contentReplacements: result.contentReplacements,
         agentName: result.agentName,
         agentColor: (result.agentColor === 'default' ? undefined : result.agentColor) as AgentColorName | undefined,
-        mainThreadAgentDefinition: resolvedAgentDef,
-      });
+        mainThreadAgentDefinition: resolvedAgentDef});
     } catch (e) {
       logEvent('tengu_session_resumed', {
         entrypoint: 'picker' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        success: false,
-      });
+        success: false});
       logError(e as Error);
       throw e;
     }
@@ -372,7 +364,7 @@ export function ResumeConversation({
     return (
       <Box>
         <Spinner />
-        <Text> Loading conversations…</Text>
+        <Text> {t('resume.loadingConversations')}</Text>
       </Box>
     );
   }
@@ -381,7 +373,7 @@ export function ResumeConversation({
     return (
       <Box>
         <Spinner />
-        <Text> Resuming conversation…</Text>
+        <Text> {t('resume.resumingConversation')}</Text>
       </Box>
     );
   }
@@ -418,8 +410,8 @@ function NoConversationsMessage(): React.ReactNode {
 
   return (
     <Box flexDirection="column">
-      <Text>No conversations found to resume.</Text>
-      <Text dimColor>Press Ctrl+C to exit and start a new conversation.</Text>
+      <Text>{t('resume.noConversations')}</Text>
+      <Text dimColor>{t('resume.pressCtrlC')}</Text>
     </Box>
   );
 }
@@ -435,12 +427,12 @@ function CrossProjectMessage({ command }: { command: string }): React.ReactNode 
 
   return (
     <Box flexDirection="column" gap={1}>
-      <Text>This conversation is from a different directory.</Text>
+      <Text>{t('resume.differentDirectory')}</Text>
       <Box flexDirection="column">
-        <Text>To resume, run:</Text>
+        <Text>{t('resume.toResumeRun')}</Text>
         <Text> {command}</Text>
       </Box>
-      <Text dimColor>(Command copied to clipboard)</Text>
+      <Text dimColor>{t('resume.commandCopied')}</Text>
     </Box>
   );
 }

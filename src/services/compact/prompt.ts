@@ -1,5 +1,7 @@
 import { feature } from 'bun:bundle'
 import type { PartialCompactDirection } from '../../types/message.js'
+import { t, getLocale, setLocale } from '../../utils/i18n/index.js'
+import { getResolvedLanguage } from '../../utils/language.js'
 
 // Dead code elimination: conditional import for proactive mode
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -272,6 +274,26 @@ const NO_TOOLS_TRAILER =
   'an <analysis> block followed by a <summary> block. ' +
   'Tool calls will be rejected and you will fail the task.'
 
+/**
+ * Returns a language instruction placed at the very start of compact prompts,
+ * so the model generates the summary in the user's preferred language rather
+ * than defaulting to English. Uses t() to support all translated languages.
+ *
+ * Before reading the translation, syncs the i18n locale to the user's resolved
+ * language preference. This guards against getLanguageInstruction() being called
+ * before the normal locale bootstrap (e.g. in forked/compact contexts) — without
+ * it, t() could fall back to the English instruction and tell the model to write
+ * the summary in English, which then poisons the continuing conversation.
+ */
+function getLanguageInstruction(): string {
+  const resolved = getResolvedLanguage()
+  const expectedLocale = resolved === 'zh' ? 'zh_CN' : 'en'
+  if (getLocale() !== expectedLocale) {
+    setLocale(expectedLocale)
+  }
+  return `${t('compactSummary.languageInstruction')}\n\n`
+}
+
 export function getPartialCompactPrompt(
   customInstructions?: string,
   direction: PartialCompactDirection = 'from',
@@ -280,11 +302,15 @@ export function getPartialCompactPrompt(
     direction === 'up_to'
       ? PARTIAL_COMPACT_UP_TO_PROMPT
       : PARTIAL_COMPACT_PROMPT
-  let prompt = NO_TOOLS_PREAMBLE + template
+  let prompt = NO_TOOLS_PREAMBLE + getLanguageInstruction() + template
 
   if (customInstructions && customInstructions.trim() !== '') {
     prompt += `\n\nAdditional Instructions:\n${customInstructions}`
   }
+
+  // Repeat the language instruction at the end as reinforcement — the model
+  // may lose attention to a single instruction buried in a long English prompt.
+  prompt += `\n\n${getLanguageInstruction()}`
 
   prompt += NO_TOOLS_TRAILER
 
@@ -292,11 +318,15 @@ export function getPartialCompactPrompt(
 }
 
 export function getCompactPrompt(customInstructions?: string): string {
-  let prompt = NO_TOOLS_PREAMBLE + BASE_COMPACT_PROMPT
+  let prompt = NO_TOOLS_PREAMBLE + getLanguageInstruction() + BASE_COMPACT_PROMPT
 
   if (customInstructions && customInstructions.trim() !== '') {
     prompt += `\n\nAdditional Instructions:\n${customInstructions}`
   }
+
+  // Repeat the language instruction at the end as reinforcement — the model
+  // may lose attention to a single instruction buried in a long English prompt.
+  prompt += `\n\n${getLanguageInstruction()}`
 
   prompt += NO_TOOLS_TRAILER
 
@@ -343,29 +373,27 @@ export function getCompactUserSummaryMessage(
 ): string {
   const formattedSummary = formatCompactSummary(summary)
 
-  let baseSummary = `This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+  let baseSummary = `${t('compactSummary.sessionContinued')}
 
 ${formattedSummary}`
 
   if (transcriptPath) {
-    baseSummary += `\n\nIf you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: ${transcriptPath}`
+    baseSummary += `\n\n${t('compactSummary.transcriptPath', transcriptPath)}`
   }
 
   if (recentMessagesPreserved) {
-    baseSummary += `\n\nRecent messages are preserved verbatim.`
+    baseSummary += `\n\n${t('compactSummary.recentPreserved')}`
   }
 
   if (suppressFollowUpQuestions) {
     let continuation = `${baseSummary}
-Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.`
+${t('compactSummary.resumeDirectly')}`
 
     if (
       (feature('PROACTIVE') || feature('KAIROS')) &&
       proactiveModule?.isProactiveActive()
     ) {
-      continuation += `
-
-You are running in autonomous/proactive mode. This is NOT a first wake-up — you were already working autonomously before compaction. Continue your work loop: pick up where you left off based on the summary above. Do not greet the user or ask what to work on.`
+      continuation += t('compactSummary.proactiveResume')
     }
 
     return continuation

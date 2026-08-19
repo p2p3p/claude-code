@@ -133,8 +133,7 @@ async function callBuddyReactAPI(
     headers: {
       Authorization: `Bearer ${tokens.accessToken}`,
       'Content-Type': 'application/json',
-      'User-Agent': getUserAgent(),
-    },
+      'User-Agent': getUserAgent()},
     body: JSON.stringify({
       name: companion.name.slice(0, 32),
       personality: companion.personality.slice(0, 200),
@@ -144,10 +143,8 @@ async function callBuddyReactAPI(
       transcript,
       reason: addressed ? 'addressed' : 'turn',
       recent: recentReactions.map(r => r.slice(0, 200)),
-      addressed,
-    }),
-    signal: AbortSignal.timeout(10_000),
-  })
+      addressed}),
+    signal: AbortSignal.timeout(10_000)})
 
   if (!resp.ok) return null
 

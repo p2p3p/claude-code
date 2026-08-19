@@ -14,6 +14,7 @@ import { logForDebugging } from '../utils/debug.js'
 import { distRoot } from '../utils/distRoot.js'
 import { execFileNoThrowWithCwd } from '../utils/execFileNoThrow.js'
 import { gracefulShutdown } from '../utils/gracefulShutdown.js'
+import { t } from '../utils/i18n/index.js'
 import { writeToStdout } from '../utils/process.js'
 
 const PACKAGE_NAME = 'claude-code-best'
@@ -93,62 +94,59 @@ function gte(a: string, b: string): boolean {
 
 export async function updateCCB(): Promise<void> {
   const currentVersion = getCurrentVersion()
-  writeToStdout(`Current version: ${currentVersion}\n`)
+  writeToStdout(t('updateCCB.currentVersion', currentVersion) + '\n')
 
   // Determine package manager
   const hasBun = isCommandAvailable('bun')
   const useBun = isBunInstallation()
   const pkgManager = useBun && hasBun ? 'bun' : 'npm'
 
-  writeToStdout(`Package manager: ${pkgManager}\n`)
-  writeToStdout('Checking for updates...\n')
+  writeToStdout(t('updateCCB.packageManager', pkgManager) + '\n')
+  writeToStdout(t('updateCCB.checkingForUpdates') + '\n')
 
   // Get latest version
   const latestVersion = await getLatestVersion()
   if (!latestVersion) {
-    process.stderr.write(chalk.red('Failed to check for updates') + '\n')
-    process.stderr.write('Unable to fetch latest version from npm registry.\n')
+    process.stderr.write(chalk.red(t('updateCCB.failedToCheck')) + '\n')
+    process.stderr.write(t('updateCCB.unableToFetch') + '\n')
     await gracefulShutdown(1)
     return
   }
 
   // Already up to date?
   if (latestVersion === currentVersion || gte(currentVersion, latestVersion)) {
-    writeToStdout(chalk.green(`ccb is up to date (${currentVersion})`) + '\n')
+    writeToStdout(chalk.green(t('updateCCB.upToDate', currentVersion)) + '\n')
     await gracefulShutdown(0)
     return
   }
 
   writeToStdout(
-    `New version available: ${latestVersion} (current: ${currentVersion})\n`,
+    t('updateCCB.newVersionAvailable', latestVersion, currentVersion) + '\n',
   )
-  writeToStdout(`Installing update via ${pkgManager}...\n`)
+  writeToStdout(t('updateCCB.installingUpdate', pkgManager) + '\n')
 
   try {
     if (pkgManager === 'bun') {
       execSync(`bun install -g ${PACKAGE_NAME}@latest`, {
         stdio: 'inherit',
         cwd: homedir(),
-        timeout: 120_000,
-      })
+        timeout: 120_000})
     } else {
       execSync(`npm install -g ${PACKAGE_NAME}@latest`, {
         stdio: 'inherit',
         cwd: homedir(),
-        timeout: 120_000,
-      })
+        timeout: 120_000})
     }
 
     writeToStdout(
-      chalk.green(
-        `Successfully updated from ${currentVersion} to ${latestVersion}`,
-      ) + '\n',
+      chalk.green(t('updateCCB.updateSuccess', currentVersion, latestVersion)) +
+        '\n',
     )
   } catch (error) {
-    process.stderr.write(chalk.red('Update failed') + '\n')
+    process.stderr.write(chalk.red(t('updateCCB.updateFailed')) + '\n')
     process.stderr.write(`${error}\n`)
     process.stderr.write('\n')
-    process.stderr.write('Try manually updating with:\n')
+    process.stderr.write(t('updateCCB.tryManualUpdate') + '\n')
     if (pkgManager === 'bun') {
       process.stderr.write(
         chalk.bold(`  bun install -g ${PACKAGE_NAME}@latest`) + '\n',

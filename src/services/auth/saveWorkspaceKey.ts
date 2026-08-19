@@ -16,6 +16,7 @@
 import { promises as fs } from 'fs'
 import { getGlobalClaudeFile } from '../../utils/env.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
+import { t } from '../../utils/i18n/index.js'
 import { logError } from '../../utils/log.js'
 
 // ---------------------------------------------------------------------------
@@ -43,22 +44,20 @@ const MAX_KEY_LENGTH = 256
 export async function saveWorkspaceKey(key: string): Promise<void> {
   // --- Validation (prefix-only, no key value in errors) ---
   if (!key || key.trim().length === 0) {
-    throw new Error('Workspace API key must not be empty.')
+    throw new Error(t('saveWorkspaceKey.empty'))
   }
 
   const trimmed = key.trim()
 
   if (trimmed.length < MIN_KEY_LENGTH) {
     throw new Error(
-      `Workspace API key is too short (${trimmed.length} chars). ` +
-        `Expected at least ${MIN_KEY_LENGTH} chars starting with "${WORKSPACE_KEY_PREFIX}".`,
+      t('saveWorkspaceKey.tooShort', String(trimmed.length), String(MIN_KEY_LENGTH), WORKSPACE_KEY_PREFIX),
     )
   }
 
   if (trimmed.length > MAX_KEY_LENGTH) {
     throw new Error(
-      `Workspace API key is too long (${trimmed.length} chars). ` +
-        `Maximum allowed length is ${MAX_KEY_LENGTH} chars.`,
+      t('saveWorkspaceKey.tooLong', String(trimmed.length), String(MAX_KEY_LENGTH)),
     )
   }
 
@@ -66,9 +65,7 @@ export async function saveWorkspaceKey(key: string): Promise<void> {
     // Only show first 4 chars of the actual key to avoid leaking entropy
     const prefix4 = trimmed.slice(0, 4)
     throw new Error(
-      `Workspace API key must start with "${WORKSPACE_KEY_PREFIX}" (workspace key). ` +
-        `Got prefix "${prefix4}...". ` +
-        'Obtain a workspace API key from https://console.anthropic.com/settings/keys.',
+      t('saveWorkspaceKey.wrongPrefix', WORKSPACE_KEY_PREFIX, prefix4),
     )
   }
 
@@ -76,12 +73,11 @@ export async function saveWorkspaceKey(key: string): Promise<void> {
   try {
     saveGlobalConfig(current => ({
       ...current,
-      workspaceApiKey: trimmed,
-    }))
+      workspaceApiKey: trimmed}))
   } catch (err: unknown) {
     // Sanitize: re-throw without mentioning the key value
     throw new Error(
-      `Failed to save workspace API key to config: ${sanitizeErrorMessage(err)}`,
+      t('saveWorkspaceKey.failedToSave', sanitizeErrorMessage(err)),
     )
   }
 
@@ -106,7 +102,7 @@ export async function removeWorkspaceKey(): Promise<void> {
     })
   } catch (err: unknown) {
     throw new Error(
-      `Failed to remove workspace API key: ${sanitizeErrorMessage(err)}`,
+      t('saveWorkspaceKey.failedToRemove', sanitizeErrorMessage(err)),
     )
   }
 }

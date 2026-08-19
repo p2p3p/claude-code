@@ -110,8 +110,7 @@ export const StructuredDiff = memo(function StructuredDiff({
   firstLine,
   fileContent,
   width,
-  skipHighlighting = false,
-}: Props): React.ReactNode {
+  skipHighlighting = false}: Props): React.ReactNode {
   const [theme] = useTheme();
   const settings = useSettings();
   const syntaxHighlightingDisabled = settings.syntaxHighlightingDisabled ?? false;

@@ -8,8 +8,7 @@ import type {
   OAuthTokenExchangeResponse,
   OAuthTokens,
   RateLimitTier,
-  SubscriptionType,
-} from './types.js'
+  SubscriptionType} from './types.js'
 
 /**
  * OAuth service that handles the OAuth 2.0 authorization code flow with PKCE.
@@ -24,6 +23,7 @@ export class OAuthService {
   private port: number | null = null
   private manualAuthCodeResolver: ((authorizationCode: string) => void) | null =
     null
+  private manualAuthCodeReject: ((reason?: unknown) => void) | null = null
 
   constructor() {
     this.codeVerifier = crypto.generateCodeVerifier()
@@ -64,8 +64,7 @@ export class OAuthService {
       inferenceOnly: options?.inferenceOnly,
       orgUUID: options?.orgUUID,
       loginHint: options?.loginHint,
-      loginMethod: options?.loginMethod,
-    }
+      loginMethod: options?.loginMethod}
     const manualFlowUrl = client.buildAuthUrl({ ...opts, isManual: true })
     const automaticFlowUrl = client.buildAuthUrl({ ...opts, isManual: false })
 
@@ -138,16 +137,19 @@ export class OAuthService {
     return new Promise((resolve, reject) => {
       // Set up manual auth code resolver
       this.manualAuthCodeResolver = resolve
+      this.manualAuthCodeReject = reject
 
       // Start automatic flow
       this.authCodeListener
         ?.waitForAuthorization(state, onReady)
         .then(authorizationCode => {
           this.manualAuthCodeResolver = null
+          this.manualAuthCodeReject = null
           resolve(authorizationCode)
         })
         .catch(error => {
           this.manualAuthCodeResolver = null
+          this.manualAuthCodeReject = null
           reject(error)
         })
     })
@@ -161,6 +163,7 @@ export class OAuthService {
     if (this.manualAuthCodeResolver) {
       this.manualAuthCodeResolver(params.authorizationCode)
       this.manualAuthCodeResolver = null
+      this.manualAuthCodeReject = null
       // Close the auth code listener since manual input was used
       this.authCodeListener?.close()
     }
@@ -184,15 +187,29 @@ export class OAuthService {
         ? {
             uuid: response.account.uuid,
             emailAddress: response.account.email_address,
-            organizationUuid: response.organization?.uuid,
-          }
-        : undefined,
-    }
+            organizationUuid: response.organization?.uuid}
+        : undefined}
   }
 
   // Clean up any resources (like the local server)
   cleanup(): void {
     this.authCodeListener?.close()
     this.manualAuthCodeResolver = null
+    this.manualAuthCodeReject = null
+  }
+
+  /**
+   * Cancel an in-flight OAuth flow. Rejects the pending wait for an
+   * authorization code so startOAuthFlow's promise settles and callers can
+   * clean up (e.g. reset the "flow started" flag before re-entering).
+   */
+  cancel(): void {
+    this.authCodeListener?.close()
+    if (this.manualAuthCodeReject) {
+      const reject = this.manualAuthCodeReject
+      this.manualAuthCodeReject = null
+      this.manualAuthCodeResolver = null
+      reject(new Error('OAuth flow cancelled'))
+    }
   }
 }

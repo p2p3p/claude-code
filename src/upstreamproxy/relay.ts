@@ -143,8 +143,7 @@ function newConnState(): ConnState {
     pending: [],
     wsOpen: false,
     established: false,
-    closed: false,
-  }
+    closed: false}
 }
 
 /**
@@ -208,8 +207,7 @@ function startBunRelay(
             const n = sock.write(bytes)
             if (n < bytes.length) st.writeBuf.push(bytes.subarray(n))
           },
-          end: () => sock.end(),
-        }
+          end: () => sock.end()}
         handleData(adapter, st, data, wsUrl, authHeader, wsAuthHeader)
       },
       drain(sock) {
@@ -230,14 +228,11 @@ function startBunRelay(
       error(sock, err) {
         logForDebugging(`[upstreamproxy] client socket error: ${err.message}`)
         cleanupConn(sock.data)
-      },
-    },
-  })
+      }}})
 
   return {
     port: server.port,
-    stop: () => server.stop(true),
-  }
+    stop: () => server.stop(true)}
 }
 
 // Exported so tests can exercise the Node path directly — the test runner is
@@ -260,8 +255,7 @@ export async function startNodeRelay(
       write: payload => {
         sock.write(typeof payload === 'string' ? payload : Buffer.from(payload))
       },
-      end: () => sock.end(),
-    }
+      end: () => sock.end()}
     sock.on('data', (data: Buffer) =>
       handleData(adapter, st, data, wsUrl, authHeader, wsAuthHeader),
     )
@@ -282,8 +276,7 @@ export async function startNodeRelay(
       }
       resolve({
         port: addr.port,
-        stop: () => server.close(),
-      })
+        stop: () => server.close()})
     })
   })
 }
@@ -355,22 +348,19 @@ function openTunnel(
   // silently with EOF.
   const headers = {
     'Content-Type': 'application/proto',
-    Authorization: wsAuthHeader,
-  }
+    Authorization: wsAuthHeader}
   let ws: WebSocketLike
   if (nodeWSCtor) {
     ws = new nodeWSCtor(wsUrl, {
       headers,
       agent: getWebSocketProxyAgent(wsUrl),
-      ...getWebSocketTLSOptions(),
-    }) as unknown as WebSocketLike
+      ...getWebSocketTLSOptions()}) as unknown as WebSocketLike
   } else {
     ws = new globalThis.WebSocket(wsUrl, {
       // @ts-expect-error — Bun extension; not in lib.dom WebSocket types
       headers,
       proxy: getWebSocketProxyUrl(wsUrl),
-      tls: getWebSocketTLSOptions() || undefined,
-    })
+      tls: getWebSocketTLSOptions() || undefined})
   }
   ws.binaryType = 'arraybuffer'
   st.ws = ws

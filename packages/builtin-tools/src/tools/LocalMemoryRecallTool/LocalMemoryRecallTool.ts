@@ -8,6 +8,7 @@ import {
 import { buildTool, type ToolDef } from 'src/Tool.js'
 import { isValidKey } from 'src/utils/localValidate.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
+import { t } from 'src/utils/i18n/index.js'
 import { getRuleByContentsForToolName } from 'src/utils/permissions/permissions.js'
 import { jsonStringify } from 'src/utils/slowOperations.js'
 import {
@@ -297,7 +298,7 @@ function truncateListByByteCap(
 
 export const LocalMemoryRecallTool = buildTool({
   name: LOCAL_MEMORY_RECALL_TOOL_NAME,
-  searchHint: "recall user's local cross-session notes by store/key",
+  searchHint: t('toolUI.localMemoryRecall.searchHint'),
   // 50KB matches FETCH_CAP_BYTES — tool_result longer than this gets persisted
   // as a file reference per fork's toolResultStorage.
   maxResultSizeChars: FETCH_CAP_BYTES,
@@ -319,7 +320,7 @@ export const LocalMemoryRecallTool = buildTool({
   requiresUserInteraction() {
     return true
   },
-  userFacingName: () => 'Local Memory',
+  userFacingName: () => t('toolUI.localMemoryRecall.userFacingName'),
   async description() {
     return DESCRIPTION
   },
@@ -337,14 +338,14 @@ export const LocalMemoryRecallTool = buildTool({
     if (input.action !== 'list_stores' && !input.store) {
       return {
         behavior: 'deny',
-        message: `Missing 'store' for action '${input.action}'`,
+        message: t('toolUI.localMemoryRecall.missingStore', input.action),
         decisionReason: { type: 'other', reason: 'missing_required_field' },
       }
     }
     if (input.action === 'fetch' && !input.key) {
       return {
         behavior: 'deny',
-        message: 'Missing key for fetch',
+        message: t('toolUI.localMemoryRecall.missingKey'),
         decisionReason: { type: 'other', reason: 'missing_required_field' },
       }
     }
@@ -357,14 +358,14 @@ export const LocalMemoryRecallTool = buildTool({
     if (input.store !== undefined && !isValidStoreName(input.store)) {
       return {
         behavior: 'deny',
-        message: `Invalid store name '${input.store}'`,
+        message: t('toolUI.localMemoryRecall.invalidStoreName', input.store),
         decisionReason: { type: 'other', reason: 'invalid_store_name' },
       }
     }
     if (input.key !== undefined && !isValidKey(input.key)) {
       return {
         behavior: 'deny',
-        message: `Invalid key '${input.key}'`,
+        message: t('toolUI.localMemoryRecall.invalidKey', input.key),
         decisionReason: { type: 'other', reason: 'invalid_key' },
       }
     }
@@ -388,7 +389,7 @@ export const LocalMemoryRecallTool = buildTool({
     if (denyRule) {
       return {
         behavior: 'deny',
-        message: `Denied by rule: ${ruleContent}`,
+        message: t('toolUI.localMemoryRecall.deniedByRule', ruleContent),
         decisionReason: { type: 'rule', rule: denyRule },
       }
     }
@@ -409,7 +410,7 @@ export const LocalMemoryRecallTool = buildTool({
     // L1 fix: ask branch carries decisionReason for audit completeness.
     return {
       behavior: 'ask',
-      message: `Allow fetching full content of ${input.store}/${input.key}?`,
+      message: t('toolUI.localMemoryRecall.allowFetchPermission', input.store, input.key),
       decisionReason: {
         type: 'other',
         reason: 'no_persistent_allow_for_store_key_pair',

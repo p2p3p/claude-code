@@ -20,8 +20,7 @@ import {
   type PersistedStatsCache,
   saveStatsCache,
   toDateString,
-  withStatsCacheLock,
-} from './statsCache.js'
+  withStatsCacheLock} from './statsCache.js'
 
 export type DailyActivity = {
   date: string // YYYY-MM-DD format
@@ -152,8 +151,7 @@ async function processSessionFiles(
                   sessionFile,
                   entries: null,
                   error: null,
-                  skipped: true,
-                }
+                  skipped: true}
               }
               fileSize = fileStat.size
             } catch {
@@ -169,8 +167,7 @@ async function processSessionFiles(
                   sessionFile,
                   entries: null,
                   error: null,
-                  skipped: true,
-                }
+                  skipped: true}
               }
             }
           }
@@ -263,8 +260,7 @@ async function processSessionFiles(
         date: dateKey,
         messageCount: 0,
         sessionCount: 0,
-        toolCallCount: 0,
-      }
+        toolCallCount: 0}
 
       // Subagent files contribute tokens and tool calls, but aren't sessions.
       if (!isSubagentFile) {
@@ -274,8 +270,7 @@ async function processSessionFiles(
           sessionId,
           duration,
           messageCount: mainMessages.length,
-          timestamp: firstMessage.timestamp,
-        })
+          timestamp: firstMessage.timestamp})
 
         totalMessages += mainMessages.length
 
@@ -324,8 +319,7 @@ async function processSessionFiles(
                 webSearchRequests: 0,
                 costUSD: 0,
                 contextWindow: 0,
-                maxOutputTokens: 0,
-              }
+                maxOutputTokens: 0}
             }
 
             modelUsageAgg[model]!.inputTokens += usage.input_tokens || 0
@@ -363,8 +357,7 @@ async function processSessionFiles(
     totalSpeculationTimeSavedMs,
     ...(feature('SHOT_STATS') && shotDistributionMap
       ? { shotDistribution: Object.fromEntries(shotDistributionMap) }
-      : {}),
-  }
+      : {})}
 }
 
 /**
@@ -500,8 +493,7 @@ function cacheToStats(
           maxOutputTokens: Math.max(
             modelUsage[model]!.maxOutputTokens,
             usage.maxOutputTokens,
-          ),
-        }
+          )}
       } else {
         modelUsage[model] = { ...usage }
       }
@@ -604,13 +596,11 @@ function cacheToStats(
     lastSessionDate,
     peakActivityDay,
     peakActivityHour,
-    totalSpeculationTimeSavedMs,
-  }
+    totalSpeculationTimeSavedMs}
 
   if (feature('SHOT_STATS')) {
     const shotDistribution: { [shotCount: number]: number } = {
-      ...(cache.shotDistribution || {}),
-    }
+      ...(cache.shotDistribution || {})}
     if (todayStats?.shotDistribution) {
       for (const [count, sessions] of Object.entries(
         todayStats.shotDistribution,
@@ -659,8 +649,7 @@ export async function aggregateClaudeCodeStats(): Promise<ClaudeCodeStats> {
       // No cache - process all historical data (everything before today)
       logForDebugging('Stats cache empty, processing all historical data')
       const historicalStats = await processSessionFiles(allSessionFiles, {
-        toDate: yesterday,
-      })
+        toDate: yesterday})
 
       if (
         historicalStats.sessionStats.length > 0 ||
@@ -678,8 +667,7 @@ export async function aggregateClaudeCodeStats(): Promise<ClaudeCodeStats> {
       )
       const newStats = await processSessionFiles(allSessionFiles, {
         fromDate: nextDay,
-        toDate: yesterday,
-      })
+        toDate: yesterday})
 
       if (
         newStats.sessionStats.length > 0 ||
@@ -702,8 +690,7 @@ export async function aggregateClaudeCodeStats(): Promise<ClaudeCodeStats> {
   const today = getTodayDateString()
   const todayStats = await processSessionFiles(allSessionFiles, {
     fromDate: today,
-    toDate: today,
-  })
+    toDate: today})
 
   // Combine cache with today's stats
   return cacheToStats(updatedCache, todayStats)
@@ -736,8 +723,7 @@ export async function aggregateClaudeCodeStatsForRange(
 
   // Process session files for the date range
   const stats = await processSessionFiles(allSessionFiles, {
-    fromDate: fromDateStr,
-  })
+    fromDate: fromDateStr})
 
   return processedStatsToClaudeCodeStats(stats)
 }
@@ -823,8 +809,7 @@ function processedStatsToClaudeCodeStats(
     lastSessionDate,
     peakActivityDay,
     peakActivityHour,
-    totalSpeculationTimeSavedMs: stats.totalSpeculationTimeSavedMs,
-  }
+    totalSpeculationTimeSavedMs: stats.totalSpeculationTimeSavedMs}
 
   if (feature('SHOT_STATS') && stats.shotDistribution) {
     result.shotDistribution = stats.shotDistribution
@@ -857,8 +842,7 @@ function calculateStreaks(dailyActivity: DailyActivity[]): StreakInfo {
       longestStreak: 0,
       currentStreakStart: null,
       longestStreakStart: null,
-      longestStreakEnd: null,
-    }
+      longestStreakEnd: null}
   }
 
   const today = new Date()
@@ -926,8 +910,7 @@ function calculateStreaks(dailyActivity: DailyActivity[]): StreakInfo {
     longestStreak,
     currentStreakStart,
     longestStreakStart,
-    longestStreakEnd,
-  }
+    longestStreakEnd}
 }
 
 const SHOT_COUNT_REGEX = /(\d+)-shotted by/
@@ -1046,8 +1029,7 @@ function getEmptyStats(): ClaudeCodeStats {
       longestStreak: 0,
       currentStreakStart: null,
       longestStreakStart: null,
-      longestStreakEnd: null,
-    },
+      longestStreakEnd: null},
     dailyActivity: [],
     dailyModelTokens: [],
     longestSession: null,
@@ -1056,6 +1038,5 @@ function getEmptyStats(): ClaudeCodeStats {
     lastSessionDate: null,
     peakActivityDay: null,
     peakActivityHour: null,
-    totalSpeculationTimeSavedMs: 0,
-  }
+    totalSpeculationTimeSavedMs: 0}
 }

@@ -30,8 +30,7 @@ export const DEPTH_RULES: Record<string, number> = {
   kubectl: 3,
   docker: 3,
   dotnet: 3,
-  'git push': 2,
-}
+  'git push': 2}
 
 const toArray = <T>(val: T | T[]): T[] => (Array.isArray(val) ? val : [val])
 

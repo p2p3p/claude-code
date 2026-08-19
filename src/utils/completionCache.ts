@@ -33,8 +33,7 @@ function detectShell(): ShellInfo | null {
       rcFile: join(home, '.zshrc'),
       cacheFile,
       completionLine: `[[ -f "${cacheFile}" ]] && source "${cacheFile}"`,
-      shellFlag: 'zsh',
-    }
+      shellFlag: 'zsh'}
   }
   if (shell.endsWith('/bash') || shell.endsWith('/bash.exe')) {
     const cacheFile = join(claudeDir, 'completion.bash')
@@ -43,8 +42,7 @@ function detectShell(): ShellInfo | null {
       rcFile: join(home, '.bashrc'),
       cacheFile,
       completionLine: `[ -f "${cacheFile}" ] && source "${cacheFile}"`,
-      shellFlag: 'bash',
-    }
+      shellFlag: 'bash'}
   }
   if (shell.endsWith('/fish') || shell.endsWith('/fish.exe')) {
     const xdg = process.env.XDG_CONFIG_HOME || join(home, '.config')
@@ -54,8 +52,7 @@ function detectShell(): ShellInfo | null {
       rcFile: join(xdg, 'fish', 'config.fish'),
       cacheFile,
       completionLine: `[ -f "${cacheFile}" ] && source "${cacheFile}"`,
-      shellFlag: 'fish',
-    }
+      shellFlag: 'fish'}
   }
   return null
 }

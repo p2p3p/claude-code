@@ -1,15 +1,14 @@
 import {
   STATUS_TAG,
   SUMMARY_TAG,
-  TASK_NOTIFICATION_TAG,
-} from '../constants/xml.js'
-import { BACKGROUND_BASH_SUMMARY_PREFIX } from '../tasks/LocalShellTask/LocalShellTask.js'
+  TASK_NOTIFICATION_TAG} from '../constants/xml.js'
+import { getBackgroundBashSummaryPrefix } from '../tasks/LocalShellTask/LocalShellTask.js'
 import type {
   NormalizedUserMessage,
-  RenderableMessage,
-} from '../types/message.js'
+  RenderableMessage} from '../types/message.js'
 import { isFullscreenEnvEnabled } from './fullscreen.js'
 import { extractTag } from './messages.js'
+import { t } from './i18n/index.js'
 
 function isCompletedBackgroundBash(
   msg: RenderableMessage,
@@ -26,9 +25,10 @@ function isCompletedBackgroundBash(
   // The prefix constant distinguishes bash-kind LocalShellTask completions from
   // agent/workflow/monitor notifications. Monitor-kind completions have their
   // own summary wording and deliberately don't collapse here.
+  const bashPrefix = getBackgroundBashSummaryPrefix()
   return (
     extractTag(content0.text, SUMMARY_TAG)?.startsWith(
-      BACKGROUND_BASH_SUMMARY_PREFIX,
+      bashPrefix,
     ) ?? false
   )
 }
@@ -71,11 +71,8 @@ export function collapseBackgroundBashNotifications(
             content: [
               {
                 type: 'text',
-                text: `<${TASK_NOTIFICATION_TAG}><${STATUS_TAG}>completed</${STATUS_TAG}><${SUMMARY_TAG}>${count} background commands completed</${SUMMARY_TAG}></${TASK_NOTIFICATION_TAG}>`,
-              },
-            ],
-          },
-        })
+                text: `<${TASK_NOTIFICATION_TAG}><${STATUS_TAG}>completed</${STATUS_TAG}><${SUMMARY_TAG}>${t('toolUI.bash.collapsedCompleted', count)}</${SUMMARY_TAG}></${TASK_NOTIFICATION_TAG}>`},
+            ]}})
       }
     } else {
       result.push(msg)

@@ -34,8 +34,7 @@ export const getOsRelease = memoize(
       const idLikeMatch = content.match(/^ID_LIKE=["']?(.+?)["']?\s*$/m)
       return {
         id: idMatch?.[1] ?? '',
-        idLike: idLikeMatch?.[1]?.split(' ') ?? [],
-      }
+        idLike: idLikeMatch?.[1]?.split(' ') ?? []}
     } catch {
       return null
     }
@@ -180,8 +179,7 @@ export const detectPacman = memoize(async (): Promise<boolean> => {
 
   const result = await execFileNoThrow('pacman', ['-Qo', execPath], {
     timeout: 5000,
-    useCwd: false,
-  })
+    useCwd: false})
 
   if (result.code === 0 && result.stdout) {
     logForDebugging(`Detected pacman installation: ${result.stdout.trim()}`)
@@ -213,8 +211,7 @@ export const detectDeb = memoize(async (): Promise<boolean> => {
 
   const result = await execFileNoThrow('dpkg', ['-S', execPath], {
     timeout: 5000,
-    useCwd: false,
-  })
+    useCwd: false})
 
   if (result.code === 0 && result.stdout) {
     logForDebugging(`Detected deb installation: ${result.stdout.trim()}`)
@@ -246,8 +243,7 @@ export const detectRpm = memoize(async (): Promise<boolean> => {
 
   const result = await execFileNoThrow('rpm', ['-qf', execPath], {
     timeout: 5000,
-    useCwd: false,
-  })
+    useCwd: false})
 
   if (result.code === 0 && result.stdout) {
     logForDebugging(`Detected rpm installation: ${result.stdout.trim()}`)
@@ -283,8 +279,7 @@ export const detectApk = memoize(async (): Promise<boolean> => {
     ['info', '--who-owns', execPath],
     {
       timeout: 5000,
-      useCwd: false,
-    },
+      useCwd: false},
   )
 
   if (result.code === 0 && result.stdout) {

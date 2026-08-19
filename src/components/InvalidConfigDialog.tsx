@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Dialog, wrappedRender as render, Text } from '@anthropic/ink';
 import { KeybindingSetup } from '../keybindings/KeybindingProviderSetup.js';
+import { t } from '../utils/i18n/index.js';
 import { AppStateProvider } from '../state/AppState.js';
 import type { ConfigParseError } from '../utils/errors.js';
 import { getBaseRenderOptions } from '../utils/renderOptions.js';
@@ -26,8 +27,7 @@ function InvalidConfigDialog({
   filePath,
   errorDescription,
   onExit,
-  onReset,
-}: InvalidConfigDialogProps): React.ReactNode {
+  onReset}: InvalidConfigDialogProps): React.ReactNode {
   // Handler for Select onChange
   const handleSelect = (value: string) => {
     if (value === 'exit') {
@@ -38,7 +38,7 @@ function InvalidConfigDialog({
   };
 
   return (
-    <Dialog title="Configuration Error" color="error" onCancel={onExit}>
+    <Dialog title={t('invalidconfigdialog.configurationError')} color="error" onCancel={onExit}>
       <Box flexDirection="column" gap={1}>
         <Text>
           The configuration file at <Text bold>{filePath}</Text> contains invalid JSON.
@@ -46,11 +46,11 @@ function InvalidConfigDialog({
         <Text>{errorDescription}</Text>
       </Box>
       <Box flexDirection="column">
-        <Text bold>Choose an option:</Text>
+        <Text bold>{t('invalidconfigdialog.chooseAnOption')}</Text>
         <Select
           options={[
-            { label: 'Exit and fix manually', value: 'exit' },
-            { label: 'Reset with default configuration', value: 'reset' },
+            { label: t('invalidConfig.exitAndFix'), value: 'exit' },
+            { label: t('invalidConfig.resetDefault'), value: 'reset' },
           ]}
           onChange={handleSelect}
           onCancel={onExit}
@@ -74,8 +74,7 @@ export async function showInvalidConfigDialog({ error }: InvalidConfigHandlerPro
     ...getBaseRenderOptions(false),
     // IMPORTANT: Use hardcoded theme name to avoid circular dependency with getGlobalConfig()
     // This allows the error dialog to show even when config file has JSON syntax errors
-    theme: SAFE_ERROR_THEME_NAME,
-  };
+    theme: SAFE_ERROR_THEME_NAME};
 
   // biome-ignore lint/suspicious/noAsyncPromiseExecutor: render must be awaited inside executor
   await new Promise<void>(async resolve => {
@@ -93,8 +92,7 @@ export async function showInvalidConfigDialog({ error }: InvalidConfigHandlerPro
             onReset={() => {
               writeFileSync_DEPRECATED(error.filePath, jsonStringify(error.defaultConfig, null, 2), {
                 flush: false,
-                encoding: 'utf8',
-              });
+                encoding: 'utf8'});
               unmount();
               void resolve();
               process.exit(0);

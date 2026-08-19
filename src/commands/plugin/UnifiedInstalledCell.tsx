@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Box, color, Text, useTheme } from '@anthropic/ink';
 import { plural } from '../../utils/stringUtils.js';
 import type { UnifiedInstalledItem } from './unifiedTypes.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props = {
   item: UnifiedInstalledItem;
@@ -20,16 +21,16 @@ export function UnifiedInstalledCell({ item, isSelected }: Props): React.ReactNo
     // Show pending toggle status if set, otherwise show current status
     if (item.pendingToggle) {
       statusIcon = color('suggestion', theme)(figures.arrowRight);
-      statusText = item.pendingToggle === 'will-enable' ? 'will enable' : 'will disable';
+      statusText = item.pendingToggle === 'will-enable' ? t('pluginUI.willEnable') : t('pluginUI.willDisable');
     } else if (item.errorCount > 0) {
       statusIcon = color('error', theme)(figures.cross);
-      statusText = `${item.errorCount} ${plural(item.errorCount, 'error')}`;
+      statusText = `${item.errorCount} ${plural(item.errorCount, t('pluginUI.error'))}`;
     } else if (!item.isEnabled) {
       statusIcon = color('inactive', theme)(figures.radioOff);
-      statusText = 'disabled';
+      statusText = t('pluginUI.disabled');
     } else {
       statusIcon = color('success', theme)(figures.tick);
-      statusText = 'enabled';
+      statusText = t('pluginUI.enabled');
     }
 
     return (
@@ -38,7 +39,7 @@ export function UnifiedInstalledCell({ item, isSelected }: Props): React.ReactNo
         <Text color={isSelected ? 'suggestion' : undefined}>{item.name}</Text>
         <Text dimColor={!isSelected}>
           {' '}
-          <Text backgroundColor="userMessageBackground">Plugin</Text>
+          <Text backgroundColor="userMessageBackground">{t('unifiedinstalledcell.plugin')}</Text>
         </Text>
         <Text dimColor> · {item.marketplace}</Text>
         <Text dimColor={!isSelected}> · {statusIcon} </Text>
@@ -56,7 +57,7 @@ export function UnifiedInstalledCell({ item, isSelected }: Props): React.ReactNo
         <Text color={isSelected ? 'suggestion' : undefined}>{item.name}</Text>
         <Text dimColor={!isSelected}>
           {' '}
-          <Text backgroundColor="userMessageBackground">Plugin</Text>
+          <Text backgroundColor="userMessageBackground">{t('unifiedinstalledcell.plugin2')}</Text>
         </Text>
         <Text dimColor> · {item.marketplace}</Text>
         <Text dimColor={!isSelected}> · {statusIcon} </Text>
@@ -75,7 +76,7 @@ export function UnifiedInstalledCell({ item, isSelected }: Props): React.ReactNo
         <Text color={isSelected ? 'suggestion' : undefined}>{item.name}</Text>
         <Text dimColor={!isSelected}>
           {' '}
-          <Text backgroundColor="userMessageBackground">Plugin</Text>
+          <Text backgroundColor="userMessageBackground">{t('unifiedinstalledcell.plugin3')}</Text>
         </Text>
         <Text dimColor> · {item.marketplace}</Text>
         <Text dimColor={!isSelected}> · {statusIcon} </Text>
@@ -93,7 +94,7 @@ export function UnifiedInstalledCell({ item, isSelected }: Props): React.ReactNo
     statusText = 'connected';
   } else if (item.status === 'disabled') {
     statusIcon = color('inactive', theme)(figures.radioOff);
-    statusText = 'disabled';
+    statusText = t('pluginUI.disabled');
   } else if (item.status === 'pending') {
     statusIcon = color('inactive', theme)(figures.radioOff);
     statusText = 'connecting…';

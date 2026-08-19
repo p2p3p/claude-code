@@ -43,8 +43,7 @@ export async function getLatestVersionFromArtifactory(
     ],
     {
       timeout: 30000,
-      preserveOutputOnError: true,
-    },
+      preserveOutputOnError: true},
   )
 
   const latencyMs = Date.now() - startTime
@@ -53,8 +52,7 @@ export async function getLatestVersionFromArtifactory(
     logEvent('tengu_version_check_failure', {
       latency_ms: latencyMs,
       source_npm: true,
-      exit_code: code,
-    })
+      exit_code: code})
     const error = new Error(`npm view failed with code ${code}: ${stderr}`)
     logError(error)
     throw error
@@ -62,8 +60,7 @@ export async function getLatestVersionFromArtifactory(
 
   logEvent('tengu_version_check_success', {
     latency_ms: latencyMs,
-    source_npm: true,
-  })
+    source_npm: true})
   logForDebugging(
     `npm view ${MACRO.NATIVE_PACKAGE_URL}@${tag} version: ${stdout}`,
   )
@@ -81,12 +78,10 @@ export async function getLatestVersionFromBinaryRepo(
     const response = await axios.get(`${baseUrl}/${channel}`, {
       timeout: 30000,
       responseType: 'text',
-      ...authConfig,
-    })
+      ...authConfig})
     const latencyMs = Date.now() - startTime
     logEvent('tengu_version_check_success', {
-      latency_ms: latencyMs,
-    })
+      latency_ms: latencyMs})
     return response.data.trim()
   } catch (error) {
     const latencyMs = Date.now() - startTime
@@ -99,8 +94,7 @@ export async function getLatestVersionFromBinaryRepo(
     logEvent('tengu_version_check_failure', {
       latency_ms: latencyMs,
       http_status: httpStatus,
-      is_timeout: errorMessage.includes('timeout'),
-    })
+      is_timeout: errorMessage.includes('timeout')})
     const fetchError = new Error(
       `Failed to fetch version from ${baseUrl}/${channel}: ${errorMessage}`,
     )
@@ -168,8 +162,7 @@ export async function downloadVersionFromArtifactory(
   const {
     stdout: integrityOutput,
     code,
-    stderr,
-  } = await execFileNoThrowWithCwd(
+    stderr} = await execFileNoThrowWithCwd(
     'npm',
     [
       'view',
@@ -180,8 +173,7 @@ export async function downloadVersionFromArtifactory(
     ],
     {
       timeout: 30000,
-      preserveOutputOnError: true,
-    },
+      preserveOutputOnError: true},
   )
 
   if (code !== 0) {
@@ -204,9 +196,7 @@ export async function downloadVersionFromArtifactory(
     name: 'claude-native-installer',
     version: '0.0.1',
     dependencies: {
-      [MACRO.NATIVE_PACKAGE_URL!]: version,
-    },
-  }
+      [MACRO.NATIVE_PACKAGE_URL!]: version}}
 
   // Create package-lock.json with integrity verification for platform-specific package
   const packageLock = {
@@ -219,21 +209,14 @@ export async function downloadVersionFromArtifactory(
         name: 'claude-native-installer',
         version: '0.0.1',
         dependencies: {
-          [MACRO.NATIVE_PACKAGE_URL!]: version,
-        },
-      },
+          [MACRO.NATIVE_PACKAGE_URL!]: version}},
       [`node_modules/${MACRO.NATIVE_PACKAGE_URL}`]: {
         version: version,
         optionalDependencies: {
-          [platformPackageName]: version,
-        },
-      },
+          [platformPackageName]: version}},
       [`node_modules/${platformPackageName}`]: {
         version: version,
-        integrity: integrity,
-      },
-    },
-  }
+        integrity: integrity}}}
 
   writeFileSync_DEPRECATED(
     join(stagingPath, 'package.json'),
@@ -255,8 +238,7 @@ export async function downloadVersionFromArtifactory(
     {
       timeout: 60000,
       preserveOutputOnError: true,
-      cwd: stagingPath,
-    },
+      cwd: stagingPath},
   )
 
   if (result.code !== 0) {
@@ -326,8 +308,7 @@ async function downloadAndVerifyBinary(
           // Reset stall timer on each chunk of data received
           resetStallTimer()
         },
-        ...requestConfig,
-      })
+        ...requestConfig})
 
       clearStallTimer()
 
@@ -408,8 +389,7 @@ export async function downloadVersionFromBinaryRepo(
       {
         timeout: 10000,
         responseType: 'json',
-        ...authConfig,
-      },
+        ...authConfig},
     )
     manifest = manifestResponse.data
   } catch (error) {
@@ -423,8 +403,7 @@ export async function downloadVersionFromBinaryRepo(
     logEvent('tengu_binary_manifest_fetch_failure', {
       latency_ms: latencyMs,
       http_status: httpStatus,
-      is_timeout: errorMessage.includes('timeout'),
-    })
+      is_timeout: errorMessage.includes('timeout')})
     logError(
       new Error(
         `Failed to fetch manifest from ${baseUrl}/${version}/manifest.json: ${errorMessage}`,
@@ -461,8 +440,7 @@ export async function downloadVersionFromBinaryRepo(
     )
     const latencyMs = Date.now() - startTime
     logEvent('tengu_binary_download_success', {
-      latency_ms: latencyMs,
-    })
+      latency_ms: latencyMs})
   } catch (error) {
     const latencyMs = Date.now() - startTime
     const errorMessage = error instanceof Error ? error.message : String(error)
@@ -475,8 +453,7 @@ export async function downloadVersionFromBinaryRepo(
       latency_ms: latencyMs,
       http_status: httpStatus,
       is_timeout: errorMessage.includes('timeout'),
-      is_checksum_mismatch: errorMessage.includes('Checksum mismatch'),
-    })
+      is_checksum_mismatch: errorMessage.includes('Checksum mismatch')})
     logError(
       new Error(`Failed to download binary from ${binaryUrl}: ${errorMessage}`),
     )

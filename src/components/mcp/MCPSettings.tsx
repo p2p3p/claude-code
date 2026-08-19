@@ -5,8 +5,7 @@ import type {
   McpClaudeAIProxyServerConfig,
   McpHTTPServerConfig,
   McpSSEServerConfig,
-  McpStdioServerConfig,
-} from '../../services/mcp/types.js';
+  McpStdioServerConfig} from '../../services/mcp/types.js';
 import { extractAgentMcpServers, filterToolsByServer } from '../../services/mcp/utils.js';
 import { useAppState } from '../../state/AppState.js';
 import { getSessionIngressAuthToken } from '../../utils/sessionIngressAuth.js';
@@ -27,8 +26,7 @@ export function MCPSettings({ onComplete }: Props): React.ReactNode {
   const agentDefinitions = useAppState(s => s.agentDefinitions);
   const mcpClients = mcp.clients;
   const [viewState, setViewState] = React.useState<MCPViewState>({
-    type: 'list',
-  });
+    type: 'list'});
   const [servers, setServers] = React.useState<ServerInfo[]>([]);
 
   // Extract agent-specific MCP servers from agent definitions
@@ -72,36 +70,31 @@ export function MCPSettings({ onComplete }: Props): React.ReactNode {
           const baseInfo = {
             name: client.name,
             client,
-            scope,
-          };
+            scope};
 
           if (isClaudeAIProxy) {
             return {
               ...baseInfo,
               transport: 'claudeai-proxy' as const,
               isAuthenticated: false,
-              config: client.config as McpClaudeAIProxyServerConfig,
-            };
+              config: client.config as McpClaudeAIProxyServerConfig};
           } else if (isSSE) {
             return {
               ...baseInfo,
               transport: 'sse' as const,
               isAuthenticated,
-              config: client.config as McpSSEServerConfig,
-            };
+              config: client.config as McpSSEServerConfig};
           } else if (isHTTP) {
             return {
               ...baseInfo,
               transport: 'http' as const,
               isAuthenticated,
-              config: client.config as McpHTTPServerConfig,
-            };
+              config: client.config as McpHTTPServerConfig};
           } else {
             return {
               ...baseInfo,
               transport: 'stdio' as const,
-              config: client.config as McpStdioServerConfig,
-            };
+              config: client.config as McpStdioServerConfig};
           }
         }),
       );
@@ -181,8 +174,7 @@ export function MCPSettings({ onComplete }: Props): React.ReactNode {
             setViewState({
               type: 'server-tool-detail',
               server: viewState.server,
-              toolIndex: index,
-            })
+              toolIndex: index})
           }
           onBack={() => setViewState({ type: 'server-menu', server: viewState.server })}
         />

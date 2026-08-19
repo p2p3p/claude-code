@@ -3,6 +3,7 @@ import { GITHUB_ACTION_SETUP_DOCS_URL } from '../../constants/github-app.js';
 import { Box, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import type { Warning } from './types.js';
+import { t } from '../../utils/i18n/index.js';
 
 interface WarningsStepProps {
   warnings: Warning[];
@@ -17,8 +18,8 @@ export function WarningsStep({ warnings, onContinue }: WarningsStepProps) {
     <>
       <Box flexDirection="column" borderStyle="round" paddingX={1}>
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>{figures.warning} Setup Warnings</Text>
-          <Text dimColor>We found some potential issues, but you can continue anyway</Text>
+          <Text bold>{figures.warning} {t('installGithub.setupWarnings')}</Text>
+          <Text dimColor>{t('installGithub.warningsDesc')}</Text>
         </Box>
 
         {warnings.map((warning, index) => (
@@ -41,12 +42,12 @@ export function WarningsStep({ warnings, onContinue }: WarningsStepProps) {
 
         <Box marginTop={1}>
           <Text bold color="permission">
-            Press Enter to continue anyway, or Ctrl+C to exit and fix issues
+            {t('installGithub.continueAnyway')}
           </Text>
         </Box>
         <Box marginTop={1}>
           <Text dimColor>
-            You can also try the manual setup steps if needed:{' '}
+            {t('installGithub.manualSetup')}
             <Text color="claude">{GITHUB_ACTION_SETUP_DOCS_URL}</Text>
           </Text>
         </Box>

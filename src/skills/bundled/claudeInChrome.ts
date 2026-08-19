@@ -29,6 +29,5 @@ export function registerClaudeInChromeSkill(): void {
         prompt += `\n## Task\n\n${args}`
       }
       return [{ type: 'text', text: prompt }]
-    },
-  })
+    }})
 }

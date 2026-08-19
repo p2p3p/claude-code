@@ -3,8 +3,7 @@ import { EffortPanel } from '../../components/EffortPanel/EffortPanel.js';
 import { useMainLoopModel } from '../../hooks/useMainLoopModel.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js';
+  logEvent} from '../../services/analytics/index.js';
 import { useAppState, useSetAppState } from '../../state/AppState.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import {
@@ -13,9 +12,9 @@ import {
   getEffortEnvOverride,
   getEffortValueDescription,
   isEffortLevel,
-  toPersistableEffort,
-} from '../../utils/effort.js';
+  toPersistableEffort} from '../../utils/effort.js';
 import { updateSettingsForSource } from '../../utils/settings/settings.js';
+import { t } from '../../utils/i18n/index.js'
 
 const COMMON_HELP_ARGS = ['help', '-h', '--help'];
 
@@ -28,17 +27,14 @@ function setEffortValue(effortValue: EffortValue): EffortCommandResult {
   const persistable = toPersistableEffort(effortValue);
   if (persistable !== undefined) {
     const result = updateSettingsForSource('userSettings', {
-      effortLevel: persistable,
-    });
+      effortLevel: persistable});
     if (result.error) {
       return {
-        message: `Failed to set effort level: ${result.error.message}`,
-      };
+        message: t('effortCmd.failedToSet', result.error.message)};
     }
   }
   logEvent('tengu_effort_command', {
-    effort: effortValue as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  });
+    effort: effortValue as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
   // Env var wins at resolveAppliedEffort time. Only flag it when it actually
   // conflicts — if env matches what the user just asked for, the outcome is
@@ -48,22 +44,19 @@ function setEffortValue(effortValue: EffortValue): EffortCommandResult {
     const envRaw = process.env.CLAUDE_CODE_EFFORT_LEVEL;
     if (persistable === undefined) {
       return {
-        message: `Not applied: CLAUDE_CODE_EFFORT_LEVEL=${envRaw} overrides effort this session, and ${effortValue} is session-only (nothing saved)`,
-        effortUpdate: { value: effortValue },
-      };
+        message: t('effortCmd.notAppliedOverride', envRaw, effortValue),
+        effortUpdate: { value: effortValue }};
     }
     return {
-      message: `CLAUDE_CODE_EFFORT_LEVEL=${envRaw} overrides this session — clear it and ${effortValue} takes over`,
-      effortUpdate: { value: effortValue },
-    };
+      message: t('effortCmd.overrideNote', envRaw, effortValue),
+      effortUpdate: { value: effortValue }};
   }
 
   const description = getEffortValueDescription(effortValue);
-  const suffix = persistable !== undefined ? '' : ' (this session only)';
+  const suffix = persistable !== undefined ? '' : t('effortCmd.sessionOnly');
   return {
-    message: `Set effort level to ${effortValue}${suffix}: ${description}`,
-    effortUpdate: { value: effortValue },
-  };
+    message: t('effortCmd.setLevel', effortValue, suffix, description),
+    effortUpdate: { value: effortValue }};
 }
 
 export function showCurrentEffort(appStateEffort: EffortValue | undefined, model: string): EffortCommandResult {
@@ -71,40 +64,34 @@ export function showCurrentEffort(appStateEffort: EffortValue | undefined, model
   const effectiveValue = envOverride === null ? undefined : (envOverride ?? appStateEffort);
   if (effectiveValue === undefined) {
     const level = getDisplayedEffortLevel(model, appStateEffort);
-    return { message: `Effort level: auto (currently ${level})` };
+    return { message: t('effortCmd.autoLevel', level) };
   }
   const description = getEffortValueDescription(effectiveValue);
   return {
-    message: `Current effort level: ${effectiveValue} (${description})`,
-  };
+    message: t('effortCmd.currentLevel', effectiveValue, description)};
 }
 
 function unsetEffortLevel(): EffortCommandResult {
   const result = updateSettingsForSource('userSettings', {
-    effortLevel: undefined,
-  });
+    effortLevel: undefined});
   if (result.error) {
     return {
-      message: `Failed to set effort level: ${result.error.message}`,
-    };
+      message: `Failed to set effort level: ${result.error.message}`};
   }
   logEvent('tengu_effort_command', {
-    effort: 'auto' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  });
+    effort: 'auto' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
   // env=auto/unset (null) matches what /effort auto asks for, so only warn
   // when env is pinning a specific level that will keep overriding.
   const envOverride = getEffortEnvOverride();
   if (envOverride !== undefined && envOverride !== null) {
     const envRaw = process.env.CLAUDE_CODE_EFFORT_LEVEL;
     return {
-      message: `Cleared effort from settings, but CLAUDE_CODE_EFFORT_LEVEL=${envRaw} still controls this session`,
-      effortUpdate: { value: undefined },
-    };
+      message: t('effortCmd.clearedOverride', envRaw),
+      effortUpdate: { value: undefined }};
   }
   return {
-    message: 'Effort level set to auto',
-    effortUpdate: { value: undefined },
-  };
+    message: t('effortCmd.setToAuto'),
+    effortUpdate: { value: undefined }};
 }
 
 export function executeEffort(args: string): EffortCommandResult {
@@ -115,8 +102,7 @@ export function executeEffort(args: string): EffortCommandResult {
 
   if (!isEffortLevel(normalized)) {
     return {
-      message: `Invalid argument: ${args}. Valid options are: low, medium, high, max, auto`,
-    };
+      message: t('effortCmd.invalidArg', args)};
   }
 
   return setEffortValue(normalized);
@@ -132,8 +118,7 @@ function ShowCurrentEffort({ onDone }: { onDone: (result: string) => void }): Re
 
 function ApplyEffortAndClose({
   result,
-  onDone,
-}: {
+  onDone}: {
   result: EffortCommandResult;
   onDone: (result: string) => void;
 }): React.ReactNode {
@@ -143,8 +128,7 @@ function ApplyEffortAndClose({
     if (effortUpdate) {
       setAppState(prev => ({
         ...prev,
-        effortValue: effortUpdate.value,
-      }));
+        effortValue: effortUpdate.value}));
     }
     onDone(message);
   }, [setAppState, effortUpdate, message, onDone]);
@@ -155,9 +139,7 @@ export async function call(onDone: LocalJSXCommandOnDone, _context: unknown, arg
   args = args?.trim() || '';
 
   if (COMMON_HELP_ARGS.includes(args)) {
-    onDone(
-      'Usage: /effort [low|medium|high|xhigh|max|auto]\n\nEffort levels:\n- low: Quick, straightforward implementation\n- medium: Balanced approach with standard testing\n- high: Comprehensive implementation with extensive testing\n- xhigh: Extended reasoning beyond high, short of max; including ChatGPT Codex models\n- max: Maximum capability with deepest reasoning\n- auto: Use the default effort level for your model',
-    );
+    onDone(t('effortCmd.help'));
     return;
   }
 

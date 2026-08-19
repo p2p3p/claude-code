@@ -53,20 +53,17 @@ async function execTmux(
     // server PID. Same root cause as TungstenTool/utils.ts:execTmuxCommand.
     const result = await execFileNoThrow('wsl', ['-e', TMUX_COMMAND, ...args], {
       env: { ...process.env, WSL_UTF8: '1' },
-      ...opts,
-    })
+      ...opts})
     return {
       stdout: result.stdout || '',
       stderr: result.stderr || '',
-      code: result.code || 0,
-    }
+      code: result.code || 0}
   }
   const result = await execFileNoThrow(TMUX_COMMAND, args, opts)
   return {
     stdout: result.stdout || '',
     stderr: result.stderr || '',
-    code: result.code || 0,
-  }
+    code: result.code || 0}
 }
 
 // Socket state - initialized lazily when Tmux tool is first used or a tmux command is run
@@ -154,11 +151,9 @@ export async function checkTmuxAvailable(): Promise<boolean> {
       getPlatform() === 'windows'
         ? await execFileNoThrow('wsl', ['-e', TMUX_COMMAND, '-V'], {
             env: { ...process.env, WSL_UTF8: '1' },
-            useCwd: false,
-          })
+            useCwd: false})
         : await execFileNoThrow('which', [TMUX_COMMAND], {
-            useCwd: false,
-          })
+            useCwd: false})
     tmuxAvailable = result.code === 0
     if (!tmuxAvailable) {
       logForDebugging(

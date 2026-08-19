@@ -32,8 +32,7 @@ async function loadCliHighlight(): Promise<CliHighlight | null> {
     loadedGetLanguage = hljsMod.getLanguage ?? hljsMod.default?.getLanguage
     return {
       highlight: cliHighlight.highlight,
-      supportsLanguage: cliHighlight.supportsLanguage,
-    }
+      supportsLanguage: cliHighlight.supportsLanguage}
   } catch {
     return null
   }

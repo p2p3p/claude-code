@@ -27,7 +27,7 @@ export type ProviderKind = z.infer<typeof ProviderKindSchema>
  * - kind: only 'openai-compat' in PR-2
  * - baseUrl: full base URL including /v1 suffix if needed
  * - apiKeyEnv: name of the env var that holds the API key
- * - defaultModel: model string passed as OPENAI_MODEL
+ * - defaultModel: model string passed as MODEL
  * - compatRule: selects CompatProfile from providerCompatMatrix
  */
 export const ProviderConfigSchema = z.object({
@@ -39,8 +39,7 @@ export const ProviderConfigSchema = z.object({
   baseUrl: z.string().url(),
   apiKeyEnv: z.string().min(1),
   defaultModel: z.string().min(1),
-  compatRule: CompatRuleSchema,
-})
+  compatRule: CompatRuleSchema})
 
 export type ProviderConfig = z.infer<typeof ProviderConfigSchema>
 

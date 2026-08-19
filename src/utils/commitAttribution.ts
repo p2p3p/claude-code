@@ -4,8 +4,7 @@ import { isAbsolute, join, relative, sep } from 'path'
 import { getOriginalCwd, getSessionId } from '../bootstrap/state.js'
 import type {
   AttributionSnapshotMessage,
-  FileAttributionState,
-} from '../types/logs.js'
+  FileAttributionState} from '../types/logs.js'
 import { getCwd } from './cwd.js'
 import { logForDebugging } from './debug.js'
 import { execFileNoThrowWithCwd } from './execFileNoThrow.js'
@@ -315,8 +314,7 @@ export function createEmptyAttributionState(): AttributionState {
     permissionPromptCount: 0,
     permissionPromptCountAtLastCommit: 0,
     escapeCount: 0,
-    escapeCountAtLastCommit: 0,
-  }
+    escapeCountAtLastCommit: 0}
 }
 
 /**
@@ -372,8 +370,7 @@ function computeFileModificationState(
     return {
       contentHash: computeContentHash(newContent),
       claudeContribution: existingContribution + claudeContribution,
-      mtime,
-    }
+      mtime}
   } catch (error) {
     logError(error as Error)
     return null
@@ -429,8 +426,7 @@ export function trackFileModification(
 
   return {
     ...state,
-    fileStates: newFileStates,
-  }
+    fileStates: newFileStates}
 }
 
 /**
@@ -464,8 +460,7 @@ export function trackFileDeletion(
   const newFileState: FileAttributionState = {
     contentHash: '', // Empty hash for deleted files
     claudeContribution: existingContribution + deletedChars,
-    mtime: Date.now(),
-  }
+    mtime: Date.now()}
 
   const newFileStates = new Map(state.fileStates)
   newFileStates.set(normalizedPath, newFileState)
@@ -476,8 +471,7 @@ export function trackFileDeletion(
 
   return {
     ...state,
-    fileStates: newFileStates,
-  }
+    fileStates: newFileStates}
 }
 
 // --
@@ -511,8 +505,7 @@ export function trackBulkFileChanges(
       newFileStates.set(normalizedPath, {
         contentHash: '',
         claudeContribution: existingContribution + deletedChars,
-        mtime,
-      })
+        mtime})
 
       logForDebugging(
         `Attribution: Tracked deletion of ${normalizedPath} (${deletedChars} chars removed, total contribution: ${existingContribution + deletedChars})`,
@@ -538,8 +531,7 @@ export function trackBulkFileChanges(
 
   return {
     ...state,
-    fileStates: newFileStates,
-  }
+    fileStates: newFileStates}
 }
 
 /**
@@ -606,8 +598,7 @@ export async function calculateCommitAttribution(
         mergedFileStates.set(path, {
           ...fileState,
           claudeContribution:
-            existing.claudeContribution + fileState.claudeContribution,
-        })
+            existing.claudeContribution + fileState.claudeContribution})
       } else {
         mergedFileStates.set(path, fileState)
       }
@@ -685,8 +676,7 @@ export async function calculateCommitAttribution(
         claudeChars,
         humanChars,
         percent,
-        surface: fileSurface,
-      }
+        surface: fileSurface}
     }),
   )
 
@@ -703,8 +693,7 @@ export async function calculateCommitAttribution(
       claudeChars: result.claudeChars,
       humanChars: result.humanChars,
       percent: result.percent,
-      surface: result.surface,
-    }
+      surface: result.surface}
 
     totalClaudeChars += result.claudeChars
     totalHumanChars += result.humanChars
@@ -734,13 +723,11 @@ export async function calculateCommitAttribution(
       claudePercent,
       claudeChars: totalClaudeChars,
       humanChars: totalHumanChars,
-      surfaces: Array.from(surfaces),
-    },
+      surfaces: Array.from(surfaces)},
     files,
     surfaceBreakdown,
     excludedGenerated,
-    sessions: [sessionId],
-  }
+    sessions: [sessionId]}
 }
 
 /**
@@ -890,8 +877,7 @@ export function stateToSnapshotMessage(
     permissionPromptCount: state.permissionPromptCount,
     permissionPromptCountAtLastCommit: state.permissionPromptCountAtLastCommit,
     escapeCount: state.escapeCount,
-    escapeCountAtLastCommit: state.escapeCountAtLastCommit,
-  }
+    escapeCountAtLastCommit: state.escapeCountAtLastCommit}
 }
 
 /**
@@ -954,8 +940,7 @@ export function incrementPromptCount(
 ): AttributionState {
   const newAttribution = {
     ...attribution,
-    promptCount: attribution.promptCount + 1,
-  }
+    promptCount: attribution.promptCount + 1}
   const snapshot = stateToSnapshotMessage(newAttribution, randomUUID())
   saveSnapshot(snapshot)
   return newAttribution

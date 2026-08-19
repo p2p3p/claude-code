@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { useExitOnCtrlCDWithKeybindings } from '../../hooks/useExitOnCtrlCDWithKeybindings.js';
 import { Box, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
@@ -30,7 +31,7 @@ export function ManagedSettingsSecurityDialog({ settings, onAccept, onReject }: 
   }
 
   return (
-    <PermissionDialog color="warning" titleColor="warning" title="Managed settings require approval">
+    <PermissionDialog color="warning" titleColor="warning" title={t('managedsettingssecuritydialog.managedSettingsRequireApproval')}>
       <Box flexDirection="column" gap={1} paddingTop={1}>
         <Text>
           Your organization has configured managed settings that could allow execution of arbitrary code or interception
@@ -38,7 +39,7 @@ export function ManagedSettingsSecurityDialog({ settings, onAccept, onReject }: 
         </Text>
 
         <Box flexDirection="column">
-          <Text dimColor>Settings requiring approval:</Text>
+          <Text dimColor>{t('managedsettingssecuritydialog.settingsRequiringApproval')}</Text>
           {settingsList.map((item, index) => (
             <Box key={index} paddingLeft={2}>
               <Text>
@@ -56,15 +57,15 @@ export function ManagedSettingsSecurityDialog({ settings, onAccept, onReject }: 
 
         <Select
           options={[
-            { label: 'Yes, I trust these settings', value: 'accept' },
-            { label: 'No, exit Claude Code', value: 'exit' },
+            { label: t('managedSettingsSecurity.yesTrust'), value: 'accept' },
+            { label: t('managedSettingsSecurity.noExit'), value: 'exit' },
           ]}
           onChange={value => onChange(value as 'accept' | 'exit')}
           onCancel={() => onChange('exit')}
         />
 
         <Text dimColor>
-          {exitState.pending ? <>Press {exitState.keyName} again to exit</> : <>Enter to confirm · Esc to exit</>}
+          {exitState.pending ? <>{t('common.pressAgain', exitState.keyName)}</> : <>{t('managedSettingsSecurity.enterConfirmEscExit')}</>}
         </Text>
       </Box>
     </PermissionDialog>

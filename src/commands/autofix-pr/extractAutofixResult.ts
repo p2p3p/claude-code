@@ -15,8 +15,7 @@
 
 import type {
   SDKAssistantMessage,
-  SDKMessage,
-} from '../../entrypoints/agentSdkTypes.js'
+  SDKMessage} from '../../entrypoints/agentSdkTypes.js'
 
 export const AUTOFIX_RESULT_TAG = 'autofix-result'
 

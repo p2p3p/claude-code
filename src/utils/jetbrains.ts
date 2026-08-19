@@ -21,8 +21,7 @@ const ideNameToDirMap: { [key: string]: string[] } = {
   aqua: ['Aqua'],
   gateway: ['Gateway'],
   fleet: ['Fleet'],
-  androidstudio: ['AndroidStudio'],
-}
+  androidstudio: ['AndroidStudio']}
 
 // Build plugin directory paths
 // https://www.jetbrains.com/help/pycharm/directories-used-by-the-ide-to-store-settings-caches-plugins-and-logs.html#plugins-directory

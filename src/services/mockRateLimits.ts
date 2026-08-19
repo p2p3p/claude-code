@@ -7,6 +7,7 @@
 
 import type { SubscriptionType } from '../services/oauth/types.js'
 import { setMockBillingAccessOverride } from '../utils/billing.js'
+import { t } from '../utils/i18n/index.js'
 import type { OverageDisabledReason } from './claudeAiLimits.js'
 
 type MockHeaders = {
@@ -355,8 +356,7 @@ export function setMockRateLimitScenario(scenario: MockScenario): void {
     case 'normal':
       mockHeaders = {
         'anthropic-ratelimit-unified-status': 'allowed',
-        'anthropic-ratelimit-unified-reset': String(fiveHoursFromNow),
-      }
+        'anthropic-ratelimit-unified-reset': String(fiveHoursFromNow)}
       break
 
     case 'session-limit-reached':
@@ -369,8 +369,7 @@ export function setMockRateLimitScenario(scenario: MockScenario): void {
       mockHeaders = {
         'anthropic-ratelimit-unified-status': 'allowed_warning',
         'anthropic-ratelimit-unified-reset': String(sevenDaysFromNow),
-        'anthropic-ratelimit-unified-representative-claim': 'seven_day',
-      }
+        'anthropic-ratelimit-unified-representative-claim': 'seven_day'}
       break
 
     case 'weekly-limit-reached':
@@ -548,8 +547,7 @@ export function setMockRateLimitScenario(scenario: MockScenario): void {
       mockHeaders = {
         'anthropic-ratelimit-unified-status': 'allowed_warning',
         'anthropic-ratelimit-unified-reset': String(sevenDaysFromNow),
-        'anthropic-ratelimit-unified-representative-claim': 'seven_day_opus',
-      }
+        'anthropic-ratelimit-unified-representative-claim': 'seven_day_opus'}
       break
     }
 
@@ -566,8 +564,7 @@ export function setMockRateLimitScenario(scenario: MockScenario): void {
       mockHeaders = {
         'anthropic-ratelimit-unified-status': 'allowed_warning',
         'anthropic-ratelimit-unified-reset': String(sevenDaysFromNow),
-        'anthropic-ratelimit-unified-representative-claim': 'seven_day_sonnet',
-      }
+        'anthropic-ratelimit-unified-representative-claim': 'seven_day_sonnet'}
       break
     }
 
@@ -589,8 +586,7 @@ export function setMockRateLimitScenario(scenario: MockScenario): void {
 
     case 'extra-usage-required': {
       // Headerless 429 — exercises the entitlement-rejection path in errors.ts
-      mockHeaderless429Message =
-        'Extra usage is required for long context requests.'
+      mockHeaderless429Message = t('mockRateLimits.extraUsageRequired')
       break
     }
 
@@ -629,19 +625,19 @@ export function getMockStatus(): string {
     !mockEnabled ||
     (Object.keys(mockHeaders).length === 0 && !mockSubscriptionType)
   ) {
-    return 'No mock headers active (using real limits)'
+    return t('mockRateLimits.noMockActive')
   }
 
   const lines: string[] = []
-  lines.push('Active mock headers:')
+  lines.push(t('mockRateLimits.activeMockHeaders'))
 
   // Show subscription type - either explicitly set or default
   const effectiveSubscription =
     mockSubscriptionType || DEFAULT_MOCK_SUBSCRIPTION
   if (mockSubscriptionType) {
-    lines.push(`  Subscription Type: ${mockSubscriptionType} (explicitly set)`)
+    lines.push(t('mockRateLimits.subscriptionType', mockSubscriptionType, '(explicitly set)'))
   } else {
-    lines.push(`  Subscription Type: ${effectiveSubscription} (default)`)
+    lines.push(t('mockRateLimits.subscriptionType', effectiveSubscription, '(default)'))
   }
 
   Object.entries(mockHeaders).forEach(([key, value]) => {
@@ -665,10 +661,10 @@ export function getMockStatus(): string {
 
   // Show exceeded limits if any
   if (exceededLimits.length > 0) {
-    lines.push('\nExceeded limits (contributing to representative claim):')
+    lines.push(t('mockRateLimits.exceededLimitsHeader'))
     exceededLimits.forEach(limit => {
       const date = new Date(limit.resetsAt * 1000)
-      lines.push(`  ${limit.type}: resets at ${date.toLocaleString()}`)
+      lines.push(t('mockRateLimits.exceededLimit', limit.type, date.toLocaleString()))
     })
   }
 
@@ -758,47 +754,47 @@ export function getCurrentMockScenario(): MockScenario | null {
 export function getScenarioDescription(scenario: MockScenario): string {
   switch (scenario) {
     case 'normal':
-      return 'Normal usage, no limits'
+      return t('mockRateLimits.scenarioNormal')
     case 'session-limit-reached':
-      return 'Session rate limit exceeded'
+      return t('mockRateLimits.scenarioSessionLimit')
     case 'approaching-weekly-limit':
-      return 'Approaching weekly aggregate limit'
+      return t('mockRateLimits.scenarioApproachingWeekly')
     case 'weekly-limit-reached':
-      return 'Weekly aggregate limit exceeded'
+      return t('mockRateLimits.scenarioWeeklyLimit')
     case 'overage-active':
-      return 'Using extra usage (overage active)'
+      return t('mockRateLimits.scenarioOverageActive')
     case 'overage-warning':
-      return 'Approaching extra usage limit'
+      return t('mockRateLimits.scenarioOverageWarning')
     case 'overage-exhausted':
-      return 'Both subscription and extra usage limits exhausted'
+      return t('mockRateLimits.scenarioOverageExhausted')
     case 'out-of-credits':
-      return 'Out of extra usage credits (wallet empty)'
+      return t('mockRateLimits.scenarioOutOfCredits')
     case 'org-zero-credit-limit':
-      return 'Org spend cap is zero (no extra usage budget)'
+      return t('mockRateLimits.scenarioOrgZeroCredit')
     case 'org-spend-cap-hit':
-      return 'Org spend cap hit for the month'
+      return t('mockRateLimits.scenarioOrgSpendCapHit')
     case 'member-zero-credit-limit':
-      return 'Member limit is zero (admin can allocate more)'
+      return t('mockRateLimits.scenarioMemberZeroCredit')
     case 'seat-tier-zero-credit-limit':
-      return 'Seat tier limit is zero (admin can allocate more)'
+      return t('mockRateLimits.scenarioSeatTierZeroCredit')
     case 'opus-limit':
-      return 'Opus limit reached'
+      return t('mockRateLimits.scenarioOpusLimit')
     case 'opus-warning':
-      return 'Approaching Opus limit'
+      return t('mockRateLimits.scenarioOpusWarning')
     case 'sonnet-limit':
-      return 'Sonnet limit reached'
+      return t('mockRateLimits.scenarioSonnetLimit')
     case 'sonnet-warning':
-      return 'Approaching Sonnet limit'
+      return t('mockRateLimits.scenarioSonnetWarning')
     case 'fast-mode-limit':
-      return 'Fast mode rate limit'
+      return t('mockRateLimits.scenarioFastModeLimit')
     case 'fast-mode-short-limit':
-      return 'Fast mode rate limit (short)'
+      return t('mockRateLimits.scenarioFastModeShortLimit')
     case 'extra-usage-required':
-      return 'Headerless 429: Extra usage required for 1M context'
+      return t('mockRateLimits.scenarioExtraUsageRequired')
     case 'clear':
-      return 'Clear mock headers (use real limits)'
+      return t('mockRateLimits.scenarioClear')
     default:
-      return 'Unknown scenario'
+      return t('mockRateLimits.scenarioUnknown')
   }
 }
 

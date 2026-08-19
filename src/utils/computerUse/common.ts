@@ -24,8 +24,7 @@ const TERMINAL_BUNDLE_ID_FALLBACK: Readonly<Record<string, string>> = {
   ghostty: 'com.mitchellh.ghostty',
   kitty: 'net.kovidgoyal.kitty',
   WarpTerminal: 'dev.warp.Warp-Stable',
-  vscode: 'com.microsoft.VSCode',
-}
+  vscode: 'com.microsoft.VSCode'}
 
 /**
  * Bundle ID of the terminal emulator we're running inside, so `prepareDisplay`
@@ -59,8 +58,7 @@ export const CLI_CU_CAPABILITIES = {
     ? 'win32'
     : process.platform === 'linux'
       ? 'linux'
-      : 'darwin') as any,
-}
+      : 'darwin') as any}
 
 export function isComputerUseMCPServer(name: string): boolean {
   return normalizeNameForMCP(name) === COMPUTER_USE_MCP_SERVER_NAME

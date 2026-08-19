@@ -1,3 +1,5 @@
+import { t } from '../../utils/i18n/index.js'
+
 // Pure decision matrix for autofix-pr completion detection.
 //
 // Given a snapshot of the PR (state, head SHA, CI rollup) and a baseline
@@ -52,14 +54,12 @@ export function summariseAutofixOutcome(
   if (payload.state === 'MERGED') {
     return {
       completed: true,
-      summary: `${owner}/${repo}#${prNumber} merged. Autofix monitoring complete.`,
-    }
+      summary: t('autofix.prMerged', owner, repo, prNumber)}
   }
   if (payload.state === 'CLOSED') {
     return {
       completed: true,
-      summary: `${owner}/${repo}#${prNumber} closed without merge. Autofix monitoring complete.`,
-    }
+      summary: t('autofix.prClosed', owner, repo, prNumber)}
   }
 
   if (!initialHeadSha) return { completed: false }
@@ -70,13 +70,11 @@ export function summariseAutofixOutcome(
   if (ciState.state === 'failure') {
     return {
       completed: true,
-      summary: `Autofix pushed commits to ${owner}/${repo}#${prNumber} but CI is failing (${ciState.detail}).`,
-    }
+      summary: t('autofix.ciFailing', owner, repo, prNumber, ciState.detail)}
   }
   return {
     completed: true,
-    summary: `Autofix pushed commits to ${owner}/${repo}#${prNumber}, CI green.`,
-  }
+    summary: t('autofix.ciGreen', owner, repo, prNumber)}
 }
 
 interface CiSummary {
@@ -90,7 +88,7 @@ function summariseCiRollup(
   if (!rollup || rollup.length === 0) {
     // No checks configured on this repo — treat as success so completion
     // can fire on push alone. PRs without CI are perfectly valid.
-    return { state: 'success', detail: 'no checks configured' }
+    return { state: 'success', detail: t('autofix.noChecks') }
   }
   let pending = 0
   let failed = 0
@@ -116,8 +114,8 @@ function summariseCiRollup(
     failed++
   }
   if (pending > 0)
-    return { state: 'pending', detail: `${pending}/${total} checks pending` }
+    return { state: 'pending', detail: t('autofix.checksPending', pending, total) }
   if (failed > 0)
-    return { state: 'failure', detail: `${failed}/${total} checks failing` }
-  return { state: 'success', detail: `${total}/${total} checks passing` }
+    return { state: 'failure', detail: t('autofix.checksFailing', failed, total) }
+  return { state: 'success', detail: t('autofix.checksPassing', total) }
 }

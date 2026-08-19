@@ -6,8 +6,7 @@ import { errorMessage } from '../errors.js'
 import {
   executeCwdChangedHooks,
   executeFileChangedHooks,
-  type HookOutsideReplResult,
-} from '../hooks.js'
+  type HookOutsideReplResult} from '../hooks.js'
 import { clearCwdEnvFiles } from '../sessionEnvironment.js'
 import { getHooksConfigFromSnapshot } from './hooksConfigSnapshot.js'
 
@@ -70,8 +69,7 @@ function startWatching(paths: string[]): void {
     persistent: true,
     ignoreInitial: true,
     awaitWriteFinish: { stabilityThreshold: 500, pollInterval: 200 },
-    ignorePermissionErrors: true,
-  })
+    ignorePermissionErrors: true})
   watcher.on('change', p => handleFileEvent(p, 'change'))
   watcher.on('add', p => handleFileEvent(p, 'add'))
   watcher.on('unlink', p => handleFileEvent(p, 'unlink'))
@@ -99,8 +97,7 @@ function handleFileEvent(
     .catch(e => {
       const msg = errorMessage(e)
       logForDebugging(`FileChanged hook failed: ${msg}`, {
-        level: 'error',
-      })
+        level: 'error'})
       notifyCallback?.(msg, true)
     })
 }
@@ -148,14 +145,12 @@ export async function onCwdChangedForHooks(
   const hookResult = await executeCwdChangedHooks(oldCwd, newCwd).catch(e => {
     const msg = errorMessage(e)
     logForDebugging(`CwdChanged hook failed: ${msg}`, {
-      level: 'error',
-    })
+      level: 'error'})
     notifyCallback?.(msg, true)
     return {
       results: [] as HookOutsideReplResult[],
       watchPaths: [] as string[],
-      systemMessages: [] as string[],
-    }
+      systemMessages: [] as string[]}
   })
   dynamicWatchPaths = hookResult.watchPaths
   dynamicWatchPathsSorted = hookResult.watchPaths.slice().sort()

@@ -56,8 +56,7 @@ export async function executePostSamplingHooks(
     userContext,
     systemContext,
     toolUseContext,
-    querySource,
-  }
+    querySource}
 
   for (const hook of postSamplingHooks) {
     try {

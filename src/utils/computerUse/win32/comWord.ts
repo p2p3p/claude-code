@@ -44,8 +44,7 @@ function runPs(script: string): string {
   const result = Bun.spawnSync({
     cmd: ['powershell', '-NoProfile', '-NonInteractive', '-Command', script],
     stdout: 'pipe',
-    stderr: 'pipe',
-  })
+    stderr: 'pipe'})
   return new TextDecoder().decode(result.stdout).trim()
 }
 
@@ -183,8 +182,7 @@ export async function openWord(filePath: string): Promise<WordDocInfo> {
     paragraphs: [],
     tables: [],
     wordCount: 0,
-    pageCount: 0,
-  })
+    pageCount: 0})
 }
 
 // ---------------------------------------------------------------------------

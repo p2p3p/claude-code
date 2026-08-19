@@ -2,6 +2,7 @@ import { lstat, realpath } from 'fs/promises'
 import { dirname, join, resolve, sep } from 'path'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { getErrnoCode } from '../utils/errors.js'
+import { t } from '../utils/i18n/index.js'
 import { getAutoMemPath, isAutoMemoryEnabled } from './paths.js'
 
 /**
@@ -22,7 +23,7 @@ export class PathTraversalError extends Error {
 function sanitizePathKey(key: string): string {
   // Null bytes can truncate paths in C-based syscalls
   if (key.includes('\0')) {
-    throw new PathTraversalError(`Null byte in path key: "${key}"`)
+    throw new PathTraversalError(t('teamMemPaths.nullByteInKey', key))
   }
   // URL-encoded traversals (e.g. %2e%2e%2f = ../)
   let decoded: string
@@ -34,7 +35,7 @@ function sanitizePathKey(key: string): string {
     decoded = key
   }
   if (decoded !== key && (decoded.includes('..') || decoded.includes('/'))) {
-    throw new PathTraversalError(`URL-encoded traversal in path key: "${key}"`)
+    throw new PathTraversalError(t('teamMemPaths.urlEncodedTraversal', key))
   }
   // Unicode normalization attacks: fullwidth ．．／ (U+FF0E U+FF0F) normalize
   // to ASCII ../ under NFKC. While path.resolve/fs.writeFile treat these as
@@ -49,16 +50,16 @@ function sanitizePathKey(key: string): string {
       normalized.includes('\0'))
   ) {
     throw new PathTraversalError(
-      `Unicode-normalized traversal in path key: "${key}"`,
+      t('teamMemPaths.unicodeTraversal', key),
     )
   }
   // Reject backslashes (Windows path separator used as traversal vector)
   if (key.includes('\\')) {
-    throw new PathTraversalError(`Backslash in path key: "${key}"`)
+    throw new PathTraversalError(t('teamMemPaths.backslashInKey', key))
   }
   // Reject absolute paths
   if (key.startsWith('/')) {
-    throw new PathTraversalError(`Absolute path key: "${key}"`)
+    throw new PathTraversalError(t('teamMemPaths.absolutePathKey', key))
   }
   return key
 }
@@ -137,7 +138,7 @@ async function realpathDeepestExisting(absolutePath: string): Promise<string> {
           const st = await lstat(current)
           if (st.isSymbolicLink()) {
             throw new PathTraversalError(
-              `Dangling symlink detected (target does not exist): "${current}"`,
+              t('teamMemPaths.danglingSymlink', current),
             )
           }
           // lstat succeeded but isn't a symlink — ENOENT from realpath was
@@ -151,14 +152,14 @@ async function realpathDeepestExisting(absolutePath: string): Promise<string> {
       } else if (code === 'ELOOP') {
         // Symlink loop — corrupted or malicious filesystem state.
         throw new PathTraversalError(
-          `Symlink loop detected in path: "${current}"`,
+          t('teamMemPaths.symlinkLoop', current),
         )
       } else if (code !== 'ENOTDIR' && code !== 'ENAMETOOLONG') {
         // EACCES, EIO, etc. — cannot verify containment. Fail closed by wrapping
         // as PathTraversalError so the caller can skip this entry gracefully
         // instead of aborting the entire batch.
         throw new PathTraversalError(
-          `Cannot verify path containment (${code}): "${current}"`,
+          t('teamMemPaths.cannotVerifyContainment', code, current),
         )
       }
       tail.push(current.slice(parent.length + sep.length))
@@ -229,7 +230,7 @@ export async function validateTeamMemWritePath(
   filePath: string,
 ): Promise<string> {
   if (filePath.includes('\0')) {
-    throw new PathTraversalError(`Null byte in path: "${filePath}"`)
+    throw new PathTraversalError(t('teamMemPaths.nullByteInPath', filePath))
   }
   // First pass: normalize .. segments and check string-level containment.
   // This is a fast rejection for obvious traversal attempts before we touch
@@ -240,7 +241,7 @@ export async function validateTeamMemWritePath(
   // so "team-evil/" won't match "team/"
   if (!resolvedPath.startsWith(teamDir)) {
     throw new PathTraversalError(
-      `Path escapes team memory directory: "${filePath}"`,
+      t('teamMemPaths.pathEscapesDir', filePath),
     )
   }
   // Second pass: resolve symlinks on the deepest existing ancestor and verify
@@ -249,7 +250,7 @@ export async function validateTeamMemWritePath(
   const realPath = await realpathDeepestExisting(resolvedPath)
   if (!(await isRealPathWithinTeamDir(realPath))) {
     throw new PathTraversalError(
-      `Path escapes team memory directory via symlink: "${filePath}"`,
+      t('teamMemPaths.pathEscapesViaSymlink', filePath),
     )
   }
   return resolvedPath
@@ -270,14 +271,14 @@ export async function validateTeamMemKey(relativeKey: string): Promise<string> {
   const resolvedPath = resolve(fullPath)
   if (!resolvedPath.startsWith(teamDir)) {
     throw new PathTraversalError(
-      `Key escapes team memory directory: "${relativeKey}"`,
+      t('teamMemPaths.keyEscapesDir', relativeKey),
     )
   }
   // Second pass: resolve symlinks and verify real containment.
   const realPath = await realpathDeepestExisting(resolvedPath)
   if (!(await isRealPathWithinTeamDir(realPath))) {
     throw new PathTraversalError(
-      `Key escapes team memory directory via symlink: "${relativeKey}"`,
+      t('teamMemPaths.keyEscapesViaSymlink', relativeKey),
     )
   }
   return resolvedPath

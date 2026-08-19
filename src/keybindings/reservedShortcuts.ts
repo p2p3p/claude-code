@@ -17,19 +17,16 @@ export const NON_REBINDABLE: ReservedShortcut[] = [
   {
     key: 'ctrl+c',
     reason: 'Cannot be rebound - used for interrupt/exit (hardcoded)',
-    severity: 'error',
-  },
+    severity: 'error'},
   {
     key: 'ctrl+d',
     reason: 'Cannot be rebound - used for exit (hardcoded)',
-    severity: 'error',
-  },
+    severity: 'error'},
   {
     key: 'ctrl+m',
     reason:
       'Cannot be rebound - identical to Enter in terminals (both send CR)',
-    severity: 'error',
-  },
+    severity: 'error'},
 ]
 
 /**
@@ -44,13 +41,11 @@ export const TERMINAL_RESERVED: ReservedShortcut[] = [
   {
     key: 'ctrl+z',
     reason: 'Unix process suspend (SIGTSTP)',
-    severity: 'warning',
-  },
+    severity: 'warning'},
   {
     key: 'ctrl+\\',
     reason: 'Terminal quit signal (SIGQUIT)',
-    severity: 'error',
-  },
+    severity: 'error'},
 ]
 
 /**

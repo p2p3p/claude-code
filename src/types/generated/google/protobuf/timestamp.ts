@@ -121,8 +121,7 @@ export const Timestamp: MessageFns<Timestamp> = {
   fromJSON(object: any): Timestamp {
     return {
       seconds: isSet(object.seconds) ? globalThis.Number(object.seconds) : 0,
-      nanos: isSet(object.nanos) ? globalThis.Number(object.nanos) : 0,
-    }
+      nanos: isSet(object.nanos) ? globalThis.Number(object.nanos) : 0}
   },
 
   toJSON(message: Timestamp): unknown {
@@ -146,8 +145,7 @@ export const Timestamp: MessageFns<Timestamp> = {
     message.seconds = object.seconds ?? 0
     message.nanos = object.nanos ?? 0
     return message
-  },
-}
+  }}
 
 type Builtin =
   | Date

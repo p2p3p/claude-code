@@ -1,24 +1,18 @@
+import { APIError } from '@anthropic-ai/sdk'
 import { parseSSEFrames } from 'src/cli/transports/SSETransport.js'
 import { errorMessage } from 'src/utils/errors.js'
 import { getProxyFetchOptions } from 'src/utils/proxy.js'
 import type {
   GeminiGenerateContentRequest,
-  GeminiStreamChunk,
-} from '@ant/model-provider'
-
-const DEFAULT_GEMINI_BASE_URL =
-  'https://generativelanguage.googleapis.com/v1beta'
+  GeminiStreamChunk} from '@ant/model-provider'
 
 const STREAM_DECODE_OPTS: TextDecodeOptions = { stream: true }
 
-function getGeminiBaseUrl(): string {
-  return (process.env.GEMINI_BASE_URL || DEFAULT_GEMINI_BASE_URL).replace(
-    /\/+$/,
-    '',
-  )
+export function getGeminiBaseUrl(): string {
+  return (process.env.BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '')
 }
 
-function getGeminiModelPath(model: string): string {
+export function getGeminiModelPath(model: string): string {
   const normalized = model.replace(/^\/+/, '')
   return normalized.startsWith('models/') ? normalized : `models/${normalized}`
 }
@@ -36,22 +30,24 @@ export async function* streamGeminiGenerateContent(params: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-goog-api-key': process.env.GEMINI_API_KEY || '',
-    },
+      'x-goog-api-key': process.env.API_KEY || ''},
     body: JSON.stringify(params.body),
     signal: params.signal,
-    ...getProxyFetchOptions({ forAnthropicAPI: false }),
-  })
+    ...getProxyFetchOptions({ forAnthropicAPI: false })})
 
   if (!response.ok) {
     const body = await response.text()
-    throw new Error(
+    throw APIError.generate(
+      response.status,
+      undefined,
       `Gemini API request failed (${response.status} ${response.statusText}): ${body || 'empty response body'}`,
+      response.headers,
     )
   }
 
   if (!response.body) {
-    throw new Error('Gemini API returned no response body')
+    // biome-ignore lint: APIError.generate needs a status code
+    throw APIError.generate(500, undefined, 'Gemini API returned no response body', undefined)
   }
 
   const reader = response.body.getReader()

@@ -7,6 +7,7 @@ import type { MonitorMcpTaskState } from '../../tasks/MonitorMcpTask/MonitorMcpT
 import { Byline } from '../design-system/Byline.js';
 import { Dialog } from '../design-system/Dialog.js';
 import { KeyboardShortcutHint } from '../design-system/KeyboardShortcutHint.js';
+import { t } from '../../utils/i18n/index.js';
 
 type Props = {
   task: DeepImmutable<MonitorMcpTaskState>;
@@ -37,7 +38,7 @@ export function MonitorMcpDetailDialog({ task, onBack, onKill }: Props): React.R
   return (
     <Box flexDirection="column" tabIndex={0} borderStyle="round" onKeyDown={handleKeyDown}>
       <Dialog
-        title="MCP Monitor"
+        title={t('taskDetail.mcpMonitorTitle')}
         subtitle={
           <Text dimColor>
             {elapsedTime} · {task.serverName}:{task.resourceUri}
@@ -46,17 +47,17 @@ export function MonitorMcpDetailDialog({ task, onBack, onKill }: Props): React.R
         onCancel={onBack ?? (() => {})}
         inputGuide={() => (
           <Byline>
-            {onBack && <KeyboardShortcutHint shortcut="←" action="go back" />}
-            <KeyboardShortcutHint shortcut="Esc" action="close" />
-            {task.status === 'running' && onKill && <KeyboardShortcutHint shortcut="x" action="stop" />}
+            {onBack && <KeyboardShortcutHint shortcut="←" action={t('taskDetail.goBack')} />}
+            <KeyboardShortcutHint shortcut="Esc" action={t('taskDetail.close')} />
+            {task.status === 'running' && onKill && <KeyboardShortcutHint shortcut="x" action={t('taskDetail.stop')} />}
           </Byline>
         )}
       >
         <Box flexDirection="column" gap={1}>
           <Text>
-            <Text bold>Status:</Text>{' '}
+            <Text bold>{t('taskDetail.status')}:</Text>{' '}
             {task.status === 'running' ? (
-              <Text color="ansi:green">running</Text>
+              <Text color="ansi:green">{t('taskDetail.running')}</Text>
             ) : task.status === 'completed' ? (
               <Text color="ansi:green">{task.status}</Text>
             ) : (
@@ -64,17 +65,17 @@ export function MonitorMcpDetailDialog({ task, onBack, onKill }: Props): React.R
             )}
           </Text>
           <Text>
-            <Text bold>Description:</Text> {task.description}
+            <Text bold>{t('taskDetail.descriptionLabel')}</Text> {task.description}
           </Text>
           <Text>
-            <Text bold>Server:</Text> {task.serverName}
+            <Text bold>{t('taskDetail.serverLabel')}</Text> {task.serverName}
           </Text>
           <Text>
-            <Text bold>Resource:</Text> {task.resourceUri}
+            <Text bold>{t('taskDetail.resourceLabel')}</Text> {task.resourceUri}
           </Text>
           {task.command && (
             <Text>
-              <Text bold>Command:</Text> {task.command}
+              <Text bold>{t('taskDetail.command')}:</Text> {task.command}
             </Text>
           )}
         </Box>

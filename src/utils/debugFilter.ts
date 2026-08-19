@@ -47,8 +47,7 @@ export const parseDebugFilter = memoize(
     return {
       include: hasExclusive ? [] : cleanFilters,
       exclude: hasExclusive ? cleanFilters : [],
-      isExclusive: hasExclusive,
-    }
+      isExclusive: hasExclusive}
   },
 )
 

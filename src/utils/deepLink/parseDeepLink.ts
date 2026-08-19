@@ -18,6 +18,7 @@
  * use (terminalLauncher.ts) — that escaping is the injection boundary.
  */
 
+import { t } from '../i18n/index.js'
 import { partiallySanitizeUnicode } from '../sanitization.js'
 
 export const DEEP_LINK_PROTOCOL = 'claude-cli'
@@ -90,20 +91,18 @@ export function parseDeepLink(uri: string): DeepLinkAction {
       : null
 
   if (!normalized) {
-    throw new Error(
-      `Invalid deep link: expected ${DEEP_LINK_PROTOCOL}:// scheme, got "${uri}"`,
-    )
+    throw new Error(t('parseDeepLink.invalidScheme', DEEP_LINK_PROTOCOL, uri))
   }
 
   let url: URL
   try {
     url = new URL(normalized)
   } catch {
-    throw new Error(`Invalid deep link URL: "${uri}"`)
+    throw new Error(t('parseDeepLink.invalidUrl', uri))
   }
 
   if (url.hostname !== 'open') {
-    throw new Error(`Unknown deep link action: "${url.hostname}"`)
+    throw new Error(t('parseDeepLink.unknownAction', url.hostname))
   }
 
   const cwd = url.searchParams.get('cwd') ?? undefined
@@ -112,27 +111,21 @@ export function parseDeepLink(uri: string): DeepLinkAction {
 
   // Validate cwd if present — must be an absolute path
   if (cwd && !cwd.startsWith('/') && !/^[a-zA-Z]:[/\\]/.test(cwd)) {
-    throw new Error(
-      `Invalid cwd in deep link: must be an absolute path, got "${cwd}"`,
-    )
+    throw new Error(t('parseDeepLink.invalidCwd', cwd))
   }
 
   // Reject control characters in cwd (newlines, etc.) but allow path chars like backslash.
   if (cwd && containsControlChars(cwd)) {
-    throw new Error('Deep link cwd contains disallowed control characters')
+    throw new Error(t('parseDeepLink.cwdControlChars'))
   }
   if (cwd && cwd.length > MAX_CWD_LENGTH) {
-    throw new Error(
-      `Deep link cwd exceeds ${MAX_CWD_LENGTH} characters (got ${cwd.length})`,
-    )
+    throw new Error(t('parseDeepLink.cwdTooLong', String(MAX_CWD_LENGTH), String(cwd.length)))
   }
 
   // Validate repo slug format. Resolution happens later (protocolHandler.ts) —
   // this parser stays pure with no config/filesystem access.
   if (repo && !REPO_SLUG_PATTERN.test(repo)) {
-    throw new Error(
-      `Invalid repo in deep link: expected "owner/repo", got "${repo}"`,
-    )
+    throw new Error(t('parseDeepLink.invalidRepo', repo))
   }
 
   let query: string | undefined
@@ -140,12 +133,10 @@ export function parseDeepLink(uri: string): DeepLinkAction {
     // Strip hidden Unicode characters (ASCII smuggling / hidden prompt injection)
     query = partiallySanitizeUnicode(rawQuery.trim())
     if (containsControlChars(query)) {
-      throw new Error('Deep link query contains disallowed control characters')
+      throw new Error(t('parseDeepLink.queryControlChars'))
     }
     if (query.length > MAX_QUERY_LENGTH) {
-      throw new Error(
-        `Deep link query exceeds ${MAX_QUERY_LENGTH} characters (got ${query.length})`,
-      )
+      throw new Error(t('parseDeepLink.queryTooLong', String(MAX_QUERY_LENGTH), String(query.length)))
     }
   }
 

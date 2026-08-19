@@ -1,12 +1,12 @@
 import { getGlobalConfig } from '../../utils/config.js';
 import type { Command } from '../../types/command.js';
+import { t } from '../../utils/i18n/index.js'
 
 const skillStoreCommand: Command = {
   type: 'local-jsx',
   name: 'skill-store',
   aliases: ['ss', 'cloud-skills'],
-  description:
-    'Browse and install remote skills from the Anthropic skill marketplace. Requires Claude Pro/Max/Team subscription.',
+  description: t('cmd.descSkillStore'),
   // REPL markdown renderer strips `<...>` as HTML tags — use uppercase.
   argumentHint:
     'list | get ID | versions ID | version ID VER | create NAME MARKDOWN | delete ID | install ID[@VERSION]',
@@ -22,7 +22,6 @@ const skillStoreCommand: Command = {
   load: async () => {
     const m = await import('./launchSkillStore.js');
     return { call: m.callSkillStore };
-  },
-};
+  }};
 
 export default skillStoreCommand;

@@ -5,24 +5,21 @@ export const STATUS_DOT: Record<RunProgress['status'], string> = {
   running: '●',
   completed: '✓',
   failed: '✗',
-  killed: '■',
-}
+  killed: '■'}
 
 /** run status -> ink theme color token (follows existing WorkflowList palette). */
 export const RUN_STATUS_COLOR: Record<RunProgress['status'], string> = {
   running: 'warning',
   completed: 'success',
   failed: 'error',
-  killed: 'subtle',
-}
+  killed: 'subtle'}
 
 /** run status -> display text (used by header; aligns with reference image done/running). */
 export const RUN_STATUS_TEXT: Record<RunProgress['status'], string> = {
   running: 'running',
   completed: 'done',
   failed: 'failed',
-  killed: 'killed',
-}
+  killed: 'killed'}
 
 /** merged phase status in the sidebar (includes pending: declared by meta but not started). */
 export type PhaseStatus = 'running' | 'done' | 'pending'
@@ -30,14 +27,12 @@ export type PhaseStatus = 'running' | 'done' | 'pending'
 export const PHASE_MARK: Record<PhaseStatus, string> = {
   running: '●',
   done: '✓',
-  pending: '○',
-}
+  pending: '○'}
 
 export const PHASE_COLOR: Record<PhaseStatus, string> = {
   running: 'warning',
   done: 'success',
-  pending: 'subtle',
-}
+  pending: 'subtle'}
 
 /** visual for an agent row: mark character + color (running has the mark overridden by a spinner animation in UI). */
 export type AgentVisual = { mark: string; color: string }

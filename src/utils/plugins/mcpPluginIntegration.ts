@@ -3,8 +3,7 @@ import { expandEnvVarsInString } from '../../services/mcp/envExpansion.js'
 import {
   type McpServerConfig,
   McpServerConfigSchema,
-  type ScopedMcpServerConfig,
-} from '../../services/mcp/types.js'
+  type ScopedMcpServerConfig} from '../../services/mcp/types.js'
 import type { LoadedPlugin, PluginError } from '../../types/plugin.js'
 import { logForDebugging } from '../debug.js'
 import { errorMessage, isENOENT } from '../errors.js'
@@ -17,15 +16,13 @@ import {
   type McpbLoadResult,
   type UserConfigSchema,
   type UserConfigValues,
-  validateUserConfig,
-} from './mcpbHandler.js'
+  validateUserConfig} from './mcpbHandler.js'
 import { getPluginDataDir } from './pluginDirectories.js'
 import {
   getPluginStorageId,
   loadPluginOptions,
   substitutePluginVariables,
-  substituteUserConfigVariables,
-} from './pluginOptionsStorage.js'
+  substituteUserConfigVariables} from './pluginOptionsStorage.js'
 
 /**
  * Load MCP servers from an MCPB file
@@ -79,8 +76,7 @@ async function loadMcpServersFromMcpb(
   } catch (error) {
     const errorMsg = errorMessage(error)
     logForDebugging(`Failed to load MCPB ${mcpbPath}: ${errorMsg}`, {
-      level: 'error',
-    })
+      level: 'error'})
 
     // Use plugin@repository as source (consistent with other plugin errors)
     const source = `${plugin.name}@${plugin.repository}`
@@ -96,8 +92,7 @@ async function loadMcpServersFromMcpb(
         source,
         plugin: plugin.name,
         url: mcpbPath,
-        reason: errorMsg,
-      })
+        reason: errorMsg})
     } else if (
       errorMsg.includes('manifest') ||
       errorMsg.includes('user configuration')
@@ -107,16 +102,14 @@ async function loadMcpServersFromMcpb(
         source,
         plugin: plugin.name,
         mcpbPath,
-        validationError: errorMsg,
-      })
+        validationError: errorMsg})
     } else {
       errors.push({
         type: 'mcpb-extract-failed',
         source,
         plugin: plugin.name,
         mcpbPath,
-        reason: errorMsg,
-      })
+        reason: errorMsg})
     }
 
     return null
@@ -231,8 +224,7 @@ async function loadMcpServersFromFile(
       return null
     }
     logForDebugging(`Failed to load MCP servers from ${filePath}: ${e}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return null
   }
 
@@ -259,8 +251,7 @@ async function loadMcpServersFromFile(
     return validatedServers
   } catch (error) {
     logForDebugging(`Failed to load MCP servers from ${filePath}: ${error}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return null
   }
 }
@@ -310,8 +301,7 @@ export function getUnconfiguredChannels(
       unconfigured.push({
         server: channel.server,
         displayName: channel.displayName ?? channel.server,
-        configSchema: channel.userConfig,
-      })
+        configSchema: channel.userConfig})
     }
   }
   return unconfigured
@@ -351,8 +341,7 @@ export function addPluginScopeToServers(
     const scoped: ScopedMcpServerConfig = {
       ...config,
       scope: 'dynamic', // Use dynamic scope for plugin servers
-      pluginSource,
-    }
+      pluginSource}
     scopedServers[scopedName] = scoped
   }
 
@@ -398,8 +387,7 @@ export async function extractMcpServersFromPlugins(
             type: 'generic-error',
             source: name,
             plugin: plugin.name,
-            error: errorMessage(err),
-          })
+            error: errorMessage(err)})
         }
       }
 
@@ -511,8 +499,7 @@ export function resolvePluginMcpEnvironment(
       const resolvedEnv: Record<string, string> = {
         CLAUDE_PLUGIN_ROOT: plugin.path,
         CLAUDE_PLUGIN_DATA: getPluginDataDir(plugin.source),
-        ...(stdioConfig.env || {}),
-      }
+        ...(stdioConfig.env || {})}
       for (const [key, value] of Object.entries(resolvedEnv)) {
         if (key !== 'CLAUDE_PLUGIN_ROOT' && key !== 'CLAUDE_PLUGIN_DATA') {
           resolvedEnv[key] = resolveValue(value)
@@ -573,8 +560,7 @@ export function resolvePluginMcpEnvironment(
         source: `plugin:${pluginName}`,
         plugin: pluginName,
         serverName,
-        validationError: `Missing environment variables: ${varList}`,
-      })
+        validationError: `Missing environment variables: ${varList}`})
     }
   }
 
@@ -624,8 +610,7 @@ export async function getPluginMcpServers(
         type: 'generic-error',
         source: name,
         plugin: plugin.name,
-        error: errorMessage(err),
-      })
+        error: errorMessage(err)})
     }
   }
 

@@ -17,8 +17,7 @@ const INITIAL_STATE: PrStatusState = {
   number: null,
   url: null,
   reviewState: null,
-  lastUpdated: 0,
-}
+  lastUpdated: 0}
 
 /**
  * Polls PR review status every 60s while the session is active.
@@ -72,8 +71,7 @@ export function usePrStatus(isLoading: boolean, enabled = true): PrStatusState {
           number: newNumber,
           url: result?.url ?? null,
           reviewState: newReviewState,
-          lastUpdated: Date.now(),
-        }
+          lastUpdated: Date.now()}
       })
 
       if (Date.now() - start > SLOW_GH_THRESHOLD_MS) {

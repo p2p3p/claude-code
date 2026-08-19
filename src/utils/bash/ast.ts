@@ -230,8 +230,7 @@ const REDIRECT_OPS: Record<string, Redirect['op']> = {
   '>|': '>|',
   '&>': '&>',
   '&>>': '&>>',
-  '<<<': '<<<',
-}
+  '<<<': '<<<'}
 
 /**
  * Brace expansion pattern: {a,b} or {a..b}. Must have , or .. inside
@@ -415,26 +414,22 @@ export function parseForSecurityFromAst(
   if (BACKSLASH_WHITESPACE_RE.test(cmd)) {
     return {
       kind: 'too-complex',
-      reason: 'Contains backslash-escaped whitespace',
-    }
+      reason: 'Contains backslash-escaped whitespace'}
   }
   if (ZSH_TILDE_BRACKET_RE.test(cmd)) {
     return {
       kind: 'too-complex',
-      reason: 'Contains zsh ~[ dynamic directory syntax',
-    }
+      reason: 'Contains zsh ~[ dynamic directory syntax'}
   }
   if (ZSH_EQUALS_EXPANSION_RE.test(cmd)) {
     return {
       kind: 'too-complex',
-      reason: 'Contains zsh =cmd equals expansion',
-    }
+      reason: 'Contains zsh =cmd equals expansion'}
   }
   if (BRACE_WITH_QUOTE_RE.test(maskBracesInQuotedContexts(cmd))) {
     return {
       kind: 'too-complex',
-      reason: 'Contains brace with quote character (expansion obfuscation)',
-    }
+      reason: 'Contains brace with quote character (expansion obfuscation)'}
   }
 
   const trimmed = cmd.trim()
@@ -453,8 +448,7 @@ export function parseForSecurityFromAst(
       kind: 'too-complex',
       reason:
         'Parser aborted (timeout or resource limit) — possible adversarial input',
-      nodeType: 'PARSE_ABORT',
-    }
+      nodeType: 'PARSE_ABORT'}
   }
 
   return walkProgram(root)
@@ -630,8 +624,7 @@ function collectCommands(
             return {
               kind: 'too-complex',
               reason: `declare flag ${arg} changes assignment semantics (nameref/integer/array)`,
-              nodeType: 'declaration_command',
-            }
+              nodeType: 'declaration_command'}
           }
           // SECURITY: bare positional assignment with a subscript also
           // evaluates — no -a/-i flag needed. `declare 'x[$(id)]=val'`
@@ -650,8 +643,7 @@ function collectCommands(
             return {
               kind: 'too-complex',
               reason: `declare positional '${arg}' contains array subscript — bash evaluates $(cmd) in subscripts`,
-              nodeType: 'declaration_command',
-            }
+              nodeType: 'declaration_command'}
           }
           argv.push(arg)
           break
@@ -743,8 +735,7 @@ function collectCommands(
       return {
         kind: 'too-complex',
         reason: `${loopVar} as loop variable bypasses assignment validation`,
-        nodeType: 'for_statement',
-      }
+        nodeType: 'for_statement'}
     }
     // SECURITY: Body uses a scope COPY — vars assigned inside the loop
     // body don't leak to commands after `done`. The loop var itself is
@@ -866,8 +857,7 @@ function collectCommands(
                   return {
                     kind: 'too-complex',
                     reason: `'read ${a}' in condition may not execute (||/pipeline/subshell); cannot prove it overwrites tracked literal '${existing}'`,
-                    nodeType: 'if_statement',
-                  }
+                    nodeType: 'if_statement'}
                 }
                 varScope.set(a, VAR_PLACEHOLDER)
               }
@@ -1121,8 +1111,7 @@ function walkFileRedirect(
     return {
       kind: 'too-complex',
       reason: 'Unrecognized redirect shape',
-      nodeType: node.type,
-    }
+      nodeType: node.type}
   }
   return { op, target, fd }
 }
@@ -1177,8 +1166,7 @@ function walkHeredocRedirect(node: Node): ParseForSecurityResult | null {
     return {
       kind: 'too-complex',
       reason: 'Heredoc with unquoted delimiter undergoes shell expansion',
-      nodeType: 'heredoc_redirect',
-    }
+      nodeType: 'heredoc_redirect'}
   }
 
   if (body) {
@@ -1358,8 +1346,7 @@ function walkCommand(
       : node.text
   return {
     kind: 'simple',
-    commands: [{ argv, envVars, redirects, text }],
-  }
+    commands: [{ argv, envVars, redirects, text }]}
 }
 
 /**
@@ -1419,8 +1406,7 @@ function walkArgument(
         return {
           kind: 'too-complex',
           reason: 'Word contains brace expansion syntax',
-          nodeType: 'word',
-        }
+          nodeType: 'word'}
       }
       return node.text.replace(/\\(.)/g, '$1')
     }
@@ -1436,8 +1422,7 @@ function walkArgument(
         return {
           kind: 'too-complex',
           reason: 'Number node contains expansion (NN# arithmetic base syntax)',
-          nodeType: node.children[0]?.type,
-        }
+          nodeType: node.children[0]?.type}
       }
       return node.text
 
@@ -1452,8 +1437,7 @@ function walkArgument(
         return {
           kind: 'too-complex',
           reason: 'Brace expansion',
-          nodeType: 'concatenation',
-        }
+          nodeType: 'concatenation'}
       }
       let result = ''
       for (const child of node.children) {
@@ -1680,8 +1664,7 @@ function walkArithmetic(node: Node): ParseForSecurityResult | null {
         return {
           kind: 'too-complex',
           reason: `Arithmetic expansion references variable or non-literal: ${child.text}`,
-          nodeType: 'arithmetic_expansion',
-        }
+          nodeType: 'arithmetic_expansion'}
       }
       continue
     }
@@ -1824,8 +1807,7 @@ function walkVariableAssignment(
     return {
       kind: 'too-complex',
       reason: 'Variable assignment without name',
-      nodeType: 'variable_assignment',
-    }
+      nodeType: 'variable_assignment'}
   }
   // SECURITY: tree-sitter-bash accepts invalid var names (e.g. `1VAR=value`)
   // as variable_assignment. Bash only recognizes [A-Za-z_][A-Za-z0-9_]* —
@@ -1835,8 +1817,7 @@ function walkVariableAssignment(
     return {
       kind: 'too-complex',
       reason: `Invalid variable name (bash treats as command): ${name}`,
-      nodeType: 'variable_assignment',
-    }
+      nodeType: 'variable_assignment'}
   }
   // SECURITY: Setting IFS changes word-splitting behavior for subsequent
   // unquoted $VAR expansions. `IFS=: && VAR=a:b && rm $VAR` → bash splits
@@ -1846,8 +1827,7 @@ function walkVariableAssignment(
     return {
       kind: 'too-complex',
       reason: 'IFS assignment changes word-splitting — cannot model statically',
-      nodeType: 'variable_assignment',
-    }
+      nodeType: 'variable_assignment'}
   }
   // SECURITY: PS4 is expanded via promptvars (default on) on every command
   // traced after `set -x`. A raw_string value containing $(cmd) or `cmd`
@@ -1880,15 +1860,13 @@ function walkVariableAssignment(
         kind: 'too-complex',
         reason:
           'PS4 += cannot be statically verified — combine into a single PS4= assignment',
-        nodeType: 'variable_assignment',
-      }
+        nodeType: 'variable_assignment'}
     }
     if (containsAnyPlaceholder(value)) {
       return {
         kind: 'too-complex',
         reason: 'PS4 value derived from cmdsub/variable — runtime unknowable',
-        nodeType: 'variable_assignment',
-      }
+        nodeType: 'variable_assignment'}
     }
     if (
       !/^[A-Za-z0-9 _+:./=[\]-]*$/.test(
@@ -1900,8 +1878,7 @@ function walkVariableAssignment(
         reason:
           // biome-ignore lint/suspicious/noTemplateCurlyInString: ${VAR} is bash syntax documentation, not a JS template literal
           'PS4 value outside safe charset — only ${VAR} refs and [A-Za-z0-9 _+:.=/[]-] allowed',
-        nodeType: 'variable_assignment',
-      }
+        nodeType: 'variable_assignment'}
     }
   }
   // SECURITY: Tilde expansion in assignment RHS. `VAR=~/x` (unquoted) →
@@ -1915,8 +1892,7 @@ function walkVariableAssignment(
     return {
       kind: 'too-complex',
       reason: 'Tilde in assignment value — bash may expand at assignment time',
-      nodeType: 'variable_assignment',
-    }
+      nodeType: 'variable_assignment'}
   }
   return { name, value, isAppend }
 }
@@ -2151,8 +2127,7 @@ const SUBSCRIPT_EVAL_FLAGS: Record<string, Set<string>> = {
   // is `arr[EXPR]`, bash arithmetically evaluates the subscript — running
   // $(cmd) even from a single-quoted raw_string. Verified bash 5.3.9:
   // `: & wait -p 'a[$(id)]' %1` executes id.
-  wait: new Set(['-p']),
-}
+  wait: new Set(['-p'])}
 
 /**
  * `[[ ARG1 OP ARG2 ]]` where OP is an arithmetic comparison. bash manual:
@@ -2253,8 +2228,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
             // value (e.g. placeholder from $() substitution). Fail closed.
             return {
               ok: false,
-              reason: `timeout with ${arg} flag cannot be statically analyzed`,
-            }
+              reason: `timeout with ${arg} flag cannot be statically analyzed`}
           } else if (arg === '-v') {
             i++ // --verbose, no argument
           } else if (
@@ -2270,8 +2244,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
             // wrapped cmd. Reject, don't fall through to name='timeout'.
             return {
               ok: false,
-              reason: `timeout with ${arg} flag cannot be statically analyzed`,
-            }
+              reason: `timeout with ${arg} flag cannot be statically analyzed`}
           } else {
             break // non-flag — should be the duration
           }
@@ -2289,8 +2262,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
           // consistent with the unknown-FLAG handling above (lines ~1895,1912).
           return {
             ok: false,
-            reason: `timeout duration '${a[i]}' cannot be statically analyzed`,
-          }
+            reason: `timeout duration '${a[i]}' cannot be statically analyzed`}
         } else {
           break // no more args — `timeout` alone, inert
         }
@@ -2309,8 +2281,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
           // Fail closed — mirrors the timeout-duration fail-closed above.
           return {
             ok: false,
-            reason: `nice argument '${a[1]}' contains expansion — cannot statically determine wrapped command`,
-          }
+            reason: `nice argument '${a[1]}' contains expansion — cannot statically determine wrapped command`}
         } else {
           a = a.slice(1) // bare `nice cmd`
         }
@@ -2334,8 +2305,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
             // or unknown flag. Can't model — reject the whole command.
             return {
               ok: false,
-              reason: `env with ${arg} flag cannot be statically analyzed`,
-            }
+              reason: `env with ${arg} flag cannot be statically analyzed`}
           } else {
             break // the wrapped command
           }
@@ -2367,8 +2337,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
             // accepts space-separated — we can't enumerate safely, reject.
             return {
               ok: false,
-              reason: `stdbuf with ${arg} flag cannot be statically analyzed`,
-            }
+              reason: `stdbuf with ${arg} flag cannot be statically analyzed`}
           } else {
             break // the wrapped command
           }
@@ -2395,8 +2364,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
     if (name === '') {
       return {
         ok: false,
-        reason: 'Empty command name — argv[0] may not reflect what bash runs',
-      }
+        reason: 'Empty command name — argv[0] may not reflect what bash runs'}
     }
 
     // Defense-in-depth: argv[0] should never be a placeholder after the
@@ -2406,8 +2374,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
     if (name.includes(CMDSUB_PLACEHOLDER) || name.includes(VAR_PLACEHOLDER)) {
       return {
         ok: false,
-        reason: 'Command name is runtime-determined (placeholder argv[0])',
-      }
+        reason: 'Command name is runtime-determined (placeholder argv[0])'}
     }
 
     // argv[0] starts with an operator/flag: this is a fragment, not a
@@ -2415,8 +2382,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
     if (name.startsWith('-') || name.startsWith('|') || name.startsWith('&')) {
       return {
         ok: false,
-        reason: 'Command appears to be an incomplete fragment',
-      }
+        reason: 'Command appears to be an incomplete fragment'}
     }
 
     // SECURITY: builtins that re-parse a NAME operand internally. bash
@@ -2433,8 +2399,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
         if (dangerFlags.has(arg) && a[i + 1]?.includes('[')) {
           return {
             ok: false,
-            reason: `'${name} ${arg}' operand contains array subscript — bash evaluates $(cmd) in subscripts`,
-          }
+            reason: `'${name} ${arg}' operand contains array subscript — bash evaluates $(cmd) in subscripts`}
         }
         // Combined short flags: `-ra` is bash shorthand for `-r -a`.
         // Check if any danger flag character appears in a combined flag
@@ -2450,8 +2415,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
               if (a[i + 1]?.includes('[')) {
                 return {
                   ok: false,
-                  reason: `'${name} ${flag}' (combined in '${arg}') operand contains array subscript — bash evaluates $(cmd) in subscripts`,
-                }
+                  reason: `'${name} ${flag}' (combined in '${arg}') operand contains array subscript — bash evaluates $(cmd) in subscripts`}
               }
             }
           }
@@ -2467,8 +2431,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
           ) {
             return {
               ok: false,
-              reason: `'${name} ${flag}' (fused) operand contains array subscript — bash evaluates $(cmd) in subscripts`,
-            }
+              reason: `'${name} ${flag}' (fused) operand contains array subscript — bash evaluates $(cmd) in subscripts`}
           }
         }
       }
@@ -2489,8 +2452,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
         if (a[i - 1]?.includes('[') || a[i + 1]?.includes('[')) {
           return {
             ok: false,
-            reason: `'[[ ... ${a[i]} ... ]]' operand contains array subscript — bash arithmetically evaluates $(cmd) in subscripts`,
-          }
+            reason: `'[[ ... ${a[i]} ... ]]' operand contains array subscript — bash arithmetically evaluates $(cmd) in subscripts`}
         }
       }
     }
@@ -2533,8 +2495,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
         if (arg.includes('[')) {
           return {
             ok: false,
-            reason: `'${name}' positional NAME '${arg}' contains array subscript — bash evaluates $(cmd) in subscripts`,
-          }
+            reason: `'${name}' positional NAME '${arg}' contains array subscript — bash evaluates $(cmd) in subscripts`}
         }
       }
     }
@@ -2547,8 +2508,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
     if (SHELL_KEYWORDS.has(name)) {
       return {
         ok: false,
-        reason: `Shell keyword '${name}' as command name — tree-sitter mis-parse`,
-      }
+        reason: `Shell keyword '${name}' as command name — tree-sitter mis-parse`}
     }
 
     // Check argv (not .text) to catch both single-quote (`'\n#'`) and
@@ -2562,8 +2522,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
         return {
           ok: false,
           reason:
-            'Newline followed by # inside a quoted argument can hide arguments from path validation',
-        }
+            'Newline followed by # inside a quoted argument can hide arguments from path validation'}
       }
     }
     for (const ev of cmd.envVars) {
@@ -2571,8 +2530,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
         return {
           ok: false,
           reason:
-            'Newline followed by # inside an env var value can hide arguments from path validation',
-        }
+            'Newline followed by # inside an env var value can hide arguments from path validation'}
       }
     }
     for (const r of cmd.redirects) {
@@ -2580,8 +2538,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
         return {
           ok: false,
           reason:
-            'Newline followed by # inside a redirect target can hide arguments from path validation',
-        }
+            'Newline followed by # inside a redirect target can hide arguments from path validation'}
       }
     }
 
@@ -2597,8 +2554,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
           return {
             ok: false,
             reason:
-              'jq command contains system() function which executes arbitrary commands',
-          }
+              'jq command contains system() function which executes arbitrary commands'}
         }
       }
       if (
@@ -2611,16 +2567,14 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
         return {
           ok: false,
           reason:
-            'jq command contains dangerous flags that could execute code or read arbitrary files',
-        }
+            'jq command contains dangerous flags that could execute code or read arbitrary files'}
       }
     }
 
     if (ZSH_DANGEROUS_BUILTINS.has(name)) {
       return {
         ok: false,
-        reason: `Zsh builtin '${name}' can bypass security checks`,
-      }
+        reason: `Zsh builtin '${name}' can bypass security checks`}
     }
 
     if (EVAL_LIKE_BUILTINS.has(name)) {
@@ -2650,8 +2604,7 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
       } else {
         return {
           ok: false,
-          reason: `'${name}' evaluates arguments as shell code`,
-        }
+          reason: `'${name}' evaluates arguments as shell code`}
       }
     }
 
@@ -2662,16 +2615,14 @@ export function checkSemantics(commands: SimpleCommand[]): SemanticCheckResult {
       if (arg.includes('/proc/') && PROC_ENVIRON_RE.test(arg)) {
         return {
           ok: false,
-          reason: 'Accesses /proc/*/environ which may expose secrets',
-        }
+          reason: 'Accesses /proc/*/environ which may expose secrets'}
       }
     }
     for (const r of cmd.redirects) {
       if (r.target.includes('/proc/') && PROC_ENVIRON_RE.test(r.target)) {
         return {
           ok: false,
-          reason: 'Accesses /proc/*/environ which may expose secrets',
-        }
+          reason: 'Accesses /proc/*/environ which may expose secrets'}
       }
     }
   }

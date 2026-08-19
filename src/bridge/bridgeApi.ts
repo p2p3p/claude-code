@@ -1,5 +1,6 @@
 import axios from 'axios'
 
+import { t } from '../utils/i18n/index.js'
 import { debugBody, extractErrorDetail } from './debugUtils.js'
 import { rcLog } from './rcDebugLog.js'
 import {
@@ -7,8 +8,7 @@ import {
   type BridgeApiClient,
   type BridgeConfig,
   type PermissionResponseEvent,
-  type WorkResponse,
-} from './types.js'
+  type WorkResponse} from './types.js'
 
 type BridgeApiDeps = {
   baseUrl: string
@@ -48,7 +48,7 @@ const SAFE_ID_PATTERN = /^[a-zA-Z0-9_-]+$/
  */
 export function validateBridgeId(id: string, label: string): string {
   if (!id || !SAFE_ID_PATTERN.test(id)) {
-    throw new Error(`Invalid ${label}: contains unsafe characters`)
+    throw new Error(t('bridgeApi.invalidId', label))
   }
   return id
 }
@@ -80,8 +80,7 @@ export function createBridgeApiClient(deps: BridgeApiDeps): BridgeApiClient {
       'Content-Type': 'application/json',
       'anthropic-version': '2023-06-01',
       'anthropic-beta': BETA_HEADER,
-      'x-environment-runner-version': deps.runnerVersion,
-    }
+      'x-environment-runner-version': deps.runnerVersion}
     const deviceToken = deps.getTrustedDeviceToken?.()
     if (deviceToken) {
       headers['X-Trusted-Device-Token'] = deviceToken
@@ -174,14 +173,11 @@ export function createBridgeApiClient(deps: BridgeApiDeps): BridgeApiClient {
               // a new env. The backend may still hand back a fresh ID if
               // the old one expired — callers must compare the response.
               ...(config.reuseEnvironmentId && {
-                environment_id: config.reuseEnvironmentId,
-              }),
-            },
+                environment_id: config.reuseEnvironmentId})},
             {
               headers: getHeaders(token),
               timeout: 15_000,
-              validateStatus: status => status < 500,
-            },
+              validateStatus: status => status < 500},
           ),
         'Registration',
       )
@@ -220,8 +216,7 @@ export function createBridgeApiClient(deps: BridgeApiDeps): BridgeApiClient {
               : undefined,
           timeout: 10_000,
           signal,
-          validateStatus: status => status < 500,
-        },
+          validateStatus: status => status < 500},
       )
 
       handleErrorStatus(response.status, response.data, 'Poll')
@@ -266,8 +261,7 @@ export function createBridgeApiClient(deps: BridgeApiDeps): BridgeApiClient {
         {
           headers: getHeaders(sessionToken),
           timeout: 10_000,
-          validateStatus: s => s < 500,
-        },
+          validateStatus: s => s < 500},
       )
 
       handleErrorStatus(response.status, response.data, 'Acknowledge')
@@ -292,8 +286,7 @@ export function createBridgeApiClient(deps: BridgeApiDeps): BridgeApiClient {
             {
               headers: getHeaders(token),
               timeout: 10_000,
-              validateStatus: s => s < 500,
-            },
+              validateStatus: s => s < 500},
           ),
         'StopWork',
       )
@@ -314,8 +307,7 @@ export function createBridgeApiClient(deps: BridgeApiDeps): BridgeApiClient {
             {
               headers: getHeaders(token),
               timeout: 10_000,
-              validateStatus: s => s < 500,
-            },
+              validateStatus: s => s < 500},
           ),
         'Deregister',
       )
@@ -339,8 +331,7 @@ export function createBridgeApiClient(deps: BridgeApiDeps): BridgeApiClient {
             {
               headers: getHeaders(token),
               timeout: 10_000,
-              validateStatus: s => s < 500,
-            },
+              validateStatus: s => s < 500},
           ),
         'ArchiveSession',
       )
@@ -378,8 +369,7 @@ export function createBridgeApiClient(deps: BridgeApiDeps): BridgeApiClient {
             {
               headers: getHeaders(token),
               timeout: 10_000,
-              validateStatus: s => s < 500,
-            },
+              validateStatus: s => s < 500},
           ),
         'ReconnectSession',
       )
@@ -409,8 +399,7 @@ export function createBridgeApiClient(deps: BridgeApiDeps): BridgeApiClient {
         {
           headers: getHeaders(sessionToken),
           timeout: 10_000,
-          validateStatus: s => s < 500,
-        },
+          validateStatus: s => s < 500},
       )
 
       handleErrorStatus(response.status, response.data, 'Heartbeat')
@@ -437,8 +426,7 @@ export function createBridgeApiClient(deps: BridgeApiDeps): BridgeApiClient {
         {
           headers: getHeaders(sessionToken),
           timeout: 10_000,
-          validateStatus: s => s < 500,
-        },
+          validateStatus: s => s < 500},
       )
 
       handleErrorStatus(
@@ -451,8 +439,7 @@ export function createBridgeApiClient(deps: BridgeApiDeps): BridgeApiClient {
       )
       debug(`[bridge:api] >>> ${debugBody({ events: [event] })}`)
       debug(`[bridge:api] <<< ${debugBody(response.data)}`)
-    },
-  }
+    }}
 }
 
 function handleErrorStatus(
@@ -468,38 +455,34 @@ function handleErrorStatus(
   switch (status) {
     case 401:
       throw new BridgeFatalError(
-        `${context}: Authentication failed (401)${detail ? `: ${detail}` : ''}. ${BRIDGE_LOGIN_INSTRUCTION}`,
+        t('bridgeApi.authFailed', context, detail) + ' ' + BRIDGE_LOGIN_INSTRUCTION,
         401,
         errorType,
       )
     case 403:
       throw new BridgeFatalError(
         isExpiredErrorType(errorType)
-          ? 'Remote Control session has expired. Please restart with `claude remote-control` or /remote-control.'
-          : `${context}: Access denied (403)${detail ? `: ${detail}` : ''}. Check your organization permissions.`,
+          ? t('bridgeApi.sessionExpired')
+          : t('bridgeApi.accessDenied', context, detail),
         403,
         errorType,
       )
     case 404:
       throw new BridgeFatalError(
-        detail ??
-          `${context}: Not found (404). Remote Control may not be available for this organization.`,
+        detail ?? t('bridgeApi.notFound', context, detail),
         404,
         errorType,
       )
     case 410:
       throw new BridgeFatalError(
-        detail ??
-          'Remote Control session has expired. Please restart with `claude remote-control` or /remote-control.',
+        detail ?? t('bridgeApi.sessionExpired'),
         410,
         errorType ?? 'environment_expired',
       )
     case 429:
-      throw new Error(`${context}: Rate limited (429). Polling too frequently.`)
+      throw new Error(t('bridgeApi.rateLimited', context))
     default:
-      throw new Error(
-        `${context}: Failed with status ${status}${detail ? `: ${detail}` : ''}`,
-      )
+      throw new Error(t('bridgeApi.failedWithStatus', context, status, detail))
   }
 }
 

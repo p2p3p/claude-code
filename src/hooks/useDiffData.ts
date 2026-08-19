@@ -4,8 +4,7 @@ import {
   fetchGitDiff,
   fetchGitDiffHunks,
   type GitDiffResult,
-  type GitDiffStats,
-} from '../utils/gitDiff.js'
+  type GitDiffStats} from '../utils/gitDiff.js'
 
 const MAX_LINES_PER_FILE = 400
 
@@ -99,8 +98,7 @@ export function useDiffData(): DiffData {
         isBinary: fileStats.isBinary,
         isLargeFile,
         isTruncated,
-        isUntracked,
-      })
+        isUntracked})
     }
 
     files.sort((a, b) => a.path.localeCompare(b.path))

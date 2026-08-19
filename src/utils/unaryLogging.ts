@@ -1,7 +1,6 @@
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 
 export type CompletionType =
   | 'str_replace_single'
@@ -33,7 +32,5 @@ export async function logUnaryEvent(event: LogEvent): Promise<void> {
     platform: event.metadata
       .platform as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     ...(event.metadata.hasFeedback !== undefined && {
-      hasFeedback: event.metadata.hasFeedback,
-    }),
-  })
+      hasFeedback: event.metadata.hasFeedback})})
 }

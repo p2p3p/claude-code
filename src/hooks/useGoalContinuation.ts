@@ -31,17 +31,14 @@ import {
   markGoalMaxTurnsReached,
   getGoal,
   incrementGoalTurns,
-  MAX_GOAL_TURNS,
-} from 'src/services/goal/goalState.js'
+  MAX_GOAL_TURNS} from 'src/services/goal/goalState.js'
 import { persistCurrentGoal } from 'src/services/goal/goalStorage.js'
 import {
   buildBudgetLimitPrompt,
-  buildContinuationPrompt,
-} from 'src/services/goal/prompts.js'
+  buildContinuationPrompt} from 'src/services/goal/prompts.js'
 import {
   enqueue,
-  getCommandQueueSnapshot,
-} from 'src/utils/messageQueueManager.js'
+  getCommandQueueSnapshot} from 'src/utils/messageQueueManager.js'
 
 function hookLog(msg: string): void {
   logForDebugging(`[goal] hook: ${msg}`)
@@ -136,8 +133,7 @@ export function useGoalContinuation(opts: UseGoalContinuationOpts): void {
         priority: 'now',
         isMeta: true,
         origin: 'goal-budget-limit',
-        skipSlashCommands: true,
-      })
+        skipSlashCommands: true})
       return
     }
 
@@ -176,12 +172,10 @@ export function useGoalContinuation(opts: UseGoalContinuationOpts): void {
       priority: 'now',
       isMeta: true,
       origin: 'goal-continuation',
-      skipSlashCommands: true,
-    })
+      skipSlashCommands: true})
     opts.onContinuationEnqueued?.({
       turn: turns,
-      objective: goal.objective,
-    })
+      objective: goal.objective})
   }, [
     opts.isLoading,
     opts.wasAborted,

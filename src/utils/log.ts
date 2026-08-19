@@ -6,14 +6,12 @@ import { join } from 'path'
 import type { QuerySource } from 'src/constants/querySource.js'
 import {
   setLastAPIRequest,
-  setLastAPIRequestMessages,
-} from '../bootstrap/state.js'
+  setLastAPIRequestMessages} from '../bootstrap/state.js'
 import { TICK_TAG } from '../constants/xml.js'
 import {
   type LogOption,
   type SerializedMessage,
-  sortLogs,
-} from '../types/logs.js'
+  sortLogs} from '../types/logs.js'
 import { CACHE_PATHS } from './cachePaths.js'
 import { stripDisplayTags, stripDisplayTagsAllowEmpty } from './displayTags.js'
 import { isEnvTruthy } from './envUtils.js'
@@ -179,8 +177,7 @@ export function logError(error: unknown): void {
 
     const errorInfo = {
       error: errorStr,
-      timestamp: new Date().toISOString(),
-    }
+      timestamp: new Date().toISOString()}
 
     // Always add to in-memory log (no dependencies needed)
     addToInMemoryErrorLog(errorInfo)
@@ -270,15 +267,13 @@ async function loadLogList(path: string): Promise<LogOption[]> {
           firstPrompt.split('\n')[0]?.slice(0, 50) +
             (firstPrompt.length > 50 ? '…' : '') || 'No prompt',
         messageCount: messages.length,
-        isSidechain,
-      }
+        isSidechain}
     }),
   )
 
   return sortLogs(logData.filter(_ => _ !== null)).map((_, i) => ({
     ..._,
-    value: i,
-  }))
+    value: i}))
 }
 
 function parseISOString(s: string): Date {

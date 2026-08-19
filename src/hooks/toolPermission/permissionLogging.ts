@@ -4,8 +4,7 @@
 import { feature } from 'bun:bundle'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { sanitizeToolNameForAnalytics } from 'src/services/analytics/metadata.js'
 import { getCodeEditToolDecisionCounter } from '../../bootstrap/state.js'
 import type { Tool as ToolType, ToolUseContext } from '../../Tool.js'
@@ -14,8 +13,7 @@ import { SandboxManager } from '../../utils/sandbox/sandbox-adapter.js'
 import { logOTelEvent } from '../../utils/telemetry/events.js'
 import type {
   PermissionApprovalSource,
-  PermissionRejectionSource,
-} from './PermissionContext.js'
+  PermissionRejectionSource} from './PermissionContext.js'
 
 type PermissionLogContext = {
   tool: ToolType
@@ -60,8 +58,7 @@ async function buildCodeEditToolAttributes(
     decision,
     source,
     tool_name: tool.name,
-    ...(language && { language }),
-  }
+    ...(language && { language })}
 }
 
 // Flattens structured source into a string label for analytics/OTel events
@@ -99,8 +96,7 @@ function baseMetadata(
     toolName: sanitizeToolNameForAnalytics(toolName),
     sandboxEnabled: SandboxManager.isSandboxingEnabled(),
     // Only include wait time when the user was actually prompted (not auto-approved)
-    ...(waitMs !== undefined && { waiting_for_user_permission_ms: waitMs }),
-  }
+    ...(waitMs !== undefined && { waiting_for_user_permission_ms: waitMs })}
 }
 
 // Emits a distinct analytics event name per approval source for funnel analysis
@@ -140,8 +136,7 @@ function logApprovalEvent(
     case 'hook':
       logEvent('tengu_tool_use_granted_by_permission_hook', {
         ...baseMetadata(messageId, tool.name, waitMs),
-        permanent: source.permanent ?? false,
-      })
+        permanent: source.permanent ?? false})
       break
     default:
       break
@@ -170,9 +165,7 @@ function logRejectionEvent(
       ? { isHook: true }
       : {
           hasFeedback:
-            source.type === 'user_reject' ? source.hasFeedback : false,
-        }),
-  })
+            source.type === 'user_reject' ? source.hasFeedback : false})})
 }
 
 // Single entry point for all permission decision logging. Called by permission
@@ -224,14 +217,12 @@ function logPermissionDecision(
   toolUseContext.toolDecisions.set(toolUseID, {
     source: sourceString,
     decision,
-    timestamp: Date.now(),
-  })
+    timestamp: Date.now()})
 
   void logOTelEvent('tool_decision', {
     decision,
     source: sourceString,
-    tool_name: sanitizeToolNameForAnalytics(tool.name),
-  })
+    tool_name: sanitizeToolNameForAnalytics(tool.name)})
 }
 
 export { isCodeEditingTool, buildCodeEditToolAttributes, logPermissionDecision }

@@ -12,6 +12,7 @@ import { getKairosActive, setKairosActive } from '../../bootstrap/state.js';
 import type { LocalJSXCommandContext } from '../../commands.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import type { AppState } from '../../state/AppState.js';
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * Compute the default directory for assistant daemon installation.
@@ -53,8 +54,7 @@ export function NewInstallWizard({ defaultDir, onInstalled, onCancel, onError }:
         } else {
           onCancel();
         }
-      },
-    },
+      }},
     { context: 'Select' },
   );
 
@@ -70,13 +70,12 @@ export function NewInstallWizard({ defaultDir, onInstalled, onCancel, onError }:
       const child = spawnCli(launch, {
         cwd: dir,
         stdio: 'ignore',
-        detached: true,
-      });
+        detached: true});
 
       child.unref();
 
       child.on('error', err => {
-        onError(`Failed to start daemon: ${err.message}`);
+        onError(t('assistant.failedToStartDaemon', err.message));
       });
 
       // Give the daemon a moment to initialize, then report success.
@@ -86,34 +85,34 @@ export function NewInstallWizard({ defaultDir, onInstalled, onCancel, onError }:
         onInstalled(dir);
       }, 1500);
     } catch (err) {
-      onError(`Failed to start daemon: ${err instanceof Error ? err.message : String(err)}`);
+      onError(t('assistant.failedToStartDaemon', err instanceof Error ? err.message : String(err)));
     }
   }
 
   if (starting) {
     return (
-      <Dialog title="Assistant Setup" onCancel={onCancel} hideInputGuide>
-        <Text>Starting daemon in {defaultDir}...</Text>
+      <Dialog title={t("cmdSystemUI.assistantTitle")} onCancel={onCancel} hideInputGuide>
+        <Text>{t('assistant.startingDaemonIn', defaultDir)}</Text>
       </Dialog>
     );
   }
 
   return (
-    <Dialog title="Assistant Setup" onCancel={onCancel} hideInputGuide>
+    <Dialog title={t("cmdSystemUI.assistantTitle")} onCancel={onCancel} hideInputGuide>
       <Box flexDirection="column" gap={1}>
-        <Text>No active assistant sessions found.</Text>
+        <Text>{t('assistant.noActiveAssistantSessionsFound')}</Text>
         <Text>
-          Start a daemon in <Text bold>{defaultDir || '.'}</Text> to create a cloud session?
+          {t('assistant.startDaemonPrompt', defaultDir || '.')}
         </Text>
         <Box flexDirection="column">
           <ListItem isFocused={focusIndex === 0}>
-            <Text>Start assistant daemon</Text>
+            <Text>{t('assistant.startAssistantDaemon')}</Text>
           </ListItem>
           <ListItem isFocused={focusIndex === 1}>
-            <Text>Cancel</Text>
+            <Text>{t('assistant.cancel')}</Text>
           </ListItem>
         </Box>
-        <Text dimColor>Enter to select · Esc to cancel</Text>
+        <Text dimColor>{t('assistantCmd2.enterToSelectEscToCancel')}</Text>
       </Box>
     </Dialog>
   );
@@ -140,10 +139,9 @@ export async function call(
         ({
           ...prev,
           kairosEnabled: true,
-          assistantPanelVisible: true,
-        }) as AppState,
+          assistantPanelVisible: true}) as AppState,
     );
-    onDone('KAIROS assistant mode activated.', { display: 'system' });
+    onDone(t('assistant.kairosActivated'), { display: 'system' });
     return null;
   }
 
@@ -156,19 +154,17 @@ export async function call(
       (prev: AppState) =>
         ({
           ...prev,
-          assistantPanelVisible: false,
-        }) as AppState,
+          assistantPanelVisible: false}) as AppState,
     );
-    onDone('Assistant panel hidden.', { display: 'system' });
+    onDone(t('assistant.panelHidden'), { display: 'system' });
   } else {
     setAppState(
       (prev: AppState) =>
         ({
           ...prev,
-          assistantPanelVisible: true,
-        }) as AppState,
+          assistantPanelVisible: true}) as AppState,
     );
-    onDone('Assistant panel opened.', { display: 'system' });
+    onDone(t('assistant.panelOpened'), { display: 'system' });
   }
 
   return null;

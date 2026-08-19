@@ -19,8 +19,7 @@ export class AwsAuthStatusManager {
   private static instance: AwsAuthStatusManager | null = null
   private status: AwsAuthStatus = {
     isAuthenticating: false,
-    output: [],
-  }
+    output: []}
   private changed = createSignal<[status: AwsAuthStatus]>()
 
   static getInstance(): AwsAuthStatusManager {
@@ -33,15 +32,13 @@ export class AwsAuthStatusManager {
   getStatus(): AwsAuthStatus {
     return {
       ...this.status,
-      output: [...this.status.output],
-    }
+      output: [...this.status.output]}
   }
 
   startAuthentication(): void {
     this.status = {
       isAuthenticating: true,
-      output: [],
-    }
+      output: []}
     this.changed.emit(this.getStatus())
   }
 
@@ -60,8 +57,7 @@ export class AwsAuthStatusManager {
       // Clear the status completely on success
       this.status = {
         isAuthenticating: false,
-        output: [],
-      }
+        output: []}
     } else {
       // Keep the output visible on failure
       this.status.isAuthenticating = false

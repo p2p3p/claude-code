@@ -53,8 +53,7 @@ function getHttpHookPolicy(): {
   const settings = settingsModule.getInitialSettings()
   return {
     allowedUrls: settings.allowedHttpHookUrls,
-    allowedEnvVars: settings.httpHookAllowedEnvVars,
-  }
+    allowedEnvVars: settings.httpHookAllowedEnvVars}
 }
 
 /**
@@ -157,8 +156,7 @@ export async function execHttpHook(
   try {
     // Build headers with env var interpolation in values
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    }
+      'Content-Type': 'application/json'}
     if (hook.headers) {
       // Intersect hook's allowedEnvVars with policy allowlist when policy is set
       const hookVars = hook.allowedEnvVars ?? []
@@ -214,8 +212,7 @@ export async function execHttpHook(
       // use — the proxy performs DNS for the target, and applying the
       // guard would instead validate the proxy's own IP, breaking
       // connections to corporate proxies on private networks.
-      lookup: sandboxProxy || envProxyActive ? undefined : ssrfGuardedLookup,
-    })
+      lookup: sandboxProxy || envProxyActive ? undefined : ssrfGuardedLookup})
 
     cleanup()
 
@@ -227,8 +224,7 @@ export async function execHttpHook(
     return {
       ok: response.status >= 200 && response.status < 300,
       statusCode: response.status,
-      body,
-    }
+      body}
   } catch (error) {
     cleanup()
 

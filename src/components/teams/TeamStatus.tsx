@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Text } from '@anthropic/ink';
 import { useAppState } from '../../state/AppState.js';
 
@@ -27,7 +28,7 @@ export function TeamStatus({ teamsSelected, showHint }: Props): React.ReactNode 
     showHint && teamsSelected ? (
       <>
         <Text dimColor>· </Text>
-        <Text dimColor>Enter to view</Text>
+        <Text dimColor>{t('teamstatus.enterToView')}</Text>
       </>
     ) : null;
 

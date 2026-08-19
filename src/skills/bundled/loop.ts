@@ -2,8 +2,7 @@ import {
   CRON_CREATE_TOOL_NAME,
   CRON_DELETE_TOOL_NAME,
   DEFAULT_MAX_AGE_DAYS,
-  isKairosCronEnabled,
-} from '@claude-code-best/builtin-tools/tools/ScheduleCronTool/prompt.js'
+  isKairosCronEnabled} from '@claude-code-best/builtin-tools/tools/ScheduleCronTool/prompt.js'
 import { registerBundledSkill } from '../bundledSkills.js'
 
 const DEFAULT_INTERVAL = '10m'
@@ -87,6 +86,5 @@ export function registerLoopSkill(): void {
         return [{ type: 'text', text: USAGE_MESSAGE }]
       }
       return [{ type: 'text', text: buildPrompt(trimmed) }]
-    },
-  })
+    }})
 }

@@ -9,8 +9,7 @@ import type {
   Entry,
   LogOption,
   SerializedMessage,
-  TranscriptMessage,
-} from '../../types/logs.js'
+  TranscriptMessage} from '../../types/logs.js'
 import { parseJSONL } from '../../utils/json.js'
 import {
   getProjectDir,
@@ -18,10 +17,10 @@ import {
   getTranscriptPathForSession,
   isTranscriptMessage,
   saveCustomTitle,
-  searchSessionsByCustomTitle,
-} from '../../utils/sessionStorage.js'
+  searchSessionsByCustomTitle} from '../../utils/sessionStorage.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import { escapeRegExp } from '../../utils/stringUtils.js'
+import { t } from '../../utils/i18n/index.js'
 
 type TranscriptEntry = TranscriptMessage & {
   forkedFrom?: {
@@ -39,7 +38,7 @@ export function deriveFirstPrompt(
   firstUserMessage: Extract<SerializedMessage, { type: 'user' }> | undefined,
 ): string {
   const content = (firstUserMessage as any)?.message?.content
-  if (!content) return 'Branched conversation'
+  if (!content) return t('branchCmd.branchedConversationTitle')
   const raw =
     typeof content === 'string'
       ? content
@@ -49,9 +48,9 @@ export function deriveFirstPrompt(
             text?: string
           }): block is { type: 'text'; text: string } => block.type === 'text',
         )?.text
-  if (!raw) return 'Branched conversation'
+  if (!raw) return t('branchCmd.branchedConversationTitle')
   return (
-    raw.replace(/\s+/g, ' ').trim().slice(0, 100) || 'Branched conversation'
+    raw.replace(/\s+/g, ' ').trim().slice(0, 100) || t('branchCmd.branchedConversationTitle')
   )
 }
 
@@ -81,11 +80,11 @@ async function createFork(customTitle?: string): Promise<{
   try {
     transcriptContent = await readFile(currentTranscriptPath)
   } catch {
-    throw new Error('No conversation to branch')
+    throw new Error(t('branchCmd.noConversationToBranch'))
   }
 
   if (transcriptContent.length === 0) {
-    throw new Error('No conversation to branch')
+    throw new Error(t('branchCmd.noConversationToBranch'))
   }
 
   // Parse all transcript entries (messages + metadata entries like content-replacement)
@@ -113,7 +112,7 @@ async function createFork(customTitle?: string): Promise<{
     .flatMap(entry => entry.replacements)
 
   if (mainConversationEntries.length === 0) {
-    throw new Error('No messages to branch')
+    throw new Error(t('branchCmd.noMessagesToBranch'))
   }
 
   // Build forked entries with new sessionId and preserved metadata
@@ -130,15 +129,12 @@ async function createFork(customTitle?: string): Promise<{
       isSidechain: false,
       forkedFrom: {
         sessionId: originalSessionId,
-        messageUuid: entry.uuid,
-      },
-    }
+        messageUuid: entry.uuid}}
 
     // Build serialized message for LogOption
     const serialized: SerializedMessage = {
       ...entry,
-      sessionId: forkSessionId,
-    }
+      sessionId: forkSessionId}
 
     serializedMessages.push(serialized)
     lines.push(jsonStringify(forkedEntry))
@@ -154,24 +150,21 @@ async function createFork(customTitle?: string): Promise<{
     const forkedReplacementEntry: ContentReplacementEntry = {
       type: 'content-replacement',
       sessionId: forkSessionId,
-      replacements: contentReplacementRecords,
-    }
+      replacements: contentReplacementRecords}
     lines.push(jsonStringify(forkedReplacementEntry))
   }
 
   // Write the fork session file
   await writeFile(forkSessionPath, lines.join('\n') + '\n', {
     encoding: 'utf8',
-    mode: 0o600,
-  })
+    mode: 0o600})
 
   return {
     sessionId: forkSessionId,
     title: customTitle,
     forkPath: forkSessionPath,
     serializedMessages,
-    contentReplacementRecords,
-  }
+    contentReplacementRecords}
 }
 
 /**
@@ -236,8 +229,7 @@ export async function call(
       title,
       forkPath,
       serializedMessages,
-      contentReplacementRecords,
-    } = await createFork(customTitle)
+      contentReplacementRecords} = await createFork(customTitle)
 
     // Build LogOption for resume
     const now = new Date()
@@ -257,8 +249,7 @@ export async function call(
 
     logEvent('tengu_conversation_forked', {
       message_count: serializedMessages.length,
-      has_custom_title: !!title,
-    })
+      has_custom_title: !!title})
 
     const forkLog: LogOption = {
       date: now.toISOString().split('T')[0]!,
@@ -272,13 +263,12 @@ export async function call(
       isSidechain: false,
       sessionId,
       customTitle: effectiveTitle,
-      contentReplacements: contentReplacementRecords,
-    }
+      contentReplacements: contentReplacementRecords}
 
     // Resume into the fork
     const titleInfo = title ? ` "${title}"` : ''
-    const resumeHint = `\nTo resume the original: claude -r ${originalSessionId}`
-    const successMessage = `Branched conversation${titleInfo}. You are now in the branch.${resumeHint}`
+    const resumeHint = t('branchCmd.toResumeOriginal', originalSessionId)
+    const successMessage = t('branchCmd.branchedConversationSuccess', titleInfo, resumeHint)
 
     if (context.resume) {
       await context.resume(sessionId, forkLog, 'fork')
@@ -286,15 +276,15 @@ export async function call(
     } else {
       // Fallback if resume not available
       onDone(
-        `Branched conversation${titleInfo}. Resume with: /resume ${sessionId}`,
+        t('branchCmd.branchedConversationResume', titleInfo, sessionId),
       )
     }
 
     return null
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : 'Unknown error occurred'
-    onDone(`Failed to branch conversation: ${message}`)
+      error instanceof Error ? error.message : t('branchCmd.unknownError')
+    onDone(t('branchCmd.failedToBranch', message))
     return null
   }
 }

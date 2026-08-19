@@ -1,6 +1,7 @@
 import type { PermissionResult } from 'src/utils/permissions/PermissionResult.js'
 import { z } from 'zod/v4'
 import { buildTool, type ToolDef } from 'src/Tool.js'
+import { t } from 'src/utils/i18n/index.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import { jsonStringify } from 'src/utils/slowOperations.js'
 import { createAdapter } from './adapters/index.js'
@@ -89,19 +90,19 @@ import type { WebSearchProgress } from 'src/types/tools.js'
 
 export const WebSearchTool = buildTool({
   name: WEB_SEARCH_TOOL_NAME,
-  searchHint: 'search the web for current information',
+  searchHint: t('toolUI.webSearch.searchHint'),
   maxResultSizeChars: 100_000,
   shouldDefer: true,
   async description(input) {
-    return `Claude wants to search the web for: ${input.query}`
+    return t('toolUI.webSearch.description', input.query)
   },
   userFacingName() {
-    return 'Web Search'
+    return t('toolUI.webSearch.userFacingName')
   },
   getToolUseSummary,
   getActivityDescription(input) {
     const summary = getToolUseSummary(input)
-    return summary ? `Searching for ${summary}` : 'Searching the web'
+    return summary ? t('toolUI.webSearch.searchingFor', summary) : t('toolUI.webSearch.searchingTheWeb')
   },
   isEnabled() {
     // Always enabled — the adapter factory selects the appropriate backend
@@ -126,7 +127,7 @@ export const WebSearchTool = buildTool({
   async checkPermissions(_input): Promise<PermissionResult> {
     return {
       behavior: 'passthrough',
-      message: 'WebSearchTool requires permission.',
+      message: t('toolUI.webSearch.requiresPermission'),
       suggestions: [
         {
           type: 'addRules',
@@ -151,15 +152,14 @@ export const WebSearchTool = buildTool({
     if (!query.length) {
       return {
         result: false,
-        message: 'Error: Missing query',
+        message: t('toolUI.webSearch.missingQuery'),
         errorCode: 1,
       }
     }
     if (allowed_domains?.length && blocked_domains?.length) {
       return {
         result: false,
-        message:
-          'Error: Cannot specify both allowed_domains and blocked_domains in the same request',
+        message: t('toolUI.webSearch.cannotSpecifyBoth'),
         errorCode: 2,
       }
     }

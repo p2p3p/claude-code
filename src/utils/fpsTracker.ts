@@ -41,7 +41,6 @@ export class FpsTracker {
 
     return {
       averageFps: Math.round(averageFps * 100) / 100,
-      low1PctFps: Math.round(low1PctFps * 100) / 100,
-    }
+      low1PctFps: Math.round(low1PctFps * 100) / 100}
   }
 }

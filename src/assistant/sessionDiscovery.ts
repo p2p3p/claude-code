@@ -46,6 +46,5 @@ export async function discoverAssistantSessions(): Promise<AssistantSession[]> {
       id: s.id,
       title: s.title || 'Untitled',
       status: s.status,
-      created_at: s.created_at ?? '',
-    }))
+      created_at: s.created_at ?? ''}))
 }

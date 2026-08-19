@@ -5,8 +5,7 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
-  useSyncExternalStore,
-} from 'react'
+  useSyncExternalStore} from 'react'
 import type { ScrollBoxHandle, DOMElement } from '@anthropic/ink'
 
 /**
@@ -168,8 +167,7 @@ export function useVirtualScroll(
   const offsetsRef = useRef<{ arr: Float64Array; version: number; n: number }>({
     arr: new Float64Array(0),
     version: -1,
-    n: -1,
-  })
+    n: -1})
   const itemRefs = useRef(new Map<string, DOMElement>())
   const refCache = useRef(new Map<string, (el: DOMElement | null) => void>())
   // Inline ref-compare: must run before offsets is computed below. The
@@ -715,6 +713,5 @@ export function useVirtualScroll(
     getItemTop,
     getItemElement,
     getItemHeight,
-    scrollToIndex,
-  }
+    scrollToIndex}
 }

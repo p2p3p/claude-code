@@ -7,6 +7,7 @@ import { ConfigurableShortcutHint } from './ConfigurableShortcutHint.js';
 import { Byline } from './Byline.js';
 import { KeyboardShortcutHint } from './KeyboardShortcutHint.js';
 import { Pane } from './Pane.js';
+import { t } from 'src/utils/i18n/index.js';
 
 type DialogProps = {
   title: React.ReactNode;
@@ -51,11 +52,11 @@ export function Dialog({
   });
 
   const defaultInputGuide = exitState.pending ? (
-    <Text>Press {exitState.keyName} again to exit</Text>
+    <Text>{t('ui.pressToExit', exitState.keyName)}</Text>
   ) : (
     <Byline>
-      <KeyboardShortcutHint shortcut="Enter" action="confirm" />
-      <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+      <KeyboardShortcutHint shortcut="Enter" action={t('ui.confirm')} />
+      <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('ui.cancel')} />
     </Byline>
   );
 

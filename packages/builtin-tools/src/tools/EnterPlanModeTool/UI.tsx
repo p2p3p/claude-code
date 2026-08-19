@@ -6,6 +6,7 @@ import type { ToolProgressData } from 'src/Tool.js';
 import type { ProgressMessage } from 'src/types/message.js';
 import type { ThemeName } from 'src/utils/theme.js';
 import type { Output } from './EnterPlanModeTool.js';
+import { t } from 'src/utils/i18n/index.js';
 
 export function renderToolUseMessage(): React.ReactNode {
   return null;
@@ -20,10 +21,10 @@ export function renderToolResultMessage(
     <Box flexDirection="column" marginTop={1}>
       <Box flexDirection="row">
         <Text color={getModeColor('plan')}>{BLACK_CIRCLE}</Text>
-        <Text> Entered plan mode</Text>
+        <Text>{t('toolUI.enterPlanMode.entered')}</Text>
       </Box>
       <Box paddingLeft={2}>
-        <Text dimColor>Claude is now exploring and designing an implementation approach.</Text>
+        <Text dimColor>{t('toolUI.enterPlanMode.description')}</Text>
       </Box>
     </Box>
   );
@@ -33,7 +34,7 @@ export function renderToolUseRejectedMessage(): React.ReactNode {
   return (
     <Box flexDirection="row" marginTop={1}>
       <Text color={getModeColor('default')}>{BLACK_CIRCLE}</Text>
-      <Text> User declined to enter plan mode</Text>
+      <Text>{t('toolUI.enterPlanMode.declined')}</Text>
     </Box>
   );
 }

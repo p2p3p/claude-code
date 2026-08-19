@@ -20,6 +20,7 @@ import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs
 import type { PermissionDecision } from '../types/permissions.js'
 import type { PermissionUpdate } from './permissions/PermissionUpdateSchema.js'
 import { getClaudeConfigHomeDir } from './envUtils.js'
+import { t } from './i18n/index.js'
 import { logError } from './log.js'
 import { attachNdjsonFramer } from './ndjsonFramer.js'
 
@@ -243,8 +244,7 @@ export class PipeServer extends EventEmitter {
               pid: process.pid,
               ts: Date.now(),
               ip: getLocalIp(),
-              hostname: hostname(),
-            }),
+              hostname: hostname()}),
           ).catch(() => {})
         }
         resolve()
@@ -423,9 +423,7 @@ export class PipeClient extends EventEmitter {
           break
         } catch {
           if (Date.now() + retryDelayMs >= deadline) {
-            throw new Error(
-              `Pipe "${this.targetName}" not found at ${this.socketPath}. Is the server running?`,
-            )
+            throw new Error(t('pipeTransport.pipeNotFound', this.targetName, this.socketPath))
           }
           await new Promise(r => setTimeout(r, retryDelayMs))
         }
@@ -484,7 +482,7 @@ export class PipeClient extends EventEmitter {
 
   send(msg: PipeMessage): void {
     if (!this.socket || this.socket.destroyed) {
-      throw new Error(`Not connected to pipe "${this.targetName}"`)
+      throw new Error(t('pipeTransport.notConnected', this.targetName))
     }
     msg.from = msg.from ?? this.senderName
     msg.ts = msg.ts ?? new Date().toISOString()
@@ -676,8 +674,7 @@ const DEFAULT_PIPE_IPC: PipeIpcState = {
   selectedPipes: [],
   routeMode: 'selected',
   slaves: {},
-  discoveredPipes: [],
-}
+  discoveredPipes: []}
 
 export function isPipeControlled(pipeIpc: PipeIpcState): boolean {
   return Boolean(pipeIpc.attachedBy)

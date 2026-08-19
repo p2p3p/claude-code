@@ -3,6 +3,7 @@ import { chmod, open, rename, stat, unlink } from 'fs/promises'
 import mapValues from 'lodash-es/mapValues.js'
 import memoize from 'lodash-es/memoize.js'
 import { dirname, join, parse } from 'path'
+import { t } from '../../utils/i18n/index.js'
 import { getPlatform } from 'src/utils/platform.js'
 import type { PluginError } from '../../types/plugin.js'
 import { getPluginErrorMessage } from '../../types/plugin.js'
@@ -11,11 +12,10 @@ import {
   getCurrentProjectConfig,
   getGlobalConfig,
   saveCurrentProjectConfig,
-  saveGlobalConfig,
-} from '../../utils/config.js'
+  saveGlobalConfig} from '../../utils/config.js'
 import { getCwd } from '../../utils/cwd.js'
 import { logForDebugging } from '../../utils/debug.js'
-import { getErrnoCode } from '../../utils/errors.js'
+import { errorMessage, getErrnoCode } from '../../utils/errors.js'
 import { getFsImplementation } from '../../utils/fsOperations.js'
 import { safeParseJSON } from '../../utils/json.js'
 import { logError } from '../../utils/log.js'
@@ -26,20 +26,17 @@ import { getManagedFilePath } from '../../utils/settings/managedPath.js'
 import { isRestrictedToPluginOnly } from '../../utils/settings/pluginOnlyPolicy.js'
 import {
   getInitialSettings,
-  getSettingsForSource,
-} from '../../utils/settings/settings.js'
+  getSettingsForSource} from '../../utils/settings/settings.js'
 import {
   isMcpServerCommandEntry,
   isMcpServerNameEntry,
   isMcpServerUrlEntry,
-  type SettingsJson,
-} from '../../utils/settings/types.js'
+  type SettingsJson} from '../../utils/settings/types.js'
 import type { ValidationError } from '../../utils/settings/validation.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../analytics/index.js'
+  logEvent} from '../analytics/index.js'
 import { fetchClaudeAIMcpConfigsIfEligible } from './claudeai.js'
 import { expandEnvVarsInString } from './envExpansion.js'
 import {
@@ -52,8 +49,7 @@ import {
   type McpSSEServerConfig,
   type McpStdioServerConfig,
   type McpWebSocketServerConfig,
-  type ScopedMcpServerConfig,
-} from './types.js'
+  type ScopedMcpServerConfig} from './types.js'
 import { getProjectMcpServerStatus } from './utils.js'
 
 /**
@@ -106,8 +102,7 @@ async function writeMcpjsonFile(config: McpJsonConfig): Promise<void> {
   const handle = await open(tempPath, 'w', existingMode ?? 0o644)
   try {
     await handle.writeFile(jsonStringify(config, null, 2), {
-      encoding: 'utf8',
-    })
+      encoding: 'utf8'})
     await handle.datasync()
   } finally {
     await handle.close()
@@ -577,8 +572,7 @@ function expandEnvVars(config: McpServerConfig): {
         args: stdioConfig.args.map(expandString),
         env: stdioConfig.env
           ? mapValues(stdioConfig.env, expandString)
-          : undefined,
-      }
+          : undefined}
       break
     }
     case 'sse':
@@ -593,8 +587,7 @@ function expandEnvVars(config: McpServerConfig): {
         url: expandString(remoteConfig.url),
         headers: remoteConfig.headers
           ? mapValues(remoteConfig.headers, expandString)
-          : undefined,
-      }
+          : undefined}
       break
     }
     case 'sse-ide':
@@ -611,8 +604,7 @@ function expandEnvVars(config: McpServerConfig): {
 
   return {
     expanded,
-    missingVars: [...new Set(missingVars)],
-  }
+    missingVars: [...new Set(missingVars)]}
 }
 
 /**
@@ -628,14 +620,12 @@ export async function addMcpConfig(
   scope: ConfigScope,
 ): Promise<void> {
   if (name.match(/[^a-zA-Z0-9_-]/)) {
-    throw new Error(
-      `Invalid name ${name}. Names can only contain letters, numbers, hyphens, and underscores.`,
-    )
+    throw new Error(t('mcpConfig.invalidName', name))
   }
 
   // Block reserved server name "claude-in-chrome"
   if (isClaudeInChromeMCPServer(name)) {
-    throw new Error(`Cannot add MCP server "${name}": this name is reserved.`)
+    throw new Error(t('mcpConfig.reservedName', name))
   }
 
   if (feature('CHICAGO_MCP')) {
@@ -643,15 +633,13 @@ export async function addMcpConfig(
       '../../utils/computerUse/common.js'
     )
     if (isComputerUseMCPServer(name)) {
-      throw new Error(`Cannot add MCP server "${name}": this name is reserved.`)
+      throw new Error(t('mcpConfig.reservedName', name))
     }
   }
 
   // Block adding servers when enterprise MCP config exists (it has exclusive control)
   if (doesEnterpriseMcpConfigExist()) {
-    throw new Error(
-      `Cannot add MCP server: enterprise MCP configuration is active and has exclusive control over MCP servers`,
-    )
+    throw new Error(t('mcpConfig.enterpriseActive'))
   }
 
   // Validate config first (needed for command-based policy checks)
@@ -660,22 +648,18 @@ export async function addMcpConfig(
     const formattedErrors = result.error.issues
       .map(err => `${err.path.join('.')}: ${err.message}`)
       .join(', ')
-    throw new Error(`Invalid configuration: ${formattedErrors}`)
+    throw new Error(t('mcpConfig.invalidConfiguration', formattedErrors))
   }
   const validatedConfig = result.data
 
   // Check denylist (with config for command-based checks)
   if (isMcpServerDenied(name, validatedConfig)) {
-    throw new Error(
-      `Cannot add MCP server "${name}": server is explicitly blocked by enterprise policy`,
-    )
+    throw new Error(t('mcpConfig.deniedByPolicy', name))
   }
 
   // Check allowlist (with config for command-based checks)
   if (!isMcpServerAllowedByPolicy(name, validatedConfig)) {
-    throw new Error(
-      `Cannot add MCP server "${name}": not allowed by enterprise policy`,
-    )
+    throw new Error(t('mcpConfig.notAllowedByPolicy', name))
   }
 
   // Check if server already exists in the target scope
@@ -683,30 +667,30 @@ export async function addMcpConfig(
     case 'project': {
       const { servers } = getProjectMcpConfigsFromCwd()
       if (servers[name]) {
-        throw new Error(`MCP server ${name} already exists in .mcp.json`)
+        throw new Error(t('mcpConfig.alreadyExistsMcpJson', name))
       }
       break
     }
     case 'user': {
       const globalConfig = getGlobalConfig()
       if (globalConfig.mcpServers?.[name]) {
-        throw new Error(`MCP server ${name} already exists in user config`)
+        throw new Error(t('mcpConfig.alreadyExistsUser', name))
       }
       break
     }
     case 'local': {
       const projectConfig = getCurrentProjectConfig()
       if (projectConfig.mcpServers?.[name]) {
-        throw new Error(`MCP server ${name} already exists in local config`)
+        throw new Error(t('mcpConfig.alreadyExistsLocal', name))
       }
       break
     }
     case 'dynamic':
-      throw new Error('Cannot add MCP server to scope: dynamic')
+      throw new Error(t('mcpConfig.cannotAddScopeDynamic'))
     case 'enterprise':
-      throw new Error('Cannot add MCP server to scope: enterprise')
+      throw new Error(t('mcpConfig.cannotAddScopeEnterprise'))
     case 'claudeai':
-      throw new Error('Cannot add MCP server to scope: claudeai')
+      throw new Error(t('mcpConfig.cannotAddScopeClaudeai'))
   }
 
   // Add based on scope
@@ -728,7 +712,7 @@ export async function addMcpConfig(
       try {
         await writeMcpjsonFile(mcpConfig)
       } catch (error) {
-        throw new Error(`Failed to write to .mcp.json: ${error}`)
+        throw new Error(t('mcpConfig.failedToWriteMcpJson', errorMessage(error)))
       }
       break
     }
@@ -738,9 +722,7 @@ export async function addMcpConfig(
         ...current,
         mcpServers: {
           ...current.mcpServers,
-          [name]: validatedConfig,
-        },
-      }))
+          [name]: validatedConfig}}))
       break
     }
 
@@ -749,14 +731,12 @@ export async function addMcpConfig(
         ...current,
         mcpServers: {
           ...current.mcpServers,
-          [name]: validatedConfig,
-        },
-      }))
+          [name]: validatedConfig}}))
       break
     }
 
     default:
-      throw new Error(`Cannot add MCP server to scope: ${scope}`)
+      throw new Error(t('mcpConfig.cannotAddScope', scope))
   }
 }
 
@@ -775,7 +755,7 @@ export async function removeMcpConfig(
       const { servers: existingServers } = getProjectMcpConfigsFromCwd()
 
       if (!existingServers[name]) {
-        throw new Error(`No MCP server found with name: ${name} in .mcp.json`)
+        throw new Error(t('mcpConfig.notFoundMcpJson', name))
       }
 
       // Strip scope information when writing back to .mcp.json
@@ -792,7 +772,7 @@ export async function removeMcpConfig(
       try {
         await writeMcpjsonFile(mcpConfig)
       } catch (error) {
-        throw new Error(`Failed to remove from .mcp.json: ${error}`)
+        throw new Error(t('mcpConfig.failedToRemoveMcpJson', errorMessage(error)))
       }
       break
     }
@@ -800,14 +780,13 @@ export async function removeMcpConfig(
     case 'user': {
       const config = getGlobalConfig()
       if (!config.mcpServers?.[name]) {
-        throw new Error(`No user-scoped MCP server found with name: ${name}`)
+        throw new Error(t('mcpConfig.notFoundUser', name))
       }
       saveGlobalConfig(current => {
         const { [name]: _, ...restMcpServers } = current.mcpServers ?? {}
         return {
           ...current,
-          mcpServers: restMcpServers,
-        }
+          mcpServers: restMcpServers}
       })
       break
     }
@@ -816,20 +795,19 @@ export async function removeMcpConfig(
       // Check if server exists before updating
       const config = getCurrentProjectConfig()
       if (!config.mcpServers?.[name]) {
-        throw new Error(`No project-local MCP server found with name: ${name}`)
+        throw new Error(t('mcpConfig.notFoundProjectLocal', name))
       }
       saveCurrentProjectConfig(current => {
         const { [name]: _, ...restMcpServers } = current.mcpServers ?? {}
         return {
           ...current,
-          mcpServers: restMcpServers,
-        }
+          mcpServers: restMcpServers}
       })
       break
     }
 
     default:
-      throw new Error(`Cannot remove MCP server from scope: ${scope}`)
+      throw new Error(t('mcpConfig.cannotRemoveScope', scope))
   }
 }
 
@@ -854,30 +832,25 @@ export function getProjectMcpConfigsFromCwd(): {
   const { config, errors } = parseMcpConfigFromFilePath({
     filePath: mcpJsonPath,
     expandVars: true,
-    scope: 'project',
-  })
+    scope: 'project'})
 
-  // Missing .mcp.json is expected, but malformed files should report errors
+  // A missing .mcp.json is not an error (parseMcpConfigFromFilePath returns
+  // no errors for ENOENT); malformed files still surface their errors.
   if (!config) {
-    const nonMissingErrors = errors.filter(
-      e => !e.message.startsWith('MCP config file not found'),
-    )
-    if (nonMissingErrors.length > 0) {
+    if (errors.length > 0) {
       logForDebugging(
-        `MCP config errors for ${mcpJsonPath}: ${jsonStringify(nonMissingErrors.map(e => e.message))}`,
+        `MCP config errors for ${mcpJsonPath}: ${jsonStringify(errors.map(e => e.message))}`,
         { level: 'error' },
       )
-      return { servers: {}, errors: nonMissingErrors }
     }
-    return { servers: {}, errors: [] }
+    return { servers: {}, errors }
   }
 
   return {
     servers: config.mcpServers
       ? addScopeToServers(config.mcpServers, 'project')
       : {},
-    errors: errors || [],
-  }
+    errors: errors || []}
 }
 
 /**
@@ -898,8 +871,7 @@ export function getMcpConfigsByScope(
   > = {
     project: 'projectSettings',
     user: 'userSettings',
-    local: 'localSettings',
-  }
+    local: 'localSettings'}
 
   if (scope in sourceMap && !isSettingSourceEnabled(sourceMap[scope]!)) {
     return { servers: {}, errors: [] }
@@ -926,20 +898,17 @@ export function getMcpConfigsByScope(
         const { config, errors } = parseMcpConfigFromFilePath({
           filePath: mcpJsonPath,
           expandVars: true,
-          scope: 'project',
-        })
+          scope: 'project'})
 
-        // Missing .mcp.json in parent directories is expected, but malformed files should report errors
+        // A missing .mcp.json in an ancestor directory is expected, not an
+        // error; malformed files still surface their errors.
         if (!config) {
-          const nonMissingErrors = errors.filter(
-            e => !e.message.startsWith('MCP config file not found'),
-          )
-          if (nonMissingErrors.length > 0) {
+          if (errors.length > 0) {
             logForDebugging(
-              `MCP config errors for ${mcpJsonPath}: ${jsonStringify(nonMissingErrors.map(e => e.message))}`,
+              `MCP config errors for ${mcpJsonPath}: ${jsonStringify(errors.map(e => e.message))}`,
               { level: 'error' },
             )
-            allErrors.push(...nonMissingErrors)
+            allErrors.push(...errors)
           }
           continue
         }
@@ -956,8 +925,7 @@ export function getMcpConfigsByScope(
 
       return {
         servers: allServers,
-        errors: allErrors,
-      }
+        errors: allErrors}
     }
     case 'user': {
       const mcpServers = getGlobalConfig().mcpServers
@@ -968,13 +936,11 @@ export function getMcpConfigsByScope(
       const { config, errors } = parseMcpConfig({
         configObject: { mcpServers },
         expandVars: true,
-        scope: 'user',
-      })
+        scope: 'user'})
 
       return {
         servers: addScopeToServers(config?.mcpServers, scope),
-        errors,
-      }
+        errors}
     }
     case 'local': {
       const mcpServers = getCurrentProjectConfig().mcpServers
@@ -985,13 +951,11 @@ export function getMcpConfigsByScope(
       const { config, errors } = parseMcpConfig({
         configObject: { mcpServers },
         expandVars: true,
-        scope: 'local',
-      })
+        scope: 'local'})
 
       return {
         servers: addScopeToServers(config?.mcpServers, scope),
-        errors,
-      }
+        errors}
     }
     case 'enterprise': {
       const enterpriseMcpPath = getEnterpriseMcpFilePath()
@@ -999,28 +963,23 @@ export function getMcpConfigsByScope(
       const { config, errors } = parseMcpConfigFromFilePath({
         filePath: enterpriseMcpPath,
         expandVars: true,
-        scope: 'enterprise',
-      })
+        scope: 'enterprise'})
 
-      // Missing enterprise config file is expected, but malformed files should report errors
+      // A missing enterprise config file is expected, not an error; malformed
+      // files still surface their errors.
       if (!config) {
-        const nonMissingErrors = errors.filter(
-          e => !e.message.startsWith('MCP config file not found'),
-        )
-        if (nonMissingErrors.length > 0) {
+        if (errors.length > 0) {
           logForDebugging(
-            `Enterprise MCP config errors for ${enterpriseMcpPath}: ${jsonStringify(nonMissingErrors.map(e => e.message))}`,
+            `Enterprise MCP config errors for ${enterpriseMcpPath}: ${jsonStringify(errors.map(e => e.message))}`,
             { level: 'error' },
           )
-          return { servers: {}, errors: nonMissingErrors }
         }
-        return { servers: {}, errors: [] }
+        return { servers: {}, errors }
       }
 
       return {
         servers: addScopeToServers(config.mcpServers, scope),
-        errors,
-      }
+        errors}
     }
   }
 }
@@ -1099,8 +1058,7 @@ export async function getClaudeCodeMcpConfigs(
   // Unlike the enterprise-exclusive block above, this keeps plugin servers.
   const mcpLocked = isRestrictedToPluginOnly('mcp')
   const noServers: { servers: Record<string, ScopedMcpServerConfig> } = {
-    servers: {},
-  }
+    servers: {}}
   const { servers: userServers } = mcpLocked
     ? noServers
     : getMcpConfigsByScope('user')
@@ -1183,8 +1141,7 @@ export async function getClaudeCodeMcpConfigs(
     ...approvedProjectServers,
     ...localServers,
     ...dynamicServers,
-    ...extraTargets,
-  })) {
+    ...extraTargets})) {
     if (
       !isMcpServerDisabled(name) &&
       isMcpServerAllowedByPolicy(name, config)
@@ -1224,8 +1181,7 @@ export async function getClaudeCodeMcpConfigs(
       source: name,
       plugin: parts[1]!,
       serverName: parts.slice(2).join(':'),
-      duplicateOf,
-    })
+      duplicateOf})
   }
 
   // Merge in order of precedence: plugin < user < project < local
@@ -1311,13 +1267,10 @@ export function parseMcpConfig(params: {
       errors: schemaResult.error.issues.map(issue => ({
         ...(filePath && { file: filePath }),
         path: issue.path.join('.'),
-        message: 'Does not adhere to MCP server configuration schema',
+        message: t('mcpValidation.schemaNotAdhered'),
         mcpErrorMetadata: {
           scope,
-          severity: 'fatal',
-        },
-      })),
-    }
+          severity: 'fatal'}}))}
   }
 
   // Validate each server and expand variables if requested
@@ -1334,14 +1287,12 @@ export function parseMcpConfig(params: {
         errors.push({
           ...(filePath && { file: filePath }),
           path: `mcpServers.${name}`,
-          message: `Missing environment variables: ${missingVars.join(', ')}`,
-          suggestion: `Set the following environment variables: ${missingVars.join(', ')}`,
+          message: t('mcpValidation.missingEnvVars', missingVars.join(', ')),
+          suggestion: t('mcpValidation.missingEnvVarsSuggestion', missingVars.join(', ')),
           mcpErrorMetadata: {
             scope,
             serverName: name,
-            severity: 'warning',
-          },
-        })
+            severity: 'warning'}})
       }
 
       configToCheck = expanded
@@ -1359,22 +1310,19 @@ export function parseMcpConfig(params: {
       errors.push({
         ...(filePath && { file: filePath }),
         path: `mcpServers.${name}`,
-        message: `Windows requires 'cmd /c' wrapper to execute npx`,
-        suggestion: `Change command to "cmd" with args ["/c", "npx", ...]. See: https://code.claude.com/docs/en/mcp#configure-mcp-servers`,
+        message: t('mcpValidation.windowsNpxWrapper'),
+        suggestion: t('mcpValidation.windowsNpxWrapperSuggestion'),
         mcpErrorMetadata: {
           scope,
           serverName: name,
-          severity: 'warning',
-        },
-      })
+          severity: 'warning'}})
     }
 
     validatedServers[name] = configToCheck
   }
   return {
     config: { mcpServers: validatedServers },
-    errors,
-  }
+    errors}
 }
 
 /**
@@ -1399,21 +1347,12 @@ export function parseMcpConfigFromFilePath(params: {
   } catch (error: unknown) {
     const code = getErrnoCode(error)
     if (code === 'ENOENT') {
+      // A missing file is not a configuration error — callers distinguish
+      // "no config" via `config === null`. Reporting it here would make
+      // every ancestor-directory probe above the CWD a spurious error.
       return {
         config: null,
-        errors: [
-          {
-            file: filePath,
-            path: '',
-            message: `MCP config file not found: ${filePath}`,
-            suggestion: 'Check that the file path is correct',
-            mcpErrorMetadata: {
-              scope,
-              severity: 'fatal',
-            },
-          },
-        ],
-      }
+        errors: []}
     }
     logForDebugging(
       `MCP config read error for ${filePath} (scope=${scope}): ${error}`,
@@ -1425,15 +1364,12 @@ export function parseMcpConfigFromFilePath(params: {
         {
           file: filePath,
           path: '',
-          message: `Failed to read file: ${error}`,
-          suggestion: 'Check file permissions and ensure the file exists',
+          message: t('mcpValidation.failedToRead', error),
+          suggestion: t('mcpValidation.failedToReadSuggestion'),
           mcpErrorMetadata: {
             scope,
-            severity: 'fatal',
-          },
-        },
-      ],
-    }
+            severity: 'fatal'}},
+      ]}
   }
 
   const parsedJson = safeParseJSON(configContent)
@@ -1449,31 +1385,26 @@ export function parseMcpConfigFromFilePath(params: {
         {
           file: filePath,
           path: '',
-          message: `MCP config is not a valid JSON`,
-          suggestion: 'Fix the JSON syntax errors in the file',
+          message: t('mcpValidation.invalidJson'),
+          suggestion: t('mcpValidation.invalidJsonSuggestion'),
           mcpErrorMetadata: {
             scope,
-            severity: 'fatal',
-          },
-        },
-      ],
-    }
+            severity: 'fatal'}},
+      ]}
   }
 
   return parseMcpConfig({
     configObject: parsedJson,
     expandVars,
     scope,
-    filePath,
-  })
+    filePath})
 }
 
 export const doesEnterpriseMcpConfigExist = memoize((): boolean => {
   const { config } = parseMcpConfigFromFilePath({
     filePath: getEnterpriseMcpFilePath(),
     expandVars: true,
-    scope: 'enterprise',
-  })
+    scope: 'enterprise'})
   return config !== null
 })
 
@@ -1578,7 +1509,6 @@ export function setMcpServerEnabled(name: string, enabled: boolean): void {
     logEvent('tengu_builtin_mcp_toggle', {
       serverName:
         name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      enabled,
-    })
+      enabled})
   }
 }

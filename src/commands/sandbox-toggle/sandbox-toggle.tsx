@@ -7,6 +7,7 @@ import { getPlatform } from '../../utils/platform.js';
 import { addToExcludedCommands, SandboxManager } from '../../utils/sandbox/sandbox-adapter.js';
 import { getSettings_DEPRECATED, getSettingsFilePathForSource } from '../../utils/settings/settings.js';
 import type { ThemeName } from '../../utils/theme.js';
+import { t } from '../../utils/i18n/index.js'
 
 export async function call(
   onDone: (result?: string) => void,
@@ -22,8 +23,8 @@ export async function call(
     // WSL1 users will see this since isSupportedPlatform returns false for WSL1
     const errorMessage =
       platform === 'wsl'
-        ? 'Error: Sandboxing requires WSL2. WSL1 is not supported.'
-        : 'Error: Sandboxing is currently only supported on macOS, Linux, and WSL2.';
+        ? t('sandboxCmd.wsl1NotSupported')
+        : t('sandboxCmd.unsupportedPlatform');
     const message = color('error', themeName)(errorMessage);
     onDone(message);
     return null;
@@ -37,7 +38,7 @@ export async function call(
     const message = color(
       'error',
       themeName,
-    )(`Error: Sandboxing is disabled for this platform (${platform}) via the enabledPlatforms setting.`);
+    )(t('sandboxCmd.disabledForPlatform', platform));
     onDone(message);
     return null;
   }
@@ -47,7 +48,7 @@ export async function call(
     const message = color(
       'error',
       themeName,
-    )('Error: Sandbox settings are overridden by a higher-priority configuration and cannot be changed locally.');
+    )(t('sandboxCmd.lockedByPolicy'));
     onDone(message);
     return null;
   }
@@ -73,7 +74,7 @@ export async function call(
         const message = color(
           'error',
           themeName,
-        )('Error: Please provide a command pattern to exclude (e.g., /sandbox exclude "npm run test:*")');
+        )(t('sandboxCmd.excludeMissingPattern'));
         onDone(message);
         return null;
       }
@@ -90,7 +91,7 @@ export async function call(
         ? relative(getCwdState(), localSettingsPath)
         : '.claude/settings.local.json';
 
-      const message = color('success', themeName)(`Added "${cleanPattern}" to excluded commands in ${relativePath}`);
+      const message = color('success', themeName)(t('sandboxCmd.excludedPattern', cleanPattern, relativePath));
 
       onDone(message);
       return null;
@@ -99,7 +100,7 @@ export async function call(
       const message = color(
         'error',
         themeName,
-      )(`Error: Unknown subcommand "${subcommand}". Available subcommand: exclude`);
+      )(t('sandboxCmd.unknownSubcommand', subcommand));
       onDone(message);
       return null;
     }

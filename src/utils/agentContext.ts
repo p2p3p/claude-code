@@ -173,6 +173,5 @@ export function consumeInvokingRequestId():
   context.invocationEmitted = true
   return {
     invokingRequestId: context.invokingRequestId,
-    invocationKind: context.invocationKind,
-  }
+    invocationKind: context.invocationKind}
 }

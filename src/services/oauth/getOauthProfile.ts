@@ -21,13 +21,10 @@ export async function getOauthProfileFromApiKey(): Promise<
     const response = await axios.get<OAuthProfileResponse>(endpoint, {
       headers: {
         'x-api-key': apiKey,
-        'anthropic-beta': OAUTH_BETA_HEADER,
-      },
+        'anthropic-beta': OAUTH_BETA_HEADER},
       params: {
-        account_uuid: accountUuid,
-      },
-      timeout: 10000,
-    })
+        account_uuid: accountUuid},
+      timeout: 10000})
     return response.data
   } catch (error) {
     logError(error as Error)
@@ -42,10 +39,8 @@ export async function getOauthProfileFromOauthToken(
     const response = await axios.get<OAuthProfileResponse>(endpoint, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      timeout: 10000,
-    })
+        'Content-Type': 'application/json'},
+      timeout: 10000})
     return response.data
   } catch (error) {
     logError(error as Error)

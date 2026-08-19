@@ -4,8 +4,7 @@ import { errorMessage } from '../../utils/errors.js'
 import { logError } from '../../utils/log.js'
 import {
   createLSPServerManager,
-  type LSPServerManager,
-} from './LSPServerManager.js'
+  type LSPServerManager} from './LSPServerManager.js'
 import { registerLSPNotificationHandlers } from './passiveFeedback.js'
 
 /**
@@ -68,8 +67,7 @@ export function getInitializationStatus():
   if (initializationState === 'failed') {
     return {
       status: 'failed',
-      error: initializationError || new Error('Initialization failed'),
-    }
+      error: initializationError || new Error('Initialization failed')}
   }
   if (initializationState === 'not-started') {
     return { status: 'not-started' }

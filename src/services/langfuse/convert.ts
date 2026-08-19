@@ -98,8 +98,7 @@ function toContentPart(
   if (type === 'thinking' || type === 'redacted_thinking') {
     return {
       type: 'thinking',
-      thinking: String(block.thinking ?? '[redacted]'),
-    }
+      thinking: String(block.thinking ?? '[redacted]')}
   }
   if (type === 'image') {
     return { type: 'text', text: '[image]' }
@@ -119,8 +118,7 @@ function toContentPart(
     return {
       type,
       id: String(block.id ?? ''),
-      name: String(block.name ?? type),
-    }
+      name: String(block.name ?? type)}
   }
   // unknown block: keep type + scalar fields only
   const safe: Record<string, unknown> = { type: type ?? 'unknown' }
@@ -157,9 +155,7 @@ function extractToolCalls(content: unknown[]): {
           arguments:
             typeof b.input === 'string'
               ? b.input
-              : JSON.stringify(b.input ?? {}),
-        },
-      })
+              : JSON.stringify(b.input ?? {})}})
     } else {
       rest.push(block)
     }
@@ -194,8 +190,7 @@ function extractToolResults(content: unknown[]): {
       toolMessages.push({
         role: 'tool',
         tool_call_id: String(b.tool_use_id ?? ''),
-        content: resultContent,
-      })
+        content: resultContent})
     } else {
       rest.push(block)
     }
@@ -252,8 +247,7 @@ export function convertMessagesToLangfuse(
         ...('tool_call_id' in inner && typeof inner.tool_call_id === 'string'
           ? { tool_call_id: inner.tool_call_id }
           : {}),
-        ...(toolCalls.length > 0 ? { tool_calls: toolCalls } : {}),
-      })
+        ...(toolCalls.length > 0 ? { tool_calls: toolCalls } : {})})
       continue
     }
 
@@ -275,8 +269,7 @@ export function convertMessagesToLangfuse(
       result.push({
         role: 'assistant',
         content: collapseContent(parts),
-        ...(allToolCalls.length > 0 && { tool_calls: allToolCalls }),
-      })
+        ...(allToolCalls.length > 0 && { tool_calls: allToolCalls })})
     } else {
       // User messages: extract tool_result → separate tool messages
       const { toolMessages, rest } = extractToolResults(rawContent)
@@ -298,8 +291,7 @@ export function convertMessagesToLangfuse(
           ...('tool_call_id' in inner && typeof inner.tool_call_id === 'string'
             ? { tool_call_id: inner.tool_call_id }
             : {}),
-          ...(toolCalls.length > 0 ? { tool_calls: toolCalls } : {}),
-        })
+          ...(toolCalls.length > 0 ? { tool_calls: toolCalls } : {})})
       }
       result.push(...toolMessages)
     }
@@ -316,9 +308,7 @@ export function convertToolsToLangfuse(tools: unknown[]): unknown[] {
       function: {
         name: t.name,
         description: t.description,
-        parameters: t.input_schema ?? t.parameters ?? {},
-      },
-    }
+        parameters: t.input_schema ?? t.parameters ?? {}}}
   })
 }
 
@@ -343,8 +333,7 @@ export function convertOutputToLangfuse(
     return {
       role: 'assistant',
       content: collapseContent(parts),
-      ...(tool_calls.length > 0 && { tool_calls }),
-    }
+      ...(tool_calls.length > 0 && { tool_calls })}
   }
 
   if (messages.length === 1) return convert(messages[0]!)

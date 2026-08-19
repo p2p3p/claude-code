@@ -83,8 +83,7 @@ const TASK_ID_PREFIXES: Record<string, string> = {
   in_process_teammate: 't',
   local_workflow: 'w',
   monitor_mcp: 'm',
-  dream: 'd',
-}
+  dream: 'd'}
 
 // Get task ID prefix
 function getTaskIdPrefix(type: TaskType): string {
@@ -120,6 +119,5 @@ export function createTaskStateBase(
     startTime: Date.now(),
     outputFile: getTaskOutputPath(id),
     outputOffset: 0,
-    notified: false,
-  }
+    notified: false}
 }

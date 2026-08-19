@@ -2,8 +2,7 @@ import {
   getAnthropicApiKey,
   getAuthTokenSource,
   getSubscriptionType,
-  isClaudeAISubscriber,
-} from './auth.js'
+  isClaudeAISubscriber} from './auth.js'
 import { getGlobalConfig } from './config.js'
 import { isEnvTruthy } from './envUtils.js'
 

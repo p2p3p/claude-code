@@ -19,8 +19,7 @@ export function PromptDialog({ title, toolInputSummary, request, onRespond, onAb
   const options = request.options.map(opt => ({
     label: opt.label,
     value: opt.key,
-    description: opt.description,
-  }));
+    description: opt.description}));
 
   return (
     <PermissionDialog

@@ -53,8 +53,7 @@ export function extractArgsAfterDoubleDash(
   if (commandOrValue === '--' && args.length > 0) {
     return {
       command: args[0]!,
-      args: args.slice(1),
-    }
+      args: args.slice(1)}
   }
   return { command: commandOrValue, args }
 }

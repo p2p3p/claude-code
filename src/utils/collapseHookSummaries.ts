@@ -1,7 +1,6 @@
 import type {
   RenderableMessage,
-  SystemStopHookSummaryMessage,
-} from '../types/message.js'
+  SystemStopHookSummaryMessage} from '../types/message.js'
 
 function isLabeledHookSummary(
   msg: RenderableMessage,
@@ -46,8 +45,7 @@ export function collapseHookSummaries(
           preventedContinuation: group.some(m => m.preventedContinuation),
           hasOutput: group.some(m => m.hasOutput),
           // Parallel tool calls' hooks overlap; max is closest to wall-clock.
-          totalDurationMs: Math.max(...group.map(m => m.totalDurationMs ?? 0)),
-        })
+          totalDurationMs: Math.max(...group.map(m => m.totalDurationMs ?? 0))})
       }
     } else {
       result.push(msg)

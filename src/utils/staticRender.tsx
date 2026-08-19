@@ -69,8 +69,7 @@ export async function renderToAnsiString(node: React.ReactNode, columns?: number
   // Non-TTY stdout (PassThrough) gives full-frame output instead of diffs
   const instance = await render(<RenderOnceAndExit>{node}</RenderOnceAndExit>, {
     stdout: stream as unknown as NodeJS.WriteStream,
-    patchConsole: false,
-  });
+    patchConsole: false});
 
   // Wait for the component to exit naturally
   await instance.waitUntilExit();

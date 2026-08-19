@@ -3,18 +3,15 @@ import type {
   SDKControlCancelRequest,
   SDKControlPermissionRequest,
   SDKControlRequest,
-  SDKControlResponse,
-} from '../entrypoints/sdk/controlTypes.js'
+  SDKControlResponse} from '../entrypoints/sdk/controlTypes.js'
 import { logForDebugging } from '../utils/debug.js'
 import { logError } from '../utils/log.js'
 import {
   type RemoteMessageContent,
-  sendEventToRemoteSession,
-} from '../utils/teleport/api.js'
+  sendEventToRemoteSession} from '../utils/teleport/api.js'
 import {
   SessionsWebSocket,
-  type SessionsWebSocketCallbacks,
-} from './SessionsWebSocket.js'
+  type SessionsWebSocketCallbacks} from './SessionsWebSocket.js'
 
 /**
  * Type guard to check if a message is an SDKMessage (not a control message)
@@ -127,8 +124,7 @@ export class RemoteSessionManager {
       onError: error => {
         logError(error)
         this.callbacks.onError?.(error)
-      },
-    }
+      }}
 
     this.websocket = new SessionsWebSocket(
       this.config.sessionId,
@@ -207,9 +203,7 @@ export class RemoteSessionManager {
         response: {
           subtype: 'error',
           request_id: requestId,
-          error: `Unsupported control request subtype: ${inner.subtype}`,
-        },
-      }
+          error: `Unsupported control request subtype: ${inner.subtype}`}}
       this.websocket?.sendControlResponse(response)
     }
   }
@@ -270,10 +264,7 @@ export class RemoteSessionManager {
           behavior: result.behavior,
           ...(result.behavior === 'allow'
             ? { updatedInput: result.updatedInput }
-            : { message: result.message }),
-        },
-      },
-    }
+            : { message: result.message })}}}
 
     logForDebugging(
       `[RemoteSessionManager] Sending permission response: ${result.behavior}`,
@@ -339,6 +330,5 @@ export function createRemoteSessionConfig(
     getAccessToken,
     orgUuid,
     hasInitialPrompt,
-    viewerOnly,
-  }
+    viewerOnly}
 }

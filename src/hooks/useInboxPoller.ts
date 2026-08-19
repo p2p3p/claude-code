@@ -9,8 +9,7 @@ import {
   type AppState,
   useAppState,
   useAppStateStore,
-  useSetAppState,
-} from '../state/AppState.js'
+  useSetAppState} from '../state/AppState.js'
 import { findToolByName } from '../Tool.js'
 import { isInProcessTeammateTask } from '../tasks/InProcessTeammateTask/types.js'
 import { getAllBaseTools } from '../tools.js'
@@ -18,35 +17,30 @@ import type { PermissionUpdate } from '../types/permissions.js'
 import { logForDebugging } from '../utils/debug.js'
 import {
   findInProcessTeammateTaskId,
-  handlePlanApprovalResponse,
-} from '../utils/inProcessTeammateHelpers.js'
+  handlePlanApprovalResponse} from '../utils/inProcessTeammateHelpers.js'
 import { createAssistantMessage } from '../utils/messages.js'
 import {
   permissionModeFromString,
-  toExternalPermissionMode,
-} from '../utils/permissions/PermissionMode.js'
+  toExternalPermissionMode} from '../utils/permissions/PermissionMode.js'
 import { applyPermissionUpdate } from '../utils/permissions/PermissionUpdate.js'
 import { jsonStringify } from '../utils/slowOperations.js'
 import { isInsideTmux } from '../utils/swarm/backends/detection.js'
 import {
   ensureBackendsRegistered,
-  getBackendByType,
-} from '../utils/swarm/backends/registry.js'
+  getBackendByType} from '../utils/swarm/backends/registry.js'
 import type { PaneBackendType } from '../utils/swarm/backends/types.js'
 import { TEAM_LEAD_NAME } from '../utils/swarm/constants.js'
 import { getLeaderToolUseConfirmQueue } from '../utils/swarm/leaderPermissionBridge.js'
 import { sendPermissionResponseViaMailbox } from '../utils/swarm/permissionSync.js'
 import {
   removeTeammateFromTeamFile,
-  setMemberMode,
-} from '../utils/swarm/teamHelpers.js'
+  setMemberMode} from '../utils/swarm/teamHelpers.js'
 import { unassignTeammateTasks } from '../utils/tasks.js'
 import {
   getAgentName,
   isPlanModeRequired,
   isTeamLead,
-  isTeammate,
-} from '../utils/teammate.js'
+  isTeammate} from '../utils/teammate.js'
 import { isInProcessTeammate } from '../utils/teammateContext.js'
 import {
   isModeSetRequest,
@@ -62,14 +56,12 @@ import {
   markMessagesAsRead,
   readUnreadMessages,
   type TeammateMessage,
-  writeToMailbox,
-} from '../utils/teammateMailbox.js'
+  writeToMailbox} from '../utils/teammateMailbox.js'
 import {
   hasPermissionCallback,
   hasSandboxPermissionCallback,
   processMailboxPermissionResponse,
-  processSandboxPermissionResponse,
-} from './useSwarmPermissionPoller.js'
+  processSandboxPermissionResponse} from './useSwarmPermissionPoller.js'
 
 /**
  * Get the agent name to poll for messages.
@@ -127,8 +119,7 @@ export function useInboxPoller({
   enabled,
   isLoading,
   focusedInputDialog,
-  onSubmitMessage,
-}: Props): void {
+  onSubmitMessage}: Props): void {
   // Assign to original name for clarity within the function
   const onSubmitTeammateMessage = onSubmitMessage
   const store = useAppStateStore()
@@ -175,10 +166,8 @@ export function useInboxPoller({
                 {
                   type: 'setMode',
                   mode: toExternalPermissionMode(targetMode),
-                  destination: 'session',
-                },
-              ),
-            }))
+                  destination: 'session'},
+              )}))
             logForDebugging(
               `[InboxPoller] Plan approved by team lead, exited plan mode to ${targetMode}`,
             )
@@ -284,13 +273,11 @@ export function useInboxPoller({
             toolUseID: parsed.tool_use_id,
             permissionResult: {
               behavior: 'ask',
-              message: parsed.description,
-            },
+              message: parsed.description},
             permissionPromptStartTimeMs: Date.now(),
             workerBadge: {
               name: parsed.agent_id,
-              color: 'cyan',
-            },
+              color: 'cyan'},
             onUserInteraction() {
               // No-op for tmux workers (no classifier auto-approval)
             },
@@ -312,8 +299,7 @@ export function useInboxPoller({
                   decision: 'approved',
                   resolvedBy: 'leader',
                   updatedInput,
-                  permissionUpdates,
-                },
+                  permissionUpdates},
                 parsed.request_id,
                 teamName,
               )
@@ -324,16 +310,14 @@ export function useInboxPoller({
                 {
                   decision: 'rejected',
                   resolvedBy: 'leader',
-                  feedback,
-                },
+                  feedback},
                 parsed.request_id,
                 teamName,
               )
             },
             async recheckPermission() {
               // No-op for tmux workers — permission state is on the worker side
-            },
-          }
+            }}
 
           // Deduplicate: if markMessagesAsRead failed on a prior poll,
           // the same message will be re-read — skip if already queued.
@@ -356,8 +340,7 @@ export function useInboxPoller({
         void sendNotification(
           {
             message: `${firstParsed.agent_id} needs permission for ${firstParsed.tool_name}`,
-            notificationType: 'worker_permission_prompt',
-          },
+            notificationType: 'worker_permission_prompt'},
           terminal,
         )
       }
@@ -383,14 +366,12 @@ export function useInboxPoller({
               requestId: parsed.request_id,
               decision: 'approved',
               updatedInput: parsed.response?.updated_input,
-              permissionUpdates: parsed.response?.permission_updates,
-            })
+              permissionUpdates: parsed.response?.permission_updates})
           } else {
             processMailboxPermissionResponse({
               requestId: parsed.request_id,
               decision: 'rejected',
-              feedback: parsed.error,
-            })
+              feedback: parsed.error})
           }
         }
       }
@@ -432,8 +413,7 @@ export function useInboxPoller({
           workerName: parsed.workerName,
           workerColor: parsed.workerColor,
           host: parsed.hostPattern.host,
-          createdAt: parsed.createdAt,
-        })
+          createdAt: parsed.createdAt})
       }
 
       if (newSandboxRequests.length > 0) {
@@ -444,9 +424,7 @@ export function useInboxPoller({
             queue: [
               ...prev.workerSandboxPermissions.queue,
               ...newSandboxRequests,
-            ],
-          },
-        }))
+            ]}}))
 
         // Send desktop notification for the first new request
         const firstRequest = newSandboxRequests[0]
@@ -454,8 +432,7 @@ export function useInboxPoller({
           void sendNotification(
             {
               message: `${firstRequest.workerName} needs network access to ${firstRequest.host}`,
-              notificationType: 'worker_permission_prompt',
-            },
+              notificationType: 'worker_permission_prompt'},
             terminal,
           )
         }
@@ -482,14 +459,12 @@ export function useInboxPoller({
           processSandboxPermissionResponse({
             requestId: parsed.requestId,
             host: parsed.host,
-            allow: parsed.allow,
-          })
+            allow: parsed.allow})
 
           // Clear the pending sandbox request indicator
           setAppState(prev => ({
             ...prev,
-            pendingSandboxRequest: null,
-          }))
+            pendingSandboxRequest: null}))
         }
       }
     }
@@ -533,15 +508,13 @@ export function useInboxPoller({
             type: 'addRules',
             rules: parsed.permissionUpdate.rules,
             behavior: parsed.permissionUpdate.behavior,
-            destination: 'session',
-          })
+            destination: 'session'})
           logForDebugging(
             `[InboxPoller] Updated session allow rules: ${jsonStringify(updated.alwaysAllowRules.session)}`,
           )
           return {
             ...prev,
-            toolPermissionContext: updated,
-          }
+            toolPermissionContext: updated}
         })
       }
     }
@@ -582,10 +555,8 @@ export function useInboxPoller({
             {
               type: 'setMode',
               mode: toExternalPermissionMode(targetMode),
-              destination: 'session',
-            },
-          ),
-        }))
+              destination: 'session'},
+          )}))
 
         // Update config.json so team lead can see the new mode
         const teamName = currentAppState.teamContext?.teamName
@@ -622,16 +593,14 @@ export function useInboxPoller({
           requestId: parsed.requestId,
           approved: true,
           timestamp: new Date().toISOString(),
-          permissionMode: modeToInherit,
-        }
+          permissionMode: modeToInherit}
 
         void writeToMailbox(
           m.from,
           {
             from: TEAM_LEAD_NAME,
             text: jsonStringify(approvalResponse),
-            timestamp: new Date().toISOString(),
-          },
+            timestamp: new Date().toISOString()},
           teamName,
         )
 
@@ -645,8 +614,7 @@ export function useInboxPoller({
               requestId: parsed.requestId,
               approved: true,
               timestamp: new Date().toISOString(),
-              permissionMode: modeToInherit,
-            },
+              permissionMode: modeToInherit},
             setAppState,
           )
         }
@@ -726,8 +694,7 @@ export function useInboxPoller({
             if (teamName) {
               removeTeammateFromTeamFile(teamName, {
                 agentId: teammateId,
-                name: teammateToRemove,
-              })
+                name: teammateToRemove})
             }
 
             // Unassign tasks and build notification message
@@ -759,8 +726,7 @@ export function useInboxPoller({
                   updatedTasks[tid] = {
                     ...task,
                     status: 'completed' as const,
-                    endTime: Date.now(),
-                  }
+                    endTime: Date.now()}
                 }
               }
 
@@ -769,8 +735,7 @@ export function useInboxPoller({
                 tasks: updatedTasks,
                 teamContext: {
                   ...prev.teamContext,
-                  teammates: remainingTeammates,
-                },
+                  teammates: remainingTeammates},
                 inbox: {
                   messages: [
                     ...prev.inbox.messages,
@@ -779,14 +744,10 @@ export function useInboxPoller({
                       from: 'system',
                       text: jsonStringify({
                         type: 'teammate_terminated',
-                        message: notificationMessage,
-                      }),
+                        message: notificationMessage}),
                       timestamp: new Date().toISOString(),
-                      status: 'pending' as const,
-                    },
-                  ],
-                },
-              }
+                      status: 'pending' as const},
+                  ]}}
             })
             logForDebugging(
               `[InboxPoller] Removed ${teammateToRemove} (${teammateId}) from teamContext`,
@@ -833,11 +794,8 @@ export function useInboxPoller({
               timestamp: m.timestamp,
               status: 'pending' as const,
               color: m.color,
-              summary: m.summary,
-            })),
-          ],
-        },
-      }))
+              summary: m.summary})),
+          ]}}))
     }
 
     if (!isLoading && !focusedInputDialog) {
@@ -902,9 +860,7 @@ export function useInboxPoller({
       setAppState(prev => ({
         ...prev,
         inbox: {
-          messages: prev.inbox.messages.filter(m => !processedIds.has(m.id)),
-        },
-      }))
+          messages: prev.inbox.messages.filter(m => !processedIds.has(m.id))}}))
     }
 
     // No pending messages to deliver
@@ -931,9 +887,7 @@ export function useInboxPoller({
       setAppState(prev => ({
         ...prev,
         inbox: {
-          messages: prev.inbox.messages.filter(m => !submittedIds.has(m.id)),
-        },
-      }))
+          messages: prev.inbox.messages.filter(m => !submittedIds.has(m.id))}}))
     } else {
       logForDebugging(
         `[InboxPoller] Submission rejected, keeping messages queued`,

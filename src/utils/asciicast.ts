@@ -12,8 +12,7 @@ import { jsonStringify } from './slowOperations.js'
 // Mutable recording state — filePath is updated when session ID changes (e.g., --resume)
 const recordingState: { filePath: string | null; timestamp: number } = {
   filePath: null,
-  timestamp: 0,
-}
+  timestamp: 0}
 
 /**
  * Get the asciicast recording file path.
@@ -121,9 +120,7 @@ export function installAsciicastRecorder(): void {
     timestamp: Math.floor(Date.now() / 1000),
     env: {
       SHELL: process.env.SHELL || '',
-      TERM: process.env.TERM || '',
-    },
-  })
+      TERM: process.env.TERM || ''}})
 
   try {
     // eslint-disable-next-line custom-rules/no-sync-fs -- one-time init before Ink mounts
@@ -194,8 +191,7 @@ export function installAsciicastRecorder(): void {
       await pendingWrite
       process.stdout.removeListener('resize', onResize)
       process.stdout.write = originalWrite
-    },
-  }
+    }}
 
   registerCleanup(async () => {
     await recorder?.dispose()

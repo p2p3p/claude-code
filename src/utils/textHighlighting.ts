@@ -5,8 +5,7 @@ import {
   reduceAnsiCodes,
   type Token,
   tokenize,
-  undoAnsiCodes,
-} from '@alcalzone/ansi-tokenize'
+  undoAnsiCodes} from '@alcalzone/ansi-tokenize'
 import type { Theme } from './theme.js'
 
 export type TextHighlight = {
@@ -157,8 +156,7 @@ class HighlightSegmenter {
 
     return {
       text: prefix + this.text.substring(stringStart, this.stringPos) + suffix,
-      start: visibleStart,
-    }
+      start: visibleStart}
   }
 }
 

@@ -8,11 +8,11 @@ import { Box, Newline, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../../keybindings/useKeybinding.js';
 import { BashTool } from '@claude-code-best/builtin-tools/tools/BashTool/BashTool.js';
 import { WebFetchTool } from '@claude-code-best/builtin-tools/tools/WebFetchTool/WebFetchTool.js';
+import { t } from '../../../utils/i18n/index.js';
 import type { PermissionBehavior, PermissionRuleValue } from '../../../utils/permissions/PermissionRule.js';
 import {
   permissionRuleValueFromString,
-  permissionRuleValueToString,
-} from '../../../utils/permissions/permissionRuleParser.js';
+  permissionRuleValueToString} from '../../../utils/permissions/permissionRuleParser.js';
 
 export type PermissionRuleInputProps = {
   onCancel: () => void;
@@ -45,19 +45,19 @@ export function PermissionRuleInput({ onCancel, onSubmit, ruleBehavior }: Permis
     <>
       <Box flexDirection="column" gap={1} borderStyle="round" paddingLeft={1} paddingRight={1} borderColor="permission">
         <Text bold color="permission">
-          Add {ruleBehavior} permission rule
+          {t('permissionRuleInput.addRule', { behavior: ruleBehavior })}
         </Text>
         <Box flexDirection="column">
           <Text>
-            Permission rules are a tool name, optionally followed by a specifier in parentheses.
+            {t('permissionRuleInput.description')}
             <Newline />
-            e.g., <Text bold>{permissionRuleValueToString({ toolName: WebFetchTool.name })}</Text>
-            <Text bold={false}> or </Text>
+            {t('permissionRuleInput.example')}{' '}
+            <Text bold>{permissionRuleValueToString({ toolName: WebFetchTool.name })}</Text>
+            <Text bold={false}> {t('permissionRuleInput.or')} </Text>
             <Text bold>
               {permissionRuleValueToString({
                 toolName: BashTool.name,
-                ruleContent: 'ls:*',
-              })}
+                ruleContent: 'ls:*'})}
             </Text>
           </Text>
           <Box borderDimColor borderStyle="round" marginY={1} paddingLeft={1}>
@@ -66,7 +66,7 @@ export function PermissionRuleInput({ onCancel, onSubmit, ruleBehavior }: Permis
               value={inputValue}
               onChange={setInputValue}
               onSubmit={handleSubmit}
-              placeholder={`Enter permission rule${figures.ellipsis}`}
+              placeholder={`${t('permissionRuleInput.placeholder')}${figures.ellipsis}`}
               columns={textInputColumns}
               cursorOffset={cursorOffset}
               onChangeCursorOffset={setCursorOffset}
@@ -76,9 +76,9 @@ export function PermissionRuleInput({ onCancel, onSubmit, ruleBehavior }: Permis
       </Box>
       <Box marginLeft={3}>
         {exitState.pending ? (
-          <Text dimColor>Press {exitState.keyName} again to exit</Text>
+          <Text dimColor>{t('common.pressAgain', exitState.keyName)}</Text>
         ) : (
-          <Text dimColor>Enter to submit · Esc to cancel</Text>
+          <Text dimColor>{t('permissionRuleInput.enterToSubmitEscToCancel')}</Text>
         )}
       </Box>
     </>

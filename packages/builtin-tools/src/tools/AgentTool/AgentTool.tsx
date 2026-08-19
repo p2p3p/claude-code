@@ -47,6 +47,7 @@ import { logForDebugging } from 'src/utils/debug.js';
 import { isEnvTruthy } from 'src/utils/envUtils.js';
 import { AbortError, errorMessage, toError } from 'src/utils/errors.js';
 import type { CacheSafeParams } from 'src/utils/forkedAgent.js';
+import { t } from 'src/utils/i18n/index.js';
 import { lazySchema } from 'src/utils/lazySchema.js';
 import { createUserMessage, extractTextContent, isSyntheticMessage, normalizeMessages } from 'src/utils/messages.js';
 import { getAgentModel } from 'src/utils/model/agent.js';
@@ -349,7 +350,7 @@ export const AgentTool = buildTool({
 
     // Check if user is trying to use agent teams without access
     if (team_name && !isAgentSwarmsEnabled()) {
-      throw new Error('Agent Teams is not yet available on your plan.');
+      throw new Error(t('toolUI.agent.agentTeamsNotAvailable'));
     }
 
     // Teammates (in-process or tmux) passing `name` would trigger spawnTeammate()
@@ -357,17 +358,13 @@ export const AgentTool = buildTool({
     // teammates land in the roster with no provenance and confuse the lead.
     const teamName = resolveTeamName({ team_name }, appState);
     if (isTeammate() && teamName && name) {
-      throw new Error(
-        'Teammates cannot spawn other teammates — the team roster is flat. To spawn a subagent instead, omit the `name` parameter.',
-      );
+      throw new Error(t('toolUI.agent.teammatesCannotSpawn'));
     }
     // In-process teammates cannot spawn background agents (their lifecycle is
     // tied to the leader's process). Tmux teammates are separate processes and
     // can manage their own background agents.
     if (isInProcessTeammate() && teamName && run_in_background === true) {
-      throw new Error(
-        'In-process teammates cannot spawn background agents. Use run_in_background=false for synchronous subagents.',
-      );
+      throw new Error(t('toolUI.agent.inProcessTeammateNoBackground'));
     }
 
     // Check if this is a multi-agent spawn request
@@ -426,7 +423,7 @@ export const AgentTool = buildTool({
         toolUseContext.options.querySource === `agent:builtin:${FORK_AGENT.agentType}` ||
         isInForkChild(toolUseContext.messages)
       ) {
-        throw new Error('Fork is not available inside a forked worker. Complete your task directly using your tools.');
+        throw new Error(t('toolUI.agent.forkNotAvailableInForkedWorker'));
       }
       selectedAgent = FORK_AGENT;
     } else {
@@ -447,11 +444,18 @@ export const AgentTool = buildTool({
         if (agentExistsButDenied) {
           const denyRule = getDenyRuleForAgent(appState.toolPermissionContext, AGENT_TOOL_NAME, effectiveType);
           throw new Error(
-            `Agent type '${effectiveType}' has been denied by permission rule '${AGENT_TOOL_NAME}(${effectiveType})' from ${denyRule?.source ?? 'settings'}.`,
+            t('toolUI.agent.agentTypeDenied', {
+              type: effectiveType,
+              toolName: `${AGENT_TOOL_NAME}(${effectiveType})`,
+              source: denyRule?.source ?? 'settings',
+            }),
           );
         }
         throw new Error(
-          `Agent type '${effectiveType}' not found. Available agents: ${agents.map(a => a.agentType).join(', ')}`,
+          t('toolUI.agent.agentTypeNotFound', {
+            type: effectiveType,
+            available: agents.map(a => a.agentType).join(', '),
+          }),
         );
       }
       selectedAgent = found;
@@ -462,7 +466,7 @@ export const AgentTool = buildTool({
     // here because selectedAgent is only now resolved.
     if (isInProcessTeammate() && teamName && selectedAgent.background === true) {
       throw new Error(
-        `In-process teammates cannot spawn background agents. Agent '${selectedAgent.agentType}' has background: true in its definition.`,
+        t('toolUI.agent.agentHasBackgroundTrue', { type: selectedAgent.agentType }),
       );
     }
 
@@ -528,9 +532,11 @@ export const AgentTool = buildTool({
           pattern => !serversWithTools.some(server => server.toLowerCase().includes(pattern.toLowerCase())),
         );
         throw new Error(
-          `Agent '${selectedAgent.agentType}' requires MCP servers matching: ${missing.join(', ')}. ` +
-            `MCP servers with tools: ${serversWithTools.length > 0 ? serversWithTools.join(', ') : 'none'}. ` +
-            `Use /mcp to configure and authenticate the required MCP servers.`,
+          t('toolUI.agent.requiresMcpServers', {
+            type: selectedAgent.agentType,
+            missing: missing.join(', '),
+            serversWithTools: serversWithTools.length > 0 ? serversWithTools.join(', ') : 'none',
+          }),
         );
       }
     }
@@ -570,7 +576,7 @@ export const AgentTool = buildTool({
         const reasons = (eligibility as { eligible: false; errors: BackgroundRemoteSessionPrecondition[] }).errors
           .map(formatPreconditionError)
           .join('\n');
-        throw new Error(`Cannot launch remote agent:\n${reasons}`);
+        throw new Error(t('toolUI.agent.cannotLaunchRemoteAgent', { reasons }));
       }
 
       let bundleFailHint: string | undefined;
@@ -583,7 +589,7 @@ export const AgentTool = buildTool({
         },
       });
       if (!session) {
-        throw new Error(bundleFailHint ?? 'Failed to create remote session');
+        throw new Error(bundleFailHint ?? t('toolUI.agent.failedToCreateRemoteSession'));
       }
 
       const { taskId, sessionId } = registerRemoteAgentTask({
@@ -1588,7 +1594,7 @@ duration_ms: ${data.totalDurationMs}</usage>`,
       };
     }
     data satisfies never;
-    throw new Error(`Unexpected agent tool result status: ${(data as { status: string }).status}`);
+    throw new Error(t('toolUI.agent.unexpectedResultStatus', { status: (data as { status: string }).status }));
   },
   renderToolResultMessage,
   renderToolUseMessage,

@@ -16,14 +16,12 @@ import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import { query } from '../query.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
-import { accumulateUsage, updateUsage } from '../services/api/claude.js'
+  logEvent} from '../services/analytics/index.js'
+import { accumulateUsage, updateUsage } from '../services/api/anthropic/index.js'
 import { EMPTY_USAGE, type NonNullableUsage } from '@ant/model-provider'
 import type {
   BetaRawMessageDeltaEvent,
-  BetaRawMessageStreamEvent,
-} from '@anthropic-ai/sdk/resources/beta/messages/messages.js'
+  BetaRawMessageStreamEvent} from '@anthropic-ai/sdk/resources/beta/messages/messages.js'
 import type { ToolUseContext } from '../Tool.js'
 import type { AgentDefinition } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import type { AgentId } from '../types/ids.js'
@@ -35,16 +33,14 @@ import type { REPLHookContext } from './hooks/postSamplingHooks.js'
 import {
   createUserMessage,
   extractTextContent,
-  getLastAssistantMessage,
-} from './messages.js'
+  getLastAssistantMessage} from './messages.js'
 import { createDenialTrackingState } from './permissions/denialTracking.js'
 import { parseToolListFromCLI } from './permissions/permissionSetup.js'
 import { recordSidechainTranscript } from './sessionStorage.js'
 import type { SystemPrompt } from './systemPromptType.js'
 import {
   type ContentReplacementState,
-  cloneContentReplacementState,
-} from './toolResultStorage.js'
+  cloneContentReplacementState} from './toolResultStorage.js'
 import { createAgentId } from './uuid.js'
 
 /**
@@ -131,8 +127,7 @@ export function createCacheSafeParams(
     userContext: context.userContext,
     systemContext: context.systemContext,
     toolUseContext: context.toolUseContext,
-    forkContextMessages: context.messages,
-  }
+    forkContextMessages: context.messages}
 }
 
 /**
@@ -158,10 +153,7 @@ export function createGetAppStateWithAllowedTools(
                 []),
               ...allowedTools,
             ]),
-          ],
-        },
-      },
-    }
+          ]}}}
   }
 }
 
@@ -222,8 +214,7 @@ export async function prepareForkedCommandContext(
     skillContent,
     modifiedGetAppState,
     baseAgent,
-    promptMessages,
-  }
+    promptMessages}
 }
 
 /**
@@ -365,9 +356,7 @@ export function createSubagentContext(
             ...state,
             toolPermissionContext: {
               ...state.toolPermissionContext,
-              shouldAvoidPermissionPrompts: true,
-            },
-          }
+              shouldAvoidPermissionPrompts: true}}
         }
 
   return {
@@ -452,14 +441,12 @@ export function createSubagentContext(
     // Create new query tracking chain for subagent with incremented depth
     queryTracking: {
       chainId: randomUUID(),
-      depth: (parentContext.queryTracking?.depth ?? -1) + 1,
-    },
+      depth: (parentContext.queryTracking?.depth ?? -1) + 1},
     fileReadingLimits: parentContext.fileReadingLimits,
     userModified: parentContext.userModified,
     criticalSystemReminder_EXPERIMENTAL:
       overrides?.criticalSystemReminder_EXPERIMENTAL,
-    requireCanUseTool: overrides?.requireCanUseTool,
-  }
+    requireCanUseTool: overrides?.requireCanUseTool}
 }
 
 /**
@@ -516,8 +503,7 @@ export async function runForkedAgent({
   maxTurns,
   onMessage,
   skipTranscript,
-  skipCacheWrite,
-}: ForkedAgentParams): Promise<ForkedAgentResult> {
+  skipCacheWrite}: ForkedAgentParams): Promise<ForkedAgentResult> {
   const startTime = Date.now()
   const outputMessages: Message[] = []
   let totalUsage: NonNullableUsage = { ...EMPTY_USAGE }
@@ -527,8 +513,7 @@ export async function runForkedAgent({
     userContext,
     systemContext,
     toolUseContext,
-    forkContextMessages,
-  } = cacheSafeParams
+    forkContextMessages} = cacheSafeParams
 
   // Create isolated context to prevent mutation of parent state
   const isolatedToolUseContext = createSubagentContext(
@@ -571,8 +556,7 @@ export async function runForkedAgent({
       querySource,
       maxOutputTokensOverride: maxOutputTokens,
       maxTurns,
-      skipCacheWrite,
-    })) {
+      skipCacheWrite})) {
       // Extract real usage from message_delta stream events (final usage per API call)
       if (message.type === 'stream_event') {
         if (isMessageDeltaStreamEvent(message)) {
@@ -643,13 +627,11 @@ export async function runForkedAgent({
     durationMs,
     messageCount: outputMessages.length,
     totalUsage,
-    queryTracking: toolUseContext.queryTracking,
-  })
+    queryTracking: toolUseContext.queryTracking})
 
   return {
     messages: outputMessages,
-    totalUsage,
-  }
+    totalUsage}
 }
 
 /**
@@ -661,8 +643,7 @@ function logForkAgentQueryEvent({
   durationMs,
   messageCount,
   totalUsage,
-  queryTracking,
-}: {
+  queryTracking}: {
   forkLabel: string
   querySource: QuerySource
   durationMs: number
@@ -709,8 +690,6 @@ function logForkAgentQueryEvent({
       ? {
           queryChainId:
             queryTracking.chainId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          queryDepth: queryTracking.depth,
-        }
-      : {}),
-  })
+          queryDepth: queryTracking.depth}
+      : {})})
 }

@@ -12,9 +12,13 @@ import { clearBetasCaches } from '../../utils/betas.js';
 import { saveGlobalConfig } from '../../utils/config.js';
 import { gracefulShutdownSync } from '../../utils/gracefulShutdown.js';
 import { getSecureStorage } from '../../utils/secureStorage/index.js';
-import { getSettingsForSource, updateSettingsForSource } from '../../utils/settings/settings.js';
 import { clearToolSchemaCache } from '../../utils/toolSchemaCache.js';
+import {
+  clearPlatformEnv,
+  isCurrentSubscription,
+  setProviderLayer} from '../../accounts/index.js';
 import { resetUserCache } from '../../utils/user.js';
+import { t } from '../../utils/i18n/index.js'
 
 export async function performLogout({ clearOnboarding = false }): Promise<void> {
   // Flush telemetry BEFORE clearing credentials to prevent org data leakage
@@ -39,8 +43,7 @@ export async function performLogout({ clearOnboarding = false }): Promise<void> 
       if (updated.customApiKeyResponses?.approved) {
         updated.customApiKeyResponses = {
           ...updated.customApiKeyResponses,
-          approved: [],
-        };
+          approved: []};
       }
     }
     updated.oauthAccount = undefined;
@@ -50,18 +53,12 @@ export async function performLogout({ clearOnboarding = false }): Promise<void> 
 
 function clearChatGPTSettingsAuthMode(): void {
   delete process.env.OPENAI_AUTH_MODE;
-  const userSettings = getSettingsForSource('userSettings') ?? {};
-  const env = userSettings.env ?? {};
-  const hasOpenAICompatibleConfig =
-    Boolean(env.OPENAI_API_KEY ?? process.env.OPENAI_API_KEY) &&
-    Boolean(env.OPENAI_BASE_URL ?? process.env.OPENAI_BASE_URL);
-  const settingsUpdate: Parameters<typeof updateSettingsForSource>[1] = {
-    ...(userSettings.modelType === 'openai' && !hasOpenAICompatibleConfig ? { modelType: undefined } : {}),
-    env: {
-      OPENAI_AUTH_MODE: undefined,
-    } as unknown as Record<string, string>,
-  };
-  updateSettingsForSource('userSettings', settingsUpdate);
+  // Route through the accounts domain: only clears when the active layer is a
+  // subscription, and clears both session memory and the disk `current`.
+  if (isCurrentSubscription()) {
+    setProviderLayer(undefined);
+    clearPlatformEnv();
+  }
 }
 
 // clearing anything memoized that must be invalidated when user/session/auth changes
@@ -90,7 +87,7 @@ export async function clearAuthRelatedCaches(): Promise<void> {
 export async function call(): Promise<React.ReactNode> {
   await performLogout({ clearOnboarding: true });
 
-  const message = <Text>Successfully logged out.</Text>;
+  const message = <Text>{t('logout.successfullyLoggedOut')}</Text>;
 
   setTimeout(() => {
     gracefulShutdownSync(0, 'logout');

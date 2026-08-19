@@ -17,8 +17,7 @@ import {
   isProactivePaused,
   isContextBlocked,
   setNextTickAt,
-  shouldTick,
-} from './index.js'
+  shouldTick} from './index.js'
 
 /** Default interval between ticks (ms). Prompt cache TTL is ~5 min so we
  *  stay well under that to keep the cache warm. */
@@ -61,8 +60,7 @@ export function useProactive(opts: UseProactiveOpts): void {
           isLoading,
           queuedCommandsLength,
           hasActiveLocalJsxUI,
-          isInPlanMode,
-        } = optsRef.current
+          isInPlanMode} = optsRef.current
 
         // Don't fire while a query is in-flight, plan mode is active,
         // a local JSX UI is showing, or commands are queued
@@ -82,8 +80,7 @@ export function useProactive(opts: UseProactiveOpts): void {
           const commands = await createProactiveAutonomyCommands({
             basePrompt: `<${TICK_TAG}>${new Date().toLocaleTimeString()}</${TICK_TAG}>`,
             currentDir: getCwd(),
-            shouldCreate: () => !disposed,
-          })
+            shouldCreate: () => !disposed})
           if (disposed) {
             await cancelQueuedAutonomyCommands({ commands })
             return
@@ -102,15 +99,13 @@ export function useProactive(opts: UseProactiveOpts): void {
             await cancelQueuedAutonomyCommands({
               commands: commands.filter(
                 command => !queuedCommands.includes(command),
-              ),
-            })
+              )})
             throw error
           }
         })()
           .catch(error =>
             logForDebugging(`[Proactive] failed to create tick: ${error}`, {
-              level: 'error',
-            }),
+              level: 'error'}),
           )
           .finally(() => {
             generating = false

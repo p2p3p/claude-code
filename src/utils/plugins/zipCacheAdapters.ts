@@ -19,14 +19,12 @@ import {
   type KnownMarketplacesFile,
   KnownMarketplacesFileSchema,
   type PluginMarketplace,
-  PluginMarketplaceSchema,
-} from './schemas.js'
+  PluginMarketplaceSchema} from './schemas.js'
 import {
   atomicWriteToZipCache,
   getMarketplaceJsonRelativePath,
   getPluginZipCachePath,
-  getZipCacheKnownMarketplacesPath,
-} from './zipCache.js'
+  getZipCacheKnownMarketplacesPath} from './zipCache.js'
 
 // ── Metadata I/O ──
 
@@ -158,7 +156,6 @@ export async function syncMarketplacesToZipCache(): Promise<void> {
   const zipCacheKnownMarketplaces = await readZipCacheKnownMarketplaces()
   const mergedKnownMarketplaces: KnownMarketplacesFile = {
     ...zipCacheKnownMarketplaces,
-    ...knownMarketplaces,
-  }
+    ...knownMarketplaces}
   await writeZipCacheKnownMarketplaces(mergedKnownMarketplaces)
 }

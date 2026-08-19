@@ -4,20 +4,16 @@ import { KeyboardEvent, useInput } from '@anthropic/ink'
 import {
   type AppState,
   useAppState,
-  useSetAppState,
-} from '../state/AppState.js'
+  useSetAppState} from '../state/AppState.js'
 import {
   enterTeammateView,
-  exitTeammateView,
-} from '../state/teammateViewHelpers.js'
+  exitTeammateView} from '../state/teammateViewHelpers.js'
 import {
   getRunningTeammatesSorted,
-  InProcessTeammateTask,
-} from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
+  InProcessTeammateTask} from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
 import {
   type InProcessTeammateTaskState,
-  isInProcessTeammateTask,
-} from '../tasks/InProcessTeammateTask/types.js'
+  isInProcessTeammateTask} from '../tasks/InProcessTeammateTask/types.js'
 import { isBackgroundTask } from '../tasks/types.js'
 
 // Step teammate selection by delta, wrapping across leader(-1)..teammates(0..n-1)..hide(n).
@@ -35,8 +31,7 @@ function stepTeammateSelection(
         ...prev,
         expandedView: 'teammates' as const,
         viewSelectionMode: 'selecting-agent',
-        selectedIPAgentIndex: -1,
-      }
+        selectedIPAgentIndex: -1}
     }
 
     const maxIdx = currentCount // hide row
@@ -52,8 +47,7 @@ function stepTeammateSelection(
     return {
       ...prev,
       selectedIPAgentIndex: next,
-      viewSelectionMode: 'selecting-agent',
-    }
+      viewSelectionMode: 'selecting-agent'}
   })
 }
 
@@ -108,14 +102,12 @@ export function useBackgroundTaskNavigation(options?: {
         if (prev.viewSelectionMode === 'viewing-agent') {
           return {
             ...prev,
-            selectedIPAgentIndex: -1,
-          }
+            selectedIPAgentIndex: -1}
         }
         return {
           ...prev,
           selectedIPAgentIndex: -1,
-          viewSelectionMode: 'none',
-        }
+          viewSelectionMode: 'none'}
       }
 
       // Clamp if index is out of bounds
@@ -125,8 +117,7 @@ export function useBackgroundTaskNavigation(options?: {
       if (currentCount > 0 && prev.selectedIPAgentIndex > maxIndex) {
         return {
           ...prev,
-          selectedIPAgentIndex: maxIndex,
-        }
+          selectedIPAgentIndex: maxIndex}
       }
 
       return prev
@@ -172,8 +163,7 @@ export function useBackgroundTaskNavigation(options?: {
       setAppState(prev => ({
         ...prev,
         viewSelectionMode: 'none',
-        selectedIPAgentIndex: -1,
-      }))
+        selectedIPAgentIndex: -1}))
       return
     }
 
@@ -223,8 +213,7 @@ export function useBackgroundTaskNavigation(options?: {
           ...prev,
           expandedView: 'none' as const,
           viewSelectionMode: 'none',
-          selectedIPAgentIndex: -1,
-        }))
+          selectedIPAgentIndex: -1}))
       } else {
         const selected = getSelectedTeammate()
         if (selected) {

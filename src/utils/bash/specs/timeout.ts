@@ -7,14 +7,11 @@ const timeout: CommandSpec = {
     {
       name: 'duration',
       description: 'Duration to wait before timing out (e.g., 10, 5s, 2m)',
-      isOptional: false,
-    },
+      isOptional: false},
     {
       name: 'command',
       description: 'Command to run',
-      isCommand: true,
-    },
-  ],
-}
+      isCommand: true},
+  ]}
 
 export default timeout

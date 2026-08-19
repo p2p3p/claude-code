@@ -5,8 +5,7 @@ import type {
   SDKControlCancelRequest,
   SDKControlRequest,
   SDKControlRequestInner,
-  SDKControlResponse,
-} from '../entrypoints/sdk/controlTypes.js'
+  SDKControlResponse} from '../entrypoints/sdk/controlTypes.js'
 import { logForDebugging } from '../utils/debug.js'
 import { errorMessage } from '../utils/errors.js'
 import { logError } from '../utils/log.js'
@@ -114,8 +113,7 @@ export class SessionsWebSocket {
     const accessToken = this.getAccessToken()
     const headers = {
       Authorization: `Bearer ${accessToken}`,
-      'anthropic-version': '2023-06-01',
-    }
+      'anthropic-version': '2023-06-01'}
 
     if (typeof Bun !== 'undefined') {
       // Bun's WebSocket supports headers/proxy options but the DOM typings don't
@@ -123,8 +121,7 @@ export class SessionsWebSocket {
       const ws = new globalThis.WebSocket(url, {
         headers,
         proxy: getWebSocketProxyUrl(url),
-        tls: getWebSocketTLSOptions() || undefined,
-      } as unknown as string[])
+        tls: getWebSocketTLSOptions() || undefined} as unknown as string[])
       this.ws = ws
 
       ws.addEventListener('open', () => {
@@ -166,8 +163,7 @@ export class SessionsWebSocket {
       const ws = new WS(url, {
         headers,
         agent: getWebSocketProxyAgent(url),
-        ...getWebSocketTLSOptions(),
-      })
+        ...getWebSocketTLSOptions()})
       this.ws = ws
 
       ws.on('open', () => {
@@ -347,8 +343,7 @@ export class SessionsWebSocket {
     const controlRequest: SDKControlRequest = {
       type: 'control_request',
       request_id: randomUUID(),
-      request,
-    }
+      request}
 
     logForDebugging(
       `[SessionsWebSocket] Sending control request: ${request.subtype}`,

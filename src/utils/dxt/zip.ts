@@ -120,8 +120,7 @@ export async function unzipFile(
     fileCount: 0,
     totalUncompressedSize: 0,
     compressedSize: compressedSize,
-    errors: [],
-  }
+    errors: []}
 
   const result = unzipSync(new Uint8Array(zipData), {
     filter: file => {
@@ -130,8 +129,7 @@ export async function unzipFile(
         throw new Error(validationResult.error!)
       }
       return true
-    },
-  })
+    }})
 
   logForDebugging(
     `Zip extraction completed: ${state.fileCount} files, ${Math.round(state.totalUncompressedSize / 1024)}KB uncompressed`,

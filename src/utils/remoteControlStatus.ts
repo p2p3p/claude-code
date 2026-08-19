@@ -1,8 +1,7 @@
 import {
   getBridgeAccessToken,
   getBridgeBaseUrl,
-  isSelfHostedBridge,
-} from '../bridge/bridgeConfig.js'
+  isSelfHostedBridge} from '../bridge/bridgeConfig.js'
 
 export function formatRemoteControlLocalStatus(): string {
   try {

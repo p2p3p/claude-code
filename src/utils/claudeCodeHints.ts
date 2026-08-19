@@ -113,7 +113,7 @@ export function extractClaudeCodeHints(
   // model-visible output doesn't grow vertical whitespace.
   const collapsed =
     hints.length > 0 || stripped !== output
-      ? stripped.replace(/\n{3,}/g, '\n\n')
+      ? stripped.replace(/\n{3}/g, '\n\n')
       : stripped
 
   return { hints, stripped: collapsed }
@@ -189,5 +189,4 @@ export function _resetClaudeCodeHintStore(): void {
 
 export const _test = {
   parseAttrs,
-  firstCommandToken,
-}
+  firstCommandToken}

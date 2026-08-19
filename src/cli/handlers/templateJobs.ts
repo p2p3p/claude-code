@@ -1,11 +1,11 @@
 import { randomUUID } from 'crypto'
+import { t } from '../../utils/i18n/index.js'
 import { listTemplates, loadTemplate } from '../../jobs/templates.js'
 import {
   createJob,
   readJobState,
   appendJobReply,
-  getJobDir,
-} from '../../jobs/state.js'
+  getJobDir} from '../../jobs/state.js'
 
 /**
  * Entry point for template job commands: `new`, `list`, `reply`.
@@ -28,63 +28,54 @@ export async function templatesMain(args: string[]): Promise<void> {
       handleStatus(args.slice(1))
       break
     default:
-      console.error(`Unknown template command: ${subcommand}`)
+      console.error(t('templateJobs.unknownCommand', subcommand))
       printUsage()
       process.exitCode = 1
   }
 }
 
 function printUsage(): void {
-  console.log(`
-Template Job Commands:
-
-  claude job list                    List available templates
-  claude job new <template> [args]   Create a new job from a template
-  claude job reply <job-id> <text>   Reply to an existing job
-  claude job status <job-id>         Show job status
-`)
+  console.log(t('templateJobs.usage'))
 }
 
 function handleStatus(args: string[]): void {
   const jobId = args[0]
   if (!jobId) {
-    console.error('Usage: claude job status <job-id>')
+    console.error(t('templateJobs.usageStatus'))
     process.exitCode = 1
     return
   }
 
   const state = readJobState(jobId)
   if (!state) {
-    console.error(`Job not found: ${jobId}`)
+    console.error(t('templateJobs.jobNotFound', jobId))
     process.exitCode = 1
     return
   }
 
-  console.log(`Job: ${state.jobId}`)
-  console.log(`  Template: ${state.templateName}`)
-  console.log(`  Status: ${state.status}`)
-  console.log(`  Created: ${state.createdAt}`)
-  console.log(`  Updated: ${state.updatedAt}`)
-  console.log(`  Args: ${state.args.join(' ') || '(none)'}`)
+  console.log(t('templateJobs.jobLabel', state.jobId))
+  console.log(t('templateJobs.templateLabel', state.templateName))
+  console.log(t('templateJobs.statusLabel', state.status))
+  console.log(t('templateJobs.createdLabel', state.createdAt))
+  console.log(t('templateJobs.updatedLabel', state.updatedAt))
+  console.log(t('templateJobs.argsLabel', state.args.join(' ') || t('templateJobs.none')))
 }
 
 function handleList(): void {
   const templates = listTemplates()
 
   if (templates.length === 0) {
-    console.log('No templates found.')
-    console.log('Place .md files in .claude/templates/ or ~/.claude/templates/')
+    console.log(t('templateJobs.noTemplatesFound'))
+    console.log(t('templateJobs.placeTemplates'))
     return
   }
 
-  console.log(
-    `${templates.length} template${templates.length > 1 ? 's' : ''} found:\n`,
-  )
+  console.log(t('templateJobs.templatesFound', templates.length))
 
-  for (const t of templates) {
-    console.log(`  ${t.name}`)
-    console.log(`    ${t.description}`)
-    console.log(`    Path: ${t.filePath}`)
+  for (const tpl of templates) {
+    console.log(`  ${tpl.name}`)
+    console.log(`    ${tpl.description}`)
+    console.log(t('templateJobs.pathLabel', tpl.filePath))
     console.log()
   }
 }
@@ -92,17 +83,17 @@ function handleList(): void {
 function handleNew(args: string[]): void {
   const templateName = args[0]
   if (!templateName) {
-    console.error('Usage: claude job new <template> [args...]')
+    console.error(t('templateJobs.usageNew'))
     process.exitCode = 1
     return
   }
 
   const template = loadTemplate(templateName)
   if (!template) {
-    console.error(`Template not found: ${templateName}`)
-    console.log('\nAvailable templates:')
-    for (const t of listTemplates()) {
-      console.log(`  ${t.name}`)
+    console.error(t('templateJobs.templateNotFound', templateName))
+    console.log(t('templateJobs.availableTemplates'))
+    for (const tpl of listTemplates()) {
+      console.log(`  ${tpl.name}`)
     }
     process.exitCode = 1
     return
@@ -122,11 +113,11 @@ function handleNew(args: string[]): void {
     args.slice(1),
   )
 
-  console.log(`Job created: ${jobId}`)
-  console.log(`  Template: ${templateName}`)
-  console.log(`  Directory: ${dir}`)
+  console.log(t('templateJobs.jobCreated', jobId))
+  console.log(t('templateJobs.templateLabel', templateName))
+  console.log(t('templateJobs.directoryLabel', dir))
   if (inputText) {
-    console.log(`  Input: ${inputText}`)
+    console.log(t('templateJobs.inputLabel', inputText))
   }
 }
 
@@ -135,24 +126,24 @@ function handleReply(args: string[]): void {
   const text = args.slice(1).join(' ')
 
   if (!jobId || !text) {
-    console.error('Usage: claude job reply <job-id> <text>')
+    console.error(t('templateJobs.usageReply'))
     process.exitCode = 1
     return
   }
 
   const state = readJobState(jobId)
   if (!state) {
-    console.error(`Job not found: ${jobId}`)
+    console.error(t('templateJobs.jobNotFound', jobId))
     process.exitCode = 1
     return
   }
 
   const ok = appendJobReply(jobId, text)
   if (ok) {
-    console.log(`Reply added to job ${jobId}`)
-    console.log(`  Directory: ${getJobDir(jobId)}`)
+    console.log(t('templateJobs.replyAdded', jobId))
+    console.log(t('templateJobs.directoryLabel', getJobDir(jobId)))
   } else {
-    console.error(`Failed to append reply to job ${jobId}`)
+    console.error(t('templateJobs.replyFailed', jobId))
     process.exitCode = 1
   }
 }

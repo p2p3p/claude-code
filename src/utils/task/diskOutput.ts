@@ -5,8 +5,7 @@ import {
   open,
   stat,
   symlink,
-  unlink,
-} from 'fs/promises'
+  unlink} from 'fs/promises'
 import { join } from 'path'
 import { getSessionId } from '../../bootstrap/state.js'
 import { getErrnoCode } from '../errors.js'
@@ -317,8 +316,7 @@ export async function getTaskOutputDelta(
     }
     return {
       content: result.content,
-      newOffset: fromOffset + result.bytesRead,
-    }
+      newOffset: fromOffset + result.bytesRead}
   } catch (e) {
     const code = getErrnoCode(e)
     if (code === 'ENOENT') {

@@ -2,6 +2,7 @@ import { chmod, mkdir, readFile, unlink, writeFile } from 'fs/promises'
 import { homedir } from 'os'
 import { join } from 'path'
 import { logForDebugging } from 'src/utils/debug.js'
+import { t } from '../../../utils/i18n/index.js'
 
 const ISSUER = 'https://auth.openai.com'
 const CLIENT_ID = 'app_EMoamEEZ73f0CkXaXp7hrann'
@@ -136,10 +137,8 @@ async function readStoredAuth(path: string): Promise<ChatGPTAuthTokens | null> {
       accountId: extractAccountId({
         idToken,
         accessToken,
-        accountId: tokens.account_id,
-      }),
-      lastRefresh: parsed.last_refresh,
-    }
+        accountId: tokens.account_id}),
+      lastRefresh: parsed.last_refresh}
   } catch {
     return null
   }
@@ -154,13 +153,10 @@ async function saveStoredAuth(tokens: ChatGPTAuthTokens): Promise<void> {
       id_token: tokens.idToken,
       access_token: tokens.accessToken,
       refresh_token: tokens.refreshToken,
-      account_id: extractAccountId(tokens),
-    },
-    last_refresh: new Date().toISOString(),
-  }
+      account_id: extractAccountId(tokens)},
+    last_refresh: new Date().toISOString()}
   await writeFile(path, `${JSON.stringify(body, null, 2)}\n`, {
-    mode: 0o600,
-  })
+    mode: 0o600})
   await chmod(path, 0o600).catch(() => undefined)
 }
 
@@ -171,10 +167,9 @@ async function postJSON<T>(
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
+    body: JSON.stringify(body)})
   if (!res.ok) {
-    throw new Error(`ChatGPT auth request failed (${res.status})`)
+    throw new Error(t('chatgptAuth.authRequestFailed', String(res.status)))
   }
   return (await res.json()) as T
 }
@@ -183,12 +178,11 @@ async function postForm<T>(url: string, body: URLSearchParams): Promise<T> {
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  })
+    body})
   if (!res.ok) {
     const text = await res.text().catch(() => '')
     throw new Error(
-      `ChatGPT token request failed (${res.status})${text ? `: ${text}` : ''}`,
+      t('chatgptAuth.tokenRequestFailed', String(res.status), text),
     )
   }
   return (await res.json()) as T
@@ -207,7 +201,7 @@ export async function requestChatGPTDeviceCode(): Promise<ChatGPTDeviceCode> {
   )
   const userCode = data.user_code ?? data.usercode
   if (!data.device_auth_id || !userCode) {
-    throw new Error('ChatGPT auth response did not include a device code')
+    throw new Error(t('chatgptAuth.noDeviceCode'))
   }
   const interval =
     typeof data.interval === 'number'
@@ -217,8 +211,7 @@ export async function requestChatGPTDeviceCode(): Promise<ChatGPTDeviceCode> {
     verificationUrl: `${ISSUER}/codex/device`,
     userCode,
     deviceAuthId: data.device_auth_id,
-    intervalSeconds: Number.isFinite(interval) && interval > 0 ? interval : 5,
-  }
+    intervalSeconds: Number.isFinite(interval) && interval > 0 ? interval : 5}
 }
 
 async function pollForAuthorizationCode(
@@ -231,31 +224,28 @@ async function pollForAuthorizationCode(
   }
   const started = Date.now()
   while (Date.now() - started < 15 * 60 * 1000) {
-    if (signal?.aborted) throw new Error('ChatGPT login cancelled')
+    if (signal?.aborted) throw new Error(t('chatgptAuth.loginCancelled'))
     const res = await fetch(`${ISSUER}/api/accounts/deviceauth/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         device_auth_id: deviceCode.deviceAuthId,
-        user_code: deviceCode.userCode,
-      }),
-      signal,
-    })
+        user_code: deviceCode.userCode}),
+      signal})
     if (res.ok) {
       const data = (await res.json()) as TokenPollResponse
       return {
         authorizationCode: data.authorization_code,
-        codeVerifier: data.code_verifier,
-      }
+        codeVerifier: data.code_verifier}
     }
     if (res.status !== 403 && res.status !== 404) {
-      throw new Error(`ChatGPT device auth failed (${res.status})`)
+      throw new Error(t('chatgptAuth.deviceAuthFailed', String(res.status)))
     }
     await new Promise(resolve =>
       setTimeout(resolve, deviceCode.intervalSeconds * 1000),
     )
   }
-  throw new Error('ChatGPT device auth timed out after 15 minutes')
+  throw new Error(t('chatgptAuth.deviceAuthTimedOut'))
 }
 
 async function exchangeAuthorizationCode(params: {
@@ -272,8 +262,7 @@ async function exchangeAuthorizationCode(params: {
     code: params.authorizationCode,
     redirect_uri: `${ISSUER}/deviceauth/callback`,
     client_id: CLIENT_ID,
-    code_verifier: params.codeVerifier,
-  })
+    code_verifier: params.codeVerifier})
   const data = await postForm<TokenResponse>(`${ISSUER}/oauth/token`, body)
   return {
     idToken: data.id_token,
@@ -281,9 +270,7 @@ async function exchangeAuthorizationCode(params: {
     refreshToken: data.refresh_token,
     accountId: extractAccountId({
       idToken: data.id_token,
-      accessToken: data.access_token,
-    }),
-  }
+      accessToken: data.access_token})}
 }
 
 async function refreshTokens(
@@ -299,8 +286,7 @@ async function refreshTokens(
     refresh_token: tokens.refreshToken,
     client_id: CLIENT_ID,
     scope:
-      'openid profile email offline_access api.connectors.read api.connectors.invoke',
-  })
+      'openid profile email offline_access api.connectors.read api.connectors.invoke'})
   const data = await postForm<TokenResponse>(`${ISSUER}/oauth/token`, body)
   return {
     idToken: data.id_token,
@@ -309,9 +295,7 @@ async function refreshTokens(
     accountId: extractAccountId({
       idToken: data.id_token,
       accessToken: data.access_token,
-      accountId: tokens.accountId,
-    }),
-  }
+      accountId: tokens.accountId})}
 }
 
 export async function completeChatGPTDeviceLogin(
@@ -322,10 +306,6 @@ export async function completeChatGPTDeviceLogin(
   const tokens = await exchangeAuthorizationCode(code)
   await saveStoredAuth(tokens)
   return tokens
-}
-
-export function isChatGPTAuthEnabled(): boolean {
-  return process.env.OPENAI_AUTH_MODE === 'chatgpt'
 }
 
 export async function removeChatGPTAuth(): Promise<void> {
@@ -346,7 +326,7 @@ export async function getValidChatGPTAuth(): Promise<ChatGPTAuth> {
   }
   if (!tokens) {
     throw new Error(
-      'ChatGPT account is not logged in. Run /login and select ChatGPT account with subscription.',
+      t('chatgptAuth.notLoggedIn'),
     )
   }
   const expiresAt = getTokenExpiryMs(tokens.accessToken)
@@ -356,6 +336,5 @@ export async function getValidChatGPTAuth(): Promise<ChatGPTAuth> {
   }
   return {
     accessToken: tokens.accessToken,
-    accountId: tokens.accountId ?? extractAccountId(tokens),
-  }
+    accountId: tokens.accountId ?? extractAccountId(tokens)}
 }

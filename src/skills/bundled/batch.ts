@@ -5,6 +5,7 @@ import { EXIT_PLAN_MODE_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/
 import { SKILL_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/SkillTool/constants.js'
 import { getIsGit } from '../../utils/git.js'
 import { registerBundledSkill } from '../bundledSkills.js'
+import { t } from '../../utils/i18n/index.js'
 
 const MIN_AGENTS = 5
 const MAX_AGENTS = 30
@@ -88,22 +89,17 @@ When all agents have reported, render the final table and a one-line summary (e.
 `
 }
 
-const NOT_A_GIT_REPO_MESSAGE = `This is not a git repository. The \`/batch\` command requires a git repo because it spawns agents in isolated git worktrees and creates PRs from each. Initialize a repo first, or run this from inside an existing one.`
+const NOT_A_GIT_REPO_MESSAGE = t('batch.notAGitRepo')
 
-const MISSING_INSTRUCTION_MESSAGE = `Provide an instruction describing the batch change you want to make.
-
-Examples:
-  /batch migrate from react to vue
-  /batch replace all uses of lodash with native equivalents
-  /batch add type annotations to all untyped function parameters`
+const MISSING_INSTRUCTION_MESSAGE = t('batch.missingInstruction')
 
 export function registerBatchSkill(): void {
   registerBundledSkill({
     name: 'batch',
     description:
-      'Research and plan a large-scale change, then execute it in parallel across 5–30 isolated worktree agents that each open a PR.',
+      t('batch.description'),
     whenToUse:
-      'Use when the user wants to make a sweeping, mechanical change across many files (migrations, refactors, bulk renames) that can be decomposed into independent parallel units.',
+      t('batch.whenToUse'),
     argumentHint: '<instruction>',
     userInvocable: true,
     disableModelInvocation: true,
@@ -119,6 +115,5 @@ export function registerBatchSkill(): void {
       }
 
       return [{ type: 'text', text: buildPrompt(instruction) }]
-    },
-  })
+    }})
 }

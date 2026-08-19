@@ -4,6 +4,7 @@ import { TOOL_SUMMARY_MAX_LENGTH } from 'src/constants/toolLimits.js';
 import { Box, Text } from '@anthropic/ink';
 import type { ProgressMessage } from 'src/types/message.js';
 import { truncate } from 'src/utils/format.js';
+import { t } from 'src/utils/i18n/index.js';
 import type { Output, SearchResult, WebSearchProgress } from './WebSearchTool.js';
 
 function getSearchSummary(results: (SearchResult | string | null | undefined)[]): {
@@ -47,11 +48,11 @@ export function renderToolUseMessage(
 
   if (verbose) {
     if (allowed_domains && allowed_domains.length > 0) {
-      message += `, only allowing domains: ${allowed_domains.join(', ')}`;
+      message += t('toolUI.webSearch.onlyAllowing', allowed_domains.join(', '));
     }
 
     if (blocked_domains && blocked_domains.length > 0) {
-      message += `, blocking domains: ${blocked_domains.join(', ')}`;
+      message += t('toolUI.webSearch.blockingDomains', blocked_domains.join(', '));
     }
   }
 
@@ -74,14 +75,14 @@ export function renderToolUseProgressMessage(progressMessages: ProgressMessage<W
     case 'query_update':
       return (
         <MessageResponse>
-          <Text dimColor>Searching: {data.query}</Text>
+          <Text dimColor>{t('toolUI.webSearch.searching', data.query)}</Text>
         </MessageResponse>
       );
     case 'search_results_received':
       return (
         <MessageResponse>
           <Text dimColor>
-            Found {data.resultCount} results for &quot;{data.query}&quot;
+            {t('toolUI.webSearch.foundResults', data.resultCount, data.query)}
           </Text>
         </MessageResponse>
       );
@@ -101,8 +102,7 @@ export function renderToolResultMessage(output: Output): React.ReactNode {
     <Box justifyContent="space-between" width="100%">
       <MessageResponse height={1}>
         <Text>
-          Did {searchCount} search
-          {searchCount !== 1 ? 'es' : ''} in {timeDisplay}
+          {t('toolUI.webSearch.didSearch', searchCount, timeDisplay)}
         </Text>
       </MessageResponse>
     </Box>

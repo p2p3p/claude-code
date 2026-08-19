@@ -17,33 +17,28 @@ import type { CanUseToolFn } from '../../hooks/useCanUseTool.js'
 import {
   processMailboxPermissionResponse,
   registerPermissionCallback,
-  unregisterPermissionCallback,
-} from '../../hooks/useSwarmPermissionPoller.js'
+  unregisterPermissionCallback} from '../../hooks/useSwarmPermissionPoller.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import { getAutoCompactThreshold } from '../../services/compact/autoCompact.js'
 import {
   buildPostCompactMessages,
   compactConversation,
-  ERROR_MESSAGE_USER_ABORT,
-} from '../../services/compact/compact.js'
+  ERROR_MESSAGE_USER_ABORT} from '../../services/compact/compact.js'
 import { resetMicrocompactState } from '../../services/compact/microCompact.js'
 import type { AppState } from '../../state/AppState.js'
 import type { Tool, ToolUseContext } from '../../Tool.js'
 import { appendTeammateMessage } from '../../tasks/InProcessTeammateTask/InProcessTeammateTask.js'
 import type {
   InProcessTeammateTaskState,
-  TeammateIdentity,
-} from '../../tasks/InProcessTeammateTask/types.js'
+  TeammateIdentity} from '../../tasks/InProcessTeammateTask/types.js'
 import { appendCappedMessage } from '../../tasks/InProcessTeammateTask/types.js'
 import {
   createActivityDescriptionResolver,
   createProgressTracker,
   getProgressUpdate,
-  updateProgressFromMessage,
-} from '../../tasks/LocalAgentTask/LocalAgentTask.js'
+  updateProgressFromMessage} from '../../tasks/LocalAgentTask/LocalAgentTask.js'
 import type { CustomAgentDefinition } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import { runAgent } from '@claude-code-best/builtin-tools/tools/AgentTool/runAgent.js'
 import { awaitClassifierAutoApproval } from '@claude-code-best/builtin-tools/tools/BashTool/bashPermissions.js'
@@ -60,33 +55,28 @@ import type { Message } from '../../types/message.js'
 import type { PermissionDecision } from '../../types/permissions.js'
 import {
   createAssistantAPIErrorMessage,
-  createUserMessage,
-} from '../../utils/messages.js'
+  createUserMessage} from '../../utils/messages.js'
 import { evictTaskOutput } from '../../utils/task/diskOutput.js'
 import { evictTerminalTask } from '../../utils/task/framework.js'
 import {
   tokenCountWithEstimation,
-  getTokenCountFromUsage,
-} from '../../utils/tokens.js'
+  getTokenCountFromUsage} from '../../utils/tokens.js'
 import { createAbortController } from '../abortController.js'
 import { type AgentContext, runWithAgentContext } from '../agentContext.js'
 import {
   markAutonomyRunCompleted,
   markAutonomyRunFailed,
-  markAutonomyRunRunning,
-} from '../autonomyRuns.js'
+  markAutonomyRunRunning} from '../autonomyRuns.js'
 import { count } from '../array.js'
 import { logForDebugging } from '../debug.js'
 import { cloneFileStateCache } from '../fileStateCache.js'
 import {
   SUBAGENT_REJECT_MESSAGE,
-  SUBAGENT_REJECT_MESSAGE_WITH_REASON_PREFIX,
-} from '../messages.js'
+  SUBAGENT_REJECT_MESSAGE_WITH_REASON_PREFIX} from '../messages.js'
 import type { ModelAlias } from '../model/aliases.js'
 import {
   applyPermissionUpdates,
-  persistPermissionUpdates,
-} from '../permissions/PermissionUpdate.js'
+  persistPermissionUpdates} from '../permissions/PermissionUpdate.js'
 import type { PermissionUpdate } from '../permissions/PermissionUpdateSchema.js'
 import { hasPermissionsToUseTool } from '../permissions/permissions.js'
 import { emitTaskTerminatedSdk } from '../sdkEventQueue.js'
@@ -103,19 +93,16 @@ import {
   isShutdownRequest,
   markMessageAsReadByIdentity,
   readMailbox,
-  writeToMailbox,
-} from '../teammateMailbox.js'
+  writeToMailbox} from '../teammateMailbox.js'
 import { unregisterAgent as unregisterPerfettoAgent } from '../telemetry/perfettoTracing.js'
 import { createContentReplacementState } from '../toolResultStorage.js'
 import { TEAM_LEAD_NAME } from './constants.js'
 import {
   getLeaderSetToolPermissionContext,
-  getLeaderToolUseConfirmQueue,
-} from './leaderPermissionBridge.js'
+  getLeaderToolUseConfirmQueue} from './leaderPermissionBridge.js'
 import {
   createPermissionRequest,
-  sendPermissionRequestViaMailbox,
-} from './permissionSync.js'
+  sendPermissionRequestViaMailbox} from './permissionSync.js'
 import { TEAMMATE_SYSTEM_PROMPT_ADDENDUM } from './teammatePromptAddendum.js'
 
 type SetAppStateFn = (updater: (prev: AppState) => AppState) => void
@@ -179,8 +166,7 @@ function createInProcessCanUseTool(
         return {
           behavior: 'allow',
           updatedInput: input as Record<string, unknown>,
-          decisionReason: classifierDecision,
-        }
+          decisionReason: classifierDecision}
       }
     }
 
@@ -194,8 +180,7 @@ function createInProcessCanUseTool(
     const description = await (tool as Tool).description(input as never, {
       isNonInteractiveSession: toolUseContext.options.isNonInteractiveSession,
       toolPermissionContext: appState.toolPermissionContext,
-      tools: toolUseContext.options.tools,
-    })
+      tools: toolUseContext.options.tools})
 
     if (abortController.signal.aborted) {
       return { behavior: 'ask', message: SUBAGENT_REJECT_MESSAGE }
@@ -226,8 +211,7 @@ function createInProcessCanUseTool(
         }
 
         abortController.signal.addEventListener('abort', onAbortListener, {
-          once: true,
-        })
+          once: true})
 
         setToolUseConfirmQueue(queue => [
           ...queue,
@@ -284,8 +268,7 @@ function createInProcessCanUseTool(
                   // transformed 'acceptEdits' context from leaking back
                   // to the coordinator
                   setToolPermissionContext(updatedContext, {
-                    preserveMode: true,
-                  })
+                    preserveMode: true})
                 }
               }
               const trimmedFeedback = feedback?.trim()
@@ -295,8 +278,7 @@ function createInProcessCanUseTool(
                 userModified: false,
                 acceptFeedback: trimmedFeedback || undefined,
                 ...(contentBlocks &&
-                  contentBlocks.length > 0 && { contentBlocks }),
-              })
+                  contentBlocks.length > 0 && { contentBlocks })})
             },
             onReject(feedback?: string, contentBlocks?: ContentBlockParam[]) {
               if (decisionMade) return
@@ -333,11 +315,9 @@ function createInProcessCanUseTool(
                 resolve({
                   ...freshResult,
                   updatedInput: input,
-                  userModified: false,
-                })
+                  userModified: false})
               }
-            },
-          },
+            }},
         ])
       })
     }
@@ -353,8 +333,7 @@ function createInProcessCanUseTool(
         workerId: identity.agentId,
         workerName: identity.agentName,
         workerColor: identity.color,
-        teamName: identity.teamName,
-      })
+        teamName: identity.teamName})
 
       // Register callback to be invoked when the leader responds
       registerPermissionCallback({
@@ -376,8 +355,7 @@ function createInProcessCanUseTool(
             behavior: 'allow',
             updatedInput: finalInput,
             userModified: false,
-            ...(contentBlocks && contentBlocks.length > 0 && { contentBlocks }),
-          })
+            ...(contentBlocks && contentBlocks.length > 0 && { contentBlocks })})
         },
         onReject(feedback?: string, contentBlocks?: ContentBlockParam[]) {
           cleanup()
@@ -385,8 +363,7 @@ function createInProcessCanUseTool(
             ? `${SUBAGENT_REJECT_MESSAGE_WITH_REASON_PREFIX}${feedback}`
             : SUBAGENT_REJECT_MESSAGE
           resolve({ behavior: 'ask', message, contentBlocks })
-        },
-      })
+        }})
 
       // Send request to leader's mailbox
       void sendPermissionRequestViaMailbox(request)
@@ -419,14 +396,12 @@ function createInProcessCanUseTool(
                     requestId: parsed.request_id,
                     decision: 'approved',
                     updatedInput: parsed.response?.updated_input,
-                    permissionUpdates: parsed.response?.permission_updates,
-                  })
+                    permissionUpdates: parsed.response?.permission_updates})
                 } else {
                   processMailboxPermissionResponse({
                     requestId: parsed.request_id,
                     decision: 'rejected',
-                    feedback: parsed.error,
-                  })
+                    feedback: parsed.error})
                 }
                 return // Callback already resolves the promise
               }
@@ -447,8 +422,7 @@ function createInProcessCanUseTool(
       }
 
       abortController.signal.addEventListener('abort', onAbortListener, {
-        once: true,
-      })
+        once: true})
 
       function cleanup() {
         clearInterval(pollInterval)
@@ -543,9 +517,7 @@ function updateTaskState(
       ...prev,
       tasks: {
         ...prev.tasks,
-        [taskId]: updated,
-      },
-    }
+        [taskId]: updated}}
   })
 }
 
@@ -565,8 +537,7 @@ async function sendMessageToLeader(
       from,
       text,
       timestamp: new Date().toISOString(),
-      color,
-    },
+      color},
     teamName,
   )
 }
@@ -734,10 +705,7 @@ async function waitForNextPromptOrShutdown(
             ...prev.tasks,
             [taskId]: {
               ...prevTask,
-              pendingUserMessages: prevTask.pendingUserMessages.slice(1),
-            },
-          },
-        }
+              pendingUserMessages: prevTask.pendingUserMessages.slice(1)}}}
       })
       logForDebugging(
         `[inProcessRunner] ${identity.agentName} found pending user message (poll #${pollCount})`,
@@ -753,8 +721,7 @@ async function waitForNextPromptOrShutdown(
         message: pending.message,
         autonomyRunId: pending.autonomyRunId,
         autonomyRootDir: pending.autonomyRootDir,
-        from: 'user',
-      }
+        from: 'user'}
     }
 
     // Wait before next poll (skip on first iteration to check immediately)
@@ -818,8 +785,7 @@ async function waitForNextPromptOrShutdown(
         return {
           type: 'shutdown_request',
           request: shutdownParsed,
-          originalMessage: msg.text,
-        }
+          originalMessage: msg.text}
       }
 
       // No shutdown request found. Prioritize team-lead messages over peer
@@ -858,8 +824,7 @@ async function waitForNextPromptOrShutdown(
             message: msg.text,
             from: msg.from,
             color: msg.color,
-            summary: msg.summary,
-          }
+            summary: msg.summary}
         }
       }
     } catch (err) {
@@ -875,8 +840,7 @@ async function waitForNextPromptOrShutdown(
       return {
         type: 'new_message',
         message: taskPrompt,
-        from: 'task-list',
-      }
+        from: 'task-list'}
     }
   }
 
@@ -916,8 +880,7 @@ export async function runInProcessTeammate(
     systemPromptMode,
     allowedTools,
     allowPermissionPrompts,
-    invokingRequestId,
-  } = config
+    invokingRequestId} = config
   const { setAppState } = toolUseContext
   const startTime = Date.now()
 
@@ -937,8 +900,7 @@ export async function runInProcessTeammate(
     agentType: 'teammate',
     invokingRequestId,
     invocationKind: 'spawn',
-    invocationEmitted: false,
-  }
+    invocationEmitted: false}
 
   // Build system prompt based on systemPromptMode
   let teammateSystemPrompt: string
@@ -970,14 +932,12 @@ export async function runInProcessTeammate(
           ...(process.env.USER_TYPE === 'ant'
             ? {
                 agent_type:
-                  agentDefinition.agentType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-              }
+                  agentDefinition.agentType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
             : {}),
           scope:
             agentDefinition.memory as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           source:
-            'in-process-teammate' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            'in-process-teammate' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       }
     }
 
@@ -1017,8 +977,7 @@ export async function runInProcessTeammate(
     permissionMode: 'default',
     // Propagate model from custom agent definition so getAgentModel()
     // can use it as a fallback when no tool-level model is specified
-    ...(agentDefinition?.model ? { model: agentDefinition.model } : {}),
-  }
+    ...(agentDefinition?.model ? { model: agentDefinition.model } : {})}
 
   // All messages across all prompts
   const allMessages: Message[] = []
@@ -1049,8 +1008,7 @@ export async function runInProcessTeammate(
         messages: appendCappedMessage(
           task.messages,
           createUserMessage({ content: wrappedInitialPrompt }),
-        ),
-      }),
+        )}),
       setAppState,
     )
 
@@ -1107,8 +1065,7 @@ export async function runInProcessTeammate(
           ...toolUseContext,
           readFileState: cloneFileStateCache(toolUseContext.readFileState),
           onCompactProgress: undefined,
-          setStreamMode: undefined,
-        }
+          setStreamMode: undefined}
         const compactedSummary = await compactConversation(
           allMessages,
           isolatedContext,
@@ -1117,8 +1074,7 @@ export async function runInProcessTeammate(
             userContext: {},
             systemContext: {},
             toolUseContext: isolatedContext,
-            forkContextMessages: [],
-          },
+            forkContextMessages: []},
           true, // suppressFollowUpQuestions
           undefined, // customInstructions
           true, // isAutoCompact
@@ -1172,8 +1128,7 @@ export async function runInProcessTeammate(
           : 'default'
       const iterationAgentDefinition = {
         ...resolvedAgentDefinition,
-        permissionMode: currentPermissionMode,
-      }
+        permissionMode: currentPermissionMode}
 
       // Track if this iteration was interrupted by work abort (not lifecycle abort)
       let workWasAborted = false
@@ -1206,8 +1161,7 @@ export async function runInProcessTeammate(
                   taskId,
                   task => ({
                     ...task,
-                    totalPausedMs: (task.totalPausedMs ?? 0) + waitMs,
-                  }),
+                    totalPausedMs: (task.totalPausedMs ?? 0) + waitMs}),
                   setAppState,
                 )
               },
@@ -1221,8 +1175,7 @@ export async function runInProcessTeammate(
             preserveToolUseResults: true,
             availableTools: toolUseContext.options.tools,
             allowedTools,
-            contentReplacementState: teammateReplacementState,
-          })) {
+            contentReplacementState: teammateReplacementState})) {
             // Check lifecycle abort first (kills whole teammate)
             if (abortController.signal.aborted) {
               logForDebugging(
@@ -1292,8 +1245,7 @@ export async function runInProcessTeammate(
                   ...task,
                   progress,
                   messages: appendCappedMessage(task.messages, message),
-                  inProgressToolUseIDs,
-                }
+                  inProgressToolUseIDs}
               },
               setAppState,
             )
@@ -1323,14 +1275,12 @@ export async function runInProcessTeammate(
 
         // Add interrupt message to teammate's messages so it appears in their scrollback
         const interruptMessage = createAssistantAPIErrorMessage({
-          content: ERROR_MESSAGE_USER_ABORT,
-        })
+          content: ERROR_MESSAGE_USER_ABORT})
         updateTaskState(
           taskId,
           task => ({
             ...task,
-            messages: appendCappedMessage(task.messages, interruptMessage),
-          }),
+            messages: appendCappedMessage(task.messages, interruptMessage)}),
           setAppState,
         )
         if (currentAutonomyRunId) {
@@ -1380,8 +1330,7 @@ export async function runInProcessTeammate(
           identity.teamName,
           {
             idleReason: workWasAborted ? 'interrupted' : 'available',
-            summary: getLastPeerDmSummary(allMessages),
-          },
+            summary: getLastPeerDmSummary(allMessages)},
         )
       } else {
         logForDebugging(
@@ -1487,8 +1436,7 @@ export async function runInProcessTeammate(
         if (textBlocks.length > 0 && lastAssistantContent.length === 0) {
           lastAssistantContent = textBlocks.map((b: any) => ({
             type: 'text' as const,
-            text: b.text,
-          }))
+            text: b.text}))
         }
         if (!lastUsage && m.message?.usage) {
           lastUsage = m.message.usage as AgentToolResult['usage']
@@ -1507,8 +1455,7 @@ export async function runInProcessTeammate(
       totalToolUseCount: completionToolUseCount,
       totalDurationMs: Date.now() - startTime,
       totalTokens: completionTokens,
-      usage: lastUsage as AgentToolResult['usage'],
-    } as unknown as AgentToolResult
+      usage: lastUsage as AgentToolResult['usage']} as unknown as AgentToolResult
 
     updateTaskState(
       taskId,
@@ -1535,8 +1482,7 @@ export async function runInProcessTeammate(
           abortController: undefined,
           unregisterCleanup: undefined,
           currentWorkAbortController: undefined,
-          onIdleCallbacks: [],
-        }
+          onIdleCallbacks: []}
       },
       setAppState,
     )
@@ -1548,8 +1494,7 @@ export async function runInProcessTeammate(
     if (!alreadyTerminal) {
       emitTaskTerminatedSdk(taskId, 'completed', {
         toolUseId,
-        summary: identity.agentId,
-      })
+        summary: identity.agentId})
     }
     unregisterPerfettoAgent(identity.agentId)
     return { success: true, messages: allMessages }
@@ -1587,8 +1532,7 @@ export async function runInProcessTeammate(
           inProgressToolUseIDs: undefined,
           abortController: undefined,
           unregisterCleanup: undefined,
-          currentWorkAbortController: undefined,
-        }
+          currentWorkAbortController: undefined}
       },
       setAppState,
     )
@@ -1599,8 +1543,7 @@ export async function runInProcessTeammate(
     if (!alreadyTerminal) {
       emitTaskTerminatedSdk(taskId, 'failed', {
         toolUseId,
-        summary: identity.agentId,
-      })
+        summary: identity.agentId})
     }
     if (currentAutonomyRunId) {
       await markAutonomyRunFailed(
@@ -1618,16 +1561,14 @@ export async function runInProcessTeammate(
       {
         idleReason: 'failed',
         completedStatus: 'failed',
-        failureReason: errorMessage,
-      },
+        failureReason: errorMessage},
     )
 
     unregisterPerfettoAgent(identity.agentId)
     return {
       success: false,
       error: errorMessage,
-      messages: allMessages,
-    }
+      messages: allMessages}
   }
 }
 

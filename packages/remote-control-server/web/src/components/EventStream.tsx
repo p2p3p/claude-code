@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { SessionEvent, EventPayload } from '../types';
 import { esc, truncate, cn, extractEventText, isConversationClearedStatus } from '../lib/utils';
+import { t } from '../../../../../src/utils/i18n/index.js';
 
 // ============================================================
 // Tool Trace State
@@ -156,38 +157,16 @@ type DisplayMessage =
 const SPINNER_FRAMES = ['·', '✢', '✱', '✶', '✻', '✽'];
 const SPINNER_CYCLE = [...SPINNER_FRAMES, ...SPINNER_FRAMES.slice().reverse()];
 
-const SPINNER_VERBS = [
-  'Accomplishing',
-  'Baking',
-  'Calculating',
-  'Clauding',
-  'Cogitating',
-  'Computing',
-  'Considering',
-  'Contemplating',
-  'Cooking',
-  'Crafting',
-  'Creating',
-  'Crunching',
-  'Deliberating',
-  'Doing',
-  'Effecting',
-  'Generating',
-  'Hatching',
-  'Ideating',
-  'Imagining',
-  'Inferring',
-  'Manifesting',
-  'Mulling',
-  'Pondering',
-  'Processing',
-  'Ruminating',
-  'Simmering',
-  'Synthesizing',
-  'Thinking',
-  'Tinkering',
-  'Working',
+const SPINNER_VERB_KEYS = [
+  'accomplishing', 'baking', 'calculating', 'clauding', 'cogitating',
+  'computing', 'considering', 'contemplating', 'cooking', 'crafting',
+  'creating', 'crunching', 'deliberating', 'doing', 'effecting',
+  'generating', 'hatching', 'ideating', 'imagining', 'inferring',
+  'manifesting', 'mulling', 'pondering', 'processing', 'ruminating',
+  'simmering', 'synthesizing', 'thinking', 'tinkering', 'working',
 ];
+
+const SPINNER_VERBS = SPINNER_VERB_KEYS.map(k => t(`rcs.spinnerVerbs.${k}`));
 
 // ============================================================
 // EventStream Component
@@ -337,7 +316,7 @@ function AssistantBubble({ content, traceEntries }: { content: string; traceEntr
             >
               <span className={cn('transition-transform', expanded && 'rotate-90')}>›</span>
               <span>
-                {traceEntries.length} tool {traceEntries.length === 1 ? 'call' : 'calls'}
+                {t('rcs.toolCallCount', traceEntries.length)}
               </span>
             </button>
             {expanded && (
@@ -366,7 +345,7 @@ function ToolCard({ entry }: { entry: TraceEntry }) {
       >
         <div className="flex items-center gap-2 px-3 py-2 text-xs">
           <span className="text-brand">▶</span>
-          <span className="font-medium text-text-primary">{entry.toolName || 'tool'}</span>
+          <span className="font-medium text-text-primary">{entry.toolName || t('rcs.tool')}</span>
         </div>
         {expanded && (
           <pre className="border-t border-border px-3 py-2 text-xs text-text-secondary overflow-x-auto">
@@ -388,7 +367,7 @@ function ToolCard({ entry }: { entry: TraceEntry }) {
     >
       <div className="flex items-center gap-2 px-3 py-2 text-xs">
         <span className={entry.isError ? 'text-status-error' : 'text-status-active'}>{entry.isError ? '✕' : '✓'}</span>
-        <span className="font-medium text-text-primary">{entry.isError ? 'Error' : 'Result'}</span>
+        <span className="font-medium text-text-primary">{entry.isError ? t('rcs.errorLabel') : t('rcs.resultLabel')}</span>
       </div>
       {expanded && (
         <pre className="border-t border-border px-3 py-2 text-xs text-text-secondary overflow-x-auto">
@@ -426,7 +405,7 @@ function PermissionPrompt({
 
   return (
     <div className="rounded-xl border border-status-warning/30 bg-surface-1 p-4">
-      <div className="mb-2 text-sm font-semibold text-status-warning">Permission Request</div>
+      <div className="mb-2 text-sm font-semibold text-status-warning">{t('rcs.permissionRequest')}</div>
       {description && <div className="mb-2 text-sm text-text-secondary">{esc(description)}</div>}
       <div className="mb-2 font-mono text-xs font-bold text-text-primary">{esc(toolName)}</div>
       {toolName !== 'AskUserQuestion' && (
@@ -439,13 +418,13 @@ function PermissionPrompt({
           onClick={onApprove}
           className="rounded-lg bg-status-active/20 px-4 py-2 text-sm font-medium text-status-active hover:bg-status-active/30 transition-colors"
         >
-          Approve
+          {t('rcs.approve')}
         </button>
         <button
           onClick={onReject}
           className="rounded-lg bg-status-error/20 px-4 py-2 text-sm font-medium text-status-error hover:bg-status-error/30 transition-colors"
         >
-          Reject
+          {t('rcs.reject')}
         </button>
       </div>
     </div>
@@ -508,7 +487,7 @@ function AskUserPanel({
     return (
       <div className="rounded-xl border border-brand/30 bg-surface-1 p-4">
         <div className="mb-3 text-sm font-semibold text-text-primary">
-          {esc(description || q.question || 'Question')}
+          {esc(description || q.question || t('rcs.question'))}
         </div>
         <div className="space-y-2">
           {(q.options || []).map((opt, j) => {
@@ -534,7 +513,7 @@ function AskUserPanel({
               type="text"
               value={otherTexts[0] || ''}
               onChange={e => setOtherTexts({ ...otherTexts, [0]: e.target.value })}
-              placeholder="Other..."
+              placeholder={t('rcs.other')}
               className="flex-1 rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none"
               onKeyDown={e => e.key === 'Enter' && handleOtherSubmit(0)}
             />
@@ -542,7 +521,7 @@ function AskUserPanel({
               onClick={() => handleOtherSubmit(0)}
               className="rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:bg-surface-2 transition-colors"
             >
-              Send
+              {t('rcs.send')}
             </button>
           </div>
         </div>
@@ -551,13 +530,13 @@ function AskUserPanel({
             onClick={handleSubmit}
             className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-light transition-colors"
           >
-            Submit
+            {t('rcs.submit')}
           </button>
           <button
             onClick={onSkip}
             className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-surface-2 transition-colors"
           >
-            Skip
+            {t('rcs.skip')}
           </button>
         </div>
       </div>
@@ -569,7 +548,7 @@ function AskUserPanel({
 
   return (
     <div className="rounded-xl border border-brand/30 bg-surface-1 p-4">
-      <div className="mb-3 text-sm font-semibold text-text-primary">{esc(description || 'Questions')}</div>
+      <div className="mb-3 text-sm font-semibold text-text-primary">{esc(description || t('rcs.questions'))}</div>
       <div className="mb-3 flex gap-1 overflow-x-auto">
         {questions.map((q, i) => (
           <button
@@ -604,13 +583,13 @@ function AskUserPanel({
             onClick={handleSubmit}
             className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-light transition-colors"
           >
-            Submit All
+            {t('rcs.submitAll')}
           </button>
           <button
             onClick={onSkip}
             className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-surface-2 transition-colors"
           >
-            Skip
+            {t('rcs.skip')}
           </button>
         </div>
       </div>
@@ -664,7 +643,7 @@ function QuestionTab({
             type="text"
             value={otherTexts[qIdx] || ''}
             onChange={e => onOtherTextChange(qIdx, e.target.value)}
-            placeholder="Other..."
+            placeholder={t('rcs.other')}
             className="flex-1 rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none"
             onKeyDown={e => e.key === 'Enter' && onOtherSubmit(qIdx)}
           />
@@ -702,7 +681,7 @@ function PlanPanel({
   return (
     <div className="rounded-xl border border-brand/30 bg-surface-1 p-4">
       <div className="mb-3 text-sm font-semibold text-text-primary">
-        {isEmpty ? 'Exit plan mode?' : 'Ready to code?'}
+        {isEmpty ? t('rcs.exitPlanMode') : t('rcs.readyToCode')}
       </div>
       {!isEmpty && (
         <div
@@ -755,7 +734,7 @@ function PlanPanel({
           disabled={!selected}
           className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-light disabled:opacity-50 transition-colors"
         >
-          Submit
+          {t('rcs.submit')}
         </button>
       </div>
     </div>

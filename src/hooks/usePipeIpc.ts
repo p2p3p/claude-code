@@ -22,8 +22,7 @@ import * as osm from 'os'
 import type {
   PipeMessage,
   PipeServer,
-  PipeIpcState,
-} from '../utils/pipeTransport.js'
+  PipeIpcState} from '../utils/pipeTransport.js'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -61,9 +60,7 @@ function removeDeadSlave(slaveName: string, store: StoreApi): void {
         ),
         discoveredPipes: (pipeIpc.discoveredPipes ?? []).filter(
           (pipe: { pipeName: string }) => pipe.pipeName !== slaveName,
-        ),
-      },
-    }
+        )}}
   })
 }
 
@@ -92,8 +89,7 @@ function refreshDiscoveredPipes(
       machineId: sub.machineId,
       ip: sub.ip,
       hostname: sub.hostname,
-      alive: true,
-    }))
+      alive: true}))
 
   // Include LAN beacon peers so they aren't wiped out by heartbeat
   let lanDiscovered: typeof freshDiscovered = []
@@ -111,8 +107,7 @@ function refreshDiscoveredPipes(
             machineId: peer.machineId,
             ip: peer.ip,
             hostname: peer.hostname,
-            alive: true,
-          })
+            alive: true})
         }
       }
     }
@@ -138,9 +133,7 @@ function refreshDiscoveredPipes(
         discoveredPipes: allDiscovered,
         selectedPipes: (pipeIpc.selectedPipes ?? []).filter((name: string) =>
           aliveNames.has(name),
-        ),
-      },
-    }
+        )}}
   })
 }
 
@@ -174,8 +167,7 @@ function registerMessageHandlers(
     if (!isLanPeer && currentPipeState.role !== 'sub') {
       reply({
         type: 'attach_reject',
-        data: 'Only sub sessions can be attached.',
-      })
+        data: 'Only sub sessions can be attached.'})
       return
     }
     reply({ type: 'attach_accept' })
@@ -196,9 +188,7 @@ function registerMessageHandlers(
         ...pt.getPipeIpc(prev),
         role: 'sub',
         displayRole: pt.getPipeDisplayRole(pt.getPipeIpc(prev)),
-        attachedBy: msg.from ?? 'unknown',
-      },
-    }))
+        attachedBy: msg.from ?? 'unknown'}}))
   })
 
   // Handle prompts from master
@@ -210,8 +200,7 @@ function registerMessageHandlers(
       } else {
         reply({
           type: 'error',
-          data: 'Slave is busy and could not accept the prompt.',
-        })
+          data: 'Slave is busy and could not accept the prompt.'})
       }
     }
   })
@@ -258,10 +247,8 @@ function registerMessageHandlers(
         const nextPipeState = { ...pipeIpc, role: nextRole, attachedBy: null }
         return {
           ...nextPipeState,
-          displayRole: pt.getPipeDisplayRole(nextPipeState as PipeIpcState),
-        }
-      })(),
-    }))
+          displayRole: pt.getPipeDisplayRole(nextPipeState as PipeIpcState)}
+      })()}))
   })
 }
 
@@ -290,8 +277,7 @@ function runMainHeartbeat(
         tcpEndpoint?: { host: string; port: number }
       }
       const attachTargets: AttachTarget[] = aliveSubs.map(sub => ({
-        pipeName: sub.pipeName,
-      }))
+        pipeName: sub.pipeName}))
 
       // Add LAN peers as attach targets
       if (feature('LAN_PIPES')) {
@@ -303,8 +289,7 @@ function runMainHeartbeat(
             if (!localNames.has(pName)) {
               attachTargets.push({
                 pipeName: pName,
-                tcpEndpoint: { host: peer.ip, port: peer.tcpPort },
-              })
+                tcpEndpoint: { host: peer.ip, port: peer.tcpPort }})
               aliveSubNames.add(pName)
             }
           }
@@ -345,8 +330,7 @@ function runMainHeartbeat(
 
             client.send({
               type: 'attach_request',
-              meta: { machineId },
-            })
+              meta: { machineId }})
           })
 
           if (attached && !disposed.current) {
@@ -369,11 +353,7 @@ function runMainHeartbeat(
                     connectedAt: new Date().toISOString(),
                     status: 'idle',
                     unreadCount: 0,
-                    history: [],
-                  },
-                },
-              },
-            }))
+                    history: []}}}}))
           }
         } catch {
           // Connection failed — skip this cycle
@@ -428,9 +408,7 @@ function runSubHeartbeat(
             role: 'main',
             subIndex: null,
             displayRole: 'main',
-            attachedBy: null,
-          },
-        }))
+            attachedBy: null}}))
         pp.setPipeRelay(null)
       }
     } catch {
@@ -445,8 +423,7 @@ function runSubHeartbeat(
 
 export function usePipeIpc({
   store,
-  handleIncomingPrompt,
-}: UsePipeIpcOptions): void {
+  handleIncomingPrompt}: UsePipeIpcOptions): void {
   if (!feature('UDS_INBOX')) return
 
   useEffect(() => {
@@ -475,8 +452,7 @@ export function usePipeIpc({
           ip: localIp,
           mac,
           hostname: host,
-          pipeName,
-        }
+          pipeName}
 
         let initialRole: 'main' | 'sub' = 'main'
         let subIndex: number | null = null
@@ -511,16 +487,14 @@ export function usePipeIpc({
             hostname: host,
             ip: localIp,
             tcpPort: server.tcpAddress.port,
-            role: initialRole,
-          })
+            role: initialRole})
           beacon.start()
           lb.setLanBeacon(beacon)
 
           const entryWithTcp = {
             ...entry,
             tcpPort: server.tcpAddress.port,
-            lanVisible: true,
-          }
+            lanVisible: true}
           if (initialRole === 'main') {
             await pr.registerAsMain(entryWithTcp)
           } else if (subIndex != null) {
@@ -540,9 +514,7 @@ export function usePipeIpc({
             localIp,
             hostname: host,
             machineId: machId,
-            mac,
-          },
-        }))
+            mac}}))
 
         // --- Phase 4: Message handlers ---
         registerMessageHandlers(

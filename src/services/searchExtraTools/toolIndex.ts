@@ -4,8 +4,7 @@ import {
   tokenizeAndStem,
   computeWeightedTf,
   computeIdf,
-  cosineSimilarity,
-} from '../skillSearch/localSearch.js'
+  cosineSimilarity} from '../skillSearch/localSearch.js'
 import { isDeferredTool } from '@claude-code-best/builtin-tools/tools/SearchExtraToolsTool/prompt.js'
 
 export interface ToolIndexEntry {
@@ -33,8 +32,7 @@ export interface SearchExtraToolsResult {
 const TOOL_FIELD_WEIGHT = {
   name: 3.0,
   searchHint: 2.5,
-  description: 1.0,
-} as const
+  description: 1.0} as const
 
 const SEARCH_EXTRA_TOOLS_DISPLAY_MIN_SCORE = Number(
   process.env.SEARCH_EXTRA_TOOLS_DISPLAY_MIN_SCORE ?? '0.10',
@@ -59,8 +57,7 @@ export function parseToolName(name: string): {
     return {
       parts: parts.filter(Boolean),
       full: withoutPrefix.replace(/__/g, ' ').replace(/_/g, ' '),
-      isMcp: true,
-    }
+      isMcp: true}
   }
 
   const parts = name
@@ -73,8 +70,7 @@ export function parseToolName(name: string): {
   return {
     parts,
     full: parts.join(' '),
-    isMcp: false,
-  }
+    isMcp: false}
 }
 
 export async function buildToolIndex(tools: Tools): Promise<ToolIndexEntry[]> {
@@ -91,11 +87,9 @@ export async function buildToolIndex(tools: Tools): Promise<ToolIndexEntry[]> {
           alwaysAllowRules: {},
           alwaysDenyRules: {},
           alwaysAskRules: {},
-          isBypassPermissionsModeAvailable: false,
-        }),
+          isBypassPermissionsModeAvailable: false}),
         tools,
-        agents: [],
-      })
+        agents: []})
     } catch {
       description = ''
     }
@@ -130,8 +124,7 @@ export async function buildToolIndex(tools: Tools): Promise<ToolIndexEntry[]> {
       isDeferred: true,
       inputSchema,
       tokens: allTokens,
-      tfVector,
-    })
+      tfVector})
   }
 
   const idf = computeIdf(entries)
@@ -199,8 +192,7 @@ export function searchTools(
         score,
         isMcp: entry.isMcp,
         isDeferred: entry.isDeferred,
-        inputSchema: entry.inputSchema,
-      })
+        inputSchema: entry.inputSchema})
     }
   }
 

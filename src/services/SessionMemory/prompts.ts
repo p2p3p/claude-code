@@ -241,8 +241,7 @@ export async function buildSessionMemoryUpdatePrompt(
     notesPath,
     CLAUDE_EFFORT: getDisplayedEffortLevel(currentModel, undefined),
     CLAUDE_MODEL: currentModel,
-    CLAUDE_CWD: process.cwd(),
-  }
+    CLAUDE_CWD: process.cwd()}
 
   const basePrompt = substituteVariables(promptTemplate, variables)
 
@@ -295,8 +294,7 @@ export function truncateSessionMemoryForCompact(content: string): {
 
   return {
     truncatedContent: outputLines.join('\n'),
-    wasTruncated,
-  }
+    wasTruncated}
 }
 
 function flushSessionSection(

@@ -60,8 +60,7 @@ export function useSwarmInitialization(
           initializeTeammateHooks(setAppState, getSessionId(), {
             teamName,
             agentId: member.agentId,
-            agentName,
-          })
+            agentName})
         }
       } else {
         // Fresh spawn or standalone session
@@ -72,8 +71,7 @@ export function useSwarmInitialization(
           initializeTeammateHooks(setAppState, getSessionId(), {
             teamName: context.teamName,
             agentId: context.agentId,
-            agentName: context.agentName,
-          })
+            agentName: context.agentName})
         }
       }
     }

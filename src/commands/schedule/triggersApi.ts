@@ -91,8 +91,7 @@ async function buildHeaders(): Promise<Record<string, string>> {
   return {
     ...getOAuthHeaders(accessToken),
     'anthropic-beta': TRIGGERS_BETA_HEADER,
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 }
 
 function triggersBaseUrl(): string {
@@ -183,8 +182,7 @@ export async function listTriggers(): Promise<Trigger[]> {
   return withRetry(async () => {
     const headers = await buildHeaders()
     const response = await axios.get<ListTriggersResponse>(triggersBaseUrl(), {
-      headers,
-    })
+      headers})
     return response.data.data ?? []
   })
 }
@@ -193,8 +191,7 @@ export async function getTrigger(id: string): Promise<Trigger> {
   return withRetry(async () => {
     const headers = await buildHeaders()
     const response = await axios.get<Trigger>(`${triggersBaseUrl()}/${id}`, {
-      headers,
-    })
+      headers})
     return response.data
   })
 }
@@ -203,8 +200,7 @@ export async function createTrigger(body: CreateTriggerBody): Promise<Trigger> {
   return withRetry(async () => {
     const headers = await buildHeaders()
     const response = await axios.post<Trigger>(triggersBaseUrl(), body, {
-      headers,
-    })
+      headers})
     return response.data
   })
 }

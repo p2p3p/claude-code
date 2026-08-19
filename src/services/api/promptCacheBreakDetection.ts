@@ -13,8 +13,7 @@ import { jsonStringify } from 'src/utils/slowOperations.js'
 import type { QuerySource } from '../../constants/querySource.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../analytics/index.js'
+  logEvent} from '../analytics/index.js'
 
 function getCacheBreakDiffPath(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -259,8 +258,7 @@ export function recordPromptState(snapshot: PromptStateSnapshot): void {
       isUsingOverage = false,
       cachedMCEnabled = false,
       effortValue,
-      extraBodyParams,
-    } = snapshot
+      extraBodyParams} = snapshot
     const key = getTrackingKey(querySource, agentId)
     if (!key) return
 
@@ -320,8 +318,7 @@ export function recordPromptState(snapshot: PromptStateSnapshot): void {
         prevCacheReadTokens: null,
         cacheDeletionsPending: false,
         buildDiffableContent: buildDiffableContent(system, toolSchemas, model),
-        perToolHashes: computeToolHashes(),
-      })
+        perToolHashes: computeToolHashes()})
       return
     }
 
@@ -401,8 +398,7 @@ export function recordPromptState(snapshot: PromptStateSnapshot): void {
         removedBetas: prev.betas.filter(b => !newBetaSet.has(b)),
         prevEffortValue: prev.effortValue,
         newEffortValue: effortStr,
-        prevDiffableContent: prev.buildDiffableContent,
-      }
+        prevDiffableContent: prev.buildDiffableContent}
     } else {
       prev.pendingChanges = null
     }
@@ -639,8 +635,7 @@ export async function checkResponseForCacheBreak(
       lastAssistantMsgOver5minAgo,
       lastAssistantMsgOver1hAgo,
       requestId: (requestId ??
-        '') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        '') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
     // Write diff file for ant debugging via --debug. The path is included in
     // the summary log so ants can find it (DevBar UI removed — event data

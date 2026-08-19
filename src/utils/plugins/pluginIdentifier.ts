@@ -1,11 +1,9 @@
 import type {
   EditableSettingSource,
-  SettingSource,
-} from '../settings/constants.js'
+  SettingSource} from '../settings/constants.js'
 import {
   ALLOWED_OFFICIAL_MARKETPLACE_NAMES,
-  type PluginScope,
-} from './schemas.js'
+  type PluginScope} from './schemas.js'
 
 /**
  * Extended scope type that includes 'flag' for session-only plugins.
@@ -28,8 +26,7 @@ export const SETTING_SOURCE_TO_SCOPE = {
   userSettings: 'user',
   projectSettings: 'project',
   localSettings: 'local',
-  flagSettings: 'flag',
-} as const satisfies Record<SettingSource, ExtendedPluginScope>
+  flagSettings: 'flag'} as const satisfies Record<SettingSource, ExtendedPluginScope>
 
 /**
  * Parsed plugin identifier with name and optional marketplace
@@ -92,8 +89,7 @@ const SCOPE_TO_EDITABLE_SOURCE: Record<
 > = {
   user: 'userSettings',
   project: 'projectSettings',
-  local: 'localSettings',
-}
+  local: 'localSettings'}
 
 /**
  * Convert a plugin scope to its corresponding editable setting source

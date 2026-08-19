@@ -6,14 +6,12 @@ import type { SearchResult } from '../skillSearch/localSearch.js'
 import { createInstinct, type StoredInstinct } from './instinctParser.js'
 import {
   getProjectStorageDir,
-  resolveProjectContext,
-} from './projectContext.js'
+  resolveProjectContext} from './projectContext.js'
 import { generateSkillDraft, writeLearnedSkill } from './skillGenerator.js'
 import type {
   InstinctDomain,
   SkillGapStatus,
-  SkillLearningProjectContext,
-} from './types.js'
+  SkillLearningProjectContext} from './types.js'
 
 export type SkillGapRecommendation = Pick<
   SearchResult,
@@ -103,13 +101,11 @@ export async function recordSkillGap(
     recommendations: (options.recommendations ?? []).slice(0, 5).map(r => ({
       name: r.name,
       description: r.description,
-      score: r.score,
-    })),
+      score: r.score})),
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
     draft: existing?.draft,
-    active: existing?.active,
-  }
+    active: existing?.active}
 
   if (gap.status === 'rejected') {
     state.gaps[key] = gap
@@ -172,8 +168,7 @@ export async function recordDraftHit(
     ...gap,
     draftHits: gap.draftHits + 1,
     draftHitSessions: [...existingSessions, sessionId],
-    updatedAt: now,
-  }
+    updatedAt: now}
 
   if (shouldPromoteToActive(updated)) {
     updated.active = await writeActiveSkillForGap(updated, project)
@@ -200,8 +195,7 @@ export async function promoteGapToDraft(
     ...gap,
     draft: await writeSkillGapDraft(gap, project),
     status: 'draft',
-    updatedAt: new Date().toISOString(),
-  }
+    updatedAt: new Date().toISOString()}
   state.gaps[key] = updated
   await writeSkillGapState(project, state, rootDir)
   await clearRuntimeSkillCaches()
@@ -219,8 +213,7 @@ export async function rejectSkillGap(
   const updated: SkillGapRecord = {
     ...gap,
     status: 'rejected',
-    updatedAt: new Date().toISOString(),
-  }
+    updatedAt: new Date().toISOString()}
   state.gaps[key] = updated
   await writeSkillGapState(project, state, rootDir)
   return updated
@@ -259,16 +252,14 @@ async function writeSkillGapDraft(
     scope: 'project',
     name: `draft-${buildNameFragment(gap.prompt)}`,
     description:
-      'Draft learned skill candidate. Promote after repeated evidence or explicit user correction.',
-  })
+      'Draft learned skill candidate. Promote after repeated evidence or explicit user correction.'})
   const skillFile = join(draft.outputPath, 'SKILL.md')
   if (!existsSync(skillFile)) {
     await writeLearnedSkill({
       ...draft,
       content:
         draft.content +
-        '\n## Promotion Rule\n\nDo not move this draft into active skills until the same gap repeats or the user explicitly confirms this should become reusable.\n',
-    })
+        '\n## Promotion Rule\n\nDo not move this draft into active skills until the same gap repeats or the user explicitly confirms this should become reusable.\n'})
   }
   return { type: 'draft', name: draft.name, skillPath: skillFile }
 }
@@ -282,8 +273,7 @@ async function writeActiveSkillForGap(
     cwd: project.projectRoot ?? project.cwd,
     scope: 'project',
     name: buildNameFragment(gap.prompt),
-    description: buildGapAction(gap.prompt),
-  })
+    description: buildGapAction(gap.prompt)})
   const skillFile = join(draft.outputPath, 'SKILL.md')
   if (!existsSync(skillFile)) {
     await writeLearnedSkill(draft)
@@ -309,8 +299,7 @@ function createGapInstinct(
       `No high-confidence active skill was auto-loaded.`,
       `Observed ${gap.count} time(s).`,
     ],
-    status,
-  })
+    status})
 }
 
 function buildGapAction(prompt: string): string {
@@ -404,8 +393,7 @@ function migrateLegacyGapState(state: SkillGapState): SkillGapState {
       count,
       draftHits,
       draftHitSessions,
-      status,
-    }
+      status}
   }
   return { version: 1, gaps: migrated }
 }
@@ -474,7 +462,7 @@ function buildNameFragment(prompt: string): string {
     'flag',
     'name',
   ])
-  const words = (mapped.match(/[a-z0-9][a-z0-9_-]{2,}/g) ?? [])
+  const words = (mapped.match(/[a-z0-9][a-z0-9_-]{2}/g) ?? [])
     .filter(word => !stop.has(word))
     .slice(0, 5)
   const value = words.join('-') || 'learned-gap'

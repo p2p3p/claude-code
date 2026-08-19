@@ -4,5 +4,4 @@ export {
   extractConnectionErrorDetails,
   sanitizeAPIError,
   getSSLErrorHint,
-  type ConnectionErrorDetails,
-} from '@ant/model-provider'
+  type ConnectionErrorDetails} from '@ant/model-provider'

@@ -2,6 +2,7 @@ import { relative } from 'path';
 import React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import { DiagnosticTrackingService } from '../services/diagnosticTracking.js';
+import { t } from '../utils/i18n/index.js';
 import type { Attachment } from '../utils/attachments.js';
 import { getCwd } from '../utils/cwd.js';
 import { CtrlOToExpand } from './CtrlOToExpand.js';
@@ -65,8 +66,7 @@ export function DiagnosticsDisplay({ attachment, verbose }: DiagnosticsDisplayPr
     return (
       <MessageResponse>
         <Text dimColor wrap="wrap">
-          Found <Text bold>{totalIssues}</Text> new diagnostic {totalIssues === 1 ? 'issue' : 'issues'} in {fileCount}{' '}
-          {fileCount === 1 ? 'file' : 'files'} <CtrlOToExpand />
+          {t('diagnosticsDisplay.foundIssues', totalIssues, fileCount)} <CtrlOToExpand />
         </Text>
       </MessageResponse>
     );

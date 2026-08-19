@@ -4,8 +4,7 @@ import { type InputEvent, useInput } from '@anthropic/ink'
 import { useKeybindings } from '../../keybindings/useKeybinding.js'
 import {
   normalizeFullWidthDigits,
-  normalizeFullWidthSpace,
-} from '../../utils/stringUtils.js'
+  normalizeFullWidthSpace} from '../../utils/stringUtils.js'
 import type { OptionWithDescription } from './select.js'
 import type { SelectState } from './use-select-state.js'
 
@@ -93,8 +92,7 @@ export const useSelectInput = <T>({
   onInputModeToggle,
   inputValues,
   imagesSelected = false,
-  onEnterImageSelection,
-}: UseSelectProps<T>) => {
+  onEnterImageSelection}: UseSelectProps<T>) => {
   // Automatically register as an overlay when onCancel is provided.
   // This ensures CancelRequestHandler won't intercept Escape when the select is active.
   useRegisterOverlay('select', !!state.onCancel)
@@ -164,8 +162,7 @@ export const useSelectInput = <T>({
 
   useKeybindings(keybindingHandlers, {
     context: 'Select',
-    isActive: !isDisabled,
-  })
+    isActive: !isDisabled})
 
   // Remaining keys that stay as useInput: number keys, pageUp/pageDown, tab, space,
   // and arrow key navigation when in input mode

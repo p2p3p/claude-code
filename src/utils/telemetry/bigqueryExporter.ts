@@ -5,8 +5,7 @@ import {
   type MetricData,
   type DataPoint as OTelDataPoint,
   type PushMetricExporter,
-  type ResourceMetrics,
-} from '@opentelemetry/sdk-metrics'
+  type ResourceMetrics} from '@opentelemetry/sdk-metrics'
 import axios from 'axios'
 import { checkMetricsEnabled } from 'src/services/api/metricsOptOut.js'
 import { getIsNonInteractiveSession } from '../../bootstrap/state.js'
@@ -67,8 +66,7 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
     if (this.isShutdown) {
       resultCallback({
         code: ExportResultCode.FAILED,
-        error: new Error('Exporter has been shutdown'),
-      })
+        error: new Error('Exporter has been shutdown')})
       return
     }
 
@@ -116,21 +114,18 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
         logForDebugging(`Metrics export failed: ${authResult.error}`)
         resultCallback({
           code: ExportResultCode.FAILED,
-          error: new Error(authResult.error),
-        })
+          error: new Error(authResult.error)})
         return
       }
 
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         'User-Agent': getClaudeCodeUserAgent(),
-        ...authResult.headers,
-      }
+        ...authResult.headers}
 
       const response = await axios.post(this.endpoint, payload, {
         timeout: this.timeout,
-        headers,
-      })
+        headers})
 
       logForDebugging('BigQuery metrics exported successfully')
       logForDebugging(
@@ -142,8 +137,7 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
       logError(error)
       resultCallback({
         code: ExportResultCode.FAILED,
-        error: toError(error),
-      })
+        error: toError(error)})
     }
   }
 
@@ -161,8 +155,7 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
       'aggregation.temporality':
         this.selectAggregationTemporality() === AggregationTemporality.DELTA
           ? 'delta'
-          : 'cumulative',
-    }
+          : 'cumulative'}
 
     // Only add wsl.version if it exists (omit instead of default)
     if (attrs['wsl.version']) {
@@ -187,10 +180,8 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
           name: metric.descriptor.name,
           description: metric.descriptor.description,
           unit: metric.descriptor.unit,
-          data_points: this.extractDataPoints(metric),
-        })),
-      ),
-    }
+          data_points: this.extractDataPoints(metric)})),
+      )}
 
     return transformed
   }
@@ -208,8 +199,7 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
         value: point.value,
         timestamp: this.hrTimeToISOString(
           point.endTime || point.startTime || [Date.now() / 1000, 0],
-        ),
-      }))
+        )}))
   }
 
   async shutdown(): Promise<void> {

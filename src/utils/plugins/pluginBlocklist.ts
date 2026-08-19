@@ -14,13 +14,11 @@ import { errorMessage } from '../errors.js'
 import { loadInstalledPluginsV2 } from './installedPluginsManager.js'
 import {
   getMarketplace,
-  loadKnownMarketplacesConfigSafe,
-} from './marketplaceManager.js'
+  loadKnownMarketplacesConfigSafe} from './marketplaceManager.js'
 import {
   addFlaggedPlugin,
   getFlaggedPlugins,
-  loadFlaggedPlugins,
-} from './pluginFlagging.js'
+  loadFlaggedPlugins} from './pluginFlagging.js'
 import type { InstalledPluginsFileV2, PluginMarketplace } from './schemas.js'
 
 /**

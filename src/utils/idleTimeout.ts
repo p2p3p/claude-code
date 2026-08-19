@@ -48,6 +48,5 @@ export function createIdleTimeoutManager(isIdle: () => boolean): {
         clearTimeout(timer)
         timer = null
       }
-    },
-  }
+    }}
 }

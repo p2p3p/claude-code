@@ -5,6 +5,7 @@ import { extractTag } from 'src/utils/messages.js';
 import { removeSandboxViolationTags } from 'src/utils/sandbox/sandbox-ui-utils.js';
 import { Box, Text } from '@anthropic/ink';
 import { useShortcutDisplay } from '../keybindings/useShortcutDisplay.js';
+import { t } from '../utils/i18n/index.js';
 import { countCharInString } from '../utils/stringUtils.js';
 import { MessageResponse } from './MessageResponse.js';
 
@@ -20,7 +21,7 @@ export function FallbackToolUseErrorMessage({ result, verbose }: Props): React.R
   let error: string;
 
   if (typeof result !== 'string') {
-    error = 'Tool execution failed';
+    error = t('fallbackToolUseError.toolExecutionFailed');
   } else {
     const extractedError = extractTag(result, 'tool_use_error') ?? result;
     // Remove sandbox_violations tags from error display (Claude still sees them in the tool result)
@@ -29,11 +30,11 @@ export function FallbackToolUseErrorMessage({ result, verbose }: Props): React.R
     const withoutErrorTags = withoutSandboxViolations.replace(/<\/?error>/g, '');
     const trimmed = withoutErrorTags.trim();
     if (!verbose && trimmed.includes('InputValidationError: ')) {
-      error = 'Invalid tool parameters';
+      error = t('fallbackToolUseError.invalidToolParameters');
     } else if (trimmed.startsWith('Error: ') || trimmed.startsWith('Cancelled: ')) {
       error = trimmed;
     } else {
-      error = `Error: ${trimmed}`;
+      error = `${t('fallbackToolUseError.errorPrefix')} ${trimmed}`;
     }
   }
 
@@ -50,13 +51,13 @@ export function FallbackToolUseErrorMessage({ result, verbose }: Props): React.R
           // rendering bug
           <Box>
             <Text dimColor>
-              … +{plusLines} {plusLines === 1 ? 'line' : 'lines'} (
+              {t('fallbackToolUseError.plusLines', plusLines)}
             </Text>
             <Text dimColor bold>
               {transcriptShortcut}
             </Text>
             <Text> </Text>
-            <Text dimColor>to see all)</Text>
+            <Text dimColor>{t('fallbackToolUseError.toSeeAll')}</Text>
           </Box>
         )}
       </Box>

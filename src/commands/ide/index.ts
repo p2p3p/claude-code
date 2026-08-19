@@ -1,11 +1,11 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const ide = {
   type: 'local-jsx',
   name: 'ide',
-  description: 'Manage IDE integrations and show status',
+  description: t('cmd.descIde'),
   argumentHint: '[open]',
-  load: () => import('./ide.js'),
-} satisfies Command
+  load: () => import('./ide.js')} satisfies Command
 
 export default ide

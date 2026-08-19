@@ -156,8 +156,7 @@ function parseNode(raw: any): AccessibilityNode {
       ? Array.isArray(raw.c)
         ? raw.c.map(parseNode)
         : [parseNode(raw.c)]
-      : undefined,
-  }
+      : undefined}
 }
 
 /**

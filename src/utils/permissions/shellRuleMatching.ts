@@ -164,23 +164,20 @@ export function parsePermissionRule(
   if (prefix !== null) {
     return {
       type: 'prefix',
-      prefix,
-    }
+      prefix}
   }
 
   // Check for new wildcard syntax (contains * but not :* at end)
   if (hasWildcards(permissionRule)) {
     return {
       type: 'wildcard',
-      pattern: permissionRule,
-    }
+      pattern: permissionRule}
   }
 
   // Otherwise, it's an exact match
   return {
     type: 'exact',
-    command: permissionRule,
-  }
+    command: permissionRule}
 }
 
 /**
@@ -196,12 +193,10 @@ export function suggestionForExactCommand(
       rules: [
         {
           toolName,
-          ruleContent: command,
-        },
+          ruleContent: command},
       ],
       behavior: 'allow',
-      destination: 'localSettings',
-    },
+      destination: 'localSettings'},
   ]
 }
 
@@ -218,11 +213,9 @@ export function suggestionForPrefix(
       rules: [
         {
           toolName,
-          ruleContent: `${prefix}:*`,
-        },
+          ruleContent: `${prefix}:*`},
       ],
       behavior: 'allow',
-      destination: 'localSettings',
-    },
+      destination: 'localSettings'},
   ]
 }

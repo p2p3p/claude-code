@@ -32,8 +32,7 @@ import { logForDebugging } from '../debug.js'
 import {
   getClaudeConfigHomeDir,
   isEnvDefinedFalsy,
-  isEnvTruthy,
-} from '../envUtils.js'
+  isEnvTruthy} from '../envUtils.js'
 import { errorMessage } from '../errors.js'
 import { djb2Hash } from '../hash.js'
 import { jsonStringify } from '../slowOperations.js'
@@ -158,8 +157,7 @@ function getCurrentAgentInfo(): AgentInfo {
     agentName,
     parentAgentId: parentSessionId,
     processId: agentId === getSessionId() ? 1 : getProcessIdForAgent(agentId),
-    threadId: stringToNumericHash(agentName),
-  }
+    threadId: stringToNumericHash(agentName)}
 
   agentRegistry.set(agentId, info)
   totalAgentCount++
@@ -200,9 +198,7 @@ function evictStaleSpans(): void {
         args: {
           ...span.args,
           evicted: true,
-          duration_ms: (now - span.startTime) / 1000,
-        },
-      })
+          duration_ms: (now - span.startTime) / 1000}})
       pendingSpans.delete(spanId)
     }
   }
@@ -218,9 +214,7 @@ function buildTraceDocument(): string {
       session_id: getSessionId(),
       trace_start_time: new Date(startTimeMs).toISOString(),
       agent_count: totalAgentCount,
-      total_event_count: metadataEvents.length + events.length,
-    },
-  })
+      total_event_count: metadataEvents.length + events.length}})
 }
 
 /**
@@ -239,8 +233,7 @@ function evictOldestEvents(): void {
     ts: dropped[dropped.length - 1]?.ts ?? 0,
     pid: 1,
     tid: 0,
-    args: { dropped_events: dropped.length },
-  })
+    args: { dropped_events: dropped.length }})
   logForDebugging(
     `[Perfetto] Evicted ${dropped.length} oldest events (cap ${MAX_EVENTS})`,
   )
@@ -348,8 +341,7 @@ function emitProcessMetadata(agentInfo: AgentInfo): void {
     ts: 0,
     pid: agentInfo.processId,
     tid: 0,
-    args: { name: agentInfo.agentName },
-  })
+    args: { name: agentInfo.agentName }})
 
   // Thread name (same as process for now)
   metadataEvents.push({
@@ -359,8 +351,7 @@ function emitProcessMetadata(agentInfo: AgentInfo): void {
     ts: 0,
     pid: agentInfo.processId,
     tid: agentInfo.threadId,
-    args: { name: agentInfo.agentName },
-  })
+    args: { name: agentInfo.agentName }})
 
   // Add parent info if available
   if (agentInfo.parentAgentId) {
@@ -372,9 +363,7 @@ function emitProcessMetadata(agentInfo: AgentInfo): void {
       pid: agentInfo.processId,
       tid: 0,
       args: {
-        parent_agent_id: agentInfo.parentAgentId,
-      },
-    })
+        parent_agent_id: agentInfo.parentAgentId}})
   }
 }
 
@@ -401,8 +390,7 @@ export function registerAgent(
     agentName,
     parentAgentId,
     processId: getProcessIdForAgent(agentId),
-    threadId: stringToNumericHash(agentName),
-  }
+    threadId: stringToNumericHash(agentName)}
 
   agentRegistry.set(agentId, info)
   totalAgentCount++
@@ -444,9 +432,7 @@ export function startLLMRequestPerfettoSpan(args: {
       prompt_tokens: args.promptTokens,
       message_id: args.messageId,
       is_speculative: args.isSpeculative ?? false,
-      query_source: args.querySource,
-    },
-  })
+      query_source: args.querySource}})
 
   // Emit begin event
   events.push({
@@ -456,8 +442,7 @@ export function startLLMRequestPerfettoSpan(args: {
     ts: pendingSpans.get(spanId)!.startTime,
     pid: agentInfo.processId,
     tid: agentInfo.threadId,
-    args: pendingSpans.get(spanId)!.args,
-  })
+    args: pendingSpans.get(spanId)!.args})
 
   return spanId
 }
@@ -541,8 +526,7 @@ export function endLLMRequestPerfettoSpan(
     // Derived metrics
     itps,
     otps,
-    cache_hit_rate_pct: cacheHitRate,
-  }
+    cache_hit_rate_pct: cacheHitRate}
 
   // Emit Request Setup sub-span when there was measurable setup time
   // (client creation, param building, retries before the successful attempt)
@@ -562,9 +546,7 @@ export function endLLMRequestPerfettoSpan(
       tid: pending.agentInfo.threadId,
       args: {
         request_setup_ms: requestSetupMs,
-        attempt_count: attemptStartTimes?.length ?? 1,
-      },
-    })
+        attempt_count: attemptStartTimes?.length ?? 1}})
 
     // Emit retry attempt sub-spans within Request Setup.
     // Each failed attempt runs from its start to the next attempt's start.
@@ -585,16 +567,14 @@ export function endLLMRequestPerfettoSpan(
           ts: attemptStartUs,
           pid: pending.agentInfo.processId,
           tid: pending.agentInfo.threadId,
-          args: { attempt: i + 1 },
-        })
+          args: { attempt: i + 1 }})
         events.push({
           name: `Attempt ${i + 1} (retry)`,
           cat: 'api,retry',
           ph: 'E',
           ts: attemptEndUs,
           pid: pending.agentInfo.processId,
-          tid: pending.agentInfo.threadId,
-        })
+          tid: pending.agentInfo.threadId})
       }
     }
 
@@ -604,8 +584,7 @@ export function endLLMRequestPerfettoSpan(
       ph: 'E',
       ts: setupEndTs,
       pid: pending.agentInfo.processId,
-      tid: pending.agentInfo.threadId,
-    })
+      tid: pending.agentInfo.threadId})
   }
 
   // Emit sub-spans for First Token and Sampling phases (before API Call end)
@@ -627,17 +606,14 @@ export function endLLMRequestPerfettoSpan(
         ttft_ms: ttftMs,
         prompt_tokens: promptTokens,
         itps,
-        cache_hit_rate_pct: cacheHitRate,
-      },
-    })
+        cache_hit_rate_pct: cacheHitRate}})
     events.push({
       name: 'First Token',
       cat: 'api,ttft',
       ph: 'E',
       ts: firstTokenEndTs,
       pid: pending.agentInfo.processId,
-      tid: pending.agentInfo.threadId,
-    })
+      tid: pending.agentInfo.threadId})
 
     // Sampling phase: from first token to last token
     // Note: samplingMs = ttltMs - ttftMs still includes setup time in ttltMs,
@@ -656,17 +632,14 @@ export function endLLMRequestPerfettoSpan(
         args: {
           sampling_ms: actualSamplingMs,
           output_tokens: outputTokens,
-          otps,
-        },
-      })
+          otps}})
       events.push({
         name: 'Sampling',
         cat: 'api,sampling',
         ph: 'E',
         ts: firstTokenEndTs + actualSamplingMs * 1000,
         pid: pending.agentInfo.processId,
-        tid: pending.agentInfo.threadId,
-      })
+        tid: pending.agentInfo.threadId})
     }
   }
 
@@ -678,8 +651,7 @@ export function endLLMRequestPerfettoSpan(
     ts: endTime,
     pid: pending.agentInfo.processId,
     tid: pending.agentInfo.threadId,
-    args,
-  })
+    args})
 
   pendingSpans.delete(spanId)
 }
@@ -703,9 +675,7 @@ export function startToolPerfettoSpan(
     agentInfo,
     args: {
       tool_name: toolName,
-      ...args,
-    },
-  })
+      ...args}})
 
   // Emit begin event
   events.push({
@@ -715,8 +685,7 @@ export function startToolPerfettoSpan(
     ts: pendingSpans.get(spanId)!.startTime,
     pid: agentInfo.processId,
     tid: agentInfo.threadId,
-    args: pendingSpans.get(spanId)!.args,
-  })
+    args: pendingSpans.get(spanId)!.args})
 
   return spanId
 }
@@ -745,8 +714,7 @@ export function endToolPerfettoSpan(
     success: metadata?.success ?? true,
     error: metadata?.error,
     result_tokens: metadata?.resultTokens,
-    duration_ms: duration / 1000,
-  }
+    duration_ms: duration / 1000}
 
   // Emit end event
   events.push({
@@ -756,8 +724,7 @@ export function endToolPerfettoSpan(
     ts: endTime,
     pid: pending.agentInfo.processId,
     tid: pending.agentInfo.threadId,
-    args,
-  })
+    args})
 
   pendingSpans.delete(spanId)
 }
@@ -777,9 +744,7 @@ export function startUserInputPerfettoSpan(context?: string): string {
     startTime: getTimestamp(),
     agentInfo,
     args: {
-      context,
-    },
-  })
+      context}})
 
   // Emit begin event
   events.push({
@@ -789,8 +754,7 @@ export function startUserInputPerfettoSpan(context?: string): string {
     ts: pendingSpans.get(spanId)!.startTime,
     pid: agentInfo.processId,
     tid: agentInfo.threadId,
-    args: pendingSpans.get(spanId)!.args,
-  })
+    args: pendingSpans.get(spanId)!.args})
 
   return spanId
 }
@@ -817,8 +781,7 @@ export function endUserInputPerfettoSpan(
     ...pending.args,
     decision: metadata?.decision,
     source: metadata?.source,
-    duration_ms: duration / 1000,
-  }
+    duration_ms: duration / 1000}
 
   // Emit end event
   events.push({
@@ -828,8 +791,7 @@ export function endUserInputPerfettoSpan(
     ts: endTime,
     pid: pending.agentInfo.processId,
     tid: pending.agentInfo.threadId,
-    args,
-  })
+    args})
 
   pendingSpans.delete(spanId)
 }
@@ -853,8 +815,7 @@ export function emitPerfettoInstant(
     ts: getTimestamp(),
     pid: agentInfo.processId,
     tid: agentInfo.threadId,
-    args,
-  })
+    args})
 }
 
 /**
@@ -875,8 +836,7 @@ export function emitPerfettoCounter(
     ts: getTimestamp(),
     pid: agentInfo.processId,
     tid: agentInfo.threadId,
-    args: values,
-  })
+    args: values})
 }
 
 /**
@@ -894,9 +854,7 @@ export function startInteractionPerfettoSpan(userPrompt?: string): string {
     startTime: getTimestamp(),
     agentInfo,
     args: {
-      user_prompt_length: userPrompt?.length,
-    },
-  })
+      user_prompt_length: userPrompt?.length}})
 
   // Emit begin event
   events.push({
@@ -906,8 +864,7 @@ export function startInteractionPerfettoSpan(userPrompt?: string): string {
     ts: pendingSpans.get(spanId)!.startTime,
     pid: agentInfo.processId,
     tid: agentInfo.threadId,
-    args: pendingSpans.get(spanId)!.args,
-  })
+    args: pendingSpans.get(spanId)!.args})
 
   return spanId
 }
@@ -934,9 +891,7 @@ export function endInteractionPerfettoSpan(spanId: string): void {
     tid: pending.agentInfo.threadId,
     args: {
       ...pending.args,
-      duration_ms: duration / 1000,
-    },
-  })
+      duration_ms: duration / 1000}})
 
   pendingSpans.delete(spanId)
 }
@@ -975,9 +930,7 @@ function closeOpenSpans(): void {
       args: {
         ...pending.args,
         incomplete: true,
-        duration_ms: (endTime - pending.startTime) / 1000,
-      },
-    })
+        duration_ms: (endTime - pending.startTime) / 1000}})
     pendingSpans.delete(spanId)
   }
 }

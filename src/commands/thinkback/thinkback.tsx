@@ -14,6 +14,7 @@ import { isENOENT, toError } from '../../utils/errors.js';
 import { execFileNoThrow } from '../../utils/execFileNoThrow.js';
 import { pathExists } from '../../utils/file.js';
 import { logError } from '../../utils/log.js';
+import { t } from '../../utils/i18n/index.js';
 import { getPlatform } from '../../utils/platform.js';
 import { clearAllCaches } from '../../utils/plugins/cacheUtils.js';
 import { isPluginInstalled } from '../../utils/plugins/installedPluginsManager.js';
@@ -21,8 +22,7 @@ import {
   addMarketplaceSource,
   clearMarketplacesCache,
   loadKnownMarketplacesConfig,
-  refreshMarketplace,
-} from '../../utils/plugins/marketplaceManager.js';
+  refreshMarketplace} from '../../utils/plugins/marketplaceManager.js';
 import { OFFICIAL_MARKETPLACE_NAME } from '../../utils/plugins/officialMarketplace.js';
 import { loadAllPlugins } from '../../utils/plugins/pluginLoader.js';
 import { installSelectedPlugins } from '../../utils/plugins/pluginStartupCheck.js';
@@ -86,14 +86,12 @@ export async function playAnimation(skillDir: string): Promise<{
     if (isENOENT(e)) {
       return {
         success: false,
-        message: 'No animation found. Run /think-back first to generate one.',
-      };
+        message: t('thinkback.noAnimationFound')};
     }
     logError(e);
     return {
       success: false,
-      message: `Could not access animation data: ${toError(e).message}`,
-    };
+      message: t('thinkback.couldNotAccessData', toError(e).message)};
   }
 
   try {
@@ -102,20 +100,18 @@ export async function playAnimation(skillDir: string): Promise<{
     if (isENOENT(e)) {
       return {
         success: false,
-        message: 'Player script not found. The player.js file is missing from the thinkback skill.',
-      };
+        message: t('thinkback.playerScriptNotFound')};
     }
     logError(e);
     return {
       success: false,
-      message: `Could not access player script: ${toError(e).message}`,
-    };
+      message: t('thinkback.couldNotAccessPlayer', toError(e).message)};
   }
 
   // Get ink instance for terminal takeover
   const inkInstance = instances.get(process.stdout);
   if (!inkInstance) {
-    return { success: false, message: 'Failed to access terminal instance' };
+    return { success: false, message: t('thinkback.failedToAccessTerminal') };
   }
 
   inkInstance.enterAlternateScreen();
@@ -123,8 +119,7 @@ export async function playAnimation(skillDir: string): Promise<{
     await execa('node', [playerPath], {
       stdio: 'inherit',
       cwd: skillDir,
-      reject: false,
-    });
+      reject: false});
   } catch {
     // Animation may have been interrupted (e.g., Ctrl+C)
   } finally {
@@ -139,7 +134,7 @@ export async function playAnimation(skillDir: string): Promise<{
     void execFileNoThrow(openCmd, [htmlPath]);
   }
 
-  return { success: true, message: 'Year in review animation complete!' };
+  return { success: true, message: t('thinkback.animationComplete') };
 }
 
 type InstallState =
@@ -152,8 +147,7 @@ type InstallState =
 
 function ThinkbackInstaller({
   onReady,
-  onError,
-}: {
+  onError}: {
   onReady: () => void;
   onError: (message: string) => void;
 }): React.ReactNode {
@@ -187,7 +181,7 @@ function ThinkbackInstaller({
           // Marketplace installed but plugin not installed - refresh to get latest plugins
           // Only refresh when needed to avoid potentially destructive git operations
           setState({ phase: 'installing-marketplace' });
-          setProgressMessage('Updating marketplace…');
+          setProgressMessage(t('thinkback.updatingMarketplace'));
           logForDebugging(`Refreshing marketplace ${marketplaceName}`);
 
           await refreshMarketplace(marketplaceName, message => {
@@ -207,7 +201,7 @@ function ThinkbackInstaller({
 
           if (result.failed.length > 0) {
             const errorMsg = result.failed.map(f => `${f.name}: ${f.error}`).join(', ');
-            throw new Error(`Failed to install plugin: ${errorMsg}`);
+            throw new Error(t('thinkback.failedToInstallPlugin', errorMsg));
           }
 
           clearAllCaches();
@@ -224,7 +218,7 @@ function ThinkbackInstaller({
 
             const enableResult = await enablePluginOp(pluginId);
             if (!enableResult.success) {
-              throw new Error(`Failed to enable plugin: ${enableResult.message}`);
+              throw new Error(t('thinkback.failedToEnablePlugin', enableResult.message));
             }
 
             clearAllCaches();
@@ -248,7 +242,7 @@ function ThinkbackInstaller({
   if (state.phase === 'error') {
     return (
       <Box flexDirection="column">
-        <Text color="error">Error: {state.message}</Text>
+        <Text color="error">{t('thinkback.errorPrefix')}{state.message}</Text>
       </Box>
     );
   }
@@ -259,12 +253,12 @@ function ThinkbackInstaller({
 
   const statusMessage =
     state.phase === 'checking'
-      ? 'Checking thinkback installation…'
+      ? t('thinkback.checkingInstallation')
       : state.phase === 'installing-marketplace'
-        ? 'Installing marketplace…'
+        ? t('thinkback.installingMarketplace')
         : state.phase === 'enabling-plugin'
-          ? 'Enabling thinkback plugin…'
-          : 'Installing thinkback plugin…';
+          ? t('thinkback.enablingPlugin')
+          : t('thinkback.installingPlugin');
 
   return (
     <Box flexDirection="column">
@@ -283,8 +277,7 @@ function ThinkbackMenu({
   onDone,
   onAction,
   skillDir,
-  hasGenerated,
-}: {
+  hasGenerated}: {
   onDone: (result?: string, options?: { display?: CommandResultDisplay; shouldQuery?: boolean }) => void;
   onAction: (action: GenerativeAction) => void;
   skillDir: string;
@@ -295,32 +288,27 @@ function ThinkbackMenu({
   const options = hasGenerated
     ? [
         {
-          label: 'Play animation',
+          label: t('commandsThinkback.playAnimation'),
           value: 'play' as const,
-          description: 'Watch your year in review',
-        },
+          description: t('commandsThinkback.playAnimationDesc')},
         {
-          label: 'Edit content',
+          label: t('commandsThinkback.editContent'),
           value: 'edit' as const,
-          description: 'Modify the animation',
-        },
+          description: t('commandsThinkback.editContentDesc')},
         {
-          label: 'Fix errors',
+          label: t('commandsThinkback.fixErrors'),
           value: 'fix' as const,
-          description: 'Fix validation or rendering issues',
-        },
+          description: t('commandsThinkback.fixErrorsDesc')},
         {
-          label: 'Regenerate',
+          label: t('commandsThinkback.regenerate'),
           value: 'regenerate' as const,
-          description: 'Create a new animation from scratch',
-        },
+          description: t('commandsThinkback.regenerateDesc')},
       ]
     : [
         {
-          label: "Let's go!",
+          label: t('thinkback.letsGo'),
           value: 'regenerate' as const,
-          description: 'Generate your personalized animation',
-        },
+          description: t('commandsThinkback.generateDesc')},
       ];
 
   function handleSelect(value: MenuAction): void {
@@ -345,8 +333,8 @@ function ThinkbackMenu({
 
   return (
     <Dialog
-      title="Think Back on 2025 with Claude Code"
-      subtitle="Generate your 2025 Claude Code Think Back (takes a few minutes to run)"
+      title={t("cmdSystemUI.thinkbackTitle")}
+      subtitle={t('commandsThinkback.generateYour2025ClaudeCodeThinkBackTakesAFewMinutesToRun')}
       onCancel={handleCancel}
       color="claude"
     >
@@ -354,8 +342,8 @@ function ThinkbackMenu({
         {/* Description for first-time users */}
         {!hasGenerated && (
           <Box flexDirection="column">
-            <Text>Relive your year of coding with Claude.</Text>
-            <Text dimColor>{"We'll create a personalized ASCII animation celebrating your journey."}</Text>
+            <Text>{t('commandsThinkback.relive')}</Text>
+            <Text dimColor>{t('commandsThinkback.animationCelebration')}</Text>
           </Box>
         )}
 
@@ -376,8 +364,7 @@ const REGENERATE_PROMPT =
   'Use the Skill tool to invoke the "thinkback" skill with mode=regenerate to create a completely new Claude Code year in review animation from scratch. Delete the existing animation and start fresh. When the animation is ready, tell the user to run /think-back again to play it.';
 
 function ThinkbackFlow({
-  onDone,
-}: {
+  onDone}: {
   onDone: (result?: string, options?: { display?: CommandResultDisplay; shouldQuery?: boolean }) => void;
 }): React.ReactNode {
   const [installComplete, setInstallComplete] = useState(false);
@@ -393,9 +380,8 @@ function ThinkbackFlow({
     (message: string): void => {
       setInstallError(message);
       // Call onDone with the error message so the model can continue
-      onDone(`Error with thinkback: ${message}. Try running /plugin to manually install the think-back plugin.`, {
-        display: 'system',
-      });
+      onDone(t('thinkback.errorWithThinkback', message), {
+        display: 'system'});
     },
     [onDone],
   );
@@ -408,7 +394,7 @@ function ThinkbackFlow({
           logForDebugging(`Thinkback skill directory: ${dir}`);
           setSkillDir(dir);
         } else {
-          handleError('Could not find thinkback skill directory');
+          handleError(t('thinkback.couldNotFindSkillDir'));
         }
       });
     }
@@ -432,16 +418,15 @@ function ThinkbackFlow({
     const prompts: Record<GenerativeAction, string> = {
       edit: EDIT_PROMPT,
       fix: FIX_PROMPT,
-      regenerate: REGENERATE_PROMPT,
-    };
+      regenerate: REGENERATE_PROMPT};
     onDone(prompts[action], { display: 'user', shouldQuery: true });
   }
 
   if (installError) {
     return (
       <Box flexDirection="column">
-        <Text color="error">Error: {installError}</Text>
-        <Text dimColor>Try running /plugin to manually install the think-back plugin.</Text>
+        <Text color="error">{t('thinkback.errorPrefix')}{installError}</Text>
+        <Text dimColor>{t('commandsThinkback.tryRunningPluginToManuallyInstallTheThinkBackPlugin')}</Text>
       </Box>
     );
   }
@@ -454,7 +439,7 @@ function ThinkbackFlow({
     return (
       <Box>
         <Spinner />
-        <Text>Loading thinkback skill…</Text>
+        <Text>{t('thinkback.loadingThinkbackSkill')}</Text>
       </Box>
     );
   }

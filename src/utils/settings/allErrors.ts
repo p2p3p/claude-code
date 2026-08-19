@@ -27,6 +27,5 @@ export function getSettingsWithAllErrors(): SettingsWithErrors {
   const mcpErrors = scopes.flatMap(scope => getMcpConfigsByScope(scope).errors)
   return {
     settings: result.settings,
-    errors: [...result.errors, ...mcpErrors],
-  }
+    errors: [...result.errors, ...mcpErrors]}
 }

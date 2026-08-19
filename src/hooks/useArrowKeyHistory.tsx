@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { t } from '../utils/i18n/index.js';
 import { getModeFromInput } from 'src/components/PromptInput/inputModes.js';
 import { useNotifications } from 'src/context/notifications.js';
 import { ConfigurableShortcutHint } from '../components/ConfigurableShortcutHint.js';
@@ -138,13 +139,12 @@ export function useArrowKeyHistory(
             action="history:search"
             context="Global"
             fallback="ctrl+r"
-            description="search history"
+            description={t('desc.searchHistory')}
           />
         </Text>
       ),
       priority: 'immediate',
-      timeoutMs: FOOTER_TEMPORARY_STATUS_TIMEOUT,
-    });
+      timeoutMs: FOOTER_TEMPORARY_STATUS_TIMEOUT});
   }, [addNotification]);
 
   const onHistoryUp = useCallback((): void => {
@@ -167,8 +167,7 @@ export function useArrowKeyHistory(
           ? {
               display: inputAtPress,
               pastedContents: pastedContentsAtPress,
-              mode: modeAtPress,
-            }
+              mode: modeAtPress}
           : undefined,
       );
     }
@@ -262,6 +261,5 @@ export function useArrowKeyHistory(
     onHistoryUp,
     onHistoryDown,
     resetHistory,
-    dismissSearchHint,
-  };
+    dismissSearchHint};
 }

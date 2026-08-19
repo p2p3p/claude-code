@@ -100,8 +100,7 @@ const PROD_OAUTH_CONFIG = {
   // No suffix for production config
   OAUTH_FILE_SUFFIX: '',
   MCP_PROXY_URL: 'https://mcp-proxy.anthropic.com',
-  MCP_PROXY_PATH: '/v1/mcp/{server_id}',
-} as const
+  MCP_PROXY_PATH: '/v1/mcp/{server_id}'} as const
 
 /**
  * Client ID Metadata Document URL for MCP OAuth (CIMD / SEP-991).
@@ -138,8 +137,7 @@ const STAGING_OAUTH_CONFIG =
         CLIENT_ID: '22422756-60c9-4084-8eb7-27705fd5cf9a',
         OAUTH_FILE_SUFFIX: '-staging-oauth',
         MCP_PROXY_URL: 'https://mcp-proxy-staging.anthropic.com',
-        MCP_PROXY_PATH: '/v1/mcp/{server_id}',
-      } as const)
+        MCP_PROXY_PATH: '/v1/mcp/{server_id}'} as const)
     : undefined
 
 // Three local dev servers: :8000 api-proxy (`api dev start -g ccr`),
@@ -169,8 +167,7 @@ function getLocalOauthConfig(): OauthConfig {
     CLIENT_ID: '22422756-60c9-4084-8eb7-27705fd5cf9a',
     OAUTH_FILE_SUFFIX: '-local-oauth',
     MCP_PROXY_URL: 'http://localhost:8205',
-    MCP_PROXY_PATH: '/v1/toolbox/shttp/mcp/{server_id}',
-  }
+    MCP_PROXY_PATH: '/v1/toolbox/shttp/mcp/{server_id}'}
 }
 
 // Allowed base URLs for CLAUDE_CODE_CUSTOM_OAUTH_URL override.
@@ -217,8 +214,7 @@ export function getOauthConfig(): OauthConfig {
       CONSOLE_SUCCESS_URL: `${base}/oauth/code/success?app=claude-code`,
       CLAUDEAI_SUCCESS_URL: `${base}/oauth/code/success?app=claude-code`,
       MANUAL_REDIRECT_URL: `${base}/oauth/code/callback`,
-      OAUTH_FILE_SUFFIX: '-custom-oauth',
-    }
+      OAUTH_FILE_SUFFIX: '-custom-oauth'}
   }
 
   // Allow CLIENT_ID override via environment variable (e.g., for Xcode integration)
@@ -226,8 +222,7 @@ export function getOauthConfig(): OauthConfig {
   if (clientIdOverride) {
     config = {
       ...config,
-      CLIENT_ID: clientIdOverride,
-    }
+      CLIENT_ID: clientIdOverride}
   }
 
   return config

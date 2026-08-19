@@ -1,11 +1,11 @@
 import type { Command } from '../../commands.js'
+import { t } from '../../utils/i18n/index.js'
 
 const pipes = {
   type: 'local',
   name: 'pipes',
-  description: 'Inspect pipe registry state and toggle the pipe selector',
+  description: t('cmd.descPipes'),
   supportsNonInteractive: true,
-  load: () => import('./pipes.js'),
-} satisfies Command
+  load: () => import('./pipes.js')} satisfies Command
 
 export default pipes

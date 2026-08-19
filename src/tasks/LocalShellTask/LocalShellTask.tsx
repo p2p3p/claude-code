@@ -6,8 +6,7 @@ import {
   SUMMARY_TAG,
   TASK_ID_TAG,
   TASK_NOTIFICATION_TAG,
-  TOOL_USE_ID_TAG,
-} from '../../constants/xml.js';
+  TOOL_USE_ID_TAG} from '../../constants/xml.js';
 import { abortSpeculation } from '../../services/PromptSuggestion/speculation.js';
 import type { AppState } from '../../state/AppState.js';
 import type { LocalShellSpawnInput, SetAppState, Task, TaskContext, TaskHandle } from '../../Task.js';
@@ -21,13 +20,16 @@ import type { ShellCommand } from '../../utils/ShellCommand.js';
 import { evictTaskOutput, getTaskOutputPath } from '../../utils/task/diskOutput.js';
 import { registerTask, updateTaskState } from '../../utils/task/framework.js';
 import { escapeXml } from '../../utils/xml.js';
+import { t } from '../../utils/i18n/index.js';
 import { backgroundAgentTask, isLocalAgentTask } from '../LocalAgentTask/LocalAgentTask.js';
 import { isMainSessionTask } from '../LocalMainSessionTask.js';
 import { type BashTaskKind, isLocalShellTask, type LocalShellTaskState } from './guards.js';
 import { killTask } from './killShellTasks.js';
 
 /** Prefix that identifies a LocalShellTask summary to the UI collapse transform. */
-export const BACKGROUND_BASH_SUMMARY_PREFIX = 'Background command ';
+export function getBackgroundBashSummaryPrefix(): string {
+  return t('toolUI.bash.summaryPrefix');
+}
 
 const STALL_CHECK_INTERVAL_MS = 5_000;
 const STALL_THRESHOLD_MS = 45_000;
@@ -90,7 +92,7 @@ function startStallWatchdog(
             cancelled = true;
             clearInterval(timer);
             const toolUseIdLine = toolUseId ? `\n<${TOOL_USE_ID_TAG}>${toolUseId}</${TOOL_USE_ID_TAG}>` : '';
-            const summary = `${BACKGROUND_BASH_SUMMARY_PREFIX}"${description}" appears to be waiting for interactive input`;
+            const summary = `${getBackgroundBashSummaryPrefix()}${t('toolUI.bash.stalledPrompt', description)}`;
             // No <status> tag — print.ts treats <status> as a terminal
             // signal and an unknown value falls through to 'completed',
             // falsely closing the task for SDK consumers. Statusless
@@ -103,13 +105,12 @@ function startStallWatchdog(
 Last output:
 ${content.trimEnd()}
 
-The command is likely blocked on an interactive prompt. Kill this task and re-run with piped input (e.g., \`echo y | command\`) or a non-interactive flag if one exists.`;
+${t('toolUI.bash.stalledHelp')}`;
             enqueuePendingNotification({
               value: message,
               mode: 'task-notification',
               priority: 'next',
-              agentId,
-            });
+              agentId});
           },
           () => {},
         );
@@ -164,25 +165,31 @@ function enqueueShellNotification(
     // completed" collapse.
     switch (status) {
       case 'completed':
-        summary = `Monitor "${description}" stream ended`;
+        summary = t('toolUI.bash.monitorStreamEnded', description);
         break;
       case 'failed':
-        summary = `Monitor "${description}" script failed${exitCode !== undefined ? ` (exit ${exitCode})` : ''}`;
+        summary = t('toolUI.bash.monitorScriptFailed', {
+          description,
+          exitCode: exitCode !== undefined ? String(exitCode) : undefined});
         break;
       case 'killed':
-        summary = `Monitor "${description}" stopped`;
+        summary = t('toolUI.bash.monitorStopped', description);
         break;
     }
   } else {
     switch (status) {
       case 'completed':
-        summary = `${BACKGROUND_BASH_SUMMARY_PREFIX}"${description}" completed${exitCode !== undefined ? ` (exit code ${exitCode})` : ''}`;
+        summary = `${getBackgroundBashSummaryPrefix()}${t('toolUI.bash.bgCompleted', {
+          description,
+          exitCode: exitCode !== undefined ? String(exitCode) : undefined})}`;
         break;
       case 'failed':
-        summary = `${BACKGROUND_BASH_SUMMARY_PREFIX}"${description}" failed${exitCode !== undefined ? ` with exit code ${exitCode}` : ''}`;
+        summary = `${getBackgroundBashSummaryPrefix()}${t('toolUI.bash.bgFailed', {
+          description,
+          exitCode: exitCode !== undefined ? String(exitCode) : undefined})}`;
         break;
       case 'killed':
-        summary = `${BACKGROUND_BASH_SUMMARY_PREFIX}"${description}" was stopped`;
+        summary = `${getBackgroundBashSummaryPrefix()}${t('toolUI.bash.bgStopped', description)}`;
         break;
     }
   }
@@ -200,8 +207,7 @@ function enqueueShellNotification(
     value: message,
     mode: 'task-notification',
     priority: feature('MONITOR_TOOL') ? 'next' : 'later',
-    agentId,
-  });
+    agentId});
 }
 
 export const LocalShellTask: Task = {
@@ -209,8 +215,7 @@ export const LocalShellTask: Task = {
   type: 'local_bash',
   async kill(taskId, setAppState) {
     killTask(taskId, setAppState);
-  },
-};
+  }};
 
 export async function spawnShellTask(
   input: LocalShellSpawnInput & { shellCommand: ShellCommand },
@@ -238,8 +243,7 @@ export async function spawnShellTask(
     lastReportedTotalLines: 0,
     isBackgrounded: true,
     agentId,
-    kind,
-  };
+    kind};
 
   registerTask(taskState, setAppState);
 
@@ -266,8 +270,7 @@ export async function spawnShellTask(
         result: { code: result.code, interrupted: result.interrupted },
         shellCommand: null,
         unregisterCleanup: undefined,
-        endTime: Date.now(),
-      };
+        endTime: Date.now()};
     });
 
     enqueueShellNotification(
@@ -288,8 +291,7 @@ export async function spawnShellTask(
     taskId,
     cleanup: () => {
       unregisterCleanup();
-    },
-  };
+    }};
 }
 
 /**
@@ -320,8 +322,7 @@ export function registerForeground(
     unregisterCleanup,
     lastReportedTotalLines: 0,
     isBackgrounded: false, // Not yet backgrounded - running in foreground
-    agentId,
-  };
+    agentId};
 
   registerTask(taskState, setAppState);
   return taskId;
@@ -357,9 +358,7 @@ function backgroundTask(taskId: string, getAppState: () => AppState, setAppState
       ...prev,
       tasks: {
         ...prev.tasks,
-        [taskId]: { ...prevTask, isBackgrounded: true },
-      },
-    };
+        [taskId]: { ...prevTask, isBackgrounded: true }}};
   });
 
   const cancelStallWatchdog = startStallWatchdog(taskId, description, kind, toolUseId, agentId);
@@ -386,8 +385,7 @@ function backgroundTask(taskId: string, getAppState: () => AppState, setAppState
         result: { code: result.code, interrupted: result.interrupted },
         shellCommand: null,
         unregisterCleanup: undefined,
-        endTime: Date.now(),
-      };
+        endTime: Date.now()};
     });
 
     // Call cleanup outside of the state updater (avoid side effects in updater)
@@ -479,9 +477,7 @@ export function backgroundExistingForegroundTask(
       ...prev,
       tasks: {
         ...prev.tasks,
-        [taskId]: { ...prevTask, isBackgrounded: true },
-      },
-    };
+        [taskId]: { ...prevTask, isBackgrounded: true }}};
   });
 
   const cancelStallWatchdog = startStallWatchdog(taskId, description, undefined, toolUseId, agentId);
@@ -505,8 +501,7 @@ export function backgroundExistingForegroundTask(
         result: { code: result.code, interrupted: result.interrupted },
         shellCommand: null,
         unregisterCleanup: undefined,
-        endTime: Date.now(),
-      };
+        endTime: Date.now()};
     });
 
     cleanupFn?.();

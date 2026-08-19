@@ -6,6 +6,7 @@ import z from 'zod/v4'
 import { getClaudeAIOAuthTokens } from '../auth.js'
 import { getGlobalConfig } from '../config.js'
 import { logForDebugging } from '../debug.js'
+import { t } from '../i18n/index.js'
 import { parseGitHubRepository } from '../detectRepository.js'
 import { errorMessage, toError } from '../errors.js'
 import { lazySchema } from '../lazySchema.js'
@@ -161,15 +162,12 @@ export const CodeSessionSchema = lazySchema(() =>
       .object({
         name: z.string(),
         owner: z.object({
-          login: z.string(),
-        }),
-        default_branch: z.string().optional(),
-      })
+          login: z.string()}),
+        default_branch: z.string().optional()})
       .nullable(),
     turns: z.array(z.string()),
     created_at: z.string(),
-    updated_at: z.string(),
-  }),
+    updated_at: z.string()}),
 )
 
 // Export the inferred type from the Zod schema
@@ -230,24 +228,16 @@ export async function prepareWorkspaceApiRequest(): Promise<{
       .workspaceApiKey
     const wasCleared = isWorkspaceKeyCleared(rawValue)
     const preface = wasCleared
-      ? 'Your workspace API key was cleared. '
-      : 'A workspace API key (sk-ant-api03-*) is required to use workspace endpoints ' +
-        '(/v1/agents, /v1/vaults, /v1/memory_stores, /v1/skills). '
+      ? t('teleportApi.workspaceKeyCleared')
+      : t('teleportApi.workspaceKeyRequired')
     throw new Error(
       preface +
-        'Press W in /login to save your key directly (no restart needed), or ' +
-        'set ANTHROPIC_API_KEY=<key> and restart. ' +
-        'Obtain a key from https://console.anthropic.com/settings/keys. ' +
-        'Subscription OAuth (claude.ai login) cannot reach these endpoints.',
+        t('teleportApi.workspaceKeyHint'),
     )
   }
   if (!apiKey.startsWith('sk-ant-api03-')) {
     // D5: expose at most first 4 chars to avoid leaking high-entropy secret bits into error logs/reports
-    throw new Error(
-      `Workspace API key must start with sk-ant-api03-, got prefix "${apiKey.slice(0, 4)}...". ` +
-        'Obtain a workspace API key from https://console.anthropic.com/settings/keys. ' +
-        'Press W in /login to save your key, or set ANTHROPIC_API_KEY.',
-    )
+    throw new Error(t('teleportApi.workspaceKeyWrongPrefix', apiKey.slice(0, 4)))
   }
   return { apiKey }
 }
@@ -262,14 +252,12 @@ export async function prepareApiRequest(): Promise<{
 }> {
   const accessToken = getClaudeAIOAuthTokens()?.accessToken
   if (accessToken === undefined) {
-    throw new Error(
-      'Claude Code web sessions require authentication with a Claude.ai account. API key authentication is not sufficient. Please run /login to authenticate, or check your authentication status with /status.',
-    )
+    throw new Error(t('teleportApi.requiresAuth'))
   }
 
   const orgUUID = await getOrganizationUUID()
   if (!orgUUID) {
-    throw new Error('Unable to get organization UUID')
+    throw new Error(t('teleportApi.noOrgUUID'))
   }
 
   return { accessToken, orgUUID }
@@ -290,15 +278,13 @@ export async function fetchCodeSessionsFromSessionsAPI(): Promise<
     const headers = {
       ...getOAuthHeaders(accessToken),
       'anthropic-beta': 'ccr-byoc-2025-07-29',
-      'x-organization-uuid': orgUUID,
-    }
+      'x-organization-uuid': orgUUID}
 
     const response = await axiosGetWithRetry<ListSessionsResponse>(url, {
-      headers,
-    })
+      headers})
 
     if (response.status !== 200) {
-      throw new Error(`Failed to fetch code sessions: ${response.statusText}`)
+      throw new Error(t('teleportApi.fetchSessionsFailed', response.statusText))
     }
 
     // Transform SessionResource[] to CodeSession[] format
@@ -318,10 +304,8 @@ export async function fetchCodeSessionsFromSessionsAPI(): Promise<
             repo = {
               name,
               owner: {
-                login: owner,
-              },
-              default_branch: gitSource.revision || undefined,
-            }
+                login: owner},
+              default_branch: gitSource.revision || undefined}
           }
         }
       }
@@ -334,8 +318,7 @@ export async function fetchCodeSessionsFromSessionsAPI(): Promise<
         repo,
         turns: [], // SessionResource doesn't have turns field
         created_at: session.created_at,
-        updated_at: session.updated_at,
-      }
+        updated_at: session.updated_at}
     })
 
     return sessions
@@ -355,8 +338,7 @@ export function getOAuthHeaders(accessToken: string): Record<string, string> {
   return {
     Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'application/json',
-    'anthropic-version': '2023-06-01',
-  }
+    'anthropic-version': '2023-06-01'}
 }
 
 /**
@@ -373,14 +355,12 @@ export async function fetchSession(
   const headers = {
     ...getOAuthHeaders(accessToken),
     'anthropic-beta': 'ccr-byoc-2025-07-29',
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   const response = await axios.get<SessionResource>(url, {
     headers,
     timeout: 15000,
-    validateStatus: status => status < 500,
-  })
+    validateStatus: status => status < 500})
 
   if (response.status !== 200) {
     // Extract error message from response if available
@@ -388,16 +368,16 @@ export async function fetchSession(
     const apiMessage = errorData?.error?.message
 
     if (response.status === 404) {
-      throw new Error(`Session not found: ${sessionId}`)
+      throw new Error(t('teleportApi.sessionNotFound', sessionId))
     }
 
     if (response.status === 401) {
-      throw new Error('Session expired. Please run /login to sign in again.')
+      throw new Error(t('teleportApi.sessionExpired'))
     }
 
     throw new Error(
       apiMessage ||
-        `Failed to fetch session: ${response.status} ${response.statusText}`,
+        t('teleportApi.fetchSessionFailed', String(response.status), response.statusText),
     )
   }
 
@@ -448,8 +428,7 @@ export async function sendEventToRemoteSession(
     const headers = {
       ...getOAuthHeaders(accessToken),
       'anthropic-beta': 'ccr-byoc-2025-07-29',
-      'x-organization-uuid': orgUUID,
-    }
+      'x-organization-uuid': orgUUID}
 
     const userEvent = {
       uuid: opts?.uuid ?? randomUUID(),
@@ -458,13 +437,10 @@ export async function sendEventToRemoteSession(
       parent_tool_use_id: null,
       message: {
         role: 'user',
-        content: messageContent,
-      },
-    }
+        content: messageContent}}
 
     const requestBody = {
-      events: [userEvent],
-    }
+      events: [userEvent]}
 
     logForDebugging(
       `[sendEventToRemoteSession] Sending event to session ${sessionId}`,
@@ -474,8 +450,7 @@ export async function sendEventToRemoteSession(
     const response = await axios.post(url, requestBody, {
       headers,
       validateStatus: status => status < 500,
-      timeout: 30000,
-    })
+      timeout: 30000})
 
     if (response.status === 200 || response.status === 201) {
       logForDebugging(
@@ -511,8 +486,7 @@ export async function updateSessionTitle(
     const headers = {
       ...getOAuthHeaders(accessToken),
       'anthropic-beta': 'ccr-byoc-2025-07-29',
-      'x-organization-uuid': orgUUID,
-    }
+      'x-organization-uuid': orgUUID}
 
     logForDebugging(
       `[updateSessionTitle] Updating title for session ${sessionId}: "${title}"`,
@@ -522,8 +496,7 @@ export async function updateSessionTitle(
       { title },
       {
         headers,
-        validateStatus: status => status < 500,
-      },
+        validateStatus: status => status < 500},
     )
 
     if (response.status === 200) {

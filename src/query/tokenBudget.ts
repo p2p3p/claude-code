@@ -15,8 +15,7 @@ export function createBudgetTracker(): BudgetTracker {
     continuationCount: 0,
     lastDeltaTokens: 0,
     lastGlobalTurnTokens: 0,
-    startedAt: Date.now(),
-  }
+    startedAt: Date.now()}
 }
 
 type ContinueDecision = {
@@ -71,8 +70,7 @@ export function checkTokenBudget(
       continuationCount: tracker.continuationCount,
       pct,
       turnTokens,
-      budget,
-    }
+      budget}
   }
 
   if (isDiminishing || tracker.continuationCount > 0) {
@@ -84,9 +82,7 @@ export function checkTokenBudget(
         turnTokens,
         budget,
         diminishingReturns: isDiminishing,
-        durationMs: Date.now() - tracker.startedAt,
-      },
-    }
+        durationMs: Date.now() - tracker.startedAt}}
   }
 
   return { action: 'stop', completionEvent: null }

@@ -25,8 +25,7 @@ const LEGACY_TOOL_NAME_ALIASES: Record<string, string> = {
   BashOutputTool: TASK_OUTPUT_TOOL_NAME,
   ...((feature('KAIROS') || feature('KAIROS_BRIEF')) && BRIEF_TOOL_NAME
     ? { Brief: BRIEF_TOOL_NAME }
-    : {}),
-}
+    : {})}
 
 export function normalizeLegacyToolName(name: string): string {
   return LEGACY_TOOL_NAME_ALIASES[name] ?? name

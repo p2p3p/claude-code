@@ -6,6 +6,7 @@ import { renderToolResultMessage as renderDefaultMCPToolResultMessage } from '@c
 import type { MCPToolResult } from '../../utils/mcpValidation.js';
 import { truncateToWidth } from '../format.js';
 import { trackClaudeInChromeTabId } from './common.js';
+import { t } from '../i18n/index.js';
 
 export type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
@@ -201,55 +202,55 @@ export function renderChromeToolResultMessage(
   let summary: string | null = null;
   switch (toolName) {
     case 'navigate':
-      summary = 'Navigation completed';
+      summary = t('chromeTool.navigationCompleted');
       break;
     case 'tabs_create_mcp':
-      summary = 'Tab created';
+      summary = t('chromeTool.tabCreated');
       break;
     case 'tabs_context_mcp':
-      summary = 'Tabs read';
+      summary = t('chromeTool.tabsRead');
       break;
     case 'form_input':
-      summary = 'Input completed';
+      summary = t('chromeTool.inputCompleted');
       break;
     case 'computer':
-      summary = 'Action completed';
+      summary = t('chromeTool.actionCompleted');
       break;
     case 'resize_window':
-      summary = 'Window resized';
+      summary = t('chromeTool.windowResized');
       break;
     case 'find':
-      summary = 'Search completed';
+      summary = t('chromeTool.searchCompleted');
       break;
     case 'gif_creator':
-      summary = 'GIF action completed';
+      summary = t('chromeTool.gifActionCompleted');
       break;
     case 'read_console_messages':
-      summary = 'Console messages retrieved';
+      summary = t('chromeTool.consoleMessagesRetrieved');
       break;
     case 'read_network_requests':
-      summary = 'Network requests retrieved';
+      summary = t('chromeTool.networkRequestsRetrieved');
       break;
     case 'shortcuts_list':
-      summary = 'Shortcuts retrieved';
+      summary = t('chromeTool.shortcutsRetrieved');
       break;
     case 'shortcuts_execute':
-      summary = 'Shortcut executed';
+      summary = t('chromeTool.shortcutExecuted');
       break;
     case 'javascript_tool':
-      summary = 'Script executed';
+      summary = t('chromeTool.scriptExecuted');
       break;
     case 'read_page':
-      summary = 'Page read';
+      summary = t('chromeTool.pageRead');
       break;
     case 'upload_image':
-      summary = 'Image uploaded';
+      summary = t('chromeTool.imageUploaded');
       break;
     case 'get_page_text':
-      summary = 'Page text retrieved';
+      summary = t('chromeTool.pageTextRetrieved');
       break;
     case 'update_plan':
-      summary = 'Plan updated';
+      summary = t('chromeTool.planUpdated');
       break;
   }
 
@@ -282,7 +283,7 @@ export function getClaudeInChromeMCPToolOverrides(toolName: string): {
     userFacingName(_input?: Record<string, unknown>) {
       // Trim the _mcp postfix that show up in some of the tool names
       const displayName = toolName.replace(/_mcp$/, '');
-      return `Claude in Chrome[${displayName}]`;
+      return t('claudeInChrome.userFacingName', displayName);
     },
     renderToolUseMessage(input: Record<string, unknown>, { verbose }: { verbose: boolean }): React.ReactNode {
       return renderChromeToolUseMessage(input, toolName as ChromeToolName, verbose);
@@ -299,8 +300,7 @@ export function getClaudeInChromeMCPToolOverrides(toolName: string): {
         return null;
       }
       return renderChromeToolResultMessage(output, toolName as ChromeToolName, verbose);
-    },
-  };
+    }};
 }
 
 function isMCPToolResult(output: string | MCPToolResult): output is MCPToolResult {

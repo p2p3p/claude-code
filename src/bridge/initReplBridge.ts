@@ -22,15 +22,13 @@ import { getFeatureValue_CACHED_WITH_REFRESH } from '../services/analytics/growt
 import { getOrganizationUUID } from '../services/oauth/client.js'
 import {
   isPolicyAllowed,
-  waitForPolicyLimitsToLoad,
-} from '../services/policyLimits/index.js'
+  waitForPolicyLimitsToLoad} from '../services/policyLimits/index.js'
 import type { Message } from '../types/message.js'
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/index.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
   getClaudeAIOAuthTokens,
-  handleOAuth401Error,
-} from '../utils/auth.js'
+  handleOAuth401Error} from '../utils/auth.js'
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js'
 import { logForDebugging } from '../utils/debug.js'
 import { stripDisplayTagsAllowEmpty } from '../utils/displayTags.js'
@@ -40,32 +38,27 @@ import { toSDKMessages } from '../utils/messages/mappers.js'
 import {
   getContentText,
   getMessagesAfterCompactBoundary,
-  isSyntheticMessage,
-} from '../utils/messages.js'
+  isSyntheticMessage} from '../utils/messages.js'
 import type { PermissionMode } from '../utils/permissions/PermissionMode.js'
 import { getCurrentSessionTitle } from '../utils/sessionStorage.js'
 import {
   extractConversationText,
-  generateSessionTitle,
-} from '../utils/sessionTitle.js'
+  generateSessionTitle} from '../utils/sessionTitle.js'
 import { generateShortWordSlug } from '../utils/words.js'
 import {
   getBridgeAccessToken,
   getBridgeBaseUrl,
   getBridgeTokenOverride,
-  isSelfHostedBridge,
-} from './bridgeConfig.js'
+  isSelfHostedBridge} from './bridgeConfig.js'
 import {
   checkBridgeMinVersion,
   isBridgeEnabledBlocking,
   isCseShimEnabled,
-  isEnvLessBridgeEnabled,
-} from './bridgeEnabled.js'
+  isEnvLessBridgeEnabled} from './bridgeEnabled.js'
 import {
   archiveBridgeSession,
   createBridgeSession,
-  updateBridgeSessionTitle,
-} from './createSession.js'
+  updateBridgeSessionTitle} from './createSession.js'
 import { logBridgeSkip } from './debugUtils.js'
 import { checkEnvLessBridgeMinVersion } from './envLessBridgeConfig.js'
 import { getPollIntervalConfig } from './pollConfig.js'
@@ -126,8 +119,7 @@ export async function initReplBridge(
     initialName,
     perpetual,
     outboundOnly,
-    tags,
-  } = options ?? {}
+    tags} = options ?? {}
 
   // Wire the cse_ shim kill switch so toCompatSessionId respects the
   // GrowthBook gate. Daemon/SDK paths skip this — shim defaults to active.
@@ -236,8 +228,7 @@ export async function initReplBridge(
         bridgeOauthDeadFailCount:
           c.bridgeOauthDeadExpiresAt === deadExpiresAt
             ? (c.bridgeOauthDeadFailCount ?? 0) + 1
-            : 1,
-      }))
+            : 1}))
       return null
     }
   }
@@ -327,8 +318,7 @@ export async function initReplBridge(
     )
     void updateBridgeSessionTitle(bridgeSessionId, derived, {
       baseUrl,
-      getAccessToken: getBridgeAccessToken,
-    }).catch(() => {})
+      getAccessToken: getBridgeAccessToken}).catch(() => {})
   }
   // Fire-and-forget Haiku generation with post-await guards. Re-checks /rename
   // (sessionStorage), v1 env-lost (lastBridgeSessionId), and same-session
@@ -455,8 +445,7 @@ export async function initReplBridge(
       onSetPermissionMode,
       onStateChange,
       outboundOnly,
-      tags,
-    })
+      tags})
   }
 
   // ── v1 path: env-based (register/poll/ack/heartbeat) ──────────────────
@@ -507,8 +496,7 @@ export async function initReplBridge(
         ...opts,
         events: [],
         baseUrl,
-        getAccessToken: getBridgeAccessToken,
-      }),
+        getAccessToken: getBridgeAccessToken}),
     archiveSession: sessionId =>
       archiveBridgeSession(sessionId, {
         baseUrl,
@@ -517,8 +505,7 @@ export async function initReplBridge(
         // Teardown also does stopWork (parallel) + deregister (sequential),
         // so archive can't have the full budget. 1.5s matches v2's
         // teardown_archive_timeout_ms default.
-        timeoutMs: 1500,
-      }).catch((err: unknown) => {
+        timeoutMs: 1500}).catch((err: unknown) => {
         // archiveBridgeSession has no try/catch — 5xx/timeout/network throw
         // straight through. Previously swallowed silently, making archive
         // failures BQ-invisible and undiagnosable from debug logs.
@@ -545,8 +532,7 @@ export async function initReplBridge(
     onSetMaxThinkingTokens,
     onSetPermissionMode,
     onStateChange,
-    perpetual,
-  })
+    perpetual})
 }
 
 const TITLE_MAX_LEN = 50

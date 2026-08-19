@@ -1,10 +1,10 @@
 import {
   hasUsedBackslashReturn,
-  isShiftEnterKeyBindingInstalled,
-} from '../../commands/terminalSetup/terminalSetup.js'
+  isShiftEnterKeyBindingInstalled} from '../../commands/terminalSetup/terminalSetup.js'
 import type { Key } from '@anthropic/ink'
 import { getGlobalConfig } from '../../utils/config.js'
 import { env } from '../../utils/env.js'
+import { t } from 'src/utils/i18n/index.js'
 /**
  * Helper function to check if vim mode is currently enabled
  * @returns boolean indicating if vim mode is active
@@ -17,18 +17,18 @@ export function isVimModeEnabled(): boolean {
 export function getNewlineInstructions(): string {
   // Apple Terminal on macOS uses native modifier key detection for Shift+Enter
   if (env.terminal === 'Apple_Terminal' && process.platform === 'darwin') {
-    return 'shift + ⏎ for newline'
+    return t('promptHelpMenu.shiftEnterNewline')
   }
 
   // For iTerm2 and VSCode, show Shift+Enter instructions if installed
   if (isShiftEnterKeyBindingInstalled()) {
-    return 'shift + ⏎ for newline'
+    return t('promptHelpMenu.shiftEnterNewline')
   }
 
   // Otherwise show backslash+return instructions
   return hasUsedBackslashReturn()
-    ? '\\⏎ for newline'
-    : 'backslash (\\) + return (⏎) for newline'
+    ? t('promptHelpMenu.backslashNewline')
+    : t('promptHelpMenu.backslashReturnNewline')
 }
 
 /**

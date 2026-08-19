@@ -14,11 +14,10 @@ export function resetProToOpusDefault(): void {
   const apiProvider = getAPIProvider()
 
   // Pro users on firstParty get auto-migrated to Opus 4.5 default
-  if (apiProvider !== 'firstParty' || !isProSubscriber()) {
+  if (apiProvider !== 'anthropic' || !isProSubscriber()) {
     saveGlobalConfig(current => ({
       ...current,
-      opusProMigrationComplete: true,
-    }))
+      opusProMigrationComplete: true}))
     logEvent('tengu_reset_pro_to_opus_default', { skipped: true })
     return
   }
@@ -31,21 +30,17 @@ export function resetProToOpusDefault(): void {
     saveGlobalConfig(current => ({
       ...current,
       opusProMigrationComplete: true,
-      opusProMigrationTimestamp,
-    }))
+      opusProMigrationTimestamp}))
     logEvent('tengu_reset_pro_to_opus_default', {
       skipped: false,
-      had_custom_model: false,
-    })
+      had_custom_model: false})
   } else {
     // User has a custom model setting, just mark migration complete
     saveGlobalConfig(current => ({
       ...current,
-      opusProMigrationComplete: true,
-    }))
+      opusProMigrationComplete: true}))
     logEvent('tengu_reset_pro_to_opus_default', {
       skipped: false,
-      had_custom_model: true,
-    })
+      had_custom_model: true})
   }
 }

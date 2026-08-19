@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { getBridgeAccessToken } from '../../bridge/bridgeConfig.js';
 import { checkBridgeMinVersion, getBridgeDisabledReason, isEnvLessBridgeEnabled } from '../../bridge/bridgeEnabled.js';
 import { checkEnvLessBridgeMinVersion } from '../../bridge/envLessBridgeConfig.js';
-import { BRIDGE_LOGIN_INSTRUCTION, REMOTE_CONTROL_DISCONNECTED_MSG } from '../../bridge/types.js';
+import { BRIDGE_LOGIN_INSTRUCTION } from '../../bridge/types.js';
 import { Dialog, ListItem } from '@anthropic/ink';
 import { shouldShowRemoteCallout } from '../../components/RemoteCallout.js';
 import { useRegisterOverlay } from '../../context/overlayContext.js';
@@ -13,12 +13,12 @@ import { Box, Text } from '@anthropic/ink';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js';
+  logEvent} from '../../services/analytics/index.js';
 import { useAppState, useSetAppState } from '../../state/AppState.js';
 import type { ToolUseContext } from '../../Tool.js';
 import type { LocalJSXCommandContext, LocalJSXCommandOnDone } from '../../types/command.js';
 import { logForDebugging } from '../../utils/debug.js';
+import { t } from '../../utils/i18n/index.js'
 
 type Props = {
   onDone: LocalJSXCommandOnDone;
@@ -61,8 +61,7 @@ function BridgeToggle({ onDone, name }: Props): React.ReactNode {
       if (cancelled) return;
       if (error) {
         logEvent('tengu_bridge_command', {
-          action: 'preflight_failed' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        });
+          action: 'preflight_failed' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
         onDone(error, { display: 'system' });
         return;
       }
@@ -76,8 +75,7 @@ function BridgeToggle({ onDone, name }: Props): React.ReactNode {
           return {
             ...prev,
             showRemoteCallout: true,
-            replBridgeInitialName: name,
-          };
+            replBridgeInitialName: name};
         });
         onDone('', { display: 'system' });
         return;
@@ -86,8 +84,7 @@ function BridgeToggle({ onDone, name }: Props): React.ReactNode {
       // Enable the bridge — useReplBridge in REPL.tsx handles the rest:
       // registers environment, creates session with conversation, connects WebSocket
       logEvent('tengu_bridge_command', {
-        action: 'connect' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        action: 'connect' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
       setAppState(prev => {
         if (prev.replBridgeEnabled && !prev.replBridgeOutboundOnly) return prev;
         return {
@@ -95,12 +92,10 @@ function BridgeToggle({ onDone, name }: Props): React.ReactNode {
           replBridgeEnabled: true,
           replBridgeExplicit: true,
           replBridgeOutboundOnly: false,
-          replBridgeInitialName: name,
-        };
+          replBridgeInitialName: name};
       });
-      onDone('Remote Control connecting\u2026', {
-        display: 'system',
-      });
+      onDone(t('bridge.connecting'), {
+        display: 'system'});
     })();
 
     return () => {
@@ -140,8 +135,7 @@ function BridgeDisconnectDialog({ onDone }: Props): React.ReactNode {
     qrToString(displayUrl, {
       type: 'utf8',
       errorCorrectionLevel: 'L',
-      small: true,
-    } as Parameters<typeof qrToString>[1])
+      small: true} as Parameters<typeof qrToString>[1])
       .then(setQrText)
       .catch(() => setQrText(''));
   }, [showQR, displayUrl]);
@@ -153,13 +147,11 @@ function BridgeDisconnectDialog({ onDone }: Props): React.ReactNode {
         ...prev,
         replBridgeEnabled: false,
         replBridgeExplicit: false,
-        replBridgeOutboundOnly: false,
-      };
+        replBridgeOutboundOnly: false};
     });
     logEvent('tengu_bridge_command', {
-      action: 'disconnect' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
-    onDone(REMOTE_CONTROL_DISCONNECTED_MSG, { display: 'system' });
+      action: 'disconnect' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
+    onDone(t('bridge.disconnected'), { display: 'system' });
   }
 
   function handleShowQR(): void {
@@ -184,19 +176,19 @@ function BridgeDisconnectDialog({ onDone }: Props): React.ReactNode {
         } else {
           handleContinue();
         }
-      },
-    },
+      }},
     { context: 'Select' },
   );
 
   const qrLines = qrText ? qrText.split('\n').filter(l => l.length > 0) : [];
 
   return (
-    <Dialog title="Remote Control" onCancel={handleContinue} hideInputGuide>
+    <Dialog title={t("cmdSystemUI.bridgeTitle")} onCancel={handleContinue} hideInputGuide>
       <Box flexDirection="column" gap={1}>
         <Text>
-          This session is available via Remote Control
-          {displayUrl ? ` at ${displayUrl}` : ''}.
+          {displayUrl
+            ? t('bridge.sessionAvailable', displayUrl)
+            : t('bridge.sessionAvailableNoUrl')}
         </Text>
         {showQR && qrLines.length > 0 && (
           <Box flexDirection="column">
@@ -207,16 +199,16 @@ function BridgeDisconnectDialog({ onDone }: Props): React.ReactNode {
         )}
         <Box flexDirection="column">
           <ListItem isFocused={focusIndex === 0}>
-            <Text>Disconnect this session</Text>
+            <Text>{t('bridge.disconnectThisSession')}</Text>
           </ListItem>
           <ListItem isFocused={focusIndex === 1}>
-            <Text>{showQR ? 'Hide QR code' : 'Show QR code'}</Text>
+            <Text>{showQR ? t('ui.hideQrCode') : t('ui.showQrCode')}</Text>
           </ListItem>
           <ListItem isFocused={focusIndex === 2}>
-            <Text>Continue</Text>
+            <Text>{t('bridge.continue')}</Text>
           </ListItem>
         </Box>
-        <Text dimColor>Enter to select · Esc to continue</Text>
+        <Text dimColor>{t('bridgeCmd2.enterToSelectEscToContinue')}</Text>
       </Box>
     </Dialog>
   );
@@ -233,7 +225,7 @@ async function checkBridgePrerequisites(): Promise<string | null> {
   const { waitForPolicyLimitsToLoad, isPolicyAllowed } = await import('../../services/policyLimits/index.js');
   await waitForPolicyLimitsToLoad();
   if (!isPolicyAllowed('allow_remote_control')) {
-    return "Remote Control is disabled by your organization's policy.";
+    return t('bridgeEnabled.disabledByOrgPolicy');
   }
 
   const disabledReason = await getBridgeDisabledReason();

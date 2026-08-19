@@ -3,6 +3,7 @@
  * Ported from claude-agent-acp-main/src/utils.ts and acp-agent.ts helpers.
  */
 import { Writable } from 'node:stream'
+import { t } from '../../utils/i18n/index.js'
 import type { PermissionMode } from '../../entrypoints/sdk/coreTypes.generated.js'
 
 // ── Pushable ──────────────────────────────────────────────────────
@@ -43,14 +44,12 @@ export class Pushable<T> implements AsyncIterable<T> {
         if (this.done) {
           return Promise.resolve({
             value: undefined as unknown as T,
-            done: true,
-          })
+            done: true})
         }
         return new Promise<IteratorResult<T>>(resolve => {
           this.resolvers.push(resolve)
         })
-      },
-    }
+      }}
   }
 }
 
@@ -67,8 +66,7 @@ export function nodeToWebWritable(
           else resolve()
         })
       })
-    },
-  })
+    }})
 }
 
 // ── unreachable ───────────────────────────────────────────────────
@@ -104,8 +102,7 @@ const PERMISSION_MODE_ALIASES: Record<string, PermissionMode> = {
   dontask: 'dontAsk',
   plan: 'plan',
   bypasspermissions: 'bypassPermissions',
-  bypass: 'bypassPermissions',
-}
+  bypass: 'bypassPermissions'}
 
 export function resolvePermissionMode(
   defaultMode?: unknown,
@@ -116,22 +113,22 @@ export function resolvePermissionMode(
   }
 
   if (typeof defaultMode !== 'string') {
-    throw new Error(`Invalid ${source}: expected a string.`)
+    throw new Error(t('acpUtils.invalidSource', source, 'expected a string.'))
   }
 
   const normalized = defaultMode.trim().toLowerCase()
   if (normalized === '') {
-    throw new Error(`Invalid ${source}: expected a non-empty string.`)
+    throw new Error(t('acpUtils.invalidSource', source, 'expected a non-empty string.'))
   }
 
   const mapped = PERMISSION_MODE_ALIASES[normalized]
   if (!mapped) {
-    throw new Error(`Invalid ${source}: ${defaultMode}.`)
+    throw new Error(t('acpUtils.invalidSource', source, `${defaultMode}.`))
   }
 
   if (mapped === 'bypassPermissions' && !ALLOW_BYPASS) {
     throw new Error(
-      `Invalid ${source}: bypassPermissions is not available when running as root.`,
+      t('acpUtils.bypassNotAvailable', source),
     )
   }
 

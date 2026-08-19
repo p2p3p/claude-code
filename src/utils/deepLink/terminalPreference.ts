@@ -22,8 +22,7 @@ const TERM_PROGRAM_TO_APP: Record<string, string> = {
   kitty: 'kitty',
   alacritty: 'Alacritty',
   wezterm: 'WezTerm',
-  apple_terminal: 'Terminal',
-}
+  apple_terminal: 'Terminal'}
 
 /**
  * Capture the current terminal from TERM_PROGRAM and store it for the deep

@@ -39,8 +39,7 @@ export function killTask(taskId: string, setAppState: SetAppStateFn): void {
       shellCommand: null,
       unregisterCleanup: undefined,
       cleanupTimeoutId: undefined,
-      endTime: Date.now(),
-    }
+      endTime: Date.now()}
   })
   void evictTaskOutput(taskId)
 }

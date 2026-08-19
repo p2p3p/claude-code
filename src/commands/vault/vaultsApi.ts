@@ -95,8 +95,7 @@ async function buildHeaders(): Promise<Record<string, string>> {
     'x-api-key': apiKey,
     'anthropic-version': '2023-06-01',
     'anthropic-beta': VAULTS_BETA_HEADER,
-    'content-type': 'application/json',
-  }
+    'content-type': 'application/json'}
 }
 
 function vaultsBaseUrl(): string {
@@ -187,8 +186,7 @@ export async function listVaults(): Promise<Vault[]> {
   return withRetry(async () => {
     const headers = await buildHeaders()
     const response = await axios.get<ListVaultsResponse>(vaultsBaseUrl(), {
-      headers,
-    })
+      headers})
     return response.data.data ?? []
   })
 }
@@ -198,8 +196,7 @@ export async function createVault(name: string): Promise<Vault> {
     const headers = await buildHeaders()
     const body: CreateVaultBody = { name }
     const response = await axios.post<Vault>(vaultsBaseUrl(), body, {
-      headers,
-    })
+      headers})
     return response.data
   })
 }
@@ -208,8 +205,7 @@ export async function getVault(id: string): Promise<Vault> {
   return withRetry(async () => {
     const headers = await buildHeaders()
     const response = await axios.get<Vault>(`${vaultsBaseUrl()}/${id}`, {
-      headers,
-    })
+      headers})
     return response.data
   }, id)
 }

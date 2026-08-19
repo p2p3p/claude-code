@@ -6,8 +6,7 @@ import { isSkillSearchEnabled } from './featureCheck.js'
 import {
   getSkillIndex,
   searchSkills,
-  type SearchResult,
-} from './localSearch.js'
+  type SearchResult} from './localSearch.js'
 import { normalizeQueryIntent } from './intentNormalize.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { readFile } from 'node:fs/promises'
@@ -101,8 +100,7 @@ function buildDiscoveryAttachment(
     skills,
     signal,
     source: 'native',
-    gap,
-  } as Attachment
+    gap} as Attachment
 }
 
 type SkillDiscoveryResult = {
@@ -135,8 +133,7 @@ async function enrichResultsForAutoLoad(
     const base: SkillDiscoveryResult = {
       name: result.name,
       description: result.description,
-      score: result.score,
-    }
+      score: result.score}
 
     if (loadedCount >= AUTO_LOAD_LIMIT || result.score < AUTO_LOAD_MIN_SCORE) {
       enriched.push(base)
@@ -155,8 +152,7 @@ async function enrichResultsForAutoLoad(
       ...base,
       autoLoaded: true,
       content: loaded.content,
-      path: loaded.path,
-    })
+      path: loaded.path})
   }
 
   return enriched
@@ -177,8 +173,7 @@ async function loadSkillContent(
       const raw = await readFile(path, 'utf8')
       return {
         path,
-        content: parseFrontmatter(raw).content.slice(0, AUTO_LOAD_MAX_CHARS),
-      }
+        content: parseFrontmatter(raw).content.slice(0, AUTO_LOAD_MAX_CHARS)}
     } catch {
       // Try next candidate.
     }
@@ -226,8 +221,7 @@ async function maybeRecordSkillGap(
       sessionId:
         ((context as Record<string, unknown>).sessionId as string) ??
         'unknown-session',
-      recommendations: results,
-    })
+      recommendations: results})
     const status = gap.status
     if (status !== 'pending' && status !== 'draft' && status !== 'active') {
       return undefined
@@ -238,8 +232,7 @@ async function maybeRecordSkillGap(
       draftName: gap.draft?.name,
       draftPath: gap.draft?.skillPath,
       activeName: gap.active?.name,
-      activePath: gap.active?.skillPath,
-    }
+      activePath: gap.active?.skillPath}
   } catch (error) {
     logForDebugging(`[skill-search] skill gap learning error: ${error}`)
     return undefined
@@ -276,8 +269,7 @@ export async function startSkillDiscoveryPrefetch(
       startedAt,
       durationMs: Date.now() - startedAt,
       indexSize: index.length,
-      method: 'tfidf',
-    }
+      method: 'tfidf'}
 
     logForDebugging(
       `[skill-search] prefetch found ${newResults.length} skills in ${signal.durationMs}ms`,
@@ -341,8 +333,7 @@ export async function getTurnZeroSkillDiscovery(
       startedAt,
       durationMs: Date.now() - startedAt,
       indexSize: index.length,
-      method: 'tfidf',
-    }
+      method: 'tfidf'}
 
     logForDebugging(
       `[skill-search] turn-zero found ${results.length} skills in ${signal.durationMs}ms`,

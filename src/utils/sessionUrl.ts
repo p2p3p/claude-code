@@ -28,8 +28,7 @@ export function parseSessionIdentifier(
       ingressUrl: null,
       isUrl: false,
       jsonlFile: resumeIdentifier,
-      isJsonlFile: true,
-    }
+      isJsonlFile: true}
   }
 
   // Check if it's a plain UUID
@@ -39,8 +38,7 @@ export function parseSessionIdentifier(
       ingressUrl: null,
       isUrl: false,
       jsonlFile: null,
-      isJsonlFile: false,
-    }
+      isJsonlFile: false}
   }
 
   // Check if it's a URL
@@ -54,8 +52,7 @@ export function parseSessionIdentifier(
       ingressUrl: url.href,
       isUrl: true,
       jsonlFile: null,
-      isJsonlFile: false,
-    }
+      isJsonlFile: false}
   } catch {
     // Not a valid URL
   }

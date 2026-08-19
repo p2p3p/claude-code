@@ -4,19 +4,19 @@
  * When enabled, the model receives periodic <tick> prompts and works
  * autonomously between user inputs.  SleepTool controls pacing.
  */
+import { t } from '../utils/i18n/index.js'
 import { feature } from 'bun:bundle'
 import type { ToolUseContext } from '../Tool.js'
 import type {
   Command,
   LocalJSXCommandContext,
-  LocalJSXCommandOnDone,
-} from '../types/command.js'
+  LocalJSXCommandOnDone} from '../types/command.js'
 
 const proactive = {
   bridgeSafe: true,
   type: 'local-jsx',
   name: 'proactive',
-  description: 'Toggle proactive (autonomous) mode',
+  description: t('cmd.descProactive'),
   isEnabled: () => {
     if (feature('PROACTIVE') || feature('KAIROS')) {
       return true
@@ -36,22 +36,17 @@ const proactive = {
 
         if (mod.isProactiveActive()) {
           mod.deactivateProactive()
-          onDone('Proactive mode disabled', { display: 'system' })
+          onDone(t('proactiveCmd.disabled'), { display: 'system' })
         } else {
           mod.activateProactive('slash_command')
           onDone(
-            'Proactive mode enabled — model will work autonomously between ticks',
+            t('proactiveCmd.enabled'),
             {
               display: 'system',
-              metaMessages: [
-                '<system-reminder>\nProactive mode is now enabled. You will receive periodic <tick> prompts. Do useful work on each tick, or call Sleep if there is nothing to do. Do not output "still waiting" — either act or sleep.\n</system-reminder>',
-              ],
-            },
+              metaMessages: [t('proactiveCmd.systemReminder')]},
           )
         }
         return null
-      },
-    }),
-} satisfies Command
+      }})} satisfies Command
 
 export default proactive

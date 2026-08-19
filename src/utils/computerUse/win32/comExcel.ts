@@ -26,8 +26,7 @@ function ps(script: string): string {
   const result = Bun.spawnSync({
     cmd: ['powershell', '-NoProfile', '-NonInteractive', '-Command', script],
     stdout: 'pipe',
-    stderr: 'pipe',
-  })
+    stderr: 'pipe'})
   const stderr = new TextDecoder().decode(result.stderr).trim()
   if (result.exitCode !== 0 && stderr) {
     throw new Error(`PowerShell error: ${stderr}`)
@@ -120,10 +119,8 @@ try {
     sheets: sheets.map((s: any) => ({
       name: s.name,
       usedRange: s.usedRange,
-      cells: Array.isArray(s.cells) ? s.cells : s.cells ? [s.cells] : [],
-    })),
-    sheetNames,
-  }
+      cells: Array.isArray(s.cells) ? s.cells : s.cells ? [s.cells] : []})),
+    sheetNames}
 }
 
 /**

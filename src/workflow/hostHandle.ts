@@ -1,8 +1,7 @@
 import {
   createHostHandle,
   unwrapHostHandle,
-  type HostHandle,
-} from '@claude-code-best/workflow-engine'
+  type HostHandle} from '@claude-code-best/workflow-engine'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import type { AssistantMessage } from '../types/message.js'
 import type { AgentId } from '../types/ids.js'
@@ -29,8 +28,7 @@ export function buildHostBundle(
     toolUseContext,
     canUseTool,
     ...(parentMessage !== undefined ? { parentMessage } : {}),
-    agentId: toolUseContext.agentId,
-  }
+    agentId: toolUseContext.agentId}
 }
 
 export function makeHostHandle(bundle: WorkflowHostBundle): HostHandle {

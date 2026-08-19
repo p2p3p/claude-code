@@ -26,9 +26,7 @@ const DEFAULTS: SkillLearningConfig = {
     maxCallsPerSession: 20,
     cooldownMs: 30_000,
     failureThreshold: 3,
-    circuitCooldownMs: 60_000,
-  },
-}
+    circuitCooldownMs: 60_000}}
 
 let overrides: SkillLearningConfigOverrides | undefined
 
@@ -37,8 +35,7 @@ export function getSkillLearningConfig(): SkillLearningConfig {
   return {
     minConfidence: overrides.minConfidence ?? DEFAULTS.minConfidence,
     minClusterSize: overrides.minClusterSize ?? DEFAULTS.minClusterSize,
-    llm: { ...DEFAULTS.llm, ...overrides.llm },
-  }
+    llm: { ...DEFAULTS.llm, ...overrides.llm }}
 }
 
 export function setSkillLearningConfigForTest(

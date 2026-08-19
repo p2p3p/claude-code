@@ -29,8 +29,7 @@ export function useSessionBackgrounding({
   setIsLoading,
   resetLoadingState,
   setAbortController,
-  onBackgroundQuery,
-}: UseSessionBackgroundingProps): UseSessionBackgroundingResult {
+  onBackgroundQuery}: UseSessionBackgroundingProps): UseSessionBackgroundingResult {
   const foregroundedTaskId = useAppState(s => s.foregroundedTaskId)
   const foregroundedTask = useAppState(s =>
     s.foregroundedTaskId ? s.tasks[s.foregroundedTaskId] : undefined,
@@ -53,9 +52,7 @@ export function useSessionBackgrounding({
           foregroundedTaskId: undefined,
           tasks: {
             ...prev.tasks,
-            [taskId]: { ...task, isBackgrounded: true },
-          },
-        }
+            [taskId]: { ...task, isBackgrounded: true }}}
       })
       setMessages([])
       resetLoadingState()
@@ -110,9 +107,7 @@ export function useSessionBackgrounding({
             foregroundedTaskId: undefined,
             tasks: {
               ...prev.tasks,
-              [prev.foregroundedTaskId]: { ...task, isBackgrounded: true },
-            },
-          }
+              [prev.foregroundedTaskId]: { ...task, isBackgrounded: true }}}
         })
         resetLoadingState()
         setAbortController(null)
@@ -135,8 +130,7 @@ export function useSessionBackgrounding({
         return {
           ...prev,
           foregroundedTaskId: undefined,
-          tasks: { ...prev.tasks, [taskId]: { ...task, isBackgrounded: true } },
-        }
+          tasks: { ...prev.tasks, [taskId]: { ...task, isBackgrounded: true } }}
       })
       resetLoadingState()
       setAbortController(null)
@@ -153,6 +147,5 @@ export function useSessionBackgrounding({
   ])
 
   return {
-    handleBackgroundSession,
-  }
+    handleBackgroundSession}
 }

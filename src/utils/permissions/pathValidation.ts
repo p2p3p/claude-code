@@ -7,8 +7,7 @@ import { posixPathToWindowsPath } from '../windowsPaths.js'
 import {
   getFsImplementation,
   getPathsForPermissionCheck,
-  safeResolvePath,
-} from '../fsOperations.js'
+  safeResolvePath} from '../fsOperations.js'
 import { containsPathTraversal } from '../path.js'
 import { SandboxManager } from '../sandbox/sandbox-adapter.js'
 import { containsVulnerableUncPath } from '../shell/readOnlyCommandValidation.js'
@@ -18,8 +17,7 @@ import {
   checkReadableInternalPath,
   matchingRuleForInput,
   pathInAllowedWorkingPath,
-  pathInWorkingPath,
-} from './filesystem.js'
+  pathInWorkingPath} from './filesystem.js'
 import type { PermissionDecisionReason } from './PermissionResult.js'
 
 const MAX_DIRS_TO_LIST = 5
@@ -168,8 +166,7 @@ export function isPathAllowed(
   if (denyRule !== null) {
     return {
       allowed: false,
-      decisionReason: { type: 'rule', rule: denyRule },
-    }
+      decisionReason: { type: 'rule', rule: denyRule }}
   }
 
   // 2. For write/create operations, check internal editable paths (plan files, scratchpad, agent memory, job dirs)
@@ -181,8 +178,7 @@ export function isPathAllowed(
     if (internalEditResult.behavior === 'allow') {
       return {
         allowed: true,
-        decisionReason: internalEditResult.decisionReason,
-      }
+        decisionReason: internalEditResult.decisionReason}
     }
   }
 
@@ -205,9 +201,7 @@ export function isPathAllowed(
         decisionReason: {
           type: 'safetyCheck',
           reason: failedCheck.message,
-          classifierApprovable: failedCheck.classifierApprovable,
-        },
-      }
+          classifierApprovable: failedCheck.classifierApprovable}}
     }
   }
 
@@ -233,8 +227,7 @@ export function isPathAllowed(
     if (internalReadResult.behavior === 'allow') {
       return {
         allowed: true,
-        decisionReason: internalReadResult.decisionReason,
-      }
+        decisionReason: internalReadResult.decisionReason}
     }
   }
 
@@ -255,9 +248,7 @@ export function isPathAllowed(
       allowed: true,
       decisionReason: {
         type: 'other',
-        reason: 'Path is in sandbox write allowlist',
-      },
-    }
+        reason: 'Path is in sandbox write allowlist'}}
   }
 
   // 4. Check allow rules for the operation type
@@ -270,8 +261,7 @@ export function isPathAllowed(
   if (allowRule !== null) {
     return {
       allowed: true,
-      decisionReason: { type: 'rule', rule: allowRule },
-    }
+      decisionReason: { type: 'rule', rule: allowRule }}
   }
 
   // 5. Path is not allowed
@@ -306,8 +296,7 @@ export function validateGlobPattern(
     return {
       allowed: result.allowed,
       resolvedPath,
-      decisionReason: result.decisionReason,
-    }
+      decisionReason: result.decisionReason}
   }
 
   const basePath = getGlobBaseDirectory(cleanPath)
@@ -327,8 +316,7 @@ export function validateGlobPattern(
   return {
     allowed: result.allowed,
     resolvedPath,
-    decisionReason: result.decisionReason,
-  }
+    decisionReason: result.decisionReason}
 }
 
 const WINDOWS_DRIVE_ROOT_REGEX = /^[A-Za-z]:\/?$/
@@ -402,9 +390,7 @@ export function validatePath(
       resolvedPath: cleanPath,
       decisionReason: {
         type: 'other',
-        reason: 'UNC network paths require manual approval',
-      },
-    }
+        reason: 'UNC network paths require manual approval'}}
   }
 
   // SECURITY: Reject tilde variants (~user, ~+, ~-, ~N) that expandTilde doesn't handle.
@@ -421,9 +407,7 @@ export function validatePath(
       decisionReason: {
         type: 'other',
         reason:
-          'Tilde expansion variants (~user, ~+, ~-) in paths require manual approval',
-      },
-    }
+          'Tilde expansion variants (~user, ~+, ~-) in paths require manual approval'}}
   }
 
   // SECURITY: Reject paths containing ANY shell expansion syntax ($ or % characters,
@@ -446,9 +430,7 @@ export function validatePath(
       resolvedPath: cleanPath,
       decisionReason: {
         type: 'other',
-        reason: 'Shell expansion syntax in paths requires manual approval',
-      },
-    }
+        reason: 'Shell expansion syntax in paths requires manual approval'}}
   }
 
   // SECURITY: Block glob patterns in write/create operations
@@ -464,9 +446,7 @@ export function validatePath(
         decisionReason: {
           type: 'other',
           reason:
-            'Glob patterns are not allowed in write operations. Please specify an exact file path.',
-        },
-      }
+            'Glob patterns are not allowed in write operations. Please specify an exact file path.'}}
     }
 
     // For read operations, validate the base directory where the glob would expand
@@ -514,6 +494,5 @@ export function validatePath(
   return {
     allowed: result.allowed,
     resolvedPath,
-    decisionReason: result.decisionReason,
-  }
+    decisionReason: result.decisionReason}
 }

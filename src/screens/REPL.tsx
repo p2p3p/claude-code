@@ -1,13 +1,13 @@
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { feature } from 'bun:bundle';
+import { t } from '../utils/i18n/index.js'
 import { spawnSync } from 'child_process';
 import {
   snapshotOutputTokensForTurn,
   getCurrentTurnTokenBudget,
   getTurnOutputTokens,
   getBudgetContinuationCount,
-  getTotalInputTokens,
-} from '../bootstrap/state.js';
+  getTotalInputTokens} from '../bootstrap/state.js';
 import { parseTokenBudget } from '../utils/tokenBudget.js';
 import { count } from '../utils/array.js';
 import { dirname, join } from 'path';
@@ -30,8 +30,7 @@ import {
   useTheme,
   useTerminalFocus,
   useTerminalTitle,
-  useTabStatus,
-} from '@anthropic/ink';
+  useTabStatus} from '@anthropic/ink';
 import { CostThresholdDialog } from '../components/CostThresholdDialog.js';
 import { IdleReturnDialog } from '../components/IdleReturnDialog.js';
 import * as React from 'react';
@@ -43,8 +42,7 @@ import {
   useCallback,
   useDeferredValue,
   useLayoutEffect,
-  type RefObject,
-} from 'react';
+  type RefObject} from 'react';
 import { useNotifications } from '../context/notifications.js';
 import { sendNotification } from '../services/notifier.js';
 import { startPreventSleep, stopPreventSleep } from '../services/preventSleep.js';
@@ -52,8 +50,7 @@ import { useTerminalNotification, hasCursorUpViewportYankBug } from '@anthropic/
 import {
   createFileStateCacheWithSizeLimit,
   mergeFileStateCaches,
-  READ_FILE_STATE_CACHE_SIZE,
-} from '../utils/fileStateCache.js';
+  READ_FILE_STATE_CACHE_SIZE} from '../utils/fileStateCache.js';
 import {
   updateLastInteractionTime,
   getLastInteractionTime,
@@ -70,8 +67,7 @@ import {
   resetTurnToolDuration,
   getTurnClassifierDurationMs,
   getTurnClassifierCount,
-  resetTurnClassifierDuration,
-} from '../bootstrap/state.js';
+  resetTurnClassifierDuration} from '../bootstrap/state.js';
 import { asSessionId, asAgentId } from '../types/ids.js';
 import { logForDebugging } from '../utils/debug.js';
 import { QueryGuard } from '../utils/QueryGuard.js';
@@ -80,35 +76,30 @@ import { formatTokens, truncateToWidth } from '../utils/format.js';
 import { consumeEarlyInput } from '../utils/earlyInput.js';
 import {
   claimConsumableQueuedAutonomyCommands,
-  finalizeAutonomyCommandsForTurn,
-} from '../utils/autonomyQueueLifecycle.js';
+  finalizeAutonomyCommandsForTurn} from '../utils/autonomyQueueLifecycle.js';
 
 import { setMemberActive } from '../utils/swarm/teamHelpers.js';
 import {
   isSwarmWorker,
   generateSandboxRequestId,
   sendSandboxPermissionRequestViaMailbox,
-  sendSandboxPermissionResponseViaMailbox,
-} from '../utils/swarm/permissionSync.js';
+  sendSandboxPermissionResponseViaMailbox} from '../utils/swarm/permissionSync.js';
 import { registerSandboxPermissionCallback } from '../hooks/useSwarmPermissionPoller.js';
 import { getTeamName, getAgentName } from '../utils/teammate.js';
 import { WorkerPendingPermission } from '../components/permissions/WorkerPendingPermission.js';
 import {
   injectUserMessageToTeammate,
-  getAllInProcessTeammateTasks,
-} from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js';
+  getAllInProcessTeammateTasks} from '../tasks/InProcessTeammateTask/InProcessTeammateTask.js';
 import {
   isLocalAgentTask,
   queuePendingMessage,
   appendMessageToLocalAgent,
-  type LocalAgentTaskState,
-} from '../tasks/LocalAgentTask/LocalAgentTask.js';
+  type LocalAgentTaskState} from '../tasks/LocalAgentTask/LocalAgentTask.js';
 import {
   registerLeaderToolUseConfirmQueue,
   unregisterLeaderToolUseConfirmQueue,
   registerLeaderSetToolPermissionContext,
-  unregisterLeaderSetToolPermissionContext,
-} from '../utils/swarm/leaderPermissionBridge.js';
+  unregisterLeaderSetToolPermissionContext} from '../utils/swarm/leaderPermissionBridge.js';
 import { endInteractionSpan } from '../utils/telemetry/sessionTracing.js';
 import { useLogMessages } from '../hooks/useLogMessages.js';
 import { useReplBridge } from '../hooks/useReplBridge.js';
@@ -117,14 +108,12 @@ import {
   type CommandResultDisplay,
   type ResumeEntrypoint,
   getCommandName,
-  isCommandEnabled,
-} from '../commands.js';
+  isCommandEnabled} from '../commands.js';
 import type { PromptInputMode, QueuedCommand, VimMode } from '../types/textInputTypes.js';
 import {
   MessageSelector,
   selectableUserMessagesFilter,
-  messagesAfterAreOnlySynthetic,
-} from '../components/MessageSelector.js';
+  messagesAfterAreOnlySynthetic} from '../components/MessageSelector.js';
 import { useIdeLogging } from '../hooks/useIdeLogging.js';
 import { PermissionRequest, type ToolUseConfirm } from '../components/permissions/PermissionRequest.js';
 import { ElicitationDialog } from '../components/mcp/ElicitationDialog.js';
@@ -176,8 +165,7 @@ const useVoiceIntegration: typeof import('../hooks/useVoiceIntegration.js').useV
   : () => ({
       stripTrailing: () => 0,
       handleKeyEvent: () => {},
-      resetAnchor: () => {},
-    });
+      resetAnchor: () => {}});
 const VoiceKeybindingHandler: typeof import('../hooks/useVoiceIntegration.js').VoiceKeybindingHandler = feature(
   'VOICE_MODE',
 )
@@ -210,8 +198,7 @@ import { notifyAutomationStateChanged } from '../utils/sessionState.js';
 import {
   applyPermissionUpdate,
   applyPermissionUpdates,
-  persistPermissionUpdate,
-} from '../utils/permissions/PermissionUpdate.js';
+  persistPermissionUpdate} from '../utils/permissions/PermissionUpdate.js';
 import { buildPermissionUpdates } from '../components/permissions/ExitPlanModePermissionRequest/ExitPlanModePermissionRequest.js';
 import { stripDangerousPermissionsForAutoMode } from '../utils/permissions/permissionSetup.js';
 import { getScratchpadDir, isScratchpadEnabled } from '../utils/permissions/filesystem.js';
@@ -223,8 +210,7 @@ import { getGlobalConfig, saveGlobalConfig, getGlobalConfigWriteCount } from '..
 import { hasConsoleBillingAccess } from '../utils/billing.js';
 import {
   logEvent,
-  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-} from 'src/services/analytics/index.js';
+  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS} from 'src/services/analytics/index.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js';
 import {
   textForResubmit,
@@ -241,16 +227,14 @@ import {
   createApiMetricsMessage,
   createSystemMessage,
   createCommandInputMessage,
-  formatCommandInputTags,
-} from '../utils/messages.js';
+  formatCommandInputTags} from '../utils/messages.js';
 import { generateSessionTitle } from '../utils/sessionTitle.js';
 import {
   BASH_INPUT_TAG,
   COMMAND_MESSAGE_TAG,
   COMMAND_NAME_TAG,
   FORK_BOILERPLATE_TAG,
-  LOCAL_COMMAND_STDOUT_TAG,
-} from '../constants/xml.js';
+  LOCAL_COMMAND_STDOUT_TAG} from '../constants/xml.js';
 import { FORK_SUBAGENT_TYPE } from '@claude-code-best/builtin-tools/tools/AgentTool/forkSubagent.js';
 import { escapeXml } from '../utils/xml.js';
 import type { ThinkingConfig } from '../utils/thinking.js';
@@ -264,8 +248,7 @@ import type {
   UserMessage,
   ProgressMessage,
   HookResultMessage,
-  PartialCompactDirection,
-} from '../types/message.js';
+  PartialCompactDirection} from '../types/message.js';
 import { query } from '../query.js';
 import { mergeClients, useMergedClients } from '../hooks/useMergedClients.js';
 import { getQuerySourceForREPL } from '../utils/promptCategory.js';
@@ -307,8 +290,7 @@ import {
   isEphemeralToolProgress,
   isLoggableMessage,
   saveWorktreeState,
-  getAgentTranscript,
-} from '../utils/sessionStorage.js';
+  getAgentTranscript} from '../utils/sessionStorage.js';
 import { deserializeMessages } from '../utils/conversationRecovery.js';
 import { extractReadFilesFromMessages, extractBashToolsFromMessages } from '../utils/queryHelpers.js';
 import { resetMicrocompactState } from '../services/compact/microCompact.js';
@@ -317,8 +299,7 @@ import {
   createContentReplacementState,
   provisionContentReplacementState,
   reconstructContentReplacementState,
-  type ContentReplacementRecord,
-} from '../utils/toolResultStorage.js';
+  type ContentReplacementRecord} from '../utils/toolResultStorage.js';
 import { partialCompactConversation } from '../services/compact/compact.js';
 import type { LogOption } from '../types/logs.js';
 import type { AgentColorName } from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js';
@@ -329,8 +310,7 @@ import {
   type FileHistorySnapshot,
   copyFileHistoryForResume,
   fileHistoryEnabled,
-  fileHistoryHasAnyChanges,
-} from '../utils/fileHistory.js';
+  fileHistoryHasAnyChanges} from '../utils/fileHistory.js';
 import { type AttributionState, incrementPromptCount } from '../utils/commitAttribution.js';
 import { recordAttributionSnapshot } from '../utils/sessionStorage.js';
 import {
@@ -338,8 +318,7 @@ import {
   restoreAgentFromSession,
   restoreSessionStateFromLog,
   restoreWorktreeForResume,
-  exitRestoredWorktree,
-} from '../utils/sessionRestore.js';
+  exitRestoredWorktree} from '../utils/sessionRestore.js';
 import { isBgSession, updateSessionName, updateSessionActivity } from '../utils/concurrentSessions.js';
 import { isInProcessTeammateTask, type InProcessTeammateTaskState } from '../tasks/InProcessTeammateTask/types.js';
 import { restoreRemoteAgentTasks } from '../tasks/RemoteAgentTask/RemoteAgentTask.js';
@@ -384,8 +363,7 @@ import {
   type IDEExtensionInstallationStatus,
   closeOpenDiffs,
   getConnectedIdeClient,
-  type IdeType,
-} from '../utils/ide.js';
+  type IdeType} from '../utils/ide.js';
 import { useIDEIntegration } from '../hooks/useIDEIntegration.js';
 import exit from '../commands/exit/index.js';
 import { ExitFlow } from '../components/ExitFlow.js';
@@ -396,8 +374,7 @@ import {
   type SetAppState,
   getCommandQueue,
   getCommandQueueLength,
-  removeByFilter,
-} from '../utils/messageQueueManager.js';
+  removeByFilter} from '../utils/messageQueueManager.js';
 import { useCommandQueue } from '../hooks/useCommandQueue.js';
 import { SessionBackgroundHint } from '../components/SessionBackgroundHint.js';
 import { startBackgroundSession } from '../tasks/LocalMainSessionTask.js';
@@ -434,8 +411,7 @@ import { getTipToShowOnSpinner, recordShownTip } from 'src/services/tips/tipSche
 import type { Theme } from 'src/utils/theme.js';
 import {
   checkAndDisableAutoModeIfNeeded,
-  useKickOffCheckAndDisableAutoModeIfNeeded,
-} from 'src/utils/permissions/bypassPermissionsKillswitch.js';
+  useKickOffCheckAndDisableAutoModeIfNeeded} from 'src/utils/permissions/bypassPermissionsKillswitch.js';
 import { SandboxManager } from 'src/utils/sandbox/sandbox-adapter.js';
 import { SANDBOX_NETWORK_ACCESS_TOOL_NAME } from 'src/cli/structuredIO.js';
 import { useFileHistorySnapshotInit } from 'src/hooks/useFileHistorySnapshotInit.js';
@@ -453,8 +429,7 @@ import { SearchExtraToolsHint } from 'src/components/SearchExtraToolsHint.js';
 import { useSearchExtraToolsHint } from 'src/hooks/useSearchExtraToolsHint.js';
 import {
   DesktopUpsellStartup,
-  shouldShowDesktopUpsellStartup,
-} from 'src/components/DesktopUpsell/DesktopUpsellStartup.js';
+  shouldShowDesktopUpsellStartup} from 'src/components/DesktopUpsell/DesktopUpsellStartup.js';
 import { usePluginInstallationStatus } from 'src/hooks/notifs/usePluginInstallationStatus.js';
 import { usePluginAutoupdateNotification } from 'src/hooks/notifs/usePluginAutoupdateNotification.js';
 import { performStartupChecks } from 'src/utils/plugins/performStartupChecks.js';
@@ -473,8 +448,7 @@ import {
   shouldAutoRunIssue,
   getAutoRunIssueReasonText,
   getAutoRunCommand,
-  type AutoRunIssueReason,
-} from '../utils/autoRunIssue.js';
+  type AutoRunIssueReason} from '../utils/autoRunIssue.js';
 import type { HookProgress } from '../types/hooks.js';
 import { TungstenLiveMonitor } from '@claude-code-best/builtin-tools/tools/TungstenTool/TungstenLiveMonitor.js';
 // WebBrowserPanel removed — browser-lite returns results inline via tool_result.
@@ -500,8 +474,7 @@ import {
   MessageActionsBar,
   type MessageActionsState,
   type MessageActionsNav,
-  type MessageActionCaps,
-} from '../components/messageActions.js';
+  type MessageActionCaps} from '../components/messageActions.js';
 import { setClipboard } from '@anthropic/ink';
 import type { ScrollBoxHandle } from '@anthropic/ink';
 import { createAttachmentMessage, getQueuedCommandAttachments } from '../utils/attachments.js';
@@ -539,8 +512,7 @@ function TranscriptModeFooter({
   virtualScroll,
   searchBadge,
   suppressShowAll = false,
-  status,
-}: {
+  status}: {
   showAllInTranscript: boolean;
   virtualScroll: boolean;
   /** Minimap while navigating a closed-bar search. Shows n/N hints +
@@ -574,14 +546,16 @@ function TranscriptModeFooter({
       width="100%"
     >
       <Text dimColor>
-        Showing detailed transcript · {toggleShortcut} to toggle
+        {t('transcriptModeFooter.showingDetailedTranscript', toggleShortcut)}
         {searchBadge
-          ? ' · n/N to navigate'
+          ? t('transcriptModeFooter.nToNavigate')
           : virtualScroll
-            ? ` · ${figures.arrowUp}${figures.arrowDown} scroll · home/end top/bottom`
+            ? t('transcriptModeFooter.scrollHints', figures.arrowUp, figures.arrowDown)
             : suppressShowAll
               ? ''
-              : ` · ${showAllShortcut} to ${showAllInTranscript ? 'collapse' : 'show all'}`}
+              : showAllInTranscript
+                ? t('transcriptModeFooter.shortcutToCollapse', showAllShortcut)
+                : t('transcriptModeFooter.shortcutToShowAll', showAllShortcut)}
       </Text>
       {status ? (
         // v-for-editor render progress — transient, preempts the search
@@ -617,8 +591,7 @@ function TranscriptSearchBar({
   onClose,
   onCancel,
   setHighlight,
-  initialQuery,
-}: {
+  initialQuery}: {
   jumpRef: RefObject<JumpHandle | null>;
   count: number;
   current: number;
@@ -636,8 +609,7 @@ function TranscriptSearchBar({
     isActive: true,
     initialQuery,
     onExit: () => onClose(query),
-    onCancel,
-  });
+    onCancel});
   // Index warm-up runs before the query effect so it measures the real
   // cost — otherwise setSearchQuery fills the cache first and warm
   // reports ~0ms while the user felt the actual lag.
@@ -708,11 +680,11 @@ function TranscriptSearchBar({
       {off < query.length && <Text>{query.slice(off + 1)}</Text>}
       <Box flexGrow={1} />
       {indexStatus === 'building' ? (
-        <Text dimColor>indexing… </Text>
+        <Text dimColor>{t('repl.indexing')}</Text>
       ) : indexStatus ? (
-        <Text dimColor>indexed in {indexStatus.ms}ms </Text>
+        <Text dimColor>{t('repl.indexedInMs', String(indexStatus.ms))}</Text>
       ) : count === 0 && query ? (
-        <Text color="error">no matches </Text>
+        <Text color="error">{t('repl.noMatches')}</Text>
       ) : count > 0 ? (
         // Engine-counted (indexOf on extractSearchText). May drift from
         // render-count for ghost/phantom messages — badge is a rough
@@ -742,8 +714,7 @@ function AnimatedTerminalTitle({
   isAnimating,
   title,
   disabled,
-  noPrefix,
-}: {
+  noPrefix}: {
   isAnimating: boolean;
   title: string;
   disabled: boolean;
@@ -853,8 +824,7 @@ export function REPL({
   remoteSessionConfig,
   directConnectConfig,
   sshSession,
-  thinkingConfig,
-}: Props): React.ReactNode {
+  thinkingConfig}: Props): React.ReactNode {
   const isRemoteSession = !!remoteSessionConfig;
 
   // Env-var gates hoisted to mount-time — isEnvTruthy does toLowerCase+trim+
@@ -924,10 +894,7 @@ export function REPL({
             [taskId]: {
               ...t,
               messages: [...diskOnly, ...live],
-              diskLoaded: true,
-            },
-          },
-        };
+              diskLoaded: true}}};
       });
     });
   }, [viewingAgentTaskId, needsBootstrap, setAppState]);
@@ -1073,8 +1040,7 @@ export function REPL({
   // Initialize swarm features: teammate hooks and context
   // Handles both fresh spawns and resumed teammate sessions
   useSwarmInitialization(setAppState, initialMessages, {
-    enabled: !isRemoteSession,
-  });
+    enabled: !isRemoteSession});
 
   const mergedTools = useMergedTools(combinedInitialTools, mcp.tools, toolPermissionContext);
 
@@ -1083,14 +1049,12 @@ export function REPL({
     if (!mainThreadAgentDefinition) {
       return {
         tools: mergedTools,
-        allowedAgentTypes: undefined as string[] | undefined,
-      };
+        allowedAgentTypes: undefined as string[] | undefined};
     }
     const resolved = resolveAgentTools(mainThreadAgentDefinition, mergedTools, false, true);
     return {
       tools: resolved.resolvedTools,
-      allowedAgentTypes: resolved.allowedAgentTypes,
-    };
+      allowedAgentTypes: resolved.allowedAgentTypes};
   }, [mainThreadAgentDefinition, mergedTools]);
 
   // Merge commands from local state, plugins, and MCP
@@ -1274,8 +1238,7 @@ export function REPL({
         addNotification({
           key: 'auto-updater-notification',
           text: notification,
-          priority: 'low',
-        });
+          priority: 'low'});
       });
     }
   }, [autoUpdaterResult, addNotification]);
@@ -1290,8 +1253,7 @@ export function REPL({
           addNotification({
             key: 'tmux-mouse-hint',
             text: hint,
-            priority: 'low',
-          });
+            priority: 'low'});
         }
       });
     }
@@ -1582,8 +1544,7 @@ export function REPL({
     config: remoteSessionConfig,
     setMessages,
     scrollRef,
-    onPrepend: shiftDivider,
-  });
+    onPrepend: shiftDivider});
   const { maybeLoadOlder } = feature('KAIROS') ? assistantHistoryResult : HISTORY_STUB;
   // Compose useUnseenDivider's callbacks with the lazy-load trigger.
   const composedOnScroll = useCallback(
@@ -1719,8 +1680,7 @@ export function REPL({
     tools: combinedInitialTools,
     setStreamingToolUses,
     setStreamMode,
-    setInProgressToolUseIDs,
-  });
+    setInProgressToolUseIDs});
 
   // Direct connect hook - manages WebSocket to a claude server for `claude connect` mode
   const directConnect = useDirectConnect({
@@ -1728,8 +1688,7 @@ export function REPL({
     setMessages,
     setIsLoading: setIsExternalLoading,
     setToolUseConfirmQueue,
-    tools: combinedInitialTools,
-  });
+    tools: combinedInitialTools});
 
   // SSH session hook - manages ssh child process for `claude ssh` mode.
   // Same callback shape as useDirectConnect; only the transport under the
@@ -1739,8 +1698,7 @@ export function REPL({
     setMessages,
     setIsLoading: setIsExternalLoading,
     setToolUseConfirmQueue,
-    tools: combinedInitialTools,
-  });
+    tools: combinedInitialTools});
 
   // Use whichever remote mode is active
   const activeRemote = sshRemote.isRemoteMode ? sshRemote : directConnect.isRemoteMode ? directConnect : remoteSession;
@@ -1834,8 +1792,7 @@ export function REPL({
   // For large resumed sessions, reconstruction does O(messages × blocks)
   // work; we only want that once.
   const [contentReplacementStateRef] = useState(() => ({
-    current: provisionContentReplacementState(initialMessages, initialContentReplacements),
-  }));
+    current: provisionContentReplacementState(initialMessages, initialContentReplacements)}));
   registerCompactCleanup(() => {
     contentReplacementStateRef.current = createContentReplacementState();
   });
@@ -1878,14 +1835,12 @@ export function REPL({
     void getTipToShowOnSpinner({
       theme,
       readFileState: readFileState.current,
-      bashTools: bashTools.current,
-    }).then(async tip => {
+      bashTools: bashTools.current}).then(async tip => {
       if (tip) {
         const content = await tip.content({ theme });
         setAppState(prev => ({
           ...prev,
-          spinnerTip: content,
-        }));
+          spinnerTip: content}));
         recordShownTip(tip);
       } else {
         setAppState(prev => {
@@ -1973,8 +1928,7 @@ export function REPL({
             if (prevCount >= 3) return prev;
             return {
               ...prev,
-              autoPermissionsNotificationCount: prevCount + 1,
-            };
+              autoPermissionsNotificationCount: prevCount + 1};
           });
           setMessages(prev => [...prev, createSystemMessage(AUTO_MODE_DESCRIPTION, 'warning')]);
         },
@@ -2024,14 +1978,12 @@ export function REPL({
   const {
     onBeforeQuery: mrOnBeforeQuery,
     onTurnComplete: mrOnTurnComplete,
-    render: mrRender,
-  } = useMoreRight({
+    render: mrRender} = useMoreRight({
     enabled: moreRightEnabled,
     setMessages,
     inputValue,
     setInputValue,
-    setToolJSX,
-  });
+    setToolJSX});
 
   const showSpinner =
     (!toolJSX || toolJSX.showSpinner === true) &&
@@ -2082,8 +2034,7 @@ export function REPL({
           setAutoRunIssueReason('feedback_survey_bad');
           didAutoRunIssueRef.current = true;
         }
-      },
-    }),
+      }}),
     [feedbackSurveyOriginal],
   );
 
@@ -2093,8 +2044,7 @@ export function REPL({
   // Memory survey: shown when the assistant mentions memory and a memory file
   // was read this conversation
   const memorySurvey = useMemorySurvey(messages, isLoading, hasActivePrompt, {
-    enabled: !isRemoteSession,
-  });
+    enabled: !isRemoteSession});
 
   // Frustration detection: show transcript sharing prompt after detecting frustrated messages
   const frustrationDetection = useFrustrationDetection(
@@ -2110,14 +2060,12 @@ export function REPL({
     ideToInstallExtension,
     setDynamicMcpConfig,
     setShowIdeOnboarding,
-    setIDEInstallationState: setIDEInstallationStatus,
-  });
+    setIDEInstallationState: setIDEInstallationStatus});
 
   useFileHistorySnapshotInit(initialFileHistorySnapshots, fileHistory, fileHistoryState =>
     setAppState(prev => ({
       ...prev,
-      fileHistory: fileHistoryState,
-    })),
+      fileHistory: fileHistoryState})),
   );
 
   const resume = useCallback(
@@ -2150,9 +2098,7 @@ export function REPL({
               agentDefinitions: {
                 ...freshAgentDefs,
                 allAgents: freshAgentDefs.allAgents,
-                activeAgents: getActiveAgentsFromList(freshAgentDefs.allAgents),
-              },
-            }));
+                activeAgents: getActiveAgentsFromList(freshAgentDefs.allAgents)}}));
             messages.push(createSystemMessage(warning, 'warning'));
           }
         }
@@ -2164,15 +2110,13 @@ export function REPL({
           getAppState: () => store.getState(),
           setAppState,
           signal: AbortSignal.timeout(sessionEndTimeoutMs),
-          timeoutMs: sessionEndTimeoutMs,
-        });
+          timeoutMs: sessionEndTimeoutMs});
 
         // Process session start hooks for resume
         const hookMessages = await processSessionStartHooks('resume', {
           sessionId,
           agentType: mainThreadAgentDefinition?.agentType,
-          model: mainLoopModel,
-        });
+          model: mainLoopModel});
 
         // Append hook messages to the conversation
         messages.push(...hookMessages);
@@ -2206,8 +2150,7 @@ export function REPL({
         // Always reset to the new session's values (or clear if none)
         setAppState(prev => ({
           ...prev,
-          standaloneAgentContext: computeStandaloneAgentContext(log.agentName, log.agentColor),
-        }));
+          standaloneAgentContext: computeStandaloneAgentContext(log.agentName, log.agentColor)}));
         void updateSessionName(log.agentName);
 
         // Restore read file state from the message history
@@ -2278,8 +2221,7 @@ export function REPL({
           void restoreRemoteAgentTasks({
             abortController: new AbortController(),
             getAppState: () => store.getState(),
-            setAppState,
-          });
+            setAppState});
         } else {
           // Fork: same re-persist as /clear (conversation.ts). The clear
           // above wiped currentSessionWorktree, forkLog doesn't carry it,
@@ -2334,13 +2276,11 @@ export function REPL({
         logEvent('tengu_session_resumed', {
           entrypoint: entrypoint as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           success: true,
-          resume_duration_ms: Math.round(performance.now() - resumeStart),
-        });
+          resume_duration_ms: Math.round(performance.now() - resumeStart)});
       } catch (error) {
         logEvent('tengu_session_resumed', {
           entrypoint: entrypoint as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          success: false,
-        });
+          success: false});
         throw error;
       }
     },
@@ -2385,8 +2325,7 @@ export function REPL({
       void restoreRemoteAgentTasks({
         abortController: new AbortController(),
         getAppState: () => store.getState(),
-        setAppState,
-      });
+        setAppState});
     }
     // Only run on mount - initialMessages shouldn't change during component lifetime
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2675,8 +2614,7 @@ export function REPL({
     isHelpOpen,
     inputMode,
     inputValue,
-    streamMode,
-  };
+    streamMode};
 
   useEffect(() => {
     const totalCost = getTotalCost();
@@ -2708,8 +2646,7 @@ export function REPL({
               ...prev,
               {
                 hostPattern,
-                resolvePromise: resolveShouldAllowHost,
-              },
+                resolvePromise: resolveShouldAllowHost},
             ]);
             return;
           }
@@ -2718,17 +2655,14 @@ export function REPL({
           registerSandboxPermissionCallback({
             requestId,
             host: hostPattern.host,
-            resolve: resolveShouldAllowHost,
-          });
+            resolve: resolveShouldAllowHost});
 
           // Update AppState to show pending indicator
           setAppState(prev => ({
             ...prev,
             pendingSandboxRequest: {
               requestId,
-              host: hostPattern.host,
-            },
-          }));
+              host: hostPattern.host}}));
         });
       }
 
@@ -2747,8 +2681,7 @@ export function REPL({
           ...prev,
           {
             hostPattern,
-            resolvePromise: resolveOnce,
-          },
+            resolvePromise: resolveOnce},
         ]);
 
         // When the REPL bridge is connected, also forward the sandbox
@@ -2815,8 +2748,7 @@ export function REPL({
     if (!reason) return;
     if (SandboxManager.isSandboxRequired()) {
       process.stderr.write(
-        `\nError: sandbox required but unavailable: ${reason}\n` +
-          `  sandbox.failIfUnavailable is set — refusing to start without a working sandbox.\n\n`,
+        t('repl.sandboxRequiredUnavailable', reason),
       );
       gracefulShutdownSync(1, 'other');
       return;
@@ -2826,19 +2758,18 @@ export function REPL({
       key: 'sandbox-unavailable',
       jsx: (
         <>
-          <Text color="warning">sandbox disabled</Text>
-          <Text dimColor> · /sandbox</Text>
+          <Text color="warning">{t('repl.sandboxDisabled')}</Text>
+          <Text dimColor>{t('repl.sandboxCmd')}</Text>
         </>
       ),
-      priority: 'medium',
-    });
+      priority: 'medium'});
   }, [addNotification]);
 
   if (SandboxManager.isSandboxingEnabled()) {
     // If sandboxing is enabled (setting.sandbox is defined, initialise the manager)
     SandboxManager.initialize(sandboxAskCallback).catch(err => {
       // Initialization/validation failed - display error and exit
-      process.stderr.write(`\n❌ Sandbox Error: ${errorMessage(err)}\n`);
+      process.stderr.write(t('repl.sandboxError', errorMessage(err)));
       gracefulShutdownSync(1, 'other');
     });
   }
@@ -2855,9 +2786,7 @@ export function REPL({
           // state via permission-rule updates — those call sites pass
           // { preserveMode: true }. User-initiated mode changes (e.g.,
           // selecting "allow all edits") must NOT be overridden.
-          mode: options?.preserveMode ? prev.toolPermissionContext.mode : context.mode,
-        },
-      }));
+          mode: options?.preserveMode ? prev.toolPermissionContext.mode : context.mode}}));
 
       // When permission context changes, recheck all queued items
       // This handles the case where approving item1 with "don't ask again"
@@ -2939,8 +2868,7 @@ export function REPL({
           agentDefinitions: allowedAgentTypes ? { ...s.agentDefinitions, allowedAgentTypes } : s.agentDefinitions,
           customSystemPrompt,
           appendSystemPrompt,
-          refreshTools: computeTools,
-        },
+          refreshTools: computeTools},
         getAppState: () => store.getState(),
         setAppState,
         messages,
@@ -2992,8 +2920,7 @@ export function REPL({
                   firstTokenTime: now,
                   lastTokenTime: now,
                   responseLengthBaseline: baseline,
-                  endResponseLength: baseline,
-                });
+                  endResponseLength: baseline});
               }
             : undefined,
         setStreamMode,
@@ -3029,8 +2956,7 @@ export function REPL({
         resume,
         setConversationId,
         requestPrompt: feature('HOOK_PROMPTS') ? requestPrompt : undefined,
-        contentReplacementState: contentReplacementStateRef.current,
-      };
+        contentReplacementState: contentReplacementStateRef.current};
     },
     [
       commands,
@@ -3085,8 +3011,7 @@ export function REPL({
         toolUseContext,
         customSystemPrompt,
         defaultSystemPrompt,
-        appendSystemPrompt,
-      });
+        appendSystemPrompt});
       toolUseContext.renderedSystemPrompt = systemPrompt;
 
       const notificationAttachments = await getQueuedCommandAttachments(removedNotifications).catch(() => []);
@@ -3122,12 +3047,10 @@ export function REPL({
           systemContext,
           canUseTool,
           toolUseContext,
-          querySource: getQuerySourceForREPL(),
-        },
+          querySource: getQuerySourceForREPL()},
         description: terminalTitle,
         setAppState,
-        agentDefinition: mainThreadAgentDefinition,
-      });
+        agentDefinition: mainThreadAgentDefinition});
     })();
   }, [
     abortController,
@@ -3146,8 +3069,7 @@ export function REPL({
     setIsLoading: setIsExternalLoading,
     resetLoadingState,
     setAbortController,
-    onBackgroundQuery: handleBackgroundQuery,
-  });
+    onBackgroundQuery: handleBackgroundQuery});
 
   const onQueryEvent = useCallback(
     (event: Parameters<typeof handleMessageFromStream>[0]) => {
@@ -3165,8 +3087,7 @@ export function REPL({
             if (isFullscreenEnvEnabled()) {
               setMessages(old => {
                 const postBoundary = getMessagesAfterCompactBoundary(old, {
-                  includeSnipped: true,
-                });
+                  includeSnipped: true});
                 // Hard cap: keep at most 500 messages in fullscreen scrollback
                 // to prevent unbounded memory growth in multi-day sessions.
                 // normalizeMessages/applyGrouping are O(n), and Ink fiber
@@ -3266,9 +3187,8 @@ export function REPL({
                 persistCurrentGoal();
                 addNotification({
                   key: 'goal-auto-paused-connectivity-error',
-                  text: 'Detected connection error. Active goal was auto-paused. Run /goal resume after network recovers.',
-                  priority: 'immediate',
-                });
+                  text: t('repl.goalAutoPausedConnectivityError'),
+                  priority: 'immediate'});
               }
             }
           }
@@ -3294,8 +3214,7 @@ export function REPL({
               pipeReturnHadErrorRef.current = true;
               relayPipeMessage({
                 type: 'error',
-                data: text || 'Slave request failed',
-              });
+                data: text || 'Slave request failed'});
             } else if (text) {
               relayPipeMessage({ type: 'stream', data: text });
             }
@@ -3322,8 +3241,7 @@ export function REPL({
             firstTokenTime: now,
             lastTokenTime: now,
             responseLengthBaseline: baseline,
-            endResponseLength: baseline,
-          });
+            endResponseLength: baseline});
         },
         onStreamingText,
       );
@@ -3417,10 +3335,7 @@ export function REPL({
             ...prev.toolPermissionContext,
             alwaysAllowRules: {
               ...prev.toolPermissionContext.alwaysAllowRules,
-              command: additionalAllowedTools,
-            },
-          },
-        };
+              command: additionalAllowedTools}}};
       });
 
       // The last message is an assistant message if the user input was a bash command,
@@ -3462,8 +3377,7 @@ export function REPL({
         const previousGetAppState = toolUseContext.getAppState;
         toolUseContext.getAppState = () => ({
           ...previousGetAppState(),
-          effortValue: effort,
-        });
+          effortValue: effort});
       }
 
       queryCheckpoint('query_context_loading_start');
@@ -3490,10 +3404,8 @@ export function REPL({
         proactiveModule?.isProactiveActive() &&
         !terminalFocusRef.current
           ? {
-              terminalFocus: 'The terminal is unfocused \u2014 the user is not actively watching.',
-            }
-          : {}),
-      };
+              terminalFocus: 'The terminal is unfocused \u2014 the user is not actively watching.'}
+          : {})};
       queryCheckpoint('query_context_loading_end');
 
       const systemPrompt = buildEffectiveSystemPrompt({
@@ -3501,8 +3413,7 @@ export function REPL({
         toolUseContext,
         customSystemPrompt,
         defaultSystemPrompt,
-        appendSystemPrompt,
-      });
+        appendSystemPrompt});
       toolUseContext.renderedSystemPrompt = systemPrompt;
 
       queryCheckpoint('query_query_start');
@@ -3517,8 +3428,7 @@ export function REPL({
         systemContext,
         canUseTool,
         toolUseContext,
-        querySource: getQuerySourceForREPL(),
-      })) {
+        querySource: getQuerySourceForREPL()})) {
         onQueryEvent(event);
       }
 
@@ -3543,8 +3453,7 @@ export function REPL({
           pipeReturnHadErrorRef.current = true;
           relayPipeMessage({
             type: 'error',
-            data: 'Slave request was interrupted before completion.',
-          });
+            data: 'Slave request was interrupted before completion.'});
         }
       }
 
@@ -3584,8 +3493,7 @@ export function REPL({
             toolCount: toolCount > 0 ? toolCount : undefined,
             classifierDurationMs: classifierMs > 0 ? classifierMs : undefined,
             classifierCount: classifierCount > 0 ? classifierCount : undefined,
-            configWriteCount: getGlobalConfigWriteCount(),
-          }),
+            configWriteCount: getGlobalConfigWriteCount()}),
         ]);
       }
 
@@ -3708,8 +3616,7 @@ export function REPL({
             pipeReturnHadErrorRef.current = true;
             relayPipeMessage({
               type: 'error',
-              data: error instanceof Error ? error.message : String(error),
-            });
+              data: error instanceof Error ? error.message : String(error)});
           }
           throw error;
         }
@@ -3731,8 +3638,7 @@ export function REPL({
           if (feature('UDS_INBOX') && !pipeReturnHadErrorRef.current) {
             relayPipeMessage({
               type: 'done',
-              data: '',
-            });
+              data: ''});
           }
 
           // Notify bridge clients that the turn is complete so mobile apps
@@ -3764,8 +3670,7 @@ export function REPL({
               budgetInfo = {
                 tokens: getTurnOutputTokens(),
                 limit: getCurrentTurnTokenBudget()!,
-                nudges: getBudgetContinuationCount(),
-              };
+                nudges: getBudgetContinuationCount()};
             }
             snapshotOutputTokensForTurn(null);
           }
@@ -3869,8 +3774,7 @@ export function REPL({
           loadedNestedMemoryPaths: loadedNestedMemoryPathsRef.current,
           getAppState: () => store.getState(),
           setAppState,
-          setConversationId,
-        });
+          setConversationId});
         haikuTitleAttemptedRef.current = false;
         setHaikuTitle(undefined);
         bashTools.current.clear();
@@ -3897,15 +3801,13 @@ export function REPL({
           updatedToolPermissionContext = stripDangerousPermissionsForAutoMode({
             ...updatedToolPermissionContext,
             mode: 'auto',
-            prePlanMode: undefined,
-          });
+            prePlanMode: undefined});
         }
 
         return {
           ...prev,
           initialMessage: null,
-          toolPermissionContext: updatedToolPermissionContext,
-        };
+          toolPermissionContext: updatedToolPermissionContext};
       });
 
       // Create file history snapshot for code rewind
@@ -3913,8 +3815,7 @@ export function REPL({
         void fileHistoryMakeSnapshot((updater: (prev: FileHistoryState) => FileHistoryState) => {
           setAppState(prev => ({
             ...prev,
-            fileHistory: updater(prev.fileHistory),
-          }));
+            fileHistory: updater(prev.fileHistory)}));
         }, initialMsg.message.uuid);
       }
 
@@ -3936,8 +3837,7 @@ export function REPL({
         void onSubmit(content, {
           setCursorOffset: () => {},
           clearBuffer: () => {},
-          resetHistory: () => {},
-        });
+          resetHistory: () => {}});
       } else {
         // Plan messages or complex content (images, etc.) - send directly to model
         // Plan messages use onQuery to preserve planContent metadata for rendering
@@ -3996,8 +3896,7 @@ export function REPL({
         if (!options?.fromKeybinding) {
           addToHistory({
             display: prependModeCharacterToInput(input, inputMode),
-            pastedContents,
-          });
+            pastedContents});
         }
         setInputValue('');
         helpers.setCursorOffset(0);
@@ -4034,8 +3933,7 @@ export function REPL({
             variant: idleHintShownRef.current as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             idleMinutes: Math.round((Date.now() - lastQueryCompletionTimeRef.current) / 60_000),
             messageCount: messagesRef.current.length,
-            totalInputTokens: getTotalInputTokens(),
-          });
+            totalInputTokens: getTotalInputTokens()});
           idleHintShownRef.current = false;
         }
 
@@ -4061,8 +3959,7 @@ export function REPL({
           logEvent('tengu_paste_text', { pastedTextCount, pastedTextBytes });
           logEvent('tengu_immediate_command_executed', {
             commandName: matchingCommand.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            fromKeybinding: options?.fromKeybinding ?? false,
-          });
+            fromKeybinding: options?.fromKeybinding ?? false});
 
           // Execute the command directly
           const executeImmediateCommand = async (): Promise<void> => {
@@ -4079,15 +3976,13 @@ export function REPL({
               setToolJSX({
                 jsx: null,
                 shouldHidePromptInput: false,
-                clearLocalJSX: true,
-              });
+                clearLocalJSX: true});
               const newMessages: MessageType[] = [];
               if (result && doneOptions?.display !== 'skip') {
                 addNotification({
                   key: `immediate-${matchingCommand.name}`,
                   text: result,
-                  priority: 'immediate',
-                });
+                  priority: 'immediate'});
                 // In fullscreen the command just showed as a centered modal
                 // pane — the notification above is enough feedback. Adding
                 // "❯ /config" + "⎿ dismissed" to the transcript is clutter
@@ -4142,8 +4037,7 @@ export function REPL({
               setToolJSX({
                 jsx,
                 shouldHidePromptInput: false,
-                isLocalJSXCommand: true,
-              });
+                isLocalJSXCommand: true});
             }
           };
           void executeImmediateCommand();
@@ -4191,8 +4085,7 @@ export function REPL({
       if (!options?.fromKeybinding) {
         addToHistory({
           display: speculationAccept ? input : prependModeCharacterToInput(input, inputMode),
-          pastedContents: speculationAccept ? {} : pastedContents,
-        });
+          pastedContents: speculationAccept ? {} : pastedContents});
         // Add the just-submitted command to the front of the ghost-text
         // cache so it's suggested immediately (not after the 60s TTL).
         if (inputMode === 'bash') {
@@ -4259,8 +4152,7 @@ export function REPL({
               void recordAttributionSnapshot(snapshot).catch(error => {
                 logForDebugging(`Attribution: Failed to save snapshot: ${error}`);
               });
-            }),
-          }));
+            })}));
         }
       }
 
@@ -4274,8 +4166,7 @@ export function REPL({
           {
             setMessages,
             readFileState,
-            cwd: getOriginalCwd(),
-          },
+            cwd: getOriginalCwd()},
         );
         if (queryRequired) {
           const newAbortController = createAbortController();
@@ -4329,8 +4220,7 @@ export function REPL({
                   | 'image/png'
                   | 'image/gif'
                   | 'image/webp',
-                data: pasted.content,
-              };
+                data: pasted.content};
               contentBlocks.push({ type: 'image', source });
               remoteBlocks.push({ type: 'image', source });
             } else {
@@ -4347,14 +4237,12 @@ export function REPL({
         // Note: empty input already handled by early return above
         const userMessage = createUserMessage({
           content: messageContent,
-          imagePasteIds,
-        });
+          imagePasteIds});
         setMessages(prev => [...prev, userMessage]);
 
         // Send to remote session
         await activeRemote.sendMessage(remoteContent, {
-          uuid: userMessage.uuid,
-        });
+          uuid: userMessage.uuid});
         return;
       }
 
@@ -4389,8 +4277,7 @@ export function REPL({
         // Read via ref so streamMode can be dropped from onSubmit deps —
         // handlePromptSubmit only uses it for debug log + telemetry event.
         streamMode: streamModeRef.current,
-        hasInterruptibleToolInProgress: hasInterruptibleToolInProgressRef.current,
-      });
+        hasInterruptibleToolInProgress: hasInterruptibleToolInProgressRef.current});
 
       // Restore stash that was deferred above. Two cases:
       // - Slash command: handlePromptSubmit awaited the full command execution
@@ -4459,14 +4346,12 @@ export function REPL({
             agentId: task.id,
             prompt: input,
             toolUseContext: getToolUseContext(messagesRef.current, [], new AbortController(), mainLoopModel),
-            canUseTool,
-          }).catch(err => {
+            canUseTool}).catch(err => {
             logForDebugging(`resumeAgentBackground failed: ${errorMessage(err)}`);
             addNotification({
               key: `resume-agent-failed-${task.id}`,
-              jsx: <Text color="error">Failed to resume agent: {errorMessage(err)}</Text>,
-              priority: 'low',
-            });
+              jsx: <Text color="error">{t('repl.failedToResumeAgent', errorMessage(err))}</Text>,
+              priority: 'low'});
           });
         }
       } else {
@@ -4486,8 +4371,7 @@ export function REPL({
     onSubmit(command, {
       setCursorOffset: () => {},
       clearBuffer: () => {},
-      resetHistory: () => {},
-    }).catch(err => {
+      resetHistory: () => {}}).catch(err => {
       logForDebugging(`Auto-run ${command} failed: ${errorMessage(err)}`);
     });
   }, [onSubmit, autoRunIssueReason]);
@@ -4502,8 +4386,7 @@ export function REPL({
     onSubmit(command, {
       setCursorOffset: () => {},
       clearBuffer: () => {},
-      resetHistory: () => {},
-    }).catch(err => {
+      resetHistory: () => {}}).catch(err => {
       logForDebugging(`Survey feedback request failed: ${err instanceof Error ? err.message : String(err)}`);
     });
   }, [onSubmit]);
@@ -4519,8 +4402,7 @@ export function REPL({
     void onSubmitRef.current('/rate-limit-options', {
       setCursorOffset: () => {},
       clearBuffer: () => {},
-      resetHistory: () => {},
-    });
+      resetHistory: () => {}});
   }, []);
 
   const handleExit = useCallback(async () => {
@@ -4577,8 +4459,7 @@ export function REPL({
         preRewindMessageCount: prev.length,
         postRewindMessageCount: messageIndex,
         messagesRemoved: prev.length - messageIndex,
-        rewindToMessageIndex: messageIndex,
-      });
+        rewindToMessageIndex: messageIndex});
       setMessages(prev.slice(0, messageIndex));
       // Careful, this has to happen after setMessages
       setConversationId(randomUUID());
@@ -4608,8 +4489,7 @@ export function REPL({
           permMode && prev.toolPermissionContext.mode !== permMode
             ? {
                 ...prev.toolPermissionContext,
-                mode: permMode,
-              }
+                mode: permMode}
             : prev.toolPermissionContext,
         // Clear stale prompt suggestion from previous conversation state
         promptSuggestion: {
@@ -4617,9 +4497,7 @@ export function REPL({
           promptId: null,
           shownAt: 0,
           acceptedAt: 0,
-          generationRequestId: null,
-        },
-      }));
+          generationRequestId: null}}));
     },
     [setMessages, setAppState],
   );
@@ -4649,8 +4527,7 @@ export function REPL({
                 id,
                 type: 'image',
                 content: block.source.data,
-                mediaType: block.source.media_type,
-              };
+                mediaType: block.source.media_type};
             }
           });
           setPastedContents(newPastedContents);
@@ -4688,8 +4565,7 @@ export function REPL({
           text: 'copied',
           color: 'success',
           priority: 'immediate',
-          timeoutMs: 2000,
-        });
+          timeoutMs: 2000});
       }),
     edit: async msg => {
       // Same skip-confirm check as /rewind: lossless → direct, else confirm dialog.
@@ -4708,8 +4584,7 @@ export function REPL({
         setMessageSelectorPreselect(raw);
         setIsMessageSelectorVisible(true);
       }
-    },
-  };
+    }};
   const { enter: enterMessageActions, handlers: messageActionHandlers } = useMessageActions(
     cursor,
     setCursor,
@@ -4742,8 +4617,7 @@ export function REPL({
         timestamp: Date.now(),
         offset: undefined,
         limit: undefined,
-        isPartialView: file.contentDiffersFromDisk,
-      });
+        isPartialView: file.contentDiffersFromDisk});
     }
 
     // Initial message handling is done via the initialMessage effect
@@ -4781,8 +4655,7 @@ export function REPL({
     hasCountedQueueUseRef.current = true;
     saveGlobalConfig(current => ({
       ...current,
-      promptQueueUseCount: (current.promptQueueUseCount ?? 0) + 1,
-    }));
+      promptQueueUseCount: (current.promptQueueUseCount ?? 0) + 1}));
   }, [queuedCommands.length]);
 
   // Process queued commands when query completes and queue has items
@@ -4793,8 +4666,7 @@ export function REPL({
         helpers: {
           setCursorOffset: () => {},
           clearBuffer: () => {},
-          resetHistory: () => {},
-        },
+          resetHistory: () => {}},
         queryGuard,
         commands,
         onInputChange: () => {},
@@ -4813,8 +4685,7 @@ export function REPL({
         canUseTool,
         addNotification,
         setMessages,
-        queuedCommands,
-      });
+        queuedCommands});
     },
     [
       queryGuard,
@@ -4837,8 +4708,7 @@ export function REPL({
   useQueueProcessor({
     executeQueuedInput,
     hasActiveLocalJsxUI: isShowingLocalJSXCommand,
-    queryGuard,
-  });
+    queryGuard});
 
   // We'll use the global lastInteractionTime from state.ts
 
@@ -4888,9 +4758,8 @@ export function REPL({
         ) {
           void sendNotification(
             {
-              message: 'Claude is waiting for your input',
-              notificationType: 'idle_prompt',
-            },
+              message: t('repl.waitingForYourInput'),
+              notificationType: 'idle_prompt'},
             terminal,
           );
         }
@@ -4934,28 +4803,26 @@ export function REPL({
           jsx:
             mode === 'hint_v2' ? (
               <>
-                <Text dimColor>new task? </Text>
+                <Text dimColor>{t('repl.newTask')}</Text>
                 <Text color="suggestion">/clear</Text>
-                <Text dimColor> to save </Text>
-                <Text color="suggestion">{formattedTokens} tokens</Text>
+                <Text dimColor>{t('repl.toSave')}</Text>
+                <Text color="suggestion">{t('repl.nTokens', formattedTokens)}</Text>
               </>
             ) : (
-              <Text color="warning">new task? /clear to save {formattedTokens} tokens</Text>
+              <Text color="warning">{t('repl.newTaskClearToSave', formattedTokens)}</Text>
             ),
           priority: 'medium',
           // Persist until submit — the hint fires at T+75min idle, user may
           // not return for hours. removeNotification in useEffect cleanup
           // handles dismissal. 0x7FFFFFFF = setTimeout max (~24.8 days).
-          timeoutMs: 0x7fffffff,
-        });
+          timeoutMs: 0x7fffffff});
         hintRef.current = mode;
         logEvent('tengu_idle_return_action', {
           action: 'hint_shown' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           variant: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           idleMinutes: Math.round(idleMinutes),
           messageCount: msgsRef.current.length,
-          totalInputTokens: totalTokens,
-        });
+          totalInputTokens: totalTokens});
       },
       Math.max(0, remaining),
       lastQueryCompletionTime,
@@ -4992,8 +4859,7 @@ export function REPL({
           ? ({
               value: input,
               mode: 'prompt',
-              isMeta: options?.isMeta ? true : undefined,
-            } satisfies QueuedCommand)
+              isMeta: options?.isMeta ? true : undefined} satisfies QueuedCommand)
           : input;
 
       void (async () => {
@@ -5008,8 +4874,7 @@ export function REPL({
         const userMessage = createUserMessage({
           content: command.value,
           isMeta: command.isMeta ? true : undefined,
-          origin: command.origin,
-        });
+          origin: command.origin});
 
         let executed = false;
         try {
@@ -5020,8 +4885,7 @@ export function REPL({
               commands: claim.claimedCommands,
               outcome: { type: 'failed', error },
               currentDir: getCwd(),
-              priority: 'later',
-            });
+              priority: 'later'});
           } catch (finalizeError: unknown) {
             logError(toError(finalizeError));
           }
@@ -5041,8 +4905,7 @@ export function REPL({
             commands: claim.claimedCommands,
             outcome: { type: 'completed' },
             currentDir: getCwd(),
-            priority: 'later',
-          });
+            priority: 'later'});
           for (const nextCommand of nextCommands) {
             enqueue(nextCommand);
           }
@@ -5067,15 +4930,13 @@ export function REPL({
         stripTrailing: () => 0,
         handleKeyEvent: () => {},
         resetAnchor: () => {},
-        interimRange: null,
-      };
+        interimRange: null};
 
   useInboxPoller({
     enabled: isAgentSwarmsEnabled(),
     isLoading,
     focusedInputDialog,
-    onSubmitMessage: handleIncomingPrompt,
-  });
+    onSubmitMessage: handleIncomingPrompt});
 
   useMailboxBridge({ isLoading, onSubmitMessage: handleIncomingPrompt });
   useMasterMonitor();
@@ -5111,8 +4972,7 @@ export function REPL({
     useTaskListWatcher({
       taskListId,
       isLoading,
-      onSubmitTask: handleIncomingPrompt,
-    });
+      onSubmitTask: handleIncomingPrompt});
   }
 
   // Proactive mode: auto-tick when enabled (via /proactive command)
@@ -5126,8 +4986,7 @@ export function REPL({
     queuedCommandsLength: queuedCommands.length,
     hasActiveLocalJsxUI: isShowingLocalJSXCommand,
     isInPlanMode: toolPermissionContext.mode === 'plan',
-    onQueueTick: (command: QueuedCommand) => enqueue(command),
-  });
+    onQueueTick: (command: QueuedCommand) => enqueue(command)});
 
   // Goal auto-continuation: enqueue a steering prompt when idle + active goal
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -5144,18 +5003,15 @@ export function REPL({
         ...oldMessages,
         createUserMessage({
           content: visibleGoalTurnInput,
-          isVisibleInTranscriptOnly: true,
-        }),
+          isVisibleInTranscriptOnly: true}),
       ]);
     },
     onMaxTurnsReached: () => {
       addNotification({
         key: 'goal-max-turns-reached',
-        text: 'Goal reached max continuation turns (1). Run /goal continue to reset turn counter and continue.',
-        priority: 'immediate',
-      });
-    },
-  });
+        text: t('repl.goalMaxTurnsReached'),
+        priority: 'immediate'});
+    }});
 
   useEffect(() => {
     if (!proactiveActive) {
@@ -5178,8 +5034,7 @@ export function REPL({
         enabled: true,
         phase: 'standby',
         next_tick_at: proactiveNextTickAt,
-        sleep_until: null,
-      });
+        sleep_until: null});
       return;
     }
 
@@ -5187,8 +5042,7 @@ export function REPL({
       enabled: true,
       phase: null,
       next_tick_at: null,
-      sleep_until: null,
-    });
+      sleep_until: null});
   }, [
     initialMessage,
     isLoading,
@@ -5229,7 +5083,7 @@ export function REPL({
     const handleSuspend = () => {
       // Print suspension instructions
       process.stdout.write(
-        `\nClaude Code has been suspended. Run \`fg\` to bring Claude Code back.\nNote: ctrl + z now suspends Claude Code, ctrl + _ undoes input.\n`,
+        '\n' + t('repl.suspended') + '\n',
       );
     };
 
@@ -5310,8 +5164,7 @@ export function REPL({
   const handleEnterTranscript = useCallback(() => {
     setFrozenTranscriptState({
       messagesLength: messages.length,
-      streamingToolUsesLength: streamingToolUses.length,
-    });
+      streamingToolUsesLength: streamingToolUses.length});
   }, [messages.length, streamingToolUses.length]);
 
   // Callback to clear frozen state when exiting transcript mode
@@ -5364,8 +5217,7 @@ export function REPL({
     // Search needs virtual scroll (jumpRef drives VirtualMessageList). [
     // kills it, so !dumpMode — after [ there's nothing to jump in.
     {
-      isActive: screen === 'transcript' && virtualScrollActive && !searchOpen && !dumpMode,
-    },
+      isActive: screen === 'transcript' && virtualScrollActive && !searchOpen && !dumpMode},
   );
   const { setQuery: setHighlight, scanElement, setPositions } = useSearchHighlight();
 
@@ -5500,8 +5352,7 @@ export function REPL({
     // doesn't stopPropagation, so without this gate transcript:exit
     // would fire on the same Esc that cancels the bar (child registers
     // first, fires first, bubbles).
-    searchBarOpen: searchOpen,
-  };
+    searchBarOpen: searchOpen};
 
   // Use frozen lengths to slice arrays, avoiding memory overhead of cloning
   const transcriptMessages = frozenTranscriptState
@@ -5522,8 +5373,7 @@ export function REPL({
         const pIpc = prev.pipeIpc ?? {};
         return { ...prev, pipeIpc: { ...pIpc, selectorOpen: !pIpc.selectorOpen } };
       });
-    },
-  });
+    }});
   // Auto-exit viewing mode when teammate completes or errors
   useTeammateViewAutoExit();
 
@@ -5594,9 +5444,7 @@ export function REPL({
               ...m,
               message: {
                 ...m.message,
-                content: m.message.content.filter(b => !isForkBoilerplateTextBlock(b)),
-              },
-            };
+                content: m.message.content.filter(b => !isForkBoilerplateTextBlock(b))}};
           });
 
     if (promptAlreadyRendered) return stripped;
@@ -5604,8 +5452,7 @@ export function REPL({
     const insertAt = boilerplateIndex !== -1 ? boilerplateIndex + 1 : lastAssistantToolUseIndex + 1;
     const synthetic = createUserMessage({
       content: viewedAgentTask.prompt,
-      timestamp: new Date(viewedAgentTask.startTime).toISOString(),
-    });
+      timestamp: new Date(viewedAgentTask.startTime).toISOString()});
     return [...stripped.slice(0, insertAt), synthetic, ...stripped.slice(insertAt)];
   }, [viewedAgentTask, rawAgentMessages]);
   const displayedMessages = viewedAgentTask
@@ -6025,17 +5872,14 @@ export function REPL({
                           rules: [
                             {
                               toolName: WEB_FETCH_TOOL_NAME,
-                              ruleContent: `domain:${approvedHost}`,
-                            },
+                              ruleContent: `domain:${approvedHost}`},
                           ],
                           behavior: (allow ? 'allow' : 'deny') as 'allow' | 'deny',
-                          destination: 'localSettings' as const,
-                        };
+                          destination: 'localSettings' as const};
 
                         setAppState(prev => ({
                           ...prev,
-                          toolPermissionContext: applyPermissionUpdate(prev.toolPermissionContext, update),
-                        }));
+                          toolPermissionContext: applyPermissionUpdate(prev.toolPermissionContext, update)}));
 
                         persistPermissionUpdate(update);
 
@@ -6076,8 +5920,7 @@ export function REPL({
                       if (!item) return;
                       item.resolve({
                         prompt_response: item.request.prompt,
-                        selected: selectedKey,
-                      });
+                        selected: selectedKey});
                       setPromptQueue(([, ...tail]) => tail);
                     }}
                     onAbort={() => {
@@ -6109,8 +5952,7 @@ export function REPL({
                     hostPattern={
                       {
                         host: workerSandboxPermissions.queue[0]!.host,
-                        port: undefined,
-                      } as NetworkHostPattern
+                        port: undefined} as NetworkHostPattern
                     }
                     onUserResponse={(response: { allow: boolean; persistToSettings: boolean }) => {
                       const { allow, persistToSettings } = response;
@@ -6134,17 +5976,14 @@ export function REPL({
                           rules: [
                             {
                               toolName: WEB_FETCH_TOOL_NAME,
-                              ruleContent: `domain:${approvedHost}`,
-                            },
+                              ruleContent: `domain:${approvedHost}`},
                           ],
                           behavior: 'allow' as const,
-                          destination: 'localSettings' as const,
-                        };
+                          destination: 'localSettings' as const};
 
                         setAppState(prev => ({
                           ...prev,
-                          toolPermissionContext: applyPermissionUpdate(prev.toolPermissionContext, update),
-                        }));
+                          toolPermissionContext: applyPermissionUpdate(prev.toolPermissionContext, update)}));
 
                         persistPermissionUpdate(update);
                         SandboxManager.refreshConfig();
@@ -6155,9 +5994,7 @@ export function REPL({
                         ...prev,
                         workerSandboxPermissions: {
                           ...prev.workerSandboxPermissions,
-                          queue: prev.workerSandboxPermissions.queue.slice(1),
-                        },
-                      }));
+                          queue: prev.workerSandboxPermissions.queue.slice(1)}}));
                     }}
                   />
                 )}
@@ -6176,9 +6013,7 @@ export function REPL({
                         setAppState(prev => ({
                           ...prev,
                           elicitation: {
-                            queue: prev.elicitation.queue.slice(1),
-                          },
-                        }));
+                            queue: prev.elicitation.queue.slice(1)}}));
                       }
                     }}
                     onWaitingDismiss={action => {
@@ -6187,9 +6022,7 @@ export function REPL({
                       setAppState(prev => ({
                         ...prev,
                         elicitation: {
-                          queue: prev.elicitation.queue.slice(1),
-                        },
-                      }));
+                          queue: prev.elicitation.queue.slice(1)}}));
                       currentRequest?.onWaitingDismiss?.(action);
                     }}
                   />
@@ -6201,8 +6034,7 @@ export function REPL({
                       setHaveShownCostDialog(true);
                       saveGlobalConfig(current => ({
                         ...current,
-                        hasAcknowledgedCostThreshold: true,
-                      }));
+                        hasAcknowledgedCostThreshold: true}));
                       logEvent('tengu_cost_threshold_acknowledged', {});
                     }}
                   />
@@ -6218,8 +6050,7 @@ export function REPL({
                         action: action as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                         idleMinutes: Math.round(pending.idleMinutes),
                         messageCount: messagesRef.current.length,
-                        totalInputTokens: getTotalInputTokens(),
-                      });
+                        totalInputTokens: getTotalInputTokens()});
                       if (action === 'dismiss') {
                         setInputValue(pending.input);
                         return;
@@ -6239,8 +6070,7 @@ export function REPL({
                           loadedNestedMemoryPaths: loadedNestedMemoryPathsRef.current,
                           getAppState: () => store.getState(),
                           setAppState,
-                          setConversationId,
-                        });
+                          setConversationId});
                         haikuTitleAttemptedRef.current = false;
                         setHaikuTitle(undefined);
                         bashTools.current.clear();
@@ -6250,8 +6080,7 @@ export function REPL({
                       void onSubmitRef.current(pending.input, {
                         setCursorOffset: () => {},
                         clearBuffer: () => {},
-                        resetHistory: () => {},
-                      });
+                        resetHistory: () => {}});
                     }}
                   />
                 )}
@@ -6269,8 +6098,7 @@ export function REPL({
                         setAppState(prev => ({
                           ...prev,
                           mainLoopModel: modelAlias,
-                          mainLoopModelForSession: null,
-                        }));
+                          mainLoopModelForSession: null}));
                       }
                     }}
                   />
@@ -6286,8 +6114,7 @@ export function REPL({
                       if (selection !== 'dismiss') {
                         setAppState(prev => ({
                           ...prev,
-                          effortValue: selection,
-                        }));
+                          effortValue: selection}));
                       }
                     }}
                   />
@@ -6303,9 +6130,7 @@ export function REPL({
                           ...(selection === 'enable' && {
                             replBridgeEnabled: true,
                             replBridgeExplicit: true,
-                            replBridgeOutboundOnly: false,
-                          }),
-                        };
+                            replBridgeOutboundOnly: false})};
                       });
                     }}
                   />
@@ -6408,8 +6233,7 @@ export function REPL({
                             setAppState,
                             signal: createAbortController().signal,
                             disconnectedBridge: opts?.disconnectedBridge,
-                            onSessionReady: appendWhenIdle,
-                          })
+                            onSessionReady: appendWhenIdle})
                             .then(appendStdout)
                             .catch(logError);
                         }}
@@ -6446,7 +6270,7 @@ export function REPL({
                         inputValue={inputValue}
                         setInputValue={setInputValue}
                         onRequestFeedback={handleSurveyRequestFeedback}
-                        message="How well did Claude use its memory? (optional)"
+                        message={t('repl.howWellDidClaudeUseItsMemoryOptional')}
                       />
                     ) : (
                       <FeedbackSurvey
@@ -6547,8 +6371,7 @@ export function REPL({
                       await fileHistoryRewind((updater: (prev: FileHistoryState) => FileHistoryState) => {
                         setAppState(prev => ({
                           ...prev,
-                          fileHistory: updater(prev.fileHistory),
-                        }));
+                          fileHistory: updater(prev.fileHistory)}));
                       }, message.uuid);
                     }}
                     onSummarize={async (
@@ -6591,8 +6414,7 @@ export function REPL({
                         toolUseContext: context,
                         customSystemPrompt: context.options.customSystemPrompt,
                         defaultSystemPrompt: defaultSysPrompt,
-                        appendSystemPrompt: context.options.appendSystemPrompt,
-                      });
+                        appendSystemPrompt: context.options.appendSystemPrompt});
                       const [userContext, systemContext] = await Promise.all([getUserContext(), getSystemContext()]);
 
                       const result = await partialCompactConversation(
@@ -6604,8 +6426,7 @@ export function REPL({
                           userContext,
                           systemContext,
                           toolUseContext: context,
-                          forkContextMessages: compactMessages,
-                        },
+                          forkContextMessages: compactMessages},
                         feedback,
                         direction,
                       );
@@ -6654,10 +6475,9 @@ export function REPL({
                       const historyShortcut = getShortcutDisplay('app:toggleTranscript', 'Global', 'ctrl+o');
                       addNotification({
                         key: 'summarize-ctrl-o-hint',
-                        text: `Conversation summarized (${historyShortcut} for history)`,
+                        text: t('compactSummary.summarizedWithHint', historyShortcut),
                         priority: 'medium',
-                        timeoutMs: 8000,
-                      });
+                        timeoutMs: 8000});
                     }}
                     onRestoreMessage={handleRestoreMessage}
                     onClose={() => {

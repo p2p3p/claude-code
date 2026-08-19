@@ -11,8 +11,7 @@ export function WizardProvider<T extends Record<string, unknown>>({
   onCancel,
   children,
   title,
-  showStepCounter = true,
-}: WizardProviderProps & {
+  showStepCounter = true}: WizardProviderProps & {
   initialData?: T;
   onComplete: (data: T) => void;
   onCancel: () => void;
@@ -99,8 +98,7 @@ export function WizardProvider<T extends Record<string, unknown>>({
       goToStep,
       cancel,
       title,
-      showStepCounter,
-    }),
+      showStepCounter}),
     [
       currentStepIndex,
       steps.length,

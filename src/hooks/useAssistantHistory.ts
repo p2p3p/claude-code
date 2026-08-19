@@ -4,15 +4,13 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
-  useRef,
-} from 'react'
+  useRef} from 'react'
 import {
   createHistoryAuthCtx,
   fetchLatestEvents,
   fetchOlderEvents,
   type HistoryAuthCtx,
-  type HistoryPage,
-} from '../assistant/sessionHistory.js'
+  type HistoryPage} from '../assistant/sessionHistory.js'
 import type { ScrollBoxHandle } from '@anthropic/ink'
 import type { RemoteSessionConfig } from '../remote/RemoteSessionManager.js'
 import { convertSDKMessage } from '../remote/sdkMessageAdapter.js'
@@ -52,8 +50,7 @@ function pageToMessages(page: HistoryPage): Message[] {
   for (const ev of page.events) {
     const c = convertSDKMessage(ev, {
       convertUserTextMessages: true,
-      convertToolResults: true,
-    })
+      convertToolResults: true})
     if (c.type === 'message') out.push(c.message)
   }
   return out
@@ -73,8 +70,7 @@ export function useAssistantHistory({
   config,
   setMessages,
   scrollRef,
-  onPrepend,
-}: Props): Result {
+  onPrepend}: Props): Result {
   const enabled = config?.viewerOnly === true
 
   // Cursor state: ref-only (no re-render on cursor change). `null` = no
@@ -106,8 +102,7 @@ export function useAssistantHistory({
       isMeta: false,
       timestamp: new Date().toISOString(),
       uuid: sentinelUuidRef.current,
-      level: 'info',
-    }
+      level: 'info'}
   }
 
   /** Prepend a page at the front, with scroll-anchor snapshot for non-initial.

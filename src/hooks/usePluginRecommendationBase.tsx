@@ -9,6 +9,7 @@ import * as React from 'react';
 import { getIsRemoteMode } from '../bootstrap/state.js';
 import type { useNotifications } from '../context/notifications.js';
 import { Text } from '@anthropic/ink';
+import { t } from '../utils/i18n/index.js';
 import { logError } from '../utils/log.js';
 import { getPluginById } from '../utils/plugins/marketplaceManager.js';
 
@@ -71,19 +72,17 @@ export async function installPluginAndNotify(
       key: `${keyPrefix}-installed`,
       jsx: (
         <Text color="success">
-          {figures.tick} {pluginName} installed · restart to apply
+          {figures.tick} {t('pluginInstallNotify.installed', pluginName)}
         </Text>
       ),
       priority: 'immediate',
-      timeoutMs: 5000,
-    });
+      timeoutMs: 5000});
   } catch (error) {
     logError(error);
     addNotification({
       key: `${keyPrefix}-install-failed`,
-      jsx: <Text color="error">Failed to install {pluginName}</Text>,
+      jsx: <Text color="error">{t('pluginInstallNotify.installFailed', pluginName)}</Text>,
       priority: 'immediate',
-      timeoutMs: 5000,
-    });
+      timeoutMs: 5000});
   }
 }

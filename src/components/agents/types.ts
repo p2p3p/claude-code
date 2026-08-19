@@ -3,8 +3,7 @@ import type { AgentDefinition } from '@claude-code-best/builtin-tools/tools/Agen
 
 export const AGENT_PATHS = {
   FOLDER_NAME: '.claude',
-  AGENTS_DIR: 'agents',
-} as const
+  AGENTS_DIR: 'agents'} as const
 
 // Base types for common patterns
 type WithPreviousMode = { previousMode: ModeState }

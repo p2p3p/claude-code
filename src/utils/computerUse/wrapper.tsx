@@ -23,13 +23,13 @@ import {
   type CuPermissionRequest,
   type CuPermissionResponse,
   DEFAULT_GRANT_FLAGS,
-  type ScreenshotDims,
-} from '@ant/computer-use-mcp';
+  type ScreenshotDims} from '@ant/computer-use-mcp';
 import * as React from 'react';
 import { getSessionId } from '../../bootstrap/state.js';
 import { ComputerUseApproval } from '../../components/permissions/ComputerUseApproval/ComputerUseApproval.js';
 import type { Tool, ToolUseContext } from '../../Tool.js';
 import { logForDebugging } from '../debug.js';
+import { t } from '../i18n/index.js';
 import { detectImageFormatFromBase64 } from '../imageResizer.js';
 import { checkComputerUseLock, tryAcquireComputerUseLock } from './computerUseLock.js';
 import { registerEscHotkey } from './escHotkey.js';
@@ -67,7 +67,7 @@ function tuc(): ToolUseContext {
 }
 
 function formatLockHeld(holder: string): string {
-  return `Computer use is in use by another Claude session (${holder.slice(0, 8)}…). Wait for that session to finish or run /exit there.`;
+  return t('computerUse.lockHeld', holder.slice(0, 8));
 }
 
 export function buildSessionContext(): ComputerUseSessionContext {
@@ -87,8 +87,7 @@ export function buildSessionContext(): ComputerUseSessionContext {
             ...d,
             displayId: d.displayId ?? 0,
             originX: d.originX ?? 0,
-            originY: d.originY ?? 0,
-          }
+            originY: d.originY ?? 0}
         : undefined;
     },
 
@@ -118,9 +117,7 @@ export function buildSessionContext(): ComputerUseSessionContext {
               computerUseMcpState: {
                 ...cu,
                 allowedApps: [...apps],
-                grantFlags: flags,
-              },
-            };
+                grantFlags: flags}};
       }),
 
     onAppsHidden: ids => {
@@ -133,9 +130,7 @@ export function buildSessionContext(): ComputerUseSessionContext {
           ...prev,
           computerUseMcpState: {
             ...cu,
-            hiddenDuringTurn: new Set([...(existing ?? []), ...ids]),
-          },
-        };
+            hiddenDuringTurn: new Set([...(existing ?? []), ...ids])}};
       });
     },
 
@@ -155,9 +150,7 @@ export function buildSessionContext(): ComputerUseSessionContext {
             ...cu,
             selectedDisplayId: id,
             displayPinnedByModel: false,
-            displayResolvedForApps: undefined,
-          },
-        };
+            displayResolvedForApps: undefined}};
       }),
 
     // switch_display(name) pins; switch_display("auto") unpins and clears the
@@ -180,9 +173,7 @@ export function buildSessionContext(): ComputerUseSessionContext {
             ...cu,
             selectedDisplayId: id,
             displayPinnedByModel: pinned,
-            displayResolvedForApps: nextResolvedFor,
-          },
-        };
+            displayResolvedForApps: nextResolvedFor}};
       }),
 
     onDisplayResolvedForApps: key =>
@@ -191,8 +182,7 @@ export function buildSessionContext(): ComputerUseSessionContext {
         if (cu?.displayResolvedForApps === key) return prev;
         return {
           ...prev,
-          computerUseMcpState: { ...cu, displayResolvedForApps: key },
-        };
+          computerUseMcpState: { ...cu, displayResolvedForApps: key }};
       }),
 
     onScreenshotCaptured: dims =>
@@ -209,8 +199,7 @@ export function buildSessionContext(): ComputerUseSessionContext {
           ? prev
           : {
               ...prev,
-              computerUseMcpState: { ...cu, lastScreenshotDims: dims },
-            };
+              computerUseMcpState: { ...cu, lastScreenshotDims: dims }};
       }),
 
     // ── Lock — async, direct file-lock calls ───────────────────────────────
@@ -254,13 +243,11 @@ export function buildSessionContext(): ComputerUseSessionContext {
           message: escRegistered
             ? 'Claude is using your computer · press Esc to stop'
             : 'Claude is using your computer · press Ctrl+C to stop',
-          notificationType: 'computer_use_enter',
-        });
+          notificationType: 'computer_use_enter'});
       }
     },
 
-    formatLockHeldMessage: formatLockHeld,
-  };
+    formatLockHeldMessage: formatLockHeld};
 }
 
 function getOrBind(): Binding {
@@ -268,8 +255,7 @@ function getOrBind(): Binding {
   const ctx = buildSessionContext();
   binding = {
     ctx,
-    dispatch: bindSessionContext(getComputerUseHostAdapter(), getChicagoCoordinateMode(), ctx),
-  };
+    dispatch: bindSessionContext(getComputerUseHostAdapter(), getChicagoCoordinateMode(), ctx)};
   return binding;
 }
 
@@ -307,13 +293,10 @@ export function getComputerUseMCPToolOverrides(toolName: string): ComputerUseMCP
                 source: {
                   type: 'base64' as const,
                   media_type: item.mimeType ?? detectImageFormatFromBase64(item.data),
-                  data: item.data,
-                },
-              }
+                  data: item.data}}
             : {
                 type: 'text' as const,
-                text: item.type === 'text' ? item.text : '',
-              },
+                text: item.type === 'text' ? item.text : ''},
         )
       : result.content;
     return { data };
@@ -321,8 +304,7 @@ export function getComputerUseMCPToolOverrides(toolName: string): ComputerUseMCP
 
   return {
     ...getComputerUseMCPRenderingOverrides(toolName),
-    call,
-  };
+    call};
 }
 
 /**
@@ -361,10 +343,8 @@ async function runPermissionDialog(req: CuPermissionRequest): Promise<CuPermissi
           onDone: (resp: CuPermissionResponse) => {
             signal.removeEventListener('abort', onAbort);
             resolve(resp);
-          },
-        }),
-        shouldHidePromptInput: true,
-      });
+          }}),
+        shouldHidePromptInput: true});
     });
   } finally {
     setToolJSX(null);

@@ -8,6 +8,7 @@ import type { InProcessTeammateTaskState } from '../../tasks/InProcessTeammateTa
 import { getTools } from '../../tools.js';
 import { formatNumber, truncateToWidth } from '../../utils/format.js';
 
+import { t } from '../../utils/i18n/index.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
 import { toInkColor } from '../../utils/ink.js';
 import { renderToolActivity } from './renderToolActivity.js';
@@ -25,8 +26,7 @@ export function InProcessTeammateDetailDialog({
   onDone,
   onKill,
   onBack,
-  onForeground,
-}: Props): React.ReactNode {
+  onForeground}: Props): React.ReactNode {
   const [theme] = useTheme();
   const tools = useMemo(() => getTools(getEmptyToolPermissionContext()), []);
 
@@ -40,8 +40,7 @@ export function InProcessTeammateDetailDialog({
   // Restore confirm:yes (Enter/y) dismissal — Dialog handles confirm:no (Esc)
   useKeybindings(
     {
-      'confirm:yes': onDone,
-    },
+      'confirm:yes': onDone},
     { context: 'Confirmation' },
   );
 
@@ -79,17 +78,17 @@ export function InProcessTeammateDetailDialog({
     <Text>
       {teammate.status !== 'running' && (
         <Text color={teammate.status === 'completed' ? 'success' : teammate.status === 'killed' ? 'warning' : 'error'}>
-          {teammate.status === 'completed' ? 'Completed' : teammate.status === 'failed' ? 'Failed' : 'Stopped'}
+          {teammate.status === 'completed' ? t('taskDetail.completed') : teammate.status === 'failed' ? t('taskDetail.failed') : t('taskDetail.stopped')}
           {' · '}
         </Text>
       )}
       <Text dimColor>
         {elapsedTime}
-        {tokenCount !== undefined && tokenCount > 0 && <> · {formatNumber(tokenCount)} tokens</>}
+        {tokenCount !== undefined && tokenCount > 0 && <> · {formatNumber(tokenCount)} {t('taskDetail.tokens')}</>}
         {toolUseCount !== undefined && toolUseCount > 0 && (
           <>
             {' '}
-            · {toolUseCount} {toolUseCount === 1 ? 'tool' : 'tools'}
+            · {toolUseCount} {toolUseCount === 1 ? t('taskDetail.tool') : t('taskDetail.tools')}
           </>
         )}
       </Text>
@@ -105,14 +104,14 @@ export function InProcessTeammateDetailDialog({
         color="background"
         inputGuide={exitState =>
           exitState.pending ? (
-            <Text>Press {exitState.keyName} again to exit</Text>
+            <Text>{t('common.pressAgain', exitState.keyName)}</Text>
           ) : (
             <Byline>
-              {onBack && <KeyboardShortcutHint shortcut="←" action="go back" />}
-              <KeyboardShortcutHint shortcut="Esc/Enter/Space" action="close" />
-              {teammate.status === 'running' && onKill && <KeyboardShortcutHint shortcut="x" action="stop" />}
+              {onBack && <KeyboardShortcutHint shortcut="←" action={t('taskDetail.goBack')} />}
+              <KeyboardShortcutHint shortcut="Esc/Enter/Space" action={t('taskDetail.close')} />
+              {teammate.status === 'running' && onKill && <KeyboardShortcutHint shortcut="x" action={t('taskDetail.stop')} />}
               {teammate.status === 'running' && onForeground && (
-                <KeyboardShortcutHint shortcut="f" action="foreground" />
+                <KeyboardShortcutHint shortcut="f" action={t('taskDetail.foreground')} />
               )}
             </Byline>
           )
@@ -124,7 +123,7 @@ export function InProcessTeammateDetailDialog({
           teammate.progress.recentActivities.length > 0 && (
             <Box flexDirection="column">
               <Text bold dimColor>
-                Progress
+                {t('taskDetail.progress')}
               </Text>
               {teammate.progress.recentActivities.map((activity, i) => (
                 <Text key={i} dimColor={i < teammate.progress!.recentActivities!.length - 1} wrap="truncate-end">
@@ -138,7 +137,7 @@ export function InProcessTeammateDetailDialog({
         {/* Prompt section */}
         <Box flexDirection="column" marginTop={1}>
           <Text bold dimColor>
-            Prompt
+            {t('taskDetail.prompt')}
           </Text>
           <Text wrap="wrap">{displayPrompt}</Text>
         </Box>
@@ -147,7 +146,7 @@ export function InProcessTeammateDetailDialog({
         {teammate.status === 'failed' && teammate.error && (
           <Box flexDirection="column" marginTop={1}>
             <Text bold color="error">
-              Error
+              {t('taskDetail.error')}
             </Text>
             <Text color="error" wrap="wrap">
               {teammate.error}

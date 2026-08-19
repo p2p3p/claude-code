@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Box, Text } from '@anthropic/ink';
 import { getAgentModelOptions } from '../../utils/model/agent.js';
 import { Select } from '../CustomSelect/select.js';
@@ -20,8 +21,7 @@ export function ModelSelector({ initialModel, onComplete, onCancel }: ModelSelec
         {
           value: initialModel,
           label: initialModel,
-          description: 'Current model (custom ID)',
-        },
+          description: t('modelSelector.currentModelCustom')},
         ...base,
       ];
     }
@@ -33,7 +33,7 @@ export function ModelSelector({ initialModel, onComplete, onCancel }: ModelSelec
   return (
     <Box flexDirection="column">
       <Box marginBottom={1}>
-        <Text dimColor>Model determines the agent&apos;s reasoning capabilities and speed.</Text>
+        <Text dimColor>{t('modelselector.modelDeterminesTheAgentAposSReasoningCapabilitiesAndSpeed')}</Text>
       </Box>
       <Select
         options={modelOptions}

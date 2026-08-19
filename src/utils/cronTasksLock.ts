@@ -26,8 +26,7 @@ const schedulerLockSchema = lazySchema(() =>
   z.object({
     sessionId: z.string(),
     pid: z.number(),
-    acquiredAt: z.number(),
-  }),
+    acquiredAt: z.number()}),
 )
 type SchedulerLock = z.infer<ReturnType<typeof schedulerLockSchema>>
 
@@ -119,8 +118,7 @@ export async function tryAcquireSchedulerLock(
   const lock: SchedulerLock = {
     sessionId,
     pid: process.pid,
-    acquiredAt: Date.now(),
-  }
+    acquiredAt: Date.now()}
 
   if (await tryCreateExclusive(lock, dir)) {
     lastBlockedBy = undefined

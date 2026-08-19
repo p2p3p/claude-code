@@ -4,8 +4,7 @@ import {
   readdir,
   rename,
   rm,
-  writeFile,
-} from 'node:fs/promises'
+  writeFile} from 'node:fs/promises'
 import { join } from 'node:path'
 import { getProjectRoot } from '../bootstrap/state.js'
 import { logForDebugging } from '../utils/debug.js'

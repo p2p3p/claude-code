@@ -17,8 +17,7 @@ import {
   addSessionCronTask,
   getProjectRoot,
   getSessionCronTasks,
-  removeSessionCronTasks,
-} from '../bootstrap/state.js'
+  removeSessionCronTasks} from '../bootstrap/state.js'
 import { computeNextCronRun, parseCronExpression } from './cron.js'
 import { logForDebugging } from './debug.js'
 import { isFsInaccessible } from './errors.js'
@@ -133,8 +132,7 @@ export async function readCronTasks(dir?: string): Promise<CronTask[]> {
         ? { lastFiredAt: t.lastFiredAt }
         : {}),
       ...(t.recurring ? { recurring: true } : {}),
-      ...(t.permanent ? { permanent: true } : {}),
-    })
+      ...(t.permanent ? { permanent: true } : {})})
   }
   return out
 }
@@ -172,8 +170,7 @@ export async function writeCronTasks(
   // by definition, and keeping the flag out means readCronTasks() naturally
   // yields durable: undefined without having to set it explicitly.
   const body: CronFile = {
-    tasks: tasks.map(({ durable: _durable, ...rest }) => rest),
-  }
+    tasks: tasks.map(({ durable: _durable, ...rest }) => rest)}
   await writeFile(
     getCronFilePath(root),
     jsonStringify(body, null, 2) + '\n',
@@ -206,8 +203,7 @@ export async function addCronTask(
     cron,
     prompt,
     createdAt: Date.now(),
-    ...(recurring ? { recurring: true } : {}),
-  }
+    ...(recurring ? { recurring: true } : {})}
   if (!durable) {
     addSessionCronTask({ ...task, ...(agentId ? { agentId } : {}) })
     return id
@@ -290,8 +286,7 @@ export async function listAllCronTasks(dir?: string): Promise<CronTask[]> {
   if (dir !== undefined) return fileTasks
   const sessionTasks = getSessionCronTasks().map(t => ({
     ...t,
-    durable: false as const,
-  }))
+    durable: false as const}))
   return [...fileTasks, ...sessionTasks]
 }
 
@@ -351,8 +346,7 @@ export const DEFAULT_CRON_JITTER_CONFIG: CronJitterConfig = {
   oneShotMaxMs: 90 * 1000,
   oneShotFloorMs: 0,
   oneShotMinuteMod: 30,
-  recurringMaxAgeMs: 7 * 24 * 60 * 60 * 1000,
-}
+  recurringMaxAgeMs: 7 * 24 * 60 * 60 * 1000}
 
 /**
  * taskId is an 8-hex-char UUID slice (see {@link addCronTask}) → parse as

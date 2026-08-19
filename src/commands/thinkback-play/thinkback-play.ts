@@ -3,6 +3,7 @@ import type { LocalCommandResult } from '../../commands.js'
 import { loadInstalledPluginsV2 } from '../../utils/plugins/installedPluginsManager.js'
 import { OFFICIAL_MARKETPLACE_NAME } from '../../utils/plugins/officialMarketplace.js'
 import { playAnimation } from '../thinkback/thinkback.js'
+import { t } from '../../utils/i18n/index.js'
 
 const INTERNAL_MARKETPLACE_NAME = 'claude-code-marketplace'
 const SKILL_NAME = 'thinkback'
@@ -24,17 +25,14 @@ export async function call(): Promise<LocalCommandResult> {
   if (!installations || installations.length === 0) {
     return {
       type: 'text' as const,
-      value:
-        'Thinkback plugin not installed. Run /think-back first to install it.',
-    }
+      value: t('thinkbackPlay.notInstalled')}
   }
 
   const firstInstall = installations[0]
   if (!firstInstall?.installPath) {
     return {
       type: 'text' as const,
-      value: 'Thinkback plugin installation path not found.',
-    }
+      value: t('thinkbackPlay.pathNotFound')}
   }
 
   const skillDir = join(firstInstall.installPath, 'skills', SKILL_NAME)

@@ -8,26 +8,21 @@ import {
   getClaudeAIOAuthTokens,
   isClaudeAISubscriber,
   refreshAndGetAwsCredentials,
-  refreshGcpCredentialsIfNeeded,
-} from 'src/utils/auth.js'
+  refreshGcpCredentialsIfNeeded} from 'src/utils/auth.js'
 import { getUserAgent } from 'src/utils/http.js'
 import { getSmallFastModel } from 'src/utils/model/model.js'
 import {
-  getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
-} from 'src/utils/model/providers.js'
+  getAPIProvider} from 'src/utils/model/providers.js'
 import { getProxyFetchOptions } from 'src/utils/proxy.js'
 import {
   getIsNonInteractiveSession,
-  getSessionId,
-} from '../../bootstrap/state.js'
-import { getOauthConfig } from '../../constants/oauth.js'
-import { isDebugToStdErr, logForDebugging } from '../../utils/debug.js'
+  getSessionId} from '../../../bootstrap/state.js'
+import { getOauthConfig } from '../../../constants/oauth.js'
+import { isDebugToStdErr, logForDebugging } from '../../../utils/debug.js'
 import {
   getAWSRegion,
   getVertexRegionForModel,
-  isEnvTruthy,
-} from '../../utils/envUtils.js'
+  isEnvTruthy} from '../../../utils/envUtils.js'
 
 /**
  * Environment variables for different client types:
@@ -77,8 +72,7 @@ function createStderrLogger(): ClientOptions['logger'] {
     warn: (msg, ...args) => console.error('[Anthropic SDK WARN]', msg, ...args),
     info: (msg, ...args) => console.error('[Anthropic SDK INFO]', msg, ...args),
     debug: (msg, ...args) =>
-      console.error('[Anthropic SDK DEBUG]', msg, ...args),
-  }
+      console.error('[Anthropic SDK DEBUG]', msg, ...args)}
 }
 
 export async function getAnthropicClient({
@@ -86,8 +80,7 @@ export async function getAnthropicClient({
   maxRetries,
   model,
   fetchOverride,
-  source,
-}: {
+  source}: {
   apiKey?: string
   maxRetries: number
   model?: string
@@ -112,8 +105,7 @@ export async function getAnthropicClient({
     // SSH auth proxy nonce — tunneled API requests must carry this header
     ...(process.env.ANTHROPIC_AUTH_NONCE
       ? { 'x-auth-nonce': process.env.ANTHROPIC_AUTH_NONCE }
-      : {}),
-  }
+      : {})}
 
   // Log API client configuration for HFI debugging
   logForDebugging(
@@ -144,12 +136,9 @@ export async function getAnthropicClient({
     timeout: parseInt(process.env.API_TIMEOUT_MS || String(600 * 1000), 10),
     dangerouslyAllowBrowser: true,
     fetchOptions: getProxyFetchOptions({
-      forAnthropicAPI: true,
-    }) as ClientOptions['fetchOptions'],
+      forAnthropicAPI: true}) as ClientOptions['fetchOptions'],
     ...(resolvedFetch && {
-      fetch: resolvedFetch,
-    }),
-  }
+      fetch: resolvedFetch})}
   if (isEnvTruthy(process.env.CLAUDE_CODE_USE_BEDROCK)) {
     const { BedrockClient } = await import('./bedrockClient.js')
     // Use region override for small fast model if specified
@@ -163,10 +152,8 @@ export async function getAnthropicClient({
       ...ARGS,
       awsRegion,
       ...(isEnvTruthy(process.env.CLAUDE_CODE_SKIP_BEDROCK_AUTH) && {
-        skipAuth: true,
-      }),
-      ...(isDebugToStdErr() && { logger: createStderrLogger() }),
-    }
+        skipAuth: true}),
+      ...(isDebugToStdErr() && { logger: createStderrLogger() })}
 
     // Add API key authentication if available
     if (process.env.AWS_BEARER_TOKEN_BEDROCK) {
@@ -174,8 +161,7 @@ export async function getAnthropicClient({
       // Add the Bearer token for Bedrock API key authentication
       bedrockArgs.defaultHeaders = {
         ...(bedrockArgs.defaultHeaders as Record<string, string> | undefined),
-        Authorization: `Bearer ${process.env.AWS_BEARER_TOKEN_BEDROCK}`,
-      }
+        Authorization: `Bearer ${process.env.AWS_BEARER_TOKEN_BEDROCK}`}
     } else if (!isEnvTruthy(process.env.CLAUDE_CODE_SKIP_BEDROCK_AUTH)) {
       // Refresh auth and get credentials with cache clearing
       const cachedCredentials = await refreshAndGetAwsCredentials()
@@ -201,8 +187,7 @@ export async function getAnthropicClient({
         // Use real Azure AD authentication with DefaultAzureCredential
         const {
           DefaultAzureCredential: AzureCredential,
-          getBearerTokenProvider,
-        } = await import('@azure/identity')
+          getBearerTokenProvider} = await import('@azure/identity')
         azureADTokenProvider = getBearerTokenProvider(
           new AzureCredential(),
           'https://cognitiveservices.azure.com/.default',
@@ -213,8 +198,7 @@ export async function getAnthropicClient({
     const foundryArgs: ConstructorParameters<typeof AnthropicFoundry>[0] = {
       ...ARGS,
       ...(azureADTokenProvider && { azureADTokenProvider }),
-      ...(isDebugToStdErr() && { logger: createStderrLogger() }),
-    }
+      ...(isDebugToStdErr() && { logger: createStderrLogger() })}
     // we have always been lying about the return type - this doesn't support batching or models
     return new AnthropicFoundry(foundryArgs) as unknown as Anthropic
   }
@@ -267,9 +251,7 @@ export async function getAnthropicClient({
       ? ({
           // Mock GoogleAuth for testing/proxy scenarios
           getClient: () => ({
-            getRequestHeaders: () => ({}),
-          }),
-        } as unknown as GoogleAuth)
+            getRequestHeaders: () => ({})})} as unknown as GoogleAuth)
       : new GoogleAuth({
           scopes: ['https://www.googleapis.com/auth/cloud-platform'],
           // Only use ANTHROPIC_VERTEX_PROJECT_ID as last resort fallback
@@ -283,16 +265,13 @@ export async function getAnthropicClient({
           ...(hasProjectEnvVar || hasKeyFile
             ? {}
             : {
-                projectId: process.env.ANTHROPIC_VERTEX_PROJECT_ID,
-              }),
-        })
+                projectId: process.env.ANTHROPIC_VERTEX_PROJECT_ID})})
 
     const vertexArgs: ConstructorParameters<typeof AnthropicVertex>[0] = {
       ...ARGS,
       region: getVertexRegionForModel(model),
       googleAuth: googleAuth as any,
-      ...(isDebugToStdErr() && { logger: createStderrLogger() }),
-    }
+      ...(isDebugToStdErr() && { logger: createStderrLogger() })}
     // we have always been lying about the return type - this doesn't support batching or models
     return new AnthropicVertex(vertexArgs) as unknown as Anthropic
   }
@@ -309,8 +288,7 @@ export async function getAnthropicClient({
       ? { baseURL: getOauthConfig().BASE_API_URL }
       : {}),
     ...ARGS,
-    ...(isDebugToStdErr() && { logger: createStderrLogger() }),
-  }
+    ...(isDebugToStdErr() && { logger: createStderrLogger() })}
 
   return new Anthropic(clientConfig)
 }
@@ -320,7 +298,7 @@ async function configureApiKeyHeaders(
   isNonInteractiveSession: boolean,
 ): Promise<void> {
   const token =
-    process.env.ANTHROPIC_AUTH_TOKEN ||
+    process.env.API_KEY ||
     (await getApiKeyFromApiKeyHelper(isNonInteractiveSession))
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
@@ -364,7 +342,7 @@ function buildFetch(
   // Only send to the first-party API — Bedrock/Vertex/Foundry don't log it
   // and unknown headers risk rejection by strict proxies (inc-4029 class).
   const injectClientRequestId =
-    getAPIProvider() === 'firstParty' && isFirstPartyAnthropicBaseUrl()
+    getAPIProvider() === 'anthropic' && false
   return (input, init) => {
     // eslint-disable-next-line eslint-plugin-n/no-unsupported-features/node-builtins
     const headers = new Headers(init?.headers)

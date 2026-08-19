@@ -55,8 +55,7 @@ Guidelines:
 - For implementation: make targeted changes, run tests to verify, commit if appropriate.
 - Report back with actionable findings — the coordinator will synthesize your results.
 - If you encounter errors, investigate and attempt to fix them before reporting failure.
-- NEVER create documentation files unless explicitly instructed.`,
-}
+- NEVER create documentation files unless explicitly instructed.`}
 
 /**
  * Returns the agent definitions available in coordinator mode.

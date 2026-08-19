@@ -12,6 +12,7 @@ import { truncate } from 'src/utils/format.js';
 import { exec } from 'src/utils/Shell.js';
 import { getTaskOutputPath } from 'src/utils/task/diskOutput.js';
 import { logEvent } from 'src/services/analytics/index.js';
+import { t } from 'src/utils/i18n/index.js';
 
 const MONITOR_TOOL_NAME = 'Monitor';
 
@@ -98,23 +99,23 @@ Examples:
 
   getActivityDescription(input: MonitorInput) {
     if (!input?.description) {
-      return 'Starting monitor';
+      return t('toolUI.monitor.startingMonitor');
     }
-    return `Monitoring: ${truncate(input.description, TOOL_SUMMARY_MAX_LENGTH)}`;
+    return t('toolUI.monitor.monitoring', { desc: truncate(input.description, TOOL_SUMMARY_MAX_LENGTH) });
   },
 
   async validateInput(input: MonitorInput): Promise<ValidationResult> {
     if (!input.command || input.command.trim() === '') {
       return {
         result: false,
-        message: 'Monitor command cannot be empty.',
+        message: t('toolUI.monitor.commandCannotBeEmpty'),
         errorCode: 1,
       };
     }
     if (!input.description || input.description.trim() === '') {
       return {
         result: false,
-        message: 'Monitor description cannot be empty.',
+        message: t('toolUI.monitor.descriptionCannotBeEmpty'),
         errorCode: 2,
       };
     }
@@ -166,15 +167,15 @@ Examples:
     return {
       tool_use_id: toolUseId,
       type: 'tool_result',
-      content: `Monitor started (task ${content.taskId}). Output file: ${content.outputFile}`,
+      content: t('toolUI.monitor.started', { taskId: content.taskId, outputFile: content.outputFile }),
     };
   },
 
   renderToolResultMessage(output: MonitorOutput) {
     return (
       <Text>
-        Monitor started (task {output.taskId}). Output: {output.outputFile}
-      </Text>
+          {t('toolUI.monitor.started', { taskId: output.taskId, outputFile: output.outputFile })}
+        </Text>
     );
   },
 });

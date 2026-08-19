@@ -2,8 +2,7 @@ import { useCallback, useState } from 'react';
 import { setTeleportedSessionInfo } from 'src/bootstrap/state.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
 import type { TeleportRemoteResponse } from 'src/utils/conversationRecovery.js';
 import type { CodeSession } from 'src/utils/teleport/api.js';
 import { errorMessage, TeleportOperationError } from '../utils/errors.js';
@@ -31,8 +30,7 @@ export function useTeleportResume(source: TeleportSource) {
       // Log teleport session selection
       logEvent('tengu_teleport_resume_session', {
         source: source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        session_id: session.id as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      });
+        session_id: session.id as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
 
       try {
         const result = await teleportResumeCodeSession(session.id);
@@ -44,8 +42,7 @@ export function useTeleportResume(source: TeleportSource) {
         const teleportError: TeleportResumeError = {
           message: err instanceof TeleportOperationError ? err.message : errorMessage(err),
           formattedMessage: err instanceof TeleportOperationError ? err.formattedMessage : undefined,
-          isOperationError: err instanceof TeleportOperationError,
-        };
+          isOperationError: err instanceof TeleportOperationError};
         setError(teleportError);
         setIsResuming(false);
         return null;
@@ -63,6 +60,5 @@ export function useTeleportResume(source: TeleportSource) {
     isResuming,
     error,
     selectedSession,
-    clearError,
-  };
+    clearError};
 }

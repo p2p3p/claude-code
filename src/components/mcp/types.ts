@@ -4,8 +4,7 @@ import type {
   McpClaudeAIProxyServerConfig,
   McpHTTPServerConfig,
   McpSSEServerConfig,
-  McpStdioServerConfig,
-} from '../../services/mcp/types.js'
+  McpStdioServerConfig} from '../../services/mcp/types.js'
 
 /** `/mcp` 列表与菜单共用的服务器行基类字段。 */
 type ServerInfoBase = {

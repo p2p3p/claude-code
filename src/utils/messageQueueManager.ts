@@ -5,14 +5,12 @@ import { getSessionId } from '../bootstrap/state.js'
 import type { AppState } from '../state/AppState.js'
 import type {
   QueueOperation,
-  QueueOperationMessage,
-} from '../types/messageQueueTypes.js'
+  QueueOperationMessage} from '../types/messageQueueTypes.js'
 import type {
   EditablePromptInputMode,
   PromptInputMode,
   QueuedCommand,
-  QueuePriority,
-} from '../types/textInputTypes.js'
+  QueuePriority} from '../types/textInputTypes.js'
 import type { PastedContent } from './config.js'
 import { extractTextContent } from './messages.js'
 import { objectGroupBy } from './objectGroupBy.js'
@@ -32,8 +30,7 @@ function logOperation(operation: QueueOperation, content?: string): void {
     operation,
     timestamp: new Date().toISOString(),
     sessionId,
-    ...(content !== undefined && { content }),
-  }
+    ...(content !== undefined && { content })}
   void recordQueueOperation(queueOp)
 }
 
@@ -151,8 +148,7 @@ export function enqueuePendingNotification(command: QueuedCommand): void {
 const PRIORITY_ORDER: Record<QueuePriority, number> = {
   now: 0,
   next: 1,
-  later: 2,
-}
+  later: 2}
 
 /**
  * Remove and return the highest-priority command, or undefined if empty.
@@ -406,8 +402,7 @@ function extractImagesFromValue(
         type: 'image',
         content: block.source.data,
         mediaType: block.source.media_type,
-        filename: `image${imageIndex + 1}`,
-      })
+        filename: `image${imageIndex + 1}`})
       imageIndex++
     }
   }

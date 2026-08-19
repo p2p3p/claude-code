@@ -12,8 +12,7 @@ const DOMAIN_PREFIXES: Record<InstinctDomain, string> = {
   'code-style': 'style',
   security: 'security',
   git: 'git',
-  project: 'project',
-}
+  project: 'project'}
 
 const GENERIC_NAMES = new Set([
   'learned-skill',

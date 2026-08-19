@@ -12,8 +12,7 @@ import {
   ERROR_MESSAGE_INCOMPLETE_RESPONSE,
   ERROR_MESSAGE_NOT_ENOUGH_MESSAGES,
   ERROR_MESSAGE_USER_ABORT,
-  mergeHookInstructions,
-} from '../../services/compact/compact.js'
+  mergeHookInstructions} from '../../services/compact/compact.js'
 import { suppressCompactWarning } from '../../services/compact/compactWarningState.js'
 import { microcompactMessages } from '../../services/compact/microCompact.js'
 import { runPostCompactCleanup } from '../../services/compact/postCompactCleanup.js'
@@ -28,10 +27,10 @@ import { executePreCompactHooks } from '../../utils/hooks.js'
 import { logError } from '../../utils/log.js'
 import { getMessagesAfterCompactBoundary } from '../../utils/messages.js'
 import { getUpgradeMessage } from '../../utils/model/contextWindowUpgradeCheck.js'
+import { t } from '../../utils/i18n/index.js'
 import {
   buildEffectiveSystemPrompt,
-  type SystemPrompt,
-} from '../../utils/systemPrompt.js'
+  type SystemPrompt} from '../../utils/systemPrompt.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const reactiveCompact = feature('REACTIVE_COMPACT')
@@ -48,7 +47,7 @@ export const call: LocalCommandCall = async (args, context) => {
   messages = getMessagesAfterCompactBoundary(messages)
 
   if (messages.length === 0) {
-    throw new Error('No messages to compact')
+    throw new Error(t('compactCmd.noMessages'))
   }
 
   const customInstructions = args.trim()
@@ -81,9 +80,7 @@ export const call: LocalCommandCall = async (args, context) => {
           compactionResult: sessionMemoryResult,
           displayText: buildDisplayText(context, undefined, {
             pre: sessionMemoryResult.preCompactTokenCount,
-            post: sessionMemoryResult.truePostCompactTokenCount,
-          }),
-        }
+            post: sessionMemoryResult.truePostCompactTokenCount})}
       }
     }
 
@@ -127,19 +124,17 @@ export const call: LocalCommandCall = async (args, context) => {
       compactionResult: result,
       displayText: buildDisplayText(context, result.userDisplayMessage, {
         pre: result.preCompactTokenCount,
-        post: result.truePostCompactTokenCount,
-      }),
-    }
+        post: result.truePostCompactTokenCount})}
   } catch (error) {
     if (abortController.signal.aborted) {
-      throw new Error('Compaction canceled.')
+      throw new Error(t('compactCmd.canceled'))
     } else if (hasExactErrorMessage(error, ERROR_MESSAGE_NOT_ENOUGH_MESSAGES)) {
-      throw new Error(ERROR_MESSAGE_NOT_ENOUGH_MESSAGES)
+      throw new Error(t('compactCmd.notEnoughMessages'))
     } else if (hasExactErrorMessage(error, ERROR_MESSAGE_INCOMPLETE_RESPONSE)) {
-      throw new Error(ERROR_MESSAGE_INCOMPLETE_RESPONSE)
+      throw new Error(t('compactCmd.incompleteResponse'))
     } else {
       logError(error)
-      throw new Error(`Error during compaction: ${error}`)
+      throw new Error(t('compactCmd.errorDuring', error))
     }
   }
 }
@@ -156,8 +151,7 @@ async function compactViaReactive(
 }> {
   context.onCompactProgress?.({
     type: 'hooks_start',
-    hookType: 'pre_compact',
-  })
+    hookType: 'pre_compact'})
   context.setSDKStatus?.('compacting')
 
   try {
@@ -223,13 +217,10 @@ async function compactViaReactive(
       type: 'compact',
       compactionResult: {
         ...outcome.result!,
-        userDisplayMessage: combinedMessage,
-      },
+        userDisplayMessage: combinedMessage},
       displayText: buildDisplayText(context, combinedMessage, {
         pre: outcome.result!.preCompactTokenCount,
-        post: outcome.result!.truePostCompactTokenCount,
-      }),
-    }
+        post: outcome.result!.truePostCompactTokenCount})}
   } finally {
     context.setStreamMode?.('requesting')
     context.setResponseLength?.(() => 0)
@@ -251,17 +242,17 @@ function buildDisplayText(
   )
   const tokenLine =
     tokenCounts?.pre !== undefined && tokenCounts.post !== undefined
-      ? `Context: ~${formatTokens(tokenCounts.pre)} \u2192 ~${formatTokens(tokenCounts.post)} tokens`
+      ? t('compactCmd.contextLine', formatTokens(tokenCounts.pre), formatTokens(tokenCounts.post))
       : undefined
   const dimmed = [
     ...(context.options.verbose
       ? []
-      : [`(${expandShortcut} to see full summary)`]),
+      : [t('compactCmd.expandHint', expandShortcut)]),
     ...(tokenLine ? [tokenLine] : []),
     ...(userDisplayMessage ? [userDisplayMessage] : []),
     ...(upgradeMessage ? [upgradeMessage] : []),
   ]
-  return chalk.dim('Compacted ' + dimmed.join('\n'))
+  return chalk.dim(t('compactCmd.prefix') + dimmed.join('\n'))
 }
 
 async function getCacheSharingParams(
@@ -288,8 +279,7 @@ async function getCacheSharingParams(
     toolUseContext: context,
     customSystemPrompt: context.options.customSystemPrompt,
     defaultSystemPrompt: defaultSysPrompt,
-    appendSystemPrompt: context.options.appendSystemPrompt,
-  })
+    appendSystemPrompt: context.options.appendSystemPrompt})
   const [userContext, systemContext] = await Promise.all([
     getUserContext(),
     getSystemContext(),
@@ -299,6 +289,5 @@ async function getCacheSharingParams(
     userContext,
     systemContext,
     toolUseContext: context,
-    forkContextMessages,
-  }
+    forkContextMessages}
 }

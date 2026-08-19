@@ -266,8 +266,7 @@ export class SSETransport implements Transport {
       ...authHeaders,
       Accept: 'text/event-stream',
       'anthropic-version': '2023-06-01',
-      'User-Agent': getClaudeCodeUserAgent(),
-    }
+      'User-Agent': getClaudeCodeUserAgent()}
     if (authHeaders['Cookie']) {
       delete headers['Authorization']
     }
@@ -284,8 +283,7 @@ export class SSETransport implements Transport {
       // eslint-disable-next-line eslint-plugin-n/no-unsupported-features/node-builtins
       const response = await fetch(sseUrl.href, {
         headers,
-        signal: this.abortController.signal,
-      })
+        signal: this.abortController.signal})
 
       if (!response.ok) {
         const isPermanent = PERMANENT_HTTP_CODES.has(response.status)
@@ -294,8 +292,7 @@ export class SSETransport implements Transport {
           { level: 'error' },
         )
         logForDiagnosticsNoPII('error', 'cli_sse_connect_http_error', {
-          status: response.status,
-        })
+          status: response.status})
 
         if (isPermanent) {
           this.state = 'closed'
@@ -317,8 +314,7 @@ export class SSETransport implements Transport {
       const connectDuration = Date.now() - connectStartTime
       logForDebugging('SSETransport: Connected')
       logForDiagnosticsNoPII('info', 'cli_sse_connect_connected', {
-        duration_ms: connectDuration,
-      })
+        duration_ms: connectDuration})
 
       this.state = 'connected'
       this.reconnectAttempts = 0
@@ -448,8 +444,7 @@ export class SSETransport implements Transport {
         { level: 'warn' },
       )
       logForDiagnosticsNoPII('warn', 'cli_sse_unexpected_event_type', {
-        event_type: eventType,
-      })
+        event_type: eventType})
       return
     }
 
@@ -538,8 +533,7 @@ export class SSETransport implements Transport {
         `SSETransport: Reconnecting in ${Math.round(delay)}ms (attempt ${this.reconnectAttempts}, ${Math.round(elapsed / 1000)}s elapsed)`,
       )
       logForDiagnosticsNoPII('error', 'cli_sse_reconnect_attempt', {
-        reconnectAttempts: this.reconnectAttempts,
-      })
+        reconnectAttempts: this.reconnectAttempts})
 
       this.reconnectTimer = setTimeout(() => {
         this.reconnectTimer = null
@@ -552,8 +546,7 @@ export class SSETransport implements Transport {
       )
       logForDiagnosticsNoPII('error', 'cli_sse_reconnect_exhausted', {
         reconnectAttempts: this.reconnectAttempts,
-        elapsedMs: elapsed,
-      })
+        elapsedMs: elapsed})
       this.state = 'closed'
       this.onCloseCallback?.()
     }
@@ -572,8 +565,7 @@ export class SSETransport implements Transport {
         ` state=${this.state}`,
     )
     logForDebugging('SSETransport: Liveness timeout, reconnecting', {
-      level: 'error',
-    })
+      level: 'error'})
     logForDiagnosticsNoPII('error', 'cli_sse_liveness_timeout')
     this.abortController?.abort()
     this.handleConnectionError()
@@ -611,8 +603,7 @@ export class SSETransport implements Transport {
       ...authHeaders,
       'Content-Type': 'application/json',
       'anthropic-version': '2023-06-01',
-      'User-Agent': getClaudeCodeUserAgent(),
-    }
+      'User-Agent': getClaudeCodeUserAgent()}
 
     logForDebugging(
       `SSETransport: POST body keys=${Object.keys(message as Record<string, unknown>).join(',')}`,
@@ -622,8 +613,7 @@ export class SSETransport implements Transport {
       try {
         const response = await axios.post(this.postUrl, message, {
           headers,
-          validateStatus: alwaysValidStatus,
-        })
+          validateStatus: alwaysValidStatus})
 
         if (response.status === 200 || response.status === 201) {
           logForDebugging(`SSETransport: POST success type=${message.type}`)
@@ -643,8 +633,7 @@ export class SSETransport implements Transport {
             `SSETransport: POST returned ${response.status} (client error), not retrying`,
           )
           logForDiagnosticsNoPII('warn', 'cli_sse_post_client_error', {
-            status: response.status,
-          })
+            status: response.status})
           return
         }
 
@@ -654,16 +643,14 @@ export class SSETransport implements Transport {
         )
         logForDiagnosticsNoPII('warn', 'cli_sse_post_retryable_error', {
           status: response.status,
-          attempt,
-        })
+          attempt})
       } catch (error) {
         const axiosError = error as AxiosError
         logForDebugging(
           `SSETransport: POST error: ${axiosError.message}, attempt ${attempt}/${POST_MAX_RETRIES}`,
         )
         logForDiagnosticsNoPII('warn', 'cli_sse_post_network_error', {
-          attempt,
-        })
+          attempt})
       }
 
       if (attempt === POST_MAX_RETRIES) {

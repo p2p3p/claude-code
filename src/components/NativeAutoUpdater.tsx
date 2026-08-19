@@ -5,6 +5,7 @@ import { logForDebugging } from 'src/utils/debug.js';
 import { logError } from 'src/utils/log.js';
 import { useInterval } from 'usehooks-ts';
 import { useUpdateNotification } from '../hooks/useUpdateNotification.js';
+import { t } from '../utils/i18n/index.js';
 import { Box, Text } from '@anthropic/ink';
 import type { AutoUpdaterResult } from '../utils/autoUpdater.js';
 import { getMaxVersion, getMaxVersionMessage } from '../utils/autoUpdater.js';
@@ -56,8 +57,7 @@ export function NativeAutoUpdater({
   onAutoUpdaterResult,
   autoUpdaterResult,
   showSuccessMessage,
-  verbose,
-}: Props): React.ReactNode {
+  verbose}: Props): React.ReactNode {
   const [versions, setVersions] = useState<{
     current?: string | null;
     latest?: string | null;
@@ -98,7 +98,7 @@ export function NativeAutoUpdater({
       const maxVersion = await getMaxVersion();
       if (maxVersion && gt(MACRO.VERSION, maxVersion)) {
         const msg = await getMaxVersionMessage();
-        setMaxVersionIssue(msg ?? 'affects your version');
+        setMaxVersionIssue(msg ?? t('autoupdater.affectsYourVersion'));
       }
 
       const result = await installLatest(channel);
@@ -108,8 +108,7 @@ export function NativeAutoUpdater({
       // Handle lock contention gracefully - just return without treating as error
       if (result.lockFailed) {
         logEvent('tengu_native_auto_updater_lock_contention', {
-          latency_ms: latencyMs,
-        });
+          latency_ms: latencyMs});
         return; // Silently skip this update check, will try again later
       }
 
@@ -118,18 +117,15 @@ export function NativeAutoUpdater({
 
       if (result.wasUpdated) {
         logEvent('tengu_native_auto_updater_success', {
-          latency_ms: latencyMs,
-        });
+          latency_ms: latencyMs});
 
         onAutoUpdaterResult({
           version: result.latestVersion,
-          status: 'success',
-        });
+          status: 'success'});
       } else {
         // Already up to date
         logEvent('tengu_native_auto_updater_up_to_date', {
-          latency_ms: latencyMs,
-        });
+          latency_ms: latencyMs});
       }
     } catch (error) {
       const latencyMs = Date.now() - startTime;
@@ -145,13 +141,11 @@ export function NativeAutoUpdater({
         error_permission: errorType === 'permission_denied',
         error_disk_full: errorType === 'disk_full',
         error_npm: errorType === 'npm_error',
-        error_network: errorType === 'network_error',
-      });
+        error_network: errorType === 'network_error'});
 
       onAutoUpdaterResult({
         version: null,
-        status: 'install_failed',
-      });
+        status: 'install_failed'});
     } finally {
       onChangeIsUpdating(false);
     }
@@ -191,7 +185,7 @@ export function NativeAutoUpdater({
       {isUpdating ? (
         <Box>
           <Text dimColor wrap="truncate">
-            Checking for updates
+            {t('autoupdater.checkingForUpdates')}
           </Text>
         </Box>
       ) : (
@@ -199,18 +193,18 @@ export function NativeAutoUpdater({
         showSuccessMessage &&
         updateSemver && (
           <Text color="success" wrap="truncate">
-            ✓ Update installed · Restart to update
+            {t('autoupdater.updateInstalledRestartToUpdate')}
           </Text>
         )
       )}
       {autoUpdaterResult?.status === 'install_failed' && (
         <Text color="error" wrap="truncate">
-          ✗ Auto-update failed &middot; Try <Text bold>/status</Text>
+          {t('autoupdater.updateFailedStatus')}
         </Text>
       )}
       {maxVersionIssue && process.env.USER_TYPE === 'ant' && (
         <Text color="warning">
-          ⚠ Known issue: {maxVersionIssue} &middot; Run <Text bold>claude rollback --safe</Text> to downgrade
+          {t('autoupdater.knownIssue', maxVersionIssue)}
         </Text>
       )}
     </Box>

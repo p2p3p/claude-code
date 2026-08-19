@@ -27,8 +27,7 @@ export function BashModeProgress({ input, progress, verbose }: Props): React.Rea
         BashTool.renderToolUseProgressMessage?.([], {
           verbose,
           tools: [],
-          terminalSize: undefined,
-        })
+          terminalSize: undefined})
       )}
     </Box>
   );

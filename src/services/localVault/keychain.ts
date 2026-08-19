@@ -129,5 +129,4 @@ export const tryKeychain = {
     const existing = await this.list()
     const updated = existing.filter(k => k !== account)
     indexEntry.setPassword(JSON.stringify(updated))
-  },
-}
+  }}

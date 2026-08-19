@@ -31,8 +31,7 @@ import logout from './commands/logout/index.js'
 import installGitHubApp from './commands/install-github-app/index.js'
 import installSlackApp from './commands/install-slack-app/index.js'
 import breakCache, {
-  breakCacheNonInteractive,
-} from './commands/break-cache/index.js'
+  breakCacheNonInteractive} from './commands/break-cache/index.js'
 import mcp from './commands/mcp/index.js'
 import mobile from './commands/mobile/index.js'
 import onboarding from './commands/onboarding/index.js'
@@ -194,8 +193,7 @@ import skillLearning from './commands/skill-learning/index.js'
 import skillSearch from './commands/skill-search/index.js'
 import {
   resetLimits,
-  resetLimitsNonInteractive,
-} from './commands/reset-limits/index.js'
+  resetLimitsNonInteractive} from './commands/reset-limits/index.js'
 import antTrace from './commands/ant-trace/index.js'
 import perfIssue from './commands/perf-issue/index.js'
 import sandboxToggle from './commands/sandbox-toggle/index.js'
@@ -211,23 +209,18 @@ import { logForDebugging } from './utils/debug.js'
 import {
   getSkillDirCommands,
   clearSkillCaches,
-  getDynamicSkills,
-} from './skills/loadSkillsDir.js'
+  getDynamicSkills} from './skills/loadSkillsDir.js'
 import { getBundledSkills } from './skills/bundledSkills.js'
 import { getBuiltinPluginSkillCommands } from './plugins/builtinPlugins.js'
 import {
   getPluginCommands,
   clearPluginCommandCache,
   getPluginSkills,
-  clearPluginSkillsCache,
-} from './utils/plugins/loadPluginCommands.js'
+  clearPluginSkillsCache} from './utils/plugins/loadPluginCommands.js'
 import memoize from 'lodash-es/memoize.js'
 import { isUsing3PServices, isClaudeAISubscriber } from './utils/auth.js'
 import {
-  getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
-  isThirdPartyAPIProvider,
-} from './utils/model/providers.js'
+  getAPIProvider} from './utils/model/providers.js'
 import env from './commands/env/index.js'
 import exit from './commands/exit/index.js'
 import exportCommand from './commands/export/index.js'
@@ -238,8 +231,7 @@ import remoteEnv from './commands/remote-env/index.js'
 import upgrade from './commands/upgrade/index.js'
 import {
   extraUsage,
-  extraUsageNonInteractive,
-} from './commands/extra-usage/index.js'
+  extraUsageNonInteractive} from './commands/extra-usage/index.js'
 import rateLimitOptions from './commands/rate-limit-options/index.js'
 import statusline from './commands/statusline.js'
 import effort from './commands/effort/index.js'
@@ -249,7 +241,7 @@ import effort from './commands/effort/index.js'
 const usageReport: Command = {
   type: 'prompt',
   name: 'insights',
-  description: 'Generate a report analyzing your Claude Code sessions',
+  description: t('insightsCmd.generateReport'),
   contentLength: 0,
   progressMessage: 'analyzing your sessions',
   source: 'builtin',
@@ -257,16 +249,15 @@ const usageReport: Command = {
     const real = (await import('./commands/insights.js')).default
     if (real.type !== 'prompt') throw new Error('unreachable')
     return real.getPromptForCommand(args, context)
-  },
-}
+  }}
 import oauthRefresh from './commands/oauth-refresh/index.js'
 import debugToolCall from './commands/debug-tool-call/index.js'
+import { t } from './utils/i18n/index.js'
 import { getSettingSourceName } from './utils/settings/constants.js'
 import {
   type Command,
   getCommandName,
-  isCommandEnabled,
-} from './types/command.js'
+  isCommandEnabled} from './types/command.js'
 
 // Re-export types from the centralized location
 export type {
@@ -276,8 +267,7 @@ export type {
   LocalCommandResult,
   LocalJSXCommandContext,
   PromptCommand,
-  ResumeEntrypoint,
-} from './types/command.js'
+  ResumeEntrypoint} from './types/command.js'
 export { getCommandName, isCommandEnabled } from './types/command.js'
 
 // Commands that get eliminated from the external build
@@ -473,8 +463,7 @@ async function getSkills(cwd: string): Promise<{
       skillDirCommands,
       pluginSkills,
       bundledSkills,
-      builtinPluginSkills,
-    }
+      builtinPluginSkills}
   } catch (err) {
     // This should never happen since we catch at the Promise level, but defensive
     logError(toError(err))
@@ -483,8 +472,7 @@ async function getSkills(cwd: string): Promise<{
       skillDirCommands: [],
       pluginSkills: [],
       bundledSkills: [],
-      builtinPluginSkills: [],
-    }
+      builtinPluginSkills: []}
   }
 }
 
@@ -518,8 +506,8 @@ export function meetsAvailabilityRequirement(cmd: Command): boolean {
         // plus gateway users who proxy through a custom base URL.
         if (
           !isClaudeAISubscriber() &&
-          !isThirdPartyAPIProvider(getAPIProvider()) &&
-          isFirstPartyAnthropicBaseUrl()
+          !getAPIProvider() !== 'anthropic' &&
+          false
         )
           return true
         break
@@ -826,29 +814,33 @@ export function getCommand(commandName: string, commands: Command[]): Command {
  * For model-facing prompts (like SkillTool), use cmd.description directly.
  */
 export function formatDescriptionWithSource(cmd: Command): string {
+  const cmdKey = 'cmd.' + cmd.name
+  const translated = t(cmdKey)
+  const desc = translated === cmdKey ? cmd.description : translated
+
   if (cmd.type !== 'prompt') {
-    return cmd.description
+    return desc
   }
 
   if (cmd.kind === 'workflow') {
-    return `${cmd.description} (workflow)`
+    return `${desc} (workflow)`
   }
 
   if (cmd.source === 'plugin') {
     const pluginName = cmd.pluginInfo?.pluginManifest.name
     if (pluginName) {
-      return `(${pluginName}) ${cmd.description}`
+      return `(${pluginName}) ${desc}`
     }
-    return `${cmd.description} (plugin)`
+    return `${desc} (plugin)`
   }
 
   if (cmd.source === 'builtin' || cmd.source === 'mcp') {
-    return cmd.description
+    return desc
   }
 
   if (cmd.source === 'bundled') {
-    return `${cmd.description} (bundled)`
+    return `${desc} (bundled)`
   }
 
-  return `${cmd.description} (${getSettingSourceName(cmd.source)})`
+  return `${desc} (${getSettingSourceName(cmd.source)})`
 }

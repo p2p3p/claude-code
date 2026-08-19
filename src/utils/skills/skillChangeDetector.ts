@@ -3,17 +3,14 @@ import * as platformPath from 'path'
 import { getAdditionalDirectoriesForClaudeMd } from '../../bootstrap/state.js'
 import {
   clearCommandMemoizationCaches,
-  clearCommandsCache,
-} from '../../commands.js'
+  clearCommandsCache} from '../../commands.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import {
   clearSkillCaches,
   getSkillsPath,
-  onDynamicSkillsLoaded,
-} from '../../skills/loadSkillsDir.js'
+  onDynamicSkillsLoaded} from '../../skills/loadSkillsDir.js'
 import { resetSentSkillNames } from '../attachments.js'
 import { registerCleanup } from '../cleanupRegistry.js'
 import { logForDebugging } from '../debug.js'
@@ -115,8 +112,7 @@ export async function initialize(): Promise<void> {
       stabilityThreshold:
         testOverrides?.stabilityThreshold ?? FILE_STABILITY_THRESHOLD_MS,
       pollInterval:
-        testOverrides?.pollInterval ?? FILE_STABILITY_POLL_INTERVAL_MS,
-    },
+        testOverrides?.pollInterval ?? FILE_STABILITY_POLL_INTERVAL_MS},
     // Ignore special file types (sockets, FIFOs, devices) - they cannot be watched
     // and will error with EOPNOTSUPP on macOS. Only allow regular files and directories.
     ignored: (path, stats) => {
@@ -127,8 +123,7 @@ export async function initialize(): Promise<void> {
     ignorePermissionErrors: true,
     usePolling: USE_POLLING,
     interval: testOverrides?.chokidarInterval ?? POLLING_INTERVAL_MS,
-    atomic: true,
-  })
+    atomic: true})
 
   watcher.on('add', handleChange)
   watcher.on('change', handleChange)
@@ -238,8 +233,7 @@ function handleChange(path: string): void {
   logForDebugging(`Detected skill change: ${path}`)
   logEvent('tengu_skill_file_changed', {
     source:
-      'chokidar' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      'chokidar' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
   scheduleReload(path)
 }
@@ -307,5 +301,4 @@ export const skillChangeDetector = {
   initialize,
   dispose,
   subscribe,
-  resetForTesting,
-}
+  resetForTesting}

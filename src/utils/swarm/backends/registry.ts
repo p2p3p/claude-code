@@ -9,8 +9,7 @@ import {
   isInsideTmuxSync,
   isIt2CliAvailable,
   isTmuxAvailable,
-  isWindowsTerminalAvailable,
-} from './detection.js'
+  isWindowsTerminalAvailable} from './detection.js'
 import { createInProcessBackend } from './InProcessBackend.js'
 import { getPreferTmuxOverIterm2 } from './it2Setup.js'
 import { createPaneBackendExecutor } from './PaneBackendExecutor.js'
@@ -19,8 +18,7 @@ import type {
   BackendDetectionResult,
   PaneBackend,
   PaneBackendType,
-  TeammateExecutor,
-} from './types.js'
+  TeammateExecutor} from './types.js'
 
 /**
  * Cached backend detection result.
@@ -195,8 +193,7 @@ export async function detectAndGetBackend(): Promise<BackendDetectionResult> {
     cachedDetectionResult = {
       backend,
       isNative: inWindowsTerminal,
-      needsIt2Setup: false,
-    }
+      needsIt2Setup: false}
     return cachedDetectionResult
   }
 
@@ -210,8 +207,7 @@ export async function detectAndGetBackend(): Promise<BackendDetectionResult> {
     cachedDetectionResult = {
       backend,
       isNative: true,
-      needsIt2Setup: false,
-    }
+      needsIt2Setup: false}
     return cachedDetectionResult
   }
 
@@ -238,8 +234,7 @@ export async function detectAndGetBackend(): Promise<BackendDetectionResult> {
         cachedDetectionResult = {
           backend,
           isNative: true,
-          needsIt2Setup: false,
-        }
+          needsIt2Setup: false}
         return cachedDetectionResult
       }
     }
@@ -261,8 +256,7 @@ export async function detectAndGetBackend(): Promise<BackendDetectionResult> {
       cachedDetectionResult = {
         backend,
         isNative: false,
-        needsIt2Setup: !preferTmux,
-      }
+        needsIt2Setup: !preferTmux}
       return cachedDetectionResult
     }
 
@@ -292,8 +286,7 @@ export async function detectAndGetBackend(): Promise<BackendDetectionResult> {
       cachedDetectionResult = {
         backend,
         isNative: true,
-        needsIt2Setup: false,
-      }
+        needsIt2Setup: false}
       return cachedDetectionResult
     }
   }
@@ -311,8 +304,7 @@ export async function detectAndGetBackend(): Promise<BackendDetectionResult> {
     cachedDetectionResult = {
       backend,
       isNative: false,
-      needsIt2Setup: false,
-    }
+      needsIt2Setup: false}
     return cachedDetectionResult
   }
 

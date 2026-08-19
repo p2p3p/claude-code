@@ -1,5 +1,6 @@
 import { existsSync } from 'fs'
 import { resolve } from 'path'
+import { t } from '../utils/i18n/index.js'
 import { logForDebugging } from 'src/utils/debug.js'
 
 const SSH_TIMEOUT_MS = 60_000
@@ -22,8 +23,7 @@ async function runSshCommand(
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
   const proc = Bun.spawn(['ssh', '-o', 'ConnectTimeout=10', host, command], {
     stdout: 'pipe',
-    stderr: 'pipe',
-  })
+    stderr: 'pipe'})
 
   const timer = setTimeout(() => proc.kill(), timeoutMs)
 
@@ -47,18 +47,14 @@ function findLocalBinary(): string {
   const devPath = resolve(projectRoot, 'src/entrypoints/cli.tsx')
   if (existsSync(devPath)) return devPath
 
-  throw new Error(
-    'Cannot find local CLI binary to deploy. Run `bun run build` first.',
-  )
+  throw new Error(t('sshDeploy.cannotFindBinary'))
 }
 
 export async function deployBinary(options: DeployOptions): Promise<string> {
   const { host, remotePlatform, remoteArch, localVersion, onProgress } = options
 
   if (remotePlatform !== 'linux' && remotePlatform !== 'darwin') {
-    throw new Error(
-      `Remote platform "${remotePlatform}" is not supported. Only linux and darwin are supported.`,
-    )
+    throw new Error(t('sshDeploy.unsupportedPlatform', remotePlatform))
   }
 
   logForDebugging(
@@ -71,7 +67,7 @@ export async function deployBinary(options: DeployOptions): Promise<string> {
   onProgress?.('Creating remote directory...')
   const mkdirResult = await runSshCommand(host, `mkdir -p ${REMOTE_BIN_DIR}`)
   if (mkdirResult.exitCode !== 0) {
-    throw new Error(`Failed to create remote directory: ${mkdirResult.stderr}`)
+    throw new Error(t('sshDeploy.mkdirFailed', mkdirResult.stderr))
   }
 
   onProgress?.('Uploading binary...')
@@ -86,7 +82,7 @@ export async function deployBinary(options: DeployOptions): Promise<string> {
   clearTimeout(scpTimer)
 
   if (scpExit !== 0) {
-    throw new Error(`SCP upload failed (exit ${scpExit}): ${scpStderr.trim()}`)
+    throw new Error(t('sshDeploy.scpFailed', String(scpExit), scpStderr.trim()))
   }
 
   onProgress?.('Installing wrapper script...')
@@ -100,7 +96,7 @@ export async function deployBinary(options: DeployOptions): Promise<string> {
 
   const wrapperResult = await runSshCommand(host, wrapperScript)
   if (wrapperResult.exitCode !== 0) {
-    throw new Error(`Failed to install wrapper script: ${wrapperResult.stderr}`)
+    throw new Error(t('sshDeploy.wrapperFailed', wrapperResult.stderr))
   }
 
   onProgress?.('Verifying installation...')
@@ -109,9 +105,7 @@ export async function deployBinary(options: DeployOptions): Promise<string> {
     `${REMOTE_BIN_DIR}/${REMOTE_WRAPPER} --version`,
   )
   if (verifyResult.exitCode !== 0) {
-    throw new Error(
-      `Binary deployed but verification failed (exit ${verifyResult.exitCode}): ${verifyResult.stderr}`,
-    )
+    throw new Error(t('sshDeploy.verifyFailed', String(verifyResult.exitCode), verifyResult.stderr))
   }
 
   logForDebugging(

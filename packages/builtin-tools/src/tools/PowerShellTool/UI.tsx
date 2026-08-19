@@ -11,6 +11,7 @@ import type { Tool } from 'src/Tool.js';
 import type { ProgressMessage } from 'src/types/message.js';
 import type { PowerShellProgress } from 'src/types/tools.js';
 import type { ThemeName } from 'src/utils/theme.js';
+import { t } from 'src/utils/i18n/index.js';
 import type { Out, PowerShellToolInput } from './PowerShellTool.js';
 
 // Constants for command display
@@ -70,7 +71,7 @@ export function renderToolUseProgressMessage(
   if (!lastProgress || !lastProgress.data) {
     return (
       <MessageResponse height={1}>
-        <Text dimColor>Running…</Text>
+        <Text dimColor>{t('toolUI.powerShell.running')}</Text>
       </MessageResponse>
     );
   }
@@ -94,7 +95,7 @@ export function renderToolUseProgressMessage(
 export function renderToolUseQueuedMessage(): React.ReactNode {
   return (
     <MessageResponse height={1}>
-      <Text dimColor>Waiting…</Text>
+      <Text dimColor>{t('toolUI.powerShell.waiting')}</Text>
     </MessageResponse>
   );
 }
@@ -121,7 +122,7 @@ export function renderToolResultMessage(
   if (isImage) {
     return (
       <MessageResponse height={1}>
-        <Text dimColor>[Image data detected and sent to Claude]</Text>
+        <Text dimColor>{t('toolUI.powerShell.imageDetected')}</Text>
       </MessageResponse>
     );
   }
@@ -135,12 +136,13 @@ export function renderToolResultMessage(
           <Text dimColor>
             {backgroundTaskId ? (
               <>
-                Running in the background <KeyboardShortcutHint shortcut="↓" action="manage" parens />
+                {t('toolUI.powerShell.runningInBackground')}
+                <KeyboardShortcutHint shortcut="↓" action="manage" parens />
               </>
             ) : interrupted ? (
-              'Interrupted'
+              t('toolUI.powerShell.interrupted')
             ) : (
-              returnCodeInterpretation || '(No output)'
+              returnCodeInterpretation || t('toolUI.powerShell.noOutput')
             )}
           </Text>
         </MessageResponse>

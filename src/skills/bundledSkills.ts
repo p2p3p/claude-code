@@ -94,8 +94,7 @@ export function registerBundledSkill(definition: BundledSkillDefinition): void {
     isEnabled: definition.isEnabled,
     isHidden: !(definition.userInvocable ?? true),
     progressMessage: 'running',
-    getPromptForCommand,
-  }
+    getPromptForCommand}
   bundledSkills.push(command)
 }
 

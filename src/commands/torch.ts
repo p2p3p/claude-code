@@ -1,9 +1,10 @@
 import type { Command, LocalJSXCommandOnDone } from '../types/command.js'
 import type { ReactNode } from 'react'
+import { t } from '../utils/i18n/index.js'
 
 const call = async (onDone: LocalJSXCommandOnDone): Promise<ReactNode> => {
   onDone(
-    'torch: Reserved internal debug command. No implementation is available in this build.',
+    t('torchCmd.noImpl'),
     { display: 'system' },
   )
   return null
@@ -12,8 +13,7 @@ const call = async (onDone: LocalJSXCommandOnDone): Promise<ReactNode> => {
 export default {
   type: 'local-jsx',
   name: 'torch',
-  description: '[INTERNAL] Development debug command (reserved)',
+  description: t('torchCmd.internalDevDebug'),
   isEnabled: () => true,
   isHidden: true,
-  load: () => Promise.resolve({ call }),
-} satisfies Command
+  load: () => Promise.resolve({ call })} satisfies Command

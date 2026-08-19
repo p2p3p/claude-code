@@ -24,8 +24,7 @@ import {
   createCipheriv,
   createDecipheriv,
   randomBytes,
-  scryptSync,
-} from 'node:crypto'
+  scryptSync} from 'node:crypto'
 import {
   readFileSync,
   writeFileSync,
@@ -33,11 +32,11 @@ import {
   mkdirSync,
   chmodSync,
   renameSync,
-  rmSync,
-} from 'node:fs'
+  rmSync} from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { t } from '../../utils/i18n/index.js'
 import { logError } from '../../utils/log.js'
 import { KeychainUnavailableError, tryKeychain } from './keychain.js'
 
@@ -60,22 +59,14 @@ const SCRYPT_PARAMS: Parameters<typeof scryptSync>[3] = { N: 16384, r: 8, p: 1 }
 
 export class LocalVaultDecryptionError extends Error {
   constructor(reason: string) {
-    super(
-      `LocalVault decryption failed: ${reason}. ` +
-        'Restore from your backup of ~/.claude/.local-vault-passphrase, ' +
-        'or delete ~/.claude/local-vault.enc.json to reset (DESTROYS ALL SECRETS).',
-    )
+    super(t('localVault.decryptionError', reason))
     this.name = 'LocalVaultDecryptionError'
   }
 }
 
 export class LocalVaultValueTooLargeError extends Error {
   constructor(byteLength: number) {
-    super(
-      `LocalVault: secret value is too large (${byteLength} bytes). ` +
-        `Maximum allowed is ${MAX_SECRET_BYTES} bytes (${MAX_SECRET_BYTES / 1024} KB). ` +
-        'Use external storage for large data.',
-    )
+    super(t('localVault.valueTooLarge', String(byteLength), String(MAX_SECRET_BYTES)))
     this.name = 'LocalVaultValueTooLargeError'
   }
 }
@@ -138,8 +129,7 @@ async function getOrCreatePassphrase(): Promise<string> {
     writeFileSync(passphraseFile, generated, {
       encoding: 'utf8',
       mode: 0o600,
-      flag: 'wx',
-    })
+      flag: 'wx'})
   } catch (err: unknown) {
     const code = (err as NodeJS.ErrnoException).code
     if (code === 'EEXIST') {
@@ -212,8 +202,7 @@ function encrypt(
   return {
     iv: iv.toString('hex'),
     tag: tag.toString('hex'),
-    data: encrypted.toString('hex'),
-  }
+    data: encrypted.toString('hex')}
 }
 
 function decrypt(
@@ -229,11 +218,11 @@ function decrypt(
     tag = Buffer.from(record.tag, 'hex')
     data = Buffer.from(record.data, 'hex')
   } catch {
-    throw new LocalVaultDecryptionError('corrupted record encoding')
+    throw new LocalVaultDecryptionError(t('localVault.corruptedRecordEncoding'))
   }
 
   if (iv.length !== IV_BYTES || tag.length !== TAG_BYTES) {
-    throw new LocalVaultDecryptionError('invalid IV or tag length')
+    throw new LocalVaultDecryptionError(t('localVault.invalidIvOrTagLength'))
   }
 
   const decipher = createDecipheriv(ALGORITHM, key, iv)
@@ -245,9 +234,7 @@ function decrypt(
     decrypted = Buffer.concat([decipher.update(data), decipher.final()])
   } catch {
     // Do not leak partial decrypted bytes
-    throw new LocalVaultDecryptionError(
-      'authentication tag mismatch — wrong passphrase or tampered data',
-    )
+    throw new LocalVaultDecryptionError(t('localVault.authTagMismatch'))
   }
   // H3 fix (codecov-100 audit): use a fatal TextDecoder so invalid UTF-8
   // surfaces as a thrown error instead of being silently replaced with
@@ -260,9 +247,7 @@ function decrypt(
   try {
     return new TextDecoder('utf-8', { fatal: true }).decode(decrypted)
   } catch {
-    throw new LocalVaultDecryptionError(
-      'decrypted payload is not valid UTF-8 — vault record may be corrupted',
-    )
+    throw new LocalVaultDecryptionError(t('localVault.notValidUtf8'))
   }
 }
 
@@ -285,14 +270,10 @@ async function readVaultFile(): Promise<VaultFile> {
   try {
     parsed = JSON.parse(raw)
   } catch {
-    throw new LocalVaultDecryptionError(
-      'vault file is corrupt (invalid JSON) — restore from backup',
-    )
+    throw new LocalVaultDecryptionError(t('localVault.corruptJson'))
   }
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-    throw new LocalVaultDecryptionError(
-      'vault file has unexpected format — restore from backup',
-    )
+    throw new LocalVaultDecryptionError(t('localVault.unexpectedFormat'))
   }
   return parsed as VaultFile
 }
@@ -341,7 +322,7 @@ async function getOrCreateSalt(vaultData: VaultFile): Promise<Buffer> {
 // ── Public API ────────────────────────────────────────────────────────────────
 
 export async function setSecret(key: string, value: string): Promise<void> {
-  if (!key) throw new Error('key must not be empty')
+  if (!key) throw new Error(t('localVault.keyEmpty'))
 
   // D1: Guard against unbounded value sizes
   const byteLength = Buffer.byteLength(value, 'utf8')
@@ -405,10 +386,7 @@ export async function getSecret(key: string): Promise<string | null> {
   // The new AAD binding also means old records will fail authentication.
   // Instruct user to re-set secrets encrypted under the old format.
   if (typeof vaultData['_salt'] !== 'string') {
-    throw new LocalVaultDecryptionError(
-      'vault was created with an older format (no KDF salt). ' +
-        'Please re-set your secrets using /local-vault set to upgrade to the secure format',
-    )
+    throw new LocalVaultDecryptionError(t('localVault.oldFormat'))
   }
 
   const passphrase = await getOrCreatePassphrase()

@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import type { Tools } from '../../../../Tool.js';
 import { Byline, KeyboardShortcutHint } from '@anthropic/ink';
+import { t } from '../../../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
@@ -25,12 +26,12 @@ export function ToolsStep({ tools }: Props): ReactNode {
 
   return (
     <WizardDialogLayout
-      subtitle="Select tools"
+      subtitle={t('toolsstep.selectTools')}
       footerText={
         <Byline>
-          <KeyboardShortcutHint shortcut="Enter" action="toggle selection" />
-          <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
-          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="go back" />
+          <KeyboardShortcutHint shortcut="Enter" action={t('shortcutHint.toggleSelection')} />
+          <KeyboardShortcutHint shortcut="↑↓" action={t('shortcutHint.navigate')} />
+          <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.goBack')} />
         </Byline>
       }
     >

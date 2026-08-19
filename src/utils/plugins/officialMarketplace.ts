@@ -14,8 +14,7 @@ import type { MarketplaceSource } from './schemas.js'
  */
 export const OFFICIAL_MARKETPLACE_SOURCE = {
   source: 'github',
-  repo: 'anthropics/claude-plugins-official',
-} as const satisfies MarketplaceSource
+  repo: 'anthropics/claude-plugins-official'} as const satisfies MarketplaceSource
 
 /**
  * Display name for the official marketplace.

@@ -3,6 +3,7 @@ import { isClaudeAISubscriber } from 'src/utils/auth.js';
 import { Text } from '@anthropic/ink';
 import { logEvent } from '../../services/analytics/index.js';
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js';
+import { t } from '../../utils/i18n/index.js';
 import { useStartupNotification } from './useStartupNotification.js';
 
 const MAX_SHOW_COUNT = 3;
@@ -20,23 +21,20 @@ export function useCanSwitchToExistingSubscription(): void {
 
     saveGlobalConfig(current => ({
       ...current,
-      subscriptionNoticeCount: (current.subscriptionNoticeCount ?? 0) + 1,
-    }));
+      subscriptionNoticeCount: (current.subscriptionNoticeCount ?? 0) + 1}));
     logEvent('tengu_switch_to_subscription_notice_shown', {});
 
     return {
       key: 'switch-to-subscription',
       jsx: (
         <Text color="suggestion">
-          Use your existing Claude {subscriptionType} plan with Claude Code
+          {t('notif.switchSub.useExistingPlan', { subscriptionType })}
           <Text color="text" dimColor>
-            {' '}
-            · /login to activate
+            {t('notif.switchSub.loginToActivate')}
           </Text>
         </Text>
       ),
-      priority: 'low',
-    };
+      priority: 'low'};
   });
 }
 

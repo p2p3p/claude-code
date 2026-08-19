@@ -112,8 +112,7 @@ export function truncateContent(
     content:
       content.slice(0, maxSize) +
       '\n\n[TRUNCATED - Content exceeds 60KB limit]',
-    truncated: true,
-  }
+    truncated: true}
 }
 
 /**
@@ -235,9 +234,7 @@ export function addBetaInteractionAttributes(
     new_context: truncatedPrompt,
     ...(truncated && {
       new_context_truncated: true,
-      new_context_original_length: userPrompt.length,
-    }),
-  })
+      new_context_original_length: userPrompt.length})})
 }
 
 /**
@@ -276,8 +273,7 @@ export function addBetaLLMRequestAttributes(
         system_prompt_hash: promptHash,
         system_prompt: truncatedPrompt,
         system_prompt_length: String(newContext.systemPrompt.length),
-        ...(truncated && { system_prompt_truncated: 'true' }),
-      })
+        ...(truncated && { system_prompt_truncated: 'true' })})
     }
   }
 
@@ -296,8 +292,7 @@ export function addBetaLLMRequestAttributes(
         return {
           name: typeof tool.name === 'string' ? tool.name : 'unknown',
           hash: toolHash,
-          json: toolJson,
-        }
+          json: toolJson}
       })
 
       // Set span attribute with array of name/hash pairs
@@ -320,8 +315,7 @@ export function addBetaLLMRequestAttributes(
             tool_name: sanitizeToolNameForAnalytics(name),
             tool_hash: hash,
             tool: truncatedTool,
-            ...(truncated && { tool_truncated: 'true' }),
-          })
+            ...(truncated && { tool_truncated: 'true' })})
         }
       }
     } catch {
@@ -369,9 +363,7 @@ export function addBetaLLMRequestAttributes(
           new_context_message_count: newMessages.length,
           ...(truncated && {
             new_context_truncated: true,
-            new_context_original_length: fullContext.length,
-          }),
-        })
+            new_context_original_length: fullContext.length})})
       }
 
       // Set system_reminders as a separate attribute
@@ -385,9 +377,7 @@ export function addBetaLLMRequestAttributes(
           system_reminders_count: systemReminders.length,
           ...(remindersTruncated && {
             system_reminders_truncated: true,
-            system_reminders_original_length: fullReminders.length,
-          }),
-        })
+            system_reminders_original_length: fullReminders.length})})
       }
 
       // Update last reported hash to the last message in the array
@@ -462,9 +452,7 @@ export function addBetaToolInputAttributes(
     tool_input: truncatedInput,
     ...(truncated && {
       tool_input_truncated: true,
-      tool_input_original_length: toolInput.length,
-    }),
-  })
+      tool_input_original_length: toolInput.length})})
 }
 
 /**

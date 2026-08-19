@@ -1,8 +1,7 @@
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import type {
   ToolResultBlockParam,
-  ToolUseBlock,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+  ToolUseBlock} from '@anthropic-ai/sdk/resources/index.mjs'
 import type { CanUseToolFn } from './hooks/useCanUseTool.js'
 import { FallbackTriggeredError } from './services/api/withRetry.js'
 import {
@@ -10,8 +9,7 @@ import {
   estimateMaxTurnGrowth,
   getEffectiveContextWindowSize,
   isAutoCompactEnabled,
-  type AutoCompactTrackingState,
-} from './services/compact/autoCompact.js'
+  type AutoCompactTrackingState} from './services/compact/autoCompact.js'
 import { buildPostCompactMessages } from './services/compact/compact.js'
 /* eslint-disable @typescript-eslint/no-require-imports */
 const reactiveCompact = feature('REACTIVE_COMPACT')
@@ -23,8 +21,7 @@ const contextCollapse = feature('CONTEXT_COLLAPSE')
 /* eslint-enable @typescript-eslint/no-require-imports */
 import {
   logEvent,
-  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-} from 'src/services/analytics/index.js'
+  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS} from 'src/services/analytics/index.js'
 import { ImageSizeError } from './utils/imageValidation.js'
 import { ImageResizeError } from './utils/imageResizer.js'
 import { findToolByName, type ToolUseContext } from './Tool.js'
@@ -37,13 +34,11 @@ import type {
   StreamEvent,
   ToolUseSummaryMessage,
   UserMessage,
-  TombstoneMessage,
-} from './types/message.js'
+  TombstoneMessage} from './types/message.js'
 import { logError } from './utils/log.js'
 import {
   PROMPT_TOO_LONG_ERROR_MESSAGE,
-  isPromptTooLongMessage,
-} from './services/api/errors.js'
+  isPromptTooLongMessage} from './services/api/errors.js'
 import { logAntError, logForDebugging } from './utils/debug.js'
 import {
   createUserMessage,
@@ -54,16 +49,14 @@ import {
   getMessagesAfterCompactBoundary,
   createToolUseSummaryMessage,
   createMicrocompactBoundaryMessage,
-  stripSignatureBlocks,
-} from './utils/messages.js'
+  stripSignatureBlocks} from './utils/messages.js'
 import { generateToolUseSummary } from './services/toolUseSummary/toolUseSummaryGenerator.js'
 import { prependUserContext, appendSystemContext } from './utils/api.js'
 import {
   createAttachmentMessage,
   filterDuplicateMemoryAttachments,
   getAttachmentMessages,
-  startRelevantMemoryPrefetch,
-} from './utils/attachments.js'
+  startRelevantMemoryPrefetch} from './utils/attachments.js'
 /* eslint-disable @typescript-eslint/no-require-imports */
 const skillPrefetch = feature('EXPERIMENTAL_SKILL_SEARCH')
   ? (require('./services/skillSearch/prefetch.js') as typeof import('./services/skillSearch/prefetch.js'))
@@ -79,24 +72,20 @@ import {
   enqueue,
   remove as removeFromQueue,
   getCommandsByMaxPriority,
-  isSlashCommand,
-} from './utils/messageQueueManager.js'
+  isSlashCommand} from './utils/messageQueueManager.js'
 import {
   type AutonomyTurnOutcome,
   claimConsumableQueuedAutonomyCommands,
-  finalizeAutonomyCommandsForTurn,
-} from './utils/autonomyQueueLifecycle.js'
+  finalizeAutonomyCommandsForTurn} from './utils/autonomyQueueLifecycle.js'
 import { notifyCommandLifecycle } from './utils/commandLifecycle.js'
 import { headlessProfilerCheckpoint } from './utils/headlessProfiler.js'
 import {
   getRuntimeMainLoopModel,
-  renderModelName,
-} from './utils/model/model.js'
+  renderModelName} from './utils/model/model.js'
 import {
   doesMostRecentAssistantMessageExceed200k,
   finalContextTokensFromLastResponse,
-  tokenCountWithEstimation,
-} from './utils/tokens.js'
+  tokenCountWithEstimation} from './utils/tokens.js'
 import { ESCALATED_MAX_TOKENS } from './utils/context.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from './services/analytics/growthbook.js'
 import { SLEEP_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/SleepTool/prompt.js'
@@ -119,23 +108,20 @@ import {
   getCurrentTurnTokenBudget,
   getTurnOutputTokens,
   incrementBudgetContinuationCount,
-  getSessionId,
-} from './bootstrap/state.js'
+  getSessionId} from './bootstrap/state.js'
 import { createBudgetTracker, checkTokenBudget } from './query/tokenBudget.js'
 import { count } from './utils/array.js'
 import {
   createTrace,
   endTrace,
   flushLangfuse,
-  isLangfuseEnabled,
-} from './services/langfuse/index.js'
+  isLangfuseEnabled} from './services/langfuse/index.js'
 import { getAPIProvider } from './utils/model/providers.js'
 import {
   createCacheWarningMessage,
   getCacheThreshold,
   isCacheWarningEnabled,
-  shouldShowCacheWarning,
-} from './utils/cacheWarning.js'
+  shouldShowCacheWarning} from './utils/cacheWarning.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const snipModule = feature('HISTORY_SNIP')
@@ -168,12 +154,10 @@ function* yieldMissingToolResultBlocks(
             type: 'tool_result',
             content: errorMessage,
             is_error: true,
-            tool_use_id: toolUse.id,
-          },
+            tool_use_id: toolUse.id},
         ],
         toolUseResult: errorMessage,
-        sourceToolAssistantUUID: assistantMessage.uuid,
-      })
+        sourceToolAssistantUUID: assistantMessage.uuid})
     }
   }
 }
@@ -230,8 +214,7 @@ function getAutonomyTurnOutcome(params: {
     default:
       return {
         type: 'failed',
-        message: `query ended without successful completion: ${reason}`,
-      }
+        message: `query ended without successful completion: ${reason}`}
   }
 }
 
@@ -301,16 +284,14 @@ export async function* query(
           model: params.toolUseContext.options.mainLoopModel,
           provider: getAPIProvider(),
           input: params.messages,
-          querySource: params.querySource,
-        })
+          querySource: params.querySource})
       : null)
 
   // Attach trace to toolUseContext so tool execution can record observations
   const paramsWithTrace: QueryParams = langfuseTrace
     ? {
         ...params,
-        toolUseContext: { ...params.toolUseContext, langfuseTrace },
-      }
+        toolUseContext: { ...params.toolUseContext, langfuseTrace }}
     : params
 
   let terminal: Terminal | undefined
@@ -331,10 +312,8 @@ export async function* query(
       commands: consumedAutonomyCommands,
       outcome: getAutonomyTurnOutcome({
         terminal,
-        ...(didThrow ? { thrownError } : {}),
-      }),
-      priority: 'later',
-    })
+        ...(didThrow ? { thrownError } : {})}),
+      priority: 'later'})
       .then(nextCommands => {
         for (const command of nextCommands) {
           enqueue(command)
@@ -411,8 +390,7 @@ async function* queryLoop(
     fallbackModel,
     querySource,
     maxTurns,
-    skipCacheWrite,
-  } = params
+    skipCacheWrite} = params
   const deps = params.deps ?? productionDeps()
 
   // Mutable cross-iteration state. The loop body destructures this at the top
@@ -428,8 +406,7 @@ async function* queryLoop(
     hasAttemptedReactiveCompact: false,
     turnCount: 1,
     pendingToolUseSummary: undefined,
-    transition: undefined,
-  }
+    transition: undefined}
   const budgetTracker = feature('TOKEN_BUDGET') ? createBudgetTracker() : null
 
   // task_budget.remaining tracking across compaction boundaries. Undefined
@@ -470,8 +447,7 @@ async function* queryLoop(
       maxOutputTokensOverride,
       pendingToolUseSummary,
       stopHookActive,
-      turnCount,
-    } = state
+      turnCount} = state
 
     // Skill discovery prefetch — per-iteration (uses findWritePivot guard
     // that returns early on non-write iterations). Discovery runs while the
@@ -505,20 +481,17 @@ async function* queryLoop(
     const queryTracking = toolUseContext.queryTracking
       ? {
           chainId: toolUseContext.queryTracking.chainId,
-          depth: toolUseContext.queryTracking.depth + 1,
-        }
+          depth: toolUseContext.queryTracking.depth + 1}
       : {
           chainId: deps.uuid(),
-          depth: 0,
-        }
+          depth: 0}
 
     const queryChainIdForAnalytics =
       queryTracking.chainId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
 
     toolUseContext = {
       ...toolUseContext,
-      queryTracking,
-    }
+      queryTracking}
 
     let messagesForQuery = getMessagesAfterCompactBoundary(messages)
 
@@ -657,8 +630,7 @@ async function* queryLoop(
         userContext,
         systemContext,
         toolUseContext,
-        forkContextMessages: messagesForQuery,
-      },
+        forkContextMessages: messagesForQuery},
       querySource,
       tracking,
       snipTokensFreed,
@@ -670,8 +642,7 @@ async function* queryLoop(
         preCompactTokenCount,
         postCompactTokenCount,
         truePostCompactTokenCount,
-        compactionUsage,
-      } = compactionResult
+        compactionUsage} = compactionResult
 
       logEvent('tengu_auto_compact_succeeded', {
         originalMessageCount: messages.length,
@@ -696,8 +667,7 @@ async function* queryLoop(
           : 0,
 
         queryChainId: queryChainIdForAnalytics,
-        queryDepth: queryTracking.depth,
-      })
+        queryDepth: queryTracking.depth})
 
       // task_budget: capture pre-compact final context window before
       // messagesForQuery is replaced with postCompactMessages below.
@@ -720,8 +690,7 @@ async function* queryLoop(
         compacted: true,
         turnId: deps.uuid(),
         turnCounter: 0,
-        consecutiveFailures: 0,
-      }
+        consecutiveFailures: 0}
 
       const postCompactMessages = buildPostCompactMessages(compactionResult)
 
@@ -736,15 +705,13 @@ async function* queryLoop(
       // can stop retrying on the next iteration.
       tracking = {
         ...(tracking ?? { compacted: false, turnId: '', turnCounter: 0 }),
-        consecutiveFailures,
-      }
+        consecutiveFailures}
     }
 
     //TODO: no need to set toolUseContext.messages during set-up since it is updated here
     toolUseContext = {
       ...toolUseContext,
-      messages: messagesForQuery,
-    }
+      messages: messagesForQuery}
 
     const assistantMessages: AssistantMessage[] = []
     const toolResults: (UserMessage | AttachmentMessage)[] = []
@@ -772,8 +739,7 @@ async function* queryLoop(
       mainLoopModel: toolUseContext.options.mainLoopModel,
       exceeds200kTokens:
         permissionMode === 'plan' &&
-        doesMostRecentAssistantMessageExceed200k(messagesForQuery),
-    })
+        doesMostRecentAssistantMessageExceed200k(messagesForQuery)})
 
     queryCheckpoint('query_setup_end')
 
@@ -839,8 +805,7 @@ async function* queryLoop(
       if (isAtBlockingLimit) {
         yield createAssistantAPIErrorMessage({
           content: PROMPT_TOO_LONG_ERROR_MESSAGE,
-          error: 'invalid_request',
-        })
+          error: 'invalid_request'})
         return { reason: 'blocking_limit' }
       }
     }
@@ -865,8 +830,7 @@ async function* queryLoop(
             userContext,
             systemContext,
             toolUseContext,
-            forkContextMessages: messagesForQuery,
-          },
+            forkContextMessages: messagesForQuery},
           querySource,
           tracking,
           snipTokensFreed,
@@ -880,8 +844,7 @@ async function* queryLoop(
             ? {
                 ...tracking,
                 compacted: true,
-                consecutiveFailures: predictiveResult.consecutiveFailures ?? 0,
-              }
+                consecutiveFailures: predictiveResult.consecutiveFailures ?? 0}
             : tracking
         }
       }
@@ -909,8 +872,7 @@ async function* queryLoop(
               },
               model: currentModel,
               ...(config.gates.fastModeEnabled && {
-                fastMode: appState.fastMode,
-              }),
+                fastMode: appState.fastMode}),
               toolChoice: undefined,
               isNonInteractiveSession:
                 toolUseContext.options.isNonInteractiveSession,
@@ -940,13 +902,8 @@ async function* queryLoop(
                 taskBudget: {
                   total: params.taskBudget.total,
                   ...(taskBudgetRemaining !== undefined && {
-                    remaining: taskBudgetRemaining,
-                  }),
-                },
-              }),
-              langfuseTrace: toolUseContext.langfuseTrace,
-            },
-          })) {
+                    remaining: taskBudgetRemaining})}}),
+              langfuseTrace: toolUseContext.langfuseTrace}})) {
             // We won't use the tool_calls from the first attempt
             // We could.. but then we'd have to merge assistant messages
             // with different ids and double up on full the tool_results
@@ -960,8 +917,7 @@ async function* queryLoop(
               logEvent('tengu_orphaned_messages_tombstoned', {
                 orphanedMessageCount: assistantMessages.length,
                 queryChainId: queryChainIdForAnalytics,
-                queryDepth: queryTracking.depth,
-              })
+                queryDepth: queryTracking.depth})
 
               assistantMessages.length = 0
               toolResults.length = 0
@@ -1033,9 +989,7 @@ async function* queryLoop(
                   ...message,
                   message: {
                     ...(assistantMsg.message ?? {}),
-                    content: clonedContent,
-                  },
-                } as typeof message
+                    content: clonedContent}} as typeof message
               }
             }
             // Withhold recoverable errors (prompt-too-long, max-output-tokens)
@@ -1195,8 +1149,7 @@ async function* queryLoop(
               entrypoint:
                 'cli' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               queryChainId: queryChainIdForAnalytics,
-              queryDepth: queryTracking.depth,
-            })
+              queryDepth: queryTracking.depth})
 
             // Yield system message about fallback — use 'warning' level so
             // users see the notification without needing verbose mode
@@ -1224,8 +1177,7 @@ async function* queryLoop(
         ).length,
 
         queryChainId: queryChainIdForAnalytics,
-        queryDepth: queryTracking.depth,
-      })
+        queryDepth: queryTracking.depth})
 
       // Handle image size/resize errors with user-friendly messages
       if (
@@ -1233,8 +1185,7 @@ async function* queryLoop(
         error instanceof ImageResizeError
       ) {
         yield createAssistantAPIErrorMessage({
-          content: error.message,
-        })
+          content: error.message})
         return { reason: 'image_error' }
       }
 
@@ -1249,8 +1200,7 @@ async function* queryLoop(
       // SDK consumers were seeing phantom interrupts on e.g. Node 18's missing
       // Array.prototype.with(), masking the actual cause.
       yield createAssistantAPIErrorMessage({
-        content: errorMessage,
-      })
+        content: errorMessage})
 
       // To help track down bugs, log loudly for ants
       logAntError('Query error', error)
@@ -1332,8 +1282,7 @@ async function* queryLoop(
       // user message that follows provides sufficient context.
       if (toolUseContext.abortController.signal.reason !== 'interrupt') {
         yield createUserInterruptionMessage({
-          toolUse: false,
-        })
+          toolUse: false})
       }
       return { reason: 'aborted_streaming' }
     }
@@ -1395,9 +1344,7 @@ async function* queryLoop(
               turnCount,
               transition: {
                 reason: 'collapse_drain_retry',
-                committed: drained.committed,
-              },
-            }
+                committed: drained.committed}}
             state = next
             continue
           }
@@ -1414,9 +1361,7 @@ async function* queryLoop(
             userContext,
             systemContext,
             toolUseContext,
-            forkContextMessages: messagesForQuery,
-          },
-        })
+            forkContextMessages: messagesForQuery}})
 
         if (compacted) {
           // task_budget: same carryover as the proactive path above.
@@ -1446,8 +1391,7 @@ async function* queryLoop(
             pendingToolUseSummary: undefined,
             stopHookActive: undefined,
             turnCount,
-            transition: { reason: 'reactive_compact_retry' },
-          }
+            transition: { reason: 'reactive_compact_retry' }}
           state = next
           continue
         }
@@ -1489,8 +1433,7 @@ async function* queryLoop(
           !process.env.CLAUDE_CODE_MAX_OUTPUT_TOKENS
         ) {
           logEvent('tengu_max_tokens_escalate', {
-            escalatedTo: ESCALATED_MAX_TOKENS,
-          })
+            escalatedTo: ESCALATED_MAX_TOKENS})
           const next: State = {
             messages: messagesForQuery,
             toolUseContext,
@@ -1501,8 +1444,7 @@ async function* queryLoop(
             pendingToolUseSummary: undefined,
             stopHookActive: undefined,
             turnCount,
-            transition: { reason: 'max_output_tokens_escalate' },
-          }
+            transition: { reason: 'max_output_tokens_escalate' }}
           state = next
           continue
         }
@@ -1512,8 +1454,7 @@ async function* queryLoop(
             content:
               `Output token limit hit. Resume directly — no apology, no recap of what you were doing. ` +
               `Pick up mid-thought if that is where the cut happened. Break remaining work into smaller pieces.`,
-            isMeta: true,
-          })
+            isMeta: true})
 
           const next: State = {
             messages: [
@@ -1531,9 +1472,7 @@ async function* queryLoop(
             turnCount,
             transition: {
               reason: 'max_output_tokens_recovery',
-              attempt: maxOutputTokensRecoveryCount + 1,
-            },
-          }
+              attempt: maxOutputTokensRecoveryCount + 1}}
           state = next
           continue
         }
@@ -1550,8 +1489,7 @@ async function* queryLoop(
         void executeStopFailureHooks(lastMessage, toolUseContext)
         return {
           reason: 'model_error',
-          error: lastMessage.error ?? lastMessage.apiError ?? 'api_error',
-        }
+          error: lastMessage.error ?? lastMessage.apiError ?? 'api_error'}
       }
 
       const stopHookResult = yield* handleStopHooks(
@@ -1589,8 +1527,7 @@ async function* queryLoop(
           pendingToolUseSummary: undefined,
           stopHookActive: true,
           turnCount,
-          transition: { reason: 'stop_hook_blocking' },
-        }
+          transition: { reason: 'stop_hook_blocking' }}
         state = next
         continue
       }
@@ -1614,8 +1551,7 @@ async function* queryLoop(
               ...assistantMessages,
               createUserMessage({
                 content: decision.nudgeMessage,
-                isMeta: true,
-              }),
+                isMeta: true}),
             ],
             toolUseContext,
             autoCompactTracking: tracking,
@@ -1625,8 +1561,7 @@ async function* queryLoop(
             pendingToolUseSummary: undefined,
             stopHookActive: undefined,
             turnCount,
-            transition: { reason: 'token_budget_continuation' },
-          }
+            transition: { reason: 'token_budget_continuation' }}
           continue
         }
 
@@ -1639,8 +1574,7 @@ async function* queryLoop(
           logEvent('tengu_token_budget_completed', {
             ...decision.completionEvent,
             queryChainId: queryChainIdForAnalytics,
-            queryDepth: queryTracking.depth,
-          })
+            queryDepth: queryTracking.depth})
         }
       }
 
@@ -1656,14 +1590,12 @@ async function* queryLoop(
       logEvent('tengu_streaming_tool_execution_used', {
         tool_count: toolUseBlocks.length,
         queryChainId: queryChainIdForAnalytics,
-        queryDepth: queryTracking.depth,
-      })
+        queryDepth: queryTracking.depth})
     } else {
       logEvent('tengu_streaming_tool_execution_not_used', {
         tool_count: toolUseBlocks.length,
         queryChainId: queryChainIdForAnalytics,
-        queryDepth: queryTracking.depth,
-      })
+        queryDepth: queryTracking.depth})
     }
 
     const toolUpdates = streamingToolExecutor
@@ -1691,8 +1623,7 @@ async function* queryLoop(
       if (update.newContext) {
         updatedToolUseContext = {
           ...update.newContext,
-          queryTracking,
-        }
+          queryTracking}
       }
     }
     queryCheckpoint('query_tool_execution_end')
@@ -1755,8 +1686,7 @@ async function* queryLoop(
           output:
             resultContent && 'content' in resultContent
               ? resultContent.content
-              : null,
-        }
+              : null}
       })
 
       // Fire off summary generation without blocking the next API call
@@ -1764,8 +1694,7 @@ async function* queryLoop(
         tools: toolInfoForSummary,
         signal: toolUseContext.abortController.signal,
         isNonInteractiveSession: toolUseContext.options.isNonInteractiveSession,
-        lastAssistantText,
-      })
+        lastAssistantText})
         .then(summary => {
           if (summary) {
             return createToolUseSummaryMessage(summary, toolUseIds)
@@ -1794,8 +1723,7 @@ async function* queryLoop(
       // user message that follows provides sufficient context.
       if (toolUseContext.abortController.signal.reason !== 'interrupt') {
         yield createUserInterruptionMessage({
-          toolUse: true,
-        })
+          toolUse: true})
       }
       // Check maxTurns before returning when aborted
       const nextTurnCountOnAbort = turnCount + 1
@@ -1803,8 +1731,7 @@ async function* queryLoop(
         yield createAttachmentMessage({
           type: 'max_turns_reached',
           maxTurns,
-          turnCount: nextTurnCountOnAbort,
-        })
+          turnCount: nextTurnCountOnAbort})
       }
       return { reason: 'aborted_tools' }
     }
@@ -1822,8 +1749,7 @@ async function* queryLoop(
         turnCounter: tracking.turnCounter,
 
         queryChainId: queryChainIdForAnalytics,
-        queryDepth: queryTracking.depth,
-      })
+        queryDepth: queryTracking.depth})
     }
 
     // Be careful to do this after tool calls are done, because the API
@@ -1835,8 +1761,7 @@ async function* queryLoop(
       assistantMessagesCount: assistantMessages.length,
       toolResultsCount: toolResults.length,
       queryChainId: queryChainIdForAnalytics,
-      queryDepth: queryTracking.depth,
-    })
+      queryDepth: queryTracking.depth})
 
     // Get queued commands snapshot before processing attachments.
     // These will be sent as attachments so Claude can respond to them in the current turn.
@@ -1982,8 +1907,7 @@ async function* queryLoop(
       totalToolResultsCount: toolResults.length,
       fileChangeAttachmentCount,
       queryChainId: queryChainIdForAnalytics,
-      queryDepth: queryTracking.depth,
-    })
+      queryDepth: queryTracking.depth})
 
     // Refresh tools between turns so newly-connected MCP servers become available
     if (updatedToolUseContext.options.refreshTools) {
@@ -1993,16 +1917,13 @@ async function* queryLoop(
           ...updatedToolUseContext,
           options: {
             ...updatedToolUseContext.options,
-            tools: refreshedTools,
-          },
-        }
+            tools: refreshedTools}}
       }
     }
 
     const toolUseContextWithQueryTracking = {
       ...updatedToolUseContext,
-      queryTracking,
-    }
+      queryTracking}
 
     // Each time we have tool results and are about to recurse, that's a turn
     const nextTurnCount = turnCount + 1
@@ -2024,8 +1945,7 @@ async function* queryLoop(
           forkContextMessages: messagesForQuery.concat(
             assistantMessages,
             toolResults,
-          ),
-        })
+          )})
       }
     }
 
@@ -2034,8 +1954,7 @@ async function* queryLoop(
       yield createAttachmentMessage({
         type: 'max_turns_reached',
         maxTurns,
-        turnCount: nextTurnCount,
-      })
+        turnCount: nextTurnCount})
       return { reason: 'max_turns', turnCount: nextTurnCount }
     }
 
@@ -2050,8 +1969,7 @@ async function* queryLoop(
       pendingToolUseSummary: nextPendingToolUseSummary,
       maxOutputTokensOverride: undefined,
       stopHookActive,
-      transition: { reason: 'next_turn' },
-    }
+      transition: { reason: 'next_turn' }}
     state = next
   } // while (true)
 }

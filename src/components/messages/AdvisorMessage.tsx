@@ -1,4 +1,5 @@
 import figures from 'figures';
+import { t } from '../../utils/i18n/index.js'
 import React from 'react';
 import { Box, Text } from '@anthropic/ink';
 import type { AdvisorBlock } from '../../utils/advisor.js';
@@ -25,8 +26,7 @@ export function AdvisorMessage({
   erroredToolUseIDs,
   shouldAnimate,
   verbose,
-  advisorModel,
-}: Props): React.ReactNode {
+  advisorModel}: Props): React.ReactNode {
   if (block.type === 'server_tool_use') {
     const input = block.input && Object.keys(block.input).length > 0 ? jsonStringify(block.input) : null;
     return (
@@ -36,7 +36,7 @@ export function AdvisorMessage({
           isUnresolved={!resolvedToolUseIDs.has(block.id)}
           isError={erroredToolUseIDs.has(block.id)}
         />
-        <Text bold>Advising</Text>
+        <Text bold>{t('advisormessage.advising')}</Text>
         {advisorModel ? <Text dimColor> using {renderModelName(advisorModel)}</Text> : null}
         {input ? <Text dimColor> · {input}</Text> : null}
       </Box>
@@ -46,7 +46,7 @@ export function AdvisorMessage({
   let body: React.ReactNode;
   switch (block.content.type) {
     case 'advisor_tool_result_error':
-      body = <Text color="error">Advisor unavailable ({block.content.error_code})</Text>;
+      body = <Text color="error">{t('ui.advisorUnavailable', block.content.error_code)}</Text>;
       break;
     case 'advisor_result':
       body = verbose ? (

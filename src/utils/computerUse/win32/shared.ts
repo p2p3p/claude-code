@@ -16,8 +16,7 @@ export function ps(script: string): string {
   const result = Bun.spawnSync({
     cmd: ['powershell', '-NoProfile', '-NonInteractive', '-Command', script],
     stdout: 'pipe',
-    stderr: 'pipe',
-  })
+    stderr: 'pipe'})
   return new TextDecoder().decode(result.stdout).trim()
 }
 
@@ -27,8 +26,7 @@ export function runPs(script: string): string | null {
     const result = Bun.spawnSync({
       cmd: ['powershell', '-NoProfile', '-NonInteractive', '-Command', script],
       stdout: 'pipe',
-      stderr: 'pipe',
-    })
+      stderr: 'pipe'})
     if (result.exitCode !== 0) return null
     return new TextDecoder().decode(result.stdout).trim()
   } catch {
@@ -104,8 +102,7 @@ export const VK_MAP: Record<string, number> = {
   f9: 0x78,
   f10: 0x79,
   f11: 0x7a,
-  f12: 0x7b,
-}
+  f12: 0x7b}
 
 export const MODIFIER_KEYS = new Set([
   'shift',

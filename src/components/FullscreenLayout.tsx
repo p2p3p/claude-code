@@ -9,8 +9,7 @@ import React, {
   useMemo,
   useRef,
   useState,
-  useSyncExternalStore,
-} from 'react';
+  useSyncExternalStore} from 'react';
 import { fileURLToPath } from 'url';
 import { ModalContext } from '../context/modalContext.js';
 import { PromptOverlayProvider, usePromptOverlay, usePromptOverlayDialog } from '../context/promptOverlayContext.js';
@@ -19,8 +18,8 @@ import { Box, ScrollBox, type ScrollBoxHandle, Text, instances } from '@anthropi
 import type { Message } from '../types/message.js';
 import { openBrowser, openPath } from '../utils/browser.js';
 import { isFullscreenEnvEnabled } from '../utils/fullscreen.js';
-import { plural } from '../utils/stringUtils.js';
 import { isNullRenderingAttachment } from './messages/nullRenderingAttachments.js';
+import { t } from '../utils/i18n/index.js';
 import PromptInputFooterSuggestions from './PromptInput/PromptInputFooterSuggestions.js';
 import type { StickyPrompt } from './VirtualMessageList.js';
 
@@ -197,8 +196,7 @@ export function useUnseenDivider(messageCount: number): {
     onScrollAway,
     onRepin,
     jumpToNew,
-    shiftDivider,
-  };
+    shiftDivider};
 }
 
 /**
@@ -294,8 +292,7 @@ export function FullscreenLayout({
   hidePill = false,
   hideSticky = false,
   newMessageCount = 0,
-  onPillClick,
-}: Props): React.ReactNode {
+  onPillClick}: Props): React.ReactNode {
   const { rows: terminalRows, columns } = useTerminalSize();
   // Scroll-derived chrome state lives HERE, not in REPL. StickyTracker
   // writes via ScrollChromeContext; pillVisible subscribes directly to
@@ -404,8 +401,7 @@ export function FullscreenLayout({
             value={{
               rows: terminalRows - MODAL_TRANSCRIPT_PEEK - 1,
               columns: columns - 4,
-              scrollRef: modalScrollRef ?? null,
-            }}
+              scrollRef: modalScrollRef ?? null}}
           >
             {/* Bottom-anchored, grows upward to fit content. maxHeight keeps a
                 few rows of transcript peek above the ▔ divider. Short modals
@@ -473,7 +469,7 @@ function NewMessagesPill({ count, onClick }: { count: number; onClick?: () => vo
       <Box onClick={onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
         <Text backgroundColor={hover ? 'userMessageBackgroundHover' : 'userMessageBackground'} dimColor>
           {' '}
-          {count > 0 ? `${count} new ${plural(count, 'message')}` : 'Jump to bottom'} {figures.arrowDown}{' '}
+          {count > 0 ? t('messages.newMessages', count) : t('messages.jumpToBottom')} {figures.arrowDown}{' '}
         </Text>
       </Box>
     </Box>

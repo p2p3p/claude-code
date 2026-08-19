@@ -9,13 +9,11 @@ import {
   HIDDEN_SESSION_NAME,
   SWARM_SESSION_NAME,
   SWARM_VIEW_WINDOW_NAME,
-  TMUX_COMMAND,
-} from '../constants.js'
+  TMUX_COMMAND} from '../constants.js'
 import {
   getLeaderPaneId,
   isInsideTmux as isInsideTmuxFromDetection,
-  isTmuxAvailable,
-} from './detection.js'
+  isTmuxAvailable} from './detection.js'
 import { registerTmuxBackend } from './registry.js'
 import type { CreatePaneResult, PaneBackend, PaneId } from './types.js'
 
@@ -65,8 +63,7 @@ function getTmuxColorName(color: AgentColorName): string {
     purple: 'magenta',
     orange: 'colour208',
     pink: 'colour205',
-    cyan: 'cyan',
-  }
+    cyan: 'cyan'}
   return tmuxColors[color]
 }
 

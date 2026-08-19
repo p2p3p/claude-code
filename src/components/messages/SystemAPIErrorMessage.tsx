@@ -6,6 +6,7 @@ import type { SystemAPIErrorMessage } from 'src/types/message.js';
 import { useInterval } from 'usehooks-ts';
 import { CtrlOToExpand } from '../CtrlOToExpand.js';
 import { MessageResponse } from '../MessageResponse.js';
+import { t } from '../../utils/i18n/index.js';
 
 const MAX_API_ERROR_CHARS = 1000;
 
@@ -16,8 +17,7 @@ type Props = {
 
 export function SystemAPIErrorMessage({
   message: { retryAttempt, error, retryInMs, maxRetries },
-  verbose,
-}: Props): React.ReactNode {
+  verbose}: Props): React.ReactNode {
   const _retryAttempt = retryAttempt as number;
   const _retryInMs = retryInMs as number;
   const _maxRetries = maxRetries as number;
@@ -45,9 +45,8 @@ export function SystemAPIErrorMessage({
         <Text color="error">{truncated ? formatted.slice(0, MAX_API_ERROR_CHARS) + '…' : formatted}</Text>
         {truncated && <CtrlOToExpand />}
         <Text dimColor>
-          Retrying in {retryInSecondsLive} {retryInSecondsLive === 1 ? 'second' : 'seconds'}… (attempt {_retryAttempt}/
-          {_maxRetries})
-          {process.env.API_TIMEOUT_MS ? ` · API_TIMEOUT_MS=${process.env.API_TIMEOUT_MS}ms, try increasing it` : ''}
+          {t('systemAPIErrorMessage.retrying', retryInSecondsLive, _retryAttempt, _maxRetries)}
+          {process.env.API_TIMEOUT_MS ? ` · ${t('systemAPIErrorMessage.apiTimeout', process.env.API_TIMEOUT_MS)}` : ''}
         </Text>
       </Box>
     </MessageResponse>

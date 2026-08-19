@@ -37,9 +37,7 @@ const LOCK_OPTIONS = {
   retries: {
     retries: 10,
     minTimeout: 5,
-    maxTimeout: 100,
-  },
-}
+    maxTimeout: 100}}
 
 export const MAX_MAILBOX_MESSAGES = 1_000
 export const MAX_READ_MAILBOX_MESSAGES = 200
@@ -117,8 +115,7 @@ function toMailboxMessage(value: unknown): TeammateMessage {
     timestamp: record.timestamp,
     read: record.read,
     ...(typeof record.color === 'string' ? { color: record.color } : {}),
-    ...(typeof record.summary === 'string' ? { summary: record.summary } : {}),
-  }
+    ...(typeof record.summary === 'string' ? { summary: record.summary } : {})}
   assertMailboxMessageSize(message)
   return message
 }
@@ -388,16 +385,14 @@ export async function writeToMailbox(
   try {
     release = await lockfile.lock(inboxPath, {
       lockfilePath: lockFilePath,
-      ...LOCK_OPTIONS,
-    })
+      ...LOCK_OPTIONS})
 
     // Re-read messages after acquiring lock to get the latest state
     const messages = await readMailboxForMutation(recipientName, teamName)
 
     const newMessage = toMailboxMessage({
       ...message,
-      read: false,
-    })
+      read: false})
 
     messages.push(newMessage)
 
@@ -442,8 +437,7 @@ export async function markMessageAsReadByIndex(
     )
     release = await lockfile.lock(inboxPath, {
       lockfilePath: lockFilePath,
-      ...LOCK_OPTIONS,
-    })
+      ...LOCK_OPTIONS})
     logForDebugging(`[TeammateMailbox] markMessageAsReadByIndex: lock acquired`)
 
     // Re-read messages after acquiring lock to get the latest state
@@ -507,8 +501,7 @@ export async function markMessageAsReadByIdentity(
   try {
     release = await lockfile.lock(inboxPath, {
       lockfilePath: lockFilePath,
-      ...LOCK_OPTIONS,
-    })
+      ...LOCK_OPTIONS})
 
     const messages = await readMailboxForMutation(agentName, teamName)
     const messageIndex = messages.findIndex(message => {
@@ -557,8 +550,7 @@ export async function markMessagesAsRead(
     logForDebugging(`[TeammateMailbox] markMessagesAsRead: acquiring lock...`)
     release = await lockfile.lock(inboxPath, {
       lockfilePath: lockFilePath,
-      ...LOCK_OPTIONS,
-    })
+      ...LOCK_OPTIONS})
     logForDebugging(`[TeammateMailbox] markMessagesAsRead: lock acquired`)
 
     // Re-read messages after acquiring lock to get the latest state
@@ -690,8 +682,7 @@ export function createIdleNotification(
     summary: options?.summary,
     completedTaskId: options?.completedTaskId,
     completedStatus: options?.completedStatus,
-    failureReason: options?.failureReason,
-  }
+    failureReason: options?.failureReason}
 }
 
 /**
@@ -767,8 +758,7 @@ export function createPermissionRequestMessage(params: {
     tool_use_id: params.tool_use_id,
     description: params.description,
     input: params.input,
-    permission_suggestions: params.permission_suggestions || [],
-  }
+    permission_suggestions: params.permission_suggestions || []}
 }
 
 /**
@@ -786,8 +776,7 @@ export function createPermissionResponseMessage(params: {
       type: 'permission_response',
       request_id: params.request_id,
       subtype: 'error',
-      error: params.error || 'Permission denied',
-    }
+      error: params.error || 'Permission denied'}
   }
   return {
     type: 'permission_response',
@@ -795,9 +784,7 @@ export function createPermissionResponseMessage(params: {
     subtype: 'success',
     response: {
       updated_input: params.updated_input,
-      permission_updates: params.permission_updates,
-    },
-  }
+      permission_updates: params.permission_updates}}
 }
 
 /**
@@ -888,8 +875,7 @@ export function createSandboxPermissionRequestMessage(params: {
     workerName: params.workerName,
     workerColor: params.workerColor,
     hostPattern: { host: params.host },
-    createdAt: Date.now(),
-  }
+    createdAt: Date.now()}
 }
 
 /**
@@ -905,8 +891,7 @@ export function createSandboxPermissionResponseMessage(params: {
     requestId: params.requestId,
     host: params.host,
     allow: params.allow,
-    timestamp: new Date().toISOString(),
-  }
+    timestamp: new Date().toISOString()}
 }
 
 /**
@@ -953,8 +938,7 @@ export const PlanApprovalRequestMessageSchema = lazySchema(() =>
     timestamp: z.string(),
     planFilePath: z.string(),
     planContent: z.string(),
-    requestId: z.string(),
-  }),
+    requestId: z.string()}),
 )
 
 export type PlanApprovalRequestMessage = z.infer<
@@ -971,8 +955,7 @@ export const PlanApprovalResponseMessageSchema = lazySchema(() =>
     approved: z.boolean(),
     feedback: z.string().optional(),
     timestamp: z.string(),
-    permissionMode: PermissionModeSchema().optional(),
-  }),
+    permissionMode: PermissionModeSchema().optional()}),
 )
 
 export type PlanApprovalResponseMessage = z.infer<
@@ -988,8 +971,7 @@ export const ShutdownRequestMessageSchema = lazySchema(() =>
     requestId: z.string(),
     from: z.string(),
     reason: z.string().optional(),
-    timestamp: z.string(),
-  }),
+    timestamp: z.string()}),
 )
 
 export type ShutdownRequestMessage = z.infer<
@@ -1006,8 +988,7 @@ export const ShutdownApprovedMessageSchema = lazySchema(() =>
     from: z.string(),
     timestamp: z.string(),
     paneId: z.string().optional(),
-    backendType: z.string().optional(),
-  }),
+    backendType: z.string().optional()}),
 )
 
 export type ShutdownApprovedMessage = z.infer<
@@ -1023,8 +1004,7 @@ export const ShutdownRejectedMessageSchema = lazySchema(() =>
     requestId: z.string(),
     from: z.string(),
     reason: z.string(),
-    timestamp: z.string(),
-  }),
+    timestamp: z.string()}),
 )
 
 export type ShutdownRejectedMessage = z.infer<
@@ -1044,8 +1024,7 @@ export function createShutdownRequestMessage(params: {
     requestId: params.requestId,
     from: params.from,
     reason: params.reason,
-    timestamp: new Date().toISOString(),
-  }
+    timestamp: new Date().toISOString()}
 }
 
 /**
@@ -1063,8 +1042,7 @@ export function createShutdownApprovedMessage(params: {
     from: params.from,
     timestamp: new Date().toISOString(),
     paneId: params.paneId,
-    backendType: params.backendType,
-  }
+    backendType: params.backendType}
 }
 
 /**
@@ -1080,8 +1058,7 @@ export function createShutdownRejectedMessage(params: {
     requestId: params.requestId,
     from: params.from,
     reason: params.reason,
-    timestamp: new Date().toISOString(),
-  }
+    timestamp: new Date().toISOString()}
 }
 
 /**
@@ -1110,8 +1087,7 @@ export async function sendShutdownRequestToMailbox(
   const shutdownMessage = createShutdownRequestMessage({
     requestId,
     from: senderName,
-    reason,
-  })
+    reason})
 
   await writeToMailbox(
     targetName,
@@ -1119,8 +1095,7 @@ export async function sendShutdownRequestToMailbox(
       from: senderName,
       text: jsonStringify(shutdownMessage),
       timestamp: new Date().toISOString(),
-      color: getTeammateColor(),
-    },
+      color: getTeammateColor()},
     resolvedTeamName,
   )
 
@@ -1285,8 +1260,7 @@ export const ModeSetRequestMessageSchema = lazySchema(() =>
   z.object({
     type: z.literal('mode_set_request'),
     mode: PermissionModeSchema(),
-    from: z.string(),
-  }),
+    from: z.string()}),
 )
 
 export type ModeSetRequestMessage = z.infer<
@@ -1303,8 +1277,7 @@ export function createModeSetRequestMessage(params: {
   return {
     type: 'mode_set_request',
     mode: params.mode as ModeSetRequestMessage['mode'],
-    from: params.from,
-  }
+    from: params.from}
 }
 
 /**
@@ -1376,8 +1349,7 @@ export async function markMessagesAsReadByPredicate(
   try {
     release = await lockfile.lock(inboxPath, {
       lockfilePath: lockFilePath,
-      ...LOCK_OPTIONS,
-    })
+      ...LOCK_OPTIONS})
 
     const messages = await readMailboxForMutation(agentName, teamName)
     if (messages.length === 0) {

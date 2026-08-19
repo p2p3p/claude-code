@@ -1,4 +1,5 @@
 import figures from 'figures';
+import { t } from '../../utils/i18n/index.js'
 import React, { useMemo } from 'react';
 import type { DiffFile } from '../../hooks/useDiffData.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
@@ -36,7 +37,7 @@ export function DiffFileList({ files, selectedIndex }: Props): React.ReactNode {
   }, [files.length, selectedIndex]);
 
   if (files.length === 0) {
-    return <Text dimColor>No changed files</Text>;
+    return <Text dimColor>{t('difffilelist.noChangedFiles')}</Text>;
   }
 
   const visibleFiles = files.slice(startIndex, endIndex);
@@ -73,8 +74,7 @@ export function DiffFileList({ files, selectedIndex }: Props): React.ReactNode {
 function FileItem({
   file,
   isSelected,
-  maxPathWidth,
-}: {
+  maxPathWidth}: {
   file: DiffFile;
   isSelected: boolean;
   maxPathWidth: number;
@@ -131,7 +131,7 @@ function FileStats({ file, isSelected }: { file: DiffFile; isSelected: boolean }
           -{file.linesRemoved}
         </Text>
       )}
-      {file.isTruncated && <Text dimColor={!isSelected}> (truncated)</Text>}
+      {file.isTruncated && <Text dimColor={!isSelected}>{t('diffFileList.truncated')}</Text>}
     </Text>
   );
 }

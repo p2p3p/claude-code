@@ -5,6 +5,7 @@ import { ExitPlanModeV2Tool } from '@claude-code-best/builtin-tools/tools/ExitPl
 import { useNotifyAfterTimeout } from '../../hooks/useNotifyAfterTimeout.js';
 import { useKeybinding } from '../../keybindings/useKeybinding.js';
 import type { AnyObject, Tool, ToolUseContext } from '../../Tool.js';
+import { t } from '../../utils/i18n/index.js';
 import { AskUserQuestionTool } from '@claude-code-best/builtin-tools/tools/AskUserQuestionTool/AskUserQuestionTool.js';
 import { BashTool } from '@claude-code-best/builtin-tools/tools/BashTool/BashTool.js';
 import { FileEditTool } from '@claude-code-best/builtin-tools/tools/FileEditTool/FileEditTool.js';
@@ -165,22 +166,22 @@ function getNotificationMessage(toolUseConfirm: ToolUseConfirm): string {
   const toolName = toolUseConfirm.tool.userFacingName(toolUseConfirm.input as never);
 
   if (toolUseConfirm.tool === ExitPlanModeV2Tool) {
-    return 'Claude Code needs your approval for the plan';
+    return t('permission.approvePlan');
   }
 
   if (toolUseConfirm.tool === EnterPlanModeTool) {
-    return 'Claude Code wants to enter plan mode';
+    return t('permission.enterPlanModeRequest');
   }
 
   if (feature('REVIEW_ARTIFACT') && toolUseConfirm.tool === ReviewArtifactTool) {
-    return 'Claude needs your approval for a review artifact';
+    return t('permission.reviewArtifact');
   }
 
   if (!toolName || toolName.trim() === '') {
-    return 'Claude Code needs your attention';
+    return t('permission.needsAttention');
   }
 
-  return `Claude needs your permission to use ${toolName}`;
+  return t('permission.needsPermission', toolName);
 }
 
 // TODO: Move this to Tool.renderPermissionRequest
@@ -191,8 +192,7 @@ export function PermissionRequest({
   onReject,
   verbose,
   workerBadge,
-  setStickyFooter,
-}: PermissionRequestProps): React.ReactNode {
+  setStickyFooter}: PermissionRequestProps): React.ReactNode {
   // Handle Ctrl+C (app:interrupt) to reject
   useKeybinding(
     'app:interrupt',

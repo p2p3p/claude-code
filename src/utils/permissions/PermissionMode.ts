@@ -1,12 +1,12 @@
 import z from 'zod/v4'
 import { PAUSE_ICON } from '../../constants/figures.js'
+import { t } from '../i18n/index.js'
 // Types extracted to src/types/permissions.ts to break import cycles
 import {
   EXTERNAL_PERMISSION_MODES,
   type ExternalPermissionMode,
   PERMISSION_MODES,
-  type PermissionMode,
-} from '../../types/permissions.js'
+  type PermissionMode} from '../../types/permissions.js'
 import { lazySchema } from '../lazySchema.js'
 
 // Re-export for backwards compatibility
@@ -14,8 +14,7 @@ export {
   EXTERNAL_PERMISSION_MODES,
   PERMISSION_MODES,
   type ExternalPermissionMode,
-  type PermissionMode,
-}
+  type PermissionMode}
 
 export const permissionModeSchema = lazySchema(() => z.enum(PERMISSION_MODES))
 export const externalPermissionModeSchema = lazySchema(() =>
@@ -46,44 +45,37 @@ const PERMISSION_MODE_CONFIG: Partial<
     shortTitle: 'Default',
     symbol: '',
     color: 'text',
-    external: 'default',
-  },
+    external: 'default'},
   plan: {
     title: 'Plan Mode',
     shortTitle: 'Plan',
     symbol: PAUSE_ICON,
     color: 'planMode',
-    external: 'plan',
-  },
+    external: 'plan'},
   acceptEdits: {
     title: 'Accept edits',
     shortTitle: 'Accept',
     symbol: '⏵⏵',
     color: 'autoAccept',
-    external: 'acceptEdits',
-  },
+    external: 'acceptEdits'},
   bypassPermissions: {
     title: 'Bypass',
     shortTitle: 'Bypass',
     symbol: '⏵⏵',
     color: 'error',
-    external: 'bypassPermissions',
-  },
+    external: 'bypassPermissions'},
   dontAsk: {
     title: "Don't Ask",
     shortTitle: 'DontAsk',
     symbol: '⏵⏵',
     color: 'error',
-    external: 'dontAsk',
-  },
+    external: 'dontAsk'},
   auto: {
     title: 'Auto',
     shortTitle: 'Auto',
     symbol: '⏵⏵',
     color: 'warning' as ModeColorKey,
-    external: 'default' as ExternalPermissionMode,
-  },
-}
+    external: 'default' as ExternalPermissionMode}}
 
 /**
  * Type guard to check if a PermissionMode is an ExternalPermissionMode.
@@ -133,4 +125,16 @@ export function permissionModeSymbol(mode: PermissionMode): string {
 
 export function getModeColor(mode: PermissionMode): ModeColorKey {
   return getModeConfig(mode).color
+}
+
+const PERMISSION_MODE_LABEL_KEYS: Record<string, string> = {
+  default: 'permissionMode.default',
+  plan: 'permissionMode.plan',
+  acceptEdits: 'permissionMode.acceptEdits',
+  bypassPermissions: 'permissionMode.bypassPermissions',
+  dontAsk: 'permissionMode.dontAsk',
+  auto: 'permissionMode.auto'}
+
+export function permissionModeLabel(mode: string): string {
+  return t(PERMISSION_MODE_LABEL_KEYS[mode] ?? mode)
 }

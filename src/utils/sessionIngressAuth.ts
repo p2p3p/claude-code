@@ -1,12 +1,10 @@
 import {
   getSessionIngressToken,
-  setSessionIngressToken,
-} from '../bootstrap/state.js'
+  setSessionIngressToken} from '../bootstrap/state.js'
 import {
   CCR_SESSION_INGRESS_TOKEN_PATH,
   maybePersistTokenForSubprocesses,
-  readTokenFromWellKnownFile,
-} from './authFileDescriptor.js'
+  readTokenFromWellKnownFile} from './authFileDescriptor.js'
 import { logForDebugging } from './debug.js'
 import { errorMessage } from './errors.js'
 import { getFsImplementation } from './fsOperations.js'
@@ -56,8 +54,7 @@ function getTokenFromFileDescriptor(): string | null {
     const token = fsOps.readFileSync(fdPath, { encoding: 'utf8' }).trim()
     if (!token) {
       logForDebugging('File descriptor contained empty token', {
-        level: 'error',
-      })
+        level: 'error'})
       setSessionIngressToken(null)
       return null
     }
@@ -119,8 +116,7 @@ export function getSessionIngressAuthHeaders(): Record<string, string> {
   if (!token) return {}
   if (token.startsWith('sk-ant-sid')) {
     const headers: Record<string, string> = {
-      Cookie: `sessionKey=${token}`,
-    }
+      Cookie: `sessionKey=${token}`}
     const orgUuid = process.env.CLAUDE_CODE_ORGANIZATION_UUID
     if (orgUuid) {
       headers['X-Organization-Uuid'] = orgUuid

@@ -25,22 +25,20 @@ import {
   findMidInputSlashCommand,
   generateCommandSuggestions,
   getBestCommandMatch,
-  isCommandInput,
-} from '../utils/suggestions/commandSuggestions.js';
+  isCommandInput} from '../utils/suggestions/commandSuggestions.js';
 import {
   getDirectoryCompletions,
   getPathCompletions,
-  isPathLikeToken,
-} from '../utils/suggestions/directoryCompletion.js';
+  isPathLikeToken} from '../utils/suggestions/directoryCompletion.js';
 import { getShellHistoryCompletion } from '../utils/suggestions/shellHistoryCompletion.js';
 import { getSlackChannelSuggestions, hasSlackMcpServer } from '../utils/suggestions/slackChannelSuggestions.js';
 import { TEAM_LEAD_NAME } from '../utils/swarm/constants.js';
+import { t } from '../utils/i18n/index.js';
 import {
   applyFileSuggestion,
   findLongestCommonPrefix,
   onIndexBuildComplete,
-  startBackgroundCacheRefresh,
-} from './fileSuggestions.js';
+  startBackgroundCacheRefresh} from './fileSuggestions.js';
 import { generateUnifiedSuggestions } from './unifiedSuggestions.js';
 
 // Unicode-aware character class for file path tokens:
@@ -286,8 +284,7 @@ export function applyDirectorySuggestion(
 
   return {
     newInput,
-    cursorPos: before.length + replacement.length,
-  };
+    cursorPos: before.length + replacement.length};
 }
 
 /**
@@ -321,8 +318,7 @@ export function extractCompletionToken(
       return {
         token: quotedMatch[0] + quotedSuffix,
         startPos: quotedMatch.index,
-        isQuoted: true,
-      };
+        isQuoted: true};
     }
   }
 
@@ -339,8 +335,7 @@ export function extractCompletionToken(
         return {
           token: atHeadMatch[0] + tokenSuffix,
           startPos: atIdx,
-          isQuoted: false,
-        };
+          isQuoted: false};
       }
     }
   }
@@ -361,8 +356,7 @@ export function extractCompletionToken(
   return {
     token: match[0] + tokenSuffix,
     startPos: match.index,
-    isQuoted: false,
-  };
+    isQuoted: false};
 }
 
 function extractCommandNameAndArgs(value: string): {
@@ -374,12 +368,10 @@ function extractCommandNameAndArgs(value: string): {
     if (spaceIndex === -1)
       return {
         commandName: value.slice(1),
-        args: '',
-      };
+        args: ''};
     return {
       commandName: value.slice(1, spaceIndex),
-      args: value.slice(spaceIndex + 1),
-    };
+      args: value.slice(spaceIndex + 1)};
   }
   return null;
 }
@@ -407,8 +399,7 @@ export function useTypeahead({
   suggestionsState: { suggestions, selectedSuggestion, commandArgumentHint },
   suppressSuggestions = false,
   markAccepted,
-  onModeChange,
-}: Props): UseTypeaheadResult {
+  onModeChange}: Props): UseTypeaheadResult {
   const { addNotification } = useNotifications();
   const thinkingToggleShortcut = useShortcutDisplay('chat:thinkingToggle', 'Chat', 'alt+t');
   const [suggestionType, setSuggestionType] = useState<SuggestionType>('none');
@@ -453,8 +444,7 @@ export function useTypeahead({
     return {
       text: match.suffix,
       fullCommand: match.fullCommand,
-      insertPosition: midInputCommand.startPos + 1 + midInputCommand.partialCommand.length,
-    };
+      insertPosition: midInputCommand.startPos + 1 + midInputCommand.partialCommand.length};
   }, [input, cursorOffset, mode, commands, suppressSuggestions]);
 
   // Merged ghost text: prompt mode uses synchronous useMemo, bash mode uses async useState
@@ -490,8 +480,7 @@ export function useTypeahead({
     setSuggestionsState(() => ({
       commandArgumentHint: undefined,
       suggestions: [],
-      selectedSuggestion: -1,
-    }));
+      selectedSuggestion: -1}));
     setSuggestionType('none');
     setMaxColumnWidth(undefined);
     setInlineGhostText(undefined);
@@ -511,8 +500,7 @@ export function useTypeahead({
         setSuggestionsState(() => ({
           commandArgumentHint: undefined,
           suggestions: [],
-          selectedSuggestion: -1,
-        }));
+          selectedSuggestion: -1}));
         setSuggestionType('none');
         setMaxColumnWidth(undefined);
         return;
@@ -520,8 +508,7 @@ export function useTypeahead({
       setSuggestionsState(prev => ({
         commandArgumentHint: undefined,
         suggestions: combinedItems,
-        selectedSuggestion: getPreservedSelection(prev.suggestions, prev.selectedSuggestion, combinedItems),
-      }));
+        selectedSuggestion: getPreservedSelection(prev.suggestions, prev.selectedSuggestion, combinedItems)}));
       setSuggestionType(combinedItems.length > 0 ? 'file' : 'none');
       setMaxColumnWidth(undefined); // No fixed width for file suggestions
     },
@@ -569,8 +556,7 @@ export function useTypeahead({
       setSuggestionsState(prev => ({
         commandArgumentHint: undefined,
         suggestions: channels,
-        selectedSuggestion: getPreservedSelection(prev.suggestions, prev.selectedSuggestion, channels),
-      }));
+        selectedSuggestion: getPreservedSelection(prev.suggestions, prev.selectedSuggestion, channels)}));
       setSuggestionType(channels.length > 0 ? 'slack-channel' : 'none');
       setMaxColumnWidth(undefined);
     },
@@ -606,8 +592,7 @@ export function useTypeahead({
             setSuggestionsState(() => ({
               commandArgumentHint: undefined,
               suggestions: [],
-              selectedSuggestion: -1,
-            }));
+              selectedSuggestion: -1}));
             setSuggestionType('none');
             setMaxColumnWidth(undefined);
             return;
@@ -627,14 +612,12 @@ export function useTypeahead({
           setInlineGhostText({
             text: historyMatch.suffix,
             fullCommand: historyMatch.fullCommand,
-            insertPosition: value.length,
-          });
+            insertPosition: value.length});
           // Clear dropdown suggestions when showing ghost text
           setSuggestionsState(() => ({
             commandArgumentHint: undefined,
             suggestions: [],
-            selectedSuggestion: -1,
-          }));
+            selectedSuggestion: -1}));
           setSuggestionType('none');
           setMaxColumnWidth(undefined);
           return;
@@ -664,8 +647,7 @@ export function useTypeahead({
             members.push({
               id: `dm-${t.name}`,
               displayText: `@${t.name}`,
-              description: 'send message',
-            });
+              description: t('componentsUi.mentionSendMessage')});
           }
         }
 
@@ -676,8 +658,9 @@ export function useTypeahead({
           members.push({
             id: `dm-${name}`,
             displayText: `@${name}`,
-            description: status ? `send message · ${status}` : 'send message',
-          });
+            description: status
+              ? t('componentsUi.mentionSendMessageWithStatus', status)
+              : t('componentsUi.mentionSendMessage')});
         }
 
         if (members.length > 0) {
@@ -685,8 +668,7 @@ export function useTypeahead({
           setSuggestionsState(prev => ({
             commandArgumentHint: undefined,
             suggestions: members,
-            selectedSuggestion: getPreservedSelection(prev.suggestions, prev.selectedSuggestion, members),
-          }));
+            selectedSuggestion: getPreservedSelection(prev.suggestions, prev.selectedSuggestion, members)}));
           setSuggestionType('agent');
           setMaxColumnWidth(undefined);
           return;
@@ -738,8 +720,7 @@ export function useTypeahead({
             setSuggestionsState(prev => ({
               suggestions: dirSuggestions,
               selectedSuggestion: getPreservedSelection(prev.suggestions, prev.selectedSuggestion, dirSuggestions),
-              commandArgumentHint: undefined,
-            }));
+              commandArgumentHint: undefined}));
             setSuggestionType('directory');
             return;
           }
@@ -761,8 +742,7 @@ export function useTypeahead({
 
           // Get custom title suggestions using partial match
           const matches = await searchSessionsByCustomTitle(args, {
-            limit: 10,
-          });
+            limit: 10});
 
           const suggestions = matches.map(log => {
             const sessionId = getSessionIdFromLog(log);
@@ -770,16 +750,14 @@ export function useTypeahead({
               id: `resume-title-${sessionId}`,
               displayText: log.customTitle!,
               description: formatLogMetadata(log),
-              metadata: { sessionId },
-            };
+              metadata: { sessionId }};
           });
 
           if (suggestions.length > 0) {
             setSuggestionsState(prev => ({
               suggestions,
               selectedSuggestion: getPreservedSelection(prev.suggestions, prev.selectedSuggestion, suggestions),
-              commandArgumentHint: undefined,
-            }));
+              commandArgumentHint: undefined}));
             setSuggestionType('custom-title');
             return;
           }
@@ -837,8 +815,7 @@ export function useTypeahead({
               setSuggestionsState(() => ({
                 commandArgumentHint,
                 suggestions: [],
-                selectedSuggestion: -1,
-              }));
+                selectedSuggestion: -1}));
               setSuggestionType('none');
               setMaxColumnWidth(undefined);
               return;
@@ -853,8 +830,7 @@ export function useTypeahead({
         setSuggestionsState(() => ({
           commandArgumentHint,
           suggestions: commandItems,
-          selectedSuggestion: commandItems.length > 0 ? 0 : -1,
-        }));
+          selectedSuggestion: commandItems.length > 0 ? 0 : -1}));
         setSuggestionType(commandItems.length > 0 ? 'command' : 'none');
 
         // Use stable width from all commands (prevents layout shift when filtering)
@@ -904,8 +880,7 @@ export function useTypeahead({
           if (isPathLikeToken(searchToken)) {
             latestPathTokenRef.current = searchToken;
             const pathSuggestions = await getPathCompletions(searchToken, {
-              maxResults: 10,
-            });
+              maxResults: 10});
             // Discard stale results if a newer query was initiated while waiting
             if (latestPathTokenRef.current !== searchToken) {
               return;
@@ -914,8 +889,7 @@ export function useTypeahead({
               setSuggestionsState(prev => ({
                 suggestions: pathSuggestions,
                 selectedSuggestion: getPreservedSelection(prev.suggestions, prev.selectedSuggestion, pathSuggestions),
-                commandArgumentHint: undefined,
-              }));
+                commandArgumentHint: undefined}));
               setSuggestionType('directory');
               return;
             }
@@ -1074,8 +1048,7 @@ export function useTypeahead({
               // For directories, fetch new suggestions for the updated path
               setSuggestionsState(prev => ({
                 ...prev,
-                commandArgumentHint: undefined,
-              }));
+                commandArgumentHint: undefined}));
               void updateSuggestions(newInput, newInput.length);
             } else {
               clearSuggestions();
@@ -1104,8 +1077,7 @@ export function useTypeahead({
                 // For directories, fetch new suggestions for the updated path
                 setSuggestionsState(prev => ({
                   ...prev,
-                  commandArgumentHint: undefined,
-                }));
+                  commandArgumentHint: undefined}));
                 void updateSuggestions(newInput, result.cursorPos);
               } else {
                 // For files, clear suggestions
@@ -1262,8 +1234,7 @@ export function useTypeahead({
         setSuggestionsState(prev => ({
           commandArgumentHint: undefined,
           suggestions: suggestionItems,
-          selectedSuggestion: getPreservedSelection(prev.suggestions, prev.selectedSuggestion, suggestionItems),
-        }));
+          selectedSuggestion: getPreservedSelection(prev.suggestions, prev.selectedSuggestion, suggestionItems)}));
         setSuggestionType(suggestionType);
         setMaxColumnWidth(undefined);
       }
@@ -1436,16 +1407,14 @@ export function useTypeahead({
   const handleAutocompletePrevious = useCallback(() => {
     setSuggestionsState(prev => ({
       ...prev,
-      selectedSuggestion: prev.selectedSuggestion <= 0 ? suggestions.length - 1 : prev.selectedSuggestion - 1,
-    }));
+      selectedSuggestion: prev.selectedSuggestion <= 0 ? suggestions.length - 1 : prev.selectedSuggestion - 1}));
   }, [suggestions.length, setSuggestionsState]);
 
   // Handler for autocomplete:next - selects next suggestion
   const handleAutocompleteNext = useCallback(() => {
     setSuggestionsState(prev => ({
       ...prev,
-      selectedSuggestion: prev.selectedSuggestion >= suggestions.length - 1 ? 0 : prev.selectedSuggestion + 1,
-    }));
+      selectedSuggestion: prev.selectedSuggestion >= suggestions.length - 1 ? 0 : prev.selectedSuggestion + 1}));
   }, [suggestions.length, setSuggestionsState]);
 
   // Autocomplete context keybindings - only active when suggestions are visible
@@ -1454,8 +1423,7 @@ export function useTypeahead({
       'autocomplete:accept': handleAutocompleteAccept,
       'autocomplete:dismiss': handleAutocompleteDismiss,
       'autocomplete:previous': handleAutocompletePrevious,
-      'autocomplete:next': handleAutocompleteNext,
-    }),
+      'autocomplete:next': handleAutocompleteNext}),
     [handleAutocompleteAccept, handleAutocompleteDismiss, handleAutocompletePrevious, handleAutocompleteNext],
   );
 
@@ -1472,8 +1440,7 @@ export function useTypeahead({
   // so escape reaches the overlay's handler instead of dismissing autocomplete
   useKeybindings(autocompleteHandlers, {
     context: 'Autocomplete',
-    isActive: isAutocompleteActive && !isModalOverlayActive,
-  });
+    isActive: isAutocompleteActive && !isModalOverlayActive});
 
   function acceptSuggestionText(text: string): void {
     const detectedMode = getModeFromInput(text);
@@ -1523,10 +1490,9 @@ export function useTypeahead({
         e.preventDefault();
         addNotification({
           key: 'thinking-toggle-hint',
-          jsx: <Text dimColor>Use {thinkingToggleShortcut} to toggle thinking</Text>,
+          jsx: <Text dimColor>{t('thinkingToggle.hint', thinkingToggleShortcut)}</Text>,
           priority: 'immediate',
-          timeoutMs: 3000,
-        });
+          timeoutMs: 3000});
       }
       return;
     }
@@ -1577,6 +1543,5 @@ export function useTypeahead({
     maxColumnWidth,
     commandArgumentHint,
     inlineGhostText: effectiveGhostText,
-    handleKeyDown,
-  };
+    handleKeyDown};
 }

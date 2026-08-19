@@ -11,12 +11,10 @@ import {
   getScheduledTasksEnabled,
   getSessionCronTasks,
   removeSessionCronTasks,
-  setScheduledTasksEnabled,
-} from '../bootstrap/state.js'
+  setScheduledTasksEnabled} from '../bootstrap/state.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import { cronToHuman } from './cron.js'
 import {
   type CronJitterConfig,
@@ -29,12 +27,10 @@ import {
   markCronTasksFired,
   oneShotJitteredNextCronRunMs,
   readCronTasks,
-  removeCronTasks,
-} from './cronTasks.js'
+  removeCronTasks} from './cronTasks.js'
 import {
   releaseSchedulerLock,
-  tryAcquireSchedulerLock,
-} from './cronTasksLock.js'
+  tryAcquireSchedulerLock} from './cronTasksLock.js'
 import { logForDebugging } from './debug.js'
 
 const CHECK_INTERVAL_MS = 1000
@@ -152,8 +148,7 @@ export function createCronScheduler(
     lockIdentity,
     getJitterConfig,
     isKilled,
-    filter,
-  } = options
+    filter} = options
   const lockOpts = dir || lockIdentity ? { dir, lockIdentity } : undefined
 
   // File-backed tasks only. Session tasks (durable: false) are NOT loaded
@@ -208,8 +203,7 @@ export function createCronScheduler(
           .map(t => t.id)
           .join(
             ',',
-          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       if (onMissed) {
         onMissed(missed)
       } else {
@@ -288,8 +282,7 @@ export function createCronScheduler(
       logEvent('tengu_scheduled_task_fire', {
         recurring: t.recurring ?? false,
         taskId:
-          t.id as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          t.id as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       if (onFireTask) {
         onFireTask(t)
       } else {
@@ -308,8 +301,7 @@ export function createCronScheduler(
         logEvent('tengu_scheduled_task_expired', {
           taskId:
             t.id as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          ageHours,
-        })
+          ageHours})
       }
 
       if (t.recurring && !aged) {
@@ -442,8 +434,7 @@ export function createCronScheduler(
       persistent: false,
       ignoreInitial: true,
       awaitWriteFinish: { stabilityThreshold: FILE_STABILITY_MS },
-      ignorePermissionErrors: true,
-    })
+      ignorePermissionErrors: true})
     watcher.on('add', () => void load(false))
     watcher.on('change', () => void load(false))
     watcher.on('unlink', () => {
@@ -526,8 +517,7 @@ export function createCronScheduler(
         if (t < min) min = t
       }
       return min === Infinity ? null : min
-    },
-  }
+    }}
 }
 
 /**

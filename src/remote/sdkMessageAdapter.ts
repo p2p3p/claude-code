@@ -7,14 +7,12 @@ import type {
   SDKStatusMessage,
   SDKSystemMessage,
   SDKToolProgressMessage,
-  SDKUserMessage,
-} from '../entrypoints/agentSdkTypes.js'
+  SDKUserMessage} from '../entrypoints/agentSdkTypes.js'
 import type {
   AssistantMessage,
   Message,
   StreamEvent,
-  SystemMessage,
-} from '../types/message.js'
+  SystemMessage} from '../types/message.js'
 import { logForDebugging } from '../utils/debug.js'
 import { fromSDKCompactMetadata } from '../utils/messages/mappers.js'
 import { createUserMessage } from '../utils/messages.js'
@@ -36,8 +34,7 @@ function convertAssistantMessage(msg: SDKAssistantMessage): AssistantMessage {
     uuid: msg.uuid!,
     requestId: undefined,
     timestamp: new Date().toISOString(),
-    error: msg.error,
-  }
+    error: msg.error}
 }
 
 /**
@@ -46,8 +43,7 @@ function convertAssistantMessage(msg: SDKAssistantMessage): AssistantMessage {
 function convertStreamEvent(msg: SDKPartialAssistantMessage): StreamEvent {
   return {
     type: 'stream_event',
-    event: msg.event,
-  }
+    event: msg.event}
 }
 
 /**
@@ -65,8 +61,7 @@ function convertResultMessage(msg: SDKResultMessage): SystemMessage {
     content,
     level: isError ? 'warning' : 'info',
     uuid: msg.uuid!,
-    timestamp: new Date().toISOString(),
-  }
+    timestamp: new Date().toISOString()}
 }
 
 /**
@@ -79,8 +74,7 @@ function convertInitMessage(msg: SDKSystemMessage): SystemMessage {
     content: `Remote session initialized (model: ${msg.model})`,
     level: 'info',
     uuid: msg.uuid!,
-    timestamp: new Date().toISOString(),
-  }
+    timestamp: new Date().toISOString()}
 }
 
 /**
@@ -100,8 +94,7 @@ function convertStatusMessage(msg: SDKStatusMessage): SystemMessage | null {
         : `Status: ${msg.status}`,
     level: 'info',
     uuid: msg.uuid!,
-    timestamp: new Date().toISOString(),
-  }
+    timestamp: new Date().toISOString()}
 }
 
 /**
@@ -119,8 +112,7 @@ function convertToolProgressMessage(
     level: 'info',
     uuid: msg.uuid!,
     timestamp: new Date().toISOString(),
-    toolUseID: msg.tool_use_id,
-  }
+    toolUseID: msg.tool_use_id}
 }
 
 /**
@@ -136,8 +128,7 @@ function convertCompactBoundaryMessage(
     level: 'info',
     uuid: msg.uuid!,
     timestamp: new Date().toISOString(),
-    compactMetadata: fromSDKCompactMetadata(msg.compact_metadata),
-  }
+    compactMetadata: fromSDKCompactMetadata(msg.compact_metadata)}
 }
 
 /**
@@ -174,8 +165,7 @@ export function convertSDKMessage(
     case 'assistant':
       return {
         type: 'message',
-        message: convertAssistantMessage(msg as SDKAssistantMessage),
-      }
+        message: convertAssistantMessage(msg as SDKAssistantMessage)}
 
     case 'user': {
       const userMsg = msg as SDKUserMessage
@@ -194,9 +184,7 @@ export function convertSDKMessage(
             content,
             toolUseResult: userMsg.tool_use_result,
             uuid: userMsg.uuid,
-            timestamp: userMsg.timestamp,
-          }),
-        }
+            timestamp: userMsg.timestamp})}
       }
       // When converting historical events, user-typed messages need to be
       // rendered (they weren't added locally by the REPL). Skip tool_results
@@ -209,9 +197,7 @@ export function convertSDKMessage(
               content,
               toolUseResult: userMsg.tool_use_result,
               uuid: userMsg.uuid,
-              timestamp: userMsg.timestamp,
-            }),
-          }
+              timestamp: userMsg.timestamp})}
         }
       }
       // User-typed messages (string content) are already added locally by REPL.
@@ -222,8 +208,7 @@ export function convertSDKMessage(
     case 'stream_event':
       return {
         type: 'stream_event',
-        event: convertStreamEvent(msg as SDKPartialAssistantMessage),
-      }
+        event: convertStreamEvent(msg as SDKPartialAssistantMessage)}
 
     case 'result':
       // Only show result messages for errors. Success results are noise
@@ -231,8 +216,7 @@ export function convertSDKMessage(
       if ((msg as SDKResultMessage).subtype !== 'success') {
         return {
           type: 'message',
-          message: convertResultMessage(msg as SDKResultMessage),
-        }
+          message: convertResultMessage(msg as SDKResultMessage)}
       }
       return { type: 'ignored' }
 
@@ -252,8 +236,7 @@ export function convertSDKMessage(
           type: 'message',
           message: convertCompactBoundaryMessage(
             msg as SDKCompactBoundaryMessage,
-          ),
-        }
+          )}
       }
       // hook_response and other subtypes
       logForDebugging(
@@ -265,8 +248,7 @@ export function convertSDKMessage(
     case 'tool_progress':
       return {
         type: 'message',
-        message: convertToolProgressMessage(msg as SDKToolProgressMessage),
-      }
+        message: convertToolProgressMessage(msg as SDKToolProgressMessage)}
 
     case 'auth_status':
       // Auth status is handled separately, not converted to a display message

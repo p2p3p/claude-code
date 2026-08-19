@@ -4,8 +4,9 @@ import { Box, Text, type TextProps } from '@anthropic/ink';
 import { useAppState } from '../../state/AppState.js';
 import { getRunningTeammatesSorted } from '../../tasks/InProcessTeammateTask/InProcessTeammateTask.js';
 import { formatNumber } from '../../utils/format.js';
+import { t } from '../../utils/i18n/index.js';
 import { TeammateSpinnerLine } from './TeammateSpinnerLine.js';
-import { TEAMMATE_SELECT_HINT } from './teammateSelectHint.js';
+import { getTeammateSelectHint } from './teammateSelectHint.js';
 
 type Props = {
   selectedIndex?: number;
@@ -25,8 +26,7 @@ export function TeammateSpinnerTree({
   allIdle,
   leaderVerb,
   leaderTokenCount,
-  leaderIdleText,
-}: Props): React.ReactNode {
+  leaderIdleText}: Props): React.ReactNode {
   const tasks = useAppState(s => s.tasks);
   const viewingAgentTaskId = useAppState(s => s.viewingAgentTaskId);
   const showTeammateMessagePreview = useAppState(s => s.showTeammateMessagePreview);
@@ -71,8 +71,8 @@ export function TeammateSpinnerTree({
             <Text dimColor={!isLeaderHighlighted}> · {formatNumber(leaderTokenCount)} tokens</Text>
           )}
           {/* Hints - select hint when highlighted, view hint when selected but not foregrounded */}
-          {isLeaderHighlighted && <Text dimColor> · {TEAMMATE_SELECT_HINT}</Text>}
-          {isLeaderSelected && !isLeaderForegrounded && <Text dimColor> · enter to view</Text>}
+          {isLeaderHighlighted && <Text dimColor> · {getTeammateSelectHint()}</Text>}
+          {isLeaderSelected && !isLeaderForegrounded && <Text dimColor>{t('teammateSpinner.enterToView')}</Text>}
         </Box>
       }
       {teammateTasks.map((teammate, index) => (
@@ -104,7 +104,7 @@ function HideRow({ isSelected }: { isSelected: boolean }): React.ReactNode {
       <Text dimColor={!isSelected} bold={isSelected}>
         hide
       </Text>
-      {isSelected && <Text dimColor> · enter to collapse</Text>}
+      {isSelected && <Text dimColor>{t('teammateSpinner.enterToCollapse')}</Text>}
     </Box>
   );
 }

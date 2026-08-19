@@ -32,8 +32,7 @@ import { feature } from 'bun:bundle'
 import axios from 'axios'
 import {
   createV2ReplTransport,
-  type ReplBridgeTransport,
-} from './replBridgeTransport.js'
+  type ReplBridgeTransport} from './replBridgeTransport.js'
 import { buildCCRv2SdkUrl } from './workSecret.js'
 import { toCompatSessionId } from './sessionIdCompat.js'
 import { FlushGate } from './flushGate.js'
@@ -41,8 +40,7 @@ import { createTokenRefreshScheduler } from './jwtUtils.js'
 import { getTrustedDeviceToken } from './trustedDevice.js'
 import {
   getEnvLessBridgeConfig,
-  type EnvLessBridgeConfig,
-} from './envLessBridgeConfig.js'
+  type EnvLessBridgeConfig} from './envLessBridgeConfig.js'
 import {
   handleIngressMessage,
   handleServerControlRequest,
@@ -51,8 +49,7 @@ import {
   extractTitleText,
   shouldReportRunningForMessage,
   shouldReportRunningForMessages,
-  BoundedUUIDSet,
-} from './bridgeMessaging.js'
+  BoundedUUIDSet} from './bridgeMessaging.js'
 import { logBridgeSkip } from './debugUtils.js'
 import { logForDebugging } from '../utils/debug.js'
 import { logForDiagnosticsNoPII } from '../utils/diagLogs.js'
@@ -62,15 +59,13 @@ import { sleep } from '../utils/sleep.js'
 import { registerCleanup } from '../utils/cleanupRegistry.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import type { ReplBridgeHandle, BridgeState } from './replBridge.js'
 import type { Message } from '../types/message.js'
 import type { SDKMessage } from '../entrypoints/agentSdkTypes.js'
 import type {
   SDKControlRequest,
-  SDKControlResponse,
-} from '../entrypoints/sdk/controlTypes.js'
+  SDKControlResponse} from '../entrypoints/sdk/controlTypes.js'
 import type { StdoutMessage } from '../entrypoints/sdk/controlTypes.js'
 import type { PermissionMode } from '../utils/permissions/PermissionMode.js'
 import { setSessionMetadataChangedListener } from '../utils/sessionState.js'
@@ -97,8 +92,7 @@ function oauthHeaders(accessToken: string): Record<string, string> {
   return {
     Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'application/json',
-    'anthropic-version': ANTHROPIC_VERSION,
-  }
+    'anthropic-version': ANTHROPIC_VERSION}
 }
 
 export type EnvLessBridgeParams = {
@@ -173,8 +167,7 @@ export async function initEnvLessBridgeCore(
     onSetPermissionMode,
     onStateChange,
     outboundOnly,
-    tags,
-  } = params
+    tags} = params
 
   const cfg = await getEnvLessBridgeConfig()
 
@@ -247,8 +240,7 @@ export async function initEnvLessBridgeCore(
       // MCP servers. Frozen-at-construction is correct: transport is fully
       // rebuilt on refresh (rebuildTransport below).
       getAuthToken: () => credentials.worker_jwt,
-      outboundOnly,
-    })
+      outboundOnly})
   } catch (err) {
     logForDebugging(
       `[remote-bridge] v2 transport setup failed: ${errorMessage(err)}`,
@@ -319,8 +311,7 @@ export async function initEnvLessBridgeCore(
       v2: true,
       elapsed_ms: cfg.connect_timeout_ms,
       cause:
-        cause as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        cause as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
   }
 
   // Mirror external metadata updates from the live REPL into the bridge's
@@ -399,8 +390,7 @@ export async function initEnvLessBridgeCore(
         }
       })()
     },
-    label: 'remote',
-  })
+    label: 'remote'})
   refresh.scheduleFromExpiresIn(sessionId, credentials.expires_in)
 
   // ── 6. Wire callbacks (extracted so transport-rebuild can re-wire) ──────
@@ -412,8 +402,7 @@ export async function initEnvLessBridgeCore(
       logEvent('tengu_bridge_repl_ws_connected', {
         v2: true,
         cause:
-          connectCause as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          connectCause as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
       if (!initialFlushDone && initialMessages && initialMessages.length > 0) {
         initialFlushDone = true
@@ -469,8 +458,7 @@ export async function initEnvLessBridgeCore(
             onSetModel,
             onSetMaxThinkingTokens,
             onSetPermissionMode,
-            outboundOnly,
-          }),
+            outboundOnly}),
       )
     })
 
@@ -523,8 +511,7 @@ export async function initEnvLessBridgeCore(
         heartbeatJitterFraction: cfg.heartbeat_jitter_fraction,
         initialSequenceNum: seq,
         getAuthToken: () => fresh.worker_jwt,
-        outboundOnly,
-      })
+        outboundOnly})
       if (tornDown) {
         // Teardown fired during the async createV2ReplTransport window.
         // Don't wire/connect/schedule — we'd re-arm timers after cancelAll()
@@ -637,8 +624,7 @@ export async function initEnvLessBridgeCore(
     for (const msg of msgs) recentPostedUUIDs.add(msg.uuid)
     const events: TransportMessage[] = toSDKMessages(msgs).map(m => ({
       ...m,
-      session_id: sessionId,
-    })) as TransportMessage[]
+      session_id: sessionId})) as TransportMessage[]
     if (shouldReportRunningForMessages(msgs)) {
       transport.reportState('running')
     }
@@ -665,8 +651,7 @@ export async function initEnvLessBridgeCore(
     }
     const events: TransportMessage[] = toSDKMessages(capped).map(m => ({
       ...m,
-      session_id: sessionId,
-    })) as TransportMessage[]
+      session_id: sessionId})) as TransportMessage[]
     if (events.length === 0) return
     // Mid-turn init: if Remote Control is enabled while a query is running,
     // the last eligible message may be a real user prompt or tool_result.
@@ -704,8 +689,7 @@ export async function initEnvLessBridgeCore(
     transport.reportState('idle')
     const resultMsg = {
       ...makeResultMessage(sessionId),
-      session_id: sessionId,
-    } as unknown as TransportMessage
+      session_id: sessionId} as unknown as TransportMessage
     void transport.write(resultMsg as StdoutMessage)
     let token = getAccessToken()
     let status = await archiveSession(
@@ -769,8 +753,7 @@ export async function initEnvLessBridgeCore(
         archive_ok: typeof status === 'number' && status < 400,
         archive_http_status: typeof status === 'number' ? status : undefined,
         archive_timeout: status === 'timeout',
-        archive_no_token: status === 'no_token',
-      },
+        archive_no_token: status === 'no_token'},
     )
   }
   const unregister = registerCleanup(teardown)
@@ -778,15 +761,13 @@ export async function initEnvLessBridgeCore(
   if (feature('CCR_MIRROR') && outboundOnly) {
     logEvent('tengu_ccr_mirror_started', {
       v2: true,
-      expires_in_s: credentials.expires_in,
-    })
+      expires_in_s: credentials.expires_in})
   } else {
     logEvent('tengu_bridge_repl_started', {
       has_initial_messages: !!(initialMessages && initialMessages.length > 0),
       v2: true,
       expires_in_s: credentials.expires_in,
-      inProtectedNamespace: isInProtectedNamespace(),
-    })
+      inProtectedNamespace: isInProtectedNamespace()})
   }
 
   // ── 10. Handle ──────────────────────────────────────────────────────────
@@ -827,8 +808,7 @@ export async function initEnvLessBridgeCore(
       for (const msg of filtered) recentPostedUUIDs.add(msg.uuid)
       const events: TransportMessage[] = toSDKMessages(filtered).map(m => ({
         ...m,
-        session_id: sessionId,
-      })) as TransportMessage[]
+        session_id: sessionId})) as TransportMessage[]
       // v2 does not derive worker_status from events server-side (unlike v1
       // session-ingress session_status_updater.go). Push it from here so the
       // CCR web session list shows Running instead of stuck on Idle. Only
@@ -851,8 +831,7 @@ export async function initEnvLessBridgeCore(
       }
       const events = filtered.map(m => ({
         ...m,
-        session_id: sessionId,
-      })) as StdoutMessage[]
+        session_id: sessionId})) as StdoutMessage[]
       void transport.writeBatch(events)
     },
     sendControlRequest(request: SDKControlRequest) {
@@ -864,8 +843,7 @@ export async function initEnvLessBridgeCore(
       }
       const event: TransportMessage = {
         ...request,
-        session_id: sessionId,
-      } as TransportMessage
+        session_id: sessionId} as TransportMessage
       if (
         (request as { request?: { subtype?: string } }).request?.subtype ===
         'can_use_tool'
@@ -886,8 +864,7 @@ export async function initEnvLessBridgeCore(
       }
       const event: TransportMessage = {
         ...response,
-        session_id: sessionId,
-      } as TransportMessage
+        session_id: sessionId} as TransportMessage
       transport.reportState('running')
       void transport.write(event as StdoutMessage)
       logForDebugging('[remote-bridge] Sent control_response')
@@ -902,8 +879,7 @@ export async function initEnvLessBridgeCore(
       const event: TransportMessage = {
         type: 'control_cancel_request' as const,
         request_id: requestId,
-        session_id: sessionId,
-      } as TransportMessage
+        session_id: sessionId} as TransportMessage
       // Hook/classifier/channel/recheck resolved the permission locally —
       // interactiveHandler calls only cancelRequest (no sendResponse) on
       // those paths, so without this the server stays on requires_action.
@@ -921,16 +897,14 @@ export async function initEnvLessBridgeCore(
       transport.reportState('idle')
       const resultMsg = {
         ...makeResultMessage(sessionId),
-        session_id: sessionId,
-      } as unknown as TransportMessage
+        session_id: sessionId} as unknown as TransportMessage
       void transport.write(resultMsg as StdoutMessage)
       logForDebugging(`[remote-bridge] Sent result`)
     },
     async teardown() {
       unregister()
       await teardown()
-    },
-  }
+    }}
 }
 
 // ─── Session API (v2 /code/sessions, no env) ─────────────────────────────────
@@ -963,13 +937,11 @@ async function withRetry<T>(
 // without pulling in this file's heavy CLI tree (analytics, transport).
 export {
   createCodeSession,
-  type RemoteCredentials,
-} from './codeSessionApi.js'
+  type RemoteCredentials} from './codeSessionApi.js'
 import {
   createCodeSession,
   fetchRemoteCredentials as fetchRemoteCredentialsRaw,
-  type RemoteCredentials,
-} from './codeSessionApi.js'
+  type RemoteCredentials} from './codeSessionApi.js'
 import { getBridgeBaseUrlOverride } from './bridgeConfig.js'
 
 // CLI-side wrapper that applies the CLAUDE_BRIDGE_BASE_URL dev override and
@@ -1035,11 +1007,9 @@ async function archiveSession(
         headers: {
           ...oauthHeaders(accessToken),
           'anthropic-beta': 'ccr-byoc-2025-07-29',
-          'x-organization-uuid': orgUUID,
-        },
+          'x-organization-uuid': orgUUID},
         timeout: timeoutMs,
-        validateStatus: () => true,
-      },
+        validateStatus: () => true},
     )
     logForDebugging(
       `[remote-bridge] Archive ${compatId} status=${response.status}`,

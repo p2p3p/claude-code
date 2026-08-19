@@ -20,8 +20,7 @@ import {
   executeReplace,
   executeToggleCase,
   executeX,
-  type OperatorContext,
-} from './operators.js'
+  type OperatorContext} from './operators.js'
 import {
   type CommandState,
   FIND_KEYS,
@@ -34,8 +33,7 @@ import {
   SIMPLE_MOTIONS,
   TEXT_OBJ_SCOPES,
   TEXT_OBJ_TYPES,
-  type TextObjScope,
-} from './types.js'
+  type TextObjScope} from './types.js'
 
 /**
  * Context passed to transition functions.
@@ -109,8 +107,7 @@ function handleNormalInput(
       execute: () => {
         const target = resolveMotion(input, ctx.cursor, count)
         ctx.setOffset(target.offset)
-      },
-    }
+      }}
   }
 
   if (FIND_KEYS.has(input)) {
@@ -153,8 +150,7 @@ function handleNormalInput(
         } else {
           ctx.setOffset(ctx.cursor.goToLine(count).offset)
         }
-      },
-    }
+      }}
   }
   if (input === '.') {
     return { execute: () => ctx.onDotRepeat?.() }
@@ -171,8 +167,7 @@ function handleNormalInput(
   if (input === 'I') {
     return {
       execute: () =>
-        ctx.enterInsert(ctx.cursor.firstNonBlankInLogicalLine().offset),
-    }
+        ctx.enterInsert(ctx.cursor.firstNonBlankInLogicalLine().offset)}
   }
   if (input === 'a') {
     return {
@@ -181,13 +176,11 @@ function handleNormalInput(
           ? ctx.cursor.offset
           : ctx.cursor.right().offset
         ctx.enterInsert(newOffset)
-      },
-    }
+      }}
   }
   if (input === 'A') {
     return {
-      execute: () => ctx.enterInsert(ctx.cursor.endOfLogicalLine().offset),
-    }
+      execute: () => ctx.enterInsert(ctx.cursor.endOfLogicalLine().offset)}
   }
   if (input === 'o') {
     return { execute: () => executeOpenLine('below', ctx) }
@@ -215,15 +208,12 @@ function handleOperatorInput(
         type: 'operatorTextObj',
         op,
         count,
-        scope: TEXT_OBJ_SCOPES[input],
-      },
-    }
+        scope: TEXT_OBJ_SCOPES[input]}}
   }
 
   if (FIND_KEYS.has(input)) {
     return {
-      next: { type: 'operatorFind', op, count, find: input as FindType },
-    }
+      next: { type: 'operatorFind', op, count, find: input as FindType }}
   }
 
   if (SIMPLE_MOTIONS.has(input)) {
@@ -252,8 +242,7 @@ function fromIdle(input: string, ctx: TransitionContext): TransitionResult {
   }
   if (input === '0') {
     return {
-      execute: () => ctx.setOffset(ctx.cursor.startOfLogicalLine().offset),
-    }
+      execute: () => ctx.setOffset(ctx.cursor.startOfLogicalLine().offset)}
   }
 
   const result = handleNormalInput(input, 1, ctx)
@@ -296,9 +285,7 @@ function fromOperator(
         type: 'operatorCount',
         op: state.op,
         count: state.count,
-        digits: input,
-      },
-    }
+        digits: input}}
   }
 
   const result = handleOperatorInput(state.op, state.count, input, ctx)
@@ -343,8 +330,7 @@ function fromOperatorFind(
 ): TransitionResult {
   return {
     execute: () =>
-      executeOperatorFind(state.op, state.find, input, state.count, ctx),
-  }
+      executeOperatorFind(state.op, state.find, input, state.count, ctx)}
 }
 
 function fromOperatorTextObj(
@@ -360,8 +346,7 @@ function fromOperatorTextObj(
   if (TEXT_OBJ_TYPES.has(input)) {
     return {
       execute: () =>
-        executeOperatorTextObj(state.op, state.scope, input, state.count, ctx),
-    }
+        executeOperatorTextObj(state.op, state.scope, input, state.count, ctx)}
   }
   return { next: { type: 'idle' } }
 }
@@ -378,8 +363,7 @@ function fromFind(
         ctx.setOffset(result)
         ctx.setLastFind(state.find, input)
       }
-    },
-  }
+    }}
 }
 
 function fromG(
@@ -392,8 +376,7 @@ function fromG(
       execute: () => {
         const target = resolveMotion(`g${input}`, ctx.cursor, state.count)
         ctx.setOffset(target.offset)
-      },
-    }
+      }}
   }
   if (input === 'g') {
     // If count provided (e.g., 5gg), go to that line. Otherwise go to first line.
@@ -407,12 +390,10 @@ function fromG(
             offset += (lines[i]?.length ?? 0) + 1 // +1 for newline
           }
           ctx.setOffset(offset)
-        },
-      }
+        }}
     }
     return {
-      execute: () => ctx.setOffset(ctx.cursor.startOfFirstLine().offset),
-    }
+      execute: () => ctx.setOffset(ctx.cursor.startOfFirstLine().offset)}
   }
   return { next: { type: 'idle' } }
 }
@@ -425,8 +406,7 @@ function fromOperatorG(
   if (input === 'j' || input === 'k') {
     return {
       execute: () =>
-        executeOperatorMotion(state.op, `g${input}`, state.count, ctx),
-    }
+        executeOperatorMotion(state.op, `g${input}`, state.count, ctx)}
   }
   if (input === 'g') {
     return { execute: () => executeOperatorGg(state.op, state.count, ctx) }
@@ -478,8 +458,7 @@ function executeRepeatFind(
       f: 'F',
       F: 'f',
       t: 'T',
-      T: 't',
-    }
+      T: 't'}
     findType = flipMap[findType]
   }
 

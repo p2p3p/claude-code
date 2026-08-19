@@ -39,8 +39,7 @@ class FileReadCache {
     if (cachedData && cachedData.mtime === stats.mtimeMs) {
       return {
         content: cachedData.content,
-        encoding: cachedData.encoding,
-      }
+        encoding: cachedData.encoding}
     }
 
     // Cache miss or stale data - read the file
@@ -53,8 +52,7 @@ class FileReadCache {
     this.cache.set(cacheKey, {
       content,
       encoding,
-      mtime: stats.mtimeMs,
-    })
+      mtime: stats.mtimeMs})
 
     // Evict oldest entries if cache is too large
     if (this.cache.size > this.maxCacheSize) {
@@ -87,8 +85,7 @@ class FileReadCache {
   getStats(): { size: number; entries: string[] } {
     return {
       size: this.cache.size,
-      entries: Array.from(this.cache.keys()),
-    }
+      entries: Array.from(this.cache.keys())}
   }
 }
 

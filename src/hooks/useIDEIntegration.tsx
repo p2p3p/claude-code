@@ -7,8 +7,7 @@ import {
   type IDEExtensionInstallationStatus,
   type IdeType,
   initializeIdeIntegration,
-  isSupportedTerminal,
-} from '../utils/ide.js';
+  isSupportedTerminal} from '../utils/ide.js';
 
 type UseIDEIntegrationProps = {
   autoConnectIdeFlag?: boolean;
@@ -23,8 +22,7 @@ export function useIDEIntegration({
   ideToInstallExtension,
   setDynamicMcpConfig,
   setShowIdeOnboarding,
-  setIDEInstallationState,
-}: UseIDEIntegrationProps): void {
+  setIDEInstallationState}: UseIDEIntegrationProps): void {
   useEffect(() => {
     function addIde(ide: DetectedIDEInfo | null) {
       if (!ide) {
@@ -61,9 +59,7 @@ export function useIDEIntegration({
             ideName: ide.name,
             authToken: ide.authToken,
             ideRunningInWindows: ide.ideRunningInWindows,
-            scope: 'dynamic' as const,
-          },
-        };
+            scope: 'dynamic' as const}};
       });
     }
 

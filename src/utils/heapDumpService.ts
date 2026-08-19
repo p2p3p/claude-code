@@ -11,8 +11,7 @@ import {
   getHeapSnapshot,
   getHeapSpaceStatistics,
   getHeapStatistics,
-  type HeapSpaceInfo,
-} from 'v8'
+  type HeapSpaceInfo} from 'v8'
 import { getSessionId } from '../bootstrap/state.js'
 import { logEvent } from '../services/analytics/index.js'
 import { logForDebugging } from './debug.js'
@@ -170,30 +169,25 @@ export async function captureMemoryDiagnostics(
       heapTotal: usage.heapTotal,
       external: usage.external,
       arrayBuffers: usage.arrayBuffers,
-      rss: usage.rss,
-    },
+      rss: usage.rss},
     memoryGrowthRate: {
       bytesPerSecond,
-      mbPerHour,
-    },
+      mbPerHour},
     v8HeapStats: {
       heapSizeLimit: heapStats.heap_size_limit,
       mallocedMemory: heapStats.malloced_memory,
       peakMallocedMemory: heapStats.peak_malloced_memory,
       detachedContexts: heapStats.number_of_detached_contexts,
-      nativeContexts: heapStats.number_of_native_contexts,
-    },
+      nativeContexts: heapStats.number_of_native_contexts},
     v8HeapSpaces: heapSpaceStats?.map(space => ({
       name: space.space_name,
       size: space.space_size,
       used: space.space_used_size,
-      available: space.space_available_size,
-    })),
+      available: space.space_available_size})),
     resourceUsage: {
       maxRSS: resourceUsage.maxRSS * 1024, // Convert KB to bytes
       userCPUTime: resourceUsage.userCPUTime,
-      systemCPUTime: resourceUsage.systemCPUTime,
-    },
+      systemCPUTime: resourceUsage.systemCPUTime},
     activeHandles,
     activeRequests,
     openFileDescriptors,
@@ -202,13 +196,11 @@ export async function captureMemoryDiagnostics(
       recommendation:
         potentialLeaks.length > 0
           ? `WARNING: ${potentialLeaks.length} potential leak indicator(s) found. See potentialLeaks array.`
-          : 'No obvious leak indicators. Check heap snapshot for retained objects.',
-    },
+          : 'No obvious leak indicators. Check heap snapshot for retained objects.'},
     smapsRollup,
     platform: process.platform,
     nodeVersion: process.version,
-    ccVersion: MACRO.VERSION,
-  }
+    ccVersion: MACRO.VERSION}
 }
 
 /**
@@ -248,8 +240,7 @@ export async function performHeapDump(
 
     // Write diagnostics first (cheap, unlikely to fail)
     await writeFile(diagPath, jsonStringify(diagnostics, null, 2), {
-      mode: 0o600,
-    })
+      mode: 0o600})
     logForDebugging(`[HeapDump] Diagnostics written to ${diagPath}`)
 
     // Write heap snapshot (this can crash for very large heaps)
@@ -260,8 +251,7 @@ export async function performHeapDump(
       triggerManual: trigger === 'manual',
       triggerAuto15GB: trigger === 'auto-1.5GB',
       dumpNumber,
-      success: true,
-    })
+      success: true})
 
     return { success: true, heapPath, diagPath }
   } catch (err) {
@@ -271,8 +261,7 @@ export async function performHeapDump(
       triggerManual: trigger === 'manual',
       triggerAuto15GB: trigger === 'auto-1.5GB',
       dumpNumber,
-      success: false,
-    })
+      success: false})
     return { success: false, error: error.message }
   }
 }
@@ -289,8 +278,7 @@ async function writeHeapSnapshot(filepath: string): Promise<void> {
     /* eslint-disable custom-rules/no-sync-fs -- intentionally sync to avoid cloning large heap snapshot string for cross-thread usage */
     // @ts-expect-error 2nd argument is in the next version of Bun
     writeFileSync(filepath, Bun.generateHeapSnapshot('v8', 'arraybuffer'), {
-      mode: 0o600,
-    })
+      mode: 0o600})
     /* eslint-enable custom-rules/no-sync-fs */
 
     // Force GC to try to free that heap snapshot sooner.

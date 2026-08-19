@@ -547,8 +547,7 @@ export function extractHeredocs(
       }
       skippedHeredocRanges.push({
         contentStartIndex,
-        contentEndIndex: skipContentEndIndex,
-      })
+        contentEndIndex: skipContentEndIndex})
       continue
     }
 
@@ -609,8 +608,7 @@ export function extractHeredocs(
       operatorStartIndex: startIndex,
       operatorEndIndex,
       contentStartIndex,
-      contentEndIndex,
-    })
+      contentEndIndex})
   }
 
   // If no valid heredocs found, return original

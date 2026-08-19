@@ -119,8 +119,7 @@ export class DiagnosticTrackingService {
           startText: '',
           endText: '',
           selectToEndOfLine: false,
-          makeFrontmost: false,
-        },
+          makeFrontmost: false},
         this.mcpClient,
       )
     } catch (error) {
@@ -271,8 +270,7 @@ export class DiagnosticTrackingService {
       if (newDiagnostics.length > 0) {
         newDiagnosticFiles.push({
           uri: file.uri,
-          diagnostics: newDiagnostics,
-        })
+          diagnostics: newDiagnostics})
       }
 
       // Update baseline with current diagnostics
@@ -388,8 +386,7 @@ export class DiagnosticTrackingService {
         Error: figures.cross,
         Warning: figures.warning,
         Info: figures.info,
-        Hint: figures.star,
-      }[severity] || figures.bullet
+        Hint: figures.star}[severity] || figures.bullet
     )
   }
 }

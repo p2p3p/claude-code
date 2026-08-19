@@ -5,5 +5,4 @@ export type {
   KeybindingContextName,
   KeybindingBlock,
   Chord,
-  KeybindingAction,
-} from '@anthropic/ink'
+  KeybindingAction} from '@anthropic/ink'

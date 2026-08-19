@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { KeyboardShortcutHint } from '@anthropic/ink';
 import { Box, Text } from '@anthropic/ink';
 import { useKeybinding } from '../keybindings/useKeybinding.js';
+import { t } from './i18n/index.js';
 
 type Props = {
   onRun: () => void;
@@ -31,15 +32,15 @@ export function AutoRunIssueNotification({ onRun, onCancel, reason }: Props): Re
   return (
     <Box flexDirection="column" marginTop={1}>
       <Box>
-        <Text bold>Running feedback capture...</Text>
+        <Text bold>{t('autoRunIssue.runningFeedback')}</Text>
       </Box>
       <Box>
         <Text dimColor>
-          Press <KeyboardShortcutHint shortcut="Esc" action="cancel" /> anytime
+          {t('autoRunIssue.pressEscAnyTime')}
         </Text>
       </Box>
       <Box>
-        <Text dimColor>Reason: {reason}</Text>
+        <Text dimColor>{t('autoRunIssue.reason', { reason })}</Text>
       </Box>
     </Box>
   );
@@ -84,10 +85,10 @@ export function getAutoRunCommand(reason: AutoRunIssueReason): string {
 export function getAutoRunIssueReasonText(reason: AutoRunIssueReason): string {
   switch (reason) {
     case 'feedback_survey_bad':
-      return 'You responded "Bad" to the feedback survey';
+      return t('autoRunIssue.reasonBad');
     case 'feedback_survey_good':
-      return 'You responded "Good" to the feedback survey';
+      return t('autoRunIssue.reasonGood');
     default:
-      return 'Unknown reason';
+      return t('autoRunIssue.reasonUnknown');
   }
 }

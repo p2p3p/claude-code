@@ -9,8 +9,7 @@ import {
   isTodoV2Enabled,
   listTasks,
   onTasksUpdated,
-  resetTaskList,
-} from '../utils/tasks.js'
+  resetTaskList} from '../utils/tasks.js'
 import { isTeamLead } from '../utils/teammate.js'
 
 const HIDE_DELAY_MS = 5000

@@ -5,6 +5,7 @@ import type { ScrollBoxHandle, FocusMove, SelectionState } from '@anthropic/ink'
 import { useSelection, type Key, useInput, isXtermJs, getClipboardPath } from '@anthropic/ink';
 import { useKeybindings } from '../keybindings/useKeybinding.js';
 import { logForDebugging } from '../utils/debug.js';
+import { t } from '../utils/i18n/index.js';
 
 type Props = {
   scrollRef: RefObject<ScrollBoxHandle | null>;
@@ -327,8 +328,7 @@ export function initWheelAccel(xtermJs = false, base = 1): WheelAccelState {
     base,
     pendingFlip: false,
     wheelMode: false,
-    burstCount: 0,
-  };
+    burstCount: 0};
 }
 
 // Lazy-init helper. isXtermJs() combines the TERM_PROGRAM env check + async
@@ -381,13 +381,13 @@ export function ScrollKeybindingHandler({ scrollRef, isActive, onScroll, isModal
     let msg: string;
     switch (path) {
       case 'native':
-        msg = `copied ${n} chars to clipboard`;
+        msg = t('selectionCopy.native', n);
         break;
       case 'tmux-buffer':
-        msg = `copied ${n} chars to tmux buffer · paste with prefix + ]`;
+        msg = t('selectionCopy.tmux', n);
         break;
       case 'osc52':
-        msg = `sent ${n} chars via OSC 52 · check terminal clipboard settings if paste fails`;
+        msg = t('selectionCopy.osc52', n);
         break;
     }
     addNotification({
@@ -395,8 +395,7 @@ export function ScrollKeybindingHandler({ scrollRef, isActive, onScroll, isModal
       text: msg,
       color: 'suggestion',
       priority: 'immediate',
-      timeoutMs: path === 'native' ? 2000 : 4000,
-    });
+      timeoutMs: path === 'native' ? 2000 : 4000});
   }
 
   function copyAndToast(): void {
@@ -511,8 +510,7 @@ export function ScrollKeybindingHandler({ scrollRef, isActive, onScroll, isModal
         s.scrollToBottom();
         onScroll?.(true, s);
       },
-      'selection:copy': copyAndToast,
-    },
+      'selection:copy': copyAndToast},
     { context: 'Scroll', isActive },
   );
 
@@ -553,8 +551,7 @@ export function ScrollKeybindingHandler({ scrollRef, isActive, onScroll, isModal
         translateSelectionForJump(s, d);
         const sticky = jumpBy(s, d);
         onScroll?.(sticky, s);
-      },
-    },
+      }},
     { context: 'Scroll', isActive },
   );
 

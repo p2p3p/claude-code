@@ -4,9 +4,9 @@ import type { BundledSkillDefinition } from '../skills/bundledSkills.js'
 import type {
   CommandMetadata,
   PluginAuthor,
-  PluginManifest,
-} from '../utils/plugins/schemas.js'
+  PluginManifest} from '../utils/plugins/schemas.js'
 import type { HooksSettings } from '../utils/settings/types.js'
+import { t } from '../utils/i18n/index.js'
 
 export type { PluginAuthor, PluginManifest, CommandMetadata }
 
@@ -297,67 +297,65 @@ export function getPluginErrorMessage(error: PluginError): string {
     case 'generic-error':
       return error.error
     case 'path-not-found':
-      return `Path not found: ${error.path} (${error.component})`
+      return t('pluginErrors.pathNotFound', error.component, error.path)
     case 'git-auth-failed':
-      return `Git authentication failed (${error.authType}): ${error.gitUrl}`
+      return t('pluginErrors.gitAuthFailed', error.authType.toUpperCase(), error.gitUrl)
     case 'git-timeout':
-      return `Git ${error.operation} timeout: ${error.gitUrl}`
+      return t('pluginErrors.gitTimeout', error.operation, error.gitUrl)
     case 'network-error':
-      return `Network error: ${error.url}${error.details ? ` - ${error.details}` : ''}`
+      return t('pluginErrors.networkError', error.url, error.details ?? '')
     case 'manifest-parse-error':
-      return `Manifest parse error: ${error.parseError}`
+      return t('pluginErrors.manifestParseError', error.manifestPath, error.parseError)
     case 'manifest-validation-error':
-      return `Manifest validation failed: ${error.validationErrors.join(', ')}`
+      return t('pluginErrors.manifestValidationError', error.manifestPath, error.validationErrors.join(', '))
     case 'plugin-not-found':
-      return `Plugin ${error.pluginId} not found in marketplace ${error.marketplace}`
+      return t('pluginErrors.pluginNotFound', error.pluginId, error.marketplace)
     case 'marketplace-not-found':
-      return `Marketplace ${error.marketplace} not found`
+      return t('pluginErrors.marketplaceNotFound', error.marketplace)
     case 'marketplace-load-failed':
-      return `Marketplace ${error.marketplace} failed to load: ${error.reason}`
+      return t('pluginErrors.marketplaceLoadFailed', error.marketplace, error.reason)
     case 'mcp-config-invalid':
-      return `MCP server ${error.serverName} invalid: ${error.validationError}`
+      return t('pluginErrors.mcpConfigInvalid', error.serverName, error.validationError)
     case 'mcp-server-suppressed-duplicate': {
-      const dup = error.duplicateOf.startsWith('plugin:')
-        ? `server provided by plugin "${error.duplicateOf.split(':')[1] ?? '?'}"`
-        : `already-configured "${error.duplicateOf}"`
-      return `MCP server "${error.serverName}" skipped — same command/URL as ${dup}`
+      if (error.duplicateOf.startsWith('plugin:')) {
+        const plugin = error.duplicateOf.split(':')[1] ?? '?'
+        return t('pluginErrors.mcpServerSuppressedDuplicatePlugin', error.serverName, plugin)
+      }
+      return t('pluginErrors.mcpServerSuppressedDuplicateConfig', error.serverName, error.duplicateOf)
     }
     case 'hook-load-failed':
-      return `Hook load failed: ${error.reason}`
+      return t('pluginErrors.hookLoadFailed', error.hookPath, error.reason)
     case 'component-load-failed':
-      return `${error.component} load failed from ${error.path}: ${error.reason}`
+      return t('pluginErrors.componentLoadFailed', error.component, error.path, error.reason)
     case 'mcpb-download-failed':
-      return `Failed to download MCPB from ${error.url}: ${error.reason}`
+      return t('pluginErrors.mcpbDownloadFailed', error.url, error.reason)
     case 'mcpb-extract-failed':
-      return `Failed to extract MCPB ${error.mcpbPath}: ${error.reason}`
+      return t('pluginErrors.mcpbExtractFailed', error.mcpbPath, error.reason)
     case 'mcpb-invalid-manifest':
-      return `MCPB manifest invalid at ${error.mcpbPath}: ${error.validationError}`
+      return t('pluginErrors.mcpbInvalidManifest', error.mcpbPath, error.validationError)
     case 'lsp-config-invalid':
-      return `Plugin "${error.plugin}" has invalid LSP server config for "${error.serverName}": ${error.validationError}`
+      return t('pluginErrors.lspConfigInvalid', error.serverName, error.validationError)
     case 'lsp-server-start-failed':
-      return `Plugin "${error.plugin}" failed to start LSP server "${error.serverName}": ${error.reason}`
+      return t('pluginErrors.lspServerStartFailed', error.serverName, error.reason)
     case 'lsp-server-crashed':
       if (error.signal) {
-        return `Plugin "${error.plugin}" LSP server "${error.serverName}" crashed with signal ${error.signal}`
+        return t('pluginErrors.lspCrashedSignal', error.plugin, error.serverName, error.signal)
       }
-      return `Plugin "${error.plugin}" LSP server "${error.serverName}" crashed with exit code ${error.exitCode ?? 'unknown'}`
+      return t('pluginErrors.lspCrashedExitCode', error.plugin, error.serverName, error.exitCode ?? 'unknown')
     case 'lsp-request-timeout':
-      return `Plugin "${error.plugin}" LSP server "${error.serverName}" timed out on ${error.method} request after ${error.timeoutMs}ms`
+      return t('pluginErrors.lspRequestTimeout', error.serverName, error.method, error.timeoutMs)
     case 'lsp-request-failed':
-      return `Plugin "${error.plugin}" LSP server "${error.serverName}" ${error.method} request failed: ${error.error}`
+      return t('pluginErrors.lspRequestFailed', error.serverName, error.method, error.error)
     case 'marketplace-blocked-by-policy':
       if (error.blockedByBlocklist) {
-        return `Marketplace '${error.marketplace}' is blocked by enterprise policy`
+        return t('pluginErrors.blockedByBlocklist', error.marketplace)
       }
-      return `Marketplace '${error.marketplace}' is not in the allowed marketplace list`
-    case 'dependency-unsatisfied': {
-      const hint =
-        error.reason === 'not-enabled'
-          ? 'disabled — enable it or remove the dependency'
-          : 'not found in any configured marketplace'
-      return `Dependency "${error.dependency}" is ${hint}`
-    }
+      return t('pluginErrors.notInAllowedList', error.marketplace)
+    case 'dependency-unsatisfied':
+      return error.reason === 'not-enabled'
+        ? t('pluginErrors.depNotEnabled', error.dependency)
+        : t('pluginErrors.depNotInstalled', error.dependency)
     case 'plugin-cache-miss':
-      return `Plugin "${error.plugin}" not cached at ${error.installPath} — run /plugins to refresh`
+      return t('pluginErrors.pluginCacheMiss', error.plugin, error.installPath)
   }
 }

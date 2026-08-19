@@ -2,6 +2,7 @@ import { feature } from 'bun:bundle'
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
 import { randomUUID } from 'crypto'
 import { CHANNEL_TAG } from 'src/constants/xml.js'
+import { t } from 'src/utils/i18n/index.js'
 import { logForDebugging } from 'src/utils/debug.js'
 import { getAllowedChannels } from '../../../bootstrap/state.js'
 import type { BridgePermissionCallbacks } from '../../../bridge/bridgePermissionCallbacks.js'
@@ -10,28 +11,24 @@ import { getTerminalFocused } from '@anthropic/ink'
 import {
   CHANNEL_PERMISSION_REQUEST_METHOD,
   type ChannelPermissionRequestParams,
-  findChannelEntry,
-} from '../../../services/mcp/channelNotification.js'
+  findChannelEntry} from '../../../services/mcp/channelNotification.js'
 import type { ChannelPermissionCallbacks } from '../../../services/mcp/channelPermissions.js'
 import {
   filterPermissionRelayClients,
   shortRequestId,
-  truncateForPreview,
-} from '../../../services/mcp/channelPermissions.js'
+  truncateForPreview} from '../../../services/mcp/channelPermissions.js'
 import { executeAsyncClassifierCheck } from '@claude-code-best/builtin-tools/tools/BashTool/bashPermissions.js'
 import { BASH_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/BashTool/toolName.js'
 import {
   clearClassifierChecking,
   setClassifierApproval,
   setClassifierChecking,
-  setYoloClassifierApproval,
-} from '../../../utils/classifierApprovals.js'
+  setYoloClassifierApproval} from '../../../utils/classifierApprovals.js'
 import { errorMessage } from '../../../utils/errors.js'
 import {
   forgetPipePermissionRequest,
   notifyPipePermissionCancel,
-  tryRelayPipePermissionRequest,
-} from '../../../utils/pipePermissionRelay.js'
+  tryRelayPipePermissionRequest} from '../../../utils/pipePermissionRelay.js'
 import type { PermissionDecision } from '../../../utils/permissions/PermissionResult.js'
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js'
 import { hasPermissionsToUseTool } from '../../../utils/permissions/permissions.js'
@@ -113,8 +110,7 @@ export function getLatestChannelContextHint(
           (typeof message.origin.server === 'string'
             ? message.origin.server
             : undefined),
-        chatId: parsed.chatId,
-      }
+        chatId: parsed.chatId}
     }
   }
 
@@ -145,8 +141,7 @@ function handleInteractivePermission(
     result,
     awaitAutomatedChecksBeforeDialog,
     bridgeCallbacks,
-    channelCallbacks,
-  } = params
+    channelCallbacks} = params
 
   const { resolve: resolveOnce, isResolved, claim } = createResolveOnce(resolve)
   let userInteracted = false
@@ -195,8 +190,7 @@ function handleInteractivePermission(
       ? {
           classifierCheckInProgress:
             !!result.pendingClassifierCheck &&
-            !awaitAutomatedChecksBeforeDialog,
-        }
+            !awaitAutomatedChecksBeforeDialog}
       : {}),
     onUserInteraction() {
       // Called when user starts interacting with the permission dialog
@@ -233,8 +227,7 @@ function handleInteractivePermission(
       if (bridgeCallbacks && bridgeRequestId) {
         bridgeCallbacks.sendResponse(bridgeRequestId, {
           behavior: 'deny',
-          message: 'User aborted',
-        })
+          message: t('permissionHooks.userAborted')})
         bridgeCallbacks.cancelRequest(bridgeRequestId)
       }
       channelUnsubscribe?.()
@@ -258,8 +251,7 @@ function handleInteractivePermission(
         bridgeCallbacks.sendResponse(bridgeRequestId, {
           behavior: 'allow',
           updatedInput,
-          updatedPermissions: permissionUpdates,
-        })
+          updatedPermissions: permissionUpdates})
         bridgeCallbacks.cancelRequest(bridgeRequestId)
       }
       channelUnsubscribe?.()
@@ -282,8 +274,7 @@ function handleInteractivePermission(
       if (bridgeCallbacks && bridgeRequestId) {
         bridgeCallbacks.sendResponse(bridgeRequestId, {
           behavior: 'deny',
-          message: feedback ?? 'User denied permission',
-        })
+          message: feedback ?? t('permissionHooks.userDeniedPermission')})
         bridgeCallbacks.cancelRequest(bridgeRequestId)
       }
       channelUnsubscribe?.()
@@ -291,8 +282,7 @@ function handleInteractivePermission(
       ctx.logDecision(
         {
           decision: 'reject',
-          source: { type: 'user_reject', hasFeedback: !!feedback },
-        },
+          source: { type: 'user_reject', hasFeedback: !!feedback }},
         { permissionPromptStartTimeMs },
       )
       resolveOnce(ctx.cancelAndAbort(feedback, undefined, contentBlocks))
@@ -325,8 +315,7 @@ function handleInteractivePermission(
         ctx.logDecision({ decision: 'accept', source: 'config' })
         resolveOnce(ctx.buildAllow(freshResult.updatedInput ?? ctx.input))
       }
-    },
-  }
+    }}
 
   ctx.pushToQueue(toolUseConfirm)
   pipePermissionRequestId = tryRelayPipePermissionRequest(
@@ -352,16 +341,13 @@ function handleInteractivePermission(
               decision: 'accept',
               source: {
                 type: 'user',
-                permanent: !!response.permissionUpdates?.length,
-              },
-            },
+                permanent: !!response.permissionUpdates?.length}},
             { permissionPromptStartTimeMs },
           )
           resolveOnce(
             ctx.buildAllow(response.updatedInput ?? displayInput, {
               acceptFeedback: response.feedback,
-              contentBlocks: response.contentBlocks,
-            }),
+              contentBlocks: response.contentBlocks}),
           )
         })()
       } else {
@@ -370,9 +356,7 @@ function handleInteractivePermission(
             decision: 'reject',
             source: {
               type: 'user_reject',
-              hasFeedback: !!response.feedback,
-            },
-          },
+              hasFeedback: !!response.feedback}},
           { permissionPromptStartTimeMs },
         )
         resolveOnce(
@@ -430,9 +414,7 @@ function handleInteractivePermission(
               decision: 'accept',
               source: {
                 type: 'user',
-                permanent: !!response.updatedPermissions?.length,
-              },
-            },
+                permanent: !!response.updatedPermissions?.length}},
             { permissionPromptStartTimeMs },
           )
           resolveOnce(ctx.buildAllow(response.updatedInput ?? displayInput))
@@ -442,9 +424,7 @@ function handleInteractivePermission(
               decision: 'reject',
               source: {
                 type: 'user_reject',
-                hasFeedback: !!response.message,
-              },
-            },
+                hasFeedback: !!response.message}},
             { permissionPromptStartTimeMs },
           )
           resolveOnce(ctx.cancelAndAbort(response.message))
@@ -493,18 +473,15 @@ function handleInteractivePermission(
         request_id: channelRequestId,
         tool_name: ctx.tool.name,
         description,
-        input_preview: truncateForPreview(displayInput),
-      }
+        input_preview: truncateForPreview(displayInput)}
       const channelContext = getLatestChannelContextHint(
         ctx.toolUseContext.messages,
       )
       if (channelContext?.sourceServer || channelContext?.chatId) {
         params.channel_context = {
           ...(channelContext.sourceServer && {
-            source_server: channelContext.sourceServer,
-          }),
-          ...(channelContext.chatId && { chat_id: channelContext.chatId }),
-        }
+            source_server: channelContext.sourceServer}),
+          ...(channelContext.chatId && { chat_id: channelContext.chatId })}
       }
 
       for (const client of channelClients) {
@@ -512,8 +489,7 @@ function handleInteractivePermission(
         void client.client
           .notification({
             method: CHANNEL_PERMISSION_REQUEST_METHOD,
-            params,
-          })
+            params})
           .catch(e => {
             logForDebugging(
               `Channel permission_request failed for ${client.name}: ${errorMessage(e)}`,
@@ -549,8 +525,7 @@ function handleInteractivePermission(
             ctx.logDecision(
               {
                 decision: 'accept',
-                source: { type: 'user', permanent: false },
-              },
+                source: { type: 'user', permanent: false }},
               { permissionPromptStartTimeMs },
             )
             resolveOnce(ctx.buildAllow(displayInput))
@@ -558,12 +533,11 @@ function handleInteractivePermission(
             ctx.logDecision(
               {
                 decision: 'reject',
-                source: { type: 'user_reject', hasFeedback: false },
-              },
+                source: { type: 'user_reject', hasFeedback: false }},
               { permissionPromptStartTimeMs },
             )
             resolveOnce(
-              ctx.cancelAndAbort(`Denied via channel ${response.fromServer}`),
+              ctx.cancelAndAbort(t('permissionHooks.deniedViaChannel', response.fromServer)),
             )
           }
         },
@@ -574,8 +548,7 @@ function handleInteractivePermission(
       }
 
       channelSignal.addEventListener('abort', channelUnsubscribe, {
-        once: true,
-      })
+        once: true})
     }
   }
 
@@ -649,8 +622,7 @@ function handleInteractivePermission(
             ctx.updateQueueItem({
               classifierCheckInProgress: false,
               classifierAutoApproved: true,
-              classifierMatchedRule: matchedRule,
-            })
+              classifierMatchedRule: matchedRule})
           }
 
           if (
@@ -694,16 +666,13 @@ function handleInteractivePermission(
             ctx.removeFromQueue()
           }, checkmarkMs)
           signal.addEventListener('abort', checkmarkAbortHandler, {
-            once: true,
-          })
-        },
-      },
+            once: true})
+        }},
     ).catch(error => {
       // Log classifier API errors for debugging but don't propagate them as interruptions
       // These errors can be network failures, rate limits, or model issues - not user cancellations
       logForDebugging(`Async classifier check failed: ${errorMessage(error)}`, {
-        level: 'error',
-      })
+        level: 'error'})
     })
   }
 }

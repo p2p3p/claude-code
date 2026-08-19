@@ -20,8 +20,7 @@ import { logError } from '../log.js'
 import {
   jsonParse,
   jsonStringify,
-  writeFileSync_DEPRECATED,
-} from '../slowOperations.js'
+  writeFileSync_DEPRECATED} from '../slowOperations.js'
 
 /**
  * Check if PID-based version locking is enabled.
@@ -217,8 +216,7 @@ function writeLockFile(
   try {
     writeFileSync_DEPRECATED(tempPath, jsonStringify(content, null, 2), {
       encoding: 'utf8',
-      flush: true,
-    })
+      flush: true})
     fs.renameSync(tempPath, lockFilePath)
   } catch (error) {
     // Clean up temp file on failure (best-effort)
@@ -258,8 +256,7 @@ export async function tryAcquireLock(
     pid: process.pid,
     version: versionName,
     execPath: process.execPath,
-    acquiredAt: Date.now(),
-  }
+    acquiredAt: Date.now()}
 
   try {
     writeLockFile(lockFilePath, lockContent)
@@ -369,8 +366,7 @@ export function getAllLockInfo(locksDir: string): LockInfo[] {
           isProcessRunning: isProcessRunning(content.pid),
           execPath: content.execPath,
           acquiredAt: new Date(content.acquiredAt),
-          lockFilePath,
-        })
+          lockFilePath})
       }
     }
   } catch (error) {

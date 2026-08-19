@@ -13,14 +13,14 @@ import { feature } from 'bun:bundle'
 import type {
   Command,
   LocalJSXCommandContext,
-  LocalJSXCommandOnDone,
-} from '../types/command.js'
+  LocalJSXCommandOnDone} from '../types/command.js'
 import type { ToolUseContext } from '../Tool.js'
+import { t } from '../utils/i18n/index.js'
 
 const monitor = {
   type: 'local-jsx',
   name: 'monitor',
-  description: 'Start a background shell monitor (Shift+Down to view)',
+  description: t('cmd.descMonitor'),
   isEnabled: () => {
     if (feature('MONITOR_TOOL')) {
       return true
@@ -40,8 +40,8 @@ const monitor = {
         if (!command) {
           onDone(
             process.platform === 'win32'
-              ? 'Usage: /monitor <command>\nExample: /monitor powershell -c "while(1){git status; Start-Sleep 5}"'
-              : 'Usage: /monitor <command>\nExample: /monitor watch -n 5 git status',
+              ? t('monitorCmd.usageWin')
+              : t('monitorCmd.usageUnix'),
             { display: 'system' },
           )
           return null
@@ -79,30 +79,26 @@ const monitor = {
               shellCommand,
               toolUseId: context.toolUseId ?? `monitor-${Date.now()}`,
               agentId: undefined,
-              kind: 'monitor',
-            },
+              kind: 'monitor'},
             {
               abortController: context.abortController,
               getAppState: context.getAppState,
-              setAppState: context.setAppState,
-            },
+              setAppState: context.setAppState},
           )
 
           const outputFile = getTaskOutputPath(handle.taskId)
           onDone(
-            `Monitor started (${handle.taskId}). Press Shift+Down to view.\nOutput: ${outputFile}`,
+            t('monitorCmd.started', handle.taskId, outputFile),
             { display: 'system' },
           )
         } catch (err) {
           onDone(
-            `Monitor failed: ${err instanceof Error ? err.message : String(err)}`,
+            t('monitorCmd.failed', err instanceof Error ? err.message : String(err)),
             { display: 'system' },
           )
         }
 
         return null
-      },
-    }),
-} satisfies Command
+      }})} satisfies Command
 
 export default monitor

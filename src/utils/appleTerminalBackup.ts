@@ -8,15 +8,13 @@ export function markTerminalSetupInProgress(backupPath: string): void {
   saveGlobalConfig(current => ({
     ...current,
     appleTerminalSetupInProgress: true,
-    appleTerminalBackupPath: backupPath,
-  }))
+    appleTerminalBackupPath: backupPath}))
 }
 
 export function markTerminalSetupComplete(): void {
   saveGlobalConfig(current => ({
     ...current,
-    appleTerminalSetupInProgress: false,
-  }))
+    appleTerminalSetupInProgress: false}))
 }
 
 function getTerminalRecoveryInfo(): {
@@ -26,8 +24,7 @@ function getTerminalRecoveryInfo(): {
   const config = getGlobalConfig()
   return {
     inProgress: config.appleTerminalSetupInProgress ?? false,
-    backupPath: config.appleTerminalBackupPath || null,
-  }
+    backupPath: config.appleTerminalBackupPath || null}
 }
 
 export function getTerminalPlistPath(): string {

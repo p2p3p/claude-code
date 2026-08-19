@@ -5,6 +5,7 @@ import { ConfigurableShortcutHint } from '../../components/ConfigurableShortcutH
 import { Byline, Pane, Tab, Tabs } from '@anthropic/ink';
 import { useExitOnCtrlCDWithKeybindings } from '../../hooks/useExitOnCtrlCDWithKeybindings.js';
 import { Box, Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import { useKeybinding, useKeybindings } from '../../keybindings/useKeybinding.js';
 import { useAppState, useSetAppState } from '../../state/AppState.js';
 import type { PluginError } from '../../types/plugin.js';
@@ -35,19 +36,19 @@ function MarketplaceList({ onComplete }: { onComplete: (result?: string) => void
         const names = Object.keys(config);
 
         if (names.length === 0) {
-          onComplete('No marketplaces configured');
+          onComplete(t('pluginUI.noMarketplaces'));
         } else {
-          onComplete(`Configured marketplaces:\n${names.map(n => `  • ${n}`).join('\n')}`);
+          onComplete(t('pluginUI.configuredMarketplaces') + '\n' + names.map(n => `  • ${n}`).join('\n'));
         }
       } catch (err) {
-        onComplete(`Error loading marketplaces: ${errorMessage(err)}`);
+        onComplete(`Error loading marketplaces: ${errorMessage(err)}`); // Not translated (CLI output)
       }
     }
 
     void loadList();
   }, [onComplete]);
 
-  return <Text>Loading marketplaces...</Text>;
+  return <Text>{t('pluginUI.marketplaces')}...</Text>;
 }
 
 function McpRedirectBanner(): React.ReactNode {
@@ -136,8 +137,7 @@ function buildMarketplaceAction(name: string): ErrorRowAction {
     return {
       kind: 'remove-extra-marketplace',
       name,
-      sources: editableSources,
-    };
+      sources: editableSources};
   }
 
   if (isInPolicy) {
@@ -152,9 +152,7 @@ function buildMarketplaceAction(name: string): ErrorRowAction {
     viewState: {
       type: 'manage-marketplaces',
       targetMarketplace: name,
-      action: 'remove',
-    },
-  };
+      action: 'remove'}};
 }
 
 function buildPluginAction(pluginName: string): ErrorRowAction {
@@ -164,9 +162,7 @@ function buildPluginAction(pluginName: string): ErrorRowAction {
     viewState: {
       type: 'manage-plugins',
       targetPlugin: pluginName,
-      action: 'uninstall',
-    },
-  };
+      action: 'uninstall'}};
 }
 
 const TRANSIENT_ERROR_TYPES = new Set(['git-auth-failed', 'git-timeout', 'network-error']);
@@ -204,9 +200,8 @@ function buildErrorRows(
     rows.push({
       label: pluginName ?? error.source,
       message: formatErrorMessage(error),
-      guidance: 'Restart to retry loading plugins',
-      action: { kind: 'none' },
-    });
+      guidance: t('pluginUI.restartToRetry'),
+      action: { kind: 'none' }});
   }
 
   // --- Marketplace errors ---
@@ -221,10 +216,9 @@ function buildErrorRows(
     rows.push({
       label: m.name,
       message: m.error ?? 'Installation failed',
-      guidance: action.kind === 'managed-only' ? 'Managed by your organization — contact your admin' : undefined,
+      guidance: action.kind === 'managed-only' ? t('ui.managedByOrg') : undefined,
       action,
-      scope,
-    });
+      scope});
   }
 
   for (const e of extraMarketplaceErrors) {
@@ -238,10 +232,9 @@ function buildErrorRows(
       label: marketplace,
       message: formatErrorMessage(e),
       guidance:
-        action.kind === 'managed-only' ? 'Managed by your organization — contact your admin' : getErrorGuidance(e),
+        action.kind === 'managed-only' ? t('ui.managedByOrg') : getErrorGuidance(e),
       action,
-      scope,
-    });
+      scope});
   }
 
   // Installed marketplaces that fail to load data (from known_marketplaces.json)
@@ -251,8 +244,7 @@ function buildErrorRows(
     rows.push({
       label: m.name,
       message: m.error,
-      action: { kind: 'remove-installed-marketplace', name: m.name },
-    });
+      action: { kind: 'remove-installed-marketplace', name: m.name }});
   }
 
   // --- Plugin errors ---
@@ -270,8 +262,7 @@ function buildErrorRows(
       message: formatErrorMessage(error),
       guidance: getErrorGuidance(error),
       action: pluginName ? buildPluginAction(pluginName) : { kind: 'none' },
-      scope,
-    });
+      scope});
   }
 
   // --- Other errors (non-marketplace, non-plugin-specific) ---
@@ -280,8 +271,7 @@ function buildErrorRows(
       label: error.source,
       message: formatErrorMessage(error),
       guidance: getErrorGuidance(error),
-      action: { kind: 'none' },
-    });
+      action: { kind: 'none' }});
   }
 
   return rows;
@@ -302,8 +292,7 @@ function removeExtraMarketplace(name: string, sources: Array<{ source: EditableS
     if (settings.extraKnownMarketplaces?.[name]) {
       updates.extraKnownMarketplaces = {
         ...settings.extraKnownMarketplaces,
-        [name]: undefined,
-      };
+        [name]: undefined};
     }
 
     // Remove associated enabled plugins (format: "plugin@marketplace")
@@ -331,8 +320,7 @@ function removeExtraMarketplace(name: string, sources: Array<{ source: EditableS
 function ErrorsTabContent({
   setViewState,
   setActiveTab,
-  markPluginsChanged,
-}: {
+  markPluginsChanged}: {
   setViewState: (state: ViewState) => void;
   setActiveTab: (tab: TabId) => void;
   markPluginsChanged: () => void;
@@ -442,10 +430,7 @@ function ErrorsTabContent({
             errors: prev.plugins.errors.filter(e => !('marketplace' in e && e.marketplace === action.name)),
             installationStatus: {
               ...prev.plugins.installationStatus,
-              marketplaces: prev.plugins.installationStatus.marketplaces.filter(m => m.name !== action.name),
-            },
-          },
-        }));
+              marketplaces: prev.plugins.installationStatus.marketplaces.filter(m => m.name !== action.name)}}}));
         setActionMessage(`${figures.tick} Removed "${action.name}" from ${scopes} settings`);
         markPluginsChanged();
         break;
@@ -476,8 +461,7 @@ function ErrorsTabContent({
     {
       'select:previous': () => setSelectedIndex(prev => Math.max(0, prev - 1)),
       'select:next': () => setSelectedIndex(prev => Math.min(rows.length - 1, prev + 1)),
-      'select:accept': handleSelect,
-    },
+      'select:accept': handleSelect},
     { context: 'Select', isActive: rows.length > 0 },
   );
 
@@ -494,11 +478,11 @@ function ErrorsTabContent({
     return (
       <Box flexDirection="column">
         <Box marginLeft={1}>
-          <Text dimColor>No plugin errors</Text>
+          <Text dimColor>{t('pluginUI.noPluginErrors')}</Text>
         </Box>
         <Box marginTop={1}>
           <Text dimColor italic>
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('pluginUI.back')} />
           </Text>
         </Box>
       </Box>
@@ -539,16 +523,16 @@ function ErrorsTabContent({
       <Box marginTop={1}>
         <Text dimColor italic>
           <Byline>
-            <ConfigurableShortcutHint action="select:previous" context="Select" fallback="↑" description="navigate" />
+            <ConfigurableShortcutHint action="select:previous" context="Select" fallback="↑" description={t("desc.navigate")} />
             {hasAction && (
               <ConfigurableShortcutHint
                 action="select:accept"
                 context="Select"
                 fallback="Enter"
-                description="resolve"
+                description={t("desc.resolve")}
               />
             )}
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="back" />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('pluginUI.back')} />
           </Byline>
         </Text>
       </Box>
@@ -567,14 +551,12 @@ function getInitialViewState(parsedCommand: ParsedCommand): ViewState {
         return {
           type: 'browse-marketplace',
           targetMarketplace: parsedCommand.marketplace,
-          targetPlugin: parsedCommand.plugin,
-        };
+          targetPlugin: parsedCommand.plugin};
       }
       if (parsedCommand.plugin) {
         return {
           type: 'discover-plugins',
-          targetPlugin: parsedCommand.plugin,
-        };
+          targetPlugin: parsedCommand.plugin};
       }
       return { type: 'discover-plugins' };
     case 'manage':
@@ -583,20 +565,17 @@ function getInitialViewState(parsedCommand: ParsedCommand): ViewState {
       return {
         type: 'manage-plugins',
         targetPlugin: parsedCommand.plugin,
-        action: 'uninstall',
-      };
+        action: 'uninstall'};
     case 'enable':
       return {
         type: 'manage-plugins',
         targetPlugin: parsedCommand.plugin,
-        action: 'enable',
-      };
+        action: 'enable'};
     case 'disable':
       return {
         type: 'manage-plugins',
         targetPlugin: parsedCommand.plugin,
-        action: 'disable',
-      };
+        action: 'disable'};
     case 'marketplace':
       if (parsedCommand.action === 'list') {
         return { type: 'marketplace-list' };
@@ -604,22 +583,19 @@ function getInitialViewState(parsedCommand: ParsedCommand): ViewState {
       if (parsedCommand.action === 'add') {
         return {
           type: 'add-marketplace',
-          initialValue: parsedCommand.target,
-        };
+          initialValue: parsedCommand.target};
       }
       if (parsedCommand.action === 'remove') {
         return {
           type: 'manage-marketplaces',
           targetMarketplace: parsedCommand.target,
-          action: 'remove',
-        };
+          action: 'remove'};
       }
       if (parsedCommand.action === 'update') {
         return {
           type: 'manage-marketplaces',
           targetMarketplace: parsedCommand.target,
-          action: 'update',
-        };
+          action: 'update'};
       }
       return { type: 'marketplace-menu' };
     case 'menu':
@@ -661,7 +637,7 @@ export function PluginSettings({ onComplete, args, showMcpRedirectMessage }: Plu
     }
     return count;
   });
-  const errorsTabTitle = pluginErrorCount > 0 ? `Errors (${pluginErrorCount})` : 'Errors';
+  const errorsTabTitle = pluginErrorCount > 0 ? `${t('pluginUI.errors')} (${pluginErrorCount})` : t('pluginUI.errors');
 
   const exitState = useExitOnCtrlCDWithKeybindings();
 
@@ -737,8 +713,7 @@ export function PluginSettings({ onComplete, args, showMcpRedirectMessage }: Plu
 
   useKeybinding('confirm:no', handleAddMarketplaceEscape, {
     context: 'Settings',
-    isActive: viewState.type === 'add-marketplace',
-  });
+    isActive: viewState.type === 'add-marketplace'});
 
   useEffect(() => {
     if (result) {
@@ -757,37 +732,37 @@ export function PluginSettings({ onComplete, args, showMcpRedirectMessage }: Plu
   if (viewState.type === 'help') {
     return (
       <Box flexDirection="column">
-        <Text bold>Plugin Command Usage:</Text>
+        <Text bold>{t('pluginUI.pluginCommandUsage')}:</Text>
         <Text> </Text>
-        <Text dimColor>Installation:</Text>
-        <Text> /plugin install - Browse and install plugins</Text>
-        <Text> /plugin install &lt;marketplace&gt; - Install from specific marketplace</Text>
-        <Text> /plugin install &lt;plugin&gt; - Install specific plugin</Text>
-        <Text> /plugin install &lt;plugin&gt;@&lt;market&gt; - Install plugin from marketplace</Text>
+        <Text dimColor>{t('pluginUI.installationSection')}:</Text>
+        <Text> {t('pluginUI.installCmd', 'Browse and install plugins')}</Text>
+        <Text> {t('pluginUI.installCmd', t('pluginUI.fromSpecificMarketplace'))}</Text>
+        <Text> {t('pluginUI.installCmd', t('pluginUI.installSpecificPlugin'))}</Text>
+        <Text> {t('pluginUI.installCmd', t('pluginUI.installFromMarketplace'))}</Text>
         <Text> </Text>
-        <Text dimColor>Management:</Text>
-        <Text> /plugin manage - Manage installed plugins</Text>
-        <Text> /plugin enable &lt;plugin&gt; - Enable a plugin</Text>
-        <Text> /plugin disable &lt;plugin&gt; - Disable a plugin</Text>
-        <Text> /plugin uninstall &lt;plugin&gt; - Uninstall a plugin</Text>
+        <Text dimColor>{t('pluginUI.managementSection')}:</Text>
+        <Text> /plugin manage {t('pluginUI.manageCmd')}</Text>
+        <Text> /plugin enable &lt;plugin&gt; {t('pluginUI.enableCmd')}</Text>
+        <Text> /plugin disable &lt;plugin&gt; {t('pluginUI.disableCmd')}</Text>
+        <Text> /plugin uninstall &lt;plugin&gt; {t('pluginUI.uninstallCmd')}</Text>
         <Text> </Text>
-        <Text dimColor>Marketplaces:</Text>
-        <Text> /plugin marketplace - Marketplace management menu</Text>
-        <Text> /plugin marketplace add - Add a marketplace</Text>
-        <Text> /plugin marketplace add &lt;path/url&gt; - Add marketplace directly</Text>
-        <Text> /plugin marketplace update - Update marketplaces</Text>
-        <Text> /plugin marketplace update &lt;name&gt; - Update specific marketplace</Text>
-        <Text> /plugin marketplace remove - Remove a marketplace</Text>
-        <Text> /plugin marketplace remove &lt;name&gt; - Remove specific marketplace</Text>
-        <Text> /plugin marketplace list - List all marketplaces</Text>
+        <Text dimColor>{t('pluginUI.marketplacesSection')}:</Text>
+        <Text> /plugin marketplace {t('pluginUI.marketplaceMenuCmd')}</Text>
+        <Text> /plugin marketplace add {t('pluginUI.addMarketplaceCmd')}</Text>
+        <Text> /plugin marketplace add &lt;path/url&gt; {t('pluginUI.addMarketplaceDirect')}</Text>
+        <Text> /plugin marketplace update {t('pluginUI.updateMarketplacesCmd')}</Text>
+        <Text> /plugin marketplace update &lt;name&gt; {t('pluginUI.updateMarketplaceCmd')}</Text>
+        <Text> /plugin marketplace remove {t('pluginUI.removeMarketplaceCmd')}</Text>
+        <Text> /plugin marketplace remove &lt;name&gt; {t('pluginUI.removeSpecificMarketplace')}</Text>
+        <Text> /plugin marketplace list {t('pluginUI.listMarketplacesCmd')}</Text>
         <Text> </Text>
-        <Text dimColor>Validation:</Text>
-        <Text> /plugin validate &lt;path&gt; - Validate a manifest file or directory</Text>
+        <Text dimColor>{t('pluginUI.validationSection')}:</Text>
+        <Text> /plugin validate &lt;path&gt; {t('pluginUI.validateManifestCmd')}</Text>
         <Text> </Text>
-        <Text dimColor>Other:</Text>
-        <Text> /plugin - Main plugin menu</Text>
-        <Text> /plugin help - Show this help</Text>
-        <Text> /plugins - Alias for /plugin</Text>
+        <Text dimColor>{t('pluginUI.otherSection')}:</Text>
+        <Text> /plugin {t('pluginUI.mainPluginMenu')}</Text>
+        <Text> /plugin help {t('pluginUI.showHelpCmd')}</Text>
+        <Text> /plugins {t('pluginUI.pluginsAlias')}</Text>
       </Box>
     );
   }
@@ -827,14 +802,14 @@ export function PluginSettings({ onComplete, args, showMcpRedirectMessage }: Plu
   return (
     <Pane color="suggestion">
       <Tabs
-        title="Plugins"
+        title={t("desc.plugins")}
         selectedTab={activeTab}
         onTabChange={handleTabChange}
         color="suggestion"
         disableNavigation={childSearchActive}
         banner={showMcpRedirectMessage && activeTab === 'installed' ? <McpRedirectBanner /> : undefined}
       >
-        <Tab id="discover" title="Discover">
+        <Tab id="discover" title={t('pluginUI.discoverPlugins')}>
           {viewState.type === 'browse-marketplace' ? (
             <BrowseMarketplace
               error={error}
@@ -859,7 +834,7 @@ export function PluginSettings({ onComplete, args, showMcpRedirectMessage }: Plu
             />
           )}
         </Tab>
-        <Tab id="installed" title="Installed">
+        <Tab id="installed" title={t('pluginUI.installed')}>
           <ManagePlugins
             setViewState={setViewState}
             setResult={setResult}
@@ -870,7 +845,7 @@ export function PluginSettings({ onComplete, args, showMcpRedirectMessage }: Plu
             action={viewState.type === 'manage-plugins' ? viewState.action : undefined}
           />
         </Tab>
-        <Tab id="marketplaces" title="Marketplaces">
+        <Tab id="marketplaces" title={t('pluginUI.marketplaces')}>
           <ManageMarketplaces
             setViewState={setViewState}
             error={error}

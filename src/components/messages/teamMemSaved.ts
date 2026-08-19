@@ -14,6 +14,5 @@ export function teamMemSavedPart(
   if (count === 0) return null
   return {
     segment: `${count} team ${count === 1 ? 'memory' : 'memories'}`,
-    count,
-  }
+    count}
 }

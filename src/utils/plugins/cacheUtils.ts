@@ -13,8 +13,7 @@ import { clearPluginAgentCache } from './loadPluginAgents.js'
 import { clearPluginCommandCache } from './loadPluginCommands.js'
 import {
   clearPluginHookCache,
-  pruneRemovedPluginHooks,
-} from './loadPluginHooks.js'
+  pruneRemovedPluginHooks} from './loadPluginHooks.js'
 import { clearPluginOutputStyleCache } from './loadPluginOutputStyles.js'
 import { clearPluginCache, getPluginCachePath } from './pluginLoader.js'
 import { clearPluginOptionsCache } from './pluginOptionsStorage.js'

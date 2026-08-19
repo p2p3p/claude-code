@@ -3,6 +3,7 @@ import { useInterval } from 'usehooks-ts';
 import { getIsRemoteMode, getIsScrollDraining } from '../../bootstrap/state.js';
 import { useNotifications } from '../../context/notifications.js';
 import { Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 import { getInitializationStatus, getLspServerManager } from '../../services/lsp/manager.js';
 import { useSetAppState } from '../../state/AppState.js';
 import { logForDebugging } from '../../utils/debug.js';
@@ -66,11 +67,8 @@ export function useLspInitializationNotification(): void {
               {
                 type: 'generic-error' as const,
                 source,
-                error: errorMessage,
-              },
-            ],
-          },
-        };
+                error: errorMessage},
+            ]}};
       });
 
       // Show notification - extract plugin name from source like "plugin:typescript-lsp:typescript"
@@ -80,13 +78,12 @@ export function useLspInitializationNotification(): void {
         key: `lsp-error-${source}`,
         jsx: (
           <>
-            <Text color="error">LSP for {displayName} failed</Text>
-            <Text dimColor> · /plugin for details</Text>
+            <Text color="error">{t('notif.lsp.lspFailed', { displayName })}</Text>
+            <Text dimColor>{t('notif.lsp.slashPluginDetails')}</Text>
           </>
         ),
         priority: 'medium',
-        timeoutMs: 8000,
-      });
+        timeoutMs: 8000});
     },
     [addNotification, setAppState],
   );

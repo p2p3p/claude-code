@@ -2,15 +2,13 @@ import {
   buildSearchingPastContextSection,
   DIRS_EXIST_GUIDANCE,
   ENTRYPOINT_NAME,
-  MAX_ENTRYPOINT_LINES,
-} from './memdir.js'
+  MAX_ENTRYPOINT_LINES} from './memdir.js'
 import {
   MEMORY_DRIFT_CAVEAT,
   MEMORY_FRONTMATTER_EXAMPLE,
   TRUSTING_RECALL_SECTION,
   TYPES_SECTION_COMBINED,
-  WHAT_NOT_TO_SAVE_SECTION,
-} from './memoryTypes.js'
+  WHAT_NOT_TO_SAVE_SECTION} from './memoryTypes.js'
 import { getAutoMemPath } from './paths.js'
 import { getTeamMemPath } from './teamMemPaths.js'
 

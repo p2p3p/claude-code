@@ -48,18 +48,14 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
         'Google',
         'Chrome',
         'NativeMessagingHosts',
-      ],
-    },
+      ]},
     linux: {
       binaries: ['google-chrome', 'google-chrome-stable'],
       dataPath: ['.config', 'google-chrome'],
-      nativeMessagingPath: ['.config', 'google-chrome', 'NativeMessagingHosts'],
-    },
+      nativeMessagingPath: ['.config', 'google-chrome', 'NativeMessagingHosts']},
     windows: {
       dataPath: ['Google', 'Chrome', 'User Data'],
-      registryKey: 'HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts',
-    },
-  },
+      registryKey: 'HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts'}},
   brave: {
     name: 'Brave',
     macos: {
@@ -76,8 +72,7 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
         'BraveSoftware',
         'Brave-Browser',
         'NativeMessagingHosts',
-      ],
-    },
+      ]},
     linux: {
       binaries: ['brave-browser', 'brave'],
       dataPath: ['.config', 'BraveSoftware', 'Brave-Browser'],
@@ -86,14 +81,11 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
         'BraveSoftware',
         'Brave-Browser',
         'NativeMessagingHosts',
-      ],
-    },
+      ]},
     windows: {
       dataPath: ['BraveSoftware', 'Brave-Browser', 'User Data'],
       registryKey:
-        'HKCU\\Software\\BraveSoftware\\Brave-Browser\\NativeMessagingHosts',
-    },
-  },
+        'HKCU\\Software\\BraveSoftware\\Brave-Browser\\NativeMessagingHosts'}},
   arc: {
     name: 'Arc',
     macos: {
@@ -105,20 +97,16 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
         'Arc',
         'User Data',
         'NativeMessagingHosts',
-      ],
-    },
+      ]},
     linux: {
       // Arc is not available on Linux
       binaries: [],
       dataPath: [],
-      nativeMessagingPath: [],
-    },
+      nativeMessagingPath: []},
     windows: {
       // Arc Windows is Chromium-based
       dataPath: ['Arc', 'User Data'],
-      registryKey: 'HKCU\\Software\\ArcBrowser\\Arc\\NativeMessagingHosts',
-    },
-  },
+      registryKey: 'HKCU\\Software\\ArcBrowser\\Arc\\NativeMessagingHosts'}},
   chromium: {
     name: 'Chromium',
     macos: {
@@ -129,18 +117,14 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
         'Application Support',
         'Chromium',
         'NativeMessagingHosts',
-      ],
-    },
+      ]},
     linux: {
       binaries: ['chromium', 'chromium-browser'],
       dataPath: ['.config', 'chromium'],
-      nativeMessagingPath: ['.config', 'chromium', 'NativeMessagingHosts'],
-    },
+      nativeMessagingPath: ['.config', 'chromium', 'NativeMessagingHosts']},
     windows: {
       dataPath: ['Chromium', 'User Data'],
-      registryKey: 'HKCU\\Software\\Chromium\\NativeMessagingHosts',
-    },
-  },
+      registryKey: 'HKCU\\Software\\Chromium\\NativeMessagingHosts'}},
   edge: {
     name: 'Microsoft Edge',
     macos: {
@@ -151,8 +135,7 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
         'Application Support',
         'Microsoft Edge',
         'NativeMessagingHosts',
-      ],
-    },
+      ]},
     linux: {
       binaries: ['microsoft-edge', 'microsoft-edge-stable'],
       dataPath: ['.config', 'microsoft-edge'],
@@ -160,13 +143,10 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
         '.config',
         'microsoft-edge',
         'NativeMessagingHosts',
-      ],
-    },
+      ]},
     windows: {
       dataPath: ['Microsoft', 'Edge', 'User Data'],
-      registryKey: 'HKCU\\Software\\Microsoft\\Edge\\NativeMessagingHosts',
-    },
-  },
+      registryKey: 'HKCU\\Software\\Microsoft\\Edge\\NativeMessagingHosts'}},
   vivaldi: {
     name: 'Vivaldi',
     macos: {
@@ -177,18 +157,14 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
         'Application Support',
         'Vivaldi',
         'NativeMessagingHosts',
-      ],
-    },
+      ]},
     linux: {
       binaries: ['vivaldi', 'vivaldi-stable'],
       dataPath: ['.config', 'vivaldi'],
-      nativeMessagingPath: ['.config', 'vivaldi', 'NativeMessagingHosts'],
-    },
+      nativeMessagingPath: ['.config', 'vivaldi', 'NativeMessagingHosts']},
     windows: {
       dataPath: ['Vivaldi', 'User Data'],
-      registryKey: 'HKCU\\Software\\Vivaldi\\NativeMessagingHosts',
-    },
-  },
+      registryKey: 'HKCU\\Software\\Vivaldi\\NativeMessagingHosts'}},
   opera: {
     name: 'Opera',
     macos: {
@@ -199,21 +175,17 @@ export const CHROMIUM_BROWSERS: Record<ChromiumBrowser, BrowserConfig> = {
         'Application Support',
         'com.operasoftware.Opera',
         'NativeMessagingHosts',
-      ],
-    },
+      ]},
     linux: {
       binaries: ['opera'],
       dataPath: ['.config', 'opera'],
-      nativeMessagingPath: ['.config', 'opera', 'NativeMessagingHosts'],
-    },
+      nativeMessagingPath: ['.config', 'opera', 'NativeMessagingHosts']},
     windows: {
       dataPath: ['Opera Software', 'Opera Stable'],
       registryKey:
         'HKCU\\Software\\Opera Software\\Opera Stable\\NativeMessagingHosts',
       useRoaming: true, // Opera uses Roaming AppData, not Local
-    },
-  },
-}
+    }}}
 
 // Priority order for browser detection (most common first)
 export const BROWSER_DETECTION_ORDER: ChromiumBrowser[] = [
@@ -256,8 +228,7 @@ export function getAllBrowserDataPaths(): {
             : join(home, 'AppData', 'Local')
           paths.push({
             browser: browserId,
-            path: join(appDataBase, ...config.windows.dataPath),
-          })
+            path: join(appDataBase, ...config.windows.dataPath)})
         }
         continue
       }
@@ -266,8 +237,7 @@ export function getAllBrowserDataPaths(): {
     if (dataPath && dataPath.length > 0) {
       paths.push({
         browser: browserId,
-        path: join(home, ...dataPath),
-      })
+        path: join(home, ...dataPath)})
     }
   }
 
@@ -293,8 +263,7 @@ export function getAllNativeMessagingHostsDirs(): {
         if (config.macos.nativeMessagingPath.length > 0) {
           paths.push({
             browser: browserId,
-            path: join(home, ...config.macos.nativeMessagingPath),
-          })
+            path: join(home, ...config.macos.nativeMessagingPath)})
         }
         break
       case 'linux':
@@ -302,8 +271,7 @@ export function getAllNativeMessagingHostsDirs(): {
         if (config.linux.nativeMessagingPath.length > 0) {
           paths.push({
             browser: browserId,
-            path: join(home, ...config.linux.nativeMessagingPath),
-          })
+            path: join(home, ...config.linux.nativeMessagingPath)})
         }
         break
       case 'windows':
@@ -330,8 +298,7 @@ export function getAllWindowsRegistryKeys(): {
     if (config.windows.registryKey) {
       keys.push({
         browser: browserId,
-        key: config.windows.registryKey,
-      })
+        key: config.windows.registryKey})
     }
   }
 

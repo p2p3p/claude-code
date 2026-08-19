@@ -8,8 +8,7 @@ import {
   LOCAL_COMMAND_CAVEAT_TAG,
   TASK_NOTIFICATION_TAG,
   TEAMMATE_MESSAGE_TAG,
-  TICK_TAG,
-} from '../../constants/xml.js';
+  TICK_TAG} from '../../constants/xml.js';
 import { isAgentSwarmsEnabled } from '../../utils/agentSwarmsEnabled.js';
 import { extractTag, INTERRUPT_MESSAGE, INTERRUPT_MESSAGE_FOR_TOOL_USE } from '../../utils/messages.js';
 import { InterruptedByUser } from '../InterruptedByUser.js';
@@ -40,8 +39,7 @@ export function UserTextMessage({
   verbose,
   planContent,
   isTranscriptMode,
-  timestamp,
-}: Props): React.ReactNode {
+  timestamp}: Props): React.ReactNode {
   if (param.text.trim() === NO_CONTENT_MESSAGE) {
     return null;
   }

@@ -1,5 +1,6 @@
 import type { Command, LocalCommandResult } from '../../types/command.js'
 import { getSessionId } from '../../bootstrap/state.js'
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * /env — show the user a snapshot of the current environment, claude config,
@@ -59,19 +60,19 @@ function formatEnvVars(): string {
     .sort(([a], [b]) => a.localeCompare(b))
 
   if (entries.length === 0) {
-    return '  (no recognized env vars set)'
+    return t('envCmd.noEnvVars')
   }
   return entries.map(([k, v]) => `  ${k}=${v}`).join('\n')
 }
 
 function formatRuntime(): string {
   const lines = [
-    `  platform:        ${process.platform} ${process.arch}`,
-    `  cwd:             ${process.cwd()}`,
-    `  pid:             ${process.pid}`,
-    `  bun:             ${typeof Bun !== 'undefined' ? Bun.version : 'n/a'}`,
-    `  node:            ${process.version}`,
-    `  session:         ${getSessionId()}`,
+    t('envCmd.runtimePlatform', process.platform, process.arch),
+    t('envCmd.runtimeCwd', process.cwd()),
+    t('envCmd.runtimePid', String(process.pid)),
+    t('envCmd.runtimeBun', typeof Bun !== 'undefined' ? Bun.version : t('envCmd.na')),
+    t('envCmd.runtimeNode', process.version),
+    t('envCmd.runtimeSession', getSessionId()),
   ]
   return lines.join('\n')
 }
@@ -79,24 +80,22 @@ function formatRuntime(): string {
 const env: Command = {
   type: 'local',
   name: 'env',
-  description: 'Show current environment, runtime, and feature flags',
+  description: t('cmd.descEnv'),
   isHidden: false,
   isEnabled: () => true,
   supportsNonInteractive: true,
   load: async () => ({
     call: async (): Promise<LocalCommandResult> => {
       const text = [
-        '## Runtime',
+        t('envCmd.runtimeTitle'),
         formatRuntime(),
         '',
-        '## Environment Variables (allowlisted prefixes)',
+        t('envCmd.envVarsTitle'),
         formatEnvVars(),
         '',
-        '_Secrets matching token/password/auth/api_key are masked. Set additional `CLAUDE_*` / `FEATURE_*` env vars to see them here._',
+        t('envCmd.secretsNote'),
       ].join('\n')
       return { type: 'text', value: text }
-    },
-  }),
-}
+    }})}
 
 export default env

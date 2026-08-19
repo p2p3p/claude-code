@@ -39,6 +39,5 @@ export function registerDreamSkill(): void {
       }
 
       return [{ type: 'text', text: prompt }]
-    },
-  })
+    }})
 }

@@ -1,6 +1,7 @@
 import { feature } from 'bun:bundle';
 import type { ToolResultBlockParam } from '@anthropic-ai/sdk/resources/index.mjs';
 import * as React from 'react';
+import { t } from '../../../utils/i18n/index.js';
 import { BULLET_OPERATOR } from '../../../constants/figures.js';
 import { Text } from '@anthropic/ink';
 import { filterToolProgressMessages, type Tool, type Tools } from '../../../Tool.js';
@@ -9,8 +10,7 @@ import {
   INTERRUPT_MESSAGE_FOR_TOOL_USE,
   isClassifierDenial,
   PLAN_REJECTION_PREFIX,
-  REJECT_MESSAGE_WITH_REASON_PREFIX,
-} from '../../../utils/messages.js';
+  REJECT_MESSAGE_WITH_REASON_PREFIX} from '../../../utils/messages.js';
 import { FallbackToolUseErrorMessage } from '../../FallbackToolUseErrorMessage.js';
 import { InterruptedByUser } from '../../InterruptedByUser.js';
 import { MessageResponse } from '../../MessageResponse.js';
@@ -32,8 +32,7 @@ export function UserToolErrorMessage({
   tools,
   param,
   verbose,
-  isTranscriptMode,
-}: Props): React.ReactNode {
+  isTranscriptMode}: Props): React.ReactNode {
   if (typeof param.content === 'string' && param.content.includes(INTERRUPT_MESSAGE_FOR_TOOL_USE)) {
     return (
       <MessageResponse height={1}>
@@ -55,7 +54,7 @@ export function UserToolErrorMessage({
   if (feature('TRANSCRIPT_CLASSIFIER') && typeof param.content === 'string' && isClassifierDenial(param.content)) {
     return (
       <MessageResponse height={1}>
-        <Text dimColor>Denied by auto mode classifier {BULLET_OPERATOR} /feedback if incorrect</Text>
+        <Text dimColor>{t('ui.deniedByAutoClassifier', BULLET_OPERATOR)}</Text>
       </MessageResponse>
     );
   }
@@ -65,7 +64,6 @@ export function UserToolErrorMessage({
       progressMessagesForMessage: filterToolProgressMessages(progressMessagesForMessage),
       tools,
       verbose,
-      isTranscriptMode,
-    }) ?? <FallbackToolUseErrorMessage result={param.content} verbose={verbose} />
+      isTranscriptMode}) ?? <FallbackToolUseErrorMessage result={param.content} verbose={verbose} />
   );
 }

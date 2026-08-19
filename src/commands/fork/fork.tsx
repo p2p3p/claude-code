@@ -3,6 +3,7 @@ import React from 'react';
 import { AgentTool } from '@claude-code-best/builtin-tools/tools/AgentTool/AgentTool.js';
 import { isInForkChild } from '@claude-code-best/builtin-tools/tools/AgentTool/forkSubagent.js';
 import { logForDebugging } from '../../utils/debug.js';
+import { t } from '../../utils/i18n/index.js';
 import type { LocalJSXCommandOnDone, LocalJSXCommandContext } from '../../types/command.js';
 
 export async function call(
@@ -12,21 +13,20 @@ export async function call(
 ): Promise<React.ReactNode> {
   // Check feature flag
   if (!feature('FORK_SUBAGENT')) {
-    onDone('Fork subagent feature is not enabled. Set FEATURE_FORK_SUBAGENT=1 to enable.', { display: 'system' });
+    onDone(t('forkCmd.notEnabled'), { display: 'system' });
     return null;
   }
 
   // Recursive fork guard
   if (isInForkChild(context.messages)) {
-    onDone('Fork is not available inside a forked worker. Complete your task directly using your tools.', {
-      display: 'system',
-    });
+    onDone(t('forkCmd.notAvailable'), {
+      display: 'system'});
     return null;
   }
 
   const directive = args.trim();
   if (!directive) {
-    onDone('Usage: /fork <directive>\nExample: /fork Fix the null check in validate.ts', { display: 'system' });
+    onDone(t('forkCmd.usage'), { display: 'system' });
     return null;
   }
 
@@ -34,7 +34,7 @@ export async function call(
   const lastAssistantMessage = [...context.messages].reverse().find(m => m.type === 'assistant') as any; // Type assertion to avoid complex type import
 
   if (!lastAssistantMessage) {
-    onDone('Cannot fork: no assistant response in conversation history.', { display: 'system' });
+    onDone(t('forkCmd.noAssistant'), { display: 'system' });
     return null;
   }
 
@@ -48,8 +48,7 @@ export async function call(
       // description 只显示在底部 selector / BackgroundTasksDialog，保持简短标签
       // 即可；用户输入的 prompt 会作为第一条用户消息呈现在主视图里，这里不要
       // 重复显示。
-      description: 'forked from main',
-    };
+      description: t('cmd.descForkedFromMain')};
 
     // Call AgentTool with proper parameters:
     // - input: the agent parameters (no subagent_type => fork path)
@@ -61,12 +60,12 @@ export async function call(
     });
 
     // Notify user that fork has been started
-    onDone(`Forked subagent started with directive: "${directive}"`, { display: 'system' });
+    onDone(t('forkCmd.started', directive), { display: 'system' });
     return null;
   } catch (error) {
     // Catches synchronous setup errors only
     logForDebugging(`Fork command setup error: ${error}`, { level: 'error' });
-    onDone(`Fork failed: ${error instanceof Error ? error.message : String(error)}`, { display: 'system' });
+    onDone(t('forkCmd.failed', error instanceof Error ? error.message : String(error)), { display: 'system' });
     return null;
   }
 }

@@ -51,8 +51,7 @@ export function useExitOnCtrlCD(
   const { exit } = useApp()
   const [exitState, setExitState] = useState<ExitState>({
     pending: false,
-    keyName: null,
-  })
+    keyName: null})
 
   const exitFn = useMemo(() => onExit ?? exit, [onExit, exit])
 
@@ -84,8 +83,7 @@ export function useExitOnCtrlCD(
   const handlers = useMemo(
     () => ({
       'app:interrupt': handleInterrupt,
-      'app:exit': handleExit,
-    }),
+      'app:exit': handleExit}),
     [handleInterrupt, handleExit],
   )
 

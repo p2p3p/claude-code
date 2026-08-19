@@ -70,10 +70,10 @@ mock.module('src/services/api/openai/client.js', () => ({
   clearOpenAIClientCache: () => {},
 }))
 
-// Keep isChatGPTAuthEnabled env-driven (same as production) so other suite
+// Keep isChatGPTAuthMode env-driven (same as production) so other suite
 // files are not forced into ChatGPT mode.
 mock.module('src/services/api/openai/chatgptAuth.js', () => ({
-  isChatGPTAuthEnabled: () => process.env.OPENAI_AUTH_MODE === 'chatgpt',
+  isChatGPTAuthMode: () => process.env.OPENAI_AUTH_MODE === 'chatgpt',
   getValidChatGPTAuth: async () => ({
     accessToken: 'test-access-token-not-real',
     accountId: 'acct_test',

@@ -36,9 +36,7 @@ export const getStats: () => ContextCollapseStats = () => ({
     totalErrors: 0,
     lastError: null,
     emptySpawnWarningEmitted: false,
-    totalEmptySpawns: 0,
-  },
-})
+    totalEmptySpawns: 0}})
 
 let _contextCollapseEnabled = false
 

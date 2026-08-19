@@ -12,6 +12,7 @@ import { checkHasTrustDialogAccepted, saveCurrentProjectConfig } from '../../uti
 import { getCwd } from '../../utils/cwd.js';
 import { getFsImplementation } from '../../utils/fsOperations.js';
 import { gracefulShutdownSync } from '../../utils/gracefulShutdown.js';
+import { t } from '../../utils/i18n/index.js';
 import { Select } from '../CustomSelect/index.js';
 import { PermissionDialog } from '../permissions/PermissionDialog.js';
 import {
@@ -21,8 +22,7 @@ import {
   getDangerousEnvVarsSources,
   getGcpCommandsSources,
   getHooksSources,
-  getOtelHeadersHelperSources,
-} from './utils.js';
+  getOtelHeadersHelperSources} from './utils.js';
 
 type Props = {
   onDone(): void;
@@ -107,8 +107,7 @@ export function TrustDialog({ onDone, commands }: Props): React.ReactNode {
       hasAwsCommands,
       hasGcpCommands,
       hasOtelHeadersHelper,
-      hasDangerousEnvVars,
-    });
+      hasDangerousEnvVars});
   }, [
     hasMcpServers,
     hasHooks,
@@ -142,8 +141,7 @@ export function TrustDialog({ onDone, commands }: Props): React.ReactNode {
       hasAwsCommands,
       hasGcpCommands,
       hasOtelHeadersHelper,
-      hasDangerousEnvVars,
-    });
+      hasDangerousEnvVars});
 
     if (isHomeDir) {
       // For home directory, store trust in session memory only (not persisted to disk)
@@ -153,8 +151,7 @@ export function TrustDialog({ onDone, commands }: Props): React.ReactNode {
     } else {
       saveCurrentProjectConfig(current => ({
         ...current,
-        hasTrustDialogAccepted: true,
-      }));
+        hasTrustDialogAccepted: true}));
     }
 
     // Do NOT write MCP server settings here. handleMcpjsonServerApprovals in
@@ -195,30 +192,30 @@ export function TrustDialog({ onDone, commands }: Props): React.ReactNode {
   }
 
   return (
-    <PermissionDialog color="warning" titleColor="warning" title="Accessing workspace:">
+    <PermissionDialog color="warning" titleColor="warning" title={t('trust.accessingWorkspace')}>
       <Box flexDirection="column" gap={1} paddingTop={1}>
         <Text bold>{getFsImplementation().cwd()}</Text>
 
         <Text>
-          Is this a project you trust? (Your own code, a well-known open source project, or work from your team).
+          {t('trust.title')}
         </Text>
-        <Text>Once trusted, Claude Code can read, edit, and run commands in this folder.</Text>
+        <Text>{t('trust.onceTrusted')}</Text>
 
         <Text dimColor>
-          <Link url="https://code.claude.com/docs/en/security">Security guide</Link>
+          <Link url="https://code.claude.com/docs/en/security">{t('trust.guide')}</Link>
         </Text>
 
         <Select
           options={[
-            { label: 'Yes, I trust this folder', value: 'enable_all' },
-            { label: 'No, exit', value: 'exit' },
+            { label: t('trust.yes'), value: 'enable_all' },
+            { label: t('trust.no'), value: 'exit' },
           ]}
           onChange={value => onChange(value as 'enable_all' | 'exit')}
           onCancel={() => onChange('exit')}
         />
 
         <Text dimColor>
-          {exitState.pending ? <>Press {exitState.keyName} again to exit</> : <>Enter to confirm · Esc to cancel</>}
+          {exitState.pending ? <>{t('common.pressAgain', exitState.keyName)}</> : <>{t('trust.enterConfirm')} · {t('trust.escCancel')}</>}
         </Text>
       </Box>
     </PermissionDialog>

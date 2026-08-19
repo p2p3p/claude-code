@@ -18,8 +18,8 @@ import {
   isDefaultMode,
   permissionModeSymbol,
   permissionModeTitle,
-  getModeColor,
-} from '../../utils/permissions/PermissionMode.js';
+  permissionModeLabel,
+  getModeColor} from '../../utils/permissions/PermissionMode.js';
 import { BackgroundTaskStatus } from '../tasks/BackgroundTaskStatus.js';
 import { isBackgroundTask } from '../../tasks/types.js';
 import { isPanelAgentTask } from '../../tasks/LocalAgentTask/LocalAgentTask.js';
@@ -31,7 +31,6 @@ import { TeamStatus } from '../teams/TeamStatus.js';
 import { isInProcessEnabled } from '../../utils/swarm/backends/registry.js';
 import { useAppState, useAppStateStore } from 'src/state/AppState.js';
 import { getIsRemoteMode } from '../../bootstrap/state.js';
-import HistorySearchInput from './HistorySearchInput.js';
 import { usePrStatus } from '../../hooks/usePrStatus.js';
 import { Byline, KeyboardShortcutHint } from '@anthropic/ink';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
@@ -44,6 +43,7 @@ import { isFullscreenEnvEnabled } from '../../utils/fullscreen.js';
 import { isXtermJs, useHasSelection, useSelection } from '@anthropic/ink';
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js';
 import { getPlatform } from '../../utils/platform.js';
+import { t } from '../../utils/i18n/index.js';
 import { PrBadge } from '../PrBadge.js';
 
 // Dead code elimination: conditional import for proactive mode
@@ -92,9 +92,6 @@ type Props = {
   teammateFooterIndex?: number;
   isPasting?: boolean;
   isSearching: boolean;
-  historyQuery: string;
-  setHistoryQuery: (query: string) => void;
-  historyFailedMatch: boolean;
   onOpenTasksDialog?: (taskId?: string) => void;
 };
 
@@ -125,7 +122,7 @@ function ProactiveCountdown(): React.ReactNode {
 
   if (remainingSeconds === null) return null;
 
-  return <Text dimColor>waiting {formatDuration(remainingSeconds * 1000, { mostSignificantOnly: true })}</Text>;
+  return <Text dimColor>{t('prompt.waiting', formatDuration(remainingSeconds * 1000, { mostSignificantOnly: true }))}</Text>;
 }
 
 /** Compact "goal (1h22min)" pill for the footer — colored by status. */
@@ -174,7 +171,7 @@ function GoalElapsedIndicator(): React.ReactNode {
       break;
   }
 
-  return <Text color={color as 'ansi:green'}>goal ({timeStr})</Text>;
+  return <Text color={color as 'ansi:green'}>{t('prompt.goal', timeStr)}</Text>;
 }
 
 export function PromptInputFooterLeftSide({
@@ -190,22 +187,18 @@ export function PromptInputFooterLeftSide({
   teammateFooterIndex,
   isPasting,
   isSearching,
-  historyQuery,
-  setHistoryQuery,
-  historyFailedMatch,
-  onOpenTasksDialog,
-}: Props): React.ReactNode {
+  onOpenTasksDialog}: Props): React.ReactNode {
   if (exitMessage.show) {
     return (
       <Text dimColor key="exit-message">
-        Press {exitMessage.key} again to exit
+        {t('prompt.exitAgain', exitMessage.key)}
       </Text>
     );
   }
   if (isPasting) {
     return (
       <Text dimColor key="pasting-message">
-        Pasting text…
+        {t('prompt.pasting')}
       </Text>
     );
   }
@@ -214,12 +207,9 @@ export function PromptInputFooterLeftSide({
 
   return (
     <Box justifyContent="flex-start" gap={1}>
-      {isSearching && (
-        <HistorySearchInput value={historyQuery} onChange={setHistoryQuery} historyFailedMatch={historyFailedMatch} />
-      )}
       {showVim ? (
         <Text dimColor key="vim-insert">
-          -- INSERT --
+          {t('prompt.vimInsert')}
         </Text>
       ) : null}
       <ModeIndicator
@@ -258,8 +248,7 @@ function ModeIndicator({
   teamsSelected,
   tmuxSelected,
   teammateFooterIndex,
-  onOpenTasksDialog,
-}: ModeIndicatorProps): React.ReactNode {
+  onOpenTasksDialog}: ModeIndicatorProps): React.ReactNode {
   const { columns } = useTerminalSize();
   const modeCycleShortcut = useShortcutDisplay('chat:cycleMode', 'Chat', 'shift+tab');
   const tasks = useAppState(s => s.tasks);
@@ -341,7 +330,7 @@ function ModeIndicator({
     count(Object.values(teamContext.teammates), t => t.name !== 'team-lead') > 0;
 
   if (mode === 'bash') {
-    return <Text color="bashBorder">! for bash mode</Text>;
+    return <Text color="bashBorder">{t('prompt.bashMode')}</Text>;
   }
 
   const currentMode = toolPermissionContext?.mode;
@@ -382,11 +371,11 @@ function ModeIndicator({
   const modePart =
     currentMode && hasActiveMode && !getIsRemoteMode() ? (
       <Text color={getModeColor(currentMode)} key="mode">
-        {permissionModeSymbol(currentMode)} {permissionModeTitle(currentMode).toLowerCase()} on
+        {permissionModeSymbol(currentMode)} {permissionModeLabel(currentMode)}
         {shouldShowModeHint && (
           <Text dimColor>
             {' '}
-            <KeyboardShortcutHint shortcut={modeCycleShortcut} action="cycle" parens />
+            <KeyboardShortcutHint shortcut={modeCycleShortcut} action={t('shortcutHint.cycle')} parens />
           </Text>
         )}
       </Text>
@@ -399,7 +388,7 @@ function ModeIndicator({
     ...(remoteSessionUrl
       ? [
           <Link url={remoteSessionUrl} key="remote">
-            <Text color="ide">{figures.circleDouble} remote</Text>
+            <Text color="ide">{figures.circleDouble} {t('prompt.remote')}</Text>
           </Link>,
         ]
       : []),
@@ -422,7 +411,7 @@ function ModeIndicator({
             dimColor={rssState.level === 'normal'}
             color={rssState.level === 'error' ? 'error' : rssState.level === 'warning' ? 'warning' : undefined}
           >
-            {rssState.text} · pid:{process.pid}
+            {t('prompt.rssPid', rssState.text, process.pid)}
           </Text>,
         ]
       : []),
@@ -457,7 +446,7 @@ function ModeIndicator({
   if (isViewingCompletedTeammate) {
     parts.push(
       <Text dimColor key="esc-return">
-        <KeyboardShortcutHint shortcut={escShortcut} action="return to team lead" />
+        <Text bold>{escShortcut}</Text> {t('prompt.returnToTeamLead')}
       </Text>,
     );
   } else if ((feature('PROACTIVE') || feature('KAIROS')) && hasNextTick) {
@@ -512,7 +501,7 @@ function ModeIndicator({
   if (parts.length === 0 && !tasksPart && !modePart && showHint) {
     parts.push(
       <Text dimColor key="shortcuts-hint">
-        ? for shortcuts
+        {t('prompt.shortcuts')}
       </Text>,
     );
   }
@@ -544,12 +533,12 @@ function ModeIndicator({
     parts.push(
       <Text dimColor key="selection-copy">
         <Byline>
-          {!copyOnSelect && <KeyboardShortcutHint shortcut="ctrl+c" action="copy" />}
+          {!copyOnSelect && <Text><Text bold>{t('promptInputFooter.ctrlC')}</Text> {t('prompt.copy')}</Text>}
           {isXtermJs() &&
             (altClickFailed ? (
-              <Text>set macOptionClickForcesSelection in VS Code settings</Text>
+              <Text>{t('prompt.macOptionClick')}</Text>
             ) : (
-              <KeyboardShortcutHint shortcut={isMac ? 'option+click' : 'shift+click'} action="native select" />
+              <Text><Text bold>{isMac ? t('promptInputFooter.optionClick') : t('promptInputFooter.shiftClick')}</Text> {t('prompt.nativeSelect')}</Text>
             ))}
         </Byline>
       </Text>,
@@ -565,7 +554,7 @@ function ModeIndicator({
   ) {
     parts.push(
       <Text dimColor key="voice-hint">
-        hold {voiceKeyShortcut} to speak
+        {t('prompt.holdToSpeak', voiceKeyShortcut)}
       </Text>,
     );
   }
@@ -574,9 +563,9 @@ function ModeIndicator({
     parts.push(
       <Text dimColor key="manage-tasks">
         {tasksSelected ? (
-          <KeyboardShortcutHint shortcut="Enter" action="view tasks" />
+          <Text><Text bold>{t('promptInputFooter.enter')}</Text> {t('prompt.viewTasks')}</Text>
         ) : (
-          <KeyboardShortcutHint shortcut="↓" action="manage" />
+          <Text><Text bold>{'↓'}</Text> {t('prompt.manage')}</Text>
         )}
       </Text>,
     );
@@ -630,22 +619,22 @@ function getSpinnerHintParts(
   hasRunningAgentTasks: boolean,
   isKillAgentsConfirmShowing: boolean,
 ): React.ReactElement[] {
-  let toggleAction: string;
+  let toggleAction: React.ReactNode;
   if (hasTeammates) {
     // Cycling: none → tasks → teammates → none
     switch (expandedView) {
       case 'none':
-        toggleAction = 'show tasks';
+        toggleAction = t('prompt.showTasks');
         break;
       case 'tasks':
-        toggleAction = 'show teammates';
+        toggleAction = t('prompt.showTeammates');
         break;
       case 'teammates':
-        toggleAction = 'hide';
+        toggleAction = t('prompt.hide');
         break;
     }
   } else {
-    toggleAction = expandedView === 'tasks' ? 'hide tasks' : 'show tasks';
+    toggleAction = expandedView === 'tasks' ? t('prompt.hideTasks') : t('prompt.showTasks');
   }
 
   // Show the toggle hint only when there are task items to display or
@@ -656,21 +645,21 @@ function getSpinnerHintParts(
     ...(isLoading
       ? [
           <Text dimColor key="esc">
-            <KeyboardShortcutHint shortcut={escShortcut} action="interrupt" />
+            <Text bold>{escShortcut}</Text> {t('prompt.interrupt')}
           </Text>,
         ]
       : []),
     ...(!isLoading && hasRunningAgentTasks && !isKillAgentsConfirmShowing
       ? [
           <Text dimColor key="kill-agents">
-            <KeyboardShortcutHint shortcut={killAgentsShortcut} action="stop agents" />
+            <Text bold>{killAgentsShortcut}</Text> {t('prompt.stopAgents')}
           </Text>,
         ]
       : []),
     ...(showToggleHint
       ? [
           <Text dimColor key="toggle-tasks">
-            <KeyboardShortcutHint shortcut={todosShortcut} action={toggleAction} />
+            <Text bold>{todosShortcut}</Text> {toggleAction}
           </Text>,
         ]
       : []),

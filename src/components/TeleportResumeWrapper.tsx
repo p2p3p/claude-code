@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
+import { t } from 'src/utils/i18n/index.js';
 import type { TeleportRemoteResponse } from 'src/utils/conversationRecovery.js';
 import type { CodeSession } from 'src/utils/teleport/api.js';
 import { type TeleportSource, useTeleportResume } from '../hooks/useTeleportResume.js';
@@ -28,15 +28,13 @@ export function TeleportResumeWrapper({
   onCancel,
   onError,
   isEmbedded = false,
-  source,
-}: TeleportResumeWrapperProps): React.ReactNode {
+  source}: TeleportResumeWrapperProps): React.ReactNode {
   const { resumeSession, isResuming, error, selectedSession } = useTeleportResume(source);
 
   // Log when teleport flow starts (for funnel tracking)
   useEffect(() => {
     logEvent('tengu_teleport_started', {
-      source: source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+      source: source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
   }, [source]);
 
   const handleSelect = async (session: CodeSession) => {
@@ -60,8 +58,7 @@ export function TeleportResumeWrapper({
   // Allow Esc to dismiss the error state
   useKeybinding('app:interrupt', handleCancel, {
     context: 'Global',
-    isActive: !!error && !onError,
-  });
+    isActive: !!error && !onError});
 
   // Show loading spinner when resuming
   if (isResuming && selectedSession) {
@@ -69,9 +66,9 @@ export function TeleportResumeWrapper({
       <Box flexDirection="column" padding={1}>
         <Box flexDirection="row">
           <Spinner />
-          <Text bold>Resuming session…</Text>
+          <Text bold>{t('teleportResume.resumingSession')}</Text>
         </Box>
-        <Text dimColor>Loading &quot;{selectedSession.title}&quot;…</Text>
+        <Text dimColor>{t('teleportResume.loadingTitle').replace('{title}', selectedSession.title)}</Text>
       </Box>
     );
   }
@@ -81,12 +78,12 @@ export function TeleportResumeWrapper({
     return (
       <Box flexDirection="column" padding={1}>
         <Text bold color="error">
-          Failed to resume session
+          {t('teleportResume.failedToResume')}
         </Text>
         <Text dimColor>{error.message}</Text>
         <Box marginTop={1}>
           <Text dimColor>
-            Press <Text bold>Esc</Text> to cancel
+            {t('teleportResume.pressEscToCancel')}
           </Text>
         </Box>
       </Box>

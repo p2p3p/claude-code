@@ -6,8 +6,7 @@ import { getCanonicalName } from './model/model.js'
 import { resolveAntModel } from './model/antModels.js'
 import {
   CHATGPT_CODEX_MAX_OUTPUT_TOKENS,
-  getChatGPTModelContextWindow,
-} from './model/chatgptModels.js'
+  getChatGPTModelContextWindow} from './model/chatgptModels.js'
 import { getModelCapability } from './model/modelCapabilities.js'
 
 // Model context window size (200k tokens for all models right now)
@@ -168,8 +167,7 @@ export function calculateContextPercentages(
 
   return {
     used: clampedUsed,
-    remaining: 100 - clampedUsed,
-  }
+    remaining: 100 - clampedUsed}
 }
 
 /**

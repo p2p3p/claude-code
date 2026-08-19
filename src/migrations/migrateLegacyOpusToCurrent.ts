@@ -1,14 +1,12 @@
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import { saveGlobalConfig } from '../utils/config.js'
 import { isLegacyModelRemapEnabled } from '../utils/model/model.js'
 import { getAPIProvider } from '../utils/model/providers.js'
 import {
   getSettingsForSource,
-  updateSettingsForSource,
-} from '../utils/settings/settings.js'
+  updateSettingsForSource} from '../utils/settings/settings.js'
 
 /**
  * Migrate first-party users off explicit Opus 4.0/4.1 model strings.
@@ -27,7 +25,7 @@ import {
  * project.
  */
 export function migrateLegacyOpusToCurrent(): void {
-  if (getAPIProvider() !== 'firstParty') {
+  if (getAPIProvider() !== 'anthropic') {
     return
   }
 
@@ -48,10 +46,8 @@ export function migrateLegacyOpusToCurrent(): void {
   updateSettingsForSource('userSettings', { model: 'opus' })
   saveGlobalConfig(current => ({
     ...current,
-    legacyOpusMigrationTimestamp: Date.now(),
-  }))
+    legacyOpusMigrationTimestamp: Date.now()}))
   logEvent('tengu_legacy_opus_migration', {
     from_model:
-      model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 }

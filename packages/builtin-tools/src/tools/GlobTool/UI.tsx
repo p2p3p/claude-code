@@ -8,9 +8,10 @@ import { Text } from '@anthropic/ink';
 import { FILE_NOT_FOUND_CWD_NOTE, getDisplayPath } from 'src/utils/file.js';
 import { truncate } from 'src/utils/format.js';
 import { GrepTool } from '../GrepTool/GrepTool.js';
+import { t } from 'src/utils/i18n/index.js';
 
 export function userFacingName(): string {
-  return 'Search';
+  return t('toolUI.glob.nameSearch');
 }
 
 export function renderToolUseMessage(
@@ -21,9 +22,9 @@ export function renderToolUseMessage(
     return null;
   }
   if (!path) {
-    return `pattern: "${pattern}"`;
+    return t('toolUI.glob.pattern', pattern);
   }
-  return `pattern: "${pattern}", path: "${verbose ? path : getDisplayPath(path)}"`;
+  return t('toolUI.glob.patternPath', pattern, verbose ? path : getDisplayPath(path));
 }
 
 export function renderToolUseErrorMessage(
@@ -35,13 +36,13 @@ export function renderToolUseErrorMessage(
     if (errorMessage?.includes(FILE_NOT_FOUND_CWD_NOTE)) {
       return (
         <MessageResponse>
-          <Text color="error">File not found</Text>
+          <Text color="error">{t('toolUI.glob.fileNotFound')}</Text>
         </MessageResponse>
       );
     }
     return (
       <MessageResponse>
-        <Text color="error">Error searching files</Text>
+        <Text color="error">{t('toolUI.glob.errorSearching')}</Text>
       </MessageResponse>
     );
   }

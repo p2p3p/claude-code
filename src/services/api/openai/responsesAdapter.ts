@@ -83,8 +83,7 @@ function convertMessagesToResponsesInput(messages: unknown[]): {
         input.push({
           type: 'function_call_output',
           call_id: callId,
-          output: textFromContent(record.content),
-        })
+          output: textFromContent(record.content)})
       }
       continue
     }
@@ -107,8 +106,7 @@ function convertMessagesToResponsesInput(messages: unknown[]): {
             type: 'function_call',
             call_id: id,
             name,
-            arguments: typeof fn?.arguments === 'string' ? fn.arguments : '{}',
-          })
+            arguments: typeof fn?.arguments === 'string' ? fn.arguments : '{}'})
         }
       }
       continue
@@ -117,16 +115,14 @@ function convertMessagesToResponsesInput(messages: unknown[]): {
     if (role === 'user') {
       input.push({
         role: 'user',
-        content: convertUserContent(record.content),
-      })
+        content: convertUserContent(record.content)})
     }
   }
 
   return {
     input,
     instructions:
-      instructions.length > 0 ? instructions.join('\n\n') : undefined,
-  }
+      instructions.length > 0 ? instructions.join('\n\n') : undefined}
 }
 
 function convertToolsToResponses(tools: unknown[]): ResponsesTool[] {
@@ -145,8 +141,7 @@ function convertToolsToResponses(tools: unknown[]): ResponsesTool[] {
         fn?.parameters && typeof fn.parameters === 'object'
           ? fn.parameters
           : { type: 'object', properties: {} },
-      strict: false,
-    })
+      strict: false})
   }
   return result
 }
@@ -192,8 +187,7 @@ export function buildResponsesRequest(params: {
     parallel_tool_calls: true,
     // Same OAuth session → same key so OpenAI can sticky-route to a cache node.
     // Must not hash the full message list (would change every turn).
-    prompt_cache_key: params.promptCacheKey,
-  }
+    prompt_cache_key: params.promptCacheKey}
 }
 
 async function* parseSSE(
@@ -263,8 +257,7 @@ export function extractUsage(
     totalInputTokens: totalInput,
     outputTokens,
     cacheReadTokens: cachedRaw,
-    cacheWriteTokens: writeRaw,
-  })
+    cacheWriteTokens: writeRaw})
 }
 
 function mapStopReason(response: Record<string, unknown> | undefined): string {
@@ -303,10 +296,7 @@ export async function* adaptResponsesStreamToAnthropic(
           input_tokens: 0,
           output_tokens: 0,
           cache_creation_input_tokens: 0,
-          cache_read_input_tokens: 0,
-        },
-      },
-    } as unknown as BetaRawMessageStreamEvent
+          cache_read_input_tokens: 0}}} as unknown as BetaRawMessageStreamEvent
   }
 
   for await (const event of stream) {
@@ -318,8 +308,7 @@ export async function* adaptResponsesStreamToAnthropic(
         if (thinkingBlockOpen) {
           yield {
             type: 'content_block_stop',
-            index: currentContentIndex,
-          } as BetaRawMessageStreamEvent
+            index: currentContentIndex} as BetaRawMessageStreamEvent
           thinkingBlockOpen = false
         }
         currentContentIndex++
@@ -327,14 +316,12 @@ export async function* adaptResponsesStreamToAnthropic(
         yield {
           type: 'content_block_start',
           index: currentContentIndex,
-          content_block: { type: 'text', text: '' },
-        } as BetaRawMessageStreamEvent
+          content_block: { type: 'text', text: '' }} as BetaRawMessageStreamEvent
       }
       yield {
         type: 'content_block_delta',
         index: currentContentIndex,
-        delta: { type: 'text_delta', text: String(event.delta ?? '') },
-      } as BetaRawMessageStreamEvent
+        delta: { type: 'text_delta', text: String(event.delta ?? '') }} as BetaRawMessageStreamEvent
       continue
     }
 
@@ -343,8 +330,7 @@ export async function* adaptResponsesStreamToAnthropic(
         if (textBlockOpen) {
           yield {
             type: 'content_block_stop',
-            index: currentContentIndex,
-          } as BetaRawMessageStreamEvent
+            index: currentContentIndex} as BetaRawMessageStreamEvent
           textBlockOpen = false
         }
         currentContentIndex++
@@ -352,14 +338,12 @@ export async function* adaptResponsesStreamToAnthropic(
         yield {
           type: 'content_block_start',
           index: currentContentIndex,
-          content_block: { type: 'thinking', thinking: '', signature: '' },
-        } as BetaRawMessageStreamEvent
+          content_block: { type: 'thinking', thinking: '', signature: '' }} as BetaRawMessageStreamEvent
       }
       yield {
         type: 'content_block_delta',
         index: currentContentIndex,
-        delta: { type: 'thinking_delta', thinking: String(event.delta ?? '') },
-      } as BetaRawMessageStreamEvent
+        delta: { type: 'thinking_delta', thinking: String(event.delta ?? '') }} as BetaRawMessageStreamEvent
       continue
     }
 
@@ -371,15 +355,13 @@ export async function* adaptResponsesStreamToAnthropic(
         if (textBlockOpen) {
           yield {
             type: 'content_block_stop',
-            index: currentContentIndex,
-          } as BetaRawMessageStreamEvent
+            index: currentContentIndex} as BetaRawMessageStreamEvent
           textBlockOpen = false
         }
         if (thinkingBlockOpen) {
           yield {
             type: 'content_block_stop',
-            index: currentContentIndex,
-          } as BetaRawMessageStreamEvent
+            index: currentContentIndex} as BetaRawMessageStreamEvent
           thinkingBlockOpen = false
         }
         currentContentIndex++
@@ -389,13 +371,11 @@ export async function* adaptResponsesStreamToAnthropic(
           contentIndex: currentContentIndex,
           open: true,
           name,
-          id,
-        })
+          id})
         yield {
           type: 'content_block_start',
           index: currentContentIndex,
-          content_block: { type: 'tool_use', id, name, input: {} },
-        } as BetaRawMessageStreamEvent
+          content_block: { type: 'tool_use', id, name, input: {} }} as BetaRawMessageStreamEvent
       }
       continue
     }
@@ -410,9 +390,7 @@ export async function* adaptResponsesStreamToAnthropic(
           index: block.contentIndex,
           delta: {
             type: 'input_json_delta',
-            partial_json: String(event.delta ?? ''),
-          },
-        } as BetaRawMessageStreamEvent
+            partial_json: String(event.delta ?? '')}} as BetaRawMessageStreamEvent
       }
       continue
     }
@@ -424,8 +402,7 @@ export async function* adaptResponsesStreamToAnthropic(
       if (block?.open) {
         yield {
           type: 'content_block_stop',
-          index: block.contentIndex,
-        } as BetaRawMessageStreamEvent
+          index: block.contentIndex} as BetaRawMessageStreamEvent
         block.open = false
       }
       continue
@@ -446,23 +423,20 @@ export async function* adaptResponsesStreamToAnthropic(
       if (textBlockOpen) {
         yield {
           type: 'content_block_stop',
-          index: currentContentIndex,
-        } as BetaRawMessageStreamEvent
+          index: currentContentIndex} as BetaRawMessageStreamEvent
         textBlockOpen = false
       }
       if (thinkingBlockOpen) {
         yield {
           type: 'content_block_stop',
-          index: currentContentIndex,
-        } as BetaRawMessageStreamEvent
+          index: currentContentIndex} as BetaRawMessageStreamEvent
         thinkingBlockOpen = false
       }
       const response = event.response as Record<string, unknown> | undefined
       yield {
         type: 'message_delta',
         delta: { stop_reason: mapStopReason(response), stop_sequence: null },
-        usage: extractUsage(response),
-      } as unknown as BetaRawMessageStreamEvent
+        usage: extractUsage(response)} as unknown as BetaRawMessageStreamEvent
       yield { type: 'message_stop' } as BetaRawMessageStreamEvent
     }
   }
@@ -482,8 +456,7 @@ export async function createChatGPTResponsesStream(params: {
     'OpenAI-Beta': 'responses=experimental',
     Origin: 'https://chatgpt.com',
     Referer: 'https://chatgpt.com/',
-    originator: 'claude-code-best',
-  }
+    originator: 'claude-code-best'}
   if (auth.accountId) {
     headers['ChatGPT-Account-Id'] = auth.accountId
   }
@@ -493,8 +466,7 @@ export async function createChatGPTResponsesStream(params: {
       method: 'POST',
       headers,
       body: JSON.stringify(params.request),
-      signal: params.signal,
-    },
+      signal: params.signal},
   )
   if (!response.ok) {
     const text = await response.text().catch(() => '')

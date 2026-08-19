@@ -23,6 +23,7 @@ import { logError } from 'src/utils/log.js';
 import { getPlansDirectory } from 'src/utils/plans.js';
 import { openForScan, readCapped } from 'src/utils/readEditContext.js';
 import type { Output } from './FileWriteTool.js';
+import { t } from 'src/utils/i18n/index.js';
 
 const MAX_LINES_TO_RENDER = 10;
 // Model output uses \n regardless of platform, so always split on \n.
@@ -48,7 +49,7 @@ function FileWriteToolCreatedMessage({
   verbose: boolean;
 }): React.ReactNode {
   const { columns } = useTerminalSize();
-  const contentWithFallback = content || '(No content)';
+  const contentWithFallback = content || t('toolUI.fileWrite.noContent');
   const numLines = countLines(content);
   const plusLines = numLines - MAX_LINES_TO_RENDER;
 
@@ -56,8 +57,7 @@ function FileWriteToolCreatedMessage({
     <MessageResponse>
       <Box flexDirection="column">
         <Text>
-          Wrote <Text bold>{numLines}</Text> lines to{' '}
-          <Text bold>{verbose ? filePath : relative(getCwd(), filePath)}</Text>
+          {t('toolUI.fileWrite.wroteLines', numLines, verbose ? filePath : relative(getCwd(), filePath))}
         </Text>
         <Box flexDirection="column">
           <HighlightedCode
@@ -70,7 +70,7 @@ function FileWriteToolCreatedMessage({
         </Box>
         {!verbose && plusLines > 0 && (
           <Text dimColor>
-            … +{plusLines} {plusLines === 1 ? 'line' : 'lines'} {numLines > 0 && <CtrlOToExpand />}
+            … {t('toolUI.fileWrite.plusLines', plusLines)} {numLines > 0 && <CtrlOToExpand />}
           </Text>
         )}
       </Box>
@@ -80,9 +80,9 @@ function FileWriteToolCreatedMessage({
 
 export function userFacingName(input: Partial<{ file_path: string; content: string }> | undefined): string {
   if (input?.file_path?.startsWith(getPlansDirectory())) {
-    return 'Updated plan';
+    return t('toolUI.fileWrite.nameUpdatedPlan');
   }
-  return 'Write';
+  return t('toolUI.fileWrite.nameWrite');
 }
 
 /** Gates fullscreen click-to-expand. Only `create` truncates (to
@@ -194,7 +194,7 @@ function WriteRejectionBody({
   if (data.type === 'error') {
     return (
       <MessageResponse>
-        <Text>(No changes)</Text>
+        <Text>{t('toolUI.fileWrite.noChanges')}</Text>
       </MessageResponse>
     );
   }
@@ -245,7 +245,7 @@ export function renderToolUseErrorMessage(
   if (!verbose && typeof result === 'string' && extractTag(result, 'tool_use_error')) {
     return (
       <MessageResponse>
-        <Text color="error">Error writing file</Text>
+        <Text color="error">{t('toolUI.fileWrite.errorWriting')}</Text>
       </MessageResponse>
     );
   }
@@ -268,7 +268,7 @@ export function renderToolResultMessage(
         if (style !== 'condensed') {
           return (
             <MessageResponse>
-              <Text dimColor>/plan to preview</Text>
+              <Text dimColor>{t('toolUI.fileWrite.planPreview')}</Text>
             </MessageResponse>
           );
         }
@@ -276,7 +276,7 @@ export function renderToolResultMessage(
         const numLines = countLines(content);
         return (
           <Text>
-            Wrote <Text bold>{numLines}</Text> lines to <Text bold>{relative(getCwd(), filePath)}</Text>
+            {t('toolUI.fileWrite.wroteLines', numLines, relative(getCwd(), filePath))}
           </Text>
         );
       }
@@ -293,7 +293,7 @@ export function renderToolResultMessage(
           fileContent={originalFile ?? undefined}
           style={style}
           verbose={verbose}
-          previewHint={isPlanFile ? '/plan to preview' : undefined}
+          previewHint={isPlanFile ? t('toolUI.fileWrite.planPreview') : undefined}
         />
       );
     }

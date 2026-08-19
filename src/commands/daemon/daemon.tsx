@@ -1,4 +1,5 @@
 import type { LocalJSXCommandOnDone, LocalJSXCommandContext } from '../../types/command.js';
+import { t } from '../../utils/i18n/index.js';
 
 /**
  * /daemon slash command — manages daemon and background sessions from the REPL.
@@ -16,7 +17,7 @@ export async function call(
 
   // attach is interactive/blocking — not available inside the REPL
   if (sub === 'attach') {
-    onDone('Use `claude daemon attach` from the CLI. Attach is not available inside the REPL.', { display: 'system' });
+    onDone(t('daemonCmd.attachNotAvailable'), { display: 'system' });
     return null;
   }
 
@@ -31,7 +32,7 @@ export async function call(
     }
   });
 
-  onDone(lines.join('\n') || 'Done.', { display: 'system' });
+  onDone(lines.join('\n') || t('daemonCmd.done'), { display: 'system' });
   return null;
 }
 

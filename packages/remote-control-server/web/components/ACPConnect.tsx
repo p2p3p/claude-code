@@ -9,6 +9,7 @@ import { ACPClient, DEFAULT_SETTINGS, DisconnectRequestedError } from '../src/ac
 import type { ACPSettings, ConnectionState, BrowserToolParams, BrowserToolResult } from '../src/acp';
 import { ChevronDown, FolderOpen, Globe, Image, KeyRound, ScanLine, X } from 'lucide-react';
 import { useQRScanner, type QRCodeData } from '../src/hooks';
+import { t } from '../../../../src/utils/i18n/index.js';
 
 // Get token from the URL fragment so it is not sent in HTTP requests.
 function getTokenFromUrl(): string | undefined {
@@ -98,7 +99,7 @@ export function ACPConnect({
   browserToolHandler,
   showTokenInput = false,
   inferFromUrl = false,
-  placeholder = 'Proxy server URL',
+  placeholder = t('rcs.proxyServerUrl'),
   showScanButton = false,
 }: ACPConnectProps) {
   const [settings, setSettings] = useState<ACPSettings>(() => getInitialSettings(inferFromUrl));
@@ -286,10 +287,10 @@ export function ACPConnect({
 
   // Get status label
   const statusLabels: Record<ConnectionState, string> = {
-    disconnected: 'Disconnected',
-    connecting: 'Connecting...',
-    connected: 'Connected',
-    error: 'Error',
+    disconnected: t('rcs.disconnected'),
+    connecting: t('rcs.connecting'),
+    connected: t('rcs.connected'),
+    error: t('rcs.error'),
   };
 
   return (
@@ -345,9 +346,9 @@ export function ACPConnect({
                   <div className="absolute bottom-16 left-0 right-0 flex flex-col items-center gap-3">
                     <Button onClick={handleSelectFromAlbum} variant="secondary" size="sm" className="h-9 px-4">
                       <Image className="h-4 w-4 mr-2" />
-                      Select from Album
+                      {t('rcs.selectFromAlbum')}
                     </Button>
-                    <span className="text-sm text-white/80">or point camera at QR code</span>
+                    <span className="text-sm text-white/80">{t('rcs.orPointCameraAtQrCode')}</span>
                   </div>
                 </div>,
                 document.body,
@@ -357,7 +358,7 @@ export function ACPConnect({
             <div className={`space-y-3 ${isScanning ? 'invisible' : ''}`}>
               {/* Server URL */}
               <div className="space-y-1.5">
-                <Label htmlFor="proxy-url">Server</Label>
+                <Label htmlFor="proxy-url">{t('rcs.server')}</Label>
                 <div className="flex gap-2">
                   {showScanButton && !isConnected && !isConnecting && (
                     <Button
@@ -365,7 +366,7 @@ export function ACPConnect({
                       variant="outline"
                       size="sm"
                       className="h-9 px-3"
-                      title="Scan QR code"
+                      title={t('rcs.scanQrCode')}
                       type="button"
                     >
                       <ScanLine className="h-4 w-4" />
@@ -393,7 +394,7 @@ export function ACPConnect({
                       className="h-9 px-4"
                       type="button"
                     >
-                      {isConnecting ? '...' : 'Connect'}
+                      {isConnecting ? '...' : t('rcs.connect')}
                     </Button>
                   ) : (
                     <Button
@@ -403,7 +404,7 @@ export function ACPConnect({
                       className="h-9 px-4"
                       type="button"
                     >
-                      Disconnect
+                      {t('rcs.disconnect')}
                     </Button>
                   )}
                 </div>
@@ -413,8 +414,8 @@ export function ACPConnect({
               {showTokenInput && (
                 <div className="space-y-1.5">
                   <Label htmlFor="auth-token">
-                    Auth Token
-                    <span className="text-muted-foreground font-normal ml-1.5">optional</span>
+                    {t('rcs.authToken')}
+                    <span className="text-muted-foreground font-normal ml-1.5">{t('rcs.optional')}</span>
                   </Label>
                   <InputGroup data-disabled={isConnected || isConnecting}>
                     <InputGroupAddon>
@@ -425,7 +426,7 @@ export function ACPConnect({
                       value={settings.token || ''}
                       onChange={e => updateSetting('token', e.target.value || undefined)}
                       onKeyDown={handleInputKeyDown}
-                      placeholder="For remote access"
+                      placeholder={t('rcs.forRemoteAccess')}
                       disabled={isConnected || isConnecting}
                       type="password"
                       aria-invalid={!!error}
@@ -438,8 +439,8 @@ export function ACPConnect({
               {/* Working Directory */}
               <div className="space-y-1.5">
                 <Label htmlFor="working-dir">
-                  Working Directory
-                  <span className="text-muted-foreground font-normal ml-1.5">optional</span>
+                  {t('rcs.workingDirectory')}
+                  <span className="text-muted-foreground font-normal ml-1.5">{t('rcs.optional')}</span>
                 </Label>
                 <InputGroup data-disabled={isConnected || isConnecting}>
                   <InputGroupAddon>
@@ -450,7 +451,7 @@ export function ACPConnect({
                     value={settings.cwd || ''}
                     onChange={e => updateSetting('cwd', e.target.value || undefined)}
                     onKeyDown={handleInputKeyDown}
-                    placeholder="/path/to/project"
+                    placeholder={t('rcs.pathToProject')}
                     disabled={isConnected || isConnecting}
                     aria-invalid={!!error}
                     className="font-mono"

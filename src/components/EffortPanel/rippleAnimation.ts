@@ -259,8 +259,7 @@ export function computeRippleCells(args: {
 
     cells[x] = {
       char: RIPPLE_BG_CHAR,
-      color: intensityToColor(intensity, hueShift),
-    }
+      color: intensityToColor(intensity, hueShift)}
   }
   return cells
 }
@@ -291,8 +290,7 @@ export function applyOverlaysToCells(
       if (targetIdx >= out.length) break
       out[targetIdx] = {
         char: overlay.text[i],
-        color: overlay.color ?? out[targetIdx].color,
-      }
+        color: overlay.color ?? out[targetIdx].color}
     }
   }
   return out

@@ -69,8 +69,7 @@ export function parseSkillStoreArgs(args: string): SkillStoreArgs {
       return {
         action: 'invalid',
         reason:
-          'version requires a skill id and version, e.g. version sk_123 v1',
-      }
+          'version requires a skill id and version, e.g. version sk_123 v1'}
     }
     return { action: 'version', id: parts[0], version: parts[1] }
   }
@@ -82,22 +81,19 @@ export function parseSkillStoreArgs(args: string): SkillStoreArgs {
       return {
         action: 'invalid',
         reason:
-          'create requires a skill name and markdown body, e.g. create my-skill "# My Skill\\nContent"',
-      }
+          'create requires a skill name and markdown body, e.g. create my-skill "# My Skill\\nContent"'}
     }
     const name = rest.slice(0, spaceInRest).trim()
     const markdown = rest.slice(spaceInRest + 1).trim()
     if (!name) {
       return {
         action: 'invalid',
-        reason: 'create requires a non-empty skill name',
-      }
+        reason: 'create requires a non-empty skill name'}
     }
     if (!markdown) {
       return {
         action: 'invalid',
-        reason: 'create requires a non-empty markdown body',
-      }
+        reason: 'create requires a non-empty markdown body'}
     }
     return { action: 'create', name, markdown }
   }
@@ -120,8 +116,7 @@ export function parseSkillStoreArgs(args: string): SkillStoreArgs {
       return {
         action: 'invalid',
         reason:
-          'install requires a skill id (optionally with @version), e.g. install sk_123 or install sk_123@v2',
-      }
+          'install requires a skill id (optionally with @version), e.g. install sk_123 or install sk_123@v2'}
     }
     const token = rest.split(/\s+/)[0]
     if (!token) {
@@ -136,20 +131,17 @@ export function parseSkillStoreArgs(args: string): SkillStoreArgs {
     if (!id) {
       return {
         action: 'invalid',
-        reason: 'install requires a non-empty skill id before @',
-      }
+        reason: 'install requires a non-empty skill id before @'}
     }
     if (!version) {
       return {
         action: 'invalid',
-        reason: 'install requires a non-empty version after @',
-      }
+        reason: 'install requires a non-empty version after @'}
     }
     return { action: 'install', id, version }
   }
 
   return {
     action: 'invalid',
-    reason: `Unknown sub-command "${subCmd}". ${USAGE}`,
-  }
+    reason: `Unknown sub-command "${subCmd}". ${USAGE}`}
 }

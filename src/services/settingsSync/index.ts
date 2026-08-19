@@ -18,21 +18,17 @@ import { getIsInteractive } from '../../bootstrap/state.js'
 import {
   CLAUDE_AI_INFERENCE_SCOPE,
   getOauthConfig,
-  OAUTH_BETA_HEADER,
-} from '../../constants/oauth.js'
+  OAUTH_BETA_HEADER} from '../../constants/oauth.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
-  getClaudeAIOAuthTokens,
-} from '../../utils/auth.js'
+  getClaudeAIOAuthTokens} from '../../utils/auth.js'
 import { clearMemoryFileCaches } from '../../utils/claudemd.js'
 import { getMemoryPath } from '../../utils/config.js'
 import { logForDiagnosticsNoPII } from '../../utils/diagLogs.js'
 import { classifyAxiosError } from '../../utils/errors.js'
 import { getRepoRemoteHash } from '../../utils/git.js'
 import {
-  getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
-} from '../../utils/model/providers.js'
+  getAPIProvider} from '../../utils/model/providers.js'
 import { markInternalWrite } from '../../utils/settings/internalWrites.js'
 import { getSettingsFilePathForSource } from '../../utils/settings/settings.js'
 import { resetSettingsCache } from '../../utils/settings/settingsCache.js'
@@ -45,8 +41,7 @@ import {
   type SettingsSyncFetchResult,
   type SettingsSyncUploadResult,
   SYNC_KEYS,
-  UserSyncDataSchema,
-} from './types.js'
+  UserSyncDataSchema} from './types.js'
 
 const SETTINGS_SYNC_TIMEOUT_MS = 10000 // 10 seconds
 const DEFAULT_MAX_RETRIES = 3
@@ -186,8 +181,7 @@ async function doDownloadUserSettings(
       const projectId = await getRepoRemoteHash()
       const entryCount = Object.keys(entries).length
       logForDiagnosticsNoPII('info', 'settings_sync_download_applying', {
-        entryCount,
-      })
+        entryCount})
       await applyRemoteEntriesToLocal(entries, projectId)
       logEvent('tengu_settings_sync_download_success', { entryCount })
       return true
@@ -210,7 +204,7 @@ async function doDownloadUserSettings(
  * download a no-op there. Upload is independently guarded by getIsInteractive().
  */
 function isUsingOAuth(): boolean {
-  if (getAPIProvider() !== 'firstParty' || !isFirstPartyAnthropicBaseUrl()) {
+  if (getAPIProvider() !== 'anthropic' || !false) {
     return false
   }
 
@@ -233,15 +227,12 @@ function getSettingsSyncAuthHeaders(): {
     return {
       headers: {
         Authorization: `Bearer ${oauthTokens.accessToken}`,
-        'anthropic-beta': OAUTH_BETA_HEADER,
-      },
-    }
+        'anthropic-beta': OAUTH_BETA_HEADER}}
   }
 
   return {
     headers: {},
-    error: 'No OAuth token available',
-  }
+    error: 'No OAuth token available'}
 }
 
 async function fetchUserSettingsOnce(): Promise<SettingsSyncFetchResult> {
@@ -253,29 +244,25 @@ async function fetchUserSettingsOnce(): Promise<SettingsSyncFetchResult> {
       return {
         success: false,
         error: authHeaders.error,
-        skipRetry: true,
-      }
+        skipRetry: true}
     }
 
     const headers: Record<string, string> = {
       ...authHeaders.headers,
-      'User-Agent': getClaudeCodeUserAgent(),
-    }
+      'User-Agent': getClaudeCodeUserAgent()}
 
     const endpoint = getSettingsSyncEndpoint()
     const response = await axios.get(endpoint, {
       headers,
       timeout: SETTINGS_SYNC_TIMEOUT_MS,
-      validateStatus: status => status === 200 || status === 404,
-    })
+      validateStatus: status => status === 200 || status === 404})
 
     // 404 means no settings exist yet
     if (response.status === 404) {
       logForDiagnosticsNoPII('info', 'settings_sync_fetch_empty')
       return {
         success: true,
-        isEmpty: true,
-      }
+        isEmpty: true}
     }
 
     const parsed = UserSyncDataSchema().safeParse(response.data)
@@ -283,16 +270,14 @@ async function fetchUserSettingsOnce(): Promise<SettingsSyncFetchResult> {
       logForDiagnosticsNoPII('warn', 'settings_sync_fetch_invalid_format')
       return {
         success: false,
-        error: 'Invalid settings sync response format',
-      }
+        error: 'Invalid settings sync response format'}
     }
 
     logForDiagnosticsNoPII('info', 'settings_sync_fetch_success')
     return {
       success: true,
       data: parsed.data,
-      isEmpty: false,
-    }
+      isEmpty: false}
   } catch (error) {
     const { kind, message } = classifyAxiosError(error)
     switch (kind) {
@@ -300,8 +285,7 @@ async function fetchUserSettingsOnce(): Promise<SettingsSyncFetchResult> {
         return {
           success: false,
           error: 'Not authorized for settings sync',
-          skipRetry: true,
-        }
+          skipRetry: true}
       case 'timeout':
         return { success: false, error: 'Settings sync request timeout' }
       case 'network':
@@ -336,8 +320,7 @@ async function fetchUserSettings(
     logForDiagnosticsNoPII('info', 'settings_sync_retry', {
       attempt,
       maxRetries,
-      delayMs,
-    })
+      delayMs})
     await sleep(delayMs)
   }
 
@@ -354,15 +337,13 @@ async function uploadUserSettings(
     if (authHeaders.error) {
       return {
         success: false,
-        error: authHeaders.error,
-      }
+        error: authHeaders.error}
     }
 
     const headers: Record<string, string> = {
       ...authHeaders.headers,
       'User-Agent': getClaudeCodeUserAgent(),
-      'Content-Type': 'application/json',
-    }
+      'Content-Type': 'application/json'}
 
     const endpoint = getSettingsSyncEndpoint()
     const response = await axios.put(
@@ -370,24 +351,20 @@ async function uploadUserSettings(
       { entries },
       {
         headers,
-        timeout: SETTINGS_SYNC_TIMEOUT_MS,
-      },
+        timeout: SETTINGS_SYNC_TIMEOUT_MS},
     )
 
     logForDiagnosticsNoPII('info', 'settings_sync_uploaded', {
-      entryCount: Object.keys(entries).length,
-    })
+      entryCount: Object.keys(entries).length})
     return {
       success: true,
       checksum: response.data?.checksum,
-      lastModified: response.data?.lastModified,
-    }
+      lastModified: response.data?.lastModified}
   } catch (error) {
     logForDiagnosticsNoPII('warn', 'settings_sync_upload_error')
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }
+      error: error instanceof Error ? error.message : 'Unknown error'}
   }
 }
 
@@ -499,8 +476,7 @@ async function applyRemoteEntriesToLocal(
     if (sizeBytes > MAX_FILE_SIZE_BYTES) {
       logForDiagnosticsNoPII('info', 'settings_sync_file_too_large', {
         sizeBytes,
-        maxBytes: MAX_FILE_SIZE_BYTES,
-      })
+        maxBytes: MAX_FILE_SIZE_BYTES})
       return true
     }
     return false
@@ -576,6 +552,5 @@ async function applyRemoteEntriesToLocal(
   }
 
   logForDiagnosticsNoPII('info', 'settings_sync_applied', {
-    appliedCount,
-  })
+    appliedCount})
 }

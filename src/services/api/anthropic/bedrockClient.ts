@@ -21,7 +21,7 @@ import { AnthropicBedrock } from '@anthropic-ai/bedrock-sdk'
  *
  * When upstream ships a fix, verify the probe in scripts/probe-bedrock-beta-fix.ts
  * shows "bug reproduced: false", then delete this class and change
- * `services/api/client.ts` to instantiate `AnthropicBedrock` directly.
+ * `services/api/anthropic/client.ts` to instantiate `AnthropicBedrock` directly.
  */
 type BuildRequestArg = Parameters<AnthropicBedrock['buildRequest']>[0]
 type BuildRequestRet = Awaited<ReturnType<AnthropicBedrock['buildRequest']>>

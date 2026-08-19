@@ -14,12 +14,10 @@ import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
 import type { REPLHookContext } from '../../utils/hooks/postSamplingHooks.js'
 import {
   createCacheSafeParams,
-  runForkedAgent,
-} from '../../utils/forkedAgent.js'
+  runForkedAgent} from '../../utils/forkedAgent.js'
 import {
   createUserMessage,
-  createMemorySavedMessage,
-} from '../../utils/messages.js'
+  createMemorySavedMessage} from '../../utils/messages.js'
 import type { Message } from '../../types/message.js'
 import { logForDebugging } from '../../utils/debug.js'
 import type { ToolUseContext } from '../../Tool.js'
@@ -32,23 +30,20 @@ import {
   getOriginalCwd,
   getKairosActive,
   getIsRemoteMode,
-  getSessionId,
-} from '../../bootstrap/state.js'
+  getSessionId} from '../../bootstrap/state.js'
 import { createAutoMemCanUseTool } from '../extractMemories/extractMemories.js'
 import { buildConsolidationPrompt } from './consolidationPrompt.js'
 import {
   readLastConsolidatedAt,
   listSessionsTouchedSince,
   tryAcquireConsolidationLock,
-  rollbackConsolidationLock,
-} from './consolidationLock.js'
+  rollbackConsolidationLock} from './consolidationLock.js'
 import {
   registerDreamTask,
   addDreamTurn,
   completeDreamTask,
   failDreamTask,
-  isDreamTask,
-} from '../../tasks/DreamTask/DreamTask.js'
+  isDreamTask} from '../../tasks/DreamTask/DreamTask.js'
 import { FILE_EDIT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileEditTool/constants.js'
 import { FILE_WRITE_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileWriteTool/prompt.js'
 
@@ -63,8 +58,7 @@ type AutoDreamConfig = {
 
 const DEFAULTS: AutoDreamConfig = {
   minHours: 24,
-  minSessions: 5,
-}
+  minSessions: 5}
 
 /**
  * Thresholds from tengu_onyx_plover. The enabled gate lives in config.ts
@@ -89,8 +83,7 @@ function getConfig(): AutoDreamConfig {
       Number.isFinite(raw.minSessions) &&
       raw.minSessions > 0
         ? raw.minSessions
-        : DEFAULTS.minSessions,
-  }
+        : DEFAULTS.minSessions}
 }
 
 function isGateOpen(): boolean {
@@ -195,8 +188,7 @@ export function initAutoDream(): void {
     )
     logEvent('tengu_auto_dream_fired', {
       hours_since: Math.round(hoursSince),
-      sessions_since: sessionIds.length,
-    })
+      sessions_since: sessionIds.length})
 
     const setAppState =
       context.toolUseContext.setAppStateForTasks ??
@@ -205,8 +197,7 @@ export function initAutoDream(): void {
     const taskId = registerDreamTask(setAppState, {
       sessionsReviewing: sessionIds.length,
       priorMtime,
-      abortController,
-    })
+      abortController})
 
     try {
       const memoryRoot = getAutoMemPath()
@@ -231,8 +222,7 @@ ${sessionIds.map(id => `- ${id}`).join('\n')}`
         maxTurns: 20,
         skipTranscript: true,
         overrides: { abortController },
-        onMessage: makeDreamProgressWatcher(taskId, setAppState),
-      })
+        onMessage: makeDreamProgressWatcher(taskId, setAppState)})
 
       completeDreamTask(taskId, setAppState)
       // Inline completion summary in the main transcript (same surface as
@@ -245,8 +235,7 @@ ${sessionIds.map(id => `- ${id}`).join('\n')}`
       ) {
         ;(appendSystemMessage as (msg: Message) => void)({
           ...createMemorySavedMessage(dreamState.filesTouched),
-          verb: 'Improved',
-        })
+          verb: 'Improved'})
       }
       logForDebugging(
         `[autoDream] completed — cache: read=${result.totalUsage.cache_read_input_tokens} created=${result.totalUsage.cache_creation_input_tokens}`,
@@ -255,8 +244,7 @@ ${sessionIds.map(id => `- ${id}`).join('\n')}`
         cache_read: result.totalUsage.cache_read_input_tokens,
         cache_created: result.totalUsage.cache_creation_input_tokens,
         output: result.totalUsage.output_tokens,
-        sessions_reviewed: sessionIds.length,
-      })
+        sessions_reviewed: sessionIds.length})
     } catch (e: unknown) {
       // If the user killed from the bg-tasks dialog, DreamTask.kill already
       // aborted, rolled back the lock, and set status=killed. Don't overwrite

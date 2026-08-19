@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto'
 import type { Command, LocalCommandCall } from '../types/command.js'
 import type { Message } from '../types/message.js'
+import { t } from '../utils/i18n/index.js'
 
 /**
  * Insert a snip boundary into the message array.
@@ -19,7 +20,7 @@ const call: LocalCommandCall = async (_args, context) => {
   const { messages, setMessages } = context
 
   if (messages.length === 0) {
-    return { type: 'text', value: 'No messages to snip.' }
+    return { type: 'text', value: t('forceSnip.noMessagesToSnip') }
   }
 
   // Collect UUIDs of every message that will be snipped (everything currently
@@ -30,30 +31,26 @@ const call: LocalCommandCall = async (_args, context) => {
   const boundaryMessage: Message = {
     type: 'system',
     subtype: 'snip_boundary',
-    content: '[snip] Conversation history before this point has been snipped.',
+    content: t('forceSnip.snipBoundary'),
     isMeta: true,
     timestamp: new Date().toISOString(),
     uuid: randomUUID(),
     snipMetadata: {
-      removedUuids,
-    },
-  } as Message // subtype is feature-gated; cast through Message
+      removedUuids}} as Message // subtype is feature-gated; cast through Message
 
   setMessages(prev => [...prev, boundaryMessage])
 
   return {
     type: 'text',
-    value: `Snipped ${removedUuids.length} message(s). Older history will be excluded from the next model query.`,
-  }
+    value: t('forceSnip.snippedCount', removedUuids.length)}
 }
 
 const forceSnip = {
   type: 'local',
   name: 'force-snip',
-  description: 'Force snip conversation history at current point',
+  description: t('cmd.descForceSnip'),
   supportsNonInteractive: true,
   isHidden: false,
-  load: () => Promise.resolve({ call }),
-} satisfies Command
+  load: () => Promise.resolve({ call })} satisfies Command
 
 export default forceSnip

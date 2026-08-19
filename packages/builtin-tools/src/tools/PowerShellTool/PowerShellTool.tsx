@@ -24,6 +24,7 @@ import type { AgentId } from 'src/types/ids.js';
 import type { AssistantMessage } from 'src/types/message.js';
 import { extractClaudeCodeHints } from 'src/utils/claudeCodeHints.js';
 import { isEnvTruthy } from 'src/utils/envUtils.js';
+import { t } from 'src/utils/i18n/index.js';
 import { errorMessage as getErrorMessage, ShellError } from 'src/utils/errors.js';
 import { truncate } from 'src/utils/format.js';
 import { lazySchema } from 'src/utils/lazySchema.js';
@@ -448,7 +449,7 @@ export const PowerShellTool = buildTool({
       if (sleepPattern !== null) {
         return {
           result: false,
-          message: `Blocked: ${sleepPattern}. Run blocking commands in the background with run_in_background: true — you'll get a completion notification when done. For streaming events (watching logs, polling APIs), use the Monitor tool. If you genuinely need a delay (rate limiting, deliberate pacing), keep it under 2 seconds.`,
+          message: t('toolUI.bash.blockedSleepPattern', { sleepPattern }),
           errorCode: 10,
         };
       }
@@ -509,18 +510,28 @@ export const PowerShellTool = buildTool({
     let errorMessage = stderr.trim();
     if (interrupted) {
       if (stderr) errorMessage += EOL;
-      errorMessage += '<error>Command was aborted before completion</error>';
+      errorMessage += t('toolUI.bash.commandAborted');
     }
 
     let backgroundInfo = '';
     if (backgroundTaskId) {
       const outputPath = getTaskOutputPath(backgroundTaskId);
       if (assistantAutoBackgrounded) {
-        backgroundInfo = `Command exceeded the assistant-mode blocking budget (${ASSISTANT_BLOCKING_BUDGET_MS / 1000}s) and was moved to the background with ID: ${backgroundTaskId}. It is still running — you will be notified when it completes. Output is being written to: ${outputPath}. In assistant mode, delegate long-running work to a subagent or use run_in_background to keep this conversation responsive.`;
+        backgroundInfo = t('toolUI.bash.backgroundAuto', {
+        seconds: ASSISTANT_BLOCKING_BUDGET_MS / 1000,
+        taskId: backgroundTaskId,
+        outputPath,
+      });
       } else if (backgroundedByUser) {
-        backgroundInfo = `Command was manually backgrounded by user with ID: ${backgroundTaskId}. Output is being written to: ${outputPath}`;
+        backgroundInfo = t('toolUI.bash.backgroundManual', {
+        taskId: backgroundTaskId,
+        outputPath,
+      });
       } else {
-        backgroundInfo = `Command running in background with ID: ${backgroundTaskId}. Output is being written to: ${outputPath}`;
+        backgroundInfo = t('toolUI.bash.backgroundRunning', {
+        taskId: backgroundTaskId,
+        outputPath,
+      });
       }
     }
 

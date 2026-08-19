@@ -19,40 +19,30 @@ import { describe, test, expect, mock, beforeEach } from 'bun:test'
   ISSUES_EXPLAINER: 'report issues on GitHub',
   NATIVE_PACKAGE_URL: '',
   PACKAGE_URL: '',
-  VERSION_CHANGELOG: '',
-}
+  VERSION_CHANGELOG: ''}
 
 // --- Mock 链 (阻断副作用) ---
 
 mock.module('src/bootstrap/state.js', () => ({
   getIsNonInteractiveSession: () => false,
   sessionId: 'test-session',
-  getCwd: () => '/test/project',
-}))
+  getCwd: () => '/test/project'}))
 mock.module('src/utils/cwd.js', () => ({
-  getCwd: () => '/test/project',
-}))
+  getCwd: () => '/test/project'}))
 mock.module('src/utils/git.js', () => ({
-  getIsGit: async () => true,
-}))
+  getIsGit: async () => true}))
 mock.module('src/utils/worktree.js', () => ({
-  getCurrentWorktreeSession: () => null,
-}))
+  getCurrentWorktreeSession: () => null}))
 mock.module('src/constants/common.js', () => ({
-  getSessionStartDate: () => '2026-04-22',
-}))
+  getSessionStartDate: () => '2026-04-22'}))
 mock.module('src/utils/settings/settings.js', () => ({
-  getInitialSettings: () => ({ language: undefined }),
-}))
+  getInitialSettings: () => ({ language: undefined })}))
 mock.module('src/commands/poor/poorMode.js', () => ({
-  isPoorModeActive: () => false,
-}))
+  isPoorModeActive: () => false}))
 mock.module('src/utils/env.js', () => ({
-  env: { platform: 'linux' },
-}))
+  env: { platform: 'linux' }}))
 mock.module('src/utils/envUtils.js', () => ({
-  isEnvTruthy: () => false,
-}))
+  isEnvTruthy: () => false}))
 mock.module('src/utils/model/model.js', () => ({
   getCanonicalName: (id: string) => id,
   getMarketingNameForModel: (id: string) => {
@@ -60,51 +50,37 @@ mock.module('src/utils/model/model.js', () => ({
     if (id.includes('opus-4-6')) return 'Claude Opus 4.6'
     if (id.includes('sonnet-4-6')) return 'Claude Sonnet 4.6'
     return null
-  },
-}))
+  }}))
 mock.module('src/commands.js', () => ({
-  getSkillToolCommands: async () => [],
-}))
+  getSkillToolCommands: async () => []}))
 mock.module('src/constants/outputStyles.js', () => ({
-  getOutputStyleConfig: async () => null,
-}))
+  getOutputStyleConfig: async () => null}))
 mock.module('src/utils/embeddedTools.js', () => ({
-  hasEmbeddedSearchTools: () => false,
-}))
+  hasEmbeddedSearchTools: () => false}))
 mock.module('src/utils/permissions/filesystem.js', () => ({
   isScratchpadEnabled: () => false,
-  getScratchpadDir: () => '/tmp/scratchpad',
-}))
+  getScratchpadDir: () => '/tmp/scratchpad'}))
 mock.module('src/utils/betas.js', () => ({
-  shouldUseGlobalCacheScope: () => false,
-}))
+  shouldUseGlobalCacheScope: () => false}))
 mock.module('src/utils/undercover.js', () => ({
-  isUndercover: () => false,
-}))
+  isUndercover: () => false}))
 mock.module('src/utils/model/antModels.js', () => ({
-  getAntModelOverrideConfig: () => null,
-}))
+  getAntModelOverrideConfig: () => null}))
 mock.module('src/utils/mcpInstructionsDelta.js', () => ({
-  isMcpInstructionsDeltaEnabled: () => false,
-}))
+  isMcpInstructionsDeltaEnabled: () => false}))
 mock.module('src/memdir/memdir.js', () => ({
-  loadMemoryPrompt: async () => null,
-}))
+  loadMemoryPrompt: async () => null}))
 mock.module('src/utils/debug.js', () => ({
-  logForDebugging: () => {},
-}))
+  logForDebugging: () => {}}))
 mock.module('src/services/analytics/growthbook.js', () => ({
-  getFeatureValue_CACHED_MAY_BE_STALE: () => false,
-}))
+  getFeatureValue_CACHED_MAY_BE_STALE: () => false}))
 mock.module('bun:bundle', () => ({
-  feature: (_name: string) => false,
-}))
+  feature: (_name: string) => false}))
 mock.module('src/constants/systemPromptSections.js', () => ({
   systemPromptSection: (_name: string, fn: () => any) => fn(),
   DANGEROUS_uncachedSystemPromptSection: (_name: string, fn: () => any) => fn(),
   resolveSystemPromptSections: async (sections: any[]) =>
-    sections.filter(s => s !== null),
-}))
+    sections.filter(s => s !== null)}))
 
 // 工具常量 mock
 const TOOL_NAMES = {
@@ -119,8 +95,7 @@ const TOOL_NAMES = {
   TaskCreate: 'TaskCreate',
   DiscoverSkills: 'DiscoverSkills',
   Skill: 'Skill',
-  Sleep: 'Sleep',
-}
+  Sleep: 'Sleep'}
 
 mock.module(
   '@claude-code-best/builtin-tools/tools/BashTool/toolName.js',
@@ -139,17 +114,14 @@ mock.module(
   () => ({ FILE_WRITE_TOOL_NAME: TOOL_NAMES.Write }),
 )
 mock.module('@claude-code-best/builtin-tools/tools/GlobTool/prompt.js', () => ({
-  GLOB_TOOL_NAME: TOOL_NAMES.Glob,
-}))
+  GLOB_TOOL_NAME: TOOL_NAMES.Glob}))
 mock.module('@claude-code-best/builtin-tools/tools/GrepTool/prompt.js', () => ({
-  GREP_TOOL_NAME: TOOL_NAMES.Grep,
-}))
+  GREP_TOOL_NAME: TOOL_NAMES.Grep}))
 mock.module(
   '@claude-code-best/builtin-tools/tools/AgentTool/constants.js',
   () => ({
     AGENT_TOOL_NAME: TOOL_NAMES.Agent,
-    VERIFICATION_AGENT_TYPE: 'verification',
-  }),
+    VERIFICATION_AGENT_TYPE: 'verification'}),
 )
 mock.module(
   '@claude-code-best/builtin-tools/tools/AgentTool/forkSubagent.js',
@@ -163,8 +135,7 @@ mock.module(
   '@claude-code-best/builtin-tools/tools/AgentTool/built-in/exploreAgent.js',
   () => ({
     EXPLORE_AGENT: { agentType: 'explore' },
-    EXPLORE_AGENT_MIN_QUERIES: 5,
-  }),
+    EXPLORE_AGENT_MIN_QUERIES: 5}),
 )
 mock.module(
   '@claude-code-best/builtin-tools/tools/AskUserQuestionTool/prompt.js',
@@ -201,8 +172,7 @@ import {
   getSystemPrompt,
   prependBullets,
   computeSimpleEnvInfo,
-  getScratchpadInstructions,
-} from './prompts.js'
+  getScratchpadInstructions} from './prompts.js'
 import type { Tools } from '../Tool.js'
 
 // --- 辅助 ---

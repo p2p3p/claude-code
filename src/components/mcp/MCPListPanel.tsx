@@ -6,7 +6,7 @@ import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import type { ConfigScope } from '../../services/mcp/types.js';
 import { describeMcpConfigFilePath } from '../../services/mcp/utils.js';
 import { isDebugMode } from '../../utils/debug.js';
-import { plural } from '../../utils/stringUtils.js';
+import { t } from '../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Byline, Dialog, KeyboardShortcutHint } from '@anthropic/ink';
 import { McpParsingWarnings } from './McpParsingWarnings.js';
@@ -33,15 +33,15 @@ const SCOPE_ORDER: ConfigScope[] = ['project', 'local', 'user', 'enterprise'];
 function getScopeHeading(scope: ConfigScope): { label: string; path?: string } {
   switch (scope) {
     case 'project':
-      return { label: 'Project MCPs', path: describeMcpConfigFilePath(scope) };
+      return { label: t('mcpListPanel.scopeProject'), path: describeMcpConfigFilePath(scope) };
     case 'user':
-      return { label: 'User MCPs', path: describeMcpConfigFilePath(scope) };
+      return { label: t('mcpListPanel.scopeUser'), path: describeMcpConfigFilePath(scope) };
     case 'local':
-      return { label: 'Local MCPs', path: describeMcpConfigFilePath(scope) };
+      return { label: t('mcpListPanel.scopeLocal'), path: describeMcpConfigFilePath(scope) };
     case 'enterprise':
-      return { label: 'Enterprise MCPs' };
+      return { label: t('mcpListPanel.scopeEnterprise') };
     case 'dynamic':
-      return { label: 'Built-in MCPs', path: 'always available' };
+      return { label: t('mcpListPanel.scopeDynamic'), path: t('mcpListPanel.alwaysAvailable') };
     default:
       return { label: scope };
   }
@@ -69,8 +69,7 @@ export function MCPListPanel({
   agentServers = [],
   onSelectServer,
   onSelectAgentServer,
-  onComplete,
-}: Props): React.ReactNode {
+  onComplete}: Props): React.ReactNode {
   const [theme] = useTheme();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -117,9 +116,8 @@ export function MCPListPanel({
   }, [serversByScope, claudeAiServers, agentServers, dynamicServers]);
 
   const handleCancel = useCallback((): void => {
-    onComplete('MCP dialog dismissed', {
-      display: 'system',
-    });
+    onComplete(t('mcpListPanel.dialogDismissed'), {
+      display: 'system'});
   }, [onComplete]);
 
   const handleSelect = useCallback((): void => {
@@ -138,8 +136,7 @@ export function MCPListPanel({
       'confirm:previous': () => setSelectedIndex(prev => (prev === 0 ? selectableItems.length - 1 : prev - 1)),
       'confirm:next': () => setSelectedIndex(prev => (prev === selectableItems.length - 1 ? 0 : prev + 1)),
       'confirm:yes': handleSelect,
-      'confirm:no': handleCancel,
-    },
+      'confirm:no': handleCancel},
     { context: 'Confirmation' },
   );
 
@@ -167,24 +164,24 @@ export function MCPListPanel({
 
     if (server.client.type === 'disabled') {
       statusIcon = color('inactive', theme)(figures.radioOff);
-      statusText = 'disabled';
+      statusText = t('mcpListPanel.disabled');
     } else if (server.client.type === 'connected') {
       statusIcon = color('success', theme)(figures.tick);
-      statusText = 'connected';
+      statusText = t('mcpListPanel.connected');
     } else if (server.client.type === 'pending') {
       statusIcon = color('inactive', theme)(figures.radioOff);
       const { reconnectAttempt, maxReconnectAttempts } = server.client;
       if (reconnectAttempt && maxReconnectAttempts) {
-        statusText = `reconnecting (${reconnectAttempt}/${maxReconnectAttempts})…`;
+        statusText = t('mcpListPanel.reconnecting', reconnectAttempt, maxReconnectAttempts);
       } else {
-        statusText = 'connecting…';
+        statusText = t('mcpListPanel.connecting');
       }
     } else if (server.client.type === 'needs-auth') {
       statusIcon = color('warning', theme)(figures.triangleUpOutline);
-      statusText = 'needs authentication';
+      statusText = t('mcpListPanel.needsAuth');
     } else {
       statusIcon = color('error', theme)(figures.cross);
-      statusText = 'failed';
+      statusText = t('mcpListPanel.failed');
     }
 
     return (
@@ -203,7 +200,7 @@ export function MCPListPanel({
     const statusIcon = agentServer.needsAuth
       ? color('warning', theme)(figures.triangleUpOutline)
       : color('inactive', theme)(figures.radioOff);
-    const statusText = agentServer.needsAuth ? 'may need auth' : 'agent-only';
+    const statusText = agentServer.needsAuth ? t('mcpListPanel.mayNeedAuth') : t('mcpListPanel.agentOnly');
 
     return (
       <Box key={`agent-${agentServer.name}-${index}`}>
@@ -222,8 +219,8 @@ export function MCPListPanel({
       <McpParsingWarnings />
 
       <Dialog
-        title="Manage MCP servers"
-        subtitle={`${totalServers} ${plural(totalServers, 'server')}`}
+        title={t('mcpListPanel.title')}
+        subtitle={t('mcpListPanel.serverCount', totalServers)}
         onCancel={handleCancel}
         hideInputGuide
       >
@@ -248,7 +245,7 @@ export function MCPListPanel({
           {claudeAiServers.length > 0 && (
             <Box flexDirection="column" marginBottom={1}>
               <Box paddingLeft={2}>
-                <Text bold>claude.ai</Text>
+                <Text bold>{t('mcpListPanel.claudeAi')}</Text>
               </Box>
               {claudeAiServers.map(server => renderServerItem(server))}
             </Box>
@@ -258,7 +255,7 @@ export function MCPListPanel({
           {agentServers.length > 0 && (
             <Box flexDirection="column" marginBottom={1}>
               <Box paddingLeft={2}>
-                <Text bold>Agent MCPs</Text>
+                <Text bold>{t('mcplistpanel.agentMCPs')}</Text>
               </Box>
               {/* Group servers by source agent */}
               {[...new Set(agentServers.flatMap(s => s.sourceAgents))].map(agentName => (
@@ -289,11 +286,11 @@ export function MCPListPanel({
           <Box flexDirection="column">
             {hasFailedClients && (
               <Text dimColor>
-                {debugMode ? '※ Error logs shown inline with --debug' : '※ Run claude --debug to see error logs'}
+                {debugMode ? t('mcpListPanel.debugHintWithDebug') : t('mcpListPanel.debugHint')}
               </Text>
             )}
             <Text dimColor>
-              <Link url="https://code.claude.com/docs/en/mcp">https://code.claude.com/docs/en/mcp</Link> for help
+              <Link url="https://code.claude.com/docs/en/mcp">https://code.claude.com/docs/en/mcp</Link>{t('mcpListPanel.helpHint')}
             </Text>
           </Box>
         </Box>
@@ -303,9 +300,9 @@ export function MCPListPanel({
       <Box paddingX={1}>
         <Text dimColor italic>
           <Byline>
-            <KeyboardShortcutHint shortcut="↑↓" action="navigate" />
-            <KeyboardShortcutHint shortcut="Enter" action="confirm" />
-            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description="cancel" />
+            <KeyboardShortcutHint shortcut="↑↓" action={t('shortcutHint.navigate')} />
+            <KeyboardShortcutHint shortcut="Enter" action={t('shortcutHint.confirm')} />
+            <ConfigurableShortcutHint action="confirm:no" context="Confirmation" fallback="Esc" description={t('desc.cancel')} />
           </Byline>
         </Text>
       </Box>

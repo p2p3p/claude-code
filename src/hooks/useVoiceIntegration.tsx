@@ -22,9 +22,7 @@ const voiceNs: { useVoice: typeof import('./useVoice.js').useVoice } = feature('
   : {
       useVoice: ({ enabled: _e }: { onTranscript: (t: string) => void; enabled: boolean }) => ({
         state: 'idle' as const,
-        handleKeyEvent: (_fallbackMs?: number) => {},
-      }),
-    };
+        handleKeyEvent: (_fallbackMs?: number) => {}})};
 /* eslint-enable @typescript-eslint/no-require-imports */
 
 // Maximum gap (ms) between key presses to count as held (auto-repeat).
@@ -76,8 +74,7 @@ const DEFAULT_VOICE_KEYSTROKE: ParsedKeystroke = {
   alt: false,
   shift: false,
   meta: false,
-  super: false,
-};
+  super: false};
 
 type InsertTextHandle = {
   insert: (text: string) => void;
@@ -115,8 +112,7 @@ type UseVoiceIntegrationResult = {
 export function useVoiceIntegration({
   setInputValueRaw,
   inputValueRef,
-  insertTextRef,
-}: UseVoiceIntegrationArgs): UseVoiceIntegrationResult {
+  insertTextRef}: UseVoiceIntegrationArgs): UseVoiceIntegrationResult {
   const { addNotification } = useNotifications();
 
   // Tracks the input content before/after the cursor when voice starts,
@@ -313,12 +309,10 @@ export function useVoiceIntegration({
         text: message,
         color: 'error',
         priority: 'immediate',
-        timeoutMs: 10_000,
-      });
+        timeoutMs: 10_000});
     },
     enabled: voiceEnabled,
-    focusMode: false,
-  });
+    focusMode: false});
 
   // Compute the character range of interim (not-yet-finalized) transcript
   // text in the input value, so the UI can dim it.
@@ -337,8 +331,7 @@ export function useVoiceIntegration({
     stripTrailing,
     resetAnchor,
     handleKeyEvent: voice.handleKeyEvent,
-    interimRange,
-  };
+    interimRange};
 }
 
 /**
@@ -369,8 +362,7 @@ export function useVoiceKeybindingHandler({
   voiceHandleKeyEvent,
   stripTrailing,
   resetAnchor,
-  isActive,
-}: {
+  isActive}: {
   voiceHandleKeyEvent: (fallbackMs?: number) => void;
   stripTrailing: (maxStrip: number, opts?: StripOpts) => number;
   resetAnchor: () => void;
@@ -522,8 +514,7 @@ export function useVoiceKeybindingHandler({
       if (bareChar !== null) {
         stripTrailing(repeatCount, {
           char: bareChar,
-          floor: recordingFloorRef.current,
-        });
+          floor: recordingFloorRef.current});
       }
       voiceHandleKeyEvent();
       return;
@@ -570,8 +561,7 @@ export function useVoiceKeybindingHandler({
         // recording-time leak cleanup.
         recordingFloorRef.current = stripTrailing(charsInInputRef.current + repeatCount, {
           char: bareChar,
-          anchor: true,
-        });
+          anchor: true});
         charsInInputRef.current = 0;
         voiceHandleKeyEvent();
       } else {
@@ -609,8 +599,7 @@ export function useVoiceKeybindingHandler({
       e.stopImmediatePropagation();
       stripTrailing(repeatCount, {
         char: bareChar,
-        floor: charsInInputRef.current,
-      });
+        floor: charsInInputRef.current});
     } else {
       charsInInputRef.current += repeatCount;
     }

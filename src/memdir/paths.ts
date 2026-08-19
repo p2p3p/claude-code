@@ -3,20 +3,17 @@ import { homedir } from 'os'
 import { isAbsolute, join, normalize, sep } from 'path'
 import {
   getIsNonInteractiveSession,
-  getProjectRoot,
-} from '../bootstrap/state.js'
+  getProjectRoot} from '../bootstrap/state.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import {
   getClaudeConfigHomeDir,
   isEnvDefinedFalsy,
-  isEnvTruthy,
-} from '../utils/envUtils.js'
+  isEnvTruthy} from '../utils/envUtils.js'
 import { findCanonicalGitRoot } from '../utils/git.js'
 import { sanitizePath } from '../utils/path.js'
 import {
   getInitialSettings,
-  getSettingsForSource,
-} from '../utils/settings/settings.js'
+  getSettingsForSource} from '../utils/settings/settings.js'
 
 /**
  * Whether auto-memory features are enabled (memdir, agent memory, past session search).

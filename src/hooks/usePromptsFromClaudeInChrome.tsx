@@ -20,12 +20,9 @@ const ClaudeInChromePromptNotificationSchema: () => AnyObjectSchema = lazySchema
         .object({
           type: z.literal('base64'),
           media_type: z.enum(['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
-          data: z.string(),
-        })
+          data: z.string()})
         .optional(),
-      tabId: z.number().optional(),
-    }),
-  }),
+      tabId: z.number().optional()})}),
 );
 
 /**
@@ -70,14 +67,11 @@ export function usePromptsFromClaudeInChrome(
                 source: {
                   type: image.type,
                   media_type: image.media_type,
-                  data: image.data,
-                },
-              },
+                  data: image.data}},
             ];
             enqueuePendingNotification({
               value: contentBlocks,
-              mode: 'prompt',
-            });
+              mode: 'prompt'});
           } else {
             enqueuePendingNotification({ value: prompt, mode: 'prompt' });
           }

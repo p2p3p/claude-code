@@ -45,8 +45,7 @@ export function ensureBridge(): boolean {
       stdin: 'pipe',
       stdout: 'pipe',
       stderr: 'ignore',
-      env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONUNBUFFERED: '1' },
-    })
+      env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONUNBUFFERED: '1' }})
 
     // Read stdout lines asynchronously
     const reader = (bridgeProc.stdout as ReadableStream<Uint8Array>).getReader()
@@ -105,8 +104,7 @@ export async function call<T = unknown>(
   return new Promise<T>((resolve, reject) => {
     pendingRequests.set(id, {
       resolve: resolve as (v: unknown) => void,
-      reject,
-    })
+      reject})
 
     // Timeout
     const timer = setTimeout(() => {
@@ -125,8 +123,7 @@ export async function call<T = unknown>(
       reject: e => {
         clearTimeout(timer)
         origReject(e)
-      },
-    })
+      }})
 
     try {
       const stdin = bridgeProc!.stdin
@@ -165,8 +162,7 @@ export function callSync<T = unknown>(
       stdout: 'pipe',
       stderr: 'pipe',
       env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
-      timeout: timeoutMs,
-    })
+      timeout: timeoutMs})
     const out = new TextDecoder().decode(result.stdout).trim()
     if (!out) return null
     const resp: BridgeResponse = JSON.parse(out)

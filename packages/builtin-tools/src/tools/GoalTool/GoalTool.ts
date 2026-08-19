@@ -1,5 +1,6 @@
 import { z } from 'zod/v4'
 import { buildTool, type ToolDef } from 'src/Tool.js'
+import { t } from 'src/utils/i18n/index.js'
 import { jsonStringify } from 'src/utils/slowOperations.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import {
@@ -86,19 +87,23 @@ function buildCompletionReport(): string {
   if (!goal) return ''
   const budget =
     goal.tokenBudget !== null
-      ? `Token usage: ${goal.tokensUsed} / ${goal.tokenBudget}`
-      : `Token usage: ${goal.tokensUsed}`
+      ? t(
+          'toolUI.goal.reportTokenUsageWithBudget',
+          goal.tokensUsed,
+          goal.tokenBudget,
+        )
+      : t('toolUI.goal.reportTokenUsage', goal.tokensUsed)
   return [
-    'Goal achieved — usage report:',
+    t('toolUI.goal.reportTitle'),
     `  ${budget}`,
-    `  Active time: ${formatGoalElapsed(goal)}`,
-    `  Continuation turns: ${goal.turnsExecuted}`,
+    t('toolUI.goal.reportActiveTime', formatGoalElapsed(goal)),
+    t('toolUI.goal.reportContinuationTurns', goal.turnsExecuted),
   ].join('\n')
 }
 
 export const GoalTool = buildTool({
   name: GOAL_TOOL_NAME,
-  searchHint: 'get or update the active goal (complete/blocked)',
+  searchHint: t('toolUI.goal.searchHint'),
   maxResultSizeChars: 10_000,
   async description() {
     return DESCRIPTION
@@ -113,7 +118,7 @@ export const GoalTool = buildTool({
     return outputSchema()
   },
   userFacingName() {
-    return 'Goal'
+    return t('toolUI.goal.userFacingName')
   },
   shouldDefer: true,
   isConcurrencySafe() {
@@ -133,22 +138,22 @@ export const GoalTool = buildTool({
   },
   renderToolUseMessage(input: Input) {
     const action = input.action ?? (input.status ? 'update' : 'get')
-    if (action === 'get') return 'Checking goal status…'
-    return `Updating goal: ${input.status}${input.reason ? ` — ${input.reason}` : ''}`
+    if (action === 'get') return t('toolUI.goal.checkingStatus')
+    return t('toolUI.goal.updatingGoal', input.status, input.reason ?? '')
   },
   renderToolResultMessage(output: Output) {
     if (!output) {
       return null
     }
-    if (output?.error) return `Goal error: ${output.error}`
+    if (output?.error) return t('toolUI.goal.goalError', output.error)
     if (output.report) return output.report
     if (output.goal) {
-      return `Goal "${output.goal.objective}" — ${output.goal.status}`
+      return t('toolUI.goal.goalStatus', output.goal.objective, output.goal.status)
     }
-    return output.message ?? 'Done'
+    return output.message ?? t('toolUI.goal.done')
   },
   renderToolUseRejectedMessage() {
-    return 'Goal operation rejected'
+    return t('toolUI.goal.operationRejected')
   },
   async call(input: Input): Promise<{ data: Output }> {
     const action = input.action ?? (input.status ? 'update' : 'get')
@@ -161,8 +166,7 @@ export const GoalTool = buildTool({
         return {
           data: {
             success: true,
-            message:
-              'No active goal. The user can set one with `/goal <objective>`.',
+            message: t('toolUI.goal.noActiveGoal'),
           },
         }
       }
@@ -174,8 +178,7 @@ export const GoalTool = buildTool({
       return {
         data: {
           success: false,
-          error:
-            'The "status" field is required for update. Use "complete" or "blocked".',
+          error: t('toolUI.goal.statusRequired'),
         },
       }
     }
@@ -185,7 +188,7 @@ export const GoalTool = buildTool({
       return {
         data: {
           success: false,
-          error: 'No active goal to update.',
+          error: t('toolUI.goal.noActiveGoalToUpdate'),
         },
       }
     }
@@ -204,13 +207,13 @@ export const GoalTool = buildTool({
     }
 
     // status === 'blocked'
-    const reason = input.reason ?? 'unspecified blocker'
+    const reason = input.reason ?? t('toolUI.goal.unspecifiedBlocker')
     const result = recordBlockedAttempt(reason)
     if (!result) {
       return {
         data: {
           success: false,
-          error: 'Goal is not in a state that accepts blocked attempts.',
+          error: t('toolUI.goal.notAcceptingBlocked'),
         },
       }
     }
@@ -221,7 +224,7 @@ export const GoalTool = buildTool({
         data: {
           success: true,
           goal: buildGoalSnapshot(),
-          message: `Goal marked as blocked after ${result.attempts} consecutive attempts. Reason: ${reason}`,
+          message: t('toolUI.goal.markedBlocked', result.attempts, reason),
         },
       }
     }
@@ -230,7 +233,7 @@ export const GoalTool = buildTool({
       data: {
         success: true,
         goal: buildGoalSnapshot(),
-        message: `Blocked attempt ${result.attempts} recorded. The goal remains active — the same condition must persist for 3 consecutive turns before it is marked blocked.`,
+        message: t('toolUI.goal.blockedAttemptRecorded', result.attempts),
       },
     }
   },

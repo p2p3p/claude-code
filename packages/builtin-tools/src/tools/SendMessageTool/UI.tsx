@@ -3,13 +3,14 @@ import { MessageResponse } from 'src/components/MessageResponse.js';
 import { Text } from '@anthropic/ink';
 import { jsonParse } from 'src/utils/slowOperations.js';
 import type { Input, SendMessageToolOutput } from './SendMessageTool.js';
+import { t } from 'src/utils/i18n/index.js';
 
 export function renderToolUseMessage(input: Partial<Input>): React.ReactNode {
   if (typeof input.message !== 'object' || input.message === null) {
     return null;
   }
   if (input.message.type === 'plan_approval_response') {
-    return input.message.approve ? `approve plan from: ${input.to}` : `reject plan from: ${input.to}`;
+    return input.message.approve ? t('toolUI.sendMessage.approve', input.to) : t('toolUI.sendMessage.reject', input.to);
   }
   return null;
 }

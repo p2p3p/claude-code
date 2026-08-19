@@ -8,8 +8,7 @@ import { registerHookCallbacks } from '../bootstrap/state.js'
 import type { HookInput, HookJSONOutput } from '../entrypoints/agentSdkTypes.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import { FILE_EDIT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileEditTool/constants.js'
 import { inputSchema as editInputSchema } from '@claude-code-best/builtin-tools/tools/FileEditTool/types.js'
 import { FileReadTool } from '@claude-code-best/builtin-tools/tools/FileReadTool/FileReadTool.js'
@@ -25,8 +24,7 @@ import {
   detectSessionFileType,
   detectSessionPatternType,
   isAutoMemFile,
-  memoryScopeForPath,
-} from './memoryFileDetection.js'
+  memoryScopeForPath} from './memoryFileDetection.js'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const teamMemPaths = feature('TEAMMEM')
@@ -172,8 +170,7 @@ async function handleSessionFileAccess(
   if (filePath && isAutoMemFile(filePath)) {
     logEvent('tengu_memdir_accessed', {
       tool: input.tool_name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      ...subagentProps,
-    })
+      ...subagentProps})
 
     switch (input.tool_name) {
       case FILE_READ_TOOL_NAME:
@@ -192,8 +189,7 @@ async function handleSessionFileAccess(
   if (feature('TEAMMEM') && filePath && teamMemPaths!.isTeamMemFile(filePath)) {
     logEvent('tengu_team_mem_accessed', {
       tool: input.tool_name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      ...subagentProps,
-    })
+      ...subagentProps})
 
     switch (input.tool_name) {
       case FILE_READ_TOOL_NAME:
@@ -238,8 +234,7 @@ export function registerSessionFileAccessHooks(): void {
     type: 'callback',
     callback: handleSessionFileAccess,
     timeout: 1, // Very short timeout - just logging
-    internal: true,
-  }
+    internal: true}
 
   registerHookCallbacks({
     PostToolUse: [
@@ -248,6 +243,5 @@ export function registerSessionFileAccessHooks(): void {
       { matcher: GLOB_TOOL_NAME, hooks: [hook] },
       { matcher: FILE_EDIT_TOOL_NAME, hooks: [hook] },
       { matcher: FILE_WRITE_TOOL_NAME, hooks: [hook] },
-    ],
-  })
+    ]})
 }

@@ -16,8 +16,7 @@ const DEFAULTS: ChicagoConfig = {
   hideBeforeAction: true,
   autoTargetDisplay: true,
   clipboardGuard: true,
-  coordinateMode: 'pixels',
-}
+  coordinateMode: 'pixels'}
 
 // Spread over defaults so a partial JSON ({"enabled": true} alone) inherits the
 // rest. The generic on getDynamicConfig is a type assertion, not a validator —
@@ -28,8 +27,7 @@ function readConfig(): ChicagoConfig {
     ...getDynamicConfig_CACHED_MAY_BE_STALE<Partial<ChicagoConfig>>(
       'tengu_malort_pedway',
       DEFAULTS,
-    ),
-  }
+    )}
 }
 
 // Max/Pro only for external rollout. Ant bypass so dogfooding continues

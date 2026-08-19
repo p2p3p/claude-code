@@ -1,8 +1,7 @@
 import type {
   AsyncHookJSONOutput,
   HookEvent,
-  SyncHookJSONOutput,
-} from 'src/entrypoints/agentSdkTypes.js'
+  SyncHookJSONOutput} from 'src/entrypoints/agentSdkTypes.js'
 import { logForDebugging } from '../debug.js'
 import type { ShellCommand } from '../ShellCommand.js'
 import { invalidateSessionEnvCache } from '../sessionEnvironment.js'
@@ -36,8 +35,7 @@ export function registerPendingAsyncHook({
   command,
   shellCommand,
   toolName,
-  pluginId,
-}: {
+  pluginId}: {
   processId: string
   hookId: string
   asyncResponse: AsyncHookJSONOutput
@@ -64,8 +62,7 @@ export function registerPendingAsyncHook({
       const stdout = await taskOutput.getStdout()
       const stderr = taskOutput.getStderr()
       return { stdout, stderr, output: stdout + stderr }
-    },
-  })
+    }})
   pendingHooks.set(processId, {
     processId,
     hookId,
@@ -78,8 +75,7 @@ export function registerPendingAsyncHook({
     timeout: timeout as number,
     responseAttachmentSent: false,
     shellCommand,
-    stopProgressInterval,
-  })
+    stopProgressInterval})
 }
 
 export function getPendingAsyncHooks(): PendingAsyncHook[] {
@@ -106,8 +102,7 @@ async function finalizeHook(
     stdout,
     stderr,
     exitCode,
-    outcome,
-  })
+    outcome})
 }
 
 export async function checkForAsyncHookResponses(): Promise<
@@ -227,9 +222,7 @@ export async function checkForAsyncHookResponses(): Promise<
           pluginId: hook.pluginId,
           stdout,
           stderr,
-          exitCode,
-        },
-      }
+          exitCode}}
     }),
   )
 

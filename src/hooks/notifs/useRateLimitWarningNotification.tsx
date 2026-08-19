@@ -29,8 +29,7 @@ export function useRateLimitWarningNotification(model: string): void {
       addNotification({
         key: 'limit-reached',
         text: usingOverageText,
-        priority: 'immediate',
-      });
+        priority: 'immediate'});
       setHasShownOverageNotification(true);
     } else if (!claudeAiLimits.isUsingOverage && hasShownOverageNotification) {
       // Reset when no longer in overage mode
@@ -57,8 +56,7 @@ export function useRateLimitWarningNotification(model: string): void {
             <Text color="warning">{rateLimitWarning}</Text>
           </Text>
         ),
-        priority: 'high',
-      });
+        priority: 'high'});
     }
   }, [rateLimitWarning, addNotification]);
 }

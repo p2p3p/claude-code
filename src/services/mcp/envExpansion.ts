@@ -33,6 +33,5 @@ export function expandEnvVarsInString(value: string): {
 
   return {
     expanded,
-    missingVars,
-  }
+    missingVars}
 }

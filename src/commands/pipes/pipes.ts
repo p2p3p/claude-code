@@ -4,14 +4,13 @@ import {
   isPipeAlive,
   getPipeIpc,
   getPipeDisplayRole,
-  isPipeControlled,
-} from '../../utils/pipeTransport.js'
+  isPipeControlled} from '../../utils/pipeTransport.js'
 import {
   cleanupStaleEntries,
   readRegistry,
   isMainMachine,
-  mergeWithLanPeers,
-} from '../../utils/pipeRegistry.js'
+  mergeWithLanPeers} from '../../utils/pipeRegistry.js'
+import { t } from '../../utils/i18n/index.js'
 
 export const call: LocalCommandCall = async (_args, context) => {
   const args = _args.trim()
@@ -24,29 +23,25 @@ export const call: LocalCommandCall = async (_args, context) => {
       pipeIpc: {
         ...pipeIpc,
         statusVisible: true,
-        selectorOpen: !pipeIpc.selectorOpen,
-      },
-    }
+        selectorOpen: !pipeIpc.selectorOpen}}
   })
 
   // Handle select/deselect subcommands
   if (args.startsWith('select ') || args.startsWith('sel ')) {
     const pipeName = args.replace(/^(select|sel)\s+/, '').trim()
     if (!pipeName)
-      return { type: 'text', value: 'Usage: /pipes select <pipe-name>' }
+      return { type: 'text', value: t('pipesCmd.usageSelect') }
     context.setAppState(prev => {
       const pipeIpc = getPipeIpc(prev)
       const selected = pipeIpc.selectedPipes ?? []
       if (selected.includes(pipeName)) return prev
       return {
         ...prev,
-        pipeIpc: { ...pipeIpc, selectedPipes: [...selected, pipeName] },
-      }
+        pipeIpc: { ...pipeIpc, selectedPipes: [...selected, pipeName] }}
     })
     return {
       type: 'text',
-      value: `Selected ${pipeName} — messages will be broadcast to this pipe.`,
-    }
+      value: t('pipesCmd.selected', pipeName)}
   }
 
   if (
@@ -56,7 +51,7 @@ export const call: LocalCommandCall = async (_args, context) => {
   ) {
     const pipeName = args.replace(/^(deselect|desel|unsel)\s+/, '').trim()
     if (!pipeName)
-      return { type: 'text', value: 'Usage: /pipes deselect <pipe-name>' }
+      return { type: 'text', value: t('pipesCmd.usageDeselect') }
     context.setAppState(prev => {
       const pipeIpc = getPipeIpc(prev)
       const selected = (pipeIpc.selectedPipes ?? []).filter(
@@ -64,7 +59,7 @@ export const call: LocalCommandCall = async (_args, context) => {
       )
       return { ...prev, pipeIpc: { ...pipeIpc, selectedPipes: selected } }
     })
-    return { type: 'text', value: `Deselected ${pipeName}.` }
+    return { type: 'text', value: t('pipesCmd.deselected', pipeName) }
   }
 
   if (args === 'select-all' || args === 'all') {
@@ -73,23 +68,19 @@ export const call: LocalCommandCall = async (_args, context) => {
     const slaveNames = Object.keys(pipeState.slaves)
     context.setAppState(prev => ({
       ...prev,
-      pipeIpc: { ...getPipeIpc(prev), selectedPipes: slaveNames },
-    }))
+      pipeIpc: { ...getPipeIpc(prev), selectedPipes: slaveNames }}))
     return {
       type: 'text',
-      value: `Selected all ${slaveNames.length} connected pipes.`,
-    }
+      value: t('pipesCmd.selectedAll', slaveNames.length)}
   }
 
   if (args === 'deselect-all' || args === 'none') {
     context.setAppState(prev => ({
       ...prev,
-      pipeIpc: { ...getPipeIpc(prev), selectedPipes: [] },
-    }))
+      pipeIpc: { ...getPipeIpc(prev), selectedPipes: [] }}))
     return {
       type: 'text',
-      value: 'Deselected all pipes. Messages will only run locally.',
-    }
+      value: t('pipesCmd.deselectedAll')}
   }
 
   const currentState = context.getAppState()
@@ -103,15 +94,15 @@ export const call: LocalCommandCall = async (_args, context) => {
 
   const lines: string[] = []
 
-  lines.push(`Your pipe:   ${myName ?? '(not started)'}`)
-  lines.push(`Role:        ${displayRole}`)
+  lines.push(t('pipesCmd.yourPipe', myName ?? t('pipesCmd.notStarted')))
+  lines.push(t('pipesCmd.role', displayRole))
   if (pipeState.machineId)
-    lines.push(`Machine ID:  ${pipeState.machineId.slice(0, 8)}...`)
-  if (pipeState.localIp) lines.push(`IP:          ${pipeState.localIp}`)
-  if (pipeState.hostname) lines.push(`Host:        ${pipeState.hostname}`)
+    lines.push(t('pipesCmd.machineId', pipeState.machineId.slice(0, 8)))
+  if (pipeState.localIp) lines.push(t('pipesCmd.ip', pipeState.localIp))
+  if (pipeState.hostname) lines.push(t('pipesCmd.host', pipeState.hostname))
 
   if (isPipeControlled(pipeState)) {
-    lines.push(`Controlled by: ${pipeState.attachedBy}`)
+    lines.push(t('pipesCmd.controlledBy', pipeState.attachedBy))
   }
 
   lines.push('')
@@ -119,7 +110,7 @@ export const call: LocalCommandCall = async (_args, context) => {
   if (registry.mainMachineId) {
     const isMyMachine = isMainMachine(pipeState.machineId ?? '', registry)
     lines.push(
-      `Main machine: ${registry.mainMachineId.slice(0, 8)}...${isMyMachine ? ' (this machine)' : ''}`,
+      t('pipesCmd.mainMachine', registry.mainMachineId.slice(0, 8), isMyMachine ? t('pipesCmd.thisMachine') : ''),
     )
   }
 
@@ -129,7 +120,7 @@ export const call: LocalCommandCall = async (_args, context) => {
     const alive = await isPipeAlive(m.pipeName, 1000)
     const isSelf = m.pipeName === myName
     lines.push(
-      `  [main] ${m.pipeName}  ${m.hostname}/${m.ip}  [${alive ? 'alive' : 'stale'}]${isSelf ? ' (you)' : ''}`,
+      t('pipesCmd.mainEntry', m.pipeName, m.hostname, m.ip, alive ? t('pipesCmd.alive') : t('pipesCmd.stale'), isSelf ? t('pipesCmd.you') : ''),
     )
   }
 
@@ -149,9 +140,9 @@ export const call: LocalCommandCall = async (_args, context) => {
     const isSelf = sub.pipeName === myName
     const isSelected = selected.includes(sub.pipeName)
     const checkbox = isSelected ? '☑' : '☐'
-    const isAttached = pipeState.slaves[sub.pipeName] ? ' [connected]' : ''
+    const isAttached = pipeState.slaves[sub.pipeName] ? t('pipesCmd.connected') : ''
     lines.push(
-      `  ${checkbox} [sub-${sub.subIndex}] ${sub.pipeName}  ${sub.hostname}/${sub.ip}  [${alive ? 'alive' : 'stale'}]${isAttached}${isSelf ? ' (you)' : ''}`,
+      t('pipesCmd.subEntry', checkbox, sub.subIndex, sub.pipeName, sub.hostname, sub.ip, alive ? t('pipesCmd.alive') : t('pipesCmd.stale'), isAttached, isSelf ? t('pipesCmd.you') : ''),
     )
     if (alive) {
       discoveredPipes.push({
@@ -161,13 +152,12 @@ export const call: LocalCommandCall = async (_args, context) => {
         machineId: sub.machineId,
         ip: sub.ip,
         hostname: sub.hostname,
-        alive,
-      })
+        alive})
     }
   }
 
   if (!registry.main && registry.subs.length === 0) {
-    lines.push('No other pipes in registry.')
+    lines.push(t('pipesCmd.noOtherPipes'))
   }
 
   // Show LAN peers (if LAN_PIPES enabled)
@@ -181,7 +171,7 @@ export const call: LocalCommandCall = async (_args, context) => {
       const lanOnly = merged.filter(e => e.source === 'lan')
       if (lanOnly.length > 0) {
         lines.push('')
-        lines.push('LAN Peers:')
+        lines.push(t('pipesCmd.lanPeersHeading'))
         for (const peer of lanOnly) {
           const isSelected = selected.includes(peer.pipeName)
           const checkbox = isSelected ? '☑' : '☐'
@@ -189,7 +179,7 @@ export const call: LocalCommandCall = async (_args, context) => {
             ? `tcp:${peer.tcpEndpoint.host}:${peer.tcpEndpoint.port}`
             : ''
           lines.push(
-            `  ${checkbox} [${peer.role}] ${peer.pipeName}  ${peer.hostname}/${peer.ip}  ${ep}  [LAN]`,
+            t('pipesCmd.lanPeerEntry', checkbox, peer.role, peer.pipeName, peer.hostname, peer.ip, ep),
           )
           discoveredPipes.push({
             id: peer.id,
@@ -198,12 +188,11 @@ export const call: LocalCommandCall = async (_args, context) => {
             machineId: peer.machineId,
             ip: peer.ip,
             hostname: peer.hostname,
-            alive: true,
-          })
+            alive: true})
         }
       } else {
         lines.push('')
-        lines.push('LAN Peers: (none discovered)')
+        lines.push(t('pipesCmd.lanPeersNone'))
       }
     }
   }
@@ -211,21 +200,22 @@ export const call: LocalCommandCall = async (_args, context) => {
   // Update state
   context.setAppState(prev => ({
     ...prev,
-    pipeIpc: { ...getPipeIpc(prev), discoveredPipes },
-  }))
+    pipeIpc: { ...getPipeIpc(prev), discoveredPipes }}))
 
   lines.push('')
   lines.push(
-    `Selected: ${selected.length > 0 ? selected.join(', ') : '(none — messages run locally only)'}`,
+    selected.length > 0
+      ? t('pipesCmd.selectedList', selected.join(', '))
+      : t('pipesCmd.selectedNone'),
   )
   lines.push('')
-  lines.push('Commands:')
-  lines.push('  /pipes select <name>    — select pipe for broadcast')
-  lines.push('  /pipes deselect <name>  — deselect pipe')
-  lines.push('  /pipes all              — select all connected')
-  lines.push('  /pipes none             — deselect all')
-  lines.push('  /send <name> <msg>      — send to specific pipe')
-  lines.push('  /claim-main             — claim this machine as main')
+  lines.push(t('pipesCmd.commandsHeading'))
+  lines.push('  /pipes select <name>    ' + t('pipesCmd.cmdSelect'))
+  lines.push('  /pipes deselect <name>  ' + t('pipesCmd.cmdDeselect'))
+  lines.push('  /pipes all              ' + t('pipesCmd.cmdAll'))
+  lines.push('  /pipes none             ' + t('pipesCmd.cmdNone'))
+  lines.push('  /send <name> <msg>      ' + t('pipesCmd.cmdSend'))
+  lines.push('  /claim-main             ' + t('pipesCmd.cmdClaimMain'))
 
   return { type: 'text', value: lines.join('\n') }
 }

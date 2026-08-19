@@ -4,8 +4,7 @@ import {
   finalizeAutonomyRunFailed,
   listAutonomyRuns,
   markAutonomyRunCancelled,
-  markAutonomyRunRunning,
-} from './autonomyRuns.js'
+  markAutonomyRunRunning} from './autonomyRuns.js'
 
 export type AutonomyQueuePartition = {
   attachmentCommands: QueuedCommand[]
@@ -50,8 +49,7 @@ function getAutonomyRunRefs(
     }
     const ref = {
       runId,
-      rootDir: getCommandRootDir(command, fallbackRootDir),
-    }
+      rootDir: getCommandRootDir(command, fallbackRootDir)}
     refs.set(refKey(ref), ref)
   }
   return [...refs.values()]
@@ -164,8 +162,7 @@ export async function claimConsumableQueuedAutonomyCommands(
     }
     const key = refKey({
       runId,
-      rootDir: getCommandRootDir(command, rootDir),
-    })
+      rootDir: getCommandRootDir(command, rootDir)})
     if (claimedRunKeySet.has(key)) {
       attachmentCommands.push(command)
       claimedCommands.push(command)
@@ -178,8 +175,7 @@ export async function claimConsumableQueuedAutonomyCommands(
     attachmentCommands,
     staleCommands,
     claimedRunIds,
-    claimedCommands,
-  }
+    claimedCommands}
 }
 
 export async function cancelQueuedAutonomyCommands(params: {
@@ -242,8 +238,7 @@ export async function finalizeAutonomyCommandsForTurn(params: {
           rootDir: autonomy.rootDir,
           currentDir: params.currentDir,
           priority: params.priority,
-          workload: command.workload ?? params.workload,
-        })),
+          workload: command.workload ?? params.workload})),
       )
     } else if (params.outcome.type === 'cancelled') {
       await markAutonomyRunCancelled(autonomy.runId, autonomy.rootDir)
@@ -253,8 +248,7 @@ export async function finalizeAutonomyCommandsForTurn(params: {
         rootDir: autonomy.rootDir,
         error:
           params.outcome.message ??
-          sanitizeAutonomyFailureForPersistence(params.outcome.error),
-      })
+          sanitizeAutonomyFailureForPersistence(params.outcome.error)})
     }
   }
   return nextCommands

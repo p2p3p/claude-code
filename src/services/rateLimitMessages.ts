@@ -6,13 +6,11 @@
 import {
   getOauthAccountInfo,
   getSubscriptionType,
-  isOverageProvisioningAllowed,
-} from '../utils/auth.js'
+  isOverageProvisioningAllowed} from '../utils/auth.js'
 import { hasClaudeAiBillingAccess } from '../utils/billing.js'
 import { formatResetTime } from '../utils/format.js'
+import { t } from '../utils/i18n/index.js'
 import type { ClaudeAILimits } from './claudeAiLimits.js'
-
-const FEEDBACK_CHANNEL_ANT = '#briarpatch-cc'
 
 /**
  * All possible rate limit error message prefixes
@@ -52,9 +50,8 @@ export function getRateLimitMessage(
     // Show warning if approaching overage spending limit
     if (limits.overageStatus === 'allowed_warning') {
       return {
-        message: "You're close to your extra usage spending limit",
-        severity: 'warning',
-      }
+        message: t('rateLimitMessages.closeToExtraUsageLimit'),
+        severity: 'warning'}
     }
     return null
   }
@@ -146,7 +143,7 @@ function getLimitReachedText(limits: ClaudeAILimits, model: string): string {
   const overageResetTime = limits.overageResetsAt
     ? formatResetTime(limits.overageResetsAt, true)
     : undefined
-  const resetMessage = resetTime ? ` · resets ${resetTime}` : ''
+  const resetMessage = resetTime ? t('rateLimitMessages.resetsIn', resetTime) : ''
 
   // if BOTH subscription (checked before this method) and overage are exhausted
   if (limits.overageStatus === 'rejected') {
@@ -155,21 +152,21 @@ function getLimitReachedText(limits: ClaudeAILimits, model: string): string {
     if (resetsAt && limits.overageResetsAt) {
       // Both timestamps present - use the earlier one
       if (resetsAt < limits.overageResetsAt) {
-        overageResetMessage = ` · resets ${resetTime}`
+        overageResetMessage = t('rateLimitMessages.resetsIn', resetTime!)
       } else {
-        overageResetMessage = ` · resets ${overageResetTime}`
+        overageResetMessage = t('rateLimitMessages.resetsIn', overageResetTime!)
       }
     } else if (resetTime) {
-      overageResetMessage = ` · resets ${resetTime}`
+      overageResetMessage = t('rateLimitMessages.resetsIn', resetTime)
     } else if (overageResetTime) {
-      overageResetMessage = ` · resets ${overageResetTime}`
+      overageResetMessage = t('rateLimitMessages.resetsIn', overageResetTime)
     }
 
     if (limits.overageDisabledReason === 'out_of_credits') {
-      return `You're out of extra usage${overageResetMessage}`
+      return t('rateLimitMessages.outOfExtraUsage', overageResetMessage)
     }
 
-    return formatLimitReachedText('limit', overageResetMessage, model)
+    return formatLimitReachedText(t('rateLimitMessages.limit'), overageResetMessage, model)
   }
 
   if (limits.rateLimitType === 'seven_day_sonnet') {
@@ -177,42 +174,44 @@ function getLimitReachedText(limits: ClaudeAILimits, model: string): string {
     const isProOrEnterprise =
       subscriptionType === 'pro' || subscriptionType === 'enterprise'
     // For pro and enterprise, Sonnet limit is the same as weekly
-    const limit = isProOrEnterprise ? 'weekly limit' : 'Sonnet limit'
+    const limit = isProOrEnterprise
+      ? t('rateLimitMessages.limitWeekly')
+      : t('rateLimitMessages.limitSonnet')
     return formatLimitReachedText(limit, resetMessage, model)
   }
 
   if (limits.rateLimitType === 'seven_day_opus') {
-    return formatLimitReachedText('Opus limit', resetMessage, model)
+    return formatLimitReachedText(t('rateLimitMessages.limitOpus'), resetMessage, model)
   }
 
   if (limits.rateLimitType === 'seven_day') {
-    return formatLimitReachedText('weekly limit', resetMessage, model)
+    return formatLimitReachedText(t('rateLimitMessages.limitWeekly'), resetMessage, model)
   }
 
   if (limits.rateLimitType === 'five_hour') {
-    return formatLimitReachedText('session limit', resetMessage, model)
+    return formatLimitReachedText(t('rateLimitMessages.limitSession'), resetMessage, model)
   }
 
-  return formatLimitReachedText('usage limit', resetMessage, model)
+  return formatLimitReachedText(t('rateLimitMessages.limitUsage'), resetMessage, model)
 }
 
 function getEarlyWarningText(limits: ClaudeAILimits): string | null {
-  let limitName: string | null = null
+  let limitName = ''
   switch (limits.rateLimitType) {
     case 'seven_day':
-      limitName = 'weekly limit'
+      limitName = t('rateLimitMessages.limitWeekly')
       break
     case 'five_hour':
-      limitName = 'session limit'
+      limitName = t('rateLimitMessages.limitSession')
       break
     case 'seven_day_opus':
-      limitName = 'Opus limit'
+      limitName = t('rateLimitMessages.limitOpus')
       break
     case 'seven_day_sonnet':
-      limitName = 'Sonnet limit'
+      limitName = t('rateLimitMessages.limitSonnet')
       break
     case 'overage':
-      limitName = 'extra usage'
+      limitName = t('rateLimitMessages.limitExtraUsage')
       break
     case undefined:
       return null
@@ -230,26 +229,32 @@ function getEarlyWarningText(limits: ClaudeAILimits): string | null {
   const upsell = getWarningUpsellText(limits.rateLimitType)
 
   if (used && resetTime) {
-    const base = `You've used ${used}% of your ${limitName} · resets ${resetTime}`
+    const base = `${t('rateLimitMessages.usedPctOf', used, limitName)}${t(
+      'rateLimitMessages.resetsIn',
+      resetTime,
+    )}`
     return upsell ? `${base} · ${upsell}` : base
   }
 
   if (used) {
-    const base = `You've used ${used}% of your ${limitName}`
+    const base = t('rateLimitMessages.usedPctOf', used, limitName)
     return upsell ? `${base} · ${upsell}` : base
   }
 
   if (limits.rateLimitType === 'overage') {
     // For the "Approaching <x>" verbiage, "extra usage limit" makes more sense than "extra usage"
-    limitName += ' limit'
+    limitName = t('rateLimitMessages.limitExtraUsageApproaching')
   }
 
   if (resetTime) {
-    const base = `Approaching ${limitName} · resets ${resetTime}`
+    const base = `${t('rateLimitMessages.approaching', limitName)}${t(
+      'rateLimitMessages.resetsIn',
+      resetTime,
+    )}`
     return upsell ? `${base} · ${upsell}` : base
   }
 
-  const base = `Approaching ${limitName}`
+  const base = t('rateLimitMessages.approaching', limitName)
   return upsell ? `${base} · ${upsell}` : base
 }
 
@@ -271,7 +276,7 @@ function getWarningUpsellText(
     // Only show if overage provisioning is allowed for this org type (e.g., not AWS marketplace)
     if (subscriptionType === 'team' || subscriptionType === 'enterprise') {
       if (!hasExtraUsageEnabled && isOverageProvisioningAllowed()) {
-        return '/extra-usage to request more'
+        return t('rateLimitMessages.extraUsageRequest')
       }
       // Teams/Enterprise with overages enabled or unsupported billing type don't need upsell
       return null
@@ -279,7 +284,7 @@ function getWarningUpsellText(
 
     // Pro/Max users: prompt to upgrade
     if (subscriptionType === 'pro' || subscriptionType === 'max') {
-      return '/upgrade to keep using Claude Code'
+      return t('rateLimitMessages.upgradeContinue')
     }
   }
 
@@ -287,7 +292,7 @@ function getWarningUpsellText(
   if (rateLimitType === 'overage') {
     if (subscriptionType === 'team' || subscriptionType === 'enterprise') {
       if (!hasExtraUsageEnabled && isOverageProvisioningAllowed()) {
-        return '/extra-usage to request more'
+        return t('rateLimitMessages.extraUsageRequest')
       }
     }
   }
@@ -307,27 +312,29 @@ export function getUsingOverageText(limits: ClaudeAILimits): string {
 
   let limitName = ''
   if (limits.rateLimitType === 'five_hour') {
-    limitName = 'session limit'
+    limitName = t('rateLimitMessages.limitSession')
   } else if (limits.rateLimitType === 'seven_day') {
-    limitName = 'weekly limit'
+    limitName = t('rateLimitMessages.limitWeekly')
   } else if (limits.rateLimitType === 'seven_day_opus') {
-    limitName = 'Opus limit'
+    limitName = t('rateLimitMessages.limitOpus')
   } else if (limits.rateLimitType === 'seven_day_sonnet') {
     const subscriptionType = getSubscriptionType()
     const isProOrEnterprise =
       subscriptionType === 'pro' || subscriptionType === 'enterprise'
     // For pro and enterprise, Sonnet limit is the same as weekly
-    limitName = isProOrEnterprise ? 'weekly limit' : 'Sonnet limit'
+    limitName = isProOrEnterprise
+      ? t('rateLimitMessages.limitWeekly')
+      : t('rateLimitMessages.limitSonnet')
   }
 
   if (!limitName) {
-    return 'Now using extra usage'
+    return t('rateLimitMessages.startedUsingExtraUsage')
   }
 
   const resetMessage = resetTime
-    ? ` · Your ${limitName} resets ${resetTime}`
+    ? t('rateLimitMessages.yourLimitResets', limitName, resetTime)
     : ''
-  return `You're now using extra usage${resetMessage}`
+  return t('rateLimitMessages.nowUsingExtraUsage', resetMessage)
 }
 
 function formatLimitReachedText(
@@ -337,8 +344,8 @@ function formatLimitReachedText(
 ): string {
   // Enhanced messaging for Ant users
   if (process.env.USER_TYPE === 'ant') {
-    return `You've hit your ${limit}${resetMessage}. If you have feedback about this limit, post in ${FEEDBACK_CHANNEL_ANT}. You can reset your limits with /reset-limits`
+    return t('rateLimitMessages.hitLimitAnt', limit, resetMessage)
   }
 
-  return `You've hit your ${limit}${resetMessage}`
+  return t('rateLimitMessages.hitLimit', limit, resetMessage)
 }

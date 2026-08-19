@@ -5,13 +5,13 @@
  * and simply lets the user drill into each matcher to see its hooks.
  */
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import type { HookEvent } from 'src/entrypoints/agentSdkTypes.js';
 import { Box, Text } from '@anthropic/ink';
 import {
   type HookSource,
   hookSourceInlineDisplayString,
-  type IndividualHookConfig,
-} from '../../utils/hooks/hooksSettings.js';
+  type IndividualHookConfig} from '../../utils/hooks/hooksSettings.js';
 import { plural } from '../../utils/stringUtils.js';
 import { Select } from '../CustomSelect/select.js';
 import { Dialog } from '@anthropic/ink';
@@ -37,8 +37,7 @@ export function SelectMatcherMode({
   hooksByEventAndMatcher,
   eventDescription,
   onSelect,
-  onCancel,
-}: Props): React.ReactNode {
+  onCancel}: Props): React.ReactNode {
   // Group matchers with their sources (already sorted by priority in parent)
   const matchersWithSources: MatcherWithSource[] = React.useMemo(() => {
     return matchersForSelectedEvent.map(matcher => {
@@ -47,8 +46,7 @@ export function SelectMatcherMode({
       return {
         matcher,
         sources,
-        hookCount: hooks.length,
-      };
+        hookCount: hooks.length};
     });
   }, [matchersForSelectedEvent, hooksByEventAndMatcher, selectedEvent]);
 
@@ -58,11 +56,11 @@ export function SelectMatcherMode({
         title={`${selectedEvent} - Matchers`}
         subtitle={eventDescription}
         onCancel={onCancel}
-        inputGuide={() => <Text>Esc to go back</Text>}
+        inputGuide={() => <Text>{t('selectmatchermode.escToGoBack')}</Text>}
       >
         <Box flexDirection="column" gap={1}>
-          <Text dimColor>No hooks configured for this event.</Text>
-          <Text dimColor>To add hooks, edit settings.json directly or ask Claude.</Text>
+          <Text dimColor>{t('selectmatchermode.noHooksConfiguredForThisEvent')}</Text>
+          <Text dimColor>{t('selectmatchermode.toAddHooksEditSettingsJsonDirectlyOrAskClaude')}</Text>
         </Box>
       </Dialog>
     );
@@ -78,8 +76,7 @@ export function SelectMatcherMode({
             return {
               label: `[${sourceText}] ${matcherLabel}`,
               value: item.matcher,
-              description: `${item.hookCount} ${plural(item.hookCount, 'hook')}`,
-            };
+              description: `${item.hookCount} ${plural(item.hookCount, 'hook')}`};
           })}
           onChange={value => {
             onSelect(value);

@@ -66,8 +66,7 @@ async function buildHeaders(): Promise<Record<string, string>> {
     'x-api-key': apiKey,
     'anthropic-version': '2023-06-01',
     'anthropic-beta': AGENTS_BETA_HEADER,
-    'content-type': 'application/json',
-  }
+    'content-type': 'application/json'}
 }
 
 function agentsBaseUrl(): string {
@@ -157,8 +156,7 @@ export async function listAgents(): Promise<AgentTrigger[]> {
   return withRetry(async () => {
     const headers = await buildHeaders()
     const response = await axios.get<ListAgentsResponse>(agentsBaseUrl(), {
-      headers,
-    })
+      headers})
     return response.data.data ?? []
   })
 }
@@ -178,8 +176,7 @@ export async function createAgent(
         // tells the server how to interpret the cron expression. We use the
         // system timezone so that "9am every Monday" means 9am local time.
         // Users can override via the --tz flag parsed in parseArgs.ts.
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'UTC',
-      },
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'UTC'},
       { headers },
     )
     return response.data

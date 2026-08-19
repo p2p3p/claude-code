@@ -32,9 +32,7 @@ export const anthropicAdapter: ProviderUsageAdapter = {
         kind,
         label,
         utilization,
-        ...(Number.isFinite(resetsAt) && resetsAt > 0 ? { resetsAt } : {}),
-      })
+        ...(Number.isFinite(resetsAt) && resetsAt > 0 ? { resetsAt } : {})})
     }
     return buckets
-  },
-}
+  }}

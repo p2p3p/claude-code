@@ -10,8 +10,7 @@ import type { AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS } from 
 import {
   useAppState,
   useAppStateStore,
-  useSetAppState,
-} from 'src/state/AppState.js'
+  useSetAppState} from 'src/state/AppState.js'
 import { isVimModeEnabled } from '../components/PromptInput/utils.js'
 import type { ToolUseConfirm } from '../components/permissions/PermissionRequest.js'
 import type { SpinnerMode } from '../components/Spinner/types.js'
@@ -24,14 +23,13 @@ import type { Screen } from '../screens/REPL.js'
 import { exitTeammateView } from '../state/teammateViewHelpers.js'
 import {
   killAllRunningAgentTasks,
-  markAgentsNotified,
-} from '../tasks/LocalAgentTask/LocalAgentTask.js'
+  markAgentsNotified} from '../tasks/LocalAgentTask/LocalAgentTask.js'
 import type { PromptInputMode, VimMode } from '../types/textInputTypes.js'
 import {
   clearCommandQueue,
   enqueuePendingNotification,
-  hasCommandsInQueue,
-} from '../utils/messageQueueManager.js'
+  hasCommandsInQueue} from '../utils/messageQueueManager.js'
+import { t } from '../utils/i18n/index.js'
 import { emitTaskTerminatedSdk } from '../utils/sdkEventQueue.js'
 
 /** Time window in ms during which a second press kills all background agents. */
@@ -75,8 +73,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
     isHelpOpen,
     inputMode,
     inputValue,
-    streamMode,
-  } = props
+    streamMode} = props
   const store = useAppStateStore()
   const setAppState = useSetAppState()
   const queuedCommandsLength = useCommandQueue().length
@@ -89,8 +86,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
       source:
         'escape' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       streamMode:
-        streamMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    }
+        streamMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS}
 
     // Priority 1: If there's an active task running, cancel it first
     // This takes precedence over queue management so users can always interrupt Claude
@@ -163,8 +159,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
 
   useKeybinding('chat:cancel', handleCancel, {
     context: 'Chat',
-    isActive: isEscapeActive,
-  })
+    isActive: isEscapeActive})
 
   // Shared kill path: stop all agents, suppress per-agent notifications,
   // emit SDK events, enqueue a single aggregate model-facing notification.
@@ -182,8 +177,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
       descriptions.push(task.description)
       emitTaskTerminatedSdk(taskId, 'stopped', {
         toolUseId: task.toolUseId,
-        summary: task.description,
-      })
+        summary: task.description})
     }
     const summary =
       descriptions.length === 1
@@ -216,8 +210,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
 
   useKeybinding('app:interrupt', handleInterrupt, {
     context: 'Global',
-    isActive: isCtrlCActive,
-  })
+    isActive: isCtrlCActive})
 
   // chat:killAgents uses a two-press pattern: first press shows a
   // confirmation hint, second press within the window actually kills all
@@ -230,10 +223,9 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
     if (!hasRunningAgents) {
       addNotification({
         key: 'kill-agents-none',
-        text: 'No background agents running',
+        text: t('notif.cancelRequest.noAgentsRunning'),
         priority: 'immediate',
-        timeoutMs: 2000,
-      })
+        timeoutMs: 2000})
       return
     }
     const now = Date.now()
@@ -244,8 +236,7 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
       removeNotification('kill-agents-confirm')
       logEvent('tengu_cancel', {
         source:
-          'kill_agents' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          'kill_agents' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       clearCommandQueue()
       killAllAgentsAndNotify()
       return
@@ -259,18 +250,16 @@ export function CancelRequestHandler(props: CancelRequestHandlerProps): null {
     )
     addNotification({
       key: 'kill-agents-confirm',
-      text: `Press ${shortcut} again to stop background agents`,
+      text: t('notif.cancelRequest.pressAgain', { shortcut }),
       priority: 'immediate',
-      timeoutMs: KILL_AGENTS_CONFIRM_WINDOW_MS,
-    })
+      timeoutMs: KILL_AGENTS_CONFIRM_WINDOW_MS})
   }, [store, addNotification, removeNotification, killAllAgentsAndNotify])
 
   // Must stay always-active: ctrl+x is consumed as a chord prefix regardless
   // of isActive (because ctrl+x ctrl+e is always live), so an inactive handler
   // here would leak ctrl+k to readline kill-line. Handler gates internally.
   useKeybinding('chat:killAgents', handleKillAgents, {
-    context: 'Chat',
-  })
+    context: 'Chat'})
 
   return null
 }

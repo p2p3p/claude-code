@@ -13,19 +13,16 @@ import {
   resetCostState,
   setLastAPIRequest,
   setLastAPIRequestMessages,
-  setLastClassifierRequests,
-} from '../../bootstrap/state.js'
+  setLastClassifierRequests} from '../../bootstrap/state.js'
 import type { SDKStatusMessage } from '../../entrypoints/sdk/coreTypes.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import type { AppState } from '../../state/AppState.js'
 import { isInProcessTeammateTask } from '../../tasks/InProcessTeammateTask/types.js'
 import {
   isLocalAgentTask,
-  type LocalAgentTaskState,
-} from '../../tasks/LocalAgentTask/LocalAgentTask.js'
+  type LocalAgentTaskState} from '../../tasks/LocalAgentTask/LocalAgentTask.js'
 import { isLocalShellTask } from '../../tasks/LocalShellTask/guards.js'
 import { asAgentId } from '../../types/ids.js'
 import type { Message } from '../../types/message.js'
@@ -34,8 +31,7 @@ import { createEmptyAttributionState } from '../../utils/commitAttribution.js'
 import type { FileStateCache } from '../../utils/fileStateCache.js'
 import {
   executeSessionEndHooks,
-  getSessionEndHookTimeoutMs,
-} from '../../utils/hooks.js'
+  getSessionEndHookTimeoutMs} from '../../utils/hooks.js'
 import { logError } from '../../utils/log.js'
 import { clearAllPlanSlugs } from '../../utils/plans.js'
 import { setCwd } from '../../utils/Shell.js'
@@ -44,12 +40,10 @@ import {
   clearSessionMetadata,
   getAgentTranscriptPath,
   resetSessionFilePointer,
-  saveWorktreeState,
-} from '../../utils/sessionStorage.js'
+  saveWorktreeState} from '../../utils/sessionStorage.js'
 import {
   evictTaskOutput,
-  initTaskOutputAsSymlink,
-} from '../../utils/task/diskOutput.js'
+  initTaskOutputAsSymlink} from '../../utils/task/diskOutput.js'
 import { getCurrentWorktreeSession } from '../../utils/worktree.js'
 import { clearSessionCaches } from './caches.js'
 
@@ -63,8 +57,7 @@ function notifyRemoteConversationCleared(): void {
     subtype: 'status',
     status: 'conversation_cleared',
     message: 'conversation_cleared',
-    uuid: randomUUID(),
-  }
+    uuid: randomUUID()}
   handle.writeSdkMessages([message])
 }
 
@@ -75,8 +68,7 @@ export async function clearConversation({
   loadedNestedMemoryPaths,
   getAppState,
   setAppState,
-  setConversationId,
-}: {
+  setConversationId}: {
   setMessages: (updater: (prev: Message[]) => Message[]) => void
   readFileState: FileStateCache
   discoveredSkillNames?: Set<string>
@@ -92,8 +84,7 @@ export async function clearConversation({
     getAppState,
     setAppState,
     signal: AbortSignal.timeout(sessionEndTimeoutMs),
-    timeoutMs: sessionEndTimeoutMs,
-  })
+    timeoutMs: sessionEndTimeoutMs})
 
   // Signal to inference that this conversation's cache can be evicted.
   const lastRequestId = getLastMainRequestId()
@@ -102,8 +93,7 @@ export async function clearConversation({
       scope:
         'conversation_clear' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       last_request_id:
-        lastRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        lastRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
   }
 
   // Compute preserved tasks up front so their per-agent state survives the
@@ -212,8 +202,7 @@ export async function clearConversation({
         fileHistory: {
           snapshots: [],
           trackedFiles: new Set(),
-          snapshotSequence: 0,
-        },
+          snapshotSequence: 0},
         // Reset MCP state to default to trigger re-initialization.
         // Preserve pluginReconnectKey so /clear doesn't cause a no-op
         // (it's only bumped by /reload-plugins).
@@ -222,9 +211,7 @@ export async function clearConversation({
           tools: [],
           commands: [],
           resources: {},
-          pluginReconnectKey: prev.mcp.pluginReconnectKey,
-        },
-      }
+          pluginReconnectKey: prev.mcp.pluginReconnectKey}}
     })
   }
 
@@ -268,8 +255,7 @@ export async function clearConversation({
     /* eslint-disable @typescript-eslint/no-require-imports */
     const { saveMode } = require('../../utils/sessionStorage.js')
     const {
-      isCoordinatorMode,
-    } = require('../../coordinator/coordinatorMode.js')
+      isCoordinatorMode} = require('../../coordinator/coordinatorMode.js')
     /* eslint-enable @typescript-eslint/no-require-imports */
     saveMode(isCoordinatorMode() ? 'coordinator' : 'normal')
   }

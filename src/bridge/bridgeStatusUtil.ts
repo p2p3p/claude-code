@@ -3,6 +3,7 @@ import { isSelfHostedBridge, getBridgeBaseUrl } from './bridgeConfig.js'
 import { stringWidth } from '@anthropic/ink'
 import { formatDuration, truncateToWidth } from '../utils/format.js'
 import { getGraphemeSegmenter } from '../utils/intl.js'
+import { t } from '../utils/i18n/index.js'
 
 /** Bridge status state machine states. */
 export type StatusState =
@@ -125,8 +126,7 @@ export function getBridgeStatus({
   error,
   connected,
   sessionActive,
-  reconnecting,
-}: {
+  reconnecting}: {
   error: string | undefined
   connected: boolean
   sessionActive: boolean
@@ -142,16 +142,16 @@ export function getBridgeStatus({
 
 /** Footer text shown when bridge is idle (Ready state). */
 export function buildIdleFooterText(url: string): string {
-  return `Code everywhere with the Claude app or ${url}`
+  return t('bridgeStatus.idleFooter', url)
 }
 
 /** Footer text shown when a session is active (Connected state). */
 export function buildActiveFooterText(url: string): string {
-  return `Continue coding in the Claude app or ${url}`
+  return t('bridgeStatus.activeFooter', url)
 }
 
 /** Footer text shown when the bridge has failed. */
-export const FAILED_FOOTER_TEXT = 'Something went wrong, please try again'
+export const FAILED_FOOTER_TEXT = t('bridgeStatus.failedFooter')
 
 /**
  * Wrap text in an OSC 8 terminal hyperlink. Zero visual width for layout purposes.

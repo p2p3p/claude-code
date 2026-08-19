@@ -129,21 +129,18 @@ export const RARITY_WEIGHTS = {
   uncommon: 25,
   rare: 10,
   epic: 4,
-  legendary: 1,
-} as const satisfies Record<Rarity, number>
+  legendary: 1} as const satisfies Record<Rarity, number>
 
 export const RARITY_STARS = {
   common: '★',
   uncommon: '★★',
   rare: '★★★',
   epic: '★★★★',
-  legendary: '★★★★★',
-} as const satisfies Record<Rarity, string>
+  legendary: '★★★★★'} as const satisfies Record<Rarity, string>
 
 export const RARITY_COLORS = {
   common: 'inactive',
   uncommon: 'success',
   rare: 'permission',
   epic: 'autoAccept',
-  legendary: 'warning',
-} as const satisfies Record<Rarity, keyof import('../utils/theme.js').Theme>
+  legendary: 'warning'} as const satisfies Record<Rarity, keyof import('../utils/theme.js').Theme>

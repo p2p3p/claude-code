@@ -2,8 +2,7 @@ import { createHash } from 'node:crypto'
 import type {
   SkillLearningProjectContext,
   SkillLearningScope,
-  StoredSkillObservation,
-} from './observationStore.js'
+  StoredSkillObservation} from './observationStore.js'
 import type { Instinct as BaseInstinct, InstinctStatus } from './types.js'
 
 export type { Instinct } from './types.js'
@@ -31,8 +30,7 @@ export function createInstinct(
     ...candidate,
     createdAt: now,
     updatedAt: now,
-    status: candidate.status ?? 'pending',
-  })
+    status: candidate.status ?? 'pending'})
 }
 
 const MAX_EVIDENCE_ENTRIES = 10
@@ -47,8 +45,7 @@ export function normalizeInstinct(instinct: StoredInstinct): StoredInstinct {
     evidenceOutcome: instinct.evidenceOutcome,
     observationIds: instinct.observationIds
       ? Array.from(new Set(instinct.observationIds)).slice(-20)
-      : undefined,
-  }
+      : undefined}
 }
 
 export function serializeInstinct(instinct: StoredInstinct): string {
@@ -92,8 +89,7 @@ export function candidateFromObservation(
         observation.toolName ??
         observation.id,
     ],
-    observationIds: [observation.id],
-  }
+    observationIds: [observation.id]}
 }
 
 export function isContradictingInstinct(

@@ -1,5 +1,6 @@
 import { GITHUB_ACTION_SETUP_DOCS_URL } from '../../constants/github-app.js';
 import { Box, Text } from '@anthropic/ink';
+import { t } from '../../utils/i18n/index.js';
 
 interface ErrorStepProps {
   error: string | undefined;
@@ -12,17 +13,17 @@ export function ErrorStep({ error, errorReason, errorInstructions }: ErrorStepPr
     <>
       <Box flexDirection="column" borderStyle="round" paddingX={1}>
         <Box flexDirection="column" marginBottom={1}>
-          <Text bold>Install GitHub App</Text>
+          <Text bold>{t("cmdSystemUI.installGithubApp")}</Text>
         </Box>
-        <Text color="error">Error: {error}</Text>
+        <Text color="error">{t('installGithub.errorPrefix')} {error}</Text>
         {errorReason && (
           <Box marginTop={1}>
-            <Text dimColor>Reason: {errorReason}</Text>
+            <Text dimColor>{t('installGithub.reasonPrefix')} {errorReason}</Text>
           </Box>
         )}
         {errorInstructions && errorInstructions.length > 0 && (
           <Box flexDirection="column" marginTop={1}>
-            <Text dimColor>How to fix:</Text>
+            <Text dimColor>{t('installGithub.howToFix')}</Text>
             {errorInstructions.map((instruction, index) => (
               <Box key={index} marginLeft={2}>
                 <Text dimColor>• </Text>
@@ -33,12 +34,12 @@ export function ErrorStep({ error, errorReason, errorInstructions }: ErrorStepPr
         )}
         <Box marginTop={1}>
           <Text dimColor>
-            For manual setup instructions, see: <Text color="claude">{GITHUB_ACTION_SETUP_DOCS_URL}</Text>
+            {t('installGithub.manualSetupInstructions')} <Text color="claude">{GITHUB_ACTION_SETUP_DOCS_URL}</Text>
           </Text>
         </Box>
       </Box>
       <Box marginLeft={3}>
-        <Text dimColor>Press any key to exit</Text>
+        <Text dimColor>{t('installGithub.pressAnyKey')}</Text>
       </Box>
     </>
   );

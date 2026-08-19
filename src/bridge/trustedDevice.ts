@@ -4,8 +4,7 @@ import { hostname } from 'os'
 import { getOauthConfig } from '../constants/oauth.js'
 import {
   checkGate_CACHED_OR_BLOCKING,
-  getFeatureValue_CACHED_MAY_BE_STALE,
-} from '../services/analytics/growthbook.js'
+  getFeatureValue_CACHED_MAY_BE_STALE} from '../services/analytics/growthbook.js'
 import { logForDebugging } from '../utils/debug.js'
 import { errorMessage } from '../utils/errors.js'
 import { isEssentialTrafficOnly } from '../utils/privacyLevel.js'
@@ -151,11 +150,9 @@ export async function enrollTrustedDevice(): Promise<void> {
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
+            'Content-Type': 'application/json'},
           timeout: 10_000,
-          validateStatus: s => s < 500,
-        },
+          validateStatus: s => s < 500},
       )
     } catch (err: unknown) {
       logForDebugging(

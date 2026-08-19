@@ -3,17 +3,16 @@
  * critique user-written rules. Dynamically imported when `claude auto-mode ...` runs.
  */
 
+import { t } from '../../utils/i18n/index.js'
 import { errorMessage } from '../../utils/errors.js'
 import {
   getMainLoopModel,
   getSmallFastModel,
-  parseUserSpecifiedModel,
-} from '../../utils/model/model.js'
+  parseUserSpecifiedModel} from '../../utils/model/model.js'
 import {
   type AutoModeRules,
   buildDefaultExternalSystemPrompt,
-  getDefaultExternalAutoModeRules,
-} from '../../utils/permissions/yoloClassifier.js'
+  getDefaultExternalAutoModeRules} from '../../utils/permissions/yoloClassifier.js'
 import { getAutoModeConfig } from '../../utils/settings/settings.js'
 import { isPoorModeActive } from '../../commands/poor/poorMode.js'
 import { sideQuery } from '../../utils/sideQuery.js'
@@ -44,8 +43,7 @@ export function autoModeConfigHandler(): void {
       : defaults.soft_deny,
     environment: config?.environment?.length
       ? config.environment
-      : defaults.environment,
-  })
+      : defaults.environment})
 }
 
 const CRITIQUE_SYSTEM_PROMPT =
@@ -83,9 +81,8 @@ export async function autoModeCritiqueHandler(options: {
 
   if (!hasCustomRules) {
     process.stdout.write(
-      'No custom auto mode rules found.\n\n' +
-        'Add rules to your settings file under autoMode.{allow, soft_deny, environment}.\n' +
-        'Run `claude auto-mode defaults` to see the default rules for reference.\n',
+      t('autoMode.noRulesFound') + '\n\n' +
+        t('autoMode.noRulesFoundHint') + '\n',
     )
     return
   }
@@ -112,7 +109,7 @@ export async function autoModeCritiqueHandler(options: {
       defaults.environment,
     )
 
-  process.stdout.write('Analyzing your auto mode rules…\n\n')
+  process.stdout.write(t('autoMode.analyzing') + '\n\n')
 
   let response
   try {
@@ -132,13 +129,11 @@ export async function autoModeCritiqueHandler(options: {
             '\n</classifier_system_prompt>\n\n' +
             "Here are the user's custom rules that REPLACE the corresponding default sections:\n\n" +
             userRulesSummary +
-            '\nPlease critique these custom rules.',
-        },
-      ],
-    })
+            '\nPlease critique these custom rules.'},
+      ]})
   } catch (error) {
     process.stderr.write(
-      'Failed to analyze rules: ' + errorMessage(error) + '\n',
+      t('autoMode.failedToAnalyze', errorMessage(error)) + '\n',
     )
     process.exitCode = 1
     return
@@ -148,7 +143,7 @@ export async function autoModeCritiqueHandler(options: {
   if (textBlock?.type === 'text') {
     process.stdout.write(textBlock.text + '\n')
   } else {
-    process.stdout.write('No critique was generated. Please try again.\n')
+    process.stdout.write(t('autoMode.noCritique') + '\n')
   }
 }
 

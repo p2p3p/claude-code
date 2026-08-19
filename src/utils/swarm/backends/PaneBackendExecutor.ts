@@ -11,8 +11,7 @@ import {
   buildInheritedCliArgParts,
   buildInheritedEnvVars,
   getInheritedEnvVarAssignments,
-  getTeammateCommand,
-} from '../spawnUtils.js'
+  getTeammateCommand} from '../spawnUtils.js'
 import { assignTeammateColor } from '../teammateLayoutManager.js'
 import { isInsideTmux } from './detection.js'
 import type {
@@ -21,8 +20,7 @@ import type {
   TeammateExecutor,
   TeammateMessage,
   TeammateSpawnConfig,
-  TeammateSpawnResult,
-} from './types.js'
+  TeammateSpawnResult} from './types.js'
 
 function quotePowerShellString(value: string): string {
   return `'${value.replace(/'/g, "''")}'`
@@ -126,8 +124,7 @@ export class PaneBackendExecutor implements TeammateExecutor {
         success: false,
         agentId,
         error:
-          'PaneBackendExecutor not initialized. Call setContext() before spawn().',
-      }
+          'PaneBackendExecutor not initialized. Call setContext() before spawn().'}
     }
 
     try {
@@ -178,8 +175,7 @@ export class PaneBackendExecutor implements TeammateExecutor {
       const appState = this.context.getAppState()
       let inheritedArgParts = buildInheritedCliArgParts({
         planModeRequired: config.planModeRequired,
-        permissionMode: appState.toolPermissionContext.mode,
-      })
+        permissionMode: appState.toolPermissionContext.mode})
 
       // If teammate has a custom model, add --model flag (or replace inherited one)
       if (config.model) {
@@ -225,8 +221,7 @@ export class PaneBackendExecutor implements TeammateExecutor {
         {
           from: 'team-lead',
           text: config.prompt,
-          timestamp: new Date().toISOString(),
-        },
+          timestamp: new Date().toISOString()},
         config.teamName,
       )
 
@@ -245,8 +240,7 @@ export class PaneBackendExecutor implements TeammateExecutor {
           'windowName' in paneResult
             ? (paneResult as { windowName: string }).windowName
             : undefined,
-        isSplitPane: config.useSplitPane !== false,
-      }
+        isSplitPane: config.useSplitPane !== false}
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error)
@@ -256,8 +250,7 @@ export class PaneBackendExecutor implements TeammateExecutor {
       return {
         success: false,
         agentId,
-        error: errorMessage,
-      }
+        error: errorMessage}
     }
   }
 
@@ -286,8 +279,7 @@ export class PaneBackendExecutor implements TeammateExecutor {
         text: message.text,
         from: message.from,
         color: message.color,
-        timestamp: message.timestamp ?? new Date().toISOString(),
-      },
+        timestamp: message.timestamp ?? new Date().toISOString()},
       teamName,
     )
 
@@ -322,16 +314,14 @@ export class PaneBackendExecutor implements TeammateExecutor {
       type: 'shutdown_request',
       requestId: `shutdown-${agentId}-${Date.now()}`,
       from: 'team-lead',
-      reason,
-    }
+      reason}
 
     await writeToMailbox(
       agentName,
       {
         from: 'team-lead',
         text: jsonStringify(shutdownRequest),
-        timestamp: new Date().toISOString(),
-      },
+        timestamp: new Date().toISOString()},
       teamName,
     )
 

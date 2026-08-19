@@ -2,10 +2,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { checkIsGitClean, checkNeedsClaudeAiLogin } from 'src/utils/background/remote/preconditions.js';
 import { gracefulShutdownSync } from 'src/utils/gracefulShutdown.js';
 import { Box, Text } from '@anthropic/ink';
-import { ConsoleOAuthFlow } from './ConsoleOAuthFlow.js';
+import { ConsoleOAuthFlow } from '../accounts/ui/ConsoleOAuthFlow.js';
 import { Select } from './CustomSelect/index.js';
 import { Dialog } from '@anthropic/ink';
 import { TeleportStash } from './TeleportStash.js';
+import { t } from '../utils/i18n/index.js';
 
 export type TeleportLocalErrorType = 'needsLogin' | 'needsGitStash';
 
@@ -22,8 +23,7 @@ const EMPTY_ERRORS_TO_IGNORE: ReadonlySet<TeleportLocalErrorType> = new Set();
 
 export function TeleportError({
   onComplete,
-  errorsToIgnore = EMPTY_ERRORS_TO_IGNORE,
-}: TeleportErrorProps): React.ReactNode {
+  errorsToIgnore = EMPTY_ERRORS_TO_IGNORE}: TeleportErrorProps): React.ReactNode {
   const [currentError, setCurrentError] = useState<TeleportLocalErrorType | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
 
@@ -97,15 +97,15 @@ export function TeleportError({
       }
 
       return (
-        <Dialog title="Log in to Claude" onCancel={onCancel}>
+        <Dialog title={t('teleportError.title')} onCancel={onCancel}>
           <Box flexDirection="column">
-            <Text dimColor>Teleport requires a Claude.ai account.</Text>
-            <Text dimColor>Your Claude Pro/Max subscription will be used by Claude Code.</Text>
+            <Text dimColor>{t('teleportError.teleportRequires')}</Text>
+            <Text dimColor>{t('teleportError.subscriptionUsed')}</Text>
           </Box>
           <Select
             options={[
-              { label: 'Login with Claude account', value: 'login' },
-              { label: 'Exit', value: 'exit' },
+              { label: t('teleportError.loginWithClaude'), value: 'login' },
+              { label: t('teleportError.exit'), value: 'exit' },
             ]}
             onChange={handleLoginDialogSelect}
           />

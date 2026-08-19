@@ -9,8 +9,7 @@ import { setUseCoworkPlugins } from '../../bootstrap/state.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import {
   disableAllPlugins,
   disablePlugin,
@@ -19,8 +18,7 @@ import {
   uninstallPlugin,
   updatePluginCli,
   VALID_INSTALLABLE_SCOPES,
-  VALID_UPDATE_SCOPES,
-} from '../../services/plugins/pluginCliCommands.js'
+  VALID_UPDATE_SCOPES} from '../../services/plugins/pluginCliCommands.js'
 import { getPluginErrorMessage } from '../../types/plugin.js'
 import { errorMessage } from '../../utils/errors.js'
 import { logError } from '../../utils/log.js'
@@ -28,36 +26,31 @@ import { clearAllCaches } from '../../utils/plugins/cacheUtils.js'
 import { getInstallCounts } from '../../utils/plugins/installCounts.js'
 import {
   isPluginInstalled,
-  loadInstalledPluginsV2,
-} from '../../utils/plugins/installedPluginsManager.js'
+  loadInstalledPluginsV2} from '../../utils/plugins/installedPluginsManager.js'
 import {
   createPluginId,
-  loadMarketplacesWithGracefulDegradation,
-} from '../../utils/plugins/marketplaceHelpers.js'
+  loadMarketplacesWithGracefulDegradation} from '../../utils/plugins/marketplaceHelpers.js'
 import {
   addMarketplaceSource,
   loadKnownMarketplacesConfig,
   refreshAllMarketplaces,
   refreshMarketplace,
   removeMarketplaceSource,
-  saveMarketplaceToSettings,
-} from '../../utils/plugins/marketplaceManager.js'
+  saveMarketplaceToSettings} from '../../utils/plugins/marketplaceManager.js'
 import { loadPluginMcpServers } from '../../utils/plugins/mcpPluginIntegration.js'
 import { parseMarketplaceInput } from '../../utils/plugins/parseMarketplaceInput.js'
 import {
   parsePluginIdentifier,
-  scopeToSettingSource,
-} from '../../utils/plugins/pluginIdentifier.js'
+  scopeToSettingSource} from '../../utils/plugins/pluginIdentifier.js'
 import { loadAllPlugins } from '../../utils/plugins/pluginLoader.js'
 import type { PluginSource } from '../../utils/plugins/schemas.js'
 import {
   type ValidationResult,
   validateManifest,
-  validatePluginContents,
-} from '../../utils/plugins/validatePlugin.js'
+  validatePluginContents} from '../../utils/plugins/validatePlugin.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
-import { plural } from '../../utils/stringUtils.js'
 import { cliError, cliOk } from '../exit.js'
+import { t } from '../../utils/i18n/index.js'
 
 // Re-export for main.tsx to reference in option definitions
 export { VALID_INSTALLABLE_SCOPES, VALID_UPDATE_SCOPES }
@@ -67,13 +60,13 @@ export { VALID_INSTALLABLE_SCOPES, VALID_UPDATE_SCOPES }
  */
 export function handleMarketplaceError(error: unknown, action: string): never {
   logError(error)
-  cliError(`${figures.cross} Failed to ${action}: ${errorMessage(error)}`)
+  cliError(`${figures.cross} ${t('pluginsCli.failedToAction', action)}: ${errorMessage(error)}`)
 }
 
 function printValidationResult(result: ValidationResult): void {
   if (result.errors.length > 0) {
     console.log(
-      `${figures.cross} Found ${result.errors.length} ${plural(result.errors.length, 'error')}:\n`,
+      `${figures.cross} ${t('pluginsCli.foundErrors', result.errors.length)}:\n`,
     )
     result.errors.forEach(error => {
       console.log(`  ${figures.pointer} ${error.path}: ${error.message}`)
@@ -82,7 +75,7 @@ function printValidationResult(result: ValidationResult): void {
   }
   if (result.warnings.length > 0) {
     console.log(
-      `${figures.warning} Found ${result.warnings.length} ${plural(result.warnings.length, 'warning')}:\n`,
+      `${figures.warning} ${t('pluginsCli.foundWarnings', result.warnings.length)}:\n`,
     )
     result.warnings.forEach(warning => {
       console.log(`  ${figures.pointer} ${warning.path}: ${warning.message}`)
@@ -100,7 +93,7 @@ export async function pluginValidateHandler(
   try {
     const result = await validateManifest(manifestPath)
 
-    console.log(`Validating ${result.fileType} manifest: ${result.filePath}\n`)
+    console.log(`${t('pluginsCli.validatingManifest', result.fileType, result.filePath)}\n`)
     printValidationResult(result)
 
     // If this is a plugin manifest located inside a .claude-plugin directory,
@@ -113,7 +106,7 @@ export async function pluginValidateHandler(
       if (basename(manifestDir) === '.claude-plugin') {
         contentResults = await validatePluginContents(dirname(manifestDir))
         for (const r of contentResults) {
-          console.log(`Validating ${r.fileType}: ${r.filePath}\n`)
+          console.log(`${t('pluginsCli.validatingFileType', r.fileType, r.filePath)}\n`)
           printValidationResult(r)
         }
       }
@@ -127,17 +120,17 @@ export async function pluginValidateHandler(
     if (allSuccess) {
       cliOk(
         hasWarnings
-          ? `${figures.tick} Validation passed with warnings`
-          : `${figures.tick} Validation passed`,
+          ? `${figures.tick} ${t('pluginsCli.validationPassedWarnings')}`
+          : `${figures.tick} ${t('pluginsCli.validationPassed')}`,
       )
     } else {
-      console.log(`${figures.cross} Validation failed`)
+      console.log(`${figures.cross} ${t('pluginsCli.validationFailed')}`)
       process.exit(1)
     }
   } catch (error) {
     logError(error)
     console.error(
-      `${figures.cross} Unexpected error during validation: ${errorMessage(error)}`,
+      `${figures.cross} ${t('pluginsCli.unexpectedErrorValidation', errorMessage(error))}`,
     )
     process.exit(2)
   }
@@ -168,8 +161,7 @@ export async function pluginListHandler(options: {
   const {
     enabled: loadedEnabled,
     disabled: loadedDisabled,
-    errors: loadErrors,
-  } = await loadAllPlugins()
+    errors: loadErrors} = await loadAllPlugins()
   const allLoadedPlugins = [...loadedEnabled, ...loadedDisabled]
   const inlinePlugins = allLoadedPlugins.filter(p =>
     p.source.endsWith('@inline'),
@@ -237,8 +229,7 @@ export async function pluginListHandler(options: {
           lastUpdated: installation.lastUpdated,
           projectPath: installation.projectPath,
           mcpServers,
-          errors: pluginErrors.length > 0 ? pluginErrors : undefined,
-        })
+          errors: pluginErrors.length > 0 ? pluginErrors : undefined})
       }
     }
 
@@ -265,8 +256,7 @@ export async function pluginListHandler(options: {
         installPath: p.path,
         mcpServers:
           servers && Object.keys(servers).length > 0 ? servers : undefined,
-        errors: pErrors.length > 0 ? pErrors : undefined,
-      })
+        errors: pErrors.length > 0 ? pErrors : undefined})
     }
     // Path-level inline failures (--plugin-dir /nonexistent): no LoadedPlugin
     // exists so the loop above can't surface them. Mirror the human-path
@@ -280,8 +270,7 @@ export async function pluginListHandler(options: {
         scope: 'session',
         enabled: false,
         installPath: 'path' in e ? e.path : '',
-        errors: [getPluginErrorMessage(e)],
-      })
+        errors: [getPluginErrorMessage(e)]})
     }
 
     // If --available is set, also load available plugins from marketplaces
@@ -306,8 +295,7 @@ export async function pluginListHandler(options: {
 
         for (const {
           name: marketplaceName,
-          data: marketplace,
-        } of marketplaces) {
+          data: marketplace} of marketplaces) {
           if (marketplace) {
             for (const entry of marketplace.plugins) {
               const pluginId = createPluginId(entry.name, marketplaceName)
@@ -320,8 +308,7 @@ export async function pluginListHandler(options: {
                   marketplaceName,
                   version: entry.version,
                   source: entry.source,
-                  installCount: installCounts?.get(pluginId),
-                })
+                  installCount: installCounts?.get(pluginId)})
               }
             }
           }
@@ -341,14 +328,12 @@ export async function pluginListHandler(options: {
     // points at a nonexistent path). Don't early-exit over them — fall
     // through to the session section so the failure is visible.
     if (inlineLoadErrors.length === 0) {
-      cliOk(
-        'No plugins installed. Use `claude plugin install` to install a plugin.',
-      )
+      cliOk(t('pluginsCli.noPluginsInstalled'))
     }
   }
 
   if (pluginIds.length > 0) {
-    console.log('Installed plugins:\n')
+    console.log(`${t('pluginsCli.installedPlugins')}\n`)
   }
 
   for (const pluginId of pluginIds.sort()) {
@@ -365,26 +350,26 @@ export async function pluginListHandler(options: {
       const isEnabled = enabledPlugins.has(pluginId)
       const status =
         pluginErrors.length > 0
-          ? `${figures.cross} failed to load`
+          ? `${figures.cross} ${t('pluginsCli.failedToLoad')}`
           : isEnabled
-            ? `${figures.tick} enabled`
-            : `${figures.cross} disabled`
+            ? `${figures.tick} ${t('pluginsCli.enabled')}`
+            : `${figures.cross} ${t('pluginsCli.disabled')}`
       const version = installation.version || 'unknown'
       const scope = installation.scope
 
       console.log(`  ${figures.pointer} ${pluginId}`)
-      console.log(`    Version: ${version}`)
-      console.log(`    Scope: ${scope}`)
-      console.log(`    Status: ${status}`)
+      console.log(`    ${t('pluginsCli.version', version)}`)
+      console.log(`    ${t('pluginsCli.scope', scope)}`)
+      console.log(`    ${t('pluginsCli.status', status)}`)
       for (const error of pluginErrors) {
-        console.log(`    Error: ${getPluginErrorMessage(error)}`)
+        console.log(`    ${t('pluginsCli.error', getPluginErrorMessage(error))}`)
       }
       console.log('')
     }
   }
 
   if (inlinePlugins.length > 0 || inlineLoadErrors.length > 0) {
-    console.log('Session-only plugins (--plugin-dir):\n')
+    console.log(`${t('pluginsCli.sessionOnlyPlugins')}\n`)
     for (const p of inlinePlugins) {
       // Same dirName≠manifestName fallback as the JSON path above — error
       // sources use the dir basename but p.source uses the manifest name.
@@ -393,14 +378,14 @@ export async function pluginListHandler(options: {
       )
       const status =
         pErrors.length > 0
-          ? `${figures.cross} loaded with errors`
-          : `${figures.tick} loaded`
+          ? `${figures.cross} ${t('pluginsCli.loadedWithErrors')}`
+          : `${figures.tick} ${t('pluginsCli.loaded')}`
       console.log(`  ${figures.pointer} ${p.source}`)
-      console.log(`    Version: ${p.manifest.version ?? 'unknown'}`)
-      console.log(`    Path: ${p.path}`)
-      console.log(`    Status: ${status}`)
+      console.log(`    ${t('pluginsCli.version', p.manifest.version ?? 'unknown')}`)
+      console.log(`    ${t('pluginsCli.path', p.path)}`)
+      console.log(`    ${t('pluginsCli.status', status)}`)
       for (const e of pErrors) {
-        console.log(`    Error: ${getPluginErrorMessage(e)}`)
+        console.log(`    ${t('pluginsCli.error', getPluginErrorMessage(e))}`)
       }
       console.log('')
     }
@@ -429,7 +414,7 @@ export async function marketplaceAddHandler(
 
     if (!parsed) {
       cliError(
-        `${figures.cross} Invalid marketplace source format. Try: owner/repo, https://..., or ./path`,
+        `${figures.cross} ${t('pluginsCli.invalidMarketplaceSource')}`,
       )
     }
 
@@ -441,7 +426,7 @@ export async function marketplaceAddHandler(
     const scope = options.scope ?? 'user'
     if (scope !== 'user' && scope !== 'project' && scope !== 'local') {
       cliError(
-        `${figures.cross} Invalid scope '${scope}'. Use: user, project, or local`,
+        `${figures.cross} ${t('pluginsCli.invalidScope', scope)}`,
       )
     }
     const settingSource = scopeToSettingSource(scope)
@@ -455,16 +440,15 @@ export async function marketplaceAddHandler(
       ) {
         marketplaceSource = {
           ...marketplaceSource,
-          sparsePaths: options.sparse,
-        }
+          sparsePaths: options.sparse}
       } else {
         cliError(
-          `${figures.cross} --sparse is only supported for github and git marketplace sources (got: ${marketplaceSource.source})`,
+          `${figures.cross} ${t('pluginsCli.sparseNotSupported', marketplaceSource.source)}`,
         )
       }
     }
 
-    console.log('Adding marketplace...')
+    console.log(t('pluginsCli.addingMarketplace'))
 
     const { name, alreadyMaterialized, resolvedSource } =
       await addMarketplaceSource(marketplaceSource, message => {
@@ -483,13 +467,12 @@ export async function marketplaceAddHandler(
     }
     logEvent('tengu_marketplace_added', {
       source_type:
-        sourceType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        sourceType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
     cliOk(
       alreadyMaterialized
-        ? `${figures.tick} Marketplace '${name}' already on disk — declared in ${scope} settings`
-        : `${figures.tick} Successfully added marketplace: ${name} (declared in ${scope} settings)`,
+        ? `${figures.tick} ${t('pluginsCli.marketplaceAlreadyOnDisk', name)}`
+        : `${figures.tick} ${t('pluginsCli.marketplaceAdded', name, scope)}`,
     )
   } catch (error) {
     handleMarketplaceError(error, 'add marketplace')
@@ -518,17 +501,16 @@ export async function marketplaceListHandler(options: {
           ...(source?.source === 'url' && { url: source.url }),
           ...(source?.source === 'directory' && { path: source.path }),
           ...(source?.source === 'file' && { path: source.path }),
-          installLocation: marketplace?.installLocation,
-        }
+          installLocation: marketplace?.installLocation}
       })
       cliOk(jsonStringify(marketplaces, null, 2))
     }
 
     if (names.length === 0) {
-      cliOk('No marketplaces configured')
+      cliOk(t('pluginsCli.noMarketplacesConfigured'))
     }
 
-    console.log('Configured marketplaces:\n')
+    console.log(`${t('pluginsCli.configuredMarketplaces')}\n`)
     names.forEach(name => {
       const marketplace = config[name]
       console.log(`  ${figures.pointer} ${name}`)
@@ -536,15 +518,15 @@ export async function marketplaceListHandler(options: {
       if (marketplace?.source) {
         const src = marketplace.source
         if (src.source === 'github') {
-          console.log(`    Source: GitHub (${src.repo})`)
+          console.log(`    ${t('pluginsCli.sourceGitHub', src.repo)}`)
         } else if (src.source === 'git') {
-          console.log(`    Source: Git (${src.url})`)
+          console.log(`    ${t('pluginsCli.sourceGit', src.url)}`)
         } else if (src.source === 'url') {
-          console.log(`    Source: URL (${src.url})`)
+          console.log(`    ${t('pluginsCli.sourceUrl', src.url)}`)
         } else if (src.source === 'directory') {
-          console.log(`    Source: Directory (${src.path})`)
+          console.log(`    ${t('pluginsCli.sourceDirectory', src.path)}`)
         } else if (src.source === 'file') {
-          console.log(`    Source: File (${src.path})`)
+          console.log(`    ${t('pluginsCli.sourceFile', src.path)}`)
         }
       }
       console.log('')
@@ -568,10 +550,9 @@ export async function marketplaceRemoveHandler(
 
     logEvent('tengu_marketplace_removed', {
       marketplace_name:
-        name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
+        name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
-    cliOk(`${figures.tick} Successfully removed marketplace: ${name}`)
+    cliOk(`${figures.tick} ${t('pluginsCli.marketplaceRemoved', name)}`)
   } catch (error) {
     handleMarketplaceError(error, 'remove marketplace')
   }
@@ -585,7 +566,7 @@ export async function marketplaceUpdateHandler(
   if (options.cowork) setUseCoworkPlugins(true)
   try {
     if (name) {
-      console.log(`Updating marketplace: ${name}...`)
+      console.log(`${t('pluginsCli.updatingMarketplace', name)}`)
 
       await refreshMarketplace(name, message => {
         console.log(message)
@@ -595,30 +576,28 @@ export async function marketplaceUpdateHandler(
 
       logEvent('tengu_marketplace_updated', {
         marketplace_name:
-          name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
-      cliOk(`${figures.tick} Successfully updated marketplace: ${name}`)
+      cliOk(`${figures.tick} ${t('pluginsCli.marketplaceUpdated', name)}`)
     } else {
       const config = await loadKnownMarketplacesConfig()
       const marketplaceNames = Object.keys(config)
 
       if (marketplaceNames.length === 0) {
-        cliOk('No marketplaces configured')
+        cliOk(t('pluginsCli.noMarketplacesConfigured'))
       }
 
-      console.log(`Updating ${marketplaceNames.length} marketplace(s)...`)
+      console.log(`${t('pluginsCli.updatingNMarketplaces', marketplaceNames.length)}`)
 
       await refreshAllMarketplaces()
       clearAllCaches()
 
       logEvent('tengu_marketplace_updated_all', {
         count:
-          marketplaceNames.length as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          marketplaceNames.length as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
       cliOk(
-        `${figures.tick} Successfully updated ${marketplaceNames.length} marketplace(s)`,
+        `${figures.tick} ${t('pluginsCli.nMarketplacesUpdated', marketplaceNames.length)}`,
       )
     }
   } catch (error) {
@@ -634,7 +613,7 @@ export async function pluginInstallHandler(
   if (options.cowork) setUseCoworkPlugins(true)
   const scope = options.scope || 'user'
   if (options.cowork && scope !== 'user') {
-    cliError('--cowork can only be used with user scope')
+    cliError(t('pluginsCli.coworkOnlyUserScope'))
   }
   if (
     !VALID_INSTALLABLE_SCOPES.includes(
@@ -642,7 +621,7 @@ export async function pluginInstallHandler(
     )
   ) {
     cliError(
-      `Invalid scope: ${scope}. Must be one of: ${VALID_INSTALLABLE_SCOPES.join(', ')}.`,
+      t('pluginsCli.invalidScopeMustBe', scope, VALID_INSTALLABLE_SCOPES.join(', ')),
     )
   }
   // _PROTO_* routes to PII-tagged plugin_name/marketplace_name BQ columns.
@@ -654,10 +633,8 @@ export async function pluginInstallHandler(
     _PROTO_plugin_name: name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
     ...(marketplace && {
       _PROTO_marketplace_name:
-        marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-    }),
-    scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+        marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
+    scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
   await installPlugin(plugin, scope as 'user' | 'project' | 'local')
 }
@@ -670,7 +647,7 @@ export async function pluginUninstallHandler(
   if (options.cowork) setUseCoworkPlugins(true)
   const scope = options.scope || 'user'
   if (options.cowork && scope !== 'user') {
-    cliError('--cowork can only be used with user scope')
+    cliError(t('pluginsCli.coworkOnlyUserScope'))
   }
   if (
     !VALID_INSTALLABLE_SCOPES.includes(
@@ -678,7 +655,7 @@ export async function pluginUninstallHandler(
     )
   ) {
     cliError(
-      `Invalid scope: ${scope}. Must be one of: ${VALID_INSTALLABLE_SCOPES.join(', ')}.`,
+      t('pluginsCli.invalidScopeMustBe', scope, VALID_INSTALLABLE_SCOPES.join(', ')),
     )
   }
   const { name, marketplace } = parsePluginIdentifier(plugin)
@@ -686,10 +663,8 @@ export async function pluginUninstallHandler(
     _PROTO_plugin_name: name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
     ...(marketplace && {
       _PROTO_marketplace_name:
-        marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-    }),
-    scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+        marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
+    scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
   await uninstallPlugin(
     plugin,
@@ -712,13 +687,13 @@ export async function pluginEnableHandler(
       )
     ) {
       cliError(
-        `Invalid scope "${options.scope}". Valid scopes: ${VALID_INSTALLABLE_SCOPES.join(', ')}`,
+        t('pluginsCli.invalidScopeQuoted', options.scope, VALID_INSTALLABLE_SCOPES.join(', ')),
       )
     }
     scope = options.scope as (typeof VALID_INSTALLABLE_SCOPES)[number]
   }
   if (options.cowork && scope !== undefined && scope !== 'user') {
-    cliError('--cowork can only be used with user scope')
+    cliError(t('pluginsCli.coworkOnlyUserScope'))
   }
 
   // --cowork always operates at user scope
@@ -731,11 +706,9 @@ export async function pluginEnableHandler(
     _PROTO_plugin_name: name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
     ...(marketplace && {
       _PROTO_marketplace_name:
-        marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-    }),
+        marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
     scope: (scope ??
-      'auto') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      'auto') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
   await enablePlugin(plugin, scope)
 }
@@ -746,18 +719,18 @@ export async function pluginDisableHandler(
   options: { scope?: string; cowork?: boolean; all?: boolean },
 ): Promise<void> {
   if (options.all && plugin) {
-    cliError('Cannot use --all with a specific plugin')
+    cliError(t('pluginsCli.cannotUseAllWithPlugin'))
   }
 
   if (!options.all && !plugin) {
-    cliError('Please specify a plugin name or use --all to disable all plugins')
+    cliError(t('pluginsCli.specifyPluginOrAll'))
   }
 
   if (options.cowork) setUseCoworkPlugins(true)
 
   if (options.all) {
     if (options.scope) {
-      cliError('Cannot use --scope with --all')
+      cliError(t('pluginsCli.cannotUseScopeWithAll'))
     }
 
     // No _PROTO_plugin_name here — --all disables all plugins.
@@ -776,13 +749,13 @@ export async function pluginDisableHandler(
       )
     ) {
       cliError(
-        `Invalid scope "${options.scope}". Valid scopes: ${VALID_INSTALLABLE_SCOPES.join(', ')}`,
+        t('pluginsCli.invalidScopeQuoted', options.scope, VALID_INSTALLABLE_SCOPES.join(', ')),
       )
     }
     scope = options.scope as (typeof VALID_INSTALLABLE_SCOPES)[number]
   }
   if (options.cowork && scope !== undefined && scope !== 'user') {
-    cliError('--cowork can only be used with user scope')
+    cliError(t('pluginsCli.coworkOnlyUserScope'))
   }
 
   // --cowork always operates at user scope
@@ -795,11 +768,9 @@ export async function pluginDisableHandler(
     _PROTO_plugin_name: name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
     ...(marketplace && {
       _PROTO_marketplace_name:
-        marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-    }),
+        marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
     scope: (scope ??
-      'auto') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      'auto') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
   await disablePlugin(plugin!, scope)
 }
@@ -815,9 +786,7 @@ export async function pluginUpdateHandler(
     _PROTO_plugin_name: name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
     ...(marketplace && {
       _PROTO_marketplace_name:
-        marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-    }),
-  })
+        marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED})})
 
   let scope: (typeof VALID_UPDATE_SCOPES)[number] = 'user'
   if (options.scope) {
@@ -827,13 +796,13 @@ export async function pluginUpdateHandler(
       )
     ) {
       cliError(
-        `Invalid scope "${options.scope}". Valid scopes: ${VALID_UPDATE_SCOPES.join(', ')}`,
+        t('pluginsCli.invalidScopeQuoted', options.scope, VALID_UPDATE_SCOPES.join(', ')),
       )
     }
     scope = options.scope as (typeof VALID_UPDATE_SCOPES)[number]
   }
   if (options.cowork && scope !== 'user') {
-    cliError('--cowork can only be used with user scope')
+    cliError(t('pluginsCli.coworkOnlyUserScope'))
   }
 
   await updatePluginCli(plugin, scope)

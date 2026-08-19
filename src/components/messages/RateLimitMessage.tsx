@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { extraUsage } from 'src/commands/extra-usage/index.js';
 import { Box, Text } from '@anthropic/ink';
 import { useClaudeAiLimits } from 'src/services/claudeAiLimitsHook.js';
+import { t } from '../../utils/i18n/index.js';
 import { shouldProcessMockLimits } from 'src/services/rateLimitMocking.js'; // Used for /mock-limits command
 import { getRateLimitTier, getSubscriptionType, isClaudeAISubscriber } from 'src/utils/auth.js';
 import { hasClaudeAiBillingAccess } from 'src/utils/billing.js';
@@ -22,36 +23,35 @@ export function getUpsellMessage({
   isExtraUsageCommandEnabled,
   shouldAutoOpenRateLimitOptionsMenu,
   isTeamOrEnterprise,
-  hasBillingAccess,
-}: UpsellParams): string | null {
+  hasBillingAccess}: UpsellParams): string | null {
   if (!shouldShowUpsell) return null;
 
   if (isMax20x) {
     if (isExtraUsageCommandEnabled) {
-      return '/extra-usage to finish what you\u2019re working on.';
+      return t('rateLimitMessage.extraUsageToFinishWork');
     }
-    return '/login to switch to an API usage-billed account.';
+    return t('rateLimitMessage.loginToSwitchToApi');
   }
 
   if (shouldAutoOpenRateLimitOptionsMenu) {
-    return 'Opening your options\u2026';
+    return t('rateLimitMessage.openingYourOptions');
   }
 
   if (!isTeamOrEnterprise && !isExtraUsageCommandEnabled) {
-    return '/upgrade to increase your usage limit.';
+    return t('rateLimitMessage.upgradeToIncreaseLimit');
   }
 
   if (isTeamOrEnterprise) {
     if (!isExtraUsageCommandEnabled) return null;
 
     if (hasBillingAccess) {
-      return '/extra-usage to finish what you\u2019re working on.';
+      return t('rateLimitMessage.extraUsageToFinishWork');
     }
 
-    return '/extra-usage to request more usage from your admin.';
+    return t('rateLimitMessage.extraUsageToRequestFromAdmin');
   }
 
-  return '/upgrade or /extra-usage to finish what you\u2019re working on.';
+  return t('rateLimitMessage.upgradeOrExtraUsageToFinish');
 }
 
 type RateLimitMessageProps = {
@@ -95,8 +95,7 @@ export function RateLimitMessage({ text, onOpenRateLimitOptions }: RateLimitMess
       isExtraUsageCommandEnabled: extraUsage.isEnabled(),
       shouldAutoOpenRateLimitOptionsMenu: !!shouldAutoOpenRateLimitOptionsMenu,
       isTeamOrEnterprise,
-      hasBillingAccess: hasClaudeAiBillingAccess(),
-    });
+      hasBillingAccess: hasClaudeAiBillingAccess()});
     if (!message) return null;
     return <Text dimColor>{message}</Text>;
   }, [shouldShowUpsell, isMax20x, isTeamOrEnterprise, shouldAutoOpenRateLimitOptionsMenu]);

@@ -22,8 +22,7 @@ import {
   MAX_SANITIZED_LENGTH,
   readSessionLite,
   sanitizePath,
-  validateUuid,
-} from './sessionStoragePortable.js'
+  validateUuid} from './sessionStoragePortable.js'
 
 /**
  * Session metadata returned by listSessions.
@@ -144,8 +143,7 @@ export function parseSessionInfoFromLite(
     gitBranch,
     cwd: sessionCwd,
     tag,
-    createdAt,
-  }
+    createdAt}
 }
 
 // ---------------------------------------------------------------------------
@@ -341,8 +339,7 @@ async function gatherProjectCandidates(
     const sanitized = sanitizePath(wt)
     return {
       path: wt,
-      prefix: caseInsensitive ? sanitized.toLowerCase() : sanitized,
-    }
+      prefix: caseInsensitive ? sanitized.toLowerCase() : sanitized}
   })
   indexed.sort((a, b) => b.prefix.length - a.prefix.length)
 

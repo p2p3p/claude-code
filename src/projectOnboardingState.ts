@@ -2,8 +2,8 @@ import memoize from 'lodash-es/memoize.js'
 import { join } from 'path'
 import {
   getCurrentProjectConfig,
-  saveCurrentProjectConfig,
-} from './utils/config.js'
+  saveCurrentProjectConfig} from './utils/config.js'
+import { t } from './utils/i18n/index.js'
 import { getCwd } from './utils/cwd.js'
 import { isDirEmpty } from './utils/file.js'
 import { getFsImplementation } from './utils/fsOperations.js'
@@ -25,18 +25,16 @@ export function getSteps(): Step[] {
   return [
     {
       key: 'workspace',
-      text: 'Ask Claude to create a new app or clone a repository',
+      text: t('project.workspaceStep'),
       isComplete: false,
       isCompletable: true,
-      isEnabled: isWorkspaceDirEmpty,
-    },
+      isEnabled: isWorkspaceDirEmpty},
     {
       key: 'claudemd',
-      text: 'Run /init to create a CLAUDE.md file with instructions for Claude',
+      text: t('feed.initClaudeMd'),
       isComplete: hasClaudeMd,
       isCompletable: true,
-      isEnabled: !isWorkspaceDirEmpty,
-    },
+      isEnabled: !isWorkspaceDirEmpty},
   ]
 }
 
@@ -55,8 +53,7 @@ export function maybeMarkProjectOnboardingComplete(): void {
   if (isProjectOnboardingComplete()) {
     saveCurrentProjectConfig(current => ({
       ...current,
-      hasCompletedProjectOnboarding: true,
-    }))
+      hasCompletedProjectOnboarding: true}))
   }
 }
 
@@ -78,6 +75,5 @@ export const shouldShowProjectOnboarding = memoize((): boolean => {
 export function incrementProjectOnboardingSeenCount(): void {
   saveCurrentProjectConfig(current => ({
     ...current,
-    projectOnboardingSeenCount: current.projectOnboardingSeenCount + 1,
-  }))
+    projectOnboardingSeenCount: current.projectOnboardingSeenCount + 1}))
 }

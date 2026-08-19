@@ -29,10 +29,8 @@ export async function fetchAndStoreClaudeCodeFirstTokenDate(): Promise<void> {
     const response = await axios.get(url, {
       headers: {
         ...authHeaders.headers,
-        'User-Agent': getClaudeCodeUserAgent(),
-      },
-      timeout: 10000,
-    })
+        'User-Agent': getClaudeCodeUserAgent()},
+      timeout: 10000})
 
     const firstTokenDate = response.data?.first_token_date ?? null
 
@@ -52,8 +50,7 @@ export async function fetchAndStoreClaudeCodeFirstTokenDate(): Promise<void> {
 
     saveGlobalConfig(current => ({
       ...current,
-      claudeCodeFirstTokenDate: firstTokenDate,
-    }))
+      claudeCodeFirstTokenDate: firstTokenDate}))
   } catch (error) {
     logError(error)
   }

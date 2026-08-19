@@ -127,8 +127,7 @@ export async function resolveDependencyClosure(
         ok: false,
         reason: 'cross-marketplace',
         dependency: id,
-        requiredBy,
-      }
+        requiredBy}
     }
     if (stack.includes(id)) {
       return { ok: false, reason: 'cycle', chain: [...stack, id] }
@@ -218,8 +217,7 @@ export function verifyAndDemote(plugins: readonly LoadedPlugin[]): {
             dependency: dep,
             reason: (isBare ? knownByName.has(dep) : known.has(dep))
               ? 'not-enabled'
-              : 'not-found',
-          })
+              : 'not-found'})
           changed = true
           break
         }

@@ -1,4 +1,5 @@
 import type { StructuredPatchHunk } from 'diff';
+import { t } from '../../utils/i18n/index.js'
 import { resolve } from 'path';
 import React, { useMemo } from 'react';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
@@ -28,8 +29,7 @@ export function DiffDetailView({
   isLargeFile,
   isBinary,
   isTruncated,
-  isUntracked,
-}: Props): React.ReactNode {
+  isUntracked}: Props): React.ReactNode {
   const { columns } = useTerminalSize();
 
   // Read file content for syntax detection and multiline construct handling.
@@ -42,8 +42,7 @@ export function DiffDetailView({
     const content = readFileSafe(fullPath);
     return {
       firstLine: content?.split('\n')[0] ?? null,
-      fileContent: content ?? undefined,
-    };
+      fileContent: content ?? undefined};
   }, [filePath]);
 
   // Handle untracked files
@@ -52,15 +51,15 @@ export function DiffDetailView({
       <Box flexDirection="column" width="100%">
         <Box>
           <Text bold>{filePath}</Text>
-          <Text dimColor> (untracked)</Text>
+          <Text dimColor>{t('diffDetail.untracked')}</Text>
         </Box>
         <Divider padding={4} />
         <Box flexDirection="column">
           <Text dimColor italic>
-            New file not yet staged.
+            {t('diffdetailview.newFileNotStaged')}
           </Text>
           <Text dimColor italic>
-            Run `git add {filePath}` to see line counts.
+            {t('diffdetailview.runGitAdd', filePath)}
           </Text>
         </Box>
       </Box>
@@ -77,7 +76,7 @@ export function DiffDetailView({
         <Divider padding={4} />
         <Box flexDirection="column">
           <Text dimColor italic>
-            Binary file - cannot display diff
+            {t('diffdetailview.binaryFile')}
           </Text>
         </Box>
       </Box>
@@ -94,7 +93,7 @@ export function DiffDetailView({
         <Divider padding={4} />
         <Box flexDirection="column">
           <Text dimColor italic>
-            Large file - diff exceeds 1 MB limit
+            {t('diffdetailview.largeFile')}
           </Text>
         </Box>
       </Box>
@@ -108,13 +107,13 @@ export function DiffDetailView({
     <Box flexDirection="column" width="100%">
       <Box>
         <Text bold>{filePath}</Text>
-        {isTruncated && <Text dimColor> (truncated)</Text>}
+        {isTruncated && <Text dimColor>{t('diffDetail.truncated')}</Text>}
       </Box>
 
       <Divider padding={4} />
       <Box flexDirection="column">
         {hunks.length === 0 ? (
-          <Text dimColor>No diff content</Text>
+          <Text dimColor>{t('diffdetailview.noDiffContent')}</Text>
         ) : (
           hunks.map((hunk, index) => (
             <StructuredDiff
@@ -132,7 +131,7 @@ export function DiffDetailView({
 
       {isTruncated && (
         <Text dimColor italic>
-          … diff truncated (exceeded 400 line limit)
+          {t('diffdetailview.diffTruncated')}
         </Text>
       )}
     </Box>

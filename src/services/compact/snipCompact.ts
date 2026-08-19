@@ -1,4 +1,5 @@
 import type { Message } from 'src/types/message.js'
+import { t } from '../../utils/i18n/index.js'
 
 /**
  * Estimated characters per token (conservative for mixed code/text).
@@ -14,8 +15,7 @@ const SNIP_NUDGE_THRESHOLD = 30
  * Text shown to the model as a nudge when the conversation is long enough
  * to benefit from snipping.
  */
-export const SNIP_NUDGE_TEXT: string =
-  'The conversation history is getting long. Consider using the /force-snip command or the snip tool to compress older messages, freeing context window space for continued work.'
+export const SNIP_NUDGE_TEXT: string = t('services.snipNudge')
 
 /**
  * Check whether a message is an internal snip marker (not user-facing).
@@ -121,8 +121,7 @@ export function snipCompactIfNeeded(
       messages: kept,
       executed: true,
       tokensFreed: 0,
-      boundaryMessage,
-    }
+      boundaryMessage}
   }
 
   // Filter out messages whose UUIDs are listed in removedUuids
@@ -142,8 +141,7 @@ export function snipCompactIfNeeded(
     messages: kept,
     executed: true,
     tokensFreed,
-    boundaryMessage,
-  }
+    boundaryMessage}
 }
 
 /**

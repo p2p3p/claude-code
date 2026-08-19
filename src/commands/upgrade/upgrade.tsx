@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js';
 import type { LocalJSXCommandContext } from '../../commands.js';
 import { getOauthProfileFromOauthToken } from '../../services/oauth/getOauthProfile.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
@@ -30,7 +31,7 @@ export async function call(
         setTimeout(
           onDone,
           0,
-          'You are already on the highest Max subscription plan. For additional usage, run /login to switch to an API usage-billed account.',
+          t('upgradeCmd.alreadyMax'),
         );
         return null;
       }
@@ -41,16 +42,16 @@ export async function call(
 
     return (
       <Login
-        startingMessage={'Starting new login following /upgrade. Exit with Ctrl-C to use existing account.'}
+        startingMessage={t('upgradeCmd.startingMessage')}
         onDone={success => {
           context.onChangeAPIKey();
-          onDone(success ? 'Login successful' : 'Login interrupted');
+          onDone(success ? t('ui.loginSuccessful') : t('ui.loginInterrupted'));
         }}
       />
     );
   } catch (error) {
     logError(error as Error);
-    setTimeout(onDone, 0, 'Failed to open browser. Please visit https://claude.ai/upgrade/max to upgrade.');
+    setTimeout(onDone, 0, t('upgradeCmd.failedToOpenBrowser'));
   }
   return null;
 }

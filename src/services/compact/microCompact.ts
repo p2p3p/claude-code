@@ -16,18 +16,15 @@ import { SHELL_TOOL_NAMES } from '../../utils/shell/shellToolUtils.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../analytics/index.js'
+  logEvent} from '../analytics/index.js'
 import { notifyCacheDeletion } from '../api/promptCacheBreakDetection.js'
 import { roughTokenCountEstimation } from '../tokenEstimation.js'
 import {
   clearCompactWarningSuppression,
-  suppressCompactWarning,
-} from './compactWarningState.js'
+  suppressCompactWarning} from './compactWarningState.js'
 import {
   getTimeBasedMCConfig,
-  type TimeBasedMCConfig,
-} from './timeBasedMCConfig.js'
+  type TimeBasedMCConfig} from './timeBasedMCConfig.js'
 
 // Inline from utils/toolResultStorage.ts — importing that file pulls in
 // sessionStorage → utils/messages → services/api/errors, completing a
@@ -356,8 +353,7 @@ async function cachedMicrocompactPath(
       triggerType:
         'auto' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       threshold: config.triggerThreshold,
-      keepRecent: config.keepRecent,
-    })
+      keepRecent: config.keepRecent})
 
     // Suppress warning after successful compaction
     suppressCompactWarning()
@@ -392,10 +388,7 @@ async function cachedMicrocompactPath(
         pendingCacheEdits: {
           trigger: 'auto',
           deletedToolIds: toolsToDelete,
-          baselineCacheDeletedTokens: baseline,
-        },
-      },
-    }
+          baselineCacheDeletedTokens: baseline}}}
   }
 
   // No compaction needed, return messages unchanged
@@ -493,8 +486,7 @@ function maybeTimeBasedMicrocompact(
     if (!touched) return message
     return {
       ...message,
-      message: { ...message.message, content: newContent },
-    }
+      message: { ...message.message, content: newContent }}
   })
 
   if (tokensSaved === 0) {
@@ -507,8 +499,7 @@ function maybeTimeBasedMicrocompact(
     toolsCleared: clearSet.size,
     toolsKept: keepSet.size,
     keepRecent: config.keepRecent,
-    tokensSaved,
-  })
+    tokensSaved})
 
   logForDebugging(
     `[TIME-BASED MC] gap ${Math.round(gapMinutes)}min > ${config.gapThresholdMinutes}min, cleared ${clearSet.size} tool results (~${tokensSaved} tokens), kept last ${keepSet.size}`,

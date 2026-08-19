@@ -5,16 +5,13 @@ import type { SpinnerMode } from '../components/Spinner/types.js'
 import {
   type RemotePermissionResponse,
   type RemoteSessionConfig,
-  RemoteSessionManager,
-} from '../remote/RemoteSessionManager.js'
+  RemoteSessionManager} from '../remote/RemoteSessionManager.js'
 import {
   createSyntheticAssistantMessage,
-  createToolStub,
-} from '../remote/remotePermissionBridge.js'
+  createToolStub} from '../remote/remotePermissionBridge.js'
 import {
   convertSDKMessage,
-  isSessionEndMessage,
-} from '../remote/sdkMessageAdapter.js'
+  isSessionEndMessage} from '../remote/sdkMessageAdapter.js'
 import { useSetAppState } from '../state/AppState.js'
 import type { AppState } from '../state/AppStateStore.js'
 import type { Tool } from '../Tool.js'
@@ -22,16 +19,14 @@ import { findToolByName } from '../Tool.js'
 import type { Message as MessageType } from '../types/message.js'
 import type {
   PermissionAskDecision,
-  PermissionUpdate,
-} from '../types/permissions.js'
+  PermissionUpdate} from '../types/permissions.js'
 import { logForDebugging } from '../utils/debug.js'
 import { truncateToWidth } from '../utils/format.js'
 import {
   createSystemMessage,
   extractTextContent,
   handleMessageFromStream,
-  type StreamingToolUse,
-} from '../utils/messages.js'
+  type StreamingToolUse} from '../utils/messages.js'
 import { generateSessionTitle } from '../utils/sessionTitle.js'
 import type { RemoteMessageContent } from '../utils/teleport/api.js'
 import { updateSessionTitle } from '../utils/teleport/api.js'
@@ -85,8 +80,7 @@ export function useRemoteSession({
   tools,
   setStreamingToolUses,
   setStreamMode,
-  setInProgressToolUseIDs,
-}: UseRemoteSessionProps): UseRemoteSessionResult {
+  setInProgressToolUseIDs}: UseRemoteSessionProps): UseRemoteSessionResult {
   const isRemoteMode = !!config
 
   const setAppState = useSetAppState()
@@ -358,8 +352,7 @@ export function useRemoteSession({
           message:
             request.description ?? `${request.tool_name} requires permission`,
           suggestions: request.permission_suggestions as PermissionUpdate[],
-          blockedPath: request.blocked_path,
-        }
+          blockedPath: request.blocked_path}
 
         const toolUseConfirm: ToolUseConfirm = {
           assistantMessage: syntheticMessage,
@@ -377,8 +370,7 @@ export function useRemoteSession({
           onAbort() {
             const response: RemotePermissionResponse = {
               behavior: 'deny',
-              message: 'User aborted',
-            }
+              message: 'User aborted'}
             manager.respondToPermissionRequest(requestId, response)
             setToolUseConfirmQueue(queue =>
               queue.filter(item => item.toolUseID !== request.tool_use_id),
@@ -387,8 +379,7 @@ export function useRemoteSession({
           onAllow(updatedInput, _permissionUpdates, _feedback) {
             const response: RemotePermissionResponse = {
               behavior: 'allow',
-              updatedInput,
-            }
+              updatedInput}
             manager.respondToPermissionRequest(requestId, response)
             setToolUseConfirmQueue(queue =>
               queue.filter(item => item.toolUseID !== request.tool_use_id),
@@ -399,8 +390,7 @@ export function useRemoteSession({
           onReject(feedback?: string) {
             const response: RemotePermissionResponse = {
               behavior: 'deny',
-              message: feedback ?? 'User denied permission',
-            }
+              message: feedback ?? 'User denied permission'}
             manager.respondToPermissionRequest(requestId, response)
             setToolUseConfirmQueue(queue =>
               queue.filter(item => item.toolUseID !== request.tool_use_id),
@@ -408,8 +398,7 @@ export function useRemoteSession({
           },
           async recheckPermission() {
             // No-op for remote — permission state is on the container
-          },
-        }
+          }}
 
         setToolUseConfirmQueue(queue => [...queue, toolUseConfirm])
         // Pause loading indicator while waiting for permission
@@ -450,8 +439,7 @@ export function useRemoteSession({
       },
       onError: error => {
         logForDebugging(`[useRemoteSession] Error: ${error.message}`)
-      },
-    })
+      }})
 
     managerRef.current = manager
     manager.connect()

@@ -34,19 +34,18 @@ import type {
   InstalledApp,
   ResolvePrepareCaptureResult,
   RunningApp,
-  ScreenshotResult,
-} from '@ant/computer-use-mcp'
+  ScreenshotResult} from '@ant/computer-use-mcp'
 
 import { API_RESIZE_PARAMS, targetImageSize } from '@ant/computer-use-mcp'
 import { logForDebugging } from '../debug.js'
 import { errorMessage } from '../errors.js'
+import { t } from '../i18n/index.js'
 import { execFileNoThrow } from '../execFileNoThrow.js'
 import { sleep } from '../sleep.js'
 import {
   CLI_CU_CAPABILITIES,
   CLI_HOST_BUNDLE_ID,
-  getTerminalBundleId,
-} from './common.js'
+  getTerminalBundleId} from './common.js'
 import { drainRunLoop } from './drainRunLoop.js'
 import { notifyExpectedEscape } from './escHotkey.js'
 import { requireComputerUseInput } from './inputLoader.js'
@@ -73,11 +72,10 @@ async function readClipboardViaPbpaste(): Promise<string> {
       'powershell',
       ['-NoProfile', '-Command', 'Get-Clipboard'],
       {
-        useCwd: false,
-      },
+        useCwd: false},
     )
     if (code !== 0) {
-      throw new Error(`PowerShell Get-Clipboard exited with code ${code}`)
+      throw new Error(t('computerUseExecutor.pwsGetClipboardExit', String(code)))
     }
     return stdout
   }
@@ -86,19 +84,17 @@ async function readClipboardViaPbpaste(): Promise<string> {
       'xclip',
       ['-selection', 'clipboard', '-o'],
       {
-        useCwd: false,
-      },
+        useCwd: false},
     )
     if (code !== 0) {
-      throw new Error(`xclip exited with code ${code}`)
+      throw new Error(t('computerUseExecutor.xclipExit', String(code)))
     }
     return stdout
   }
   const { stdout, code } = await execFileNoThrow('pbpaste', [], {
-    useCwd: false,
-  })
+    useCwd: false})
   if (code !== 0) {
-    throw new Error(`pbpaste exited with code ${code}`)
+    throw new Error(t('computerUseExecutor.pbpasteExit', String(code)))
   }
   return stdout
 }
@@ -113,11 +109,10 @@ async function writeClipboardViaPbcopy(text: string): Promise<void> {
         `Set-Clipboard -Value '${text.replace(/'/g, "''")}'`,
       ],
       {
-        useCwd: false,
-      },
+        useCwd: false},
     )
     if (code !== 0) {
-      throw new Error(`PowerShell Set-Clipboard exited with code ${code}`)
+      throw new Error(t('computerUseExecutor.pwsSetClipboardExit', String(code)))
     }
     return
   }
@@ -127,20 +122,18 @@ async function writeClipboardViaPbcopy(text: string): Promise<void> {
       ['-selection', 'clipboard'],
       {
         input: text,
-        useCwd: false,
-      },
+        useCwd: false},
     )
     if (code !== 0) {
-      throw new Error(`xclip exited with code ${code}`)
+      throw new Error(t('computerUseExecutor.xclipExit', String(code)))
     }
     return
   }
   const { code } = await execFileNoThrow('pbcopy', [], {
     input: text,
-    useCwd: false,
-  })
+    useCwd: false})
   if (code !== 0) {
-    throw new Error(`pbcopy exited with code ${code}`)
+    throw new Error(t('computerUseExecutor.pbcopyExit', String(code)))
   }
 }
 
@@ -247,7 +240,7 @@ async function typeViaClipboard(input: Input, text: string): Promise<void> {
   try {
     await writeClipboardViaPbcopy(text)
     if ((await readClipboardViaPbpaste()) !== text) {
-      throw new Error('Clipboard write did not round-trip.')
+      throw new Error(t('computerUseExecutor.clipboardNoRoundTrip'))
     }
     await input.keys([process.platform === 'darwin' ? 'command' : 'ctrl', 'v'])
     await sleep(100)
@@ -353,8 +346,7 @@ export function createCliExecutor(opts: {
   return {
     capabilities: {
       ...CLI_CU_CAPABILITIES,
-      hostBundleId: CLI_HOST_BUNDLE_ID,
-    },
+      hostBundleId: CLI_HOST_BUNDLE_ID},
 
     // ── Pre-action sequence (hide + defocus) ────────────────────────────
 
@@ -461,8 +453,7 @@ export function createCliExecutor(opts: {
         originY: baseResult.originY ?? 0,
         hidden: baseResult.hidden ?? [],
         displayId:
-          baseResult.displayId ?? opts.preferredDisplayId ?? d.displayId,
-      } as ResolvePrepareCaptureResult
+          baseResult.displayId ?? opts.preferredDisplayId ?? d.displayId} as ResolvePrepareCaptureResult
     },
 
     /**
@@ -709,8 +700,7 @@ export function createCliExecutor(opts: {
 
     async openApp(bundleId: string): Promise<void> {
       await cu.apps.open(bundleId)
-    },
-  }
+    }}
 }
 
 /**

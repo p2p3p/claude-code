@@ -94,8 +94,7 @@ export function parseGitRemote(input: string): ParsedRepository | null {
     return {
       host: sshMatch[1],
       owner: sshMatch[2],
-      name: sshMatch[3],
-    }
+      name: sshMatch[3]}
   }
 
   // URL format: https://host/owner/repo.git, ssh://git@host/owner/repo, git://host/owner/repo
@@ -116,8 +115,7 @@ export function parseGitRemote(input: string): ParsedRepository | null {
     return {
       host,
       owner: urlMatch[3],
-      name: urlMatch[4],
-    }
+      name: urlMatch[4]}
   }
 
   return null

@@ -4,9 +4,9 @@ import type { KeybindingAction } from '../../keybindings/types.js';
 import { useKeybindings } from '../../keybindings/useKeybinding.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js';
+  logEvent} from '../../services/analytics/index.js';
 import { useSetAppState } from '../../state/AppState.js';
+import { t } from '../../utils/i18n/index.js';
 import { type OptionWithDescription, Select } from '../CustomSelect/select.js';
 
 export type FeedbackType = 'accept' | 'reject';
@@ -35,9 +35,8 @@ export type PermissionPromptProps<T extends string> = {
 };
 
 const DEFAULT_PLACEHOLDERS: Record<FeedbackType, string> = {
-  accept: 'tell Claude what to do next',
-  reject: 'tell Claude what to do differently',
-};
+  accept: t('permissions.feedbackPlaceholderAccept'),
+  reject: t('permissions.feedbackPlaceholderReject')};
 
 /**
  * Shared component for permission prompts with optional feedback input.
@@ -53,9 +52,8 @@ export function PermissionPrompt<T extends string>({
   options,
   onSelect,
   onCancel,
-  question = 'Do you want to proceed?',
-  toolAnalyticsContext,
-}: PermissionPromptProps<T>): React.ReactNode {
+  question = t('filePermission.proceed'),
+  toolAnalyticsContext}: PermissionPromptProps<T>): React.ReactNode {
   const setAppState = useSetAppState();
   const [acceptFeedback, setAcceptFeedback] = useState('');
   const [rejectFeedback, setRejectFeedback] = useState('');
@@ -83,8 +81,7 @@ export function PermissionPrompt<T extends string>({
       if (!feedbackConfig) {
         return {
           label,
-          value,
-        };
+          value};
       }
 
       const { type, placeholder } = feedbackConfig;
@@ -100,15 +97,13 @@ export function PermissionPrompt<T extends string>({
           value,
           placeholder: placeholder ?? defaultPlaceholder,
           onChange,
-          allowEmptySubmitToCancel: true,
-        };
+          allowEmptySubmitToCancel: true};
       }
 
       // Not in input mode - show simple option
       return {
         label,
-        value,
-      };
+        value};
     });
   }, [options, acceptInputMode, rejectInputMode]);
 
@@ -121,8 +116,7 @@ export function PermissionPrompt<T extends string>({
       const { type } = option.feedbackConfig;
       const analyticsProps = {
         toolName: toolAnalyticsContext?.toolName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        isMcp: toolAnalyticsContext?.isMcp ?? false,
-      };
+        isMcp: toolAnalyticsContext?.isMcp ?? false};
 
       if (type === 'accept') {
         if (acceptInputMode) {
@@ -170,8 +164,7 @@ export function PermissionPrompt<T extends string>({
           has_instructions: !!trimmedFeedback,
           instructions_length: trimmedFeedback?.length ?? 0,
           entered_feedback_mode:
-            option.feedbackConfig.type === 'accept' ? acceptFeedbackModeEntered : rejectFeedbackModeEntered,
-        };
+            option.feedbackConfig.type === 'accept' ? acceptFeedbackModeEntered : rejectFeedbackModeEntered};
 
         if (option.feedbackConfig.type === 'accept') {
           logEvent('tengu_accept_submitted', analyticsProps);
@@ -214,9 +207,7 @@ export function PermissionPrompt<T extends string>({
       ...prev,
       attribution: {
         ...prev.attribution,
-        escapeCount: prev.attribution.escapeCount + 1,
-      },
-    }));
+        escapeCount: prev.attribution.escapeCount + 1}}));
     onCancel?.();
   }, [onCancel, setAppState]);
 
@@ -242,7 +233,7 @@ export function PermissionPrompt<T extends string>({
         onInputModeToggle={handleInputModeToggle}
       />
       <Box marginTop={1}>
-        <Text dimColor>Esc to cancel{showTabHint && ' · Tab to amend'}</Text>
+        <Text dimColor>{t('permissions.escToCancel')}{showTabHint && ` · ${t('permissions.tabToAmend')}`}</Text>
       </Box>
     </Box>
   );

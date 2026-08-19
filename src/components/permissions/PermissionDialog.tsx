@@ -23,8 +23,7 @@ export function PermissionDialog({
   innerPaddingX = 1,
   workerBadge,
   titleRight,
-  children,
-}: Props): React.ReactNode {
+  children}: Props): React.ReactNode {
   return (
     <Box
       flexDirection="column"

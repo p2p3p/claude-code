@@ -7,8 +7,7 @@ import type {
   ContentBlock,
   ToolCallContent,
   ToolCallLocation,
-  ToolKind,
-} from '@agentclientprotocol/sdk'
+  ToolKind} from '@agentclientprotocol/sdk'
 
 export type { ContentBlock, ToolCallContent, ToolCallLocation, ToolKind }
 

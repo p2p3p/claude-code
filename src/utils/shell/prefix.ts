@@ -8,13 +8,13 @@
  */
 
 import chalk from 'chalk'
+import { t } from '../i18n/index.js'
 import type { QuerySource } from '../../constants/querySource.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
-import { queryHaiku } from '../../services/api/claude.js'
+  logEvent} from '../../services/analytics/index.js'
+import { queryHaiku } from '../../services/api/anthropic/index.js'
 import { startsWithApiErrorPrefix } from '../../services/api/errors.js'
 import { memoizeWithLRU } from '../memoize.js'
 import { jsonStringify } from '../slowOperations.js'
@@ -199,7 +199,7 @@ async function getCommandPrefixImpl(
     // Log a warning if the pre-flight check takes too long
     preflightCheckTimeoutId = setTimeout(
       (tn, nonInteractive) => {
-        const message = `[${tn}Tool] Pre-flight check is taking longer than expected. Run with ANTHROPIC_LOG=debug to check for failed or slow API requests.`
+        const message = t('shell.preflightCheckWarning', tn)
         if (nonInteractive) {
           process.stderr.write(jsonStringify({ level: 'warn', message }) + '\n')
         } else {
@@ -236,9 +236,7 @@ async function getCommandPrefixImpl(
         agents: [],
         isNonInteractiveSession,
         hasAppendSystemPrompt: false,
-        mcpTools: [],
-      },
-    })
+        mcpTools: []}})
 
     // Clear the timeout since the query completed
     clearTimeout(preflightCheckTimeoutId)
@@ -257,8 +255,7 @@ async function getCommandPrefixImpl(
         success: false,
         error:
           'API error' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        durationMs,
-      })
+        durationMs})
       result = null
     } else if (prefix === 'command_injection_detected') {
       // Haiku detected something suspicious - treat as no prefix available
@@ -266,11 +263,9 @@ async function getCommandPrefixImpl(
         success: false,
         error:
           'command_injection_detected' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        durationMs,
-      })
+        durationMs})
       result = {
-        commandPrefix: null,
-      }
+        commandPrefix: null}
     } else if (
       prefix === 'git' ||
       DANGEROUS_SHELL_PREFIXES.has(prefix.toLowerCase())
@@ -280,22 +275,18 @@ async function getCommandPrefixImpl(
         success: false,
         error:
           'dangerous_shell_prefix' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        durationMs,
-      })
+        durationMs})
       result = {
-        commandPrefix: null,
-      }
+        commandPrefix: null}
     } else if (prefix === 'none') {
       // No prefix detected
       logEvent(eventName, {
         success: false,
         error:
           'prefix "none"' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        durationMs,
-      })
+        durationMs})
       result = {
-        commandPrefix: null,
-      }
+        commandPrefix: null}
     } else {
       // Validate that the prefix is actually a prefix of the command
 
@@ -305,19 +296,15 @@ async function getCommandPrefixImpl(
           success: false,
           error:
             'command did not start with prefix' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          durationMs,
-        })
+          durationMs})
         result = {
-          commandPrefix: null,
-        }
+          commandPrefix: null}
       } else {
         logEvent(eventName, {
           success: true,
-          durationMs,
-        })
+          durationMs})
         result = {
-          commandPrefix: prefix,
-        }
+          commandPrefix: prefix}
       }
     }
 
@@ -341,8 +328,7 @@ async function getCommandSubcommandPrefixImpl(
     getPrefix(command, abortSignal, isNonInteractiveSession),
     ...subcommands.map(async subcommand => ({
       subcommand,
-      prefix: await getPrefix(subcommand, abortSignal, isNonInteractiveSession),
-    })),
+      prefix: await getPrefix(subcommand, abortSignal, isNonInteractiveSession)})),
   ])
 
   if (!fullCommandPrefix) {
@@ -361,6 +347,5 @@ async function getCommandSubcommandPrefixImpl(
 
   return {
     ...fullCommandPrefix,
-    subcommandPrefixes,
-  }
+    subcommandPrefixes}
 }

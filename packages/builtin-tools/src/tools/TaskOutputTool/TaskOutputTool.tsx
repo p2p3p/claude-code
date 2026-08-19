@@ -12,6 +12,7 @@ import type { LocalAgentTaskState } from 'src/tasks/LocalAgentTask/LocalAgentTas
 import type { LocalShellTaskState } from 'src/tasks/LocalShellTask/guards.js';
 import type { RemoteAgentTaskState } from 'src/tasks/RemoteAgentTask/RemoteAgentTask.js';
 import type { TaskState } from 'src/tasks/types.js';
+import { t } from 'src/utils/i18n/index.js';
 import { AbortError } from 'src/utils/errors.js';
 import { lazySchema } from 'src/utils/lazySchema.js';
 import { extractTextContent } from 'src/utils/messages.js';
@@ -208,7 +209,7 @@ export const TaskOutputTool: Tool<InputSchema, TaskOutputToolOutput> = buildTool
     if (!task_id) {
       return {
         result: false,
-        message: 'Task ID is required',
+        message: t('toolUI.taskOutput.taskIdRequired'),
         errorCode: 1,
       };
     }
@@ -234,7 +235,7 @@ export const TaskOutputTool: Tool<InputSchema, TaskOutputToolOutput> = buildTool
     const task = appState.tasks?.[task_id] as TaskState | undefined;
 
     if (!task) {
-      throw new Error(`No task found with ID: ${task_id}`);
+      throw new Error(t('toolUI.taskOutput.noTaskFound', task_id));
     }
 
     if (!block) {
@@ -365,7 +366,7 @@ export const TaskOutputTool: Tool<InputSchema, TaskOutputToolOutput> = buildTool
       <Box flexDirection="column">
         {progressData?.taskDescription && <Text>&nbsp;&nbsp;{progressData.taskDescription}</Text>}
         <Text>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Waiting for task <Text dimColor>(esc to give additional instructions)</Text>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{t('toolUI.taskOutput.waitingForTask')} <Text dimColor>{t('toolUI.taskOutput.escToGiveInstructions')}</Text>
         </Text>
       </Box>
     );
@@ -399,7 +400,7 @@ function TaskOutputResultDisplay({
   if (!result.task) {
     return (
       <MessageResponse>
-        <Text dimColor>No task output available</Text>
+        <Text dimColor>{t('toolUI.taskOutput.noTaskOutputAvailable')}</Text>
       </MessageResponse>
     );
   }
@@ -452,7 +453,7 @@ function TaskOutputResultDisplay({
       }
       return (
         <MessageResponse>
-          <Text dimColor>Read output ({expandShortcut} to expand)</Text>
+          <Text dimColor>{t('toolUI.taskOutput.readOutput', expandShortcut)}</Text>
         </MessageResponse>
       );
     }
@@ -460,7 +461,7 @@ function TaskOutputResultDisplay({
     if (result.retrieval_status === 'timeout' || task.status === 'running') {
       return (
         <MessageResponse>
-          <Text dimColor>Task is still running…</Text>
+          <Text dimColor>{t('toolUI.taskOutput.taskIsStillRunning')}</Text>
         </MessageResponse>
       );
     }
@@ -468,14 +469,14 @@ function TaskOutputResultDisplay({
     if (result.retrieval_status === 'not_ready') {
       return (
         <MessageResponse>
-          <Text dimColor>Task is still running…</Text>
+          <Text dimColor>{t('toolUI.taskOutput.taskIsStillRunning')}</Text>
         </MessageResponse>
       );
     }
 
     return (
       <MessageResponse>
-        <Text dimColor>Task not ready</Text>
+        <Text dimColor>{t('toolUI.taskOutput.taskNotReady')}</Text>
       </MessageResponse>
     );
   }

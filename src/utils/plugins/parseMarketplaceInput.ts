@@ -119,8 +119,7 @@ export async function parseMarketplaceInput(
         error:
           code === 'ENOENT'
             ? `Path does not exist: ${resolvedPath}`
-            : `Cannot access path: ${resolvedPath} (${code ?? e})`,
-      }
+            : `Cannot access path: ${resolvedPath} (${code ?? e})`}
     }
 
     if (stats.isFile()) {
@@ -128,15 +127,13 @@ export async function parseMarketplaceInput(
         return { source: 'file', path: resolvedPath }
       } else {
         return {
-          error: `File path must point to a .json file (marketplace.json), but got: ${resolvedPath}`,
-        }
+          error: `File path must point to a .json file (marketplace.json), but got: ${resolvedPath}`}
       }
     } else if (stats.isDirectory()) {
       return { source: 'directory', path: resolvedPath }
     } else {
       return {
-        error: `Path is neither a file nor a directory: ${resolvedPath}`,
-      }
+        error: `Path is neither a file nor a directory: ${resolvedPath}`}
     }
   }
 

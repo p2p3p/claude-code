@@ -3,14 +3,12 @@ import { isKeybindingCustomizationEnabled } from '../../keybindings/loadUserBind
 import {
   MACOS_RESERVED,
   NON_REBINDABLE,
-  TERMINAL_RESERVED,
-} from '../../keybindings/reservedShortcuts.js'
+  TERMINAL_RESERVED} from '../../keybindings/reservedShortcuts.js'
 import type { KeybindingsSchemaType } from '../../keybindings/schema.js'
 import {
   KEYBINDING_ACTIONS,
   KEYBINDING_CONTEXT_DESCRIPTIONS,
-  KEYBINDING_CONTEXTS,
-} from '../../keybindings/schema.js'
+  KEYBINDING_CONTEXTS} from '../../keybindings/schema.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import { registerBundledSkill } from '../bundledSkills.js'
 
@@ -78,8 +76,7 @@ function inferContextFromAction(action: string): string {
     diff: 'DiffDialog',
     modelPicker: 'ModelPicker',
     select: 'Select',
-    permission: 'Confirmation',
-  }
+    permission: 'Confirmation'}
   return prefixToContext[prefix ?? ''] ?? 'Unknown'
 }
 
@@ -118,33 +115,24 @@ const FILE_FORMAT_EXAMPLE: KeybindingsSchemaType = {
     {
       context: 'Chat',
       bindings: {
-        'ctrl+e': 'chat:externalEditor',
-      },
-    },
-  ],
-}
+        'ctrl+e': 'chat:externalEditor'}},
+  ]}
 
 const UNBIND_EXAMPLE: KeybindingsSchemaType['bindings'][number] = {
   context: 'Chat',
   bindings: {
-    'ctrl+s': null,
-  },
-}
+    'ctrl+s': null}}
 
 const REBIND_EXAMPLE: KeybindingsSchemaType['bindings'][number] = {
   context: 'Chat',
   bindings: {
     'ctrl+g': null,
-    'ctrl+e': 'chat:externalEditor',
-  },
-}
+    'ctrl+e': 'chat:externalEditor'}}
 
 const CHORD_EXAMPLE: KeybindingsSchemaType['bindings'][number] = {
   context: 'Global',
   bindings: {
-    'ctrl+k ctrl+t': 'app:toggleTodos',
-  },
-}
+    'ctrl+k ctrl+t': 'app:toggleTodos'}}
 
 const SECTION_INTRO = [
   '# Keybindings Skill',
@@ -322,8 +310,7 @@ export function registerKeybindingsSkill(): void {
       }
 
       return [{ type: 'text', text: sections.join('\n\n') }]
-    },
-  })
+    }})
 }
 
 /**

@@ -4,10 +4,10 @@ import { updateProviderBuckets } from 'src/services/providerUsage/store.js'
 import { getProxyFetchOptions } from 'src/utils/proxy.js'
 
 /**
- * Environment variables:
+ * Environment variables (set by the platform config system via env):
  *
- * OPENAI_API_KEY: Required. API key for the OpenAI-compatible endpoint.
- * OPENAI_BASE_URL: Recommended. Base URL for the endpoint (e.g. http://localhost:11434/v1).
+ * API_KEY: Required. API key for the OpenAI-compatible endpoint.
+ * BASE_URL: Recommended. Base URL for the endpoint (e.g. http://localhost:11434/v1).
  * OPENAI_ORG_ID: Optional. Organization ID.
  * OPENAI_PROJECT_ID: Optional. Project ID.
  */
@@ -43,8 +43,8 @@ export function getOpenAIClient(options?: {
 }): OpenAI {
   if (cachedClient) return cachedClient
 
-  const apiKey = process.env.OPENAI_API_KEY || ''
-  const baseURL = process.env.OPENAI_BASE_URL
+  const apiKey = process.env.API_KEY || ''
+  const baseURL = process.env.BASE_URL
 
   const baseFetch = options?.fetchOverride ?? (globalThis.fetch as typeof fetch)
   const wrappedFetch = wrapFetchForUsage(baseFetch)
@@ -56,14 +56,11 @@ export function getOpenAIClient(options?: {
     timeout: parseInt(process.env.API_TIMEOUT_MS || String(600 * 1000), 10),
     dangerouslyAllowBrowser: true,
     ...(process.env.OPENAI_ORG_ID && {
-      organization: process.env.OPENAI_ORG_ID,
-    }),
+      organization: process.env.OPENAI_ORG_ID}),
     ...(process.env.OPENAI_PROJECT_ID && {
-      project: process.env.OPENAI_PROJECT_ID,
-    }),
+      project: process.env.OPENAI_PROJECT_ID}),
     fetchOptions: getProxyFetchOptions({ forAnthropicAPI: false }),
-    fetch: wrappedFetch,
-  })
+    fetch: wrappedFetch})
 
   if (!options?.fetchOverride) {
     cachedClient = client

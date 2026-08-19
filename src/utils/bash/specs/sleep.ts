@@ -6,8 +6,6 @@ const sleep: CommandSpec = {
   args: {
     name: 'duration',
     description: 'Duration to sleep (seconds or with suffix like 5s, 2m, 1h)',
-    isOptional: false,
-  },
-}
+    isOptional: false}}
 
 export default sleep

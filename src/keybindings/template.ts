@@ -7,8 +7,7 @@ import { jsonStringify } from '../utils/slowOperations.js'
 import { DEFAULT_BINDINGS } from './defaultBindings.js'
 import {
   NON_REBINDABLE,
-  normalizeKeyForComparison,
-} from './reservedShortcuts.js'
+  normalizeKeyForComparison} from './reservedShortcuts.js'
 import type { KeybindingBlock } from './types.js'
 
 /**
@@ -45,8 +44,7 @@ export function generateKeybindingsTemplate(): string {
   const config = {
     $schema: 'https://www.schemastore.org/claude-code-keybindings.json',
     $docs: 'https://code.claude.com/docs/en/keybindings',
-    bindings,
-  }
+    bindings}
 
   return jsonStringify(config, null, 2) + '\n'
 }

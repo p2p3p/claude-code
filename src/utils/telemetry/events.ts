@@ -43,8 +43,7 @@ export async function logOTelEvent(
     ...getTelemetryAttributes(),
     'event.name': eventName,
     'event.timestamp': new Date().toISOString(),
-    'event.sequence': eventSequence++,
-  }
+    'event.sequence': eventSequence++}
 
   // Add prompt ID to events (but not metrics, where it would cause unbounded cardinality)
   const promptId = getPromptId()
@@ -70,6 +69,5 @@ export async function logOTelEvent(
   // Emit log record as an event
   eventLogger.emit({
     body: `claude_code.${eventName}`,
-    attributes,
-  })
+    attributes})
 }

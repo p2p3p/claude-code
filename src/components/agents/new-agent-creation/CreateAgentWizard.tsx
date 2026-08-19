@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { t } from '../../../utils/i18n/index.js'
 import { isAutoMemoryEnabled } from '../../../memdir/paths.js';
 import type { Tools } from '../../../Tool.js';
 import type { AgentDefinition } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js';
@@ -50,7 +51,7 @@ export function CreateAgentWizard({ tools, existingAgents, onComplete, onCancel 
         // which calls onComplete with the appropriate message
       }}
       onCancel={onCancel}
-      title="Create new agent"
+      title={t('createagentwizard.createNewAgent')}
       showStepCounter={false}
     />
   );

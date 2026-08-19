@@ -4,8 +4,7 @@ import {
   useMemo,
   useReducer,
   useRef,
-  useState,
-} from 'react'
+  useState} from 'react'
 import { isDeepStrictEqual } from 'util'
 import OptionMap from './option-map.js'
 import type { OptionWithDescription } from './select.js'
@@ -97,8 +96,7 @@ const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
           ...state,
           focusedValue: next.value,
           visibleFromIndex: 0,
-          visibleToIndex: state.visibleOptionCount,
-        }
+          visibleToIndex: state.visibleOptionCount}
       }
 
       const needsToScroll = next.index >= state.visibleToIndex
@@ -106,8 +104,7 @@ const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
       if (!needsToScroll) {
         return {
           ...state,
-          focusedValue: next.value,
-        }
+          focusedValue: next.value}
       }
 
       const nextVisibleToIndex = Math.min(
@@ -121,8 +118,7 @@ const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
         ...state,
         focusedValue: next.value,
         visibleFromIndex: nextVisibleFromIndex,
-        visibleToIndex: nextVisibleToIndex,
-      }
+        visibleToIndex: nextVisibleToIndex}
     }
 
     case 'focus-previous-option': {
@@ -154,8 +150,7 @@ const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
           ...state,
           focusedValue: previous.value,
           visibleFromIndex: nextVisibleFromIndex,
-          visibleToIndex: nextVisibleToIndex,
-        }
+          visibleToIndex: nextVisibleToIndex}
       }
 
       const needsToScroll = previous.index <= state.visibleFromIndex
@@ -163,8 +158,7 @@ const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
       if (!needsToScroll) {
         return {
           ...state,
-          focusedValue: previous.value,
-        }
+          focusedValue: previous.value}
       }
 
       const nextVisibleFromIndex = Math.max(0, state.visibleFromIndex - 1)
@@ -175,8 +169,7 @@ const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
         ...state,
         focusedValue: previous.value,
         visibleFromIndex: nextVisibleFromIndex,
-        visibleToIndex: nextVisibleToIndex,
-      }
+        visibleToIndex: nextVisibleToIndex}
     }
 
     case 'focus-next-page': {
@@ -224,8 +217,7 @@ const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
         ...state,
         focusedValue: targetItem.value,
         visibleFromIndex: nextVisibleFromIndex,
-        visibleToIndex: nextVisibleToIndex,
-      }
+        visibleToIndex: nextVisibleToIndex}
     }
 
     case 'focus-previous-page': {
@@ -267,8 +259,7 @@ const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
         ...state,
         focusedValue: targetItem.value,
         visibleFromIndex: nextVisibleFromIndex,
-        visibleToIndex: nextVisibleToIndex,
-      }
+        visibleToIndex: nextVisibleToIndex}
     }
 
     case 'reset': {
@@ -294,8 +285,7 @@ const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
         // Already visible, just update focus
         return {
           ...state,
-          focusedValue: action.value,
-        }
+          focusedValue: action.value}
       }
 
       // Need to scroll to make the item visible
@@ -323,8 +313,7 @@ const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
         ...state,
         focusedValue: action.value,
         visibleFromIndex: nextVisibleFromIndex,
-        visibleToIndex: nextVisibleToIndex,
-      }
+        visibleToIndex: nextVisibleToIndex}
     }
   }
 }
@@ -425,8 +414,7 @@ const createDefaultState = <T>({
   visibleOptionCount: customVisibleOptionCount,
   options,
   initialFocusValue,
-  currentViewport,
-}: Pick<UseSelectNavigationProps<T>, 'visibleOptionCount' | 'options'> & {
+  currentViewport}: Pick<UseSelectNavigationProps<T>, 'visibleOptionCount' | 'options'> & {
   initialFocusValue?: T
   currentViewport?: { visibleFromIndex: number; visibleToIndex: number }
 }): State<T> => {
@@ -498,8 +486,7 @@ const createDefaultState = <T>({
     visibleOptionCount,
     focusedValue,
     visibleFromIndex,
-    visibleToIndex,
-  }
+    visibleToIndex}
 }
 
 export function useSelectNavigation<T>({
@@ -507,15 +494,13 @@ export function useSelectNavigation<T>({
   options,
   initialFocusValue,
   onFocus,
-  focusValue,
-}: UseSelectNavigationProps<T>): SelectNavigation<T> {
+  focusValue}: UseSelectNavigationProps<T>): SelectNavigation<T> {
   const [state, dispatch] = useReducer(
     reducer<T>,
     {
       visibleOptionCount,
       options,
-      initialFocusValue: focusValue || initialFocusValue,
-    } as Parameters<typeof createDefaultState<T>>[0],
+      initialFocusValue: focusValue || initialFocusValue} as Parameters<typeof createDefaultState<T>>[0],
     createDefaultState<T>,
   )
 
@@ -535,44 +520,36 @@ export function useSelectNavigation<T>({
           focusValue ?? state.focusedValue ?? initialFocusValue,
         currentViewport: {
           visibleFromIndex: state.visibleFromIndex,
-          visibleToIndex: state.visibleToIndex,
-        },
-      }),
-    })
+          visibleToIndex: state.visibleToIndex}})})
 
     setLastOptions(options)
   }
 
   const focusNextOption = useCallback(() => {
     dispatch({
-      type: 'focus-next-option',
-    })
+      type: 'focus-next-option'})
   }, [])
 
   const focusPreviousOption = useCallback(() => {
     dispatch({
-      type: 'focus-previous-option',
-    })
+      type: 'focus-previous-option'})
   }, [])
 
   const focusNextPage = useCallback(() => {
     dispatch({
-      type: 'focus-next-page',
-    })
+      type: 'focus-next-page'})
   }, [])
 
   const focusPreviousPage = useCallback(() => {
     dispatch({
-      type: 'focus-previous-page',
-    })
+      type: 'focus-previous-page'})
   }, [])
 
   const focusOption = useCallback((value: T | undefined) => {
     if (value !== undefined) {
       dispatch({
         type: 'set-focus',
-        value,
-      })
+        value})
     }
   }, [])
 
@@ -580,8 +557,7 @@ export function useSelectNavigation<T>({
     return options
       .map((option, index) => ({
         ...option,
-        index,
-      }))
+        index}))
       .slice(state.visibleFromIndex, state.visibleToIndex)
   }, [options, state.visibleFromIndex, state.visibleToIndex])
 
@@ -622,8 +598,7 @@ export function useSelectNavigation<T>({
     if (focusValue !== undefined) {
       dispatch({
         type: 'set-focus',
-        value: focusValue,
-      })
+        value: focusValue})
     }
   }, [focusValue])
 
@@ -648,6 +623,5 @@ export function useSelectNavigation<T>({
     focusNextPage,
     focusPreviousPage,
     focusOption,
-    options,
-  }
+    options}
 }

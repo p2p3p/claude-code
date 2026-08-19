@@ -6,6 +6,7 @@ import {
 } from 'src/bootstrap/state.js'
 import type { Tool } from 'src/Tool.js'
 import { buildTool, type ToolDef } from 'src/Tool.js'
+import { t } from 'src/utils/i18n/index.js'
 import { lazySchema } from 'src/utils/lazySchema.js'
 import { applyPermissionUpdate } from 'src/utils/permissions/PermissionUpdate.js'
 import { prepareContextForPlanMode } from 'src/utils/permissions/permissionSetup.js'
@@ -35,10 +36,10 @@ export type Output = z.infer<OutputSchema>
 
 export const EnterPlanModeTool: Tool<InputSchema, Output> = buildTool({
   name: ENTER_PLAN_MODE_TOOL_NAME,
-  searchHint: 'switch to plan mode to design an approach before coding',
+  searchHint: t('toolUI.enterPlanMode.searchHint'),
   maxResultSizeChars: 100_000,
   async description() {
-    return 'Requests permission to enter plan mode for complex tasks requiring exploration and design'
+    return t('toolUI.enterPlanMode.toolDescription')
   },
   async prompt() {
     return getEnterPlanModeToolPrompt()
@@ -76,7 +77,7 @@ export const EnterPlanModeTool: Tool<InputSchema, Output> = buildTool({
   renderToolUseRejectedMessage,
   async call(_input, context) {
     if (context.agentId) {
-      throw new Error('EnterPlanMode tool cannot be used in agent contexts')
+      throw new Error(t('toolUI.enterPlanMode.notInAgentContexts'))
     }
 
     const appState = context.getAppState()

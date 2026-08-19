@@ -5,6 +5,7 @@ import { Box, Byline, Text } from '@anthropic/ink';
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js';
 import { createAbortController } from '../../../../utils/abortController.js';
 import { editPromptInEditor } from '../../../../utils/promptEditor.js';
+import { t } from '../../../../utils/i18n/index.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { Spinner } from '../../../Spinner.js';
 import TextInput from '../../../TextInput.js';
@@ -35,8 +36,7 @@ export function GenerateStep(): ReactNode {
   // Use Settings context so 'n' key doesn't cancel (allows typing 'n' in prompt input)
   useKeybinding('confirm:no', handleCancelGeneration, {
     context: 'Settings',
-    isActive: isGenerating,
-  });
+    isActive: isGenerating});
 
   const handleExternalEditor = useCallback(async () => {
     const result = await editPromptInEditor(prompt);
@@ -48,8 +48,7 @@ export function GenerateStep(): ReactNode {
 
   useKeybinding('chat:externalEditor', handleExternalEditor, {
     context: 'Chat',
-    isActive: !isGenerating,
-  });
+    isActive: !isGenerating});
 
   // Go back when escape pressed while not generating
   const handleGoBack = useCallback(() => {
@@ -59,8 +58,7 @@ export function GenerateStep(): ReactNode {
       systemPrompt: '',
       whenToUse: '',
       generatedAgent: undefined,
-      wasGenerated: false,
-    });
+      wasGenerated: false});
     setPrompt('');
     setError(null);
     goBack();
@@ -69,8 +67,7 @@ export function GenerateStep(): ReactNode {
   // Use Settings context so 'n' key doesn't cancel (allows typing 'n' in prompt input)
   useKeybinding('confirm:no', handleGoBack, {
     context: 'Settings',
-    isActive: !isGenerating,
-  });
+    isActive: !isGenerating});
 
   const handleGenerate = async (): Promise<void> => {
     const trimmedPrompt = prompt.trim();
@@ -83,8 +80,7 @@ export function GenerateStep(): ReactNode {
     setIsGenerating(true);
     updateWizardData({
       generationPrompt: trimmedPrompt,
-      isGenerating: true,
-    });
+      isGenerating: true});
 
     // Create abort controller for this generation
     const controller = createAbortController();
@@ -99,8 +95,7 @@ export function GenerateStep(): ReactNode {
         systemPrompt: generated.systemPrompt,
         generatedAgent: generated,
         isGenerating: false,
-        wasGenerated: true,
-      });
+        wasGenerated: true});
 
       // Skip directly to ToolsStep (index 6) - matching original flow
       goToStep(6);
@@ -125,7 +120,7 @@ export function GenerateStep(): ReactNode {
       <WizardDialogLayout
         subtitle={subtitle}
         footerText={
-          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="cancel" />
+          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.cancel')} />
         }
       >
         <Box flexDirection="row" alignItems="center">
@@ -141,14 +136,14 @@ export function GenerateStep(): ReactNode {
       subtitle={subtitle}
       footerText={
         <Byline>
-          <ConfigurableShortcutHint action="confirm:yes" context="Confirmation" fallback="Enter" description="submit" />
+          <ConfigurableShortcutHint action="confirm:yes" context="Confirmation" fallback="Enter" description={t('desc.submit')} />
           <ConfigurableShortcutHint
             action="chat:externalEditor"
             context="Chat"
             fallback="ctrl+g"
-            description="open in editor"
+            description={t('desc.openInEditor')}
           />
-          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description="go back" />
+          <ConfigurableShortcutHint action="confirm:no" context="Settings" fallback="Esc" description={t('desc.goBack')} />
         </Byline>
       }
     >
@@ -162,7 +157,7 @@ export function GenerateStep(): ReactNode {
           value={prompt}
           onChange={setPrompt}
           onSubmit={handleGenerate}
-          placeholder="e.g., Help me write unit tests for my code..."
+          placeholder={t('generatestep.placeholder')}
           columns={80}
           cursorOffset={cursorOffset}
           onChangeCursorOffset={setCursorOffset}

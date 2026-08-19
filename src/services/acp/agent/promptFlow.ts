@@ -7,17 +7,16 @@
  * Methods attached: prompt, setSessionConfigOption.
  */
 import { randomUUID } from 'node:crypto'
+import { t } from '../../../utils/i18n/index.js'
 import type {
   PromptRequest,
   PromptResponse,
   SetSessionConfigOptionRequest,
-  SetSessionConfigOptionResponse,
-} from '@agentclientprotocol/sdk'
+  SetSessionConfigOptionResponse} from '@agentclientprotocol/sdk'
 import type { SessionId } from '../../../types/ids.js'
 import {
   switchSession,
-  getSessionProjectDir,
-} from '../../../bootstrap/state.js'
+  getSessionProjectDir} from '../../../bootstrap/state.js'
 import { forwardSessionUpdates } from '../bridge.js'
 import type { ToolUseCache } from '../bridge.js'
 import { promptToQueryInput } from '../promptConversion.js'
@@ -29,8 +28,7 @@ import { popNextPendingPrompt } from './promptQueue.js'
 import {
   getConnection,
   readClientCapabilities,
-  syncSessionConfigState,
-} from './internalAccessors.js'
+  syncSessionConfigState} from './internalAccessors.js'
 
 // ── prompt ───────────────────────────────────────────────────────
 
@@ -40,7 +38,7 @@ async function prompt(
 ): Promise<PromptResponse> {
   const session = this.sessions.get(params.sessionId)
   if (!session) {
-    throw new Error(`Session ${params.sessionId} not found`)
+    throw new Error(t('acpAgent.sessionIdNotFound', params.sessionId))
   }
 
   // Per message-id.mdx RFD: if the client supplied a `messageId` on the
@@ -56,7 +54,7 @@ async function prompt(
   // effectively-empty prompt is malformed input — reject it with an
   // invalid_params error rather than fabricating a successful end_turn.
   if (!promptInput.trim()) {
-    throw new Error('Prompt content is empty')
+    throw new Error(t('acpAgent.promptEmpty'))
   }
 
   const promptCancelGeneration = session.cancelGeneration
@@ -135,23 +133,18 @@ async function prompt(
           usage.outputTokens +
           usage.cachedReadTokens +
           usage.cachedWriteTokens +
-          thoughtTokens,
-      }
+          thoughtTokens}
       return {
         stopReason,
         usage: usagePayload,
         ...(userMessageId ? { userMessageId } : {}),
         _meta: {
           claudeCode: {
-            usage: usagePayload,
-          },
-        },
-      }
+            usage: usagePayload}}}
     }
     return {
       stopReason,
-      ...(userMessageId ? { userMessageId } : {}),
-    }
+      ...(userMessageId ? { userMessageId } : {})}
   } catch (err: unknown) {
     // Treat AbortError / cancellation-shaped errors as a turn cancellation
     // regardless of the session.cancelled flag, to close the race window
@@ -173,7 +166,7 @@ async function prompt(
     ) {
       await this.teardownSession(params.sessionId)
       throw new Error(
-        'The Claude Agent process exited unexpectedly. Please start a new session.',
+        t('acpAgent.processExited'),
       )
     }
 
@@ -198,17 +191,17 @@ async function setSessionConfigOption(
 ): Promise<SetSessionConfigOptionResponse> {
   const session = this.sessions.get(params.sessionId)
   if (!session) {
-    throw new Error('Session not found')
+    throw new Error(t('acpAgent.sessionNotFound'))
   }
   if (typeof params.value !== 'string') {
     throw new Error(
-      `Invalid value for config option ${params.configId}: ${String(params.value)}`,
+      t('acpAgent.invalidConfigValue', params.configId, String(params.value)),
     )
   }
 
   const option = session.configOptions.find(o => o.id === params.configId)
   if (!option) {
-    throw new Error(`Unknown config option: ${params.configId}`)
+    throw new Error(t('acpAgent.unknownConfigOption', params.configId))
   }
 
   // Per session-config-options.mdx: value MUST be one of the values listed
@@ -221,7 +214,7 @@ async function setSessionConfigOption(
     )
     if (!validValues.includes(params.value)) {
       throw new Error(
-        `Invalid value '${params.value}' for config option ${params.configId}; must be one of: ${validValues.join(', ')}`,
+        t('acpAgent.invalidConfigValueOptions', params.value, params.configId, validValues.join(', ')),
       )
     }
   }
@@ -234,9 +227,7 @@ async function setSessionConfigOption(
       sessionId: params.sessionId,
       update: {
         sessionUpdate: 'current_mode_update',
-        currentModeId: value,
-      },
-    })
+        currentModeId: value}})
   } else if (params.configId === 'model') {
     session.queryEngine.setModel(value)
   }
@@ -290,9 +281,7 @@ async function emitSessionInfoUpdate(
       update: {
         sessionUpdate: 'session_info_update',
         ...(title ? { title } : {}),
-        updatedAt: new Date().toISOString(),
-      },
-    })
+        updatedAt: new Date().toISOString()}})
   } catch (err) {
     console.error('[ACP] Failed to send session_info_update:', err)
   }
@@ -302,5 +291,4 @@ async function emitSessionInfoUpdate(
 
 Object.assign(AcpAgent.prototype, {
   prompt,
-  setSessionConfigOption,
-})
+  setSessionConfigOption})

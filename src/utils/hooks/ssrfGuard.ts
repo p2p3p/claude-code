@@ -260,8 +260,7 @@ export function ssrfGuardedLookup(
       callback(
         Object.assign(new Error(`ENOTFOUND ${hostname}`), {
           code: 'ENOTFOUND',
-          hostname,
-        }),
+          hostname}),
         '',
       )
       return
@@ -273,8 +272,7 @@ export function ssrfGuardedLookup(
         null,
         addresses.map(a => ({
           address: a.address,
-          family: a.family === 6 ? 6 : 4,
-        })),
+          family: a.family === 6 ? 6 : 4})),
       )
     } else {
       callback(null, first.address, family)
@@ -289,6 +287,5 @@ function ssrfError(hostname: string, address: string): NodeJS.ErrnoException {
   return Object.assign(err, {
     code: 'ERR_HTTP_HOOK_BLOCKED_ADDRESS',
     hostname,
-    address,
-  })
+    address})
 }

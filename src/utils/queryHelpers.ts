@@ -1,8 +1,7 @@
 import type { ToolUseBlock } from '@anthropic-ai/sdk/resources/index.mjs'
 import {
   getSessionId,
-  isSessionPersistenceDisabled,
-} from 'src/bootstrap/state.js'
+  isSessionPersistenceDisabled} from 'src/bootstrap/state.js'
 import type { SDKMessage } from 'src/entrypoints/agentSdkTypes.js'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import { runTools } from '../services/tools/toolOrchestration.js'
@@ -12,8 +11,7 @@ import { FILE_EDIT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileE
 import type { Input as FileReadInput } from '@claude-code-best/builtin-tools/tools/FileReadTool/FileReadTool.js'
 import {
   FILE_READ_TOOL_NAME,
-  FILE_UNCHANGED_STUB,
-} from '@claude-code-best/builtin-tools/tools/FileReadTool/prompt.js'
+  FILE_UNCHANGED_STUB} from '@claude-code-best/builtin-tools/tools/FileReadTool/prompt.js'
 import { FILE_WRITE_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileWriteTool/prompt.js'
 import type { Message } from '../types/message.js'
 import type { OrphanedPermission } from '../types/textInputTypes.js'
@@ -24,14 +22,12 @@ import { getFileModificationTime, stripLineNumberPrefix } from './file.js'
 import { readFileSyncWithMetadata } from './fileRead.js'
 import {
   createFileStateCacheWithSizeLimit,
-  type FileStateCache,
-} from './fileStateCache.js'
+  type FileStateCache} from './fileStateCache.js'
 import { isNotEmptyMessage, normalizeMessages } from './messages.js'
 import { expandPath } from './path.js'
 import type {
   inputSchema as permissionToolInputSchema,
-  outputSchema as permissionToolOutputSchema,
-} from './permissions/PermissionPromptToolResultSchema.js'
+  outputSchema as permissionToolOutputSchema} from './permissions/PermissionPromptToolResultSchema.js'
 import type { ProcessUserInputContext } from './processUserInput/processUserInput.js'
 import { recordTranscript } from './sessionStorage.js'
 
@@ -123,8 +119,7 @@ export function* normalizeMessage(message: Message): Generator<SDKMessage> {
           parent_tool_use_id: null,
           session_id: getSessionId(),
           uuid: _.uuid,
-          error: _.error,
-        }
+          error: _.error}
       }
       return
     case 'progress': {
@@ -151,8 +146,7 @@ export function* normalizeMessage(message: Message): Generator<SDKMessage> {
                 parent_tool_use_id: message.parentToolUseID as string,
                 session_id: getSessionId(),
                 uuid: _.uuid,
-                error: _.error,
-              }
+                error: _.error}
               break
             case 'user':
               yield {
@@ -166,10 +160,8 @@ export function* normalizeMessage(message: Message): Generator<SDKMessage> {
                 tool_use_result: _.mcpMeta
                   ? {
                       content: _.toolUseResult,
-                      ...(_.mcpMeta as Record<string, unknown>),
-                    }
-                  : _.toolUseResult,
-              }
+                      ...(_.mcpMeta as Record<string, unknown>)}
+                  : _.toolUseResult}
               break
           }
         }
@@ -214,8 +206,7 @@ export function* normalizeMessage(message: Message): Generator<SDKMessage> {
             elapsed_time_seconds: progressData.elapsedTimeSeconds,
             task_id: progressData.taskId,
             session_id: getSessionId(),
-            uuid: message.uuid,
-          }
+            uuid: message.uuid}
         }
       }
       break
@@ -233,10 +224,8 @@ export function* normalizeMessage(message: Message): Generator<SDKMessage> {
           tool_use_result: _.mcpMeta
             ? {
                 content: _.toolUseResult,
-                ...(_.mcpMeta as Record<string, unknown>),
-              }
-            : _.toolUseResult,
-        }
+                ...(_.mcpMeta as Record<string, unknown>)}
+            : _.toolUseResult}
       }
       return
     default:
@@ -299,8 +288,7 @@ export async function* handleOrphanedPermission(
   }
   const finalToolUseBlock: ToolUseBlock = {
     ...toolUseBlock,
-    input: finalInput,
-  }
+    input: finalInput}
 
   const canUseTool: CanUseToolFn = (async () => {
     if (permissionResult.behavior === 'allow') {
@@ -311,18 +299,14 @@ export async function* handleOrphanedPermission(
         ).updatedInput,
         decisionReason: {
           type: 'mode' as const,
-          mode: 'default' as const,
-        },
-      }
+          mode: 'default' as const}}
     }
     return {
       behavior: 'deny' as const,
       message: (permissionResult as { message?: string }).message,
       decisionReason: {
         type: 'mode' as const,
-        mode: 'default' as const,
-      },
-    }
+        mode: 'default' as const}}
   }) as CanUseToolFn
 
   // Add the assistant message with tool_use to messages BEFORE executing
@@ -356,8 +340,7 @@ export async function* handleOrphanedPermission(
   const sdkAssistantMessage: SDKMessage = {
     ...assistantMessage,
     session_id: getSessionId(),
-    parent_tool_use_id: null,
-  } as SDKMessage
+    parent_tool_use_id: null} as SDKMessage
   yield sdkAssistantMessage
 
   // Execute the tool - errors are handled internally by runToolUse
@@ -376,8 +359,7 @@ export async function* handleOrphanedPermission(
       const sdkMessage: SDKMessage = {
         ...update.message,
         session_id: getSessionId(),
-        parent_tool_use_id: null,
-      } as SDKMessage
+        parent_tool_use_id: null} as SDKMessage
 
       yield sdkMessage
     }
@@ -439,8 +421,7 @@ export function extractReadFilesFromMessages(
             const absolutePath = expandPath(input.file_path, cwd)
             fileWriteToolUseIds.set(content.id, {
               filePath: absolutePath,
-              content: coerceToolContentToString(input.content),
-            })
+              content: coerceToolContentToString(input.content)})
           }
         } else if (
           content.type === 'tool_use' &&
@@ -496,8 +477,7 @@ export function extractReadFilesFromMessages(
                 content: fileContent,
                 timestamp,
                 offset: undefined,
-                limit: undefined,
-              })
+                limit: undefined})
             }
           }
 
@@ -511,8 +491,7 @@ export function extractReadFilesFromMessages(
               content: writeToolData.content,
               timestamp,
               offset: undefined,
-              limit: undefined,
-            })
+              limit: undefined})
           }
 
           // Handle Edit tool results — post-edit content isn't in the
@@ -533,8 +512,7 @@ export function extractReadFilesFromMessages(
                 content: diskContent,
                 timestamp: getFileModificationTime(editFilePath),
                 offset: undefined,
-                limit: undefined,
-              })
+                limit: undefined})
             } catch (e: unknown) {
               if (!isFsInaccessible(e)) {
                 throw e

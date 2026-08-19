@@ -3,8 +3,7 @@ import { isFeedbackSurveyDisabled } from 'src/services/analytics/config.js';
 import { checkStatsigFeatureGate_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js';
+  logEvent} from 'src/services/analytics/index.js';
 import { shouldUseSessionMemoryCompaction } from '../../services/compact/sessionMemoryCompact.js';
 import type { Message } from '../../types/message.js';
 import { isEnvTruthy } from '../../utils/envUtils.js';
@@ -54,13 +53,11 @@ export function usePostCompactSurvey(
       event_type: 'appeared' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       appearance_id: appearanceId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       session_memory_compaction_enabled:
-        smCompactionEnabled as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+        smCompactionEnabled as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     void logOTelEvent('feedback_survey', {
       event_type: 'appeared',
       appearance_id: appearanceId,
-      survey_type: 'post_compact',
-    });
+      survey_type: 'post_compact'});
   }, []);
 
   const onSelect = useCallback((appearanceId: string, selected: FeedbackSurveyResponse) => {
@@ -70,21 +67,18 @@ export function usePostCompactSurvey(
       appearance_id: appearanceId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       response: selected as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       session_memory_compaction_enabled:
-        smCompactionEnabled as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    });
+        smCompactionEnabled as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
     void logOTelEvent('feedback_survey', {
       event_type: 'responded',
       appearance_id: appearanceId,
       response: selected,
-      survey_type: 'post_compact',
-    });
+      survey_type: 'post_compact'});
   }, []);
 
   const { state, lastResponse, open, handleSelect } = useSurveyState({
     hideThanksAfterMs: HIDE_THANKS_AFTER_MS,
     onOpen,
-    onSelect,
-  });
+    onSelect});
 
   // Check the feature gate on mount
   useEffect(() => {

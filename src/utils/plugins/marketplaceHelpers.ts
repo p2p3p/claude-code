@@ -1,4 +1,5 @@
 import isEqual from 'lodash-es/isEqual.js'
+import { t } from '../i18n/index.js'
 import { toError } from '../errors.js'
 import { logError } from '../log.js'
 import { getSettingsForSource } from '../settings/settings.js'
@@ -106,8 +107,7 @@ export async function loadMarketplacesWithGracefulDegradation(
     marketplaces.push({
       name,
       config: marketplaceConfig,
-      data,
-    })
+      data})
   }
 
   return { marketplaces, failures }
@@ -128,16 +128,15 @@ export function formatMarketplaceLoadingErrors(
   if (successCount > 0) {
     const message =
       failures.length === 1
-        ? `Warning: Failed to load marketplace '${failures[0]!.name}': ${failures[0]!.error}`
-        : `Warning: Failed to load ${failures.length} marketplaces: ${formatFailureNames(failures)}`
+        ? t('marketplaceHelpers.warningSingle', failures[0]!.name, failures[0]!.error)
+        : t('marketplaceHelpers.warningMultiple', failures.length, formatFailureNames(failures))
     return { type: 'warning', message }
   }
 
   // All marketplaces failed - this is a critical error
   return {
     type: 'error',
-    message: `Failed to load all marketplaces. Errors: ${formatFailureErrors(failures)}`,
-  }
+    message: t('marketplaceHelpers.errorAll', formatFailureErrors(failures))}
 }
 
 function formatFailureNames(
@@ -549,8 +548,7 @@ export type EmptyMarketplaceReason =
  */
 export async function detectEmptyMarketplaceReason({
   configuredMarketplaceCount,
-  failedMarketplaceCount,
-}: {
+  failedMarketplaceCount}: {
   configuredMarketplaceCount: number
   failedMarketplaceCount: number
 }): Promise<EmptyMarketplaceReason> {

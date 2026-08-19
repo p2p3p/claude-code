@@ -34,8 +34,7 @@ export function truncateLabel(raw: string, max: number): string {
 export function AgentList({
   agents,
   selectedIndex,
-  focused,
-}: {
+  focused}: {
   agents: AgentProgress[];
   selectedIndex: number;
   focused: boolean;

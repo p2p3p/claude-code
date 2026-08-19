@@ -51,7 +51,7 @@ export function switchProvider(
 
   const env: Record<string, string> = {
     CLAUDE_CODE_USE_OPENAI: '1',
-    OPENAI_BASE_URL: found.baseUrl,
+    BASE_URL: found.baseUrl,
     OPENAI_MODEL: found.defaultModel,
     // The value is the env var name that holds the key, not the key itself.
     // Shell snippet: export OPENAI_API_KEY=$CEREBRAS_API_KEY
@@ -67,7 +67,7 @@ export function switchProvider(
   // in a side-channel stderr log.
   const hasOpenAIMode =
     process.env['CLAUDE_CODE_USE_OPENAI'] === '1' ||
-    Boolean(process.env['OPENAI_API_KEY'])
+    Boolean(process.env['API_KEY'])
   const hasAnthropicKey = Boolean(process.env['ANTHROPIC_API_KEY'])
   if (hasOpenAIMode && hasAnthropicKey) {
     warnings.push(
@@ -103,9 +103,9 @@ export function buildShellExportBlock(result: SwitchProviderResult): string {
   const { env, provider } = result
   const lines: string[] = [
     `export CLAUDE_CODE_USE_OPENAI=${env['CLAUDE_CODE_USE_OPENAI'] ?? '1'}`,
-    `export OPENAI_BASE_URL=${env['OPENAI_BASE_URL'] ?? provider.baseUrl}`,
-    `export OPENAI_API_KEY=$${provider.apiKeyEnv}`,
-    `export OPENAI_MODEL=${env['OPENAI_MODEL'] ?? provider.defaultModel}`,
+    `export BASE_URL=${env['BASE_URL'] ?? provider.baseUrl}`,
+    `export API_KEY=$${provider.apiKeyEnv}`,
+    `export MODEL=${env['MODEL'] ?? provider.defaultModel}`,
   ]
   return lines.join('\n')
 }

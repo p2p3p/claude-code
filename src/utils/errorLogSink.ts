@@ -55,8 +55,7 @@ function createJsonlWriter(options: {
       writer.write(jsonStringify(obj) + '\n')
     },
     flush: writer.flush,
-    dispose: writer.dispose,
-  }
+    dispose: writer.dispose}
 }
 
 // Buffered writers for JSONL log files, keyed by path
@@ -101,8 +100,7 @@ function getLogWriter(path: string): JsonlWriter {
         }
       },
       flushIntervalMs: 1000,
-      maxBufferSize: 50,
-    })
+      maxBufferSize: 50})
     logWriters.set(path, writer)
     registerCleanup(async () => writer?.dispose())
   }
@@ -120,8 +118,7 @@ function appendToLog(path: string, message: object): void {
     cwd: getFsImplementation().cwd(),
     userType: process.env.USER_TYPE,
     sessionId: getSessionId(),
-    version: MACRO.VERSION,
-  }
+    version: MACRO.VERSION}
 
   getLogWriter(path).write(messageWithTimestamp)
 }
@@ -170,8 +167,7 @@ function logErrorImpl(error: Error): void {
   logForDebugging(`${error.name}: ${context}${errorStr}`, { level: 'error' })
 
   appendToLog(getErrorsPath(), {
-    error: `${context}${errorStr}`,
-  })
+    error: `${context}${errorStr}`})
 
   // Also report to Sentry (no-op if not initialized)
   captureException(error)
@@ -192,8 +188,7 @@ function logMCPErrorImpl(serverName: string, error: unknown): void {
     error: errorStr,
     timestamp: new Date().toISOString(),
     sessionId: getSessionId(),
-    cwd: getFsImplementation().cwd(),
-  }
+    cwd: getFsImplementation().cwd()}
 
   getLogWriter(logFile).write(errorInfo)
 }
@@ -210,8 +205,7 @@ function logMCPDebugImpl(serverName: string, message: string): void {
     debug: message,
     timestamp: new Date().toISOString(),
     sessionId: getSessionId(),
-    cwd: getFsImplementation().cwd(),
-  }
+    cwd: getFsImplementation().cwd()}
 
   getLogWriter(logFile).write(debugInfo)
 }
@@ -232,8 +226,7 @@ export function initializeErrorLogSink(): void {
     logMCPError: logMCPErrorImpl,
     logMCPDebug: logMCPDebugImpl,
     getErrorsPath,
-    getMCPLogsPath,
-  })
+    getMCPLogsPath})
 
   logForDebugging('Error log sink initialized')
 }

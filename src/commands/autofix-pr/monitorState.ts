@@ -1,3 +1,5 @@
+import { t } from '../../utils/i18n/index.js'
+
 type MonitorState = {
   taskId: string
   owner: string
@@ -30,7 +32,7 @@ export function trySetActiveMonitor(state: MonitorState): boolean {
  */
 export function setActiveMonitor(state: MonitorState): void {
   if (active)
-    throw new Error(`Monitor already active: ${active.repo}#${active.prNumber}`)
+    throw new Error(t('monitorState.alreadyActive', active.repo, active.prNumber))
   active = state
 }
 

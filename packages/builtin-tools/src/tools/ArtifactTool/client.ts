@@ -1,3 +1,5 @@
+import { t } from 'src/utils/i18n/index.js'
+
 export type UploadResult = {
   id: string
   url: string
@@ -36,13 +38,13 @@ export async function uploadArtifact(
     parsed = JSON.parse(text)
   } catch {
     throw new Error(
-      `Artifact upload failed: HTTP ${response.status} (non-JSON body)`,
+      t('toolUI.artifact.uploadFailedHttp', { status: response.status }),
     )
   }
 
   if (parsed && typeof parsed === 'object' && 'error' in parsed) {
     const code = (parsed as { error: unknown }).error
-    throw new Error(`Artifact upload failed: ${String(code)}`)
+    throw new Error(t('toolUI.artifact.uploadFailedCode', { code: String(code) }))
   }
 
   const data = parsed as Partial<UploadResult>
@@ -52,7 +54,7 @@ export async function uploadArtifact(
     typeof data.expiresAt !== 'string'
   ) {
     throw new Error(
-      `Artifact upload returned malformed body: ${text.slice(0, 200)}`,
+      t('toolUI.artifact.uploadMalformedBody', { body: text.slice(0, 200) }),
     )
   }
   return { id: data.id, url: data.url, expiresAt: data.expiresAt }

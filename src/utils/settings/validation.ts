@@ -133,8 +133,7 @@ export function formatZodError(
       received: receivedValue,
       enumValues,
       message: issue.message,
-      value: receivedValue,
-    })
+      value: receivedValue})
 
     if (isInvalidValueIssue(issue)) {
       expected = enumValues?.map(v => `"${v}"`).join(', ')
@@ -167,8 +166,7 @@ export function formatZodError(
       expected,
       invalidValue,
       suggestion: tip?.suggestion,
-      docLink: tip?.docLink,
-    }
+      docLink: tip?.docLink}
   })
 }
 
@@ -205,14 +203,12 @@ export function validateSettingsFileContent(content: string):
     return {
       isValid: false,
       error: errorMessage,
-      fullSchema: generateSettingsJSONSchema(),
-    }
+      fullSchema: generateSettingsJSONSchema()}
   } catch (parseError) {
     return {
       isValid: false,
       error: `Invalid JSON: ${parseError instanceof Error ? parseError.message : 'Unknown parsing error'}`,
-      fullSchema: generateSettingsJSONSchema(),
-    }
+      fullSchema: generateSettingsJSONSchema()}
   }
 }
 
@@ -241,8 +237,7 @@ export function filterInvalidPermissionRules(
           file: filePath,
           path: `permissions.${key}`,
           message: `Non-string value in ${key} array was removed`,
-          invalidValue: rule,
-        })
+          invalidValue: rule})
         return false
       }
       // PR-0a: pass behavior so vault whole-tool allow is rejected on the
@@ -256,8 +251,7 @@ export function filterInvalidPermissionRules(
           file: filePath,
           path: `permissions.${key}`,
           message,
-          invalidValue: rule,
-        })
+          invalidValue: rule})
         return false
       }
       return true

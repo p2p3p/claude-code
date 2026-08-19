@@ -15,8 +15,7 @@ import type { Message } from '../types/message.js'
 import {
   isValidImagePaste,
   type PromptInputMode,
-  type QueuedCommand,
-} from '../types/textInputTypes.js'
+  type QueuedCommand} from '../types/textInputTypes.js'
 import { createAbortController } from './abortController.js'
 import type { PastedContent } from './config.js'
 import { getCwd } from './cwd.js'
@@ -31,8 +30,7 @@ import { enqueue } from './messageQueueManager.js'
 import { resolveSkillModelOverride } from './model/model.js'
 import {
   claimConsumableQueuedAutonomyCommands,
-  finalizeAutonomyCommandsForTurn,
-} from './autonomyQueueLifecycle.js'
+  finalizeAutonomyCommandsForTurn} from './autonomyQueueLifecycle.js'
 import type { ProcessUserInputContext } from './processUserInput/processUserInput.js'
 import { processUserInput } from './processUserInput/processUserInput.js'
 import type { QueryGuard } from './QueryGuard.js'
@@ -150,8 +148,7 @@ export async function handlePromptSubmit(
     queuedCommands,
     uuid,
     skipSlashCommands,
-    bridgeOrigin,
-  } = params
+    bridgeOrigin} = params
 
   const { setCursorOffset, clearBuffer, resetHistory } = helpers
 
@@ -176,8 +173,7 @@ export async function handlePromptSubmit(
       onBeforeQuery,
       resetHistory,
       canUseTool,
-      onInputChange,
-    })
+      onInputChange})
     return
   }
 
@@ -211,8 +207,7 @@ export async function handlePromptSubmit(
       // Submit the /exit command instead - recursive call needs to be handled
       void handlePromptSubmit({
         ...params,
-        input: '/exit',
-      })
+        input: '/exit'})
     } else {
       // Fallback to direct exit if exit command not found
       exit()
@@ -262,8 +257,7 @@ export async function handlePromptSubmit(
     ) {
       logEvent('tengu_immediate_command_executed', {
         commandName:
-          immediateCommand.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          immediateCommand.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
       // Clear input
       onInputChange('')
@@ -285,14 +279,12 @@ export async function handlePromptSubmit(
         setToolJSX({
           jsx: null,
           shouldHidePromptInput: false,
-          clearLocalJSX: true,
-        })
+          clearLocalJSX: true})
         if (result && options?.display !== 'skip' && params.addNotification) {
           params.addNotification({
             key: `immediate-${immediateCommand.name}`,
             text: result,
-            priority: 'immediate',
-          })
+            priority: 'immediate'})
         }
         if (options?.nextInput) {
           if (options.submitNextInput) {
@@ -313,8 +305,7 @@ export async function handlePromptSubmit(
           jsx,
           shouldHidePromptInput: false,
           isLocalJSXCommand: true,
-          isImmediate: true,
-        })
+          isImmediate: true})
       }
       return
     }
@@ -336,8 +327,7 @@ export async function handlePromptSubmit(
         source:
           'interrupt_on_submit' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         streamMode:
-          params.streamMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+          params.streamMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
       params.abortController?.abort('interrupt')
     }
 
@@ -350,8 +340,7 @@ export async function handlePromptSubmit(
       pastedContents: hasImages ? pastedContents : undefined,
       skipSlashCommands,
       bridgeOrigin,
-      uuid,
-    })
+      uuid})
 
     onInputChange('')
     setCursorOffset(0)
@@ -374,8 +363,7 @@ export async function handlePromptSubmit(
     pastedContents: hasImages ? pastedContents : undefined,
     skipSlashCommands,
     bridgeOrigin,
-    uuid,
-  }
+    uuid}
 
   await executeUserInput({
     queuedCommands: [cmd],
@@ -394,8 +382,7 @@ export async function handlePromptSubmit(
     onBeforeQuery,
     resetHistory,
     canUseTool,
-    onInputChange,
-  })
+    onInputChange})
 }
 
 /**
@@ -421,8 +408,7 @@ async function executeUserInput(params: ExecuteUserInputParams): Promise<void> {
     onBeforeQuery,
     resetHistory,
     canUseTool,
-    queuedCommands,
-  } = params
+    queuedCommands} = params
 
   // Note: paste references are already processed before calling this function
   // (either in handlePromptSubmit before queuing, or before initial execution).
@@ -520,8 +506,7 @@ async function executeUserInput(params: ExecuteUserInputParams): Promise<void> {
             bridgeOrigin: cmd.bridgeOrigin,
             isMeta: cmd.isMeta,
             skipAttachments: !isFirst,
-            autonomy: cmd.autonomy,
-          })
+            autonomy: cmd.autonomy})
           if (runId && result.deferAutonomyCompletion) {
             deferredAutonomyRunIds.add(runId)
           }
@@ -560,8 +545,7 @@ async function executeUserInput(params: ExecuteUserInputParams): Promise<void> {
               (updater: (prev: FileHistoryState) => FileHistoryState) => {
                 setAppState(prev => ({
                   ...prev,
-                  fileHistory: updater(prev.fileHistory),
-                }))
+                  fileHistory: updater(prev.fileHistory)}))
               },
               message.uuid,
             )
@@ -578,8 +562,7 @@ async function executeUserInput(params: ExecuteUserInputParams): Promise<void> {
           setToolJSX({
             jsx: null,
             shouldHidePromptInput: false,
-            clearLocalJSX: true,
-          })
+            clearLocalJSX: true})
 
           const primaryCmd = commands[0]
           const primaryMode = primaryCmd?.mode ?? 'prompt'
@@ -610,8 +593,7 @@ async function executeUserInput(params: ExecuteUserInputParams): Promise<void> {
           setToolJSX({
             jsx: null,
             shouldHidePromptInput: false,
-            clearLocalJSX: true,
-          })
+            clearLocalJSX: true})
           resetHistory()
           setAbortController(null)
         }
@@ -646,8 +628,7 @@ async function executeUserInput(params: ExecuteUserInputParams): Promise<void> {
             outcome: { type: 'failed', error: turnError },
             currentDir: getCwd(),
             priority: 'later',
-            workload: turnWorkload,
-          })
+            workload: turnWorkload})
         } catch (finalizeError) {
           logError(toError(finalizeError))
         }
@@ -658,8 +639,7 @@ async function executeUserInput(params: ExecuteUserInputParams): Promise<void> {
             outcome: { type: 'completed' },
             currentDir: getCwd(),
             priority: 'later',
-            workload: turnWorkload,
-          })
+            workload: turnWorkload})
           for (const nextCommand of nextCommands) {
             enqueue(nextCommand)
           }

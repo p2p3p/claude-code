@@ -187,8 +187,7 @@ const lightTheme: Theme = {
   rainbow_green_shimmer: 'rgb(185,230,180)',
   rainbow_blue_shimmer: 'rgb(180,205,240)',
   rainbow_indigo_shimmer: 'rgb(195,180,230)',
-  rainbow_violet_shimmer: 'rgb(230,180,210)',
-}
+  rainbow_violet_shimmer: 'rgb(230,180,210)'}
 
 /**
  * Light ANSI theme using only the 16 standard ANSI colors
@@ -268,8 +267,7 @@ const lightAnsiTheme: Theme = {
   rainbow_green_shimmer: 'ansi:greenBright',
   rainbow_blue_shimmer: 'ansi:cyanBright',
   rainbow_indigo_shimmer: 'ansi:blueBright',
-  rainbow_violet_shimmer: 'ansi:magentaBright',
-}
+  rainbow_violet_shimmer: 'ansi:magentaBright'}
 
 /**
  * Dark ANSI theme using only the 16 standard ANSI colors
@@ -349,8 +347,7 @@ const darkAnsiTheme: Theme = {
   rainbow_green_shimmer: 'ansi:greenBright',
   rainbow_blue_shimmer: 'ansi:cyanBright',
   rainbow_indigo_shimmer: 'ansi:blueBright',
-  rainbow_violet_shimmer: 'ansi:magentaBright',
-}
+  rainbow_violet_shimmer: 'ansi:magentaBright'}
 
 /**
  * Light daltonized theme (color-blind friendly) using explicit RGB values
@@ -430,8 +427,7 @@ const lightDaltonizedTheme: Theme = {
   rainbow_green_shimmer: 'rgb(185,230,180)',
   rainbow_blue_shimmer: 'rgb(180,205,240)',
   rainbow_indigo_shimmer: 'rgb(195,180,230)',
-  rainbow_violet_shimmer: 'rgb(230,180,210)',
-}
+  rainbow_violet_shimmer: 'rgb(230,180,210)'}
 
 /**
  * Dark theme using explicit RGB values to avoid inconsistencies
@@ -511,8 +507,7 @@ const darkTheme: Theme = {
   rainbow_green_shimmer: 'rgb(185,230,180)',
   rainbow_blue_shimmer: 'rgb(180,205,240)',
   rainbow_indigo_shimmer: 'rgb(195,180,230)',
-  rainbow_violet_shimmer: 'rgb(230,180,210)',
-}
+  rainbow_violet_shimmer: 'rgb(230,180,210)'}
 
 /**
  * Dark daltonized theme (color-blind friendly) using explicit RGB values
@@ -592,8 +587,7 @@ const darkDaltonizedTheme: Theme = {
   rainbow_green_shimmer: 'rgb(185,230,180)',
   rainbow_blue_shimmer: 'rgb(180,205,240)',
   rainbow_indigo_shimmer: 'rgb(195,180,230)',
-  rainbow_violet_shimmer: 'rgb(230,180,210)',
-}
+  rainbow_violet_shimmer: 'rgb(230,180,210)'}
 
 export function getTheme(themeName: ThemeName): Theme {
   switch (themeName) {

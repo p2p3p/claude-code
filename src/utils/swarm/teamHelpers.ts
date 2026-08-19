@@ -37,8 +37,7 @@ export const inputSchema = lazySchema(() =>
     description: z
       .string()
       .optional()
-      .describe('Team description/purpose (only used with spawnTeam).'),
-  }),
+      .describe('Team description/purpose (only used with spawnTeam).')}),
 )
 
 // Output types for different operations

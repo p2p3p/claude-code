@@ -29,8 +29,7 @@ function calculatePercentiles(
   return {
     p25: counts[Math.floor(counts.length * 0.25)]!,
     p50: counts[Math.floor(counts.length * 0.5)]!,
-    p75: counts[Math.floor(counts.length * 0.75)]!,
-  }
+    p75: counts[Math.floor(counts.length * 0.75)]!}
 }
 
 /**

@@ -42,9 +42,7 @@ async function fetchChannels(
         arguments: {
           query,
           limit: 20,
-          channel_types: 'public_channel,private_channel',
-        },
-      },
+          channel_types: 'public_channel,private_channel'}},
       undefined,
       { timeout: 5000 },
     )
@@ -196,8 +194,7 @@ export async function getSlackChannelSuggestions(
     .slice(0, 10)
     .map(c => ({
       id: `slack-channel-${c}`,
-      displayText: `#${c}`,
-    }))
+      displayText: `#${c}`}))
 }
 
 export function clearSlackChannelCache(): void {

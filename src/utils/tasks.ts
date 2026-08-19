@@ -103,9 +103,7 @@ const LOCK_OPTIONS = {
   retries: {
     retries: 30,
     minTimeout: 5,
-    maxTimeout: 100,
-  },
-}
+    maxTimeout: 100}}
 
 function getHighWaterMarkPath(taskListId: string): string {
   return join(getTasksDir(taskListId), HIGH_WATER_MARK_FILE)
@@ -428,8 +426,7 @@ export async function deleteTask(
       ) {
         await updateTask(taskListId, task.id, {
           blocks: newBlocks,
-          blockedBy: newBlockedBy,
-        })
+          blockedBy: newBlockedBy})
       }
     }
 
@@ -471,15 +468,13 @@ export async function blockTask(
   // Update source task: A blocks B
   if (!fromTask.blocks.includes(toTaskId)) {
     await updateTask(taskListId, fromTaskId, {
-      blocks: [...fromTask.blocks, toTaskId],
-    })
+      blocks: [...fromTask.blocks, toTaskId]})
   }
 
   // Update target task: B is blockedBy A
   if (!toTask.blockedBy.includes(fromTaskId)) {
     await updateTask(taskListId, toTaskId, {
-      blockedBy: [...toTask.blockedBy, fromTaskId],
-    })
+      blockedBy: [...toTask.blockedBy, fromTaskId]})
   }
 
   return true
@@ -595,8 +590,7 @@ export async function claimTask(
 
     // Claim the task (already holding taskPath lock — use unsafe variant)
     const updated = await updateTaskUnsafe(taskListId, taskId, {
-      owner: claimantAgentId,
-    })
+      owner: claimantAgentId})
     return { success: true, task: updated! }
   } catch (error) {
     logForDebugging(
@@ -669,14 +663,12 @@ async function claimTaskWithBusyCheck(
         success: false,
         reason: 'agent_busy',
         task,
-        busyWithTasks: agentOpenTasks.map(t => t.id),
-      }
+        busyWithTasks: agentOpenTasks.map(t => t.id)}
     }
 
     // Claim the task
     const updated = await updateTask(taskListId, taskId, {
-      owner: claimantAgentId,
-    })
+      owner: claimantAgentId})
     return { success: true, task: updated! }
   } catch (error) {
     logForDebugging(
@@ -737,9 +729,7 @@ async function readTeamMembers(
       members: teamFile.members.map(m => ({
         agentId: m.agentId,
         name: m.name,
-        agentType: m.agentType,
-      })),
-    }
+        agentType: m.agentType}))}
   } catch (e) {
     const code = getErrnoCode(e)
     if (code === 'ENOENT') {
@@ -792,8 +782,7 @@ export async function getAgentStatuses(
       name: member.name,
       agentType: member.agentType,
       status: currentTasks.length === 0 ? 'idle' : 'busy',
-      currentTasks,
-    }
+      currentTasks}
   })
 }
 
@@ -853,10 +842,8 @@ export async function unassignTeammateTasks(
   return {
     unassignedTasks: unresolvedAssignedTasks.map(t => ({
       id: t.id,
-      subject: t.subject,
-    })),
-    notificationMessage,
-  }
+      subject: t.subject})),
+    notificationMessage}
 }
 
 export const DEFAULT_TASKS_MODE_TASK_LIST_ID = 'tasklist'

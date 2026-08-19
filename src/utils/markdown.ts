@@ -28,9 +28,7 @@ export function configureMarked(): void {
     tokenizer: {
       del() {
         return undefined
-      },
-    },
-  })
+      }}})
 }
 
 export function applyMarkdown(

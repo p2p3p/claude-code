@@ -29,8 +29,7 @@ const DEFAULT_TREE_CHARS: TreeCharacters = {
   branch: figures.lineUpDownRight, // '├'
   lastBranch: figures.lineUpRight, // '└'
   line: figures.lineVertical, // '│'
-  empty: ' ',
-}
+  empty: ' '}
 
 /**
  * Custom treeify implementation with Ink theme color support
@@ -41,8 +40,7 @@ export function treeify(obj: TreeNode, options: TreeifyOptions = {}): string {
     showValues = true,
     hideFunctions = false,
     themeName = 'dark',
-    treeCharColors = {},
-  } = options
+    treeCharColors = {}} = options
 
   const lines: string[] = []
   const visited = new WeakSet<object>()

@@ -19,8 +19,7 @@ function oauthHeaders(accessToken: string): Record<string, string> {
   return {
     Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'application/json',
-    'anthropic-version': ANTHROPIC_VERSION,
-  }
+    'anthropic-version': ANTHROPIC_VERSION}
 }
 
 export async function createCodeSession(
@@ -42,8 +41,7 @@ export async function createCodeSession(
       {
         headers: oauthHeaders(accessToken),
         timeout: timeoutMs,
-        validateStatus: s => s < 500,
-      },
+        validateStatus: s => s < 500},
     )
   } catch (err: unknown) {
     logForDebugging(
@@ -110,8 +108,7 @@ export async function fetchRemoteCredentials(
       {
         headers,
         timeout: timeoutMs,
-        validateStatus: s => s < 500,
-      },
+        validateStatus: s => s < 500},
     )
   } catch (err: unknown) {
     logForDebugging(
@@ -163,6 +160,5 @@ export async function fetchRemoteCredentials(
     worker_jwt: data.worker_jwt,
     api_base_url: data.api_base_url,
     expires_in: data.expires_in,
-    worker_epoch: epoch,
-  }
+    worker_epoch: epoch}
 }

@@ -55,8 +55,7 @@ const DEFAULT_DEPS: GitBashDiscoveryDeps = {
     execSync_DEPRECATED(cmd, { stdio: 'pipe', encoding: 'utf8' }).trim(),
   cwdFn: getCwd,
   userProfile: process.env.USERPROFILE,
-  envOverride: undefined,
-}
+  envOverride: undefined}
 
 /**
  * Search common install locations for bash.exe directly. Returns the first

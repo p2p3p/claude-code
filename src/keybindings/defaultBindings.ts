@@ -54,12 +54,9 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
             'ctrl+shift+f': 'app:globalSearch' as const,
             'cmd+shift+f': 'app:globalSearch' as const,
             'ctrl+shift+p': 'app:quickOpen' as const,
-            'cmd+shift+p': 'app:quickOpen' as const,
-          }
+            'cmd+shift+p': 'app:quickOpen' as const}
         : {}),
-      ...(feature('TERMINAL_PANEL') ? { 'meta+j': 'app:toggleTerminal' } : {}),
-    },
-  },
+      ...(feature('TERMINAL_PANEL') ? { 'meta+j': 'app:toggleTerminal' } : {})}},
   {
     context: 'Chat',
     bindings: {
@@ -93,18 +90,14 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       // add a voice:pushToTalk entry (last wins); to disable, use /voice
       // — null-unbinding space hits a pre-existing useKeybinding.ts trap
       // where 'unbound' swallows the event (space dead for typing).
-      ...(feature('VOICE_MODE') ? { space: 'voice:pushToTalk' } : {}),
-    },
-  },
+      ...(feature('VOICE_MODE') ? { space: 'voice:pushToTalk' } : {})}},
   {
     context: 'Autocomplete',
     bindings: {
       tab: 'autocomplete:accept',
       escape: 'autocomplete:dismiss',
       up: 'autocomplete:previous',
-      down: 'autocomplete:next',
-    },
-  },
+      down: 'autocomplete:next'}},
   {
     context: 'Settings',
     bindings: {
@@ -127,9 +120,7 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       // Enter search mode
       '/': 'settings:search',
       // Retry loading usage data (only active on error)
-      r: 'settings:retry',
-    },
-  },
+      r: 'settings:retry'}},
   {
     context: 'Confirmation',
     bindings: {
@@ -145,9 +136,7 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       // Toggle permission explanation in permission dialogs
       'ctrl+e': 'confirm:toggleExplanation',
       // Toggle permission debug info
-      'ctrl+d': 'permission:toggleDebug',
-    },
-  },
+      'ctrl+d': 'permission:toggleDebug'}},
   {
     context: 'FormField',
     bindings: {
@@ -155,9 +144,7 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       tab: 'tabs:next',
       'shift+tab': 'tabs:previous',
       up: 'tabs:previous',
-      down: 'tabs:next',
-    },
-  },
+      down: 'tabs:next'}},
   {
     context: 'Tabs',
     bindings: {
@@ -165,9 +152,7 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       tab: 'tabs:next',
       'shift+tab': 'tabs:previous',
       right: 'tabs:next',
-      left: 'tabs:previous',
-    },
-  },
+      left: 'tabs:previous'}},
   {
     context: 'Transcript',
     bindings: {
@@ -176,9 +161,7 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       escape: 'transcript:exit',
       // q — pager convention (less, tmux copy-mode). Transcript is a modal
       // reading view with no prompt, so q-as-literal-char has no owner.
-      q: 'transcript:exit',
-    },
-  },
+      q: 'transcript:exit'}},
   {
     context: 'HistorySearch',
     bindings: {
@@ -186,23 +169,17 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       escape: 'historySearch:accept',
       tab: 'historySearch:accept',
       'ctrl+c': 'historySearch:cancel',
-      enter: 'historySearch:execute',
-    },
-  },
+      enter: 'historySearch:execute'}},
   {
     context: 'Task',
     bindings: {
       // Background running foreground tasks (bash commands, agents)
       // In tmux, users must press ctrl+b twice (tmux prefix escape)
-      'ctrl+b': 'task:background',
-    },
-  },
+      'ctrl+b': 'task:background'}},
   {
     context: 'ThemePicker',
     bindings: {
-      'ctrl+t': 'theme:toggleSyntaxHighlighting',
-    },
-  },
+      'ctrl+t': 'theme:toggleSyntaxHighlighting'}},
   {
     context: 'Scroll',
     bindings: {
@@ -219,15 +196,11 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       // Esc-to-clear and contextual ctrl+c are handled via raw
       // useInput so they can conditionally propagate.
       'ctrl+shift+c': 'selection:copy',
-      'cmd+c': 'selection:copy',
-    },
-  },
+      'cmd+c': 'selection:copy'}},
   {
     context: 'Help',
     bindings: {
-      escape: 'help:dismiss',
-    },
-  },
+      escape: 'help:dismiss'}},
   // Attachment navigation (select dialog image attachments)
   {
     context: 'Attachments',
@@ -237,9 +210,7 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       backspace: 'attachments:remove',
       delete: 'attachments:remove',
       down: 'attachments:exit',
-      escape: 'attachments:exit',
-    },
-  },
+      escape: 'attachments:exit'}},
   // Footer indicator navigation (tasks, teams, diff, loop)
   {
     context: 'Footer',
@@ -251,9 +222,7 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       right: 'footer:next',
       left: 'footer:previous',
       enter: 'footer:openSelected',
-      escape: 'footer:clearSelection',
-    },
-  },
+      escape: 'footer:clearSelection'}},
   // Message selector (rewind dialog) navigation
   {
     context: 'MessageSelector',
@@ -272,9 +241,7 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       'shift+down': 'messageSelector:bottom',
       'meta+down': 'messageSelector:bottom',
       'shift+j': 'messageSelector:bottom',
-      enter: 'messageSelector:select',
-    },
-  },
+      enter: 'messageSelector:select'}},
   // PromptInput unmounts while cursor active — no key conflict.
   ...(feature('MESSAGE_ACTIONS')
     ? [
@@ -299,9 +266,7 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
             // Mirror MESSAGE_ACTIONS. Not imported — would pull React/ink into this config module.
             enter: 'messageActions:enter' as const,
             c: 'messageActions:c' as const,
-            p: 'messageActions:p' as const,
-          },
-        },
+            p: 'messageActions:p' as const}},
       ]
     : []),
   // Diff dialog navigation
@@ -315,17 +280,14 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       down: 'diff:nextFile',
       enter: 'diff:viewDetails',
       // Note: diff:back is handled by left arrow in detail mode
-    },
-  },
+    }},
   // Model picker effort cycling (ant-only)
   {
     context: 'ModelPicker',
     bindings: {
       left: 'modelPicker:decreaseEffort',
       right: 'modelPicker:increaseEffort',
-      space: 'modelPicker:toggle1M',
-    },
-  },
+      space: 'modelPicker:toggle1M'}},
   // Effort panel (slash /effort without args)
   {
     context: 'EffortPanel',
@@ -339,9 +301,7 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       enter: 'effortPanel:confirm',
       escape: 'effortPanel:cancel',
       q: 'effortPanel:cancel',
-      'ctrl+c': 'effortPanel:cancel',
-    },
-  },
+      'ctrl+c': 'effortPanel:cancel'}},
   // Select component navigation (used by /model, /resume, permission prompts, etc.)
   {
     context: 'Select',
@@ -353,16 +313,12 @@ export const DEFAULT_BINDINGS: KeybindingBlock[] = [
       'ctrl+n': 'select:next',
       'ctrl+p': 'select:previous',
       enter: 'select:accept',
-      escape: 'select:cancel',
-    },
-  },
+      escape: 'select:cancel'}},
   // Plugin dialog actions (manage, browse, discover plugins)
   // Navigation (select:*) uses the Select context above
   {
     context: 'Plugin',
     bindings: {
       space: 'plugin:toggle',
-      i: 'plugin:install',
-    },
-  },
+      i: 'plugin:install'}},
 ]

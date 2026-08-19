@@ -120,8 +120,7 @@ function coalescePatches(
       // RFC 7396 merge — overlay keys win, nulls preserved for server
       merged[key] = {
         ...(merged[key] as Record<string, unknown>),
-        ...(value as Record<string, unknown>),
-      }
+        ...(value as Record<string, unknown>)}
     } else {
       merged[key] = value
     }

@@ -1,0 +1,83 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.getver.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+        env:
+          GIT_CONFIG_COUNT: 2
+          GIT_CONFIG_KEY_0: init.defaultBranch
+          GIT_CONFIG_KEY_1: advice.defaultBranchName
+          GIT_CONFIG_VALUE_0: main
+          GIT_CONFIG_VALUE_1: "false"
+
+      - id: getver
+        run: |
+          VERSION=$(cat package.json | grep '"version"' | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        env:
+          CLAUDE_CODE_SKIP_CHROME_MCP_SETUP: "1"
+        run: bun install --frozen-lockfile
+
+      - name: Build bundle
+        run: bun run scripts/build-bundle.ts
+
+      - name: Package artifacts
+        run: |
+          VERSION="${{ steps.getver.outputs.version }}"
+          mkdir -p artifacts
+          mkdir -p "claude-code-v$VERSION"
+          cp dist/claude-bundle.js "claude-code-v$VERSION/"
+          tar czf "artifacts/claude-code-v$VERSION.tar.gz" "claude-code-v$VERSION"
+          echo "artifactsDir=artifacts" >> $GITHUB_OUTPUT
+        id: package
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-code-build
+          path: artifacts/
+          compression-level: 0
+
+  release:
+    needs: [build]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: claude-code-build
+          path: artifacts
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+          TAG="v$VERSION"
+          gh release create "$TAG" --repo ${{ github.repository }} \
+            --title "claude-code v$VERSION" \
+            --notes "bundle (单文件js)" || true
+          for f in artifacts/*; do
+            echo "Uploading: $f"
+            gh release upload "$TAG" --repo ${{ github.repository }} "$f" --clobber || true
+          done

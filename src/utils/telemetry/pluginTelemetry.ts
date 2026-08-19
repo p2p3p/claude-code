@@ -16,17 +16,14 @@ import { sep } from 'path'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import type {
   LoadedPlugin,
   PluginError,
-  PluginManifest,
-} from '../../types/plugin.js'
+  PluginManifest} from '../../types/plugin.js'
 import {
   isOfficialMarketplaceName,
-  parsePluginIdentifier,
-} from '../plugins/pluginIdentifier.js'
+  parsePluginIdentifier} from '../plugins/pluginIdentifier.js'
 
 // builtinPlugins.ts:BUILTIN_MARKETPLACE_NAME — inlined to avoid the cycle
 // through commands.js. Marketplace schemas.ts enforces 'builtin' is reserved.
@@ -159,8 +156,7 @@ export function buildPluginTelemetryFields(
     marketplace_name_redacted: (isAnthropicControlled && marketplace
       ? marketplace
       : 'third-party') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    is_official_plugin: isAnthropicControlled,
-  }
+    is_official_plugin: isAnthropicControlled}
 }
 
 /**
@@ -201,8 +197,7 @@ export function logPluginsEnabledForSession(
         plugin.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
       ...(marketplace && {
         _PROTO_marketplace_name:
-          marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-      }),
+          marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
       ...buildPluginTelemetryFields(plugin.name, marketplace, managedNames),
       enabled_via: getEnabledVia(
         plugin,
@@ -217,9 +212,7 @@ export function logPluginsEnabledForSession(
       has_hooks: plugin.hooksConfig !== undefined,
       ...(plugin.manifest.version && {
         version: plugin.manifest
-          .version as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      }),
-    })
+          .version as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})})
   }
 }
 
@@ -281,9 +274,7 @@ export function logPluginLoadErrors(
         pluginName as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
       ...(marketplace && {
         _PROTO_marketplace_name:
-          marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
-      }),
-      ...buildPluginTelemetryFields(pluginName, marketplace, managedNames),
-    })
+          marketplace as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED}),
+      ...buildPluginTelemetryFields(pluginName, marketplace, managedNames)})
   }
 }

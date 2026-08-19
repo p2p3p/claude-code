@@ -18,6 +18,7 @@ import { logForDebugging } from 'src/utils/debug.js'
 import { countLinesChanged } from 'src/utils/diff.js'
 import { isEnvTruthy } from 'src/utils/envUtils.js'
 import { isENOENT } from 'src/utils/errors.js'
+import { t } from 'src/utils/i18n/index.js'
 import {
   FILE_NOT_FOUND_CWD_NOTE,
   findSimilarFile,
@@ -81,11 +82,11 @@ const MAX_EDIT_FILE_SIZE = 1024 * 1024 * 1024 // 1 GiB (stat bytes)
 
 export const FileEditTool = buildTool({
   name: FILE_EDIT_TOOL_NAME,
-  searchHint: 'modify file contents in place',
+  searchHint: t('toolUI.fileEdit.searchHint'),
   maxResultSizeChars: 100_000,
   strict: true,
   async description() {
-    return 'A tool for editing files'
+    return t('toolUI.fileEdit.description')
   },
   async prompt() {
     return getEditToolDescription()
@@ -94,7 +95,9 @@ export const FileEditTool = buildTool({
   getToolUseSummary,
   getActivityDescription(input) {
     const summary = getToolUseSummary(input)
-    return summary ? `Editing ${summary}` : 'Editing file'
+    return summary
+      ? t('toolUI.fileEdit.editing', summary)
+      : t('toolUI.fileEdit.editingFile')
   },
   get inputSchema() {
     return inputSchema()
@@ -145,8 +148,7 @@ export const FileEditTool = buildTool({
       return {
         result: false,
         behavior: 'ask',
-        message:
-          'No changes to make: old_string and new_string are exactly the same.',
+        message: t('toolUI.fileEdit.noChangesToMake'),
         errorCode: 1,
       }
     }
@@ -163,8 +165,7 @@ export const FileEditTool = buildTool({
       return {
         result: false,
         behavior: 'ask',
-        message:
-          'File is in a directory that is denied by your permission settings.',
+        message: t('toolUI.fileEdit.deniedDirectory'),
         errorCode: 2,
       }
     }
@@ -189,7 +190,7 @@ export const FileEditTool = buildTool({
         return {
           result: false,
           behavior: 'ask',
-          message: `Cannot edit '${file_path}': the specified path is an existing directory. Use Bash ls to list files in this directory, or specify a filename path to edit a specific file.`,
+          message: t('toolUI.fileEdit.isDirectory', file_path),
           errorCode: 10,
         }
       }
@@ -197,7 +198,11 @@ export const FileEditTool = buildTool({
         return {
           result: false,
           behavior: 'ask',
-          message: `File is too large to edit (${formatFileSize(fileStat.size)}). Maximum editable file size is ${formatFileSize(MAX_EDIT_FILE_SIZE)}.`,
+          message: t(
+          'toolUI.fileEdit.fileTooLarge',
+          formatFileSize(fileStat.size),
+          formatFileSize(MAX_EDIT_FILE_SIZE),
+        ),
           errorCode: 10,
         }
       }
@@ -260,7 +265,7 @@ export const FileEditTool = buildTool({
         return {
           result: false,
           behavior: 'ask',
-          message: 'Cannot create new file - file already exists.',
+          message: t('toolUI.fileEdit.cannotCreateNewFile'),
           errorCode: 3,
         }
       }
@@ -275,7 +280,7 @@ export const FileEditTool = buildTool({
       return {
         result: false,
         behavior: 'ask',
-        message: `File is a Jupyter Notebook. Use the ${NOTEBOOK_EDIT_TOOL_NAME} to edit this file.`,
+        message: t('toolUI.fileEdit.jupyterNotebook', NOTEBOOK_EDIT_TOOL_NAME),
         errorCode: 5,
       }
     }
@@ -298,8 +303,7 @@ export const FileEditTool = buildTool({
           return {
             result: false,
             behavior: 'ask',
-            message:
-              'File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.',
+            message: t('toolUI.fileEdit.modifiedSinceRead'),
             errorCode: 7,
           }
         }
@@ -314,7 +318,7 @@ export const FileEditTool = buildTool({
       return {
         result: false,
         behavior: 'ask',
-        message: `String to replace not found in file.\nString: ${old_string}`,
+        message: t('toolUI.fileEdit.stringNotFoundInFile', old_string),
         meta: {
           isFilePathAbsolute: String(isAbsolute(file_path)),
         },
@@ -329,7 +333,7 @@ export const FileEditTool = buildTool({
       return {
         result: false,
         behavior: 'ask',
-        message: `Found ${matches} matches of the string to replace, but replace_all is false. To replace all occurrences, set replace_all to true. To replace only one occurrence, please provide more context to uniquely identify the instance.\nString: ${old_string}`,
+        message: t('toolUI.fileEdit.multipleMatches', matches, old_string),
         meta: {
           isFilePathAbsolute: String(isAbsolute(file_path)),
           actualOldString,
@@ -458,7 +462,7 @@ export const FileEditTool = buildTool({
         const contentUnchanged =
           isFullRead && originalFileContents === lastRead.content
         if (!contentUnchanged) {
-          throw new Error(FILE_UNEXPECTEDLY_MODIFIED_ERROR)
+          throw new Error(FILE_UNEXPECTEDLY_MODIFIED_ERROR())
         }
       }
     }
@@ -564,21 +568,21 @@ export const FileEditTool = buildTool({
   mapToolResultToToolResultBlockParam(data: FileEditOutput, toolUseID) {
     const { filePath, userModified, replaceAll } = data
     const modifiedNote = userModified
-      ? '.  The user modified your proposed changes before accepting them. '
+      ? t('toolUI.fileEdit.userModifiedNote')
       : ''
 
     if (replaceAll) {
       return {
         tool_use_id: toolUseID,
         type: 'tool_result',
-        content: `The file ${filePath} has been updated${modifiedNote}. All occurrences were successfully replaced.`,
+        content: t('toolUI.fileEdit.updatedAll', filePath, modifiedNote),
       }
     }
 
     return {
       tool_use_id: toolUseID,
       type: 'tool_result',
-      content: `The file ${filePath} has been updated successfully${modifiedNote}.`,
+      content: t('toolUI.fileEdit.updated', filePath, modifiedNote),
     }
   },
 } satisfies ToolDef<ReturnType<typeof inputSchema>, FileEditOutput>)

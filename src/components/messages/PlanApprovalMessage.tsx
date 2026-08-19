@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js'
 import { Markdown } from '../../components/Markdown.js';
 import { Box, Text } from '@anthropic/ink';
 import { jsonParse } from '../../utils/slowOperations.js';
@@ -8,8 +9,7 @@ import {
   isPlanApprovalRequest,
   isPlanApprovalResponse,
   type PlanApprovalRequestMessage,
-  type PlanApprovalResponseMessage,
-} from '../../utils/teammateMailbox.js';
+  type PlanApprovalResponseMessage} from '../../utils/teammateMailbox.js';
 import { getShutdownMessageSummary } from './ShutdownMessage.js';
 import { getTaskAssignmentSummary } from './TaskAssignmentMessage.js';
 
@@ -27,7 +27,7 @@ export function PlanApprovalRequestDisplay({ request }: PlanApprovalRequestProps
       <Box borderStyle="round" borderColor="planMode" flexDirection="column" paddingX={1}>
         <Box marginBottom={1}>
           <Text color="planMode" bold>
-            Plan Approval Request from {request.from}
+            {t('planapprovalmessage.planApprovalRequestFrom', request.from)}
           </Text>
         </Box>
         <Box
@@ -41,7 +41,7 @@ export function PlanApprovalRequestDisplay({ request }: PlanApprovalRequestProps
         >
           <Markdown>{request.planContent}</Markdown>
         </Box>
-        <Text dimColor>Plan file: {request.planFilePath}</Text>
+        <Text dimColor>{t('ui.planFile', request.planFilePath)}</Text>
       </Box>
     </Box>
   );
@@ -62,11 +62,11 @@ export function PlanApprovalResponseDisplay({ response, senderName }: PlanApprov
         <Box borderStyle="round" borderColor="success" flexDirection="column" paddingX={1} paddingY={1}>
           <Box>
             <Text color="success" bold>
-              ✓ Plan Approved by {senderName}
+              {t('planapprovalmessage.planApprovedBy', senderName)}
             </Text>
           </Box>
           <Box marginTop={1}>
-            <Text>You can now proceed with implementation. Your plan mode restrictions have been lifted.</Text>
+            <Text>{t('planapprovalmessage.youCanNowProceedWithImplementationYourPlanModeRestrictionsHaveBeenLifted')}</Text>
           </Box>
         </Box>
       </Box>
@@ -78,7 +78,7 @@ export function PlanApprovalResponseDisplay({ response, senderName }: PlanApprov
       <Box borderStyle="round" borderColor="error" flexDirection="column" paddingX={1} paddingY={1}>
         <Box>
           <Text color="error" bold>
-            ✗ Plan Rejected by {senderName}
+            {t('planapprovalmessage.planRejectedBy', senderName)}
           </Text>
         </Box>
         {response.feedback && (
@@ -90,11 +90,11 @@ export function PlanApprovalResponseDisplay({ response, senderName }: PlanApprov
             borderRight={false}
             paddingX={1}
           >
-            <Text>Feedback: {response.feedback}</Text>
+            <Text>{t('planapprovalmessage.feedback')} {response.feedback}</Text>
           </Box>
         )}
         <Box marginTop={1}>
-          <Text dimColor>Please revise your plan based on the feedback and call ExitPlanMode again.</Text>
+          <Text dimColor>{t('planapprovalmessage.pleaseReviseYourPlanBasedOnTheFeedbackAndCallExitPlanModeAgain')}</Text>
         </Box>
       </Box>
     </Box>
@@ -127,15 +127,15 @@ export function tryRenderPlanApprovalMessage(content: string, senderName: string
 function getPlanApprovalSummary(content: string): string | null {
   const request = isPlanApprovalRequest(content);
   if (request) {
-    return `[Plan Approval Request from ${request.from}]`;
+    return t('planapprovalmessage.planApprovalRequestSummary', request.from);
   }
 
   const response = isPlanApprovalResponse(content);
   if (response) {
     if (response.approved) {
-      return '[Plan Approved] You can now proceed with implementation';
+      return t('planapprovalmessage.planApprovedSummary');
     } else {
-      return `[Plan Rejected] ${response.feedback || 'Please revise your plan'}`;
+      return t('planapprovalmessage.planRejectedSummary', response.feedback);
     }
   }
 
@@ -146,13 +146,13 @@ function getPlanApprovalSummary(content: string): string | null {
  * Get a brief summary text for an idle notification.
  */
 function getIdleNotificationSummary(msg: IdleNotificationMessage): string {
-  const parts: string[] = ['Agent idle'];
+  const parts: string[] = [t('planapprovalmessage.agentIdle')];
   if (msg.completedTaskId) {
-    const status = msg.completedStatus || 'completed';
-    parts.push(`Task ${msg.completedTaskId} ${status}`);
+    const status = msg.completedStatus || t('planapprovalmessage.completedStatus');
+    parts.push(t('planapprovalmessage.taskCompletedSummary', msg.completedTaskId, status));
   }
   if (msg.summary) {
-    parts.push(`Last DM: ${msg.summary}`);
+    parts.push(t('planapprovalmessage.lastDmSummary', msg.summary));
   }
   return parts.join(' · ');
 }

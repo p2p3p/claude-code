@@ -4,8 +4,7 @@ import { isAutoMemoryEnabled } from '../../memdir/paths.js'
 import type { AgentColorName } from '@claude-code-best/builtin-tools/tools/AgentTool/agentColorManager.js'
 import {
   type AgentMemoryScope,
-  loadAgentMemoryPrompt,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/agentMemory.js'
+  loadAgentMemoryPrompt} from '@claude-code-best/builtin-tools/tools/AgentTool/agentMemory.js'
 import type { AgentDefinition } from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import { FILE_EDIT_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileEditTool/constants.js'
 import { FILE_READ_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/FileReadTool/prompt.js'
@@ -16,19 +15,16 @@ import { EFFORT_LEVELS, parseEffortValue } from '../effort.js'
 import {
   coerceDescriptionToString,
   parseFrontmatter,
-  parsePositiveIntFromFrontmatter,
-} from '../frontmatterParser.js'
+  parsePositiveIntFromFrontmatter} from '../frontmatterParser.js'
 import { getFsImplementation, isDuplicatePath } from '../fsOperations.js'
 import {
   parseAgentToolsFromFrontmatter,
-  parseSlashCommandToolsFromFrontmatter,
-} from '../markdownConfigLoader.js'
+  parseSlashCommandToolsFromFrontmatter} from '../markdownConfigLoader.js'
 import { loadAllPluginsCacheOnly } from './pluginLoader.js'
 import {
   loadPluginOptions,
   substitutePluginVariables,
-  substituteUserConfigInContent,
-} from './pluginOptionsStorage.js'
+  substituteUserConfigInContent} from './pluginOptionsStorage.js'
 import type { PluginManifest } from './schemas.js'
 import { walkPluginMarkdown } from './walkPluginMarkdown.js'
 
@@ -112,8 +108,7 @@ async function loadAgentFromFile(
     // usernames, endpoints, etc. Sensitive refs resolve to a placeholder.
     let systemPrompt = substitutePluginVariables(markdownContent.trim(), {
       path: pluginPath,
-      source: sourceName,
-    })
+      source: sourceName})
     if (pluginManifest.userConfig) {
       systemPrompt = substituteUserConfigInContent(
         systemPrompt,
@@ -218,12 +213,10 @@ async function loadAgentFromFile(
       ...(memory ? { memory } : {}),
       ...(isolation ? { isolation } : {}),
       ...(effort !== undefined ? { effort } : {}),
-      ...(maxTurns !== undefined ? { maxTurns } : {}),
-    } as AgentDefinition
+      ...(maxTurns !== undefined ? { maxTurns } : {})} as AgentDefinition
   } catch (error) {
     logForDebugging(`Failed to load agent from ${filePath}: ${error}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return null
   }
 }

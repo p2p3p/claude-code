@@ -4,6 +4,7 @@ import { isClassifierPermissionsEnabled } from '../../../utils/permissions/bashC
 import type { PermissionDecisionReason } from '../../../utils/permissions/PermissionResult.js';
 import type { PermissionUpdate } from '../../../utils/permissions/PermissionUpdateSchema.js';
 import { shouldShowAlwaysAllowOptions } from '../../../utils/permissions/permissionsLoader.js';
+import { t } from '../../../utils/i18n/index.js';
 import type { OptionWithDescription } from '../../CustomSelect/select.js';
 import { generateShellSuggestionsLabel } from '../shellPermissionHelpers.js';
 
@@ -44,8 +45,7 @@ export function bashToolUseOptions({
   yesInputMode = false,
   noInputMode = false,
   editablePrefix,
-  onEditablePrefixChange,
-}: {
+  onEditablePrefixChange}: {
   suggestions?: PermissionUpdate[];
   decisionReason?: PermissionDecisionReason;
   onRejectFeedbackChange: (value: string) => void;
@@ -67,17 +67,15 @@ export function bashToolUseOptions({
   if (yesInputMode) {
     options.push({
       type: 'input',
-      label: 'Yes',
+      label: t('bashToolUse.yes'),
       value: 'yes',
-      placeholder: 'and tell Claude what to do next',
+      placeholder: t('bashToolUse.yesAndTell'),
       onChange: onAcceptFeedbackChange,
-      allowEmptySubmitToCancel: true,
-    });
+      allowEmptySubmitToCancel: true});
   } else {
     options.push({
-      label: 'Yes',
-      value: 'yes',
-    });
+      label: t('bashToolUse.yes'),
+      value: 'yes'});
   }
 
   // Only show "always allow" options when not restricted by allowManagedPermissionRulesOnly
@@ -92,24 +90,22 @@ export function bashToolUseOptions({
     if (editablePrefix !== undefined && onEditablePrefixChange && !hasNonBashSuggestions && suggestions.length > 0) {
       options.push({
         type: 'input',
-        label: 'Yes, and don\u2019t ask again for',
+        label: t('bashToolUse.yesDontAsk'),
         value: 'yes-prefix-edited',
-        placeholder: 'command prefix (e.g., npm run:*)',
+        placeholder: t('bashToolUse.commandPrefix'),
         initialValue: editablePrefix,
         onChange: onEditablePrefixChange,
         allowEmptySubmitToCancel: true,
         showLabelWithValue: true,
         labelValueSeparator: ': ',
-        resetCursorOnUpdate: true,
-      });
+        resetCursorOnUpdate: true});
     } else if (suggestions.length > 0) {
       const label = generateShellSuggestionsLabel(suggestions, BASH_TOOL_NAME, stripBashRedirections);
 
       if (label) {
         options.push({
           label,
-          value: 'yes-apply-suggestions',
-        });
+          value: 'yes-apply-suggestions'});
       }
     }
 
@@ -131,33 +127,30 @@ export function bashToolUseOptions({
     ) {
       options.push({
         type: 'input',
-        label: 'Yes, and don\u2019t ask again for',
+        label: t('bashToolUse.yesDontAsk'),
         value: 'yes-classifier-reviewed',
-        placeholder: 'describe what to allow...',
+        placeholder: t('bashToolUse.describeWhatToAllow'),
         initialValue: classifierDescription ?? '',
         onChange: onClassifierDescriptionChange,
         allowEmptySubmitToCancel: true,
         showLabelWithValue: true,
         labelValueSeparator: ': ',
-        resetCursorOnUpdate: true,
-      });
+        resetCursorOnUpdate: true});
     }
   }
 
   if (noInputMode) {
     options.push({
       type: 'input',
-      label: 'No',
+      label: t('bashToolUse.no'),
       value: 'no',
-      placeholder: 'and tell Claude what to do differently',
+      placeholder: t('bashToolUse.tellDifferent'),
       onChange: onRejectFeedbackChange,
-      allowEmptySubmitToCancel: true,
-    });
+      allowEmptySubmitToCancel: true});
   } else {
     options.push({
-      label: 'No',
-      value: 'no',
-    });
+      label: t('bashToolUse.no'),
+      value: 'no'});
   }
 
   return options;

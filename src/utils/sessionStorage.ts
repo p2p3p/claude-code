@@ -13,14 +13,12 @@ import {
   readFile,
   stat,
   unlink,
-  writeFile,
-} from 'fs/promises'
+  writeFile} from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { basename, dirname, join } from 'path'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import {
   getOriginalCwd,
   getPlanSlugCache,
@@ -28,8 +26,7 @@ import {
   getSessionId,
   getSessionProjectDir,
   isSessionPersistenceDisabled,
-  switchSession,
-} from '../bootstrap/state.js'
+  switchSession} from '../bootstrap/state.js'
 import { builtInCommandNames } from '../commands.js'
 import { COMMAND_NAME_TAG, TICK_TAG } from '../constants/xml.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
@@ -39,8 +36,7 @@ import {
   type AgentId,
   asAgentId,
   asSessionId,
-  type SessionId,
-} from '../types/ids.js'
+  type SessionId} from '../types/ids.js'
 import type { AttributionSnapshotMessage } from '../types/logs.js'
 import {
   type ContentReplacementEntry,
@@ -53,16 +49,14 @@ import {
   type PersistedWorktreeSession,
   type SerializedMessage,
   sortLogs,
-  type TranscriptMessage,
-} from '../types/logs.js'
+  type TranscriptMessage} from '../types/logs.js'
 import type {
   AssistantMessage,
   AttachmentMessage,
   Message,
   SystemCompactBoundaryMessage,
   SystemMessage,
-  UserMessage,
-} from '../types/message.js'
+  UserMessage} from '../types/message.js'
 import type { QueueOperationMessage } from '../types/messageQueueTypes.js'
 import { uniq } from './array.js'
 import { registerCleanup } from './cleanupRegistry.js'
@@ -88,8 +82,7 @@ import {
   LITE_READ_BUF_SIZE,
   readHeadAndTail,
   readTranscriptForLoad,
-  SKIP_PRECOMPACT_THRESHOLD,
-} from './sessionStoragePortable.js'
+  SKIP_PRECOMPACT_THRESHOLD} from './sessionStoragePortable.js'
 import { getSettings_DEPRECATED } from './settings/settings.js'
 import { jsonParse, jsonStringify } from './slowOperations.js'
 import type { ContentReplacementRecord } from './toolResultStorage.js'
@@ -782,8 +775,7 @@ class Project {
       appendEntryToFile(this.sessionFile, {
         type: 'last-prompt',
         lastPrompt: this.currentSessionLastPrompt,
-        sessionId,
-      })
+        sessionId})
     }
     // Unconditional: cache was refreshed from tail above; re-append keeps
     // the entry at EOF so compaction-pushed content doesn't evict it.
@@ -791,58 +783,50 @@ class Project {
       appendEntryToFile(this.sessionFile, {
         type: 'custom-title',
         customTitle: this.currentSessionTitle,
-        sessionId,
-      })
+        sessionId})
     }
     if (this.currentSessionTag) {
       appendEntryToFile(this.sessionFile, {
         type: 'tag',
         tag: this.currentSessionTag,
-        sessionId,
-      })
+        sessionId})
     }
     if (this.currentSessionAgentName) {
       appendEntryToFile(this.sessionFile, {
         type: 'agent-name',
         agentName: this.currentSessionAgentName,
-        sessionId,
-      })
+        sessionId})
     }
     if (this.currentSessionAgentColor) {
       appendEntryToFile(this.sessionFile, {
         type: 'agent-color',
         agentColor: this.currentSessionAgentColor,
-        sessionId,
-      })
+        sessionId})
     }
     if (this.currentSessionAgentSetting) {
       appendEntryToFile(this.sessionFile, {
         type: 'agent-setting',
         agentSetting: this.currentSessionAgentSetting,
-        sessionId,
-      })
+        sessionId})
     }
     if (this.currentSessionMode) {
       appendEntryToFile(this.sessionFile, {
         type: 'mode',
         mode: this.currentSessionMode,
-        sessionId,
-      })
+        sessionId})
     }
     if (this.currentSessionGoal) {
       appendEntryToFile(this.sessionFile, {
         type: 'goal',
         sessionId,
         state: this.currentSessionGoal,
-        timestamp: new Date().toISOString(),
-      })
+        timestamp: new Date().toISOString()})
     }
     if (this.currentSessionWorktree !== undefined) {
       appendEntryToFile(this.sessionFile, {
         type: 'worktree-state',
         worktreeSession: this.currentSessionWorktree,
-        sessionId,
-      })
+        sessionId})
     }
     if (
       this.currentSessionPrNumber !== undefined &&
@@ -855,8 +839,7 @@ class Project {
         prNumber: this.currentSessionPrNumber,
         prUrl: this.currentSessionPrUrl,
         prRepository: this.currentSessionPrRepository,
-        timestamp: new Date().toISOString(),
-      })
+        timestamp: new Date().toISOString()})
     }
   }
 
@@ -964,8 +947,7 @@ class Project {
           }
         })
         await writeFile(this.sessionFile, lines.join('\n'), {
-          encoding: 'utf8',
-        })
+          encoding: 'utf8'})
       } catch {
         // Silently ignore errors - the file might not exist yet
       }
@@ -1083,8 +1065,7 @@ class Project {
           timestamp: new Date().toISOString(),
           version: VERSION,
           gitBranch,
-          slug,
-        }
+          slug}
         await this.appendEntry(transcriptMessage)
         if (isChainParticipant(message)) {
           parentUuid = message.uuid
@@ -1115,8 +1096,7 @@ class Project {
         type: 'file-history-snapshot',
         messageId,
         snapshot,
-        isSnapshotUpdate,
-      }
+        isSnapshotUpdate}
       await this.appendEntry(fileHistoryMessage)
     })
   }
@@ -1142,8 +1122,7 @@ class Project {
         type: 'content-replacement',
         sessionId: getSessionId() as UUID,
         agentId,
-        replacements,
-      }
+        replacements}
       await this.appendEntry(entry)
     })
   }
@@ -1349,8 +1328,7 @@ class Project {
           entry as unknown as Record<string, unknown>,
           {
             ...(isCompactBoundaryMessage(entry) && { isCompaction: true }),
-            ...(entry.agentId && { agentId: entry.agentId }),
-          },
+            ...(entry.agentId && { agentId: entry.agentId })},
         )
       } catch {
         logEvent('tengu_session_persistence_failed', {})
@@ -1588,8 +1566,7 @@ export async function recordContextCollapseCommit(commit: {
   await getProject().appendEntry({
     type: 'marble-origami-commit',
     sessionId,
-    ...commit,
-  })
+    ...commit})
 }
 
 /**
@@ -1613,8 +1590,7 @@ export async function recordContextCollapseSnapshot(snapshot: {
   await getProject().appendEntry({
     type: 'marble-origami-snapshot',
     sessionId,
-    ...snapshot,
-  })
+    ...snapshot})
 }
 
 export async function flushSessionStorage(): Promise<void> {
@@ -1729,8 +1705,7 @@ export async function hydrateFromCCRv2InternalEvents(
             .join('')
           await writeFile(agentFile, agentContent, {
             encoding: 'utf8',
-            mode: 0o600,
-          })
+            mode: 0o600})
         }
 
         logForDebugging(
@@ -1742,8 +1717,7 @@ export async function hydrateFromCCRv2InternalEvents(
     logForDiagnosticsNoPII('info', 'hydrate_ccr_v2_completed', {
       duration_ms: Date.now() - startMs,
       event_count: events.length,
-      subagent_event_count: subagentEventCount,
-    })
+      subagent_event_count: subagentEventCount})
     return events.length > 0
   } catch (error) {
     // Re-throw epoch mismatch so the worker doesn't race against gracefulShutdown
@@ -1933,8 +1907,7 @@ function applyPreservedSegmentRelinks(
         headInTranscript: messages.has(lastSeg.headUuid),
         anchorInTranscript: messages.has(lastSeg.anchorUuid),
         walkSteps: walkSeen.size,
-        transcriptSize: messages.size,
-      })
+        transcriptSize: messages.size})
       return
     }
   }
@@ -1944,8 +1917,7 @@ function applyPreservedSegmentRelinks(
     if (head) {
       messages.set(lastSeg.headUuid, {
         ...head,
-        parentUuid: lastSeg.anchorUuid,
-      })
+        parentUuid: lastSeg.anchorUuid})
     }
     // Tail-splice: anchor's other children → tail. No-op if already pointing
     // at tail (the useLogMessages race case).
@@ -1969,10 +1941,7 @@ function applyPreservedSegmentRelinks(
             input_tokens: 0,
             output_tokens: 0,
             cache_creation_input_tokens: 0,
-            cache_read_input_tokens: 0,
-          },
-        },
-      })
+            cache_read_input_tokens: 0}}})
     }
   }
 
@@ -2071,8 +2040,7 @@ function applySnipRemovals(messages: Map<UUID, TranscriptMessage>): void {
 
   logEvent('tengu_snip_resume_filtered', {
     removed_count: removedCount,
-    relinked_count: relinkedCount,
-  })
+    relinked_count: relinkedCount})
 }
 
 /**
@@ -2232,8 +2200,7 @@ function recoverOrphanedParallelToolResults(
 
   if (recoveredCount === 0) return chain
   logEvent('tengu_chain_parallel_tr_recovered', {
-    recovered_count: recoveredCount,
-  })
+    recovered_count: recoveredCount})
 
   const result: TranscriptMessage[] = []
   for (const m of chain) {
@@ -2275,8 +2242,7 @@ export function checkResumeConsistency(chain: Message[]): void {
       actual,
       delta: actual - expected,
       chain_length: chain.length,
-      checkpoint_age_entries: chain.length - 1 - i,
-    })
+      checkpoint_age_entries: chain.length - 1 - i})
     return
   }
 }
@@ -2345,8 +2311,7 @@ export async function loadTranscriptFromFile(
       contextCollapseSnapshot,
       leafUuids,
       contentReplacements,
-      worktreeStates,
-    } = await loadTranscriptFile(filePath)
+      worktreeStates} = await loadTranscriptFile(filePath)
 
     if (messages.size === 0) {
       throw new Error('No messages found in JSONL file')
@@ -2390,8 +2355,7 @@ export async function loadTranscriptFromFile(
           : undefined,
       worktreeSession: worktreeStates.has(sessionId)
         ? worktreeStates.get(sessionId)
-        : undefined,
-    }
+        : undefined}
   }
 
   // json log files
@@ -2558,8 +2522,7 @@ function convertToLogOption(
     attributionSnapshots: attributionSnapshots,
     contentReplacements,
     gitBranch: lastMessage.gitBranch,
-    projectPath: firstMessage.cwd,
-  }
+    projectPath: firstMessage.cwd}
 }
 
 async function trackSessionBranchingAnalytics(
@@ -2591,8 +2554,7 @@ async function trackSessionBranchingAnalytics(
     sessions_with_branches: sessionsWithBranches,
     max_branches_per_session: Math.max(...branchCounts),
     avg_branches_per_session: Math.round(totalBranches / sessionsWithBranches),
-    total_transcript_count: logs.length,
-  })
+    total_transcript_count: logs.length})
 }
 
 export async function fetchLogs(limit?: number): Promise<LogOption[]> {
@@ -2664,16 +2626,14 @@ export async function saveCustomTitle(
   appendEntryToFile(resolvedPath, {
     type: 'custom-title',
     customTitle,
-    sessionId,
-  })
+    sessionId})
   // Cache for current session only (for immediate visibility)
   if (sessionId === getSessionId()) {
     getProject().currentSessionTitle = customTitle
   }
   logEvent('tengu_session_renamed', {
     source:
-      source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 }
 
 /**
@@ -2707,8 +2667,7 @@ export function saveAiGeneratedTitle(sessionId: UUID, aiTitle: string): void {
   appendEntryToFile(getTranscriptPathForSession(sessionId), {
     type: 'ai-title',
     aiTitle,
-    sessionId,
-  })
+    sessionId})
 }
 
 /**
@@ -2722,8 +2681,7 @@ export function saveTaskSummary(sessionId: UUID, summary: string): void {
     type: 'task-summary',
     summary,
     sessionId,
-    timestamp: new Date().toISOString(),
-  })
+    timestamp: new Date().toISOString()})
 }
 
 export async function saveTag(sessionId: UUID, tag: string, fullPath?: string) {
@@ -2755,8 +2713,7 @@ export function saveGoal(
     type: 'goal',
     sessionId,
     state,
-    timestamp: new Date().toISOString(),
-  })
+    timestamp: new Date().toISOString()})
   if (sessionId === getSessionId()) {
     getProject().currentSessionGoal = state
   }
@@ -2772,8 +2729,7 @@ export function clearGoalEntry(sessionId: UUID, fullPath?: string): void {
   appendEntryToFile(resolvedPath, {
     type: 'goal-cleared',
     sessionId,
-    timestamp: new Date().toISOString(),
-  })
+    timestamp: new Date().toISOString()})
   if (sessionId === getSessionId()) {
     getProject().currentSessionGoal = undefined
   }
@@ -2797,8 +2753,7 @@ export async function linkSessionToPR(
     prNumber,
     prUrl,
     prRepository,
-    timestamp: new Date().toISOString(),
-  })
+    timestamp: new Date().toISOString()})
   // Cache for current session so reAppendSessionMetadata can re-write after compaction
   if (sessionId === getSessionId()) {
     const project = getProject()
@@ -2915,8 +2870,7 @@ export async function saveAgentName(
   }
   logEvent('tengu_agent_name_set', {
     source:
-      source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  })
+      source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 }
 
 export async function saveAgentColor(
@@ -2928,8 +2882,7 @@ export async function saveAgentColor(
   appendEntryToFile(resolvedPath, {
     type: 'agent-color',
     agentColor,
-    sessionId,
-  })
+    sessionId})
   // Cache for current session only (for immediate visibility)
   if (sessionId === getSessionId()) {
     getProject().currentSessionAgentColor = agentColor
@@ -2986,8 +2939,7 @@ export function saveWorktreeState(
         originalHeadCommit: worktreeSession.originalHeadCommit,
         sessionId: worktreeSession.sessionId,
         tmuxSessionName: worktreeSession.tmuxSessionName,
-        hookBased: worktreeSession.hookBased,
-      }
+        hookBased: worktreeSession.hookBased}
     : null
   const project = getProject()
   project.currentSessionWorktree = stripped
@@ -2998,8 +2950,7 @@ export function saveWorktreeState(
     appendEntryToFile(project.sessionFile, {
       type: 'worktree-state',
       worktreeSession: stripped,
-      sessionId: getSessionId(),
-    })
+      sessionId: getSessionId()})
   }
 }
 
@@ -3062,8 +3013,7 @@ export async function loadFullLog(log: LogOption): Promise<LogOption> {
       contentReplacements,
       contextCollapseCommits,
       contextCollapseSnapshot,
-      leafUuids,
-    } = await loadTranscriptFile(sessionFile)
+      leafUuids} = await loadTranscriptFile(sessionFile)
 
     if (messages.size === 0) {
       const fallbackGoal = log.sessionId
@@ -3139,8 +3089,7 @@ export async function loadFullLog(log: LogOption): Promise<LogOption> {
       contextCollapseSnapshot:
         sessionId && contextCollapseSnapshot?.sessionId === sessionId
           ? contextCollapseSnapshot
-          : undefined,
-    }
+          : undefined}
   } catch {
     // If loading fails, return the original log
     return log
@@ -3913,8 +3862,7 @@ export async function loadTranscriptFile(
     agentContentReplacements,
     contextCollapseCommits,
     contextCollapseSnapshot,
-    leafUuids,
-  }
+    leafUuids}
 }
 
 /**
@@ -4019,8 +3967,7 @@ export async function getLastSessionLog(
     contentReplacements,
     goals,
     contextCollapseCommits,
-    contextCollapseSnapshot,
-  } = await loadSessionFile(sessionId)
+    contextCollapseSnapshot} = await loadSessionFile(sessionId)
   if (messages.size === 0) return null
   // Prime getSessionMessages cache so recordTranscript (called after REPL
   // mount on --resume) skips a second full file load. -170~227ms on large sessions.
@@ -4064,8 +4011,7 @@ export async function getLastSessionLog(
     contextCollapseSnapshot:
       contextCollapseSnapshot?.sessionId === sessionId
         ? contextCollapseSnapshot
-        : undefined,
-  }
+        : undefined}
 }
 
 /**
@@ -4272,8 +4218,7 @@ async function getStatOnlyLogsForWorktrees(
     const sanitized = sanitizePath(wt)
     return {
       path: wt,
-      prefix: caseInsensitive ? sanitized.toLowerCase() : sanitized,
-    }
+      prefix: caseInsensitive ? sanitized.toLowerCase() : sanitized}
   })
   indexed.sort((a, b) => b.prefix.length - a.prefix.length)
 
@@ -4365,8 +4310,7 @@ export async function getAgentTranscript(agentId: AgentId): Promise<{
       messages: agentTranscript.map(
         ({ isSidechain, parentUuid, ...msg }) => msg,
       ),
-      contentReplacements: agentContentReplacements.get(agentId) ?? [],
-    }
+      contentReplacements: agentContentReplacements.get(agentId) ?? []}
   } catch {
     return null
   }
@@ -4701,8 +4645,7 @@ export async function getSessionFilesWithMtime(
           path: filePath,
           mtime: st.mtime.getTime(),
           ctime: st.birthtime.getTime(),
-          size: st.size,
-        })
+          size: st.size})
       } catch {
         logForDebugging(`Failed to stat session file: ${filePath}`)
       }
@@ -4758,8 +4701,7 @@ export async function loadAllLogsFromSessionFile(
     fileHistorySnapshots,
     attributionSnapshots,
     contentReplacements,
-    leafUuids,
-  } = await loadTranscriptFile(sessionFile, { keepAllLeaves: true })
+    leafUuids} = await loadTranscriptFile(sessionFile, { keepAllLeaves: true })
 
   if (messages.size === 0) return []
 
@@ -4830,8 +4772,7 @@ export async function loadAllLogsFromSessionFile(
         attributionSnapshots,
         chain,
       ),
-      contentReplacements: contentReplacements.get(sessionId) ?? [],
-    })
+      contentReplacements: contentReplacements.get(sessionId) ?? []})
   }
 
   return logs
@@ -4952,8 +4893,7 @@ async function readLiteMetadata(
     agentSetting,
     prNumber,
     prUrl,
-    prRepository,
-  }
+    prRepository}
 }
 
 /**
@@ -5105,8 +5045,7 @@ function deduplicateLogsBySessionId(logs: LogOption[]): LogOption[] {
   }
   return sortLogs([...deduped.values()]).map((log, i) => ({
     ...log,
-    value: i,
-  }))
+    value: i}))
 }
 
 /**
@@ -5145,8 +5084,7 @@ export async function getSessionFilesLite(
       fileSize: fileInfo.size,
       isSidechain: false,
       sessionId,
-      projectPath,
-    })
+      projectPath})
   }
 
   // logs are freshly pushed above — safe to mutate in place
@@ -5184,8 +5122,7 @@ async function enrichLog(
     prNumber: meta.prNumber,
     prUrl: meta.prUrl,
     prRepository: meta.prRepository,
-    projectPath: meta.projectPath ?? log.projectPath,
-  }
+    projectPath: meta.projectPath ?? log.projectPath}
 
   // Provide a fallback title for sessions where we couldn't extract the first
   // prompt (e.g., large first messages that exceed the 16KB read buffer).

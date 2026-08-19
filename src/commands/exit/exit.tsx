@@ -6,12 +6,18 @@ import { ExitFlow } from '../../components/ExitFlow.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { isBgSession } from '../../utils/concurrentSessions.js';
 import { gracefulShutdown } from '../../utils/gracefulShutdown.js';
+import { t } from '../../utils/i18n/index.js';
 import { getCurrentWorktreeSession } from '../../utils/worktree.js';
 
-const GOODBYE_MESSAGES = ['Goodbye!', 'See ya!', 'Bye!', 'Catch you later!'];
+const GOODBYE_MESSAGES = [
+  t('exitCmd.goodbye1'),
+  t('exitCmd.goodbye2'),
+  t('exitCmd.goodbye3'),
+  t('exitCmd.goodbye4'),
+];
 
 function getRandomGoodbyeMessage(): string {
-  return sample(GOODBYE_MESSAGES) ?? 'Goodbye!';
+  return sample(GOODBYE_MESSAGES) ?? GOODBYE_MESSAGES[0]!;
 }
 
 export async function call(onDone: LocalJSXCommandOnDone): Promise<React.ReactNode> {

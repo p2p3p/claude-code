@@ -1,13 +1,13 @@
 import { isInputModeCharacter } from 'src/components/PromptInput/inputModes.js'
 import { useNotifications } from 'src/context/notifications.js'
+import { t } from '../utils/i18n/index.js'
 import stripAnsi from 'strip-ansi'
 import { markBackslashReturnUsed } from '../commands/terminalSetup/terminalSetup.js'
 import { addToHistory } from '../history.js'
 import type { Key } from '@anthropic/ink'
 import type {
   InlineGhostText,
-  TextInputState,
-} from '../types/textInputTypes.js'
+  TextInputState} from '../types/textInputTypes.js'
 import {
   Cursor,
   getLastKill,
@@ -16,8 +16,7 @@ import {
   resetKillAccumulation,
   resetYankState,
   updateYankLength,
-  yankPop,
-} from '../utils/Cursor.js'
+  yankPop} from '../utils/Cursor.js'
 import { env } from '../utils/env.js'
 import { isFullscreenEnvEnabled } from '../utils/fullscreen.js'
 import type { ImageDimensions } from '../utils/imageResizer.js'
@@ -94,8 +93,7 @@ export function useTextInput({
   onOffsetChange,
   inputFilter,
   inlineGhostText,
-  dim,
-}: UseTextInputProps): TextInputState {
+  dim}: UseTextInputProps): TextInputState {
   // Pre-warm the modifiers module for Apple Terminal (has internal guard, safe to call multiple times)
   if (env.terminal === 'Apple_Terminal') {
     prewarmModifiers()
@@ -131,10 +129,9 @@ export function useTextInput({
       }
       addNotification({
         key: 'escape-again-to-clear',
-        text: 'Esc again to clear',
+        text: t('notif.textInput.escAgainToClear'),
         priority: 'immediate',
-        timeoutMs: 1000,
-      })
+        timeoutMs: 1000})
     },
     () => {
       // Remove the "Esc again to clear" notification immediately
@@ -525,6 +522,5 @@ export function useTextInput({
     cursorLine: cursorPos.line - cursor.getViewportStartLine(maxVisibleLines),
     cursorColumn: cursorPos.column,
     viewportCharOffset: cursor.getViewportCharOffset(maxVisibleLines),
-    viewportCharEnd: cursor.getViewportCharEnd(maxVisibleLines),
-  }
+    viewportCharEnd: cursor.getViewportCharEnd(maxVisibleLines)}
 }

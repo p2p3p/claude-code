@@ -7,14 +7,13 @@ import {
   createVault,
   getVault,
   listCredentials,
-  listVaults,
-} from './vaultsApi.js';
+  listVaults} from './vaultsApi.js';
 import { VaultView } from './VaultView.js';
 import { parseVaultArgs } from './parseArgs.js';
 import { launchCommand } from '../_shared/launchCommand.js';
+import { t } from '../../utils/i18n/index.js';
 
-const USAGE =
-  'Usage: /vault list | create NAME | get ID | archive ID | add-credential VAULT_ID KEY VALUE | archive-credential VAULT_ID CRED_ID';
+const USAGE = t('vaultView.usage');
 
 type VaultViewProps = React.ComponentProps<typeof VaultView>;
 
@@ -24,28 +23,28 @@ async function dispatchVault(
 ): Promise<VaultViewProps | null> {
   if (parsed.action === 'list') {
     const vaults = await listVaults();
-    onDone(vaults.length === 0 ? 'No vaults found.' : `${vaults.length} vault(s).`, { display: 'system' });
+    onDone(vaults.length === 0 ? t('vaultView.noVaults') : t('vaultView.vaultsCount2', vaults.length), { display: 'system' });
     return { mode: 'list', vaults };
   }
 
   if (parsed.action === 'create') {
     const { name } = parsed;
     const vault = await createVault(name);
-    onDone(`Vault created: ${vault.vault_id}`, { display: 'system' });
+    onDone(t('vaultView.vaultCreatedId', vault.vault_id), { display: 'system' });
     return { mode: 'created', vault };
   }
 
   if (parsed.action === 'get') {
     const { id } = parsed;
     const vault = await getVault(id);
-    onDone(`Vault fetched.`, { display: 'system' });
+    onDone(t('vaultView.vaultFetched'), { display: 'system' });
     return { mode: 'detail', vault };
   }
 
   if (parsed.action === 'archive') {
     const { id } = parsed;
     const vault = await archiveVault(id);
-    onDone(`Vault archived.`, { display: 'system' });
+    onDone(t('vaultView.vaultArchivedId'), { display: 'system' });
     return { mode: 'archived', vault };
   }
 
@@ -53,20 +52,20 @@ async function dispatchVault(
     const { vaultId, key, secret } = parsed;
     const cred = await addCredential(vaultId, key, secret);
     // SECURITY: credential value is NOT echoed in onDone message
-    onDone(`Credential added: ${cred.credential_id}`, { display: 'system' });
+    onDone(t('vaultView.credentialAddedId', cred.credential_id), { display: 'system' });
     return { mode: 'credential-added', vaultId, credentialId: cred.credential_id };
   }
 
   if (parsed.action === 'archive-credential') {
     const { vaultId, credentialId } = parsed;
     await archiveCredential(vaultId, credentialId);
-    onDone(`Credential ${credentialId} archived.`, { display: 'system' });
+    onDone(t('vaultView.credentialArchivedId', credentialId), { display: 'system' });
     return { mode: 'credential-archived', vaultId, credentialId };
   }
 
   // Fallback: list vaults for any unrecognised action (matches original behaviour)
   const vaults = await listVaults();
-  onDone(vaults.length === 0 ? 'No vaults found.' : `${vaults.length} vault(s).`, { display: 'system' });
+  onDone(vaults.length === 0 ? t('vaultView.noVaults') : t('vaultView.vaultsCount2', vaults.length), { display: 'system' });
   return { mode: 'list', vaults };
 }
 
@@ -81,8 +80,7 @@ export const callVault: LocalJSXCommandCall = launchCommand<ReturnType<typeof pa
   },
   dispatch: dispatchVault,
   View: VaultView,
-  errorView: (msg: string) => React.createElement(VaultView, { mode: 'error', message: msg }),
-});
+  errorView: (msg: string) => React.createElement(VaultView, { mode: 'error', message: msg })});
 
 export const callVaultListCredentials = async (
   onDone: (msg: string, opts: { display: string }) => void,
@@ -92,18 +90,17 @@ export const callVaultListCredentials = async (
     const credentials = await listCredentials(vaultId);
     onDone(
       credentials.length === 0
-        ? `No credentials in vault ${vaultId}.`
-        : `${credentials.length} credential(s) in vault ${vaultId}.`,
+        ? t('vaultView.noCredentialsIn', vaultId)
+        : t('vaultView.credentialsInCount', vaultId, credentials.length),
       { display: 'system' },
     );
     return React.createElement(VaultView, {
       mode: 'credential-list',
       vaultId,
-      credentials,
-    });
+      credentials});
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    onDone(`Failed to list credentials: ${msg}`, { display: 'system' });
+    onDone(t('vaultView.failedToListCredentials', msg), { display: 'system' });
     return React.createElement(VaultView, { mode: 'error', message: msg });
   }
 };

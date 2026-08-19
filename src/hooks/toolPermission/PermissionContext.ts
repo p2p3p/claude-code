@@ -2,15 +2,13 @@ import { feature } from 'bun:bundle'
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from 'src/services/analytics/index.js'
+  logEvent} from 'src/services/analytics/index.js'
 import { sanitizeToolNameForAnalytics } from 'src/services/analytics/metadata.js'
 import type { ToolUseConfirm } from '../../components/permissions/PermissionRequest.js'
 import type {
   ToolPermissionContext,
   Tool as ToolType,
-  ToolUseContext,
-} from '../../Tool.js'
+  ToolUseContext} from '../../Tool.js'
 import { awaitClassifierAutoApproval } from '@claude-code-best/builtin-tools/tools/BashTool/bashPermissions.js'
 import { BASH_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/BashTool/toolName.js'
 import type { AssistantMessage } from '../../types/message.js'
@@ -18,29 +16,26 @@ import type {
   PendingClassifierCheck,
   PermissionAllowDecision,
   PermissionDecisionReason,
-  PermissionDenyDecision,
-} from '../../types/permissions.js'
+  PermissionDenyDecision} from '../../types/permissions.js'
 import { setClassifierApproval } from '../../utils/classifierApprovals.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { executePermissionRequestHooks } from '../../utils/hooks.js'
+import { t } from '../../utils/i18n/index.js'
 import {
   REJECT_MESSAGE,
   REJECT_MESSAGE_WITH_REASON_PREFIX,
   SUBAGENT_REJECT_MESSAGE,
   SUBAGENT_REJECT_MESSAGE_WITH_REASON_PREFIX,
-  withMemoryCorrectionHint,
-} from '../../utils/messages.js'
+  withMemoryCorrectionHint} from '../../utils/messages.js'
 import type { PermissionDecision } from '../../utils/permissions/PermissionResult.js'
 import {
   applyPermissionUpdates,
   persistPermissionUpdates,
-  supportsPersistence,
-} from '../../utils/permissions/PermissionUpdate.js'
+  supportsPersistence} from '../../utils/permissions/PermissionUpdate.js'
 import type { PermissionUpdate } from '../../utils/permissions/PermissionUpdateSchema.js'
 import {
   logPermissionDecision,
-  type PermissionDecisionArgs,
-} from './permissionLogging.js'
+  type PermissionDecisionArgs} from './permissionLogging.js'
 
 type PermissionApprovalSource =
   | { type: 'hook'; permanent?: boolean }
@@ -89,8 +84,7 @@ function createResolveOnce<T>(resolve: (value: T) => void): ResolveOnce<T> {
       if (claimed) return false
       claimed = true
       return true
-    },
-  }
+    }}
 }
 
 function createPermissionContext(
@@ -123,8 +117,7 @@ function createPermissionContext(
           input: opts?.input ?? input,
           toolUseContext,
           messageId,
-          toolUseID,
-        },
+          toolUseID},
         args,
         opts?.permissionPromptStartTimeMs,
       )
@@ -133,8 +126,7 @@ function createPermissionContext(
       logEvent('tengu_tool_use_cancelled', {
         messageID:
           messageId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        toolName: sanitizeToolNameForAnalytics(tool.name),
-      })
+        toolName: sanitizeToolNameForAnalytics(tool.name)})
     },
     async persistPermissions(updates: PermissionUpdate[]) {
       if (updates.length === 0) return false
@@ -208,10 +200,8 @@ function createPermissionContext(
               behavior: 'allow' as const,
               updatedInput: updatedInput ?? input,
               userModified: false,
-              decisionReason: classifierDecision,
-            }
-          },
-        }
+              decisionReason: classifierDecision}
+          }}
       : {}),
     async runHooks(
       permissionMode: string | undefined,
@@ -250,12 +240,11 @@ function createPermissionContext(
               toolUseContext.abortController.abort()
             }
             return this.buildDeny(
-              decision.message || 'Permission denied by hook',
+              decision.message || t('permissionHooks.deniedByHook'),
               {
                 type: 'hook',
                 hookName: 'PermissionRequest',
-                reason: decision.message,
-              },
+                reason: decision.message},
             )
           }
         }
@@ -279,9 +268,7 @@ function createPermissionContext(
         ...(opts?.acceptFeedback && { acceptFeedback: opts.acceptFeedback }),
         ...(opts?.contentBlocks &&
           opts.contentBlocks.length > 0 && {
-            contentBlocks: opts.contentBlocks,
-          }),
-      }
+            contentBlocks: opts.contentBlocks})}
     },
     buildDeny(
       message: string,
@@ -302,8 +289,7 @@ function createPermissionContext(
       this.logDecision(
         {
           decision: 'accept',
-          source: { type: 'user', permanent: acceptedPermanentUpdates },
-        },
+          source: { type: 'user', permanent: acceptedPermanentUpdates }},
         { input: updatedInput, permissionPromptStartTimeMs },
       )
       const userModified = tool.inputsEquivalent
@@ -314,8 +300,7 @@ function createPermissionContext(
         userModified,
         decisionReason,
         acceptFeedback: trimmedFeedback || undefined,
-        contentBlocks,
-      })
+        contentBlocks})
     },
     async handleHookAllow(
       finalInput: Record<string, unknown>,
@@ -327,13 +312,11 @@ function createPermissionContext(
       this.logDecision(
         {
           decision: 'accept',
-          source: { type: 'hook', permanent: acceptedPermanentUpdates },
-        },
+          source: { type: 'hook', permanent: acceptedPermanentUpdates }},
         { input: finalInput, permissionPromptStartTimeMs },
       )
       return this.buildAllow(finalInput, {
-        decisionReason: { type: 'hook', hookName: 'PermissionRequest' },
-      })
+        decisionReason: { type: 'hook', hookName: 'PermissionRequest' }})
     },
     pushToQueue(item: ToolUseConfirm) {
       queueOps?.push(item)
@@ -343,8 +326,7 @@ function createPermissionContext(
     },
     updateQueueItem(patch: Partial<ToolUseConfirm>) {
       queueOps?.update(toolUseID, patch)
-    },
-  }
+    }}
   return Object.freeze(ctx)
 }
 
@@ -375,8 +357,7 @@ function createPermissionQueueOps(
           item.toolUseID === toolUseID ? { ...item, ...patch } : item,
         ),
       )
-    },
-  }
+    }}
 }
 
 export { createPermissionContext, createPermissionQueueOps, createResolveOnce }
@@ -385,5 +366,4 @@ export type {
   PermissionApprovalSource,
   PermissionQueueOps,
   PermissionRejectionSource,
-  ResolveOnce,
-}
+  ResolveOnce}

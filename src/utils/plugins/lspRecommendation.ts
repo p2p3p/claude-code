@@ -17,12 +17,10 @@ import { logForDebugging } from '../debug.js'
 import { isPluginInstalled } from './installedPluginsManager.js'
 import {
   getMarketplace,
-  loadKnownMarketplacesConfig,
-} from './marketplaceManager.js'
+  loadKnownMarketplacesConfig} from './marketplaceManager.js'
 import {
   ALLOWED_OFFICIAL_MARKETPLACE_NAMES,
-  type PluginMarketplaceEntry,
-} from './schemas.js'
+  type PluginMarketplaceEntry} from './schemas.js'
 
 /**
  * LSP plugin recommendation returned to the caller
@@ -187,8 +185,7 @@ async function getLspPluginsFromMarketplaces(): Promise<
             marketplaceName,
             extensions: lspInfo.extensions,
             command: lspInfo.command,
-            isOfficial,
-          })
+            isOfficial})
         }
       } catch (error) {
         logForDebugging(
@@ -304,8 +301,7 @@ export async function getMatchingLspPlugins(
     description: info.entry.description,
     isOfficial: info.isOfficial,
     extensions: Array.from(info.extensions),
-    command: info.command,
-  }))
+    command: info.command}))
 }
 
 /**
@@ -321,8 +317,7 @@ export function addToNeverSuggest(pluginId: string): void {
     }
     return {
       ...currentConfig,
-      lspRecommendationNeverPlugins: [...current, pluginId],
-    }
+      lspRecommendationNeverPlugins: [...current, pluginId]}
   })
   logForDebugging(`[lspRecommendation] Added ${pluginId} to never suggest`)
 }
@@ -336,8 +331,7 @@ export function incrementIgnoredCount(): void {
     const newCount = (currentConfig.lspRecommendationIgnoredCount ?? 0) + 1
     return {
       ...currentConfig,
-      lspRecommendationIgnoredCount: newCount,
-    }
+      lspRecommendationIgnoredCount: newCount}
   })
   logForDebugging('[lspRecommendation] Incremented ignored count')
 }
@@ -367,8 +361,7 @@ export function resetIgnoredCount(): void {
     }
     return {
       ...currentConfig,
-      lspRecommendationIgnoredCount: 0,
-    }
+      lspRecommendationIgnoredCount: 0}
   })
   logForDebugging('[lspRecommendation] Reset ignored count')
 }

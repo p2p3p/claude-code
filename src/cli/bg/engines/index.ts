@@ -2,8 +2,7 @@ export type {
   BgEngine,
   BgStartOptions,
   BgStartResult,
-  SessionEntry,
-} from '../engine.js'
+  SessionEntry} from '../engine.js'
 
 export async function selectEngine(): Promise<import('../engine.js').BgEngine> {
   if (process.platform === 'win32') {

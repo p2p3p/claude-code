@@ -48,8 +48,7 @@ export function createCapacityWake(outerSignal: AbortSignal): CapacityWake {
       cleanup: () => {
         outerSignal.removeEventListener('abort', abort)
         capSig.removeEventListener('abort', abort)
-      },
-    }
+      }}
   }
 
   return { signal, wake }

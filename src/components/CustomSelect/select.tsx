@@ -216,8 +216,7 @@ export function Select<T>({
   onOpenEditor,
   onImagePaste,
   pastedContents,
-  onRemoveImage,
-}: SelectProps<T>): React.ReactNode {
+  onRemoveImage}: SelectProps<T>): React.ReactNode {
   // Image selection mode state
   const [imagesSelected, setImagesSelected] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -268,8 +267,7 @@ export function Select<T>({
     onChange,
     onCancel,
     onFocus,
-    focusValue: defaultFocusValue,
-  });
+    focusValue: defaultFocusValue});
 
   useSelectInput({
     isDisabled,
@@ -290,13 +288,11 @@ export function Select<T>({
         return true;
       }
       return false;
-    },
-  });
+    }});
 
   const styles = {
     container: () => ({ flexDirection: 'column' as const }),
-    highlightedText: () => ({ bold: true }),
-  };
+    highlightedText: () => ({ bold: true })};
 
   if (layout === 'expanded') {
     const maxIndexWidth = state.options.length.toString().length;
@@ -575,8 +571,7 @@ export function Select<T>({
       isSelected,
       isOptionDisabled,
       shouldShowDownArrow: areMoreOptionsBelow && isLastVisibleOption,
-      shouldShowUpArrow: areMoreOptionsAbove && isFirstVisibleOption,
-    };
+      shouldShowUpArrow: areMoreOptionsAbove && isFirstVisibleOption};
   });
 
   // Calculate max label width for alignment when descriptions exist
@@ -797,8 +792,7 @@ function TwoColumnRow({ isFocused, children }: { isFocused: boolean; children: R
   const cursorRef = useDeclaredCursor({
     line: 0,
     column: 0,
-    active: isFocused,
-  });
+    active: isFocused});
   return (
     <Box ref={cursorRef} flexDirection="row">
       {children}

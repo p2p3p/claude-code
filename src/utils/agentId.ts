@@ -52,8 +52,7 @@ export function parseAgentId(
   }
   return {
     agentName: agentId.slice(0, atIndex),
-    teamName: agentId.slice(atIndex + 1),
-  }
+    teamName: agentId.slice(atIndex + 1)}
 }
 
 /**

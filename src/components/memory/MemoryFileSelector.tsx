@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import { mkdir } from 'fs/promises';
 import { join } from 'path';
 import * as React from 'react';
+import { t } from '../../utils/i18n/index.js';
 import { use, useEffect, useState } from 'react';
 import { getOriginalCwd } from '../../bootstrap/state.js';
 import { useExitOnCtrlCDWithKeybindings } from '../../hooks/useExitOnCtrlCDWithKeybindings.js';
@@ -68,8 +69,7 @@ export function MemoryFileSelector({ onSelect, onCancel }: Props): React.ReactNo
             path: userMemoryPath,
             type: 'User' as const,
             content: '',
-            exists: false,
-          },
+            exists: false},
         ]),
     // Add Project memory if it doesn't exist
     ...(hasProjectMemory
@@ -79,8 +79,7 @@ export function MemoryFileSelector({ onSelect, onCancel }: Props): React.ReactNo
             path: projectMemoryPath,
             type: 'Project' as const,
             content: '',
-            exists: false,
-          },
+            exists: false},
         ]),
   ];
 
@@ -89,7 +88,7 @@ export function MemoryFileSelector({ onSelect, onCancel }: Props): React.ReactNo
   // Create options for the select component
   const memoryOptions = allMemoryFiles.map(file => {
     const displayPath = getDisplayPath(file.path);
-    const existsLabel = file.exists ? '' : ' (new)';
+    const existsLabel = file.exists ? '' : t('memoryFileSelector.newLabel');
 
     // Calculate depth based on parent
     const depth = file.parent ? (depths.get(file.parent) ?? 0) + 1 : 0;
@@ -99,9 +98,9 @@ export function MemoryFileSelector({ onSelect, onCancel }: Props): React.ReactNo
     // Format label based on type
     let label: string;
     if (file.type === 'User' && !file.isNested && file.path === userMemoryPath) {
-      label = `User memory`;
+      label = t('memoryFileSelector.userMemory');
     } else if (file.type === 'Project' && !file.isNested && file.path === projectMemoryPath) {
-      label = `Project memory`;
+      label = t('memoryFileSelector.projectMemory');
     } else if (depth > 0) {
       // For child nodes (imported files), show indented with L
       label = `${indent}L ${displayPath}${existsLabel}`;
@@ -115,15 +114,15 @@ export function MemoryFileSelector({ onSelect, onCancel }: Props): React.ReactNo
     const isGit = projectIsInGitRepo(getOriginalCwd());
 
     if (file.type === 'User' && !file.isNested) {
-      description = 'Saved in ~/.claude/CLAUDE.md';
+      description = t('ui.savedInClaudeMd');
     } else if (file.type === 'Project' && !file.isNested && file.path === projectMemoryPath) {
-      description = `${isGit ? 'Checked in at' : 'Saved in'} ./CLAUDE.md`;
+      description = `${isGit ? t('ui.checkedInAt') : t('ui.savedIn')} ./CLAUDE.md`;
     } else if (file.parent) {
       // For imported files (with @-import)
-      description = '@-imported';
+      description = t('memoryFileSelector.atImported');
     } else if (file.isNested) {
       // For nested files (dynamically loaded)
-      description = 'dynamically loaded';
+      description = t('memoryFileSelector.dynamicallyLoaded');
     } else {
       description = '';
     }
@@ -131,8 +130,7 @@ export function MemoryFileSelector({ onSelect, onCancel }: Props): React.ReactNo
     return {
       label,
       value: file.path,
-      description,
-    };
+      description};
   });
 
   // Add "Open folder" options for auto-memory and agent memory directories
@@ -146,18 +144,16 @@ export function MemoryFileSelector({ onSelect, onCancel }: Props): React.ReactNo
   if (isAutoMemoryEnabled()) {
     // Always show auto-memory folder option
     folderOptions.push({
-      label: 'Open auto-memory folder',
+      label: t('memoryFileSelector.openAutoMemoryFolder'),
       value: `${OPEN_FOLDER_PREFIX}${getAutoMemPath()}`,
-      description: '',
-    });
+      description: ''});
 
     // Team memory directly below auto-memory (team dir is a subdir of auto dir)
     if (feature('TEAMMEM') && teamMemPaths!.isTeamMemoryEnabled()) {
       folderOptions.push({
-        label: 'Open team memory folder',
+        label: t('memoryFileSelector.openTeamMemoryFolder'),
         value: `${OPEN_FOLDER_PREFIX}${teamMemPaths!.getTeamMemPath()}`,
-        description: '',
-      });
+        description: ''});
     }
 
     // Add agent memory folders for agents that have memory configured
@@ -167,8 +163,7 @@ export function MemoryFileSelector({ onSelect, onCancel }: Props): React.ReactNo
         folderOptions.push({
           label: `Open ${chalk.bold(agent.agentType)} agent memory`,
           value: `${OPEN_FOLDER_PREFIX}${agentDir}`,
-          description: `${agent.memory} scope`,
-        });
+          description: `${agent.memory} scope`});
       }
     }
   }
@@ -259,14 +254,14 @@ export function MemoryFileSelector({ onSelect, onCancel }: Props): React.ReactNo
     <Box flexDirection="column" width="100%">
       <Box flexDirection="column" marginBottom={1}>
         <ListItem isFocused={focusedToggle === 0}>
-          <Text>Auto-memory: {autoMemoryOn ? 'on' : 'off'}</Text>
+          <Text>{t('memoryFileSelector.autoMemory').replace('{state}', autoMemoryOn ? 'on' : 'off')}</Text>
         </ListItem>
         {showDreamRow && (
           <ListItem isFocused={focusedToggle === 1} styled={false}>
             <Text color={focusedToggle === 1 ? 'suggestion' : undefined}>
-              Auto-dream: {autoDreamOn ? 'on' : 'off'}
+              {t('memoryFileSelector.autoDreamOn').replace('{state}', autoDreamOn ? 'on' : 'off')}
               {dreamStatus && <Text dimColor> · {dreamStatus}</Text>}
-              {!isDreamRunning && autoDreamOn && <Text dimColor> · /dream to run</Text>}
+              {!isDreamRunning && autoDreamOn && <Text dimColor> · {t('memoryFileSelector.dreamToRun')}</Text>}
             </Text>
           </ListItem>
         )}

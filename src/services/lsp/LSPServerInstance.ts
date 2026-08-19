@@ -157,8 +157,7 @@ export function createLSPServerInstance(
       // Start the client
       await client.start(config.command, config.args || [], {
         env: config.env,
-        cwd: config.workspaceFolder,
-      })
+        cwd: config.workspaceFolder})
 
       // Initialize with workspace info
       const workspaceFolder = config.workspaceFolder || getCwd()
@@ -177,8 +176,7 @@ export function createLSPServerInstance(
         workspaceFolders: [
           {
             uri: workspaceUri,
-            name: path.basename(workspaceFolder),
-          },
+            name: path.basename(workspaceFolder)},
         ],
 
         // Deprecated fields - some servers still need these for proper URI resolution
@@ -193,15 +191,13 @@ export function createLSPServerInstance(
             configuration: false,
             // Don't claim to support workspace folders changes since we don't handle
             // workspace/didChangeWorkspaceFolders notifications
-            workspaceFolders: false,
-          },
+            workspaceFolders: false},
           textDocument: {
             synchronization: {
               dynamicRegistration: false,
               willSave: false,
               willSaveWaitUntil: false,
-              didSave: true,
-            },
+              didSave: true},
             publishDiagnostics: {
               relatedInformation: true,
               tagSupport: {
@@ -209,32 +205,22 @@ export function createLSPServerInstance(
               },
               versionSupport: false,
               codeDescriptionSupport: true,
-              dataSupport: false,
-            },
+              dataSupport: false},
             hover: {
               dynamicRegistration: false,
-              contentFormat: ['markdown', 'plaintext'],
-            },
+              contentFormat: ['markdown', 'plaintext']},
             definition: {
               dynamicRegistration: false,
-              linkSupport: true,
-            },
+              linkSupport: true},
             references: {
-              dynamicRegistration: false,
-            },
+              dynamicRegistration: false},
             documentSymbol: {
               dynamicRegistration: false,
-              hierarchicalDocumentSymbolSupport: true,
-            },
+              hierarchicalDocumentSymbolSupport: true},
             callHierarchy: {
-              dynamicRegistration: false,
-            },
-          },
+              dynamicRegistration: false}},
           general: {
-            positionEncodings: ['utf-16'],
-          },
-        },
-      }
+            positionEncodings: ['utf-16']}}}
 
       initPromise = client.initialize(initParams)
       if (config.startupTimeout !== undefined) {
@@ -488,8 +474,7 @@ export function createLSPServerInstance(
     sendRequest,
     sendNotification,
     onNotification,
-    onRequest,
-  }
+    onRequest}
 }
 
 /**

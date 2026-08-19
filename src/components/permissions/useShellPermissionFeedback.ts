@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../../services/analytics/index.js'
+  logEvent} from '../../services/analytics/index.js'
 import { sanitizeToolNameForAnalytics } from '../../services/analytics/metadata.js'
 import { useSetAppState } from '../../state/AppState.js'
 import type { ToolUseConfirm } from './PermissionRequest.js'
@@ -17,8 +16,7 @@ export function useShellPermissionFeedback({
   toolUseConfirm,
   onDone,
   onReject,
-  explainerVisible,
-}: {
+  explainerVisible}: {
   toolUseConfirm: ToolUseConfirm
   onDone: () => void
   onReject: () => void
@@ -55,8 +53,7 @@ export function useShellPermissionFeedback({
       toolName: sanitizeToolNameForAnalytics(
         toolUseConfirm.tool.name,
       ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      isMcp: toolUseConfirm.tool.isMcp ?? false,
-    }
+      isMcp: toolUseConfirm.tool.isMcp ?? false}
 
     if (option === 'yes') {
       if (yesInputMode) {
@@ -86,16 +83,13 @@ export function useShellPermissionFeedback({
     // Log escape if no feedback was provided (user pressed ESC)
     if (!hasFeedback) {
       logEvent('tengu_permission_request_escape', {
-        explainer_visible: explainerVisible,
-      })
+        explainer_visible: explainerVisible})
       // Increment escape count for attribution tracking
       setAppState(prev => ({
         ...prev,
         attribution: {
           ...prev.attribution,
-          escapeCount: prev.attribution.escapeCount + 1,
-        },
-      }))
+          escapeCount: prev.attribution.escapeCount + 1}}))
     }
 
     logUnaryPermissionEvent(
@@ -143,6 +137,5 @@ export function useShellPermissionFeedback({
     focusedOption,
     handleInputModeToggle,
     handleReject,
-    handleFocus,
-  }
+    handleFocus}
 }

@@ -3,8 +3,7 @@ import { getGlobalConfig, saveGlobalConfig } from '../../../utils/config.js'
 import { logForDebugging } from '../../../utils/debug.js'
 import {
   execFileNoThrow,
-  execFileNoThrowWithCwd,
-} from '../../../utils/execFileNoThrow.js'
+  execFileNoThrowWithCwd} from '../../../utils/execFileNoThrow.js'
 import { logError } from '../../../utils/log.js'
 
 /**
@@ -100,13 +99,11 @@ export async function installIt2(
       // uv tool install it2 installs it globally in isolated env
       // (uvx is for running, uv tool install is for installing)
       result = await execFileNoThrowWithCwd('uv', ['tool', 'install', 'it2'], {
-        cwd: homedir(),
-      })
+        cwd: homedir()})
       break
     case 'pipx':
       result = await execFileNoThrowWithCwd('pipx', ['install', 'it2'], {
-        cwd: homedir(),
-      })
+        cwd: homedir()})
       break
     case 'pip':
       // Use --user to install without sudo
@@ -132,15 +129,13 @@ export async function installIt2(
     return {
       success: false,
       error,
-      packageManager,
-    }
+      packageManager}
   }
 
   logForDebugging('[it2Setup] it2 installed successfully')
   return {
     success: true,
-    packageManager,
-  }
+    packageManager}
 }
 
 /**
@@ -157,8 +152,7 @@ export async function verifyIt2Setup(): Promise<It2VerifyResult> {
   if (!installed) {
     return {
       success: false,
-      error: 'it2 CLI is not installed or not in PATH',
-    }
+      error: 'it2 CLI is not installed or not in PATH'}
   }
 
   // Try to list sessions - this tests the Python API connection
@@ -178,20 +172,17 @@ export async function verifyIt2Setup(): Promise<It2VerifyResult> {
       return {
         success: false,
         error: 'Python API not enabled in iTerm2 preferences',
-        needsPythonApiEnabled: true,
-      }
+        needsPythonApiEnabled: true}
     }
 
     return {
       success: false,
-      error: result.stderr || 'Failed to communicate with iTerm2',
-    }
+      error: result.stderr || 'Failed to communicate with iTerm2'}
   }
 
   logForDebugging('[it2Setup] it2 setup verified successfully')
   return {
-    success: true,
-  }
+    success: true}
 }
 
 /**
@@ -216,8 +207,7 @@ export function markIt2SetupComplete(): void {
   if (config.iterm2It2SetupComplete !== true) {
     saveGlobalConfig(current => ({
       ...current,
-      iterm2It2SetupComplete: true,
-    }))
+      iterm2It2SetupComplete: true}))
     logForDebugging('[it2Setup] Marked it2 setup as complete')
   }
 }
@@ -231,8 +221,7 @@ export function setPreferTmuxOverIterm2(prefer: boolean): void {
   if (config.preferTmuxOverIterm2 !== prefer) {
     saveGlobalConfig(current => ({
       ...current,
-      preferTmuxOverIterm2: prefer,
-    }))
+      preferTmuxOverIterm2: prefer}))
     logForDebugging(`[it2Setup] Set preferTmuxOverIterm2 = ${prefer}`)
   }
 }

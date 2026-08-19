@@ -5,13 +5,13 @@
  * Each backend implements the same unified interface.
  */
 
+import { t } from '../../i18n/index.js'
 import type {
   InputPlatform,
   ScreenshotPlatform,
   DisplayPlatform,
   AppsPlatform,
-  WindowManagementPlatform,
-} from './types.js'
+  WindowManagementPlatform} from './types.js'
 
 export interface Platform {
   input: InputPlatform
@@ -37,7 +37,7 @@ export function loadPlatform(): Platform {
       cached = require('./linux.js').platform
       break
     default:
-      throw new Error(`Computer Use not supported on ${process.platform}`)
+      throw new Error(t('computerUsePlatforms.notSupported', process.platform))
   }
 
   return cached!
@@ -48,13 +48,11 @@ export type {
   ScreenshotPlatform,
   DisplayPlatform,
   AppsPlatform,
-  WindowManagementPlatform,
-} from './types.js'
+  WindowManagementPlatform} from './types.js'
 export type {
   WindowHandle,
   ScreenshotResult,
   DisplayInfo,
   InstalledApp,
   FrontmostAppInfo,
-  WindowAction,
-} from './types.js'
+  WindowAction} from './types.js'

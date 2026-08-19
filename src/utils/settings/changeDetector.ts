@@ -8,8 +8,7 @@ import { errorMessage } from '../errors.js'
 import {
   type ConfigChangeSource,
   executeConfigChangeHooks,
-  hasBlockingResult,
-} from '../hooks.js'
+  hasBlockingResult} from '../hooks.js'
 import { createSignal } from '../signal.js'
 import { jsonStringify } from '../slowOperations.js'
 import { SETTING_SOURCES, type SettingSource } from './constants.js'
@@ -19,8 +18,7 @@ import {
   getHkcuSettings,
   getMdmSettings,
   refreshMdmSettings,
-  setMdmSettingsCache,
-} from './mdm/settings.js'
+  setMdmSettingsCache} from './mdm/settings.js'
 import { getSettingsFilePathForSource } from './settings.js'
 import { resetSettingsCache } from './settingsCache.js'
 
@@ -108,8 +106,7 @@ export async function initialize(): Promise<void> {
       stabilityThreshold:
         testOverrides?.stabilityThreshold ?? FILE_STABILITY_THRESHOLD_MS,
       pollInterval:
-        testOverrides?.pollInterval ?? FILE_STABILITY_POLL_INTERVAL_MS,
-    },
+        testOverrides?.pollInterval ?? FILE_STABILITY_POLL_INTERVAL_MS},
     ignored: (path, stats) => {
       // Ignore special file types (sockets, FIFOs, devices) - they cannot be watched
       // and will error with EOPNOTSUPP on macOS.
@@ -384,8 +381,7 @@ function startMdmPoll(): void {
   const initialHkcu = getHkcuSettings()
   lastMdmSnapshot = jsonStringify({
     mdm: initial.settings,
-    hkcu: initialHkcu.settings,
-  })
+    hkcu: initialHkcu.settings})
 
   mdmPollTimer = setInterval(() => {
     if (disposed) return
@@ -397,8 +393,7 @@ function startMdmPoll(): void {
 
         const currentSnapshot = jsonStringify({
           mdm: current.settings,
-          hkcu: currentHkcu.settings,
-        })
+          hkcu: currentHkcu.settings})
 
         if (currentSnapshot !== lastMdmSnapshot) {
           lastMdmSnapshot = currentSnapshot
@@ -484,5 +479,4 @@ export const settingsChangeDetector = {
   dispose,
   subscribe,
   notifyChange,
-  resetForTesting,
-}
+  resetForTesting}

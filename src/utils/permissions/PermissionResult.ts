@@ -6,8 +6,7 @@ import type {
   PermissionDecisionReason,
   PermissionDenyDecision,
   PermissionMetadata,
-  PermissionResult,
-} from '../../types/permissions.js'
+  PermissionResult} from '../../types/permissions.js'
 
 // Re-export for backwards compatibility
 export type {
@@ -17,8 +16,7 @@ export type {
   PermissionDecisionReason,
   PermissionDenyDecision,
   PermissionMetadata,
-  PermissionResult,
-}
+  PermissionResult}
 
 // Helper function to get the appropriate prose description for rule behavior
 export function getRuleBehaviorDescription(

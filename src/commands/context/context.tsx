@@ -31,8 +31,7 @@ export async function call(onDone: LocalJSXCommandOnDone, context: LocalJSXComma
   const {
     messages,
     getAppState,
-    options: { mainLoopModel, tools },
-  } = context;
+    options: { mainLoopModel, tools }} = context;
 
   const apiView = toApiView(messages);
 

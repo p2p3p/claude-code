@@ -12,14 +12,12 @@
 import type { AppState } from '../state/AppState.js'
 import {
   type InProcessTeammateTaskState,
-  isInProcessTeammateTask,
-} from '../tasks/InProcessTeammateTask/types.js'
+  isInProcessTeammateTask} from '../tasks/InProcessTeammateTask/types.js'
 import { updateTaskState } from './task/framework.js'
 import {
   isPermissionResponse,
   isSandboxPermissionResponse,
-  type PlanApprovalResponseMessage,
-} from './teammateMailbox.js'
+  type PlanApprovalResponseMessage} from './teammateMailbox.js'
 
 type SetAppState = (updater: (prev: AppState) => AppState) => void
 
@@ -59,8 +57,7 @@ export function setAwaitingPlanApproval(
 ): void {
   updateTaskState<InProcessTeammateTaskState>(taskId, setAppState, task => ({
     ...task,
-    awaitingPlanApproval: awaiting,
-  }))
+    awaitingPlanApproval: awaiting}))
 }
 
 /**

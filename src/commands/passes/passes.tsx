@@ -14,8 +14,7 @@ export async function call(onDone: LocalJSXCommandOnDone): Promise<React.ReactNo
     saveGlobalConfig(current => ({
       ...current,
       hasVisitedPasses: true,
-      passesLastSeenRemaining: remaining ?? current.passesLastSeenRemaining,
-    }));
+      passesLastSeenRemaining: remaining ?? current.passesLastSeenRemaining}));
   }
   logEvent('tengu_guest_passes_visited', { is_first_visit: isFirstVisit });
   return <Passes onDone={onDone} />;

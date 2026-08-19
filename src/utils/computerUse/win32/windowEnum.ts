@@ -67,8 +67,7 @@ export function listWindows(): WindowInfo[] {
       ENUM_WINDOWS_PS,
     ],
     stdout: 'pipe',
-    stderr: 'pipe',
-  })
+    stderr: 'pipe'})
   const raw = new TextDecoder().decode(result.stdout).trim()
   if (!raw) return []
 

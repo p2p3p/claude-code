@@ -3,6 +3,7 @@ import { getOauthConfig } from '../../constants/oauth.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { getOAuthHeaders, prepareApiRequest } from '../../utils/teleport/api.js'
 import { fetchEnvironments } from '../../utils/teleport/environments.js'
+import { t } from '../../utils/i18n/index.js'
 
 const CCR_BYOC_BETA_HEADER = 'ccr-byoc-2025-07-29'
 
@@ -65,8 +66,7 @@ export async function importGithubToken(
   const headers = {
     ...getOAuthHeaders(accessToken),
     'anthropic-beta': CCR_BYOC_BETA_HEADER,
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   try {
     const response = await axios.post<ImportTokenResult>(
@@ -84,16 +84,14 @@ export async function importGithubToken(
       return { ok: false, error: { kind: 'not_signed_in' } }
     }
     logForDebugging(`import-token returned ${response.status}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return { ok: false, error: { kind: 'server', status: response.status } }
   } catch (err) {
     if (axios.isAxiosError(err)) {
       // err.config.data would contain the POST body with the raw token.
       // Do not include it in any log. The error code alone is enough.
       logForDebugging(`import-token network error: ${err.code ?? 'unknown'}`, {
-        level: 'error',
-      })
+        level: 'error'})
     }
     return { ok: false, error: { kind: 'network' } }
   }
@@ -134,8 +132,7 @@ export async function createDefaultEnvironment(): Promise<boolean> {
   const url = `${getOauthConfig().BASE_API_URL}/v1/environment_providers/cloud/create`
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'x-organization-uuid': orgUUID,
-  }
+    'x-organization-uuid': orgUUID}
 
   try {
     const response = await axios.post(
@@ -143,7 +140,7 @@ export async function createDefaultEnvironment(): Promise<boolean> {
       {
         name: 'Default',
         kind: 'anthropic_cloud',
-        description: 'Default - trusted network access',
+        description: t('remoteSetup.defaultTrustedNetwork'),
         config: {
           environment_type: 'anthropic',
           cwd: '/home/user',
@@ -155,10 +152,7 @@ export async function createDefaultEnvironment(): Promise<boolean> {
           ],
           network_config: {
             allowed_hosts: [],
-            allow_default_hosts: true,
-          },
-        },
-      },
+            allow_default_hosts: true}}},
       { headers, timeout: 15000, validateStatus: () => true },
     )
     return response.status >= 200 && response.status < 300

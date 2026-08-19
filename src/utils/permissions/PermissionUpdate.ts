@@ -3,25 +3,21 @@ import type { ToolPermissionContext } from '../../Tool.js'
 // Types extracted to src/types/permissions.ts to break import cycles
 import type {
   AdditionalWorkingDirectory,
-  WorkingDirectorySource,
-} from '../../types/permissions.js'
+  WorkingDirectorySource} from '../../types/permissions.js'
 import { logForDebugging } from '../debug.js'
 import type { EditableSettingSource } from '../settings/constants.js'
 import {
   getSettingsForSource,
-  updateSettingsForSource,
-} from '../settings/settings.js'
+  updateSettingsForSource} from '../settings/settings.js'
 import { jsonStringify } from '../slowOperations.js'
 import { toPosixPath } from './filesystem.js'
 import type { PermissionRuleValue } from './PermissionRule.js'
 import type {
   PermissionUpdate,
-  PermissionUpdateDestination,
-} from './PermissionUpdateSchema.js'
+  PermissionUpdateDestination} from './PermissionUpdateSchema.js'
 import {
   permissionRuleValueFromString,
-  permissionRuleValueToString,
-} from './permissionRuleParser.js'
+  permissionRuleValueToString} from './permissionRuleParser.js'
 import { addPermissionRulesToSettings } from './permissionsLoader.js'
 
 // Re-export for backwards compatibility
@@ -63,8 +59,7 @@ export function applyPermissionUpdate(
       )
       return {
         ...context,
-        mode: update.mode,
-      }
+        mode: update.mode}
 
     case 'addRules': {
       const ruleStrings = update.rules.map(rule =>
@@ -89,9 +84,7 @@ export function applyPermissionUpdate(
           [update.destination]: [
             ...(context[ruleKind][update.destination] || []),
             ...ruleStrings,
-          ],
-        },
-      }
+          ]}}
     }
 
     case 'replaceRules': {
@@ -115,8 +108,7 @@ export function applyPermissionUpdate(
         [ruleKind]: {
           ...context[ruleKind],
           [update.destination]: ruleStrings, // Replace all rules for this source
-        },
-      }
+        }}
     }
 
     case 'addDirectories': {
@@ -127,13 +119,11 @@ export function applyPermissionUpdate(
       for (const directory of update.directories) {
         newAdditionalDirs.set(directory, {
           path: directory,
-          source: update.destination,
-        })
+          source: update.destination})
       }
       return {
         ...context,
-        additionalWorkingDirectories: newAdditionalDirs,
-      }
+        additionalWorkingDirectories: newAdditionalDirs}
     }
 
     case 'removeRules': {
@@ -163,9 +153,7 @@ export function applyPermissionUpdate(
         ...context,
         [ruleKind]: {
           ...context[ruleKind],
-          [update.destination]: filteredRules,
-        },
-      }
+          [update.destination]: filteredRules}}
     }
 
     case 'removeDirectories': {
@@ -178,8 +166,7 @@ export function applyPermissionUpdate(
       }
       return {
         ...context,
-        additionalWorkingDirectories: newAdditionalDirs,
-      }
+        additionalWorkingDirectories: newAdditionalDirs}
     }
 
     default:
@@ -234,8 +221,7 @@ export function persistPermissionUpdate(update: PermissionUpdate): void {
       addPermissionRulesToSettings(
         {
           ruleValues: update.rules,
-          ruleBehavior: update.behavior,
-        },
+          ruleBehavior: update.behavior},
         update.destination,
       )
       break
@@ -258,9 +244,7 @@ export function persistPermissionUpdate(update: PermissionUpdate): void {
         const updatedDirs = [...existingDirs, ...dirsToAdd]
         updateSettingsForSource(update.destination, {
           permissions: {
-            additionalDirectories: updatedDirs,
-          },
-        })
+            additionalDirectories: updatedDirs}})
       }
       break
     }
@@ -288,9 +272,7 @@ export function persistPermissionUpdate(update: PermissionUpdate): void {
 
       updateSettingsForSource(update.destination, {
         permissions: {
-          [update.behavior]: filteredRules,
-        },
-      })
+          [update.behavior]: filteredRules}})
       break
     }
 
@@ -308,9 +290,7 @@ export function persistPermissionUpdate(update: PermissionUpdate): void {
 
       updateSettingsForSource(update.destination, {
         permissions: {
-          additionalDirectories: filteredDirs,
-        },
-      })
+          additionalDirectories: filteredDirs}})
       break
     }
 
@@ -320,9 +300,7 @@ export function persistPermissionUpdate(update: PermissionUpdate): void {
       )
       updateSettingsForSource(update.destination, {
         permissions: {
-          defaultMode: update.mode,
-        },
-      })
+          defaultMode: update.mode}})
       break
     }
 
@@ -333,9 +311,7 @@ export function persistPermissionUpdate(update: PermissionUpdate): void {
       const ruleStrings = update.rules.map(permissionRuleValueToString)
       updateSettingsForSource(update.destination, {
         permissions: {
-          [update.behavior]: ruleStrings,
-        },
-      })
+          [update.behavior]: ruleStrings}})
       break
     }
   }
@@ -380,10 +356,8 @@ export function createReadRuleSuggestion(
     rules: [
       {
         toolName: 'Read',
-        ruleContent,
-      },
+        ruleContent},
     ],
     behavior: 'allow',
-    destination,
-  }
+    destination}
 }

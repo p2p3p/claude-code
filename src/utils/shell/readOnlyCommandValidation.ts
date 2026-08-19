@@ -45,15 +45,13 @@ const GIT_REF_SELECTION_FLAGS: Record<string, FlagArgType> = {
   '--all': 'none',
   '--branches': 'none',
   '--tags': 'none',
-  '--remotes': 'none',
-}
+  '--remotes': 'none'}
 
 const GIT_DATE_FILTER_FLAGS: Record<string, FlagArgType> = {
   '--since': 'string',
   '--after': 'string',
   '--until': 'string',
-  '--before': 'string',
-}
+  '--before': 'string'}
 
 const GIT_LOG_DISPLAY_FLAGS: Record<string, FlagArgType> = {
   '--oneline': 'none',
@@ -61,13 +59,11 @@ const GIT_LOG_DISPLAY_FLAGS: Record<string, FlagArgType> = {
   '--decorate': 'none',
   '--no-decorate': 'none',
   '--date': 'string',
-  '--relative-date': 'none',
-}
+  '--relative-date': 'none'}
 
 const GIT_COUNT_FLAGS: Record<string, FlagArgType> = {
   '--max-count': 'number',
-  '-n': 'number',
-}
+  '-n': 'number'}
 
 // Stat output flags - used in git log, show, diff
 const GIT_STAT_FLAGS: Record<string, FlagArgType> = {
@@ -75,14 +71,12 @@ const GIT_STAT_FLAGS: Record<string, FlagArgType> = {
   '--numstat': 'none',
   '--shortstat': 'none',
   '--name-only': 'none',
-  '--name-status': 'none',
-}
+  '--name-status': 'none'}
 
 // Color output flags - used in git log, show, diff
 const GIT_COLOR_FLAGS: Record<string, FlagArgType> = {
   '--color': 'none',
-  '--no-color': 'none',
-}
+  '--no-color': 'none'}
 
 // Patch display flags - used in git log, show
 const GIT_PATCH_FLAGS: Record<string, FlagArgType> = {
@@ -90,15 +84,13 @@ const GIT_PATCH_FLAGS: Record<string, FlagArgType> = {
   '-p': 'none',
   '--no-patch': 'none',
   '--no-ext-diff': 'none',
-  '-s': 'none',
-}
+  '-s': 'none'}
 
 // Author/committer filter flags - used in git log, reflog
 const GIT_AUTHOR_FILTER_FLAGS: Record<string, FlagArgType> = {
   '--author': 'string',
   '--committer': 'string',
-  '--grep': 'string',
-}
+  '--grep': 'string'}
 
 // ---------------------------------------------------------------------------
 // GIT_READ_ONLY_COMMANDS — complete map of all git subcommands
@@ -169,9 +161,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '-S': 'string',
       '-G': 'string',
       '-O': 'string',
-      '-R': 'none',
-    },
-  },
+      '-R': 'none'}},
   'git log': {
     safeFlags: {
       ...GIT_LOG_DISPLAY_FLAGS,
@@ -220,9 +210,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '-S': 'string',
       '-G': 'string',
       '--pickaxe-regex': 'none',
-      '--pickaxe-all': 'none',
-    },
-  },
+      '--pickaxe-all': 'none'}},
   'git show': {
     safeFlags: {
       ...GIT_LOG_DISPLAY_FLAGS,
@@ -242,9 +230,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--diff-filter': 'string',
       // Short flags
       '-m': 'none',
-      '--quiet': 'none',
-    },
-  },
+      '--quiet': 'none'}},
   'git shortlog': {
     safeFlags: {
       ...GIT_REF_SELECTION_FLAGS,
@@ -264,17 +250,14 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--format': 'string',
       // Filtering
       '--no-merges': 'none',
-      '--author': 'string',
-    },
-  },
+      '--author': 'string'}},
   'git reflog': {
     safeFlags: {
       ...GIT_LOG_DISPLAY_FLAGS,
       ...GIT_REF_SELECTION_FLAGS,
       ...GIT_DATE_FILTER_FLAGS,
       ...GIT_COUNT_FLAGS,
-      ...GIT_AUTHOR_FILTER_FLAGS,
-    },
+      ...GIT_AUTHOR_FILTER_FLAGS},
     // SECURITY: Block `git reflog expire` (positional subcommand) — it writes
     // to .git/logs/** by expiring reflog entries. `git reflog delete` similarly
     // writes. Only `git reflog` (bare = show) and `git reflog show` are safe.
@@ -300,15 +283,12 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
         return false
       }
       return false // No positional = bare `git reflog` = safe (shows reflog)
-    },
-  },
+    }},
   'git stash list': {
     safeFlags: {
       ...GIT_LOG_DISPLAY_FLAGS,
       ...GIT_REF_SELECTION_FLAGS,
-      ...GIT_COUNT_FLAGS,
-    },
-  },
+      ...GIT_COUNT_FLAGS}},
   'git ls-remote': {
     safeFlags: {
       // Branch/tag filtering flags
@@ -336,8 +316,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       // elsewhere), `--server-option="sensitive-data"` exfiltrates the value
       // to whatever `origin` points to. The read-only path should never enable
       // network writes.
-    },
-  },
+    }},
   'git status': {
     safeFlags: {
       // Output format flags
@@ -365,9 +344,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--renames': 'none',
       '--no-renames': 'none',
       '--find-renames': 'string',
-      '-M': 'string',
-    },
-  },
+      '-M': 'string'}},
   'git blame': {
     safeFlags: {
       ...GIT_COLOR_FLAGS,
@@ -402,9 +379,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       // Other options
       '-s': 'none',
       '-l': 'none',
-      '-t': 'none',
-    },
-  },
+      '-t': 'none'}},
   'git ls-files': {
     safeFlags: {
       // File selection
@@ -445,9 +420,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       // Error handling
       '--error-unmatch': 'none',
       // Recursion
-      '--recurse-submodules': 'none',
-    },
-  },
+      '--recurse-submodules': 'none'}},
   'git config --get': {
     safeFlags: {
       // No additional flags needed - just reading config values
@@ -466,14 +439,11 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--null': 'none',
       '--name-only': 'none',
       '--show-origin': 'none',
-      '--show-scope': 'none',
-    },
-  },
+      '--show-scope': 'none'}},
   // NOTE: 'git remote show' must come BEFORE 'git remote' so longer patterns are matched first
   'git remote show': {
     safeFlags: {
-      '-n': 'none',
-    },
+      '-n': 'none'},
     // Only allow optional -n, then one alphanumeric remote name
     additionalCommandIsDangerousCallback: (
       _rawCommand: string,
@@ -484,13 +454,11 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       // Must have exactly one positional arg that looks like a remote name
       if (positional.length !== 1) return true
       return !/^[a-zA-Z0-9_-]+$/.test(positional[0]!)
-    },
-  },
+    }},
   'git remote': {
     safeFlags: {
       '-v': 'none',
-      '--verbose': 'none',
-    },
+      '--verbose': 'none'},
     // Only allow bare 'git remote' or 'git remote -v/--verbose'
     additionalCommandIsDangerousCallback: (
       _rawCommand: string,
@@ -498,8 +466,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
     ) => {
       // All args must be known safe flags; no positional args allowed
       return args.some(a => a !== '-v' && a !== '--verbose')
-    },
-  },
+    }},
   // git merge-base is a read-only command for finding common ancestors
   'git merge-base': {
     safeFlags: {
@@ -508,8 +475,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--octopus': 'none', // Find best common ancestors for multiple refs
       '--independent': 'none', // Filter independent refs
       '--all': 'none', // Output all merge bases
-    },
-  },
+    }},
   // git rev-parse is a pure read command — resolves refs to SHAs, queries repo paths
   'git rev-parse': {
     safeFlags: {
@@ -533,9 +499,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--is-bare-repository': 'none',
       '--is-shallow-repository': 'none',
       '--is-shallow-update': 'none',
-      '--path-prefix': 'none',
-    },
-  },
+      '--path-prefix': 'none'}},
   // git rev-list is read-only commit enumeration — lists/counts commits reachable from refs
   'git rev-list': {
     safeFlags: {
@@ -569,9 +533,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--dense': 'none',
       '--sparse': 'none',
       '--source': 'none',
-      '--graph': 'none',
-    },
-  },
+      '--graph': 'none'}},
   // git describe is read-only — describes commits relative to the most recent tag
   'git describe': {
     safeFlags: {
@@ -590,8 +552,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       // Suffix/dirty markers
       '--dirty': 'none', // Append "-dirty" if working tree has modifications
       '--broken': 'none', // Append "-broken" if repository is in invalid state
-    },
-  },
+    }},
   // git cat-file is read-only object inspection — displays type, size, or content of objects
   // NOTE: --batch (without --check) is intentionally excluded — it reads arbitrary objects
   // from stdin which could be exploited in piped commands to dump sensitive objects.
@@ -605,9 +566,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       // Batch mode — read-only check variant only
       '--batch-check': 'none', // For each object on stdin, print type and size (no content)
       // Output control
-      '--allow-undetermined-type': 'none',
-    },
-  },
+      '--allow-undetermined-type': 'none'}},
   // git for-each-ref is read-only ref iteration — lists refs with optional formatting and filtering
   'git for-each-ref': {
     safeFlags: {
@@ -623,8 +582,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--merged': 'string', // Only list refs reachable from specified commit
       '--no-merged': 'string', // Only list refs NOT reachable from specified commit
       '--points-at': 'string', // Only list refs pointing at specified object
-    },
-  },
+    }},
   // git grep is read-only — searches tracked files for patterns
   'git grep': {
     safeFlags: {
@@ -684,9 +642,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--threads': 'number',
       // Quiet
       '-q': 'none',
-      '--quiet': 'none',
-    },
-  },
+      '--quiet': 'none'}},
   // git stash show is read-only — displays diff of a stash entry
   'git stash show': {
     safeFlags: {
@@ -697,18 +653,14 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--word-diff': 'none',
       '--word-diff-regex': 'string',
       '--diff-filter': 'string',
-      '--abbrev': 'number',
-    },
-  },
+      '--abbrev': 'number'}},
   // git worktree list is read-only — lists linked working trees
   'git worktree list': {
     safeFlags: {
       '--porcelain': 'none',
       '-v': 'none',
       '--verbose': 'none',
-      '--expire': 'string',
-    },
-  },
+      '--expire': 'string'}},
   'git tag': {
     safeFlags: {
       // List mode flags
@@ -725,8 +677,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--column': 'none',
       '--no-column': 'none',
       '-i': 'none',
-      '--ignore-case': 'none',
-    },
+      '--ignore-case': 'none'},
     // SECURITY: Block tag creation via positional arguments. `git tag foo`
     // creates .git/refs/tags/foo (41-byte file write) — NOT read-only.
     // This is identical semantics to `git branch foo` (which has the same
@@ -802,8 +753,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
         }
       }
       return false
-    },
-  },
+    }},
   'git branch': {
     safeFlags: {
       // List mode flags
@@ -843,8 +793,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       // Show current
       '--show-current': 'none',
       '-i': 'none',
-      '--ignore-case': 'none',
-    },
+      '--ignore-case': 'none'},
     // Block branch creation via positional arguments (e.g., "git branch newbranch")
     // Flag validation is handled by safeFlags above
     // args is tokens after "git branch"
@@ -918,9 +867,7 @@ export const GIT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
         }
       }
       return false
-    },
-  },
-}
+    }}}
 
 // ---------------------------------------------------------------------------
 // GH_READ_ONLY_COMMANDS — ant-only gh CLI commands (network-dependent)
@@ -988,10 +935,8 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--json': 'string', // JSON field selection
       '--comments': 'none', // Show comments
       '--repo': 'string', // Target repository (OWNER/REPO)
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh pr list is read-only — lists pull requests
   'gh pr list': {
     safeFlags: {
@@ -1009,10 +954,8 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--draft': 'none',
       '--app': 'string',
       '--repo': 'string',
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh pr diff is read-only — shows pull request diff
   'gh pr diff': {
     safeFlags: {
@@ -1020,10 +963,8 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--name-only': 'none',
       '--patch': 'none',
       '--repo': 'string',
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh pr checks is read-only — shows CI status checks
   'gh pr checks': {
     safeFlags: {
@@ -1033,20 +974,16 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--json': 'string',
       '--interval': 'number',
       '--repo': 'string',
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh issue view is read-only — displays issue details
   'gh issue view': {
     safeFlags: {
       '--json': 'string',
       '--comments': 'none',
       '--repo': 'string',
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh issue list is read-only — lists issues
   'gh issue list': {
     safeFlags: {
@@ -1062,18 +999,14 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--json': 'string',
       '--app': 'string',
       '--repo': 'string',
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh repo view is read-only — displays repository details
   // NOTE: gh repo view uses a positional argument, not --repo/-R flags
   'gh repo view': {
     safeFlags: {
-      '--json': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '--json': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh run list is read-only — lists workflow runs
   'gh run list': {
     safeFlags: {
@@ -1094,10 +1027,8 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '-u': 'string',
       '--created': 'string', // Filter by creation date
       '--commit': 'string', // Filter by commit SHA
-      '-c': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-c': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh run view is read-only — displays a workflow run's details
   'gh run view': {
     safeFlags: {
@@ -1112,10 +1043,8 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--job': 'string', // View a specific job by ID
       '-j': 'string',
       '--attempt': 'number', // View a specific attempt
-      '-a': 'number',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-a': 'number'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh auth status is read-only — displays authentication state
   // NOTE: --show-token/-t intentionally excluded (leaks secrets)
   'gh auth status': {
@@ -1126,8 +1055,7 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '-h': 'string',
       '--json': 'string', // JSON field selection
     },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh pr status is read-only — shows your PRs
   'gh pr status': {
     safeFlags: {
@@ -1135,19 +1063,15 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '-c': 'none',
       '--json': 'string', // JSON field selection
       '--repo': 'string', // Target repository
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh issue status is read-only — shows your issues
   'gh issue status': {
     safeFlags: {
       '--json': 'string', // JSON field selection
       '--repo': 'string', // Target repository
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh release list is read-only — lists releases
   'gh release list': {
     safeFlags: {
@@ -1159,20 +1083,16 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--order': 'string', // Order: asc|desc
       '-O': 'string',
       '--repo': 'string', // Target repository
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh release view is read-only — displays release details
   // NOTE: --web/-w intentionally excluded (opens browser)
   'gh release view': {
     safeFlags: {
       '--json': 'string', // JSON field selection
       '--repo': 'string', // Target repository
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh workflow list is read-only — lists workflow files
   'gh workflow list': {
     safeFlags: {
@@ -1182,10 +1102,8 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--limit': 'number', // Max results
       '-L': 'number',
       '--repo': 'string', // Target repository
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh workflow view is read-only — displays workflow summary
   // NOTE: --web/-w intentionally excluded (opens browser)
   'gh workflow view': {
@@ -1195,10 +1113,8 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--yaml': 'none', // View workflow yaml
       '-y': 'none',
       '--repo': 'string', // Target repository
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh label list is read-only — lists labels
   // NOTE: --web/-w intentionally excluded (opens browser)
   'gh label list': {
@@ -1211,10 +1127,8 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '-S': 'string',
       '--sort': 'string', // Sort: created|name
       '--repo': 'string', // Target repository
-      '-R': 'string',
-    },
-    additionalCommandIsDangerousCallback: ghIsDangerousCallback,
-  },
+      '-R': 'string'},
+    additionalCommandIsDangerousCallback: ghIsDangerousCallback},
   // gh search repos is read-only — searches repositories
   // NOTE: --web/-w intentionally excluded (opens browser)
   'gh search repos': {
@@ -1241,8 +1155,7 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--topic': 'string', // Filter by topic
       '--updated': 'string', // Filter by update date
       '--visibility': 'string', // Filter: public|private|internal
-    },
-  },
+    }},
   // gh search issues is read-only — searches issues
   // NOTE: --web/-w intentionally excluded (opens browser)
   'gh search issues': {
@@ -1281,8 +1194,7 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--team-mentions': 'string', // Filter by team mentions
       '--updated': 'string', // Filter by update date
       '--visibility': 'string', // Filter: public|private|internal
-    },
-  },
+    }},
   // gh search prs is read-only — searches pull requests
   // NOTE: --web/-w intentionally excluded (opens browser)
   'gh search prs': {
@@ -1331,8 +1243,7 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--team-mentions': 'string', // Filter by team mentions
       '--updated': 'string', // Filter by update date
       '--visibility': 'string', // Filter: public|private|internal
-    },
-  },
+    }},
   // gh search commits is read-only — searches commits
   // NOTE: --web/-w intentionally excluded (opens browser)
   'gh search commits': {
@@ -1358,8 +1269,7 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--sort': 'string', // Sort: author-date|committer-date
       '--tree': 'string', // Filter by tree hash
       '--visibility': 'string', // Filter: public|private|internal
-    },
-  },
+    }},
   // gh search code is read-only — searches code
   // NOTE: --web/-w intentionally excluded (opens browser)
   'gh search code': {
@@ -1375,9 +1285,7 @@ export const GH_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> = {
       '--repo': 'string', // Filter by repository
       '-R': 'string',
       '--size': 'string', // Filter by size range
-    },
-  },
-}
+    }}}
 
 // ---------------------------------------------------------------------------
 // DOCKER_READ_ONLY_COMMANDS — docker inspect/logs read-only commands
@@ -1395,19 +1303,14 @@ export const DOCKER_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> =
         '-t': 'none',
         '--since': 'string',
         '--until': 'string',
-        '--details': 'none',
-      },
-    },
+        '--details': 'none'}},
     'docker inspect': {
       safeFlags: {
         '--format': 'string',
         '-f': 'string',
         '--type': 'string',
         '--size': 'none',
-        '-s': 'none',
-      },
-    },
-  }
+        '-s': 'none'}}}
 
 // ---------------------------------------------------------------------------
 // RIPGREP_READ_ONLY_COMMANDS — rg (ripgrep) read-only search
@@ -1492,10 +1395,7 @@ export const RIPGREP_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> =
         '--debug': 'none',
 
         // Special argument separator
-        '--': 'none',
-      },
-    },
-  }
+        '--': 'none'}}}
 
 // ---------------------------------------------------------------------------
 // PYRIGHT_READ_ONLY_COMMANDS — pyright static type checker
@@ -1518,17 +1418,14 @@ export const PYRIGHT_READ_ONLY_COMMANDS: Record<string, ExternalCommandConfig> =
         '--verbose': 'none',
         '--version': 'none',
         '--dependencies': 'none',
-        '--warnings': 'none',
-      },
+        '--warnings': 'none'},
       additionalCommandIsDangerousCallback: (
         _rawCommand: string,
         args: string[],
       ) => {
         // Check if --watch or -w appears as a standalone token (flag)
         return args.some(t => t === '--watch' || t === '-w')
-      },
-    },
-  }
+      }}}
 
 // ---------------------------------------------------------------------------
 // EXTERNAL_READONLY_COMMANDS — cross-shell read-only commands
@@ -1591,7 +1488,7 @@ export function containsVulnerableUncPath(pathOrCommand: string): boolean {
   // In bash, /\\server becomes /\server after escape processing, which is a UNC path.
   // Requires 2+ backslashes after / because a single backslash just escapes the next char
   // (e.g., /\a → /a after bash processing, which is NOT a UNC path).
-  const mixedSlashUncPattern = /\/\\{2,}[^\s\\/]/
+  const mixedSlashUncPattern = /\/\\{2}[^\s\\/]/
   if (mixedSlashUncPattern.test(pathOrCommand)) {
     return true
   }
@@ -1599,7 +1496,7 @@ export function containsVulnerableUncPath(pathOrCommand: string): boolean {
   // 4. Check for mixed-separator UNC paths (backslashes + forward slash)
   // \\/server in bash becomes \/server after escape processing, which is a UNC path
   // on Windows since both \ and / are path separators.
-  const reverseMixedSlashUncPattern = /\\{2,}\/[^\s\\/]/
+  const reverseMixedSlashUncPattern = /\\{2}\/[^\s\\/]/
   if (reverseMixedSlashUncPattern.test(pathOrCommand)) {
     return true
   }

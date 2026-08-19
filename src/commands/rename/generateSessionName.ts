@@ -1,4 +1,4 @@
-import { queryHaiku } from '../../services/api/claude.js'
+import { queryHaiku } from '../../services/api/anthropic/index.js'
 import type { Message } from '../../types/message.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { errorMessage } from '../../utils/errors.js'
@@ -27,21 +27,16 @@ export async function generateSessionName(
         schema: {
           type: 'object',
           properties: {
-            name: { type: 'string' },
-          },
+            name: { type: 'string' }},
           required: ['name'],
-          additionalProperties: false,
-        },
-      },
+          additionalProperties: false}},
       signal,
       options: {
         querySource: 'rename_generate_name',
         agents: [],
         isNonInteractiveSession: false,
         hasAppendSystemPrompt: false,
-        mcpTools: [],
-      },
-    })
+        mcpTools: []}})
 
     const content = Array.isArray(result.message.content)
       ? extractTextContent(result.message.content)
@@ -62,8 +57,7 @@ export async function generateSessionName(
     // logForDebugging, not logError. Called automatically on every 3rd bridge
     // message (initReplBridge.ts), so errors here would flood the error file.
     logForDebugging(`generateSessionName failed: ${errorMessage(error)}`, {
-      level: 'error',
-    })
+      level: 'error'})
     return null
   }
 }

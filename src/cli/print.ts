@@ -4,16 +4,15 @@ import { readFile, stat } from 'fs/promises'
 import { dirname } from 'path'
 import {
   downloadUserSettings,
-  redownloadUserSettings,
-} from 'src/services/settingsSync/index.js'
+  redownloadUserSettings} from 'src/services/settingsSync/index.js'
 import { waitForRemoteManagedSettingsToLoad } from 'src/services/remoteManagedSettings/index.js'
 import { StructuredIO } from 'src/cli/structuredIO.js'
+import { t } from 'src/utils/i18n/index.js'
 import { RemoteIO } from 'src/cli/remoteIO.js'
 import {
   type Command,
   formatDescriptionWithSource,
-  getCommandName,
-} from 'src/commands.js'
+  getCommandName} from 'src/commands.js'
 import { createStreamlinedTransformer } from 'src/utils/streamlinedTransform.js'
 import { installStreamJsonStdoutGuard } from 'src/utils/streamJsonStdoutGuard.js'
 import type { ToolPermissionContext } from 'src/Tool.js'
@@ -24,20 +23,17 @@ import { uniq } from 'src/utils/array.js'
 import { mergeAndFilterTools } from 'src/utils/toolPool.js'
 import {
   logEvent,
-  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-} from 'src/services/analytics/index.js'
+  type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS} from 'src/services/analytics/index.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from 'src/services/analytics/growthbook.js'
 import { logForDebugging } from 'src/utils/debug.js'
 import {
   logForDiagnosticsNoPII,
-  withDiagnosticsTiming,
-} from 'src/utils/diagLogs.js'
+  withDiagnosticsTiming} from 'src/utils/diagLogs.js'
 import { toolMatchesName, type Tool, type Tools } from 'src/Tool.js'
 import {
   type AgentDefinition,
   isBuiltInAgent,
-  parseAgentsFromJson,
-} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
+  parseAgentsFromJson} from '@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js'
 import type { Message, NormalizedUserMessage } from 'src/types/message.js'
 import type { QueuedCommand } from 'src/types/textInputTypes.js'
 import {
@@ -47,8 +43,7 @@ import {
   hasCommandsInQueue,
   peek,
   subscribeToCommandQueue,
-  getCommandsByMaxPriority,
-} from 'src/utils/messageQueueManager.js'
+  getCommandsByMaxPriority} from 'src/utils/messageQueueManager.js'
 import { notifyCommandLifecycle } from 'src/utils/commandLifecycle.js'
 import {
   getSessionState,
@@ -56,35 +51,29 @@ import {
   notifySessionMetadataChanged,
   setPermissionModeChangedListener,
   type RequiresActionDetails,
-  type SessionExternalMetadata,
-} from 'src/utils/sessionState.js'
+  type SessionExternalMetadata} from 'src/utils/sessionState.js'
 import { externalMetadataToAppState } from 'src/state/onChangeAppState.js'
 import { getInMemoryErrors, logError, logMCPDebug } from 'src/utils/log.js'
 import {
   writeToStdout,
-  registerProcessOutputErrorHandlers,
-} from 'src/utils/process.js'
+  registerProcessOutputErrorHandlers} from 'src/utils/process.js'
 import type { Stream } from 'src/utils/stream.js'
 import { EMPTY_USAGE } from '@ant/model-provider'
 import {
   loadConversationForResume,
-  type TurnInterruptionState,
-} from 'src/utils/conversationRecovery.js'
+  type TurnInterruptionState} from 'src/utils/conversationRecovery.js'
 import type {
   MCPServerConnection,
   McpSdkServerConfig,
-  ScopedMcpServerConfig,
-} from 'src/services/mcp/types.js'
+  ScopedMcpServerConfig} from 'src/services/mcp/types.js'
 import {
   ChannelMessageNotificationSchema,
   gateChannelServer,
   wrapChannelMessage,
-  findChannelEntry,
-} from 'src/services/mcp/channelNotification.js'
+  findChannelEntry} from 'src/services/mcp/channelNotification.js'
 import {
   isChannelAllowlisted,
-  isChannelsEnabled,
-} from 'src/services/mcp/channelAllowlist.js'
+  isChannelsEnabled} from 'src/services/mcp/channelAllowlist.js'
 import { parsePluginIdentifier } from 'src/utils/plugins/pluginIdentifier.js'
 import { validateUuid } from 'src/utils/uuid.js'
 import { fromArray } from 'src/utils/generators.js'
@@ -93,8 +82,7 @@ import type { PermissionPromptTool } from 'src/utils/queryHelpers.js'
 import {
   createFileStateCacheWithSizeLimit,
   mergeFileStateCaches,
-  READ_FILE_STATE_CACHE_SIZE,
-} from 'src/utils/fileStateCache.js'
+  READ_FILE_STATE_CACHE_SIZE} from 'src/utils/fileStateCache.js'
 import { expandPath } from 'src/utils/path.js'
 import { extractReadFilesFromMessages } from 'src/utils/queryHelpers.js'
 import { registerHookEventHandler } from 'src/utils/hooks/hookEvents.js'
@@ -103,8 +91,7 @@ import { finalizePendingAsyncHooks } from 'src/utils/hooks/AsyncHookRegistry.js'
 import {
   gracefulShutdown,
   gracefulShutdownSync,
-  isShuttingDown,
-} from 'src/utils/gracefulShutdown.js'
+  isShuttingDown} from 'src/utils/gracefulShutdown.js'
 import { registerCleanup } from 'src/utils/cleanupRegistry.js'
 import { createIdleTimeoutManager } from 'src/utils/idleTimeout.js'
 import type {
@@ -115,8 +102,7 @@ import type {
   PermissionResult,
   McpServerConfigForProcessTransport,
   McpServerStatus,
-  RewindFilesResult,
-} from 'src/entrypoints/agentSdkTypes.js'
+  RewindFilesResult} from 'src/entrypoints/agentSdkTypes.js'
 import type {
   StdoutMessage,
   SDKControlInitializeRequest,
@@ -124,8 +110,7 @@ import type {
   SDKControlRequest,
   SDKControlResponse,
   SDKControlMcpSetServersResponse,
-  SDKControlReloadPluginsResponse,
-} from 'src/entrypoints/sdk/controlTypes.js'
+  SDKControlReloadPluginsResponse} from 'src/entrypoints/sdk/controlTypes.js'
 import type { PermissionMode } from '@anthropic-ai/claude-agent-sdk'
 import type { PermissionMode as InternalPermissionMode } from 'src/types/permissions.js'
 import { cwd } from 'process'
@@ -143,8 +128,7 @@ import { hasPermissionsToUseTool } from 'src/utils/permissions/permissions.js'
 import { safeParseJSON } from 'src/utils/json.js'
 import {
   outputSchema as permissionToolOutputSchema,
-  permissionPromptToolResultToPermissionDecision,
-} from 'src/utils/permissions/PermissionPromptToolResultSchema.js'
+  permissionPromptToolResultToPermissionDecision} from 'src/utils/permissions/PermissionPromptToolResultSchema.js'
 import { createAbortController } from 'src/utils/abortController.js'
 import { createCombinedAbortSignal } from 'src/utils/combinedAbortSignal.js'
 import { generateSessionTitle } from 'src/utils/sessionTitle.js'
@@ -153,38 +137,32 @@ import { runSideQuestion } from 'src/utils/sideQuestion.js'
 import {
   processSessionStartHooks,
   processSetupHooks,
-  takeInitialUserMessage,
-} from 'src/utils/sessionStart.js'
+  takeInitialUserMessage} from 'src/utils/sessionStart.js'
 import {
   DEFAULT_OUTPUT_STYLE_NAME,
-  getAllOutputStyles,
-} from 'src/constants/outputStyles.js'
+  getAllOutputStyles} from 'src/constants/outputStyles.js'
 import { TEAMMATE_MESSAGE_TAG, TICK_TAG } from 'src/constants/xml.js'
 import {
   getSettings_DEPRECATED,
-  getSettingsWithSources,
-} from 'src/utils/settings/settings.js'
+  getSettingsWithSources} from 'src/utils/settings/settings.js'
 import { settingsChangeDetector } from 'src/utils/settings/changeDetector.js'
 import { applySettingsChange } from 'src/utils/settings/applySettingsChange.js'
 import {
   isFastModeAvailable,
   isFastModeEnabled,
   isFastModeSupportedByModel,
-  getFastModeState,
-} from 'src/utils/fastMode.js'
+  getFastModeState} from 'src/utils/fastMode.js'
 import {
   isAutoModeGateEnabled,
   getAutoModeUnavailableNotification,
   getAutoModeUnavailableReason,
   isBypassPermissionsModeDisabled,
-  transitionPermissionMode,
-} from 'src/utils/permissions/permissionSetup.js'
+  transitionPermissionMode} from 'src/utils/permissions/permissionSetup.js'
 import {
   tryGenerateSuggestion,
   logSuggestionOutcome,
   logSuggestionSuppressed,
-  type PromptVariant,
-} from 'src/services/PromptSuggestion/promptSuggestion.js'
+  type PromptVariant} from 'src/services/PromptSuggestion/promptSuggestion.js'
 import { getLastCacheSafeParams } from 'src/utils/cacheSafeParamsSlot.js'
 import { getAccountInformation } from 'src/utils/auth.js'
 import { OAuthService } from 'src/services/oauth/index.js'
@@ -197,8 +175,7 @@ import {
   registerHookCallbacks,
   setInitJsonSchema,
   getInitJsonSchema,
-  setSdkAgentProgressSummariesEnabled,
-} from 'src/bootstrap/state.js'
+  setSdkAgentProgressSummariesEnabled} from 'src/bootstrap/state.js'
 import { createSyntheticOutputTool } from '@claude-code-best/builtin-tools/tools/SyntheticOutputTool/SyntheticOutputTool.js'
 import { parseSessionIdentifier } from 'src/utils/sessionUrl.js'
 import {
@@ -211,8 +188,7 @@ import {
   saveAgentSetting,
   saveMode,
   saveAiGeneratedTitle,
-  restoreSessionMetadata,
-} from 'src/utils/sessionStorage.js'
+  restoreSessionMetadata} from 'src/utils/sessionStorage.js'
 import { incrementPromptCount } from 'src/utils/commitAttribution.js'
 import {
   setupSdkMcpClients,
@@ -220,62 +196,51 @@ import {
   clearServerCache,
   fetchToolsForClient,
   areMcpConfigsEqual,
-  reconnectMcpServerImpl,
-} from 'src/services/mcp/client.js'
+  reconnectMcpServerImpl} from 'src/services/mcp/client.js'
 import {
   filterMcpServersByPolicy,
   getMcpConfigByName,
   isMcpServerDisabled,
-  setMcpServerEnabled,
-} from 'src/services/mcp/config.js'
+  setMcpServerEnabled} from 'src/services/mcp/config.js'
 import {
   performMCPOAuthFlow,
-  revokeServerTokens,
-} from 'src/services/mcp/auth.js'
+  revokeServerTokens} from 'src/services/mcp/auth.js'
 import {
   runElicitationHooks,
-  runElicitationResultHooks,
-} from 'src/services/mcp/elicitationHandler.js'
+  runElicitationResultHooks} from 'src/services/mcp/elicitationHandler.js'
 import { executeNotificationHooks } from 'src/utils/hooks.js'
 import {
   ElicitRequestSchema,
-  ElicitationCompleteNotificationSchema,
-} from '@modelcontextprotocol/sdk/types.js'
+  ElicitationCompleteNotificationSchema} from '@modelcontextprotocol/sdk/types.js'
 import { getMcpPrefix } from 'src/services/mcp/mcpStringUtils.js'
 import {
   commandBelongsToServer,
-  filterToolsByServer,
-} from 'src/services/mcp/utils.js'
+  filterToolsByServer} from 'src/services/mcp/utils.js'
 import { setupVscodeSdkMcp } from 'src/services/mcp/vscodeSdkMcp.js'
 import { getAllMcpConfigs } from 'src/services/mcp/config.js'
 import {
   isQualifiedForGrove,
-  checkGroveForNonInteractive,
-} from 'src/services/api/grove.js'
+  checkGroveForNonInteractive} from 'src/services/api/grove.js'
 import {
   toInternalMessages,
-  toSDKRateLimitInfo,
-} from 'src/utils/messages/mappers.js'
+  toSDKRateLimitInfo} from 'src/utils/messages/mappers.js'
 import { createModelSwitchBreadcrumbs } from 'src/utils/messages.js'
 import { collectContextData } from 'src/commands/context/context-noninteractive.js'
 import { LOCAL_COMMAND_STDOUT_TAG } from 'src/constants/xml.js'
 import {
   statusListeners,
-  type ClaudeAILimits,
-} from 'src/services/claudeAiLimits.js'
+  type ClaudeAILimits} from 'src/services/claudeAiLimits.js'
 import {
   getDefaultMainLoopModel,
   getMainLoopModel,
   modelDisplayString,
-  parseUserSpecifiedModel,
-} from 'src/utils/model/model.js'
+  parseUserSpecifiedModel} from 'src/utils/model/model.js'
 import { getModelOptions } from 'src/utils/model/modelOptions.js'
 import {
   modelSupportsEffort,
   modelSupportsMaxEffort,
   EFFORT_LEVELS,
-  resolveAppliedEffort,
-} from 'src/utils/effort.js'
+  resolveAppliedEffort} from 'src/utils/effort.js'
 import { modelSupportsAdaptiveThinking } from 'src/utils/thinking.js'
 import { modelSupportsAutoMode } from 'src/utils/betas.js'
 import { ensureModelStringsInitialized } from 'src/utils/model/modelStrings.js'
@@ -291,8 +256,7 @@ import {
   getMainThreadAgentType,
   getAllowedChannels,
   setAllowedChannels,
-  type ChannelEntry,
-} from 'src/bootstrap/state.js'
+  type ChannelEntry} from 'src/bootstrap/state.js'
 import { runWithWorkload, WORKLOAD_CRON } from 'src/utils/workloadContext.js'
 import type { UUID } from 'crypto'
 import { randomUUID } from 'crypto'
@@ -302,41 +266,34 @@ import {
   fileHistoryRewind,
   fileHistoryCanRestore,
   fileHistoryEnabled,
-  fileHistoryGetDiffStats,
-} from 'src/utils/fileHistory.js'
+  fileHistoryGetDiffStats} from 'src/utils/fileHistory.js'
 import {
   restoreAgentFromSession,
-  restoreSessionStateFromLog,
-} from 'src/utils/sessionRestore.js'
+  restoreSessionStateFromLog} from 'src/utils/sessionRestore.js'
 import { SandboxManager } from 'src/utils/sandbox/sandbox-adapter.js'
 import {
   headlessProfilerStartTurn,
   headlessProfilerCheckpoint,
-  logHeadlessProfilerTurn,
-} from 'src/utils/headlessProfiler.js'
+  logHeadlessProfilerTurn} from 'src/utils/headlessProfiler.js'
 import {
   startQueryProfile,
-  logQueryProfileReport,
-} from 'src/utils/queryProfiler.js'
+  logQueryProfileReport} from 'src/utils/queryProfiler.js'
 import { asSessionId } from 'src/types/ids.js'
 import {
   createAutonomyQueuedPromptIfNoActiveSource,
   createProactiveAutonomyCommands,
-  markAutonomyRunFailed,
-} from 'src/utils/autonomyRuns.js'
+  markAutonomyRunFailed} from 'src/utils/autonomyRuns.js'
 import {
   cancelQueuedAutonomyCommands,
   claimConsumableQueuedAutonomyCommands,
-  finalizeAutonomyCommandsForTurn,
-} from 'src/utils/autonomyQueueLifecycle.js'
+  finalizeAutonomyCommandsForTurn} from 'src/utils/autonomyQueueLifecycle.js'
 import { jsonStringify } from '../utils/slowOperations.js'
 import { skillChangeDetector } from '../utils/skills/skillChangeDetector.js'
 import { getCommands, clearCommandsCache } from '../commands.js'
 import {
   isBareMode,
   isEnvTruthy,
-  isEnvDefinedFalsy,
-} from '../utils/envUtils.js'
+  isEnvDefinedFalsy} from '../utils/envUtils.js'
 import { installPluginsForHeadless } from '../utils/plugins/headlessPluginInstall.js'
 import { refreshActivePlugins } from '../utils/plugins/refresh.js'
 import { loadAllPluginsCacheOnly } from '../utils/plugins/pluginLoader.js'
@@ -344,13 +301,11 @@ import {
   isTeamLead,
   hasActiveInProcessTeammates,
   hasWorkingInProcessTeammates,
-  waitForTeammatesToBecomeIdle,
-} from '../utils/teammate.js'
+  waitForTeammatesToBecomeIdle} from '../utils/teammate.js'
 import {
   readUnreadMessages,
   markMessagesAsRead,
-  isShutdownApproved,
-} from '../utils/teammateMailbox.js'
+  isShutdownApproved} from '../utils/teammateMailbox.js'
 import { removeTeammateFromTeamFile } from '../utils/swarm/teamHelpers.js'
 import { unassignTeammateTasks } from '../utils/tasks.js'
 import { getRunningTasks } from '../utils/task/framework.js'
@@ -578,20 +533,20 @@ export async function runHeadless(
   void initializeGrowthBook()
 
   if (options.resumeSessionAt && !options.resume) {
-    process.stderr.write(`Error: --resume-session-at requires --resume\n`)
+    process.stderr.write(t('print.resumeSessionAtRequiresResume') + '\n')
     gracefulShutdownSync(1)
     return
   }
 
   if (options.rewindFiles && !options.resume) {
-    process.stderr.write(`Error: --rewind-files requires --resume\n`)
+    process.stderr.write(t('print.rewindFilesRequiresResume') + '\n')
     gracefulShutdownSync(1)
     return
   }
 
   if (options.rewindFiles && inputPrompt) {
     process.stderr.write(
-      `Error: --rewind-files is a standalone operation and cannot be used with a prompt\n`,
+      t('print.rewindFilesStandalone') + '\n',
     )
     gracefulShutdownSync(1)
     return
@@ -614,17 +569,11 @@ export async function runHeadless(
   const sandboxUnavailableReason = SandboxManager.getSandboxUnavailableReason()
   if (sandboxUnavailableReason) {
     if (SandboxManager.isSandboxRequired()) {
-      process.stderr.write(
-        `\nError: sandbox required but unavailable: ${sandboxUnavailableReason}\n` +
-          `  sandbox.failIfUnavailable is set — refusing to start without a working sandbox.\n\n`,
-      )
+      process.stderr.write(t('print.sandboxRequiredUnavailable', sandboxUnavailableReason))
       gracefulShutdownSync(1)
       return
     }
-    process.stderr.write(
-      `\n⚠ Sandbox disabled: ${sandboxUnavailableReason}\n` +
-        `  Commands will run WITHOUT sandboxing. Network and filesystem restrictions will NOT be enforced.\n\n`,
-    )
+    process.stderr.write(t('print.sandboxDisabled', sandboxUnavailableReason))
   } else if (SandboxManager.isSandboxingEnabled()) {
     // Initialize sandbox with a callback that forwards network permission
     // requests to the SDK host via the can_use_tool control_request protocol.
@@ -632,7 +581,7 @@ export async function runHeadless(
     try {
       await SandboxManager.initialize(structuredIO.createSandboxAskCallback())
     } catch (err) {
-      process.stderr.write(`\n❌ Sandbox Error: ${errorMessage(err)}\n`)
+      process.stderr.write(t('print.sandboxError', errorMessage(err)))
       gracefulShutdownSync(1, 'other')
       return
     }
@@ -650,8 +599,7 @@ export async function runHeadless(
               hook_name: event.hookName,
               hook_event: event.hookEvent,
               uuid: randomUUID(),
-              session_id: getSessionId(),
-            }
+              session_id: getSessionId()}
           case 'progress':
             return {
               type: 'system' as const,
@@ -663,8 +611,7 @@ export async function runHeadless(
               stderr: event.stderr,
               output: event.output,
               uuid: randomUUID(),
-              session_id: getSessionId(),
-            }
+              session_id: getSessionId()}
           case 'response':
             return {
               type: 'system' as const,
@@ -678,8 +625,7 @@ export async function runHeadless(
               exit_code: event.exitCode,
               outcome: event.outcome,
               uuid: randomUUID(),
-              session_id: getSessionId(),
-            }
+              session_id: getSessionId()}
         }
       })()
       void structuredIO.write(message)
@@ -695,8 +641,7 @@ export async function runHeadless(
   const {
     messages: initialMessages,
     turnInterruptionState,
-    agentSetting: resumedAgentSetting,
-  } = await loadInitialMessages(setAppState, {
+    agentSetting: resumedAgentSetting} = await loadInitialMessages(setAppState, {
     continue: options.continue,
     teleport: options.teleport,
     resume: options.resume,
@@ -704,8 +649,7 @@ export async function runHeadless(
     forkSession: options.forkSession,
     outputFormat: options.outputFormat,
     sessionStartHooksPromise: options.sessionStartHooksPromise,
-    restoredWorkerState: structuredIO.restoredWorkerState,
-  })
+    restoredWorkerState: structuredIO.restoredWorkerState})
 
   // SessionStart hooks can emit initialUserMessage — the first user turn for
   // headless orchestrator sessions where stdin is empty and additionalContext
@@ -755,9 +699,7 @@ export async function runHeadless(
     )
 
     if (!targetMessage || targetMessage.type !== 'user') {
-      process.stderr.write(
-        `Error: --rewind-files requires a user message UUID, but ${options.rewindFiles} is not a user message in this session\n`,
-      )
+      process.stderr.write(t('print.rewindFilesNotUserMessage', options.rewindFiles))
       gracefulShutdownSync(1)
       return
     }
@@ -770,15 +712,13 @@ export async function runHeadless(
       false,
     )
     if (!result.canRewind) {
-      process.stderr.write(`Error: ${result.error || 'Unexpected error'}\n`)
+      process.stderr.write(`Error: ${result.error || t('print.unexpectedError')}\n`)
       gracefulShutdownSync(1)
       return
     }
 
     // Rewind complete - exit successfully
-    process.stdout.write(
-      `Files rewound to state at message ${options.rewindFiles}\n`,
-    )
+    process.stdout.write(t('print.filesRewoundToMessage', options.rewindFiles))
     gracefulShutdownSync(0)
     return
   }
@@ -790,17 +730,13 @@ export async function runHeadless(
   const isUsingSdkUrl = Boolean(options.sdkUrl)
 
   if (!inputPrompt && !hasValidResumeSessionId && !isUsingSdkUrl) {
-    process.stderr.write(
-      `Error: Input must be provided either through stdin or as a prompt argument when using --print\n`,
-    )
+    process.stderr.write(t('print.inputRequiredForPrint') + '\n')
     gracefulShutdownSync(1)
     return
   }
 
   if (options.outputFormat === 'stream-json' && !options.verbose) {
-    process.stderr.write(
-      'Error: When using --print, --output-format=stream-json requires --verbose\n',
-    )
+    process.stderr.write(t('print.streamJsonRequiresVerbose') + '\n')
     gracefulShutdownSync(1)
     return
   }
@@ -824,9 +760,7 @@ export async function runHeadless(
         ...prev,
         attribution: {
           ...prev.attribution,
-          permissionPromptCount: prev.attribution.permissionPromptCount + 1,
-        },
-      }))
+          permissionPromptCount: prev.attribution.permissionPromptCount + 1}}))
     }
     notifySessionStateChanged('requires_action', details)
   }
@@ -930,7 +864,7 @@ export async function runHeadless(
   switch (options.outputFormat) {
     case 'json':
       if (!lastMessage || lastMessage.type !== 'result') {
-        throw new Error('No messages returned')
+        throw new Error(t('print.noMessagesReturned'))
       }
       if (options.verbose) {
         writeToStdout(jsonStringify(messages) + '\n')
@@ -943,7 +877,7 @@ export async function runHeadless(
       break
     default:
       if (!lastMessage || lastMessage.type !== 'result') {
-        throw new Error('No messages returned')
+        throw new Error(t('print.noMessagesReturned'))
       }
       switch (lastMessage.subtype) {
         case 'success':
@@ -1069,8 +1003,7 @@ function runHeadlessStreaming(
       run_phase: runPhase,
       worker_status: getSessionState(),
       internal_events_pending: structuredIO.internalEventsPending,
-      bg_tasks: bg,
-    })
+      bg_tasks: bg})
   })
 
   // Wire the central onChangeAppState mode-diff hook to the SDK output stream.
@@ -1097,8 +1030,7 @@ function runHeadlessStreaming(
         status: null,
         permissionMode: newMode as PermissionMode,
         uuid: randomUUID(),
-        session_id: getSessionId(),
-      })
+        session_id: getSessionId()})
     }
   })
 
@@ -1128,8 +1060,7 @@ function runHeadlessStreaming(
     inflightPromise: null,
     lastEmitted: null,
     pendingSuggestion: null,
-    pendingLastEmittedEntry: null,
-  }
+    pendingLastEmittedEntry: null}
 
   // Set up AWS auth status listener if enabled
   let unsubscribeAuthStatus: (() => void) | undefined
@@ -1142,8 +1073,7 @@ function runHeadlessStreaming(
         output: status.output,
         error: status.error,
         uuid: randomUUID(),
-        session_id: getSessionId(),
-      })
+        session_id: getSessionId()})
     })
   }
 
@@ -1157,8 +1087,7 @@ function runHeadlessStreaming(
         type: 'rate_limit_event',
         rate_limit_info: rateLimitInfo,
         uuid: randomUUID(),
-        session_id: getSessionId(),
-      } as unknown as Parameters<typeof output.enqueue>[0])
+        session_id: getSessionId()} as unknown as Parameters<typeof output.enqueue>[0])
     }
   }
   statusListeners.add(rateLimitListener)
@@ -1213,8 +1142,7 @@ function runHeadlessStreaming(
       value: turnInterruptionState.message.message!.content as
         | string
         | ContentBlockParam[],
-      uuid: randomUUID(),
-    })
+      uuid: randomUUID()})
   }
 
   const modelOptions = getModelOptions()
@@ -1237,12 +1165,10 @@ function runHeadlessStreaming(
         supportsEffort: true,
         supportedEffortLevels: modelSupportsMaxEffort(resolvedModel)
           ? [...EFFORT_LEVELS]
-          : EFFORT_LEVELS.filter(l => l !== 'max'),
-      }),
+          : EFFORT_LEVELS.filter(l => l !== 'max')}),
       ...(hasAdaptiveThinking && { supportsAdaptiveThinking: true }),
       ...(hasFastMode && { supportsFastMode: true }),
-      ...(hasAutoMode && { supportsAutoMode: true }),
-    }
+      ...(hasAutoMode && { supportsAutoMode: true })}
   })
   let activeUserSpecifiedModel = options.userSpecifiedModel
 
@@ -1268,8 +1194,7 @@ function runHeadlessStreaming(
           parent_tool_use_id: null,
           uuid: crumb.uuid,
           timestamp: crumb.timestamp,
-          isReplay: true,
-        } as unknown as StdoutMessage)
+          isReplay: true} as unknown as StdoutMessage)
       }
     }
   }
@@ -1316,8 +1241,7 @@ function runHeadlessStreaming(
             const mode = request.params.mode === 'url' ? 'url' : 'form'
 
             logEvent('tengu_mcp_elicitation_shown', {
-              mode: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            })
+              mode: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
             // Run elicitation hooks first — they can provide a response programmatically
             const hookResponse = await runElicitationHooks(
@@ -1333,8 +1257,7 @@ function runHeadlessStreaming(
               logEvent('tengu_mcp_elicitation_response', {
                 mode: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                 action:
-                  hookResponse.action as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-              })
+                  hookResponse.action as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
               return hookResponse
             }
 
@@ -1376,8 +1299,7 @@ function runHeadlessStreaming(
             logEvent('tengu_mcp_elicitation_response', {
               mode: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               action:
-                result.action as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-            })
+                result.action as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
             return result
           },
         )
@@ -1393,16 +1315,14 @@ function runHeadlessStreaming(
             )
             void executeNotificationHooks({
               message: `MCP server "${serverName}" confirmed elicitation ${elicitationId} complete`,
-              notificationType: 'elicitation_complete',
-            })
+              notificationType: 'elicitation_complete'})
             output.enqueue({
               type: 'system',
               subtype: 'elicitation_complete',
               mcp_server_name: serverName,
               elicitation_id: elicitationId,
               uuid: randomUUID(),
-              session_id: getSessionId(),
-            })
+              session_id: getSessionId()})
           },
         )
 
@@ -1477,9 +1397,7 @@ function runHeadlessStreaming(
                 ),
             ),
             ...sdkTools,
-          ],
-        },
-      }))
+          ]}}))
 
       // Set up the special internal VSCode MCP server if necessary.
       setupVscodeSdkMcp(sdkClients)
@@ -1493,8 +1411,7 @@ function runHeadlessStreaming(
   let dynamicMcpState: DynamicMcpState = {
     clients: [],
     tools: [],
-    configs: {},
-  }
+    configs: {}}
 
   // Shared tool assembly for ask() and the get_context_usage control request.
   // Closes over the mutable sdkTools/dynamicMcpState bindings so both call
@@ -1568,10 +1485,8 @@ function runHeadlessStreaming(
     response: {
       added: [] as string[],
       removed: [] as string[],
-      errors: {} as Record<string, string>,
-    },
-    sdkServersChanged: false,
-  })
+      errors: {} as Record<string, string>},
+    sdkServersChanged: false})
 
   function applyMcpServerChanges(
     servers: Record<string, McpServerConfigForProcessTransport>,
@@ -1620,15 +1535,12 @@ function runHeadlessStreaming(
                   ),
               ),
               ...sdkTools,
-            ],
-          },
-        }))
+            ]}}))
       }
 
       return {
         response: result.response,
-        sdkServersChanged: result.sdkServersChanged,
-      }
+        sdkServersChanged: result.sdkServersChanged}
     }
 
     mcpChangesPromise = mcpChangesPromise.then(doWork, doWork)
@@ -1662,14 +1574,12 @@ function runHeadlessStreaming(
           type: connection.config.type,
           url: connection.config.url,
           headers: connection.config.headers,
-          oauth: connection.config.oauth,
-        }
+          oauth: connection.config.oauth}
       } else if (connection.config.type === 'claudeai-proxy') {
         config = {
           type: 'claudeai-proxy' as const,
           url: connection.config.url,
-          id: connection.config.id,
-        }
+          id: connection.config.id}
       } else if (
         connection.config.type === 'stdio' ||
         connection.config.type === undefined
@@ -1681,8 +1591,7 @@ function runHeadlessStreaming(
         config = {
           type: 'stdio' as const,
           command: stdioConfig.command,
-          args: stdioConfig.args,
-        }
+          args: stdioConfig.args}
       }
       const serverTools =
         connection.type === 'connected'
@@ -1691,9 +1600,7 @@ function runHeadlessStreaming(
               annotations: {
                 readOnly: tool.isReadOnly({}) || undefined,
                 destructive: tool.isDestructive?.({}) || undefined,
-                openWorld: tool.isOpenWorld?.({}) || undefined,
-              },
-            }))
+                openWorld: tool.isOpenWorld?.({}) || undefined}}))
           : undefined
       // Capabilities passthrough with allowlist pre-filter. The IDE reads
       // experimental['claude/channel'] to decide whether to show the
@@ -1727,8 +1634,7 @@ function runHeadlessStreaming(
         config,
         scope: connection.config.scope,
         tools: serverTools,
-        capabilities,
-      }
+        capabilities}
     }) as McpServerStatus[]
   }
 
@@ -1879,8 +1785,7 @@ function runHeadlessStreaming(
               const commands = await createProactiveAutonomyCommands({
                 basePrompt: `<${TICK_TAG}>${new Date().toLocaleTimeString()}</${TICK_TAG}>`,
                 currentDir: cwd(),
-                shouldCreate: () => !inputClosed,
-              })
+                shouldCreate: () => !inputClosed})
               if (inputClosed) {
                 await cancelQueuedAutonomyCommands({ commands })
                 return
@@ -1888,8 +1793,7 @@ function runHeadlessStreaming(
               for (const command of commands) {
                 enqueue({
                   ...command,
-                  uuid: randomUUID(),
-                })
+                  uuid: randomUUID()})
               }
               void run()
             })().catch(error => {
@@ -1897,8 +1801,7 @@ function runHeadlessStreaming(
               logForDebugging(
                 `[Proactive] failed to create headless tick: ${error}`,
                 {
-                  level: 'error',
-                },
+                  level: 'error'},
               )
             })
           }, 0)
@@ -1948,8 +1851,7 @@ function runHeadlessStreaming(
             ),
           )
           logEvent('tengu_sync_plugin_install_timeout', {
-            timeout_ms: timeoutMs,
-          })
+            timeout_ms: timeoutMs})
         }
       } else {
         await pluginInstallPromise
@@ -1988,9 +1890,7 @@ function runHeadlessStreaming(
             command.mode !== 'orphaned-permission' &&
             command.mode !== 'task-notification'
           ) {
-            throw new Error(
-              'only prompt commands are supported in streaming mode',
-            )
+            throw new Error(t('print.onlyPromptInStreaming'))
           }
 
           // Non-prompt commands (task-notification, orphaned-permission) carry
@@ -2013,8 +1913,7 @@ function runHeadlessStreaming(
             command = {
               ...command,
               value: joinPromptValues(batch.map(c => c.value)),
-              uuid: batch.findLast(c => c.uuid)?.uuid ?? command.uuid,
-            }
+              uuid: batch.findLast(c => c.uuid)?.uuid ?? command.uuid}
           }
           const batchUuids = batch.map(c => c.uuid).filter(u => u !== undefined)
 
@@ -2033,8 +1932,7 @@ function runHeadlessStreaming(
                   session_id: getSessionId(),
                   parent_tool_use_id: null,
                   uuid: c.uuid as string,
-                  isReplay: true,
-                } as unknown as StdoutMessage)
+                  isReplay: true} as unknown as StdoutMessage)
               }
             }
           }
@@ -2141,12 +2039,10 @@ function runHeadlessStreaming(
                         tool_uses: parseInt(toolUsesMatch[1]!, 10),
                         duration_ms: durationMsMatch
                           ? parseInt(durationMsMatch[1]!, 10)
-                          : 0,
-                      }
+                          : 0}
                     : undefined,
                 session_id: getSessionId(),
-                uuid: randomUUID(),
-              })
+                uuid: randomUUID()})
             }
             // No continue -- fall through to ask() so the model processes the result
           }
@@ -2156,8 +2052,7 @@ function runHeadlessStreaming(
 
           if (structuredIO instanceof RemoteIO && command.mode === 'prompt') {
             logEvent('tengu_bridge_message_received', {
-              is_repl: false,
-            })
+              is_repl: false})
           }
 
           // Abort any in-flight suggestion generation and track acceptance
@@ -2269,10 +2164,8 @@ function runHeadlessStreaming(
                       subtype: 'status',
                       status: status as 'compacting' | null,
                       session_id: getSessionId(),
-                      uuid: randomUUID(),
-                    })
-                  },
-                })) {
+                      uuid: randomUUID()})
+                  }})) {
                   // Forward messages to bridge incrementally (mid-turn) so
                   // claude.ai sees progress and the connection stays alive
                   // while blocked on permission requests.
@@ -2317,25 +2210,21 @@ function runHeadlessStreaming(
                 commands: claimedAutonomyCommands,
                 outcome: {
                   type: 'failed',
-                  message: 'ask() returned an error result',
-                },
+                  message: 'ask() returned an error result'},
                 currentDir: cwd(),
                 priority: 'later',
-                workload: cmd.workload ?? options.workload,
-              })
+                workload: cmd.workload ?? options.workload})
             } else {
               const nextCommands = await finalizeAutonomyCommandsForTurn({
                 commands: claimedAutonomyCommands,
                 outcome: { type: 'completed' },
                 currentDir: cwd(),
                 priority: 'later',
-                workload: cmd.workload ?? options.workload,
-              })
+                workload: cmd.workload ?? options.workload})
               for (const nextCommand of nextCommands) {
                 enqueue({
                   ...nextCommand,
-                  uuid: randomUUID(),
-                })
+                  uuid: randomUUID()})
               }
             }
           } catch (error) {
@@ -2344,8 +2233,7 @@ function runHeadlessStreaming(
               outcome: { type: 'failed', error },
               currentDir: cwd(),
               priority: 'later',
-              workload: cmd.workload ?? options.workload,
-            })
+              workload: cmd.workload ?? options.workload})
             throw error
           }
 
@@ -2360,8 +2248,7 @@ function runHeadlessStreaming(
           if (feature('FILE_PERSISTENCE') && turnStartTime !== undefined) {
             void executeFilePersistence(
               {
-                turnStartTime,
-              } as import('src/utils/filePersistence/types.js').TurnStartTime,
+                turnStartTime} as import('src/utils/filePersistence/types.js').TurnStartTime,
               abortController.signal,
               result => {
                 const filesResult = result as unknown as {
@@ -2375,8 +2262,7 @@ function runHeadlessStreaming(
                   failed: filesResult.failedFiles,
                   processed_at: new Date().toISOString(),
                   uuid: randomUUID(),
-                  session_id: getSessionId(),
-                })
+                  session_id: getSessionId()})
               },
             )
           }
@@ -2419,14 +2305,12 @@ function runHeadlessStreaming(
                     type: 'prompt_suggestion' as const,
                     suggestion: result.suggestion,
                     uuid: randomUUID(),
-                    session_id: getSessionId(),
-                  }
+                    session_id: getSessionId()}
                   const lastEmittedEntry = {
                     text: result.suggestion,
                     emittedAt: Date.now(),
                     promptId: result.promptId,
-                    generationRequestId: result.generationRequestId,
-                  }
+                    generationRequestId: result.generationRequestId}
                   // Defer emission if the result is being held for background agents,
                   // so that prompt_suggestion always arrives after result.
                   // Only set lastEmitted when the suggestion is actually delivered
@@ -2437,8 +2321,7 @@ function runHeadlessStreaming(
                     suggestionState.pendingLastEmittedEntry = {
                       text: lastEmittedEntry.text,
                       promptId: lastEmittedEntry.promptId,
-                      generationRequestId: lastEmittedEntry.generationRequestId,
-                    }
+                      generationRequestId: lastEmittedEntry.generationRequestId}
                   } else {
                     suggestionState.lastEmitted = lastEmittedEntry
                     output.enqueue(suggestionMsg)
@@ -2524,8 +2407,7 @@ function runHeadlessStreaming(
           if (suggestionState.pendingLastEmittedEntry) {
             suggestionState.lastEmitted = {
               ...suggestionState.pendingLastEmittedEntry,
-              emittedAt: Date.now(),
-            }
+              emittedAt: Date.now()}
             suggestionState.pendingLastEmittedEntry = null
           }
           suggestionState.pendingSuggestion = null
@@ -2552,8 +2434,7 @@ function runHeadlessStreaming(
           errors: [
             errorMessage(error),
             ...getInMemoryErrors().map(_ => _.error),
-          ],
-        })
+          ]})
       } catch {
         // If we can't emit the error result, continue with shutdown anyway
       }
@@ -2672,8 +2553,7 @@ function runHeadlessStreaming(
                   // Remove from team file
                   removeTeammateFromTeamFile(teamName, {
                     agentId: teammateId,
-                    name: teammateToRemove,
-                  })
+                    name: teammateToRemove})
                   logForDebugging(
                     `[print.ts] Removed ${teammateToRemove} from team file`,
                   )
@@ -2696,9 +2576,7 @@ function runHeadlessStreaming(
                       ...prev,
                       teamContext: {
                         ...prev.teamContext,
-                        teammates: remainingTeammates,
-                      },
-                    }
+                        teammates: remainingTeammates}}
                   })
                 }
               }
@@ -2716,8 +2594,7 @@ function runHeadlessStreaming(
             enqueue({
               mode: 'prompt',
               value: formatted,
-              uuid: randomUUID(),
-            })
+              uuid: randomUUID()})
             void run()
             return // run() will come back here after processing
           }
@@ -2732,8 +2609,7 @@ function runHeadlessStreaming(
             enqueue({
               mode: 'prompt',
               value: SHUTDOWN_TEAM_PROMPT,
-              uuid: randomUUID(),
-            })
+              uuid: randomUUID()})
             void run()
             return // run() will come back here after processing
           }
@@ -2771,8 +2647,7 @@ function runHeadlessStreaming(
         enqueue({
           mode: 'prompt',
           value: SHUTDOWN_TEAM_PROMPT,
-          uuid: randomUUID(),
-        })
+          uuid: randomUUID()})
         void run()
       } else {
         // Wait for any in-flight push suggestion before closing the output stream.
@@ -2808,8 +2683,7 @@ function runHeadlessStreaming(
         enqueue({
           mode: 'prompt',
           value,
-          uuid: randomUUID(),
-        })
+          uuid: randomUUID()})
       }
       return entries.length > 0
     }
@@ -2858,8 +2732,7 @@ function runHeadlessStreaming(
           sourceId: params.sourceId,
           sourceLabel: params.sourceLabel,
           workload: WORKLOAD_CRON,
-          shouldCreate: () => !inputClosed,
-        })
+          shouldCreate: () => !inputClosed})
         if (!command) return
         if (inputClosed) {
           await cancelQueuedAutonomyCommands({ commands: [command] })
@@ -2878,8 +2751,7 @@ function runHeadlessStreaming(
     const enqueueAndRun = (command: QueuedCommand): void => {
       enqueue({
         ...command,
-        uuid: randomUUID(),
-      })
+        uuid: randomUUID()})
       void run()
     }
 
@@ -2893,8 +2765,7 @@ function runHeadlessStreaming(
           sourceId: prompt,
           sourceLabel: prompt,
           logSuffix: '',
-          onSuccess: enqueueAndRun,
-        })
+          onSuccess: enqueueAndRun})
       },
       onFireTask: task => {
         if (task.agentId) {
@@ -2909,8 +2780,7 @@ function runHeadlessStreaming(
                 `No teammate runtime available for scheduled task owner ${task.agentId} in headless mode.`,
                 command.autonomy!.rootDir,
               )
-            },
-          })
+            }})
           return
         }
         dispatchHeadlessCronCommand({
@@ -2918,13 +2788,11 @@ function runHeadlessStreaming(
           sourceId: task.id,
           sourceLabel: task.prompt,
           logSuffix: ` ${task.id}`,
-          onSuccess: enqueueAndRun,
-        })
+          onSuccess: enqueueAndRun})
       },
       isLoading: () => running || inputClosed,
       getJitterConfig: cronJitterConfigModule?.getCronJitterConfig,
-      isKilled: () => !cronGate?.isKairosCronEnabled(),
-    })
+      isKilled: () => !cronGate?.isKairosCronEnabled()})
     cronScheduler.start()
   }
 
@@ -2937,9 +2805,7 @@ function runHeadlessStreaming(
       response: {
         subtype: 'success',
         request_id: message.request_id,
-        response: response,
-      },
-    })
+        response: response}})
   }
 
   const sendControlResponseError = function (
@@ -2951,9 +2817,7 @@ function runHeadlessStreaming(
       response: {
         subtype: 'error',
         request_id: message.request_id,
-        error: errorMessage,
-      },
-    })
+        error: errorMessage}})
   }
 
   // Handle unexpected permission responses by looking up the unresolved tool
@@ -2968,8 +2832,7 @@ function runHeadlessStreaming(
         // The first message of a session might be the orphaned permission
         // check rather than a user prompt, so kick off the loop.
         void run()
-      },
-    })
+      }})
   })
 
   // Track active OAuth flows per server so we can abort a previous flow
@@ -3040,9 +2903,7 @@ function runHeadlessStreaming(
               ...prev,
               attribution: {
                 ...prev.attribution,
-                escapeCount: prev.attribution.escapeCount + 1,
-              },
-            }))
+                escapeCount: prev.attribution.escapeCount + 1}}))
           }
           if (abortController) {
             abortController.abort()
@@ -3077,8 +2938,7 @@ function runHeadlessStreaming(
               // The actual server connection is managed by the SDK Query class
               sdkMcpConfigs[serverName] = {
                 type: 'sdk',
-                name: serverName,
-              }
+                name: serverName}
             }
           }
 
@@ -3130,8 +2990,7 @@ function runHeadlessStreaming(
               prev.toolPermissionContext,
               output,
             ),
-            isUltraplanMode: m.ultraplan ?? prev.isUltraplanMode,
-          }))
+            isUltraplanMode: m.ultraplan ?? prev.isUltraplanMode}))
           // handleSetPermissionMode sends the control_response; the
           // notifySessionMetadataChanged that used to follow here is
           // now fired by onChangeAppState (with externalized mode name).
@@ -3155,14 +3014,12 @@ function runHeadlessStreaming(
           } else {
             options.thinkingConfig = {
               type: 'enabled',
-              budgetTokens: msg.request.max_thinking_tokens,
-            }
+              budgetTokens: msg.request.max_thinking_tokens}
           }
           sendControlResponseSuccess(msg)
         } else if (msg.request.subtype === 'mcp_status') {
           sendControlResponseSuccess(msg, {
-            mcpServers: buildMcpServerStatuses(),
-          })
+            mcpServers: buildMcpServerStatuses()})
         } else if (msg.request.subtype === 'get_context_usage') {
           try {
             const appState = getAppState()
@@ -3174,9 +3031,7 @@ function runHeadlessStreaming(
                 tools: buildAllTools(appState),
                 agentDefinitions: appState.agentDefinitions,
                 customSystemPrompt: options.systemPrompt,
-                appendSystemPrompt: options.appendSystemPrompt,
-              },
-            })
+                appendSystemPrompt: options.appendSystemPrompt}})
             sendControlResponseSuccess(msg, { ...data })
           } catch (error) {
             sendControlResponseError(msg, errorMessage(error))
@@ -3219,8 +3074,7 @@ function runHeadlessStreaming(
           const targetUuid = msg.request.message_uuid
           const removed = dequeueAllMatching(cmd => cmd.uuid === targetUuid)
           sendControlResponseSuccess(msg, {
-            cancelled: removed.length > 0,
-          })
+            cancelled: removed.length > 0})
         } else if (msg.request.subtype === 'seed_read_state') {
           // Client observed a Read that was later removed from context (e.g.
           // by snip), so transcript-based seeding missed it. Queued into
@@ -3252,8 +3106,7 @@ function runHeadlessStreaming(
                 content,
                 timestamp: diskMtime,
                 offset: undefined,
-                limit: undefined,
-              })
+                limit: undefined})
             }
           } catch {
             // ENOENT etc — skip seeding but still succeed
@@ -3314,8 +3167,7 @@ function runHeadlessStreaming(
               plugins = pluginsR.value.enabled.map(p => ({
                 name: p.name,
                 path: p.path,
-                source: p.source,
-              }))
+                source: p.source}))
             } else {
               logError(pluginsR.reason)
             }
@@ -3326,18 +3178,15 @@ function runHeadlessStreaming(
                 .map(cmd => ({
                   name: getCommandName(cmd),
                   description: formatDescriptionWithSource(cmd),
-                  argumentHint: cmd.argumentHint || '',
-                })),
+                  argumentHint: cmd.argumentHint || ''})),
               agents: currentAgents.map(a => ({
                 name: a.agentType,
                 description: a.whenToUse,
-                model: a.model === 'inherit' ? undefined : a.model,
-              })),
+                model: a.model === 'inherit' ? undefined : a.model})),
               plugins,
               mcpServers:
                 buildMcpServerStatuses() as SDKControlReloadPluginsResponse['mcpServers'],
-              error_count: r.error_count,
-            } satisfies SDKControlReloadPluginsResponse)
+              error_count: r.error_count} satisfies SDKControlReloadPluginsResponse)
           } catch (error) {
             sendControlResponseError(msg, errorMessage(error))
           }
@@ -3384,9 +3233,7 @@ function runHeadlessStreaming(
                 resources:
                   result.resources && result.resources.length > 0
                     ? { ...prev.mcp.resources, [serverName]: result.resources }
-                    : omit(prev.mcp.resources, serverName),
-              },
-            }))
+                    : omit(prev.mcp.resources, serverName)}}))
             // Also update dynamicMcpState so run() picks up the new tools
             // on the next turn (run() reads dynamicMcpState, not appState)
             dynamicMcpState = {
@@ -3400,8 +3247,7 @@ function runHeadlessStreaming(
                   t => !t.name?.startsWith(prefix),
                 ),
                 ...result.tools,
-              ],
-            }
+              ]}
             if (result.client.type === 'connected') {
               registerElicitationHandlers([result.client])
               reregisterChannelHandlerAfterReconnect(result.client)
@@ -3459,9 +3305,7 @@ function runHeadlessStreaming(
                 commands: reject(prev.mcp.commands, c =>
                   commandBelongsToServer(c, serverName),
                 ),
-                resources: omit(prev.mcp.resources, serverName),
-              },
-            }))
+                resources: omit(prev.mcp.resources, serverName)}}))
             sendControlResponseSuccess(msg)
           } else {
             // Enabling: persist + reconnect
@@ -3490,9 +3334,7 @@ function runHeadlessStreaming(
                 resources:
                   result.resources && result.resources.length > 0
                     ? { ...prev.mcp.resources, [serverName]: result.resources }
-                    : omit(prev.mcp.resources, serverName),
-              },
-            }))
+                    : omit(prev.mcp.resources, serverName)}}))
             if (result.client.type === 'connected') {
               registerElicitationHandlers([result.client])
               reregisterChannelHandlerAfterReconnect(result.client)
@@ -3557,8 +3399,7 @@ function runHeadlessStreaming(
                   skipBrowserOpen: true,
                   onWaitingForCallback: submit => {
                     oauthCallbackSubmitters.set(serverName as string, submit)
-                  },
-                },
+                  }},
               )
 
               // Wait for the auth URL (or the flow to complete without needing redirect)
@@ -3570,12 +3411,10 @@ function runHeadlessStreaming(
               if (authUrl) {
                 sendControlResponseSuccess(msg, {
                   authUrl,
-                  requiresUserAction: true,
-                })
+                  requiresUserAction: true})
               } else {
                 sendControlResponseSuccess(msg, {
-                  requiresUserAction: false,
-                })
+                  requiresUserAction: false})
               }
 
               // Store auth-only promise for mcp_oauth_callback_url handler.
@@ -3628,11 +3467,8 @@ function runHeadlessStreaming(
                         result.resources && result.resources.length > 0
                           ? {
                               ...prev.mcp.resources,
-                              [serverName as string]: result.resources,
-                            }
-                          : omit(prev.mcp.resources, serverName as string),
-                    },
-                  }))
+                              [serverName as string]: result.resources}
+                          : omit(prev.mcp.resources, serverName as string)}}))
                   // Also update dynamicMcpState so run() picks up the new tools
                   // on the next turn (run() reads dynamicMcpState, not appState)
                   dynamicMcpState = {
@@ -3648,8 +3484,7 @@ function runHeadlessStreaming(
                         t => !t.name?.startsWith(prefix),
                       ),
                       ...result.tools,
-                    ],
-                  }
+                    ]}
                 })
                 .catch(error => {
                   logForDebugging(
@@ -3741,8 +3576,7 @@ function runHeadlessStreaming(
           claudeOAuth?.service.cleanup()
 
           logEvent('tengu_oauth_flow_start', {
-            loginWithClaudeAi: (loginWithClaudeAi ?? true) as boolean | number,
-          })
+            loginWithClaudeAi: (loginWithClaudeAi ?? true) as boolean | number})
 
           const service = new OAuthService()
           let urlResolver!: (urls: {
@@ -3765,8 +3599,7 @@ function runHeadlessStreaming(
               },
               {
                 loginWithClaudeAi: (loginWithClaudeAi ?? true) as boolean,
-                skipBrowserOpen: true,
-              },
+                skipBrowserOpen: true},
             )
             .then(async tokens => {
               // installOAuthTokens: performLogout (clear stale state) →
@@ -3778,8 +3611,7 @@ function runHeadlessStreaming(
               logEvent('tengu_oauth_success', {
                 loginWithClaudeAi: (loginWithClaudeAi ?? true) as
                   | boolean
-                  | number,
-              })
+                  | number})
             })
             .finally(() => {
               service.cleanup()
@@ -3796,8 +3628,7 @@ function runHeadlessStreaming(
           // path and surfaces the real error to the client.
           void flow.catch(err =>
             logForDebugging(`claude_authenticate flow ended: ${err}`, {
-              level: 'info',
-            }),
+              level: 'info'}),
           )
 
           try {
@@ -3809,15 +3640,12 @@ function runHeadlessStreaming(
             const { manualUrl, automaticUrl } = await Promise.race([
               urlPromise,
               flow.then(() => {
-                throw new Error(
-                  'OAuth flow completed without producing auth URLs',
-                )
+                throw new Error(t('print.oauthNoUrls'))
               }),
             ])
             sendControlResponseSuccess(msg, {
               manualUrl,
-              automaticUrl,
-            })
+              automaticUrl})
           } catch (error) {
             sendControlResponseError(msg, errorMessage(error))
           }
@@ -3834,8 +3662,7 @@ function runHeadlessStreaming(
             if (req.subtype === 'claude_oauth_callback') {
               claudeOAuth.service.handleManualAuthCodeInput({
                 authorizationCode: req.authorizationCode as string,
-                state: req.state as string,
-              })
+                state: req.state as string})
             }
             // Detach the await — the stdin reader is serial and blocking
             // here deadlocks claude_oauth_wait_for_completion: flow may
@@ -3853,9 +3680,7 @@ function runHeadlessStreaming(
                     subscriptionType: accountInfo?.subscription,
                     tokenSource: accountInfo?.tokenSource,
                     apiKeySource: accountInfo?.apiKeySource,
-                    apiProvider: getAPIProvider(),
-                  },
-                })
+                    apiProvider: getAPIProvider()}})
               },
               (error: unknown) =>
                 sendControlResponseError(msg, errorMessage(error)),
@@ -3902,11 +3727,8 @@ function runHeadlessStreaming(
                   result.resources && result.resources.length > 0
                     ? {
                         ...prev.mcp.resources,
-                        [serverName]: result.resources,
-                      }
-                    : omit(prev.mcp.resources, serverName),
-              },
-            }))
+                        [serverName]: result.resources}
+                    : omit(prev.mcp.resources, serverName)}}))
             sendControlResponseSuccess(msg, {})
           }
         } else if (msg.request.subtype === 'apply_flag_settings') {
@@ -3979,16 +3801,13 @@ function runHeadlessStreaming(
             applied: {
               model,
               // Numeric effort (ant-only) → null; SDK schema is string-level only.
-              effort: typeof effort === 'string' ? effort : null,
-            },
-          })
+              effort: typeof effort === 'string' ? effort : null}})
         } else if (msg.request.subtype === 'stop_task') {
           const { task_id: taskId } = msg.request
           try {
             await stopTask(taskId, {
               getAppState,
-              setAppState,
-            })
+              setAppState})
             sendControlResponseSuccess(msg, {})
           } catch (error) {
             sendControlResponseError(msg, errorMessage(error))
@@ -4057,9 +3876,7 @@ function runHeadlessStreaming(
                     // safe. Same guard as generate_session_title above.
                     toolUseContext: {
                       ...saved.toolUseContext,
-                      abortController: createAbortController(),
-                    },
-                  }
+                      abortController: createAbortController()}}
                 : await buildSideQuestionFallbackParams({
                     tools: buildAllTools(getAppState()),
                     commands: currentCommands,
@@ -4075,12 +3892,10 @@ function runHeadlessStreaming(
                     customSystemPrompt: options.systemPrompt,
                     appendSystemPrompt: options.appendSystemPrompt,
                     thinkingConfig: options.thinkingConfig,
-                    agents: currentAgents,
-                  })
+                    agents: currentAgents})
               const result = await runSideQuestion({
                 question,
-                cacheSafeParams,
-              })
+                cacheSafeParams})
               sendControlResponseSuccess(msg, { response: result.response })
             } catch (e) {
               sendControlResponseError(msg, errorMessage(e))
@@ -4116,8 +3931,7 @@ function runHeadlessStreaming(
                   bridgeHandle.environmentId,
                   bridgeHandle.sessionIngressUrl,
                 ),
-                environment_id: bridgeHandle.environmentId,
-              })
+                environment_id: bridgeHandle.environmentId})
             } else {
               // initReplBridge surfaces gate-failure reasons via
               // onStateChange('failed', detail) before returning null.
@@ -4138,8 +3952,7 @@ function runHeadlessStreaming(
                       value: content,
                       mode: 'prompt' as const,
                       uuid,
-                      skipSlashCommands: true,
-                    })
+                      skipSlashCommands: true})
                     void run()
                   },
                   onPermissionResponse(response) {
@@ -4165,8 +3978,7 @@ function runHeadlessStreaming(
                     } else {
                       options.thinkingConfig = {
                         type: 'enabled',
-                        budgetTokens: maxTokens,
-                      }
+                        budgetTokens: maxTokens}
                     }
                   },
                   onStateChange(state, detail) {
@@ -4182,12 +3994,10 @@ function runHeadlessStreaming(
                       state,
                       detail,
                       uuid: randomUUID(),
-                      session_id: getSessionId(),
-                    } as StdoutMessage)
+                      session_id: getSessionId()} as StdoutMessage)
                   },
                   initialMessages:
-                    mutableMessages.length > 0 ? mutableMessages : undefined,
-                })
+                    mutableMessages.length > 0 ? mutableMessages : undefined})
                 if (!handle) {
                   sendControlResponseError(
                     msg,
@@ -4215,8 +4025,7 @@ function runHeadlessStreaming(
                       handle.environmentId,
                       handle.sessionIngressUrl,
                     ),
-                    environment_id: handle.environmentId,
-                  })
+                    environment_id: handle.environmentId})
                 }
               } catch (err) {
                 sendControlResponseError(msg, errorMessage(err))
@@ -4300,8 +4109,7 @@ function runHeadlessStreaming(
               parent_tool_use_id: null,
               uuid: userMsg.uuid as string,
               timestamp: (userMsg as { timestamp?: string }).timestamp,
-              isReplay: true,
-            } as unknown as StdoutMessage)
+              isReplay: true} as unknown as StdoutMessage)
           }
           // Historical dup = transcript already has this turn's output, so it
           // ran but its lifecycle was never closed (interrupted before ack).
@@ -4327,8 +4135,7 @@ function runHeadlessStreaming(
         ),
         uuid: userMsg.uuid as `${string}-${string}-${string}-${string}-${string}`,
         priority: (userMsg as { priority?: string })
-          .priority as import('src/types/textInputTypes.js').QueuePriority,
-      })
+          .priority as import('src/types/textInputTypes.js').QueuePriority})
       // Increment prompt count for attribution tracking and save snapshot
       // The snapshot persists promptCount so it survives compaction
       if (feature('COMMIT_ATTRIBUTION')) {
@@ -4338,8 +4145,7 @@ function runHeadlessStreaming(
             void recordAttributionSnapshot(snapshot).catch(error => {
               logForDebugging(`Attribution: Failed to save snapshot: ${error}`)
             })
-          }),
-        }))
+          })}))
       }
       void run()
     }
@@ -4419,23 +4225,19 @@ export function createCanUseToolWithPermissionPrompt(
         decisionReason: {
           type: 'permissionPromptTool' as const,
           permissionPromptToolName: tool.name,
-          toolResult: undefined,
-        },
-      }
+          toolResult: undefined}}
     }
 
     const abortPromise = new Promise<'aborted'>(resolve => {
       combinedSignal.addEventListener('abort', () => resolve('aborted'), {
-        once: true,
-      })
+        once: true})
     })
 
     const toolCallPromise = permissionPromptTool.call(
       {
         tool_name: tool.name,
         input,
-        tool_use_id: toolUseId,
-      },
+        tool_use_id: toolUseId},
       toolUseContext,
       canUseTool,
       assistantMessage,
@@ -4451,9 +4253,7 @@ export function createCanUseToolWithPermissionPrompt(
         decisionReason: {
           type: 'permissionPromptTool' as const,
           permissionPromptToolName: tool.name,
-          toolResult: undefined,
-        },
-      }
+          toolResult: undefined}}
     }
 
     // TypeScript narrowing: after the abort check, raceResult must be ToolResult
@@ -4468,9 +4268,7 @@ export function createCanUseToolWithPermissionPrompt(
       permissionToolResultBlockParam.content[0].type !== 'text' ||
       typeof permissionToolResultBlockParam.content[0].text !== 'string'
     ) {
-      throw new Error(
-        'Permission prompt tool returned an invalid result. Expected a single text block param with type="text" and a string text value.',
-      )
+      throw new Error(t('print.invalidPermissionPromptResult'))
     }
     return permissionPromptToolResultToPermissionDecision(
       permissionToolOutputSchema().parse(
@@ -4531,13 +4329,13 @@ export function getCanUseToolFn(
         toolMatchesName(t, permissionPromptToolName),
       ) as PermissionPromptTool | undefined
       if (!permissionPromptTool) {
-        const error = `Error: MCP tool ${permissionPromptToolName} (passed via --permission-prompt-tool) not found. Available MCP tools: ${mcpTools.map(t => t.name).join(', ') || 'none'}`
+        const error = t('print.mcpToolNotFound', permissionPromptToolName, mcpTools.map(tool => tool.name).join(', ') || t('print.none'))
         process.stderr.write(`${error}\n`)
         gracefulShutdownSync(1)
         throw new Error(error)
       }
       if (!permissionPromptTool.inputJSONSchema) {
-        const error = `Error: tool ${permissionPromptToolName} (passed via --permission-prompt-tool) must be an MCP tool`
+        const error = t('print.mcpToolMustBeMCP', permissionPromptToolName)
         process.stderr.write(`${error}\n`)
         gracefulShutdownSync(1)
         throw new Error(error)
@@ -4582,9 +4380,7 @@ async function handleInitializeRequest(
         error: 'Already initialized',
         request_id: requestId,
         pending_permission_requests:
-          structuredIO.getPendingPermissionRequests(),
-      },
-    })
+          structuredIO.getPendingPermissionRequests()}})
     return
   }
 
@@ -4666,8 +4462,7 @@ async function handleInitializeRequest(
         })
         return {
           matcher: matcher.matcher,
-          hooks: callbacks,
-        }
+          hooks: callbacks}
       })
     }
     registerHookCallbacks(hooks)
@@ -4681,14 +4476,12 @@ async function handleInitializeRequest(
       .map(cmd => ({
         name: getCommandName(cmd),
         description: formatDescriptionWithSource(cmd),
-        argumentHint: cmd.argumentHint || '',
-      })),
+        argumentHint: cmd.argumentHint || ''})),
     agents: agents.map(agent => ({
       name: agent.agentType,
       description: agent.whenToUse,
       // 'inherit' is an internal sentinel; normalize to undefined for the public API
-      model: agent.model === 'inherit' ? undefined : agent.model,
-    })),
+      model: agent.model === 'inherit' ? undefined : agent.model})),
     output_style: outputStyle,
     available_output_styles: Object.keys(availableOutputStyles),
     models: modelInfos as unknown as SDKControlInitializeResponse['models'],
@@ -4705,10 +4498,8 @@ async function handleInitializeRequest(
         | 'firstParty'
         | 'bedrock'
         | 'vertex'
-        | 'foundry',
-    },
-    pid: process.pid,
-  }
+        | 'foundry'},
+    pid: process.pid}
 
   if (isFastModeEnabled() && isFastModeAvailable()) {
     const appState = getAppState()
@@ -4723,9 +4514,7 @@ async function handleInitializeRequest(
     response: {
       subtype: 'success',
       request_id: requestId,
-      response: initResponse,
-    },
-  })
+      response: initResponse}})
 
   // After the initialize message, check the auth status-
   // This will get notified of changes, but we also want to send the
@@ -4740,8 +4529,7 @@ async function handleInitializeRequest(
         output: status.output,
         error: status.error,
         uuid: randomUUID(),
-        session_id: getSessionId(),
-      })
+        session_id: getSessionId()})
     }
   }
 }
@@ -4756,15 +4544,13 @@ async function handleRewindFiles(
     return {
       canRewind: false,
       error: 'File rewinding is not enabled.',
-      filesChanged: [],
-    }
+      filesChanged: []}
   }
   if (!fileHistoryCanRestore(appState.fileHistory, userMessageId)) {
     return {
       canRewind: false,
       error: 'No file checkpoint found for this message.',
-      filesChanged: [],
-    }
+      filesChanged: []}
   }
 
   if (dryRun) {
@@ -4776,8 +4562,7 @@ async function handleRewindFiles(
       canRewind: true,
       filesChanged: diffStats?.filesChanged ?? [],
       insertions: diffStats?.insertions,
-      deletions: diffStats?.deletions,
-    }
+      deletions: diffStats?.deletions}
   }
 
   try {
@@ -4785,16 +4570,14 @@ async function handleRewindFiles(
       updater =>
         setAppState(prev => ({
           ...prev,
-          fileHistory: updater(prev.fileHistory),
-        })),
+          fileHistory: updater(prev.fileHistory)})),
       userMessageId,
     )
   } catch (error) {
     return {
       canRewind: false,
       error: `Failed to rewind: ${errorMessage(error)}`,
-      filesChanged: [],
-    }
+      filesChanged: []}
   }
 
   return { canRewind: true, filesChanged: [] }
@@ -4815,9 +4598,7 @@ function handleSetPermissionMode(
           subtype: 'error',
           request_id: requestId,
           error:
-            'Cannot set permission mode to bypassPermissions because it is disabled by settings or configuration',
-        },
-      })
+            'Cannot set permission mode to bypassPermissions because it is disabled by settings or configuration'}})
       return toolPermissionContext
     }
     if (!toolPermissionContext.isBypassPermissionsModeAvailable) {
@@ -4827,9 +4608,7 @@ function handleSetPermissionMode(
           subtype: 'error',
           request_id: requestId,
           error:
-            'Cannot set permission mode to bypassPermissions because the session was not launched with --dangerously-skip-permissions',
-        },
-      })
+            'Cannot set permission mode to bypassPermissions because the session was not launched with --dangerously-skip-permissions'}})
       return toolPermissionContext
     }
   }
@@ -4848,9 +4627,7 @@ function handleSetPermissionMode(
         request_id: requestId,
         error: reason
           ? `Cannot set permission mode to auto: ${getAutoModeUnavailableNotification(reason)}`
-          : 'Cannot set permission mode to auto',
-      },
-    })
+          : 'Cannot set permission mode to auto'}})
     return toolPermissionContext
   }
 
@@ -4861,10 +4638,7 @@ function handleSetPermissionMode(
       subtype: 'success',
       request_id: requestId,
       response: {
-        mode: request.mode,
-      },
-    },
-  })
+        mode: request.mode}}})
 
   return {
     ...transitionPermissionMode(
@@ -4872,8 +4646,7 @@ function handleSetPermissionMode(
       request.mode,
       toolPermissionContext,
     ),
-    mode: request.mode,
-  }
+    mode: request.mode}
 }
 
 /**
@@ -4903,8 +4676,7 @@ function handleChannelEnable(
   const respondError = (error: string) =>
     output.enqueue({
       type: 'control_response',
-      response: { subtype: 'error', request_id: requestId, error },
-    })
+      response: { subtype: 'error', request_id: requestId, error }})
 
   if (!(feature('KAIROS') || feature('KAIROS_CHANNELS'))) {
     return respondError('channels feature not available in this build')
@@ -4933,8 +4705,7 @@ function handleChannelEnable(
   const entry: ChannelEntry = {
     kind: 'plugin',
     name: parsed.name,
-    marketplace: parsed.marketplace,
-  }
+    marketplace: parsed.marketplace}
   // Idempotency: don't double-append on repeat enable.
   const prior = getAllowedChannels()
   const already = prior.some(
@@ -4979,16 +4750,14 @@ function handleChannelEnable(
         entry_kind:
           'plugin' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         is_dev: false,
-        plugin: pluginId,
-      })
+        plugin: pluginId})
       enqueue({
         mode: 'prompt',
         value: wrapChannelMessage(serverName, content, meta),
         priority: 'next',
         isMeta: true,
         origin: { kind: 'channel', server: serverName } as unknown as string,
-        skipSlashCommands: true,
-      })
+        skipSlashCommands: true})
     },
   )
 
@@ -4997,9 +4766,7 @@ function handleChannelEnable(
     response: {
       subtype: 'success',
       request_id: requestId,
-      response: undefined,
-    },
-  })
+      response: undefined}})
 }
 
 /**
@@ -5055,8 +4822,7 @@ function reregisterChannelHandlerAfterReconnect(
         entry_kind:
           entry?.kind as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         is_dev: entry?.dev ?? false,
-        plugin: pluginId,
-      })
+        plugin: pluginId})
       enqueue({
         mode: 'prompt',
         value: wrapChannelMessage(connection.name, content, meta),
@@ -5064,10 +4830,8 @@ function reregisterChannelHandlerAfterReconnect(
         isMeta: true,
         origin: {
           kind: 'channel',
-          server: connection.name,
-        } as unknown as string,
-        skipSlashCommands: true,
-      })
+          server: connection.name} as unknown as string,
+        skipSlashCommands: true})
     },
   )
 }
@@ -5095,8 +4859,7 @@ function emitLoadError(
       modelUsage: {},
       permission_denials: [],
       uuid: randomUUID(),
-      errors: [message],
-    }
+      errors: [message]}
     process.stdout.write(jsonStringify(errorResult) + '\n')
   } else {
     process.stderr.write(message + '\n')
@@ -5160,8 +4923,7 @@ async function loadInitialMessages(
             // Refresh agent definitions to reflect the mode switch
             const {
               getAgentDefinitionsWithOverrides,
-              getActiveAgentsFromList,
-            } =
+              getActiveAgentsFromList} =
               // eslint-disable-next-line @typescript-eslint/no-require-imports
               require('@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js') as typeof import('@claude-code-best/builtin-tools/tools/AgentTool/loadAgentsDir.js')
             getAgentDefinitionsWithOverrides.cache.clear?.()
@@ -5174,9 +4936,7 @@ async function loadInitialMessages(
               agentDefinitions: {
                 ...freshAgentDefs,
                 allAgents: freshAgentDefs.allAgents,
-                activeAgents: getActiveAgentsFromList(freshAgentDefs.allAgents),
-              },
-            }))
+                activeAgents: getActiveAgentsFromList(freshAgentDefs.allAgents)}}))
           }
         }
 
@@ -5213,8 +4973,7 @@ async function loadInitialMessages(
         return {
           messages: result.messages,
           turnInterruptionState: result.turnInterruptionState,
-          agentSetting: result.agentSetting,
-        }
+          agentSetting: result.agentSetting}
       }
     } catch (error) {
       logError(error)
@@ -5227,23 +4986,20 @@ async function loadInitialMessages(
   if (options.teleport) {
     try {
       if (!isPolicyAllowed('allow_remote_sessions')) {
-        throw new Error(
-          "Remote sessions are disabled by your organization's policy.",
-        )
+        throw new Error(t('teleport.disabledByOrgPolicy'))
       }
 
       logEvent('tengu_teleport_print', {})
 
       if (typeof options.teleport !== 'string') {
-        throw new Error('No session ID provided for teleport')
+        throw new Error(t('print.noSessionIdForTeleport'))
       }
 
       const {
         checkOutTeleportedSessionBranch,
         processMessagesForTeleportResume,
         teleportResumeCodeSession,
-        validateGitState,
-      } = await import('src/utils/teleport.js')
+        validateGitState} = await import('src/utils/teleport.js')
       await validateGitState()
       const teleportResult = await teleportResumeCodeSession(options.teleport)
       const { branchError } = await checkOutTeleportedSessionBranch(
@@ -5253,8 +5009,7 @@ async function loadInitialMessages(
         messages: processMessagesForTeleportResume(
           teleportResult.log,
           branchError,
-        ),
-      }
+        )}
     } catch (error) {
       logError(error)
       gracefulShutdownSync(1)
@@ -5328,8 +5083,7 @@ async function loadInitialMessages(
           // Execute SessionStart hooks for startup since we're starting a new session
           return {
             messages: await (options.sessionStartHooksPromise ??
-              processSessionStartHooks('startup')),
-          }
+              processSessionStartHooks('startup'))}
         } else {
           emitLoadError(
             `No conversation found with session ID: ${parsedSessionId.sessionId}`,
@@ -5376,9 +5130,7 @@ async function loadInitialMessages(
             agentDefinitions: {
               ...freshAgentDefs,
               allAgents: freshAgentDefs.allAgents,
-              activeAgents: getActiveAgentsFromList(freshAgentDefs.allAgents),
-            },
-          }))
+              activeAgents: getActiveAgentsFromList(freshAgentDefs.allAgents)}}))
         }
       }
 
@@ -5411,8 +5163,7 @@ async function loadInitialMessages(
       return {
         messages: result.messages,
         turnInterruptionState: result.turnInterruptionState,
-        agentSetting: result.agentSetting,
-      }
+        agentSetting: result.agentSetting}
     } catch (error) {
       logError(error)
       const errorMessage =
@@ -5430,8 +5181,7 @@ async function loadInitialMessages(
   // here with sessionStartHooksPromise undefined because main.tsx guards on continue)
   return {
     messages: await (options.sessionStartHooksPromise ??
-      processSessionStartHooks('startup')),
-  }
+      processSessionStartHooks('startup'))}
 }
 
 function getStructuredIO(
@@ -5453,10 +5203,8 @@ function getStructuredIO(
           session_id: '',
           message: {
             role: 'user',
-            content: inputPrompt,
-          },
-          parent_tool_use_id: null,
-        } satisfies SDKUserMessage),
+            content: inputPrompt},
+          parent_tool_use_id: null} satisfies SDKUserMessage),
       ])
     } else {
       // Empty string - create empty stream
@@ -5482,8 +5230,7 @@ export async function handleOrphanedPermissionResponse({
   message,
   setAppState: _setAppState,
   onEnqueued,
-  handledToolUseIds,
-}: {
+  handledToolUseIds}: {
   message: SDKControlResponse
   setAppState: (f: (prev: AppState) => AppState) => void
   onEnqueued?: () => void
@@ -5542,9 +5289,7 @@ export async function handleOrphanedPermissionResponse({
       value: [],
       orphanedPermission: {
         permissionResult,
-        assistantMessage,
-      },
-    })
+        assistantMessage}})
 
     onEnqueued?.()
     return true
@@ -5662,8 +5407,7 @@ export async function handleMcpSetServers(
       const pendingClient: MCPServerConnection = {
         type: 'pending',
         name,
-        config: { ...config, scope: 'dynamic' as const },
-      }
+        config: { ...config, scope: 'dynamic' as const }}
       newSdkClients = [...newSdkClients, pendingClient]
       sdkAdded.push(name)
     }
@@ -5680,16 +5424,13 @@ export async function handleMcpSetServers(
     response: {
       added: [...sdkAdded, ...processResult.response.added],
       removed: [...sdkRemoved, ...processResult.response.removed],
-      errors: { ...policyErrors, ...processResult.response.errors },
-    },
+      errors: { ...policyErrors, ...processResult.response.errors }},
     newSdkState: {
       configs: newSdkConfigs,
       clients: newSdkClients,
-      tools: newSdkTools,
-    },
+      tools: newSdkTools},
     newDynamicState: processResult.newState,
-    sdkServersChanged: sdkAdded.length > 0 || sdkRemoved.length > 0,
-  }
+    sdkServersChanged: sdkAdded.length > 0 || sdkRemoved.length > 0}
 }
 
 /**
@@ -5800,8 +5541,7 @@ export async function reconcileMcpServers(
   const newState: DynamicMcpState = {
     clients: newClients,
     tools: newTools,
-    configs: newConfigs,
-  }
+    configs: newConfigs}
 
   // Update AppState with the new tools
   setAppState(prev => {
@@ -5831,13 +5571,10 @@ export async function reconcileMcpServers(
       mcp: {
         ...prev.mcp,
         tools: [...nonDynamicTools, ...newTools],
-        clients: [...nonDynamicClients, ...newClients],
-      },
-    }
+        clients: [...nonDynamicClients, ...newClients]}}
   })
 
   return {
     response: { added, removed, errors },
-    newState,
-  }
+    newState}
 }

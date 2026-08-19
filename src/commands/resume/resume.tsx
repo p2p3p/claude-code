@@ -25,9 +25,9 @@ import {
   loadAllProjectsMessageLogs,
   loadFullLog,
   loadSameRepoMessageLogs,
-  searchSessionsByCustomTitle,
-} from '../../utils/sessionStorage.js';
+  searchSessionsByCustomTitle} from '../../utils/sessionStorage.js';
 import { validateUuid } from '../../utils/uuid.js';
+import { t } from '../../utils/i18n/index.js'
 
 type ResumeResult =
   | { resultType: 'sessionNotFound'; arg: string }
@@ -36,17 +36,16 @@ type ResumeResult =
 function resumeHelpMessage(result: ResumeResult): string {
   switch (result.resultType) {
     case 'sessionNotFound':
-      return `Session ${chalk.bold(result.arg)} was not found. Run ${chalk.bold('/resume')} without arguments to browse all sessions.`;
+      return t('resumeCmd.sessionNotFound', chalk.bold(result.arg));
     case 'multipleMatches':
-      return `Found ${result.count} sessions matching ${chalk.bold(result.arg)}. Run ${chalk.bold('/resume')} to pick one from the list.`;
+      return t('resumeCmd.multipleMatches', result.count, chalk.bold(result.arg));
   }
 }
 
 function ResumeError({
   message,
   args,
-  onDone,
-}: {
+  onDone}: {
   message: string;
   args: string;
   onDone: () => void;
@@ -70,8 +69,7 @@ function ResumeError({
 
 function ResumeCommand({
   onDone,
-  onResume,
-}: {
+  onResume}: {
   onDone: (result?: string, options?: { display?: CommandResultDisplay }) => void;
   onResume: (sessionId: UUID, log: LogOption, entrypoint: ResumeEntrypoint) => Promise<void>;
 }): React.ReactNode {
@@ -90,12 +88,12 @@ function ResumeCommand({
         const allLogs = allProjects ? await loadAllProjectsMessageLogs() : await loadSameRepoMessageLogs(paths);
         const resumable = filterResumableSessions(allLogs, getSessionId());
         if (resumable.length === 0) {
-          onDone('No conversations found to resume');
+          onDone(t('resumeCmd.noConversations'));
           return;
         }
         setLogs(resumable);
       } catch (_err) {
-        onDone('Failed to load conversations');
+        onDone(t('resumeCmd.failedToLoad'));
       } finally {
         setLoading(false);
       }
@@ -121,7 +119,7 @@ function ResumeCommand({
   async function handleSelect(log: LogOption) {
     const sessionId = validateUuid(getSessionIdFromLog(log));
     if (!sessionId) {
-      onDone('Failed to resume conversation');
+      onDone(t('resumeCmd.failedToResume'));
       return;
     }
 
@@ -145,12 +143,12 @@ function ResumeCommand({
       // Format the output message
       const message = [
         '',
-        'This conversation is from a different directory.',
+        t('resumeCmd.differentDirectory'),
         '',
-        'To resume, run:',
+        t('resumeCmd.toResumeRun'),
         `  ${(crossProjectCheck as { command: string }).command}`,
         '',
-        '(Command copied to clipboard)',
+        t('resumeCmd.copiedToClipboard'),
         '',
       ].join('\n');
 
@@ -164,14 +162,14 @@ function ResumeCommand({
   }
 
   function handleCancel() {
-    onDone('Resume cancelled', { display: 'system' });
+    onDone(t('resumeCmd.resumeCancelled'), { display: 'system' });
   }
 
   if (loading) {
     return (
       <Box>
         <Spinner />
-        <Text> Loading conversations…</Text>
+        <Text> {t('resume2.loadingConversations')}</Text>
       </Box>
     );
   }
@@ -180,7 +178,7 @@ function ResumeCommand({
     return (
       <Box>
         <Spinner />
-        <Text> Resuming conversation…</Text>
+        <Text> {t('resumeCmd.resumingConversation')}</Text>
       </Box>
     );
   }
@@ -210,7 +208,7 @@ export const call: LocalJSXCommandCall = async (onDone, context, args) => {
       onDone(undefined, { display: 'skip' });
     } catch (error) {
       logError(error as Error);
-      onDone(`Failed to resume: ${(error as Error).message}`);
+      onDone(t('resumeCmd.failedToResumeError', (error as Error).message));
     }
   };
 
@@ -225,7 +223,7 @@ export const call: LocalJSXCommandCall = async (onDone, context, args) => {
   const worktreePaths = await getWorktreePaths(getOriginalCwd());
   const logs = await loadSameRepoMessageLogs(worktreePaths);
   if (logs.length === 0) {
-    const message = 'No conversations found to resume.';
+    const message = t('resumeCmd.noConversations2');
     return <ResumeError message={message} args={arg} onDone={() => onDone(message)} />;
   }
 
@@ -256,8 +254,7 @@ export const call: LocalJSXCommandCall = async (onDone, context, args) => {
   // Next, try exact custom title match (only if feature is enabled)
   if (isCustomTitleEnabled()) {
     const titleMatches = await searchSessionsByCustomTitle(arg, {
-      exact: true,
-    });
+      exact: true});
     if (titleMatches.length === 1) {
       const log = titleMatches[0]!;
       const sessionId = getSessionIdFromLog(log);
@@ -273,8 +270,7 @@ export const call: LocalJSXCommandCall = async (onDone, context, args) => {
       const message = resumeHelpMessage({
         resultType: 'multipleMatches',
         arg,
-        count: titleMatches.length,
-      });
+        count: titleMatches.length});
       return <ResumeError message={message} args={arg} onDone={() => onDone(message)} />;
     }
   }

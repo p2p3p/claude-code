@@ -1,6 +1,6 @@
 /**
  * Tests for the Bedrock anthropic_beta body-vs-header workaround
- * (see src/services/api/bedrockClient.ts and anthropics/claude-code#49238).
+ * (see src/services/api/anthropic/bedrockClient.ts and anthropics/claude-code#49238).
  */
 import { describe, expect, test } from 'bun:test'
 import { AnthropicBedrock } from '@anthropic-ai/bedrock-sdk'

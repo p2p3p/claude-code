@@ -29,8 +29,7 @@ export async function isPathGitignored(
     ['check-ignore', filePath],
     {
       preserveOutputOnError: false,
-      cwd,
-    },
+      cwd},
   )
 
   return code === 0

@@ -53,8 +53,7 @@ function createBaseGrowthbookExperimentEvent(): GrowthbookExperimentEvent {
     auth: undefined,
     session_id: '',
     anonymous_id: '',
-    event_metadata_vars: '',
-  }
+    event_metadata_vars: ''}
 }
 
 export const GrowthbookExperimentEvent: MessageFns<GrowthbookExperimentEvent> =
@@ -96,8 +95,7 @@ export const GrowthbookExperimentEvent: MessageFns<GrowthbookExperimentEvent> =
           : '',
         event_metadata_vars: isSet(object.event_metadata_vars)
           ? globalThis.String(object.event_metadata_vars)
-          : '',
-      }
+          : ''}
     },
 
     toJSON(message: GrowthbookExperimentEvent): unknown {
@@ -166,8 +164,7 @@ export const GrowthbookExperimentEvent: MessageFns<GrowthbookExperimentEvent> =
       message.anonymous_id = object.anonymous_id ?? ''
       message.event_metadata_vars = object.event_metadata_vars ?? ''
       return message
-    },
-  }
+    }}
 
 type Builtin =
   | Date

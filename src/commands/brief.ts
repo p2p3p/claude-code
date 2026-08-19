@@ -4,31 +4,28 @@ import { getKairosActive, setUserMsgOptIn } from '../bootstrap/state.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  logEvent,
-} from '../services/analytics/index.js'
+  logEvent} from '../services/analytics/index.js'
 import type { ToolUseContext } from '../Tool.js'
 import { isBriefEntitled } from '@claude-code-best/builtin-tools/tools/BriefTool/BriefTool.js'
 import { BRIEF_TOOL_NAME } from '@claude-code-best/builtin-tools/tools/BriefTool/prompt.js'
 import type {
   Command,
   LocalJSXCommandContext,
-  LocalJSXCommandOnDone,
-} from '../types/command.js'
+  LocalJSXCommandOnDone} from '../types/command.js'
 import { lazySchema } from '../utils/lazySchema.js'
+import { t } from '../utils/i18n/index.js'
 
 // Zod guards against fat-fingered GB pushes (same pattern as pollConfig.ts /
 // cronScheduler.ts). A malformed config falls back to DEFAULT_BRIEF_CONFIG
 // entirely rather than being partially trusted.
 const briefConfigSchema = lazySchema(() =>
   z.object({
-    enable_slash_command: z.boolean(),
-  }),
+    enable_slash_command: z.boolean()}),
 )
 type BriefConfig = z.infer<ReturnType<typeof briefConfigSchema>>
 
 const DEFAULT_BRIEF_CONFIG: BriefConfig = {
-  enable_slash_command: false,
-}
+  enable_slash_command: false}
 
 // No TTL — this gate controls slash-command *visibility*, not a kill switch.
 // CACHED_MAY_BE_STALE still has one background-update flip (first call kicks
@@ -47,7 +44,7 @@ function getBriefConfig(): BriefConfig {
 const brief = {
   type: 'local-jsx',
   name: 'brief',
-  description: 'Toggle brief-only mode',
+  description: t('cmd.descBrief'),
   isEnabled: () => {
     if (feature('KAIROS') || feature('KAIROS_BRIEF')) {
       return getBriefConfig().enable_slash_command
@@ -71,11 +68,9 @@ const brief = {
             enabled: false,
             gated: true,
             source:
-              'slash_command' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-          })
-          onDone('Brief tool is not enabled for your account', {
-            display: 'system',
-          })
+              'slash_command' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
+          onDone(t('briefCmd.notEnabled'), {
+            display: 'system'})
           return null
         }
 
@@ -95,8 +90,7 @@ const brief = {
           enabled: newState,
           gated: false,
           source:
-            'slash_command' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-        })
+            'slash_command' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS})
 
         // The tool list change alone isn't a strong enough signal mid-session
         // (model may keep emitting plain text from inertia, or keep calling a
@@ -119,12 +113,10 @@ const brief = {
             ]
 
         onDone(
-          newState ? 'Brief-only mode enabled' : 'Brief-only mode disabled',
+          newState ? t('briefCmd.enabled') : t('briefCmd.disabled'),
           { display: 'system', metaMessages },
         )
         return null
-      },
-    }),
-} satisfies Command
+      }})} satisfies Command
 
 export default brief

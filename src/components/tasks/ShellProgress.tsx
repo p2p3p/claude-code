@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Text } from '@anthropic/ink';
 import type { TaskStatus } from 'src/Task.js';
+import { t } from '../../utils/i18n/index.js';
 import type { LocalShellTaskState } from 'src/tasks/LocalShellTask/guards.js';
 import type { DeepImmutable } from 'src/types/utils.js';
 
@@ -25,11 +26,11 @@ export function TaskStatusText({ status, label, suffix }: TaskStatusTextProps): 
 export function ShellProgress({ shell }: { shell: DeepImmutable<LocalShellTaskState> }): ReactNode {
   switch (shell.status) {
     case 'completed':
-      return <TaskStatusText status="completed" label="done" />;
+      return <TaskStatusText status="completed" label={t('taskDetail.doneLabel')} />;
     case 'failed':
-      return <TaskStatusText status="failed" label="error" />;
+      return <TaskStatusText status="failed" label={t('taskDetail.errorLabel')} />;
     case 'killed':
-      return <TaskStatusText status="killed" label="stopped" />;
+      return <TaskStatusText status="killed" label={t('taskDetail.stoppedLabel')} />;
     case 'running':
     case 'pending':
       return <TaskStatusText status="running" />;

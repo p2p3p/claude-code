@@ -28,8 +28,7 @@ export const PublicApiAuth: MessageFns<PublicApiAuth> = {
         : '',
       account_uuid: isSet(object.account_uuid)
         ? globalThis.String(object.account_uuid)
-        : '',
-    }
+        : ''}
   },
 
   toJSON(message: PublicApiAuth): unknown {
@@ -59,8 +58,7 @@ export const PublicApiAuth: MessageFns<PublicApiAuth> = {
     message.organization_uuid = object.organization_uuid ?? ''
     message.account_uuid = object.account_uuid ?? ''
     return message
-  },
-}
+  }}
 
 type Builtin =
   | Date

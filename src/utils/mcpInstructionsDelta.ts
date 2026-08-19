@@ -2,8 +2,7 @@ import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growt
 import { logEvent } from '../services/analytics/index.js'
 import type {
   ConnectedMCPServer,
-  MCPServerConnection,
-} from '../services/mcp/types.js'
+  MCPServerConnection} from '../services/mcp/types.js'
 import type { Message } from '../types/message.js'
 import { isEnvDefinedFalsy, isEnvTruthy } from './envUtils.js'
 
@@ -119,13 +118,11 @@ export function getMcpInstructionsDelta(
     clientSideCount: clientSideInstructions.length,
     messagesLength: messages.length,
     attachmentCount,
-    midCount,
-  })
+    midCount})
 
   added.sort((a, b) => a.name.localeCompare(b.name))
   return {
     addedNames: added.map(a => a.name),
     addedBlocks: added.map(a => a.block),
-    removedNames: removed.sort(),
-  }
+    removedNames: removed.sort()}
 }

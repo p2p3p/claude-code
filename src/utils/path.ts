@@ -6,8 +6,7 @@ import {
   normalize,
   posix,
   relative,
-  resolve,
-} from 'path'
+  resolve} from 'path'
 import { getCwd } from './cwd.js'
 import { getFsImplementation } from './fsOperations.js'
 import { getPlatform } from './platform.js'
