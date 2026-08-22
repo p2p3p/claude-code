@@ -12,7 +12,7 @@ import {
   isFastModeAvailable,
   isFastModeCooldown,
   isFastModeEnabled} from 'src/utils/fastMode.js';
-import { Box, Text } from '@anthropic/ink';
+import { Box, Text, useInput } from '@anthropic/ink';
 import { useKeybindings } from '../keybindings/useKeybinding.js';
 import { useAppState, useSetAppState } from '../state/AppState.js';
 import {
@@ -95,6 +95,7 @@ export function ModelPicker({
     });
   }, [focusedValue]);
 
+  const [searchQuery, setSearchQuery] = useState('');
   const [hasToggledEffort, setHasToggledEffort] = useState(false);
   const effortValue = useAppState(s => s.effortValue);
   const [effort, setEffort] = useState<EffortLevel | undefined>(
@@ -185,6 +186,47 @@ export function ModelPicker({
     { context: 'ModelPicker' },
   );
 
+  // Search/filter for model options
+  useInput(
+    (input, key, event) => {
+      if (key.escape) {
+        if (searchQuery) {
+          setSearchQuery('');
+          event.stopImmediatePropagation();
+          return;
+        }
+        return;
+      }
+      if (key.return || key.upArrow || key.downArrow || key.tab || key.pageDown || key.pageUp) {
+        return;
+      }
+      // Backspace: remove last character
+      if (key.backspace || key.delete) {
+        setSearchQuery(prev => prev.slice(0, -1));
+        return;
+      }
+      // Only capture printable characters (letters, numbers, punctuation, space)
+      if (input.length > 0 && !key.ctrl && !key.meta) {
+        setSearchQuery(prev => prev + input);
+        // Prevent the Select from also processing this input (e.g. number key selection)
+        event.stopImmediatePropagation();
+      }
+    },
+    { isActive: isStandaloneCommand },
+  );
+
+  // Filter options based on search query
+  const filteredSelectOptions = useMemo(() => {
+    if (!searchQuery) return selectOptions;
+    const q = searchQuery.toLowerCase();
+    return selectOptions.filter(opt => {
+      if (opt.value === NO_PREFERENCE) return true; // Always show "Default"
+      const labelText = typeof opt.label === 'string' ? opt.label.toLowerCase() : '';
+      const descText = (opt.description ?? '').toLowerCase();
+      return labelText.includes(q) || descText.includes(q);
+    });
+  }, [selectOptions, searchQuery]);
+
   function handleSelect(value: string): void {
     logEvent('tengu_model_command_menu_effort', {
       effort: effort as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS});
@@ -242,18 +284,31 @@ export function ModelPicker({
         </Box>
 
         <Box flexDirection="column" marginBottom={1}>
+          {isStandaloneCommand && (
+            <Box marginBottom={1} marginLeft={0}>
+              <Text dimColor>
+                {searchQuery
+                  ? <Text>{t('modelPicker.searchLabel')} <Text bold>{searchQuery}</Text></Text>
+                  : <Text dimColor>{t('modelPicker.searchHint')}</Text>
+                }
+                {searchQuery ? <Text> · <Text dimColor>{t('modelPicker.searchResults', filteredSelectOptions.length)}</Text></Text> : null}
+              </Text>
+            </Box>
+          )}
           <Box flexDirection="column">
             <Select
               defaultValue={initialValue}
               defaultFocusValue={initialFocusValue}
-              options={selectOptions}
+              options={filteredSelectOptions}
               onChange={handleSelect}
               onFocus={handleFocus}
               onCancel={onCancel ?? (() => {})}
               visibleOptionCount={visibleCount}
+              highlightText={searchQuery || undefined}
+              disableSelection={isStandaloneCommand ? 'numeric' : false}
             />
           </Box>
-          {hiddenCount > 0 && (
+          {hiddenCount > 0 && !searchQuery && (
             <Box paddingLeft={3}>
               <Text dimColor>{t('modelPicker.andMore', hiddenCount)}</Text>
             </Box>

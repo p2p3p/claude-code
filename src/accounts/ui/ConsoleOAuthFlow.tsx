@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent} from 'src/services/analytics/index.js';
@@ -492,9 +492,14 @@ function saveKeyGroupPlatform(
       ...prev,
       baseUrl: platform.baseUrl,
       keys: [...platform.keys],
-      model: platform.model ?? prev.model}
+      model: platform.model ?? prev.model,
+      cachedModels: platform.cachedModels ?? prev.cachedModels}
   } else {
-    layerPlatforms.push({ baseUrl: platform.baseUrl, keys: [...platform.keys], model: platform.model })
+    layerPlatforms.push({
+      baseUrl: platform.baseUrl,
+      keys: [...platform.keys],
+      model: platform.model,
+      cachedModels: platform.cachedModels})
   }
 
   return {
@@ -663,14 +668,48 @@ function AccountManagerForm({
     setOAuthStatus({ state: 'idle' });
   }, [entries, setOAuthStatus]);
 
+  // Ctrl+Shift+Up: move the focused platform to the first position (set as active)
+  const doMoveToTop = useCallback(() => {
+    const v = focusedRef.current;
+    if (!v.startsWith('account:')) return;
+    const e = entries[parseInt(v.replace('account:', ''), 10)];
+    if (!e) return;
+    // Only API platforms can be reordered, not subscriptions
+    if (!('platform' in e)) return;
+    const layer = e.layer;
+    const baseUrl = e.platform.baseUrl;
+    const groups = getSettings_DEPRECATED()?.env;
+    if (!groups) return;
+    const layerPlatforms = [...((groups?.[layer] ?? []) as EnvPlatform[])];
+    const srcIdx = layerPlatforms.findIndex(p => p.baseUrl === baseUrl);
+    if (srcIdx <= 0) return; // Already at top or not found
+    // Move to front
+    const [platform] = layerPlatforms.splice(srcIdx, 1);
+    layerPlatforms.unshift(platform!);
+    const nextGroups: EnvConfig = { ...groups, [layer]: layerPlatforms };
+    // Just reorder — don't activate (user presses Enter to activate)
+    updateSettingsForSource('userSettings', {
+      env: nextGroups} as unknown as Parameters<typeof updateSettingsForSource>[1]);
+    // Reset focus to the first position
+    lastAccountFocusValue = 'account:0';
+    focusedRef.current = 'account:0';
+    setOAuthStatus({ state: 'idle' });
+  }, [entries, setOAuthStatus]);
+
   useInput(
-    (input, key) => {
+    (input, key, event) => {
       if (key.shift && (input || '').toLowerCase() === 'd') {
         doDeleteAccount();
         return;
       }
-      // Space edits the highlighted account (enter the edit form).
-      if (key.space || input === ' ') {
+      // Shift+Up: pin platform to top (just reorder, Enter to activate)
+      if (key.shift && key.upArrow) {
+        doMoveToTop();
+        event.stopImmediatePropagation();
+        return;
+      }
+      // Left/right arrow or Space edits the highlighted account (enter the edit form).
+      if (key.leftArrow || key.rightArrow || key.space || input === ' ') {
         const v = focusedRef.current;
         if (v.startsWith('account:')) {
           const e = entries[parseInt(v.replace('account:', ''), 10)];
@@ -912,13 +951,38 @@ function KeyGroupKeysForm({
   // Shift+D deletes the highlighted key; ←/→ edits it (mobile-friendly, same
   // as Enter via Select). Only in list mode — while typing, keys are literal.
   useInput(
-    (input, key) => {
+    (input, key, event) => {
       if (key.shift && (input || '').toLowerCase() === 'd') {
         const v = focusedKeyRef.current;
         if (v.startsWith('key:')) {
           const i = parseInt(v.replace('key:', ''), 10);
           setKeys(prev => prev.filter((_, j) => j !== i));
         }
+        return;
+      }
+      // Shift+Up: move the focused key to the first position
+      if (key.shift && key.upArrow) {
+        const v = focusedKeyRef.current;
+        if (v.startsWith('key:')) {
+          const i = parseInt(v.replace('key:', ''), 10);
+          if (i > 0) {
+            setKeys(prev => {
+              const next = [...prev];
+              const [k] = next.splice(i, 1);
+              next.unshift(k!);
+              return next;
+            });
+            lastKeyFocusValue = 'key:0';
+            focusedKeyRef.current = 'key:0';
+          }
+        }
+        event.stopImmediatePropagation();
+        return;
+      }
+      // Left/right arrow or Space: edit the focused key
+      if (key.leftArrow || key.rightArrow || key.space || input === ' ') {
+        editFocusedKey();
+        event.stopImmediatePropagation();
         return;
       }
       },
@@ -1016,7 +1080,24 @@ function KeyGroupKeysForm({
               finish();
               return;
             }
-            editFocusedKey(v);
+            if (v === '__new__') {
+              editFocusedKey(v);
+              return;
+            }
+            // Enter on a key: set as active (move to first position)
+            if (v.startsWith('key:')) {
+              const i = parseInt(v.replace('key:', ''), 10);
+              if (i > 0) {
+                setKeys(prev => {
+                  const next = [...prev];
+                  const [k] = next.splice(i, 1);
+                  next.unshift(k!);
+                  return next;
+                });
+                lastKeyFocusValue = 'key:0';
+                focusedKeyRef.current = 'key:0';
+              }
+            }
           }}
           onCancel={finish}
         />
@@ -1113,14 +1194,49 @@ function PlatformModelPickerForm({
     fetchModels();
   }, [fetchModels]);
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   useInput(
-    (input) => {
-      if (input === 'f' || input === 'F') {
-        fetchModels()
+    (input, key, event) => {
+      // Search: capture printable characters
+      if (key.escape) {
+        if (searchQuery) {
+          setSearchQuery('');
+          event.stopImmediatePropagation();
+          return;
+        }
+        return;
+      }
+      if (key.return || key.upArrow || key.downArrow || key.tab || key.pageDown || key.pageUp) {
+        return;
+      }
+      if (key.backspace || key.delete) {
+        setSearchQuery(prev => prev.slice(0, -1));
+        return;
+      }
+      if (input.length > 0 && !key.ctrl && !key.meta) {
+        setSearchQuery(prev => prev + input);
+        event.stopImmediatePropagation();
       }
     },
     { isActive: true },
   );
+
+  // Define options unconditionally (before early return) so useMemo hook count is stable
+  const options = [
+    ...(apiModels ?? []).map(id => ({ label: <Text>{id}{'\n'}</Text>, value: id })),
+    { label: <Text>{t('keyGroup.manualInput')}{'\n'}</Text>, value: '__manual__' },
+  ];
+
+  const filteredOptions = useMemo(() => {
+    if (!searchQuery) return options;
+    const q = searchQuery.toLowerCase();
+    return options.filter(opt => {
+      if (opt.value === '__manual__') return true;
+      // value is the model ID string (label is a <Text> element, not a plain string)
+      return typeof opt.value === 'string' && opt.value.toLowerCase().includes(q);
+    });
+  }, [options, searchQuery]);
 
   if (fetching && !apiModels) {
     return (
@@ -1130,13 +1246,6 @@ function PlatformModelPickerForm({
       </Box>
     );
   }
-
-  const options = [
-    ...(apiModels ?? []).map(id => ({ label: <Text>{id}{'\n'}</Text>, value: id })),
-    // Add a custom model (works even when the fetch failed). Selecting it
-    // returns to the form so the user can type the model name.
-    { label: <Text>{t('keyGroup.manualInput')}{'\n'}</Text>, value: '__manual__' },
-  ];
 
   if (addingManual) {
     return (
@@ -1202,11 +1311,21 @@ function PlatformModelPickerForm({
       {!fetchError && (!apiModels || apiModels.length === 0) ? (
         <Text dimColor>{t('keyGroup.noModelsFound')}</Text>
       ) : null}
-      <Box>
+      <Box flexDirection="column">
+        <Box marginBottom={1}>
+          <Text dimColor>
+            {searchQuery
+              ? <Text>{t('modelPicker.searchLabel')} <Text bold>{searchQuery}</Text></Text>
+              : <Text dimColor>{t('modelPicker.searchHint')}</Text>
+            }
+            {searchQuery ? <Text> · <Text dimColor>{t('modelPicker.searchResults', filteredOptions.length - 1)}</Text></Text> : null}
+          </Text>
+        </Box>
         <Select
-          options={options}
+          options={filteredOptions}
           defaultFocusValue={apiModels?.includes(model) ? model : (apiModels?.[0] ?? undefined)}
           onCancel={backToForm}
+          highlightText={searchQuery || undefined}
           onChange={value => {
             if (value === '__manual__') {
               // Inline input for a custom model — works even on fetch failure.
@@ -1230,7 +1349,7 @@ function PlatformModelPickerForm({
       </Box>
       <Text dimColor>
         {t('keyGroup.modelPickerHint')}
-        {fetching ? '' : ` ${t('keyGroup.refreshHint')}`}
+        {searchQuery ? '' : ` ${t('keyGroup.refreshHint')}`}
       </Text>
     </Box>
   );

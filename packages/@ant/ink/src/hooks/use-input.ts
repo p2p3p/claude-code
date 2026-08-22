@@ -70,6 +70,11 @@ const useInput = (inputHandler: Handler, options: Options = {}) => {
     if (options.isActive === false) {
       return
     }
+    // Respect stopImmediatePropagation so upstream handlers can
+    // prevent downstream listeners from processing the same event.
+    if (event.didStopImmediatePropagation()) {
+      return
+    }
     const { input, key } = event
 
     // If app is not supposed to exit on Ctrl+C, then let input listener handle it

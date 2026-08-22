@@ -4493,7 +4493,10 @@ export type TranslationDict = {
     currentModel: string,
     fastModeOnPrefix: string,
     fastModeOnSuffix: string,
-    useFastMode: string},
+    useFastMode: string,
+    searchLabel: string,
+    searchHint: string,
+    searchResults: (n: number) => string},
   modelSelector: {
     currentModelCustom: string},
   remoteCallout: {

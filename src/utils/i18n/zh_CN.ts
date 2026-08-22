@@ -164,9 +164,9 @@ const zh_CN: TranslationDict = {
     modelManage: '模型管理',
     unsetModel: '未设置',
     enterKeysHint: '按 Enter 管理',
-    manageHint: '↑↓ 选择 · Enter 确认并登录 · ←/→ 或 空格 编辑 · Shift+D 删除账户 · Esc 返回',
+    manageHint: '↑↓ 选择 · ←/→ 或 空格 编辑 · Shift+D 删除 · Shift+↑ 置顶 · Enter 确认并登录 · Esc 返回',
     layerSelectHint: '↑↓ 选择兼容层 · Enter 确认 · Esc 返回',
-    keysListHint: '↑↓ 选择密钥 · ←/→ 或 Enter 编辑 / 新增 · Shift+D 删除 · Esc 返回',
+    keysListHint: '↑↓ 选择密钥 · ←/→ 或 空格 编辑 · Shift+D 删除 · Shift+↑ 或 Enter 设为使用 · Esc 返回',
     keysInputHint: 'Enter 确认 · 清空后回车删除该密钥 · Esc 取消',
     fieldSwitch: '↑↓ 切换 · Enter 确认 · Esc 返回',
     methodsHint: '↑↓ 选择 · Enter 确认 · Esc 返回',
@@ -5695,7 +5695,10 @@ REPL
     contextOff: '1M 上下文已关闭',
     spaceToToggle: ' \u00b7 按 Space 切换',
     forModel: (model: string) => ` 针对 ${model}`,
-    fastModeOn: '快速模式已开启 ON，仅适用于 {model}（/fast）。切换到其他模型将关闭快速模式。'},
+    fastModeOn: '快速模式已开启 ON，仅适用于 {model}（/fast）。切换到其他模型将关闭快速模式。',
+    searchLabel: '搜索：',
+    searchHint: '输入关键词搜索模型\u2026',
+    searchResults: (n: number) => `${n} 个结果`},
   modelSelector: {
     currentModelCustom: '当前模型（自定义 ID）'},
   remoteCallout: {

@@ -696,9 +696,9 @@ Do not attempt to run the command. Simply inform the user about the plugin insta
     modelManage: 'Model',
     unsetModel: 'not set',
     enterKeysHint: 'Enter to manage',
-    manageHint: '↑/↓ select · Enter confirm & login · ←/→ or Space edit · Shift+D delete account · Esc back',
+    manageHint: '↑/↓ select · ←/→ or Space edit · Shift+D delete · Shift+↑ pin to top · Enter confirm & login · Esc back',
     layerSelectHint: '↑/↓ select layer · Enter confirm · Esc back',
-    keysListHint: '↑/↓ select key · ←/→ or Enter edit / add · Shift+D delete · Esc back',
+    keysListHint: '↑/↓ select key · ←/→ or Space edit · Shift+D delete · Shift+↑ or Enter set as active · Esc back',
     keysInputHint: 'Enter confirm · clear + Enter deletes this key · Esc cancel',
     fieldSwitch: '↑/↓ switch · Enter confirm · Esc back',
     methodsHint: '↑/↓ select · Enter confirm · Esc back',
@@ -6231,7 +6231,10 @@ OPTIONS (for start)
     contextOff: '1M context off',
     spaceToToggle: ' \u00b7 Space to toggle',
     forModel: (model: string) => ` for ${model}`,
-    fastModeOn: 'Fast mode is ON and available with {model} only (/fast). Switching to other models turns off fast mode.'},
+    fastModeOn: 'Fast mode is ON and available with {model} only (/fast). Switching to other models turns off fast mode.',
+    searchLabel: 'Search:',
+    searchHint: 'Type to search models\u2026',
+    searchResults: (n: number) => `${n} result${n === 1 ? '' : 's'}`},
   modelSelector: {
     currentModelCustom: 'Current model (custom ID)'},
   remoteCallout: {
