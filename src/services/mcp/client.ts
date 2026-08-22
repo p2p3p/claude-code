@@ -87,7 +87,6 @@ import {
   getProxyFetchOptions,
   getWebSocketProxyAgent,
   getWebSocketProxyUrl} from '../../utils/proxy.js'
-import { getSessionIngressAuthToken } from '../../utils/sessionIngressAuth.js'
 import { subprocessEnv } from '../../utils/subprocessEnv.js'
 import {
   isPersistError,
@@ -590,9 +589,8 @@ export const connectToServer = memoize(
     try {
       let transport
 
-      // If we have the session ingress JWT, we will connect via the session ingress rather than
-      // to remote MCP's directly.
-      const sessionIngressToken = getSessionIngressAuthToken()
+      // Session-ingress credentials belong only to the dedicated ingress
+      // transport. Never expose them to user-configured MCP endpoints.
 
       if (serverRef.type === 'sse') {
         // Create an auth provider for this server
@@ -707,8 +705,6 @@ export const connectToServer = memoize(
         const tlsOptions = getWebSocketTLSOptions()
         const wsHeaders = {
           'User-Agent': getMCPUserAgent(),
-          ...(sessionIngressToken && {
-            Authorization: `Bearer ${sessionIngressToken}`}),
           ...combinedHeaders}
 
         // Redact sensitive headers before logging
@@ -720,8 +716,7 @@ export const connectToServer = memoize(
           name,
           `WebSocket transport options: ${jsonStringify({
             url: serverRef.url,
-            headers: wsHeadersForLogging,
-            hasSessionAuth: !!sessionIngressToken})}`,
+            headers: wsHeadersForLogging})}`,
         )
 
         let wsClient: WsClientLike
@@ -762,12 +757,8 @@ export const connectToServer = memoize(
         // Get combined headers (static + dynamic)
         const combinedHeaders = await getMcpServerHeaders(name, serverRef)
 
-        // Check if this server has stored OAuth tokens. If so, the SDK's
-        // authProvider will set Authorization — don't override with the
-        // session ingress token (SDK merges requestInit AFTER authProvider).
-        // CCR proxy URLs (ccr_shttp_mcp) have no stored OAuth, so they still
-        // get the ingress token. See PR #24454 discussion.
-        const hasOAuthTokens = !!(await authProvider.tokens())
+        // Session-ingress credentials are reserved for the dedicated
+        // ingress transport and are never sent through user-configured MCP.
 
         // Use the auth provider with StreamableHTTPClientTransport
         const proxyOptions = getProxyFetchOptions()
@@ -788,9 +779,6 @@ export const connectToServer = memoize(
             ...proxyOptions,
             headers: {
               'User-Agent': getMCPUserAgent(),
-              ...(sessionIngressToken &&
-                !hasOAuthTokens && {
-                  Authorization: `Bearer ${sessionIngressToken}`}),
               ...combinedHeaders}}}
 
         // Redact sensitive headers before logging

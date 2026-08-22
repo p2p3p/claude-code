@@ -147,6 +147,50 @@ function newConnState(): ConnState {
 }
 
 /**
+ * Hosts allowed to receive CCR session credentials, or to supply the CA bundle
+ * that agent subprocesses will trust.
+ *
+ * The session token is a session-ingress credential scoped to Anthropic's
+ * control plane; it is meaningless to any other host and must never leak to
+ * one. The CA is even more sensitive — upstreamproxy exports it via
+ * SSL_CERT_FILE to every agent subprocess, so an attacker-supplied cert would
+ * make all of their HTTPS traffic interceptable.
+ *
+ * Loopback is permitted so tests can exercise the relay without a real
+ * control plane.
+ *
+ * Accepts http/https as well as ws/wss because the same base URL drives both
+ * the CA fetch and the WS upgrade.
+ */
+export function isAllowedControlPlaneUrl(rawUrl: string): boolean {
+  let parsed: URL
+  try {
+    parsed = new URL(rawUrl)
+  } catch {
+    return false
+  }
+  // A userinfo component would let `wss://api.anthropic.com@evil.example/`
+  // read as the real host to a careless eye while resolving to evil.example.
+  if (parsed.username || parsed.password) return false
+
+  const isLoopback =
+    parsed.hostname === '127.0.0.1' ||
+    parsed.hostname === '::1' ||
+    parsed.hostname === 'localhost'
+  if (isLoopback) {
+    return ['ws:', 'wss:', 'http:', 'https:'].includes(parsed.protocol)
+  }
+
+  // Non-loopback targets must be TLS and an Anthropic control-plane host.
+  if (parsed.protocol !== 'wss:' && parsed.protocol !== 'https:') return false
+  return (
+    parsed.hostname === 'anthropic.com' ||
+    parsed.hostname.endsWith('.anthropic.com') ||
+    parsed.hostname.endsWith('.ant.dev')
+  )
+}
+
+/**
  * Start the relay. Returns the ephemeral port it bound and a stop function.
  * Uses Bun.listen when available, otherwise Node's net.createServer — the CCR
  * container runs the CLI under Node, not Bun.
@@ -156,6 +200,15 @@ export async function startUpstreamProxyRelay(opts: {
   sessionId: string
   token: string
 }): Promise<UpstreamProxyRelay> {
+  // Defense in depth: even if the control-plane URL is somehow attacker-
+  // influenced upstream of here, refuse to hand the session token to a host
+  // that isn't Anthropic's control plane.
+  if (!isAllowedControlPlaneUrl(opts.wsUrl)) {
+    throw new Error(
+      'upstreamproxy: refusing to send session credentials to a non-control-plane host',
+    )
+  }
+
   const authHeader =
     'Basic ' + Buffer.from(`${opts.sessionId}:${opts.token}`).toString('base64')
   // WS upgrade itself is auth-gated (proto authn: PRIVATE_API) — the gateway

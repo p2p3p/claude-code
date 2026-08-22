@@ -26,7 +26,7 @@ import { registerCleanup } from '../utils/cleanupRegistry.js'
 import { logForDebugging } from '../utils/debug.js'
 import { isEnvTruthy } from '../utils/envUtils.js'
 import { isENOENT } from '../utils/errors.js'
-import { startUpstreamProxyRelay } from './relay.js'
+import { startUpstreamProxyRelay, isAllowedControlPlaneUrl } from './relay.js'
 
 export const SESSION_TOKEN_PATH = '/run/ccr/session_token'
 const SYSTEM_CA_BUNDLE = '/etc/ssl/certs/ca-certificates.crt'
@@ -111,13 +111,17 @@ export async function initUpstreamProxy(opts?: {
 
   setNonDumpable()
 
-  // CCR injects BASE_URL via StartupContext (sessionExecutor.ts /
-  // sessionHandler.ts). getOauthConfig() is wrong here: it keys off
-  // USER_TYPE + USE_{LOCAL,STAGING}_OAUTH, none of which the container sets,
-  // so it always returned the prod URL and the CA fetch 404'd.
+  // CCR_CONTROL_PLANE_BASE_URL is injected by CCR via StartupContext
+  // (sessionExecutor.ts / sessionHandler.ts). It must stay distinct from the
+  // generic BASE_URL inference var: BASE_URL is settable from project-scoped
+  // settings.json, so reading it here would let a repo point the control
+  // plane — and the session token sent to it — at an attacker's host.
+  // getOauthConfig() is wrong here too: it keys off USER_TYPE +
+  // USE_{LOCAL,STAGING}_OAUTH, none of which the container sets, so it always
+  // returned the prod URL and the CA fetch 404'd.
   const baseUrl =
     opts?.ccrBaseUrl ??
-    process.env.BASE_URL ??
+    process.env.CCR_CONTROL_PLANE_BASE_URL ??
     'https://api.anthropic.com'
   const caBundlePath =
     opts?.caBundlePath ?? join(homedir(), '.ccr', 'ca-bundle.crt')
@@ -251,9 +255,24 @@ async function downloadCaBundle(
   systemCaPath: string,
   outPath: string,
 ): Promise<boolean> {
+  // The fetched cert lands in SSL_CERT_FILE for every agent subprocess, so a
+  // cert from an attacker-controlled host would make their HTTPS traffic
+  // interceptable. Gate on the same allowlist the WS upgrade uses.
+  if (!isAllowedControlPlaneUrl(baseUrl)) {
+    logForDebugging(
+      '[upstreamproxy] ca-cert host is not an approved control plane; proxy disabled',
+      { level: 'warn' },
+    )
+    return false
+  }
   try {
     // eslint-disable-next-line eslint-plugin-n/no-unsupported-features/node-builtins
     const resp = await fetch(`${baseUrl}/v1/code/upstreamproxy/ca-cert`, {
+      // redirect:'manual' is load-bearing: the default 'follow' would let an
+      // allowlisted first hop 302 the cert fetch to an arbitrary host, and the
+      // gate above only sees the first URL. A control plane never redirects
+      // this endpoint, so treat any 3xx as hostile.
+      redirect: 'manual',
       // Bun has no default fetch timeout — a hung endpoint would block CLI
       // startup forever. 5s is generous for a small PEM.
       signal: AbortSignal.timeout(5000)})

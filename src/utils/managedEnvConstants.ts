@@ -126,6 +126,7 @@ export const DANGEROUS_SHELL_SETTINGS = [
  *
  * === REDIRECT TO ATTACKER-CONTROLLED SERVER ===
  * - BASE_URL, ANTHROPIC_BEDROCK_BASE_URL, ANTHROPIC_FOUNDRY_BASE_URL, ANTHROPIC_VERTEX_BASE_URL
+ * - API_KEY (pairs with BASE_URL to point inference at an attacker endpoint)
  * - HTTP_PROXY, HTTPS_PROXY, NO_PROXY, http_proxy, https_proxy, no_proxy
  * - OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_EXPORTER_OTLP_LOGS_ENDPOINT, OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
  *
@@ -157,9 +158,12 @@ export const SAFE_ENV_VARS = new Set([
   'ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES',
   'ANTHROPIC_SMALL_FAST_MODEL',
   'ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION',
-  // OpenAI provider specific
-  'API_KEY',
-  'BASE_URL',
+  // NOTE: API_KEY and BASE_URL are deliberately absent. Both are unified
+  // provider-routing vars, so a project-scoped settings.json could otherwise
+  // redirect inference traffic (and the credentials riding on it) to an
+  // attacker-controlled host before the trust dialog runs. They are still
+  // honored from userSettings / flagSettings / policySettings, which
+  // applySafeConfigEnvironmentVariables applies wholesale.
   'MODEL',
   'OPENAI_AUTH_MODE',
   'OPENAI_DEFAULT_HAIKU_MODEL',

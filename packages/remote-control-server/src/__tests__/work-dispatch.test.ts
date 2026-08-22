@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, mock } from 'bun:test'
 
 // Mock config before imports
+process.env.RCS_API_KEYS = 'test-api-key'
 const mockConfig = {
   port: 3000,
   host: '0.0.0.0',
@@ -80,7 +81,11 @@ describe('Work Dispatch', () => {
         Buffer.from(item!.secret, 'base64url').toString(),
       )
       expect(decoded.version).toBe(1)
-      expect(decoded.session_ingress_token).toBe('test-api-key')
+      const { verifyWorkerJwt } = await import('../auth/jwt')
+      const workerPayload = verifyWorkerJwt(decoded.session_ingress_token)
+      expect(workerPayload?.session_id).toBe(sessionId)
+      expect(workerPayload?.role).toBe('worker')
+      expect(decoded.session_ingress_token).not.toBe('test-api-key')
       expect(decoded.api_base_url).toBe('http://localhost:3000')
     })
   })

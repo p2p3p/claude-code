@@ -10,12 +10,15 @@ import {
 import { config } from '../config'
 import { getBaseUrl } from '../config'
 import type { WorkResponse } from '../types/api'
+import { generateWorkerJwt } from '../auth/jwt'
 
-/** Encode work secret as base64 JSON (no JWT — just API key as token) */
-function encodeWorkSecret(): string {
+/** Encode work secret as base64 JSON. Uses a session-scoped JWT rather than
+ *  the instance-level API key, so that a leaked token is limited to a single
+ *  session rather than granting access to the entire RCS control plane. */
+function encodeWorkSecret(sessionId: string): string {
   const payload = {
     version: 1,
-    session_ingress_token: config.apiKeys[0] || '',
+    session_ingress_token: generateWorkerJwt(sessionId, config.jwtExpiresIn),
     api_base_url: getBaseUrl(),
     sources: [] as string[],
     auth: [] as string[],
@@ -39,7 +42,7 @@ export async function createWorkItem(
     )
   }
 
-  const secret = encodeWorkSecret()
+  const secret = encodeWorkSecret(sessionId)
   const record = storeCreateWorkItem({ environmentId, sessionId, secret })
   log(
     `[RCS] Work item created: ${record.id} for env=${environmentId} session=${sessionId}`,
